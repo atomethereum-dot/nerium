@@ -144,7 +144,7 @@ body.light .scrollbtn svg{stroke:var(--ink)}
 body.lock{overflow:hidden}
 
 /* ── hero ──────────────────────────────────────── */
-.hero{position:relative;height:100svh;min-height:600px;overflow:hidden;background:#000}
+.hero{position:relative;height:100dvh;min-height:600px;overflow:hidden;background:#000}
 /* la retícula es pareja de borde a borde: el titular necesita su escenario negro */
 .hero::before{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;
   background:radial-gradient(ellipse 58% 44% at 50% 47%,rgba(0,0,0,.985),rgba(0,0,0,.9) 38%,
@@ -378,10 +378,10 @@ main>section.logos::after{display:none}
 .gal-hold{position:relative}
 @media(min-width:1000px){
   .loop .gal-hold{height:260vh;margin-top:clamp(34px,4vw,58px)}
-  .loop .gal-hold .cards{position:sticky;top:0;height:100svh;display:flex;align-items:center;
+  .loop .gal-hold .cards{position:sticky;top:0;height:100dvh;display:flex;align-items:center;
     gap:26px;grid-template-columns:none;margin:0;width:max-content;will-change:transform;padding:0 6vw}
   .loop .gal-hold .cards .card{flex:0 0 min(38vw,520px);aspect-ratio:1.3;margin:0}
-  .loop .gal-rail{position:sticky;top:calc(100svh - 56px);display:block;height:2px;
+  .loop .gal-rail{position:sticky;top:calc(100dvh - 56px);display:block;height:2px;
     width:min(360px,40vw);margin:0 auto;background:rgba(255,255,255,.16);border-radius:2px;overflow:hidden}
   .loop .gal-rail b{display:block;height:100%;width:0;background:var(--blue);border-radius:2px}
 }
@@ -455,7 +455,7 @@ main>section.logos::after{display:none}
 /* ══════ pinned horizontal run ══════════════════════════ */
 .hpin{padding:0}
 .hpin-hold{position:relative;height:330vh}
-.hpin-stage{position:sticky;top:0;height:100svh;overflow:hidden;display:flex;align-items:stretch}
+.hpin-stage{position:sticky;top:0;height:100dvh;overflow:hidden;display:flex;align-items:stretch}
 .hpin-track{display:flex;height:100%;will-change:transform}
 .hp{position:relative;flex:0 0 100vw;display:flex;align-items:center;overflow:hidden;
   border-right:1px solid rgba(255,255,255,.09);background:var(--pb,transparent)}
@@ -1026,7 +1026,7 @@ body.light .srail{color:#0B0D12}
 
 /* ══════ 6 · el stack, anclado, se transforma tres veces ══ */
 .stk-hold{position:relative;height:340vh}
-.stk-stage{position:sticky;top:0;height:100svh;display:flex;flex-direction:column;
+.stk-stage{position:sticky;top:0;height:100dvh;display:flex;flex-direction:column;
   align-items:center;justify-content:center;overflow:hidden}
 .stk-cv{position:absolute;inset:0;width:100%;height:100%}
 .stk-copy{position:absolute;left:0;right:0;bottom:clamp(38px,6.5vh,86px);z-index:2;
@@ -1130,7 +1130,7 @@ body.light .snd i{background:rgba(10,12,16,.7);
 .rm-card[data-s="now"] .rm-ul li i{color:var(--blue)}
 @media(min-width:1px){
   .rm{height:440vh}
-  .rm-stage{position:sticky;top:0;min-height:100svh;display:grid;align-content:center;
+  .rm-stage{position:sticky;top:0;min-height:100dvh;display:grid;align-content:center;
     overflow:hidden;padding:calc(var(--bar) + 4vh) 0 6vh}
   .rm-line{position:relative;margin-bottom:var(--s3)}
   .rm-track{position:absolute;left:0;right:0;top:9px;height:1px;background:rgba(190,205,240,.16)}
@@ -1189,7 +1189,7 @@ body.light .snd i{background:rgba(10,12,16,.7);
    La sección es su propio recorrido: nada se mueve por sí solo. */
 /* el recorrido justo para que cierre: al terminar, el roadmap ya está ahí */
 .xf{position:relative;height:158vh}
-.xf-stage{position:sticky;top:0;height:100svh;overflow:hidden;background:#F5F5F7}
+.xf-stage{position:sticky;top:0;height:100dvh;overflow:hidden;background:#F5F5F7}
 .xf-cv{position:absolute;inset:0;width:100%;height:100%;display:block}
 /* el rótulo aparece solo cuando la cortina ya lo tapa todo */
 .xf-word{position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);z-index:2;
@@ -1351,7 +1351,7 @@ footer .fmark-logo{--fmg-a:.24;--fmg-b:.05}
    El plano negro se agrieta en los bloques del logotipo, la luz sale por las
    juntas, los bloques se encogen y se van, y un fogonazo remata en claro. */
 .xl{position:relative;height:172vh}
-.xl-stage{position:sticky;top:0;height:100svh;overflow:hidden;background:#000}
+.xl-stage{position:sticky;top:0;height:100dvh;overflow:hidden;background:#000}
 .xl-cv{position:absolute;inset:0;width:100%;height:100%;display:block}
 .xl-word{position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);z-index:2;
   text-align:center;pointer-events:none;font-family:var(--m);
@@ -1380,7 +1380,7 @@ footer .fmark-logo{--fmg-a:.24;--fmg-b:.05}
    pasa de una a otra. En escritorio las tres siguen en fila. */
 @media(max-width:899px){
   .secure{position:relative;height:280vh;padding:0}
-  .sec-stage{position:sticky;top:0;min-height:100svh;display:grid;align-content:center;
+  .sec-stage{position:sticky;top:0;min-height:100dvh;display:grid;align-content:center;
     padding:calc(var(--bar) + 2vh) 0 3vh;overflow:hidden}
   .sec-head{margin-bottom:clamp(20px,3vh,32px)}
   .sec-h{font-size:calc(var(--fs-h2)*.86)}
@@ -1498,10 +1498,10 @@ main>section{position:relative;z-index:1}
 /* recorrido de la persiana = altura del contenedor - ventana.
    La parte que cubre la portada va en lvh para que esconder la barra del
    navegador en el móvil no se coma el recorrido. */
-.hero-hold{position:relative;height:calc(100lvh + 42svh);z-index:0;background:#FBFCFD}
+.hero-hold{position:relative;height:calc(100lvh + 42dvh);z-index:0;background:#FBFCFD}
 @media(max-width:900px){
   /* en el móvil el dedo recorre mucho de golpe: la secuencia necesita el triple */
-  .hero-hold{height:calc(100lvh + 125svh)}
+  .hero-hold{height:calc(100lvh + 125dvh)}
 }
 .hero{position:sticky;top:0;z-index:0}
 main>section+section{margin-top:clamp(-36px,-3.4vw,-64px);
@@ -1693,6 +1693,25 @@ footer{background:#FBFCFD;border-top:1px solid rgba(11,13,18,.12);padding:clamp(
 .rv.in{opacity:1;transform:none}
 @media(prefers-reduced-motion:reduce){.rv{opacity:1;transform:none}
   .hero h1,.hero p,.hero-act{opacity:1;transform:none}}
+
+/* ── el alto de las escenas sigue a la barra del navegador ──
+   svh es el alto CON la barra visible, y NO cambia cuando la barra se esconde:
+   por eso quedaba una franja vacía. dvh sigue el alto real en cada momento.
+   El orden importa: primero vh —que en móvil equivale a la pantalla con la
+   barra escondida, así que si algo falla sobra alto en vez de faltar—, luego
+   svh, y por último dvh, que es el bueno. Cada navegador se queda con la
+   última que entiende. Y --vh lo pone el JS de abajo por si ninguna sirve. */
+.hero,.hpin-stage,.stk-stage,.xf-stage,.xl-stage{
+  height:100vh; height:100svh; height:100dvh; height:var(--vh,100dvh)}
+.rm-stage,.sec-stage{
+  min-height:100vh; min-height:100svh; min-height:100dvh; min-height:var(--vh,100dvh)}
+/* nada asoma por debajo de una escena: el fondo va también en el contenedor */
+.hero-hold,.stk-hold,.secure,.roadmap,.xf,.xl{background:inherit}
+/* la de seguridad se quedaba corta en su primer y último tramo, cuando el
+   anclado aún no ha agarrado: se le fija el alto en vez del mínimo */
+@media(max-width:899px){
+  .sec-stage{height:100vh;height:100svh;height:100dvh;height:var(--vh,100dvh)}
+}
 </style>
 </head>
 <body>
@@ -4448,6 +4467,24 @@ const CALM=matchMedia('(prefers-reduced-motion: reduce)').matches;
     }
     requestAnimationFrame(tick);
   })();
+})();
+
+
+/* ── red de seguridad para el alto de pantalla ──
+   Si el navegador no entiende dvh, se calcula el alto real desde visualViewport
+   y se escribe en --vh. Con dvh disponible no se toca nada. */
+(function(){
+  const soporta = window.CSS && CSS.supports && CSS.supports('height','100dvh');
+  if(soporta)return;
+  const vv=window.visualViewport;
+  const set=()=>{
+    const h=Math.round(vv?vv.height:innerHeight);
+    document.documentElement.style.setProperty('--vh',h+'px');
+  };
+  set();
+  addEventListener('resize',set,{passive:true});
+  if(vv){vv.addEventListener('resize',set,{passive:true});
+         vv.addEventListener('scroll',set,{passive:true})}
 })();
 
 </script>
