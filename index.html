@@ -505,26 +505,11 @@ main>section.logos::after{display:none}
 
 
 /* ══════ people ════════════════════════════════════════ */
-.ppl{padding:0}
-.ppl-film{position:relative;height:min(82svh,760px);min-height:440px;overflow:hidden;
-  display:flex;align-items:flex-end}
-.ppl-vid{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
-  filter:grayscale(.35) contrast(1.06)}
-.ppl-veil{position:absolute;inset:0;background:
-  linear-gradient(180deg,rgba(5,7,16,.7) 0%,rgba(5,7,16,.24) 34%,rgba(5,7,16,.6) 68%,rgba(5,7,16,.95) 100%),
-  radial-gradient(ellipse 70% 60% at 22% 70%,rgba(5,7,16,.5),rgba(5,7,16,0) 70%)}
-.ppl-over{position:relative;z-index:2;padding-bottom:clamp(38px,6vw,80px)}
-.ppl-h{font-weight:300;font-size:var(--fs-h2);line-height:.98;letter-spacing:-.05em;
-  color:#fff;max-width:17ch;margin:16px 0 14px}
-.ppl-sub{font-size:clamp(14.5px,1.4vw,17px);color:rgba(233,238,247,.72);max-width:44ch}
-.ppl-cap{position:absolute;right:clamp(18px,3.4vw,54px);bottom:clamp(18px,3vw,34px);z-index:2;
-  font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:rgba(233,238,247,.5)}
 
 
 
 
 @media(max-width:760px){
-  .ppl-film{height:min(62svh,520px)}
 }
 
 
@@ -1033,6 +1018,10 @@ body.light .srail{color:#0B0D12}
 
 /* ══════ 5 · el titular se aparta del cursor ══════════════ */
 .hero h1 .ltr{display:inline-block;padding:.06em .09em;margin:-.06em -.09em}
+/* los envoltorios de palabra: nunca se parten por dentro */
+.hero h1 .wd,.hero h1 .wdw{display:inline-block;white-space:nowrap}
+/* y por si acaso, el titular no rompe palabras aunque no se trocee */
+.hero h1{overflow-wrap:normal;word-break:keep-all;text-wrap:balance}
 .hero h1 .sp{display:inline-block;width:.26em}
 
 /* ══════ 6 · el stack, anclado, se transforma tres veces ══ */
@@ -1346,7 +1335,10 @@ footer .fgrid a{color:rgba(11,13,18,.66)}
 footer .fgrid a:hover{color:#0B0D12}
 footer .fend{border-top-color:rgba(11,13,18,.14)}
 footer .f-legal{color:rgba(11,13,18,.4)}
-footer footer /* el rótulo gigante deja de ser luz sobre negro y pasa a ser sombra sobre papel */
+
+/* el rótulo gigante deja de ser luz sobre negro y pasa a ser sombra sobre papel.
+   OJO: aquí había un "footer footer" suelto, sin llaves, que invalidaba la regla
+   de abajo: el rótulo quedaba casi blanco sobre papel casi blanco. */
 /* con la forma corta de background se pierde el recorte a texto y el rótulo
    sale como un rectángulo: hay que usar background-image y redeclararlo */
 footer .fmark span{background-image:linear-gradient(180deg,rgba(11,13,18,.26),rgba(11,13,18,.05));
@@ -2174,28 +2166,6 @@ footer{background:#FBFCFD;border-top:1px solid rgba(11,13,18,.12);padding:clamp(
 </section>
 
 <!-- people -->
-<section class="ppl" id="people" data-bg="#05070F" data-acc="#3B6BFF">
-
-  <div class="ppl-film">
-    <video class="ppl-vid" autoplay muted loop playsinline preload="none" poster="">
-      <source media="(min-width:1500px)" src="https://videos.pexels.com/video-files/6774633/6774633-uhd_2560_1440_30fps.mp4" type="video/mp4">
-      <source media="(min-width:900px)" src="https://videos.pexels.com/video-files/6774633/6774633-hd_1920_1080_30fps.mp4" type="video/mp4">
-      <source src="https://videos.pexels.com/video-files/6774633/6774633-hd_1280_720_30fps.mp4" type="video/mp4">
-    </video>
-    <div class="ppl-veil"></div>
-    <div class="wrap ppl-over">
-      <div class="k rv">Behind the network</div>
-      <h2 class="ppl-h">Software settles it. People stand behind it.</h2>
-      <p class="ppl-sub">Every rule on this chain was argued about by someone who has to live with it.</p>
-    </div>
-    <div class="ppl-cap mono">Real-world asset chain &#183; NRM</div>
-  </div>
-
-  <span class="hold" data-bg="#05070F" data-acc="#3B6BFF"></span>
-</section>
-
-
-
 <!-- start -->
 <section class="hpin" id="docs" data-bg="#04060D" data-acc="#3B6BFF">
   <div class="hpin-hold" id="hpinHold">
@@ -2572,11 +2542,17 @@ const CALM=matchMedia('(prefers-reduced-motion: reduce)').matches;
             parts.forEach(t=>{
               if(!t.trim()){frag.appendChild(document.createTextNode(t));return}
               const units=byChar?[...t]:[t];
+              /* las letras de una misma palabra van dentro de un envoltorio que
+                 no se parte: si no, el salto de línea puede caer entre dos
+                 letras y la palabra se rompe por la mitad */
+              const cont=byChar?document.createElement('span'):frag;
+              if(byChar)cont.className='wdw';
               units.forEach(u=>{
                 const sp=document.createElement('span');sp.className='ws';
                 const w=document.createElement('span');w.className='wi';w.textContent=u;
-                sp.appendChild(w);frag.appendChild(sp);
+                sp.appendChild(w);cont.appendChild(sp);
               });
+              if(byChar)frag.appendChild(cont);
             });
             c.replaceWith(frag);
           } else if(c.nodeType===1&&!c.classList.contains('ws')
@@ -2889,19 +2865,7 @@ const CALM=matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 
   /* 22 — the people band: faces open, the film only plays when it is on screen */
-  (function(){
-    const v=document.querySelector('.ppl-vid');
-    if(!v)return;
-    let started=false;
-    new IntersectionObserver(es=>es.forEach(e=>{
-      if(e.isIntersecting){
-        if(!started){started=true;v.preload='auto';try{v.load()}catch(err){}}
-        const pr=v.play();if(pr&&pr.catch)pr.catch(()=>{});
-      } else v.pause();
-    }),{threshold:.08}).observe(v);
-  })();
-
-  measure();requestAnimationFrame(frame);
+    measure();requestAnimationFrame(frame);
   addEventListener('load',()=>setTimeout(measure,400));
 })();
 
@@ -3224,7 +3188,7 @@ const CALM=matchMedia('(prefers-reduced-motion: reduce)').matches;
     chroma:'Spectrum',say:'The thesis',paper:'The thesis',kin:'Primitives',
     solutions:'What it guarantees',stack:'The stack',security:'Security',
     presale:'Whitelist',sale:'Whitelist',token:'Tokenomics',tkp:'Tokenomics',roadmap:'Roadmap',
-    docs:'Get started',people:'Behind the network',ppl:'Behind the network',
+    docs:'Get started',
     blog:'Stay in the loop',footer:'Nereum'};
   const bands=[...document.querySelectorAll('main>section[data-bg], footer[data-bg]')]
     .filter(el=>getComputedStyle(el).display!=='none').map(el=>{
@@ -3706,12 +3670,22 @@ const CALM=matchMedia('(prefers-reduced-motion: reduce)').matches;
   const txt=h1.textContent;
   h1.textContent='';
   const L=[];
+  let pal=null;
   for(const ch of txt){
+    if(ch===' '){
+      pal=null;
+      const sp=document.createElement('i');sp.className='sp';
+      h1.appendChild(sp);
+      continue;
+    }
+    /* cada palabra en su propio envoltorio: así el salto de línea solo puede
+       caer en los espacios y nunca dentro de una palabra */
+    if(!pal){pal=document.createElement('span');pal.className='wd';h1.appendChild(pal)}
     const el=document.createElement('i');
-    el.className=ch===' '?'sp':'ltr';
-    if(ch!==' ')el.textContent=ch;
-    h1.appendChild(el);
-    if(ch!==' ')L.push({el,x:0,y:0,tx:0,ty:0,cx:0,cy:0});
+    el.className='ltr';
+    el.textContent=ch;
+    pal.appendChild(el);
+    L.push({el,x:0,y:0,tx:0,ty:0,cx:0,cy:0});
   }
   if(!L.length)return;
   const measure=()=>L.forEach(l=>{
