@@ -1,15 +1,16 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 736 736">
-  <style>
-    /* El logotipo va SIN fondo. El cuerpo se tiñe según el tema del navegador:
-       blanco sobre barras oscuras y tinta sobre barras claras. Es la misma
-       doble tinta que ya usa la web —blanco en la cabecera, oscuro en el pie—
-       y es lo único que evita que desaparezca sobre blanco.
-       Los dos cuadrados van SIEMPRE en el azul de marca. */
-    .cuerpo{fill:#FFFFFF}
-    @media (prefers-color-scheme: light){ .cuerpo{fill:#0A0C10} }
-  </style>
-  <g transform="translate(32,32)">
-    <path class="cuerpo" d="M336 0 H464 V224 H672 V336 H560 V560 H464 V672 H336 A336 336 0 0 1 336 0 Z"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Baldosa con degradado de azul profundo a negro. El logotipo va SIEMPRE
+       en blanco con los cuadrados en el azul de marca: no depende del tema
+       del navegador, se ve igual en claro y en oscuro. -->
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#173A8C"/>
+      <stop offset="1" stop-color="#05070C"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="url(#g)"/>
+  <g transform="translate(54,54) scale(0.6012)">
+    <path fill="#FFFFFF" d="M336 0 H464 V224 H672 V336 H560 V560 H464 V672 H336 A336 336 0 0 1 336 0 Z"/>
     <rect fill="#2F6BFF" x="464" y="112" width="112" height="112"/>
     <rect fill="#2F6BFF" x="560" y="336" width="112" height="112"/>
   </g>
