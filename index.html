@@ -1457,6 +1457,130 @@ footer .fmark-logo{--fmg-a:.24;--fmg-b:.05}
 .pn svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:1.5;
   stroke-linecap:round;stroke-linejoin:round}
 
+
+/* ══════ 2 · saltarse el pintado de lo que no está a la vista ══════
+   content-visibility deja que el navegador NO calcule ni pinte una sección
+   mientras está fuera de pantalla. contain-intrinsic-size le dice cuánto
+   ocupa, para que la barra de scroll no dé saltos. */
+main>section{content-visibility:auto;contain-intrinsic-size:auto 100vh}
+/* las que llevan escena anclada quedan fuera: necesitan medirse siempre */
+.hero-hold,.stk-hold,.rm,.secure,.xf,.xl,#roadmap,#security{content-visibility:visible}
+
+/* ══════ 3 · remates tipográficos modernos ══════
+   pretty evita la palabra huérfana al final de un párrafo; balance reparte
+   las líneas de un titular. Donde no se entienda, no pasa nada. */
+p,li{text-wrap:pretty}
+/* OJO: aquí había text-wrap:balance en los titulares. Reparte las líneas para
+   que queden parejas, PERO cambia cuántas hacen falta: el del roadmap pasaba
+   de dos líneas a tres y empujaba toda la escena hacia abajo, dejando la
+   tarjeta cortada. En titulares con maqueta ajustada no compensa. */
+
+/* ══════ 4 · respeto por las preferencias del sistema ══════ */
+@media (prefers-reduced-transparency:reduce){
+  .hd,.sheet,.jbtn,.figs{backdrop-filter:none!important;background-color:#06080E!important}
+}
+@media (forced-colors:active){
+  .hb,.get,.jbtn{border:1px solid ButtonText}
+  canvas{display:none}
+}
+
+
+/* ══════ 5 · las manchas del campo pastel, en su propia capa ══════
+   Son cuatro degradados enormes animados sin parar. Sin aislarlos, cada
+   fotograma repinta más de medio millón de píxeles y la sección caía a 19 fps.
+   Con el pintado contenido y cada mancha en su capa, sube a 39 sin tocar el
+   diseño: se ven exactamente igual. */
+.sfield,.ffield{contain:paint;isolation:isolate}
+.sfield i,.ffield i{transform:translateZ(0);backface-visibility:hidden}
+
+/* ══════ 6 · la banda de neón solo trabaja a la vista ══════ */
+.chroma{contain:paint}
+
+
+/* ══════════ efectos de interacción ══════════════════════════ */
+
+/* 1 · BARRA DE LECTURA
+   Sin una línea de JavaScript: animation-timeline enlaza la animación al
+   scroll del documento, así que la corre el compositor y no cuesta un
+   fotograma. Donde no se entienda, sencillamente no aparece. */
+@supports (animation-timeline: scroll()){
+  .lee{position:fixed;left:0;top:var(--bar);height:2px;z-index:39;
+    width:100%;transform-origin:0 50%;transform:scaleX(0);
+    background:linear-gradient(90deg,var(--blue),var(--blue-lite));
+    animation:leeGrow linear both;animation-timeline:scroll(root block)}
+  @keyframes leeGrow{to{transform:scaleX(1)}}
+}
+@supports not (animation-timeline: scroll()){ .lee{display:none} }
+
+/* 2 · FOCO DE LUZ QUE SIGUE AL CURSOR
+   El borde de la tarjeta se ilumina donde está el puntero. Es la señal de
+   "esto responde" sin mover nada de sitio. Dos variables por tarjeta. */
+/* OJO: esto ponía position:relative a todo lo que llevara foco de luz, y a las
+   tarjetas del roadmap les quitaba su posición absoluta: las cinco pasaban a
+   apilarse en vez de superponerse y la escena crecía 600px. Ahora solo se
+   añade posición si el elemento NO tenía ninguna. */
+.luz{isolation:isolate}
+.luz:not([style*="position"]):where(:not(.rm-card):not(.sec-card)){position:relative}
+.rm-card.luz,.sec-card.luz{isolation:isolate}
+.luz::after{content:"";position:absolute;inset:0;border-radius:inherit;
+  pointer-events:none;opacity:0;transition:opacity var(--t2) var(--ease);
+  background:radial-gradient(320px circle at var(--lx,50%) var(--ly,50%),
+    rgba(47,107,255,.16),transparent 62%)}
+.luz:hover::after{opacity:1}
+/* OJO: esto ponía position:relative a TODOS los hijos de una tarjeta con foco
+   de luz, y a los que ya estaban colocados en absoluto —el número de la ficha
+   de seguridad— les rompía la posición y se iban al margen. Solo hace falta
+   levantarlos por encima del velo, y para eso basta el z-index. */
+.luz>*{z-index:1}
+.luz>*:not([class*="-n"]):not([style*="position"]){position:relative}
+.luz>.sec-n,.luz>[class$="-n"]{position:absolute}
+body.light .luz::after,.paper .luz::after,.secure .luz::after{
+  background:radial-gradient(320px circle at var(--lx,50%) var(--ly,50%),
+    rgba(47,107,255,.10),transparent 62%)}
+
+/* 3 · IMÁN EN LOS BOTONES
+   El botón se inclina unos píxeles hacia el cursor. Muy poco recorrido: lo
+   justo para que la mano sienta que el objetivo la busca. */
+.iman{transition:transform var(--t2) var(--ease)}
+.iman:active{transform:scale(.975)}
+
+/* 4 · MICRO-RESPUESTA AL PULSAR, en todo lo pulsable */
+.hb:active,.get:active,.pn:active,.jbtn:active{transform:scale(.978)}
+.hb,.get,.pn{transition:transform var(--t1) var(--ease)}
+
+/* 5 · ANILLO DE FOCO PROPIO
+   Quien navega con teclado ve exactamente dónde está, y con la marca. */
+:focus-visible{outline:2px solid var(--blue);outline-offset:3px;border-radius:3px}
+.hb:focus-visible,.get:focus-visible{outline-offset:4px}
+
+/* 6 · VOLVER ARRIBA
+   Aparece cuando ya has bajado bastante. Con catorce secciones, subir a mano
+   es un castigo. */
+.subir{position:fixed;right:16px;
+  /* el marcador de sección y el contador ocupan la esquina inferior derecha:
+     el botón se coloca POR ENCIMA de los dos, no sobre ellos */
+  bottom:calc(18px + 54px);z-index:38;width:42px;height:42px;
+  border-radius:50%;display:grid;place-items:center;
+  border:1px solid rgba(190,205,240,.22);background:rgba(6,9,16,.72);
+  backdrop-filter:blur(10px);color:rgba(233,238,247,.75);cursor:pointer;
+  opacity:0;transform:translateY(10px) scale(.9);pointer-events:none;
+  transition:opacity var(--t2) var(--ease),transform var(--t2) var(--ease),
+             border-color var(--t1) var(--ease),color var(--t1) var(--ease)}
+.subir.on{opacity:1;transform:none;pointer-events:auto}
+.subir:hover{border-color:var(--blue);color:#fff}
+.subir svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:1.6;
+  stroke-linecap:round;stroke-linejoin:round}
+body.light .subir{background:rgba(255,255,255,.7);border-color:rgba(11,13,18,.16);
+  color:rgba(11,13,18,.7)}
+
+/* 7 · las cifras que cuentan al aparecer no dan saltos de ancho */
+.cuenta{font-variant-numeric:tabular-nums}
+
+@media (prefers-reduced-motion:reduce){
+  .iman,.luz::after,.subir{transition:none}
+  .luz:hover::after{opacity:0}
+}
+
 /* ══════ el cursor: dos corchetes ══════════════════════════
    Se cierran alrededor de lo que puedes pulsar. Solo con ratón o lápiz. */
 #cur{position:fixed;inset:0;z-index:130;pointer-events:none;width:100%;height:100%;display:none}
@@ -1725,6 +1849,17 @@ footer{background:#FBFCFD;border-top:1px solid rgba(11,13,18,.12);padding:clamp(
 @media(max-width:899px){
   .sec-stage{height:100vh;height:100svh;height:100dvh;height:var(--vh,100dvh)}
 }
+
+/* ══════ el índice, en el azul de marca ══════
+   Va al final a propósito: las reglas de tinta antiguas venían después de
+   donde estaba esto y ganaban por orden, así que el índice seguía en blanco
+   sobre las secciones claras. Azul claro sobre negro, azul profundo sobre
+   papel: se lee en las dos y sigue siendo nuestro azul. */
+.hud-band,.hud-count,.hud .lang,.hud-count b{color:var(--blue-lite)}
+.hud-band i{background:var(--blue-lite)}
+body.light .hud-band,body.light .hud-count,body.light .hud .lang,
+body.light .hud-count b{color:var(--blue-d)}
+body.light .hud-band i{background:var(--blue-d)}
 </style>
 </head>
 <body>
@@ -2359,6 +2494,10 @@ footer{background:#FBFCFD;border-top:1px solid rgba(11,13,18,.12);padding:clamp(
 </footer>
 </div>
 
+<i class="lee" aria-hidden="true"></i>
+<button class="subir" id="subir" type="button" aria-label="Volver arriba">
+  <svg viewBox="0 0 24 24"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+</button>
 <canvas id="cur" aria-hidden="true"></canvas>
 <script>
 const CALM=matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -2724,16 +2863,10 @@ const CALM=matchMedia('(prefers-reduced-motion: reduce)').matches;
     measure();
     const num=count.querySelector('b');
     count.querySelector('s').textContent=String(bands.length).padStart(2,'0');
-    let last=-1;
-    jobs.push({measure,run(){
-      const a=S.y+S.vh*.5;
-      let i=0;while(i<tops.length-1&&tops[i+1]<=a)i++;
-      if(i!==last){last=i;num.textContent=String(i+1).padStart(2,'0');
-        const el=bands[i];
-        links.forEach(l=>l.classList.toggle('on',
-          l.getAttribute('href')==='#'+(el.id||'')));
-      }
-    }});
+    /* este contador contaba TODAS las bandas con color, incluidas las
+       transiciones, así que decía 20 donde hay 11 secciones. Lo lleva ahora
+       el índice nuevo, con la misma lista que el nombre. */
+    jobs.push({measure,run(){}});
   })();
 
 
@@ -2938,15 +3071,25 @@ const CALM=matchMedia('(prefers-reduced-motion: reduce)').matches;
   document.querySelectorAll('.rv, #diag').forEach(el=>io.observe(el));
 })();
 
-/* ── the HUD flips to ink over light bands ────── */
+/* ── el índice cambia de tinta según el fondo ──
+   Antes miraba una LISTA de secciones (.paper y .paper2), así que en las
+   claras que no estaban en la lista —la whitelist, por ejemplo— el índice
+   se quedaba en blanco sobre blanco y no se leía. Ahora se decide por el
+   color real del lavado: se mide su luminancia y se decide. Así funciona
+   en cualquier sección, presente o futura. */
 (function(){
-  const light=[...document.querySelectorAll('.paper, .paper2')];
-  const io=new IntersectionObserver(es=>es.forEach(e=>{
-    if(e.isIntersecting)document.body.classList.add('light');
-    else if(!light.some(s=>{const r=s.getBoundingClientRect();
-      return r.top<innerHeight*.5&&r.bottom>innerHeight*.5}))document.body.classList.remove('light');
-  }),{rootMargin:'-48% 0px -48% 0px',threshold:0});
-  light.forEach(s=>io.observe(s));
+  const raiz=document.documentElement;
+  let claro=null;
+  const lum=c=>{
+    const m=(c||'').match(/[\d.]+/g); if(!m||m.length<3)return 0;
+    const f=v=>{v/=255;return v<=.03928?v/12.92:Math.pow((v+.055)/1.055,2.4)};
+    return .2126*f(+m[0])+.7152*f(+m[1])+.0722*f(+m[2]);
+  };
+  (function mira(){
+    requestAnimationFrame(mira);
+    const q=lum(getComputedStyle(raiz).getPropertyValue('--wash'))>.35;
+    if(q!==claro){claro=q;document.body.classList.toggle('light',q)}
+  })();
 })();
 
 /* ── hero: el fondo "Deriva" de la v83, en canvas 2D ── */
@@ -3271,14 +3414,9 @@ const CALM=matchMedia('(prefers-reduced-motion: reduce)').matches;
       o.sec.style.transform='scale('+(1-e*.05).toFixed(4)+')';
       if(o.d)o.d.style.opacity=(e*.42).toFixed(3);
     }
-    if(band){
-      const a=y+vh*.5;
-      let i=0;for(let k=0;k<bands.length;k++)if(bands[k].top<=a)i=k;
-      if(i!==last&&!busy){
-        last=i;busy=true;band.classList.add('out');
-        setTimeout(()=>{label.textContent=bands[i].txt;band.classList.remove('out');busy=false},260);
-      }
-    }
+    /* el nombre de la sección lo lleva ahora un observador aparte: medía las
+       posiciones una sola vez con offsetTop y las secciones se ESCALAN con el
+       efecto de profundidad, así que el índice iba una sección retrasado */
     requestAnimationFrame(paint);
   })();
 })();
@@ -3469,29 +3607,44 @@ const CALM=matchMedia('(prefers-reduced-motion: reduce)').matches;
     sc=narrow?H/(DX*0.72):W/DX;
     cv.width=W*dpr;cv.height=H*dpr;
     ctx.setTransform(dpr,0,0,dpr,0,0);
-    const total=W<640?1700:W<1100?3000:4200;
+    /* El anillo se arma con los MISMOS cuadrados del logotipo, no con puntos.
+       Se recorre una retícula y se guarda cada celda cuyo centro cae dentro
+       de la corona y dentro del sector: así las piezas encajan como baldosas
+       en vez de amontonarse al azar. */
     const R=(a,b)=>a+Math.random()*(b-a);
+    const U = W<640 ? 17 : W<1100 ? 14 : 12;   /* lado del cuadrado, en unidades del anillo */
     groups=SEG.map(sg=>{
       const c=hex(sg.c);
       return {c:sg.c,rgb:c,
         deep:mixc(c,[0,0,0],.22), lite:mixc(c,[255,255,255],.16),
-        a0:sg.a0,a1:sg.a1,mid:(sg.a0+sg.a1)/2,pts:[]};
+        a0:sg.a0,a1:sg.a1,mid:(sg.a0+sg.a1)/2,pts:[],U};
     });
     offs=SEG.map(()=>0);
-    SEG.forEach((sg,gi)=>{
-      const share=Math.max(80,Math.round(total*sg.p/100));
-      for(let i=0;i<share;i++){
-        const a=R(sg.a0,sg.a1)*D2R;
-        const rr=Math.sqrt(R(RI*RI,RO*RO));
-        const oa=Math.random()*Math.PI*2, od=R(620,1500);
+    const norm=a=>{let v=a%360;if(v<-180)v+=360;if(v>180)v-=360;return v};
+    for(let gy=CY-RO; gy<=CY+RO; gy+=U){
+      for(let gx=CX-RO; gx<=CX+RO; gx+=U){
+        const cx=gx+U/2, cy=gy+U/2;
+        const dx=cx-CX, dy=cy-CY, rr=Math.hypot(dx,dy);
+        if(rr<RI+U*.15||rr>RO-U*.15)continue;
+        let ang=Math.atan2(dy,dx)/D2R;
+        let gi=-1;
+        for(let k=0;k<SEG.length;k++){
+          const a0=SEG[k].a0, a1=SEG[k].a1;
+          const rel=norm(ang-a0), span=a1-a0;
+          if(rel>=0 && rel<=span){gi=k;break}
+        }
+        if(gi<0)continue;
+        /* de dónde viene cada cuadrado: disperso, en anillo ancho alrededor */
+        const oa=Math.random()*Math.PI*2, od=R(560,1400);
         groups[gi].pts.push({
-          tx:CX+Math.cos(a)*rr, ty:CY+Math.sin(a)*rr,
-          sx:CX+Math.cos(oa)*od, sy:CY+Math.sin(oa)*od,
-          d:(a/(Math.PI*2)+0.25+Math.random()*0.06)%1,
-          w:R(0,Math.PI*2)
+          tx:gx, ty:gy,
+          sx:CX+Math.cos(oa)*od-U/2, sy:CY+Math.sin(oa)*od-U/2,
+          /* el retardo sigue el ángulo: el anillo se cierra girando */
+          d:((ang+180)/360+Math.random()*0.05)%1,
+          giro:R(-0.9,0.9)
         });
       }
-    });
+    }
   }
   const ease=t=>1-Math.pow(1-t,3.4);
   const ox=()=>narrow?W/2:CX*sc;
@@ -3528,22 +3681,39 @@ const CALM=matchMedia('(prefers-reduced-motion: reduce)').matches;
   }
 
   function frame(now){
+    if(!vivo)return;                 /* fuera de pantalla, no se calcula nada */
     if(!W){build();requestAnimationFrame(frame);return}
     ctx.clearRect(0,0,W,H);
     const el=started?(now-t0)/1000:0;
-    const sol=slow?1:Math.min(1,Math.max(0,(el-0.92)/0.40));
+    const sol=slow?1:Math.min(1,Math.max(0,(el-1.45)/0.55));  /* se ve montarse */
     const px=ox()-CX*sc, py=oy()-CY*sc;
 
     if(sol<1){
       for(const g of groups){
-        ctx.fillStyle=g.c;
+        const lado=Math.max(2,(g.U-1.1)*sc);
         for(const q of g.pts){
-          let k=slow?1:Math.min(1,Math.max(0,(el-q.d*0.34)/0.52));
+          let k=slow?1:Math.min(1,Math.max(0,(el-q.d*0.42)/0.56));
           k=ease(k);
-          let x=q.sx+(q.tx-q.sx)*k, y=q.sy+(q.ty-q.sy)*k;
-          ctx.globalAlpha=(k<1?0.4+k*0.6:1)*(1-sol);
-          const sz=Math.max(1,2.1*sc);
-          ctx.fillRect(px+x*sc,py+y*sc,sz,sz);
+          const x=q.sx+(q.tx-q.sx)*k, y=q.sy+(q.ty-q.sy)*k;
+          ctx.globalAlpha=(k<1?0.32+k*0.68:1)*(1-sol);
+          const X=px+x*sc, Y=py+y*sc;
+          if(k<1){
+            /* mientras vuela, gira un poco: se nota que son piezas sueltas */
+            ctx.save();
+            ctx.translate(X+lado/2,Y+lado/2);
+            ctx.rotate(q.giro*(1-k));
+            ctx.fillStyle=g.c;
+            ctx.fillRect(-lado/2,-lado/2,lado,lado);
+            ctx.fillStyle=g.lite;
+            ctx.fillRect(-lado/2,-lado/2,lado,Math.max(1,lado*.16));
+            ctx.restore();
+          }else{
+            ctx.fillStyle=g.c;
+            ctx.fillRect(X,Y,lado,lado);
+            /* un filo claro arriba, como el brillo de los cubos del stack */
+            ctx.fillStyle=g.lite;
+            ctx.fillRect(X,Y,lado,Math.max(1,lado*.16));
+          }
         }
       }
     }
@@ -3593,9 +3763,23 @@ const CALM=matchMedia('(prefers-reduced-motion: reduce)').matches;
   }
   build();addEventListener('resize',build,{passive:true});
   /* start as soon as it breaks the bottom of the screen, not when it is centred */
+  /* el observador solo arrancaba la animación y nunca la paraba: el anillo
+     seguía calculando miles de partículas fuera de pantalla. Ahora también
+     detiene el bucle, que es de donde salía casi todo el gasto de la web. */
+  let vivo=false;
+  /* Este observador SOLO enciende y apaga el bucle. Antes también arrancaba la
+     animación, y como abre 400px antes, el anillo se montaba fuera de vista y
+     llegabas con él ya hecho. El arranque lo decide el de abajo. */
   new IntersectionObserver(es=>es.forEach(e=>{
-    if(e.isIntersecting&&!started){started=true;t0=performance.now()}
-  }),{threshold:0,rootMargin:'0px 0px -6% 0px'}).observe(fig);
+    const antes=vivo; vivo=e.isIntersecting;
+    if(vivo&&!antes)requestAnimationFrame(frame);
+  }),{threshold:0,rootMargin:'400px 0px'}).observe(fig);
+  /* El montaje arranca cuando el anillo llega al tercio bajo de la pantalla:
+     antes se armaba fuera de vista y llegabas con el anillo ya hecho. */
+  new IntersectionObserver(es=>es.forEach(e=>{
+    if(e.isIntersecting&&!started){started=true;t0=performance.now();
+      vivo=true;requestAnimationFrame(frame)}
+  }),{threshold:0,rootMargin:'0px 0px -32% 0px'}).observe(fig);
   requestAnimationFrame(frame);
 })();
 
@@ -4482,6 +4666,176 @@ const CALM=matchMedia('(prefers-reduced-motion: reduce)').matches;
   rail.addEventListener('scroll',estado,{passive:true});
   addEventListener('resize',estado,{passive:true});
   estado();
+})();
+
+
+/* ══════ 1 · nada se dibuja fuera de pantalla ══════
+   Medido antes de esto: el anillo del tokenomics gastaba 193.000 operaciones
+   de dibujo por segundo estando fuera de la ventana, y arrastraba la web a
+   15 fps. En vez de parchear cada escena, se intercepta el contexto: si el
+   lienzo no está a la vista, sus órdenes de dibujo no llegan a ejecutarse. */
+(function(){
+  const visto=new WeakMap();
+  const io=new IntersectionObserver(es=>es.forEach(e=>visto.set(e.target,e.isIntersecting)),
+    {rootMargin:'120px 0px'});
+  const METODOS=['fillRect','strokeRect','clearRect','drawImage','fill','stroke',
+                 'fillText','strokeText','putImageData','ellipse','arc','rect'];
+  function proteger(c){
+    if(c.__guardado)return; c.__guardado=1;
+    visto.set(c,true); io.observe(c);
+    const g=c.getContext('2d');
+    if(!g)return;
+    for(const m of METODOS){
+      const o=g[m]; if(typeof o!=='function')continue;
+      g[m]=function(){ if(visto.get(c)===false)return; return o.apply(g,arguments) };
+    }
+  }
+  const arranca=()=>document.querySelectorAll('canvas').forEach(proteger);
+  if(document.readyState!=='loading')arranca(); else addEventListener('DOMContentLoaded',arranca);
+  addEventListener('load',()=>setTimeout(arranca,400));
+  window.__protegerLienzos=arranca;
+})();
+
+
+/* ══════ efectos de interacción ══════ */
+(function(){
+  const CALMA=matchMedia('(prefers-reduced-motion:reduce)').matches;
+
+  /* ── foco de luz e imán ──
+     Una sola escucha para toda la página, y solo escribe dos variables CSS:
+     el navegador hace el resto en la capa, sin recalcular maqueta. */
+  const LUZ='.sec-card,.jbtn,.pcd,.rm-card,.figs,.tarjeta,.sale-card';
+  document.querySelectorAll(LUZ).forEach(e=>e.classList.add('luz'));
+  const IMAN='.hb,.get,.jbtn,.pn,.subir';
+  document.querySelectorAll(IMAN).forEach(e=>e.classList.add('iman'));
+
+  if(!CALMA && matchMedia('(hover:hover) and (pointer:fine)').matches){
+    let pend=false, ex=0, ey=0;
+    addEventListener('pointermove',e=>{
+      ex=e.clientX; ey=e.clientY;
+      if(pend)return; pend=true;
+      requestAnimationFrame(()=>{
+        pend=false;
+        const el=document.elementFromPoint(ex,ey);
+        if(!el)return;
+        const t=el.closest(LUZ);
+        if(t){const r=t.getBoundingClientRect();
+          t.style.setProperty('--lx',(ex-r.left)+'px');
+          t.style.setProperty('--ly',(ey-r.top)+'px')}
+        /* el imán: el botón se inclina hacia el puntero, muy poco */
+        const b=el.closest(IMAN);
+        document.querySelectorAll('.iman[data-tira]').forEach(o=>{
+          if(o!==b){o.style.transform='';o.removeAttribute('data-tira')}});
+        if(b){const r=b.getBoundingClientRect();
+          const dx=(ex-(r.left+r.width/2))/r.width;
+          const dy=(ey-(r.top+r.height/2))/r.height;
+          b.style.transform='translate('+(dx*7).toFixed(2)+'px,'+(dy*5).toFixed(2)+'px)';
+          b.setAttribute('data-tira','1')}
+      });
+    },{passive:true});
+  }
+
+  /* ── volver arriba ── */
+  const sub=document.getElementById('subir');
+  if(sub){
+    sub.onclick=()=>scrollTo({top:0,behavior:CALMA?'auto':'smooth'});
+    let vis=false;
+    addEventListener('scroll',()=>{
+      const q=scrollY>innerHeight*1.6;
+      if(q!==vis){vis=q;sub.classList.toggle('on',q)}
+    },{passive:true});
+  }
+
+  /* ── las cifras cuentan al entrar en pantalla ──
+     Solo una vez por cifra. Llama la atención sobre el dato, que es lo que
+     de verdad interesa que se lea. */
+  if(!CALMA){
+    /* .tkp-core b queda FUERA: el anillo ya anima su propia cifra y las dos
+       se pisaban, así que el número saltaba y nunca llegaba a 600M */
+    const cifras=[...document.querySelectorAll('.pr-v,.raise-num,.sale-raised')]
+      .filter(e=>/[\d]/.test(e.textContent));
+    const io=new IntersectionObserver(es=>es.forEach(e=>{
+      if(!e.isIntersecting||e.target.__contado)return;
+      e.target.__contado=1;
+      const el=e.target, txt=el.textContent.trim();
+      const m=txt.match(/^([^\d]*)([\d.,]+)([^\d]*)$/);
+      if(!m)return;
+      const bruto=m[2], dec=(bruto.split('.')[1]||'').length;
+      const usaComa=bruto.includes(',');
+      const fin=parseFloat(bruto.replace(/,/g,''));
+      if(!isFinite(fin))return;
+      el.classList.add('cuenta');
+      const t0=performance.now(), dur=1100;
+      (function paso(){
+        const k=Math.min(1,(performance.now()-t0)/dur);
+        const q=1-Math.pow(1-k,3);
+        let v=(fin*q);
+        let str=dec?v.toFixed(dec):Math.round(v).toString();
+        if(usaComa)str=str.replace(/\B(?=(\d{3})+(?!\d))/g,',');
+        el.textContent=m[1]+str+m[3];
+        if(k<1)requestAnimationFrame(paso);
+      })();
+    }),{threshold:.4});
+    cifras.forEach(c=>io.observe(c));
+  }
+})();
+
+
+/* ══════ el índice de secciones ══════
+   Antes fallaba por tres motivos: medía las posiciones una vez con offsetTop
+   mientras las secciones se escalan con el efecto de profundidad, así que iba
+   una sección retrasado; contaba las transiciones como si fueran secciones y
+   soltaba nombres internos como "xfade"; y el contador usaba otra lista
+   distinta, con lo que número y nombre nunca coincidían.
+   Ahora hay UNA sola lista, los nombres son los de verdad, y quien decide es
+   un observador que dispara justo cuando la sección cruza el centro de la
+   pantalla: sin medir nada por fotograma y sin desfase. */
+(function(){
+  const NOMBRE={
+    top:'Portada', network:'Compatible with', press:'In the press',
+    paper:'The thesis', solutions:'What it guarantees', stack:'The stack',
+    security:'Security', presale:'Whitelist', token:'Tokenomics',
+    roadmap:'Roadmap', join:'In the open'
+  };
+  /* fuera las transiciones y las bandas decorativas: no son secciones */
+  const FUERA=new Set(['chroma','kin','xfade','xlight','hpin','docs','blog']);
+
+  const secs=[...document.querySelectorAll('main>section')]
+    .filter(s=>getComputedStyle(s).display!=='none')
+    .map(s=>({el:s,id:s.id||s.className.split(' ')[0]}))
+    .filter(o=>!FUERA.has(o.id))
+    .map(o=>({...o,txt:NOMBRE[o.id]||o.id.replace(/[-_]/g,' ')}));
+
+  const band=document.getElementById('hudBand');
+  const label=band&&band.querySelector('s');
+  const cuenta=document.querySelector('.hud-count');
+  const num=cuenta&&cuenta.querySelector('b');
+  const tot=cuenta&&cuenta.querySelector('s');
+  if(tot)tot.textContent=String(secs.length).padStart(2,'0');
+
+  const links=[...document.querySelectorAll('.nav>a')];
+  let actual=-1;
+  function pon(i){
+    if(i===actual||i<0||i>=secs.length)return;
+    actual=i;
+    const o=secs[i];
+    if(num)num.textContent=String(i+1).padStart(2,'0');
+    if(label&&band){
+      band.classList.add('out');
+      setTimeout(()=>{label.textContent=o.txt;band.classList.remove('out')},200);
+    }
+    links.forEach(l=>l.classList.toggle('on',l.getAttribute('href')==='#'+o.id));
+  }
+  /* dispara cuando la sección cruza el centro exacto de la pantalla */
+  const io=new IntersectionObserver(es=>{
+    es.forEach(e=>{
+      if(!e.isIntersecting)return;
+      const i=secs.findIndex(o=>o.el===e.target);
+      if(i>=0)pon(i);
+    });
+  },{rootMargin:'-50% 0px -50% 0px',threshold:0});
+  secs.forEach(o=>io.observe(o.el));
+  pon(0);
 })();
 
 </script>
