@@ -1558,8 +1558,12 @@ body.light .luz::after,.paper .luz::after,.secure .luz::after{
    es un castigo. */
 .subir{position:fixed;right:16px;
   /* el marcador de sección y el contador ocupan la esquina inferior derecha:
-     el botón se coloca POR ENCIMA de los dos, no sobre ellos */
-  bottom:calc(18px + 54px);z-index:38;width:42px;height:42px;
+     el botón se coloca POR ENCIMA de los dos, no sobre ellos.
+     Se suma el área segura igual que hacen esos dos: en los móviles con barra
+     de gestos ese margen los levanta ~34px, y sin sumarlo aquí la banda subía
+     hasta meterse dentro del botón. */
+  bottom:calc(18px + 54px + env(safe-area-inset-bottom,0px));
+  z-index:38;width:42px;height:42px;
   border-radius:50%;display:grid;place-items:center;
   border:1px solid rgba(190,205,240,.22);background:rgba(6,9,16,.72);
   backdrop-filter:blur(10px);color:rgba(233,238,247,.75);cursor:pointer;
