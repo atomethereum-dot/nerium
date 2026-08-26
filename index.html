@@ -10,11 +10,16 @@
      blanco con los cuadrados en el azul de marca: NO cambia con el tema del
      navegador, se ve igual en claro y en oscuro.
      Van como archivos y no incrustados, porque Safari e iOS ignoran los
-     iconos escritos como datos dentro del HTML. El .ico lleva tres tamaños
-     dentro (16, 32 y 48) para Safari antiguo, marcadores y vistas previas. -->
+     iconos escritos como datos dentro del HTML.
+     El .ico lleva seis tamaños dentro (16 a 256) para que en pantallas 4K y
+     Retina, donde la pestaña pide el icono al doble o al triple, siga habiendo
+     resolución de sobra. Se declara con sus medidas reales y NO con sizes="any":
+     "any" significa escalable, y un mapa de bits no lo es; declararlo así hacía
+     que algunos navegadores lo prefirieran al SVG y luego lo ampliaran. -->
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
-<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48 64x64 128x128 256x256">
 <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png">
 <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
 <link rel="manifest" href="/site.webmanifest">
 <meta name="theme-color" content="#05070C">
