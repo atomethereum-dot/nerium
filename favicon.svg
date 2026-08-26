@@ -1,7 +1,15 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <rect width="512" height="512" rx="114" fill="#0A0C10"/>
-  <g transform="translate(54,54) scale(0.6012)">
-    <path fill="#FFFFFF" d="M336 0 H464 V224 H672 V336 H560 V560 H464 V672 H336 A336 336 0 0 1 336 0 Z"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 736 736">
+  <style>
+    /* El logotipo va SIN fondo. El cuerpo se tiñe según el tema del navegador:
+       blanco sobre barras oscuras y tinta sobre barras claras. Es la misma
+       doble tinta que ya usa la web —blanco en la cabecera, oscuro en el pie—
+       y es lo único que evita que desaparezca sobre blanco.
+       Los dos cuadrados van SIEMPRE en el azul de marca. */
+    .cuerpo{fill:#FFFFFF}
+    @media (prefers-color-scheme: light){ .cuerpo{fill:#0A0C10} }
+  </style>
+  <g transform="translate(32,32)">
+    <path class="cuerpo" d="M336 0 H464 V224 H672 V336 H560 V560 H464 V672 H336 A336 336 0 0 1 336 0 Z"/>
     <rect fill="#2F6BFF" x="464" y="112" width="112" height="112"/>
     <rect fill="#2F6BFF" x="560" y="336" width="112" height="112"/>
   </g>
