@@ -23,6 +23,31 @@
 <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
 <link rel="manifest" href="/site.webmanifest">
 <meta name="theme-color" content="#05070C">
+
+<!-- ── la tarjeta al compartir el enlace ──
+     Lo que ven WhatsApp, X, Telegram, LinkedIn, Slack, Discord e iMessage
+     cuando alguien pega la dirección. La imagen va con URL ABSOLUTA: los
+     rastreadores no resuelven rutas relativas, y con una relativa la tarjeta
+     sale sin imagen. Declarar medidas y tipo evita que el primer visitante
+     vea la tarjeta sin foto mientras el servicio la descarga y la mide. -->
+<link rel="canonical" href="https://nereum.xyz/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Nereum">
+<meta property="og:locale" content="en_US">
+<meta property="og:url" content="https://nereum.xyz/">
+<meta property="og:title" content="Nereum — a blockchain for real-world assets">
+<meta property="og:description" content="Nereum is a purpose-built blockchain for tokenizing real-world assets.">
+<meta property="og:image" content="https://nereum.xyz/og.jpg">
+<meta property="og:image:secure_url" content="https://nereum.xyz/og.jpg">
+<meta property="og:image:type" content="image/jpeg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Nereum — real-world asset chain">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Nereum — a blockchain for real-world assets">
+<meta name="twitter:description" content="Nereum is a purpose-built blockchain for tokenizing real-world assets.">
+<meta name="twitter:image" content="https://nereum.xyz/og.jpg">
+<meta name="twitter:image:alt" content="Nereum — real-world asset chain">
 <link rel="stylesheet" href="assets/fonts.css">
 <style>
 :root{
