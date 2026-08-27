@@ -10,12 +10,8 @@
      blanco con los cuadrados en el azul de marca: NO cambia con el tema del
      navegador, se ve igual en claro y en oscuro.
      Van como archivos y no incrustados, porque Safari e iOS ignoran los
-     iconos escritos como datos dentro del HTML.
-     El .ico lleva seis tamaños dentro (16 a 256) para que en pantallas 4K y
-     Retina, donde la pestaña pide el icono al doble o al triple, siga habiendo
-     resolución de sobra. Se declara con sus medidas reales y NO con sizes="any":
-     "any" significa escalable, y un mapa de bits no lo es; declararlo así hacía
-     que algunos navegadores lo prefirieran al SVG y luego lo ampliaran. -->
+     iconos escritos como datos dentro del HTML. El .ico lleva tres tamaños
+     dentro (16, 32 y 48) para Safari antiguo, marcadores y vistas previas. -->
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48 64x64 128x128 256x256">
 <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
@@ -24,16 +20,14 @@
 <link rel="manifest" href="/site.webmanifest">
 <meta name="theme-color" content="#05070C">
 
-<!-- ── la tarjeta al compartir el enlace ──
-     Lo que ven WhatsApp, X, Telegram, LinkedIn, Slack, Discord e iMessage
-     cuando alguien pega la dirección. La imagen va con URL ABSOLUTA: los
-     rastreadores no resuelven rutas relativas, y con una relativa la tarjeta
-     sale sin imagen. Declarar medidas y tipo evita que el primer visitante
-     vea la tarjeta sin foto mientras el servicio la descarga y la mide. -->
-<link rel="canonical" href="https://nereum.xyz/">
+<!-- ── vista previa al compartir el enlace ──
+     La imagen va con URL ABSOLUTA: los rastreadores de WhatsApp, X, Telegram,
+     LinkedIn y Slack no resuelven rutas relativas. 1200x630 es el tamaño que
+     esperan todos; en JPG porque el PNG del mismo dibujo pesaba 641 KB y este
+     47, y varios servicios descartan las imágenes pesadas.
+     El og:image:alt no es adorno: es lo que leen los lectores de pantalla. -->
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Nereum">
-<meta property="og:locale" content="en_US">
 <meta property="og:url" content="https://nereum.xyz/">
 <meta property="og:title" content="Nereum — a blockchain for real-world assets">
 <meta property="og:description" content="Issue, move and settle real-world assets on a chain built for them. Whitelist open.">
@@ -43,26 +37,28 @@
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="Nereum — real-world asset chain">
+<meta property="og:locale" content="en_US">
+
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Nereum — a blockchain for real-world assets">
 <meta name="twitter:description" content="Issue, move and settle real-world assets on a chain built for them. Whitelist open.">
 <meta name="twitter:image" content="https://nereum.xyz/og.jpg">
 <meta name="twitter:image:alt" content="Nereum — real-world asset chain">
+
+<link rel="canonical" href="https://nereum.xyz/">
 <link rel="stylesheet" href="assets/fonts.css">
 <style>
 :root{
   /* ── el margen de abajo, uno solo para todo el grupo de las esquinas ──
-     El rótulo, el contador, el índice y las dos flechas se apoyaban cada uno
-     en su propia fórmula: unos sumaban el área segura del móvil y otros no.
-     Al esconderse la barra del navegador ese margen pasa de 0 a ~34px, así que
-     los que la sumaban subían y los que no se quedaban quietos, y se montaban.
-     Con una sola variable el grupo entero sube y baja a la vez.
-     Es el MAYOR de los dos, no la suma: sumarlos daba 48px de hueco al esconder
-     la barra —14 de diseño más 34 de área segura— y el grupo quedaba flotando
-     lejos del canto. Tomando el mayor, el margen es 14px con la barra visible y
-     34px sin ella, que es justo lo que hace falta para librar la barra de
-     gestos y ni un píxel más. Todo lo demás se apila SOBRE ese suelo, así que
-     las separaciones internas no cambian nunca. */
+     El rótulo de idioma, el contador, el índice y las dos flechas se apoyaban
+     cada uno en su propia fórmula: unos sumaban el área segura del móvil y
+     otros no. Al esconderse la barra del navegador ese margen pasa de 0 a
+     ~34px, así que los que la sumaban subían y los que no se quedaban quietos:
+     de ahí que el texto del idioma acabara cruzando la flecha.
+     Es el MAYOR de los dos, no la suma: sumarlos dejaba 48px de hueco bajo el
+     grupo. Tomando el mayor son 14px con la barra visible y 34px sin ella, que
+     es lo que necesita la barra de gestos y ni un píxel más. Todo lo demás se
+     apila SOBRE este suelo, así que las separaciones internas no cambian. */
   --hud-b:max(14px,env(safe-area-inset-bottom,0px));
 
   --bg:#000000; --bg2:#06080B; --panel:#0B0E13;
@@ -1231,7 +1227,11 @@ body.light .srail{color:#0B0D12}
    que suben desde abajo, cubren el blanco y se disuelven dejando negro.
    La sección es su propio recorrido: nada se mueve por sí solo. */
 /* el recorrido justo para que cierre: al terminar, el roadmap ya está ahí */
+/* Medido en móvil: la transición termina al 55% del recorrido y el 45%
+   restante era negro puro, unos 530px de scroll sin nada. Acortada a lo que
+   de verdad usa. En escritorio se deja como estaba. */
 .xf{position:relative;height:158vh}
+@media(max-width:899px){.xf{height:136vh}}
 .xf-stage{position:sticky;top:0;height:100dvh;overflow:hidden;background:#F5F5F7}
 .xf-cv{position:absolute;inset:0;width:100%;height:100%;display:block}
 /* el rótulo aparece solo cuando la cortina ya lo tapa todo */
@@ -1393,7 +1393,9 @@ footer .fmark-logo{--fmg-a:.24;--fmg-b:.05}
    Va al revés que la persiana: allí la luz se apagaba, aquí revienta.
    El plano negro se agrieta en los bloques del logotipo, la luz sale por las
    juntas, los bloques se encogen y se van, y un fogonazo remata en claro. */
+/* Aquí el negro estaba al PRINCIPIO: el primer 20% no hacía nada. */
 .xl{position:relative;height:172vh}
+@media(max-width:899px){.xl{height:150vh}}
 .xl-stage{position:sticky;top:0;height:100dvh;overflow:hidden;background:#000}
 .xl-cv{position:absolute;inset:0;width:100%;height:100%;display:block}
 .xl-word{position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);z-index:2;
@@ -1599,11 +1601,9 @@ body.light .luz::after,.paper .luz::after,.secure .luz::after{
    es un castigo. */
 .subir{position:fixed;right:16px;
   /* el marcador de sección y el contador ocupan la esquina inferior derecha:
-     el botón se coloca POR ENCIMA de los dos, no sobre ellos.
-     Se apoya en la misma variable que ellos y queda 10-12px por encima del
+     el botón se apila sobre el mismo suelo y queda 10-12px por encima del
      índice: antes eran 20-22px y el hueco cantaba. */
-  bottom:calc(var(--hud-b) + 48px);
-  z-index:38;width:42px;height:42px;
+  bottom:calc(var(--hud-b) + 48px);z-index:38;width:42px;height:42px;
   border-radius:50%;display:grid;place-items:center;
   border:1px solid rgba(190,205,240,.22);background:rgba(6,9,16,.72);
   backdrop-filter:blur(10px);color:rgba(233,238,247,.75);cursor:pointer;
@@ -1624,6 +1624,18 @@ body.light .subir{background:rgba(255,255,255,.7);border-color:rgba(11,13,18,.16
   .iman,.luz::after,.subir{transition:none}
   .luz:hover::after{opacity:0}
 }
+
+
+/* ══════ teletipo con la letra descifrándose ══════
+   La línea se escribe de izquierda a derecha y el carácter en curso salta
+   entre símbolos sobre un bloque invertido antes de fijarse. El texto queda
+   reservado con un doble invisible, para que la fila no cambie de ancho ni
+   dé saltos mientras se escribe. */
+.tec{position:relative;display:inline-block;white-space:pre}
+.tec-fantasma{visibility:hidden}
+.tec-real{position:absolute;inset:0;white-space:pre}
+.tec-cur{background:currentColor;color:var(--wash,#F1F2F4);padding:0 .02em}
+
 
 /* ══════ el cursor: dos corchetes ══════════════════════════
    Se cierran alrededor de lo que puedes pulsar. Solo con ratón o lápiz. */
@@ -3139,12 +3151,312 @@ const CALM=matchMedia('(prefers-reduced-motion: reduce)').matches;
 /* ── hero: el fondo "Deriva" de la v83, en canvas 2D ── */
 /* ── hero: el fondo "Deriva" — bloques que derivan de lado pero solo paran
       en posiciones de la retícula. El motivo sale del propio logotipo. ── */
-(function(){
+
+/* ══════════ la portada en WebGL ══════════
+   Mismo campo, mismos colores y mismo dibujo: lo único que cambia es QUIÉN
+   hace las cuentas. Aquí la posición de cada cubo, el empuje del cursor y la
+   barra de escáner se calculan en la tarjeta gráfica, un cubo por hilo, en vez
+   de en un bucle de JavaScript.
+   Si el navegador no da WebGL, se usa el campo de canvas de más abajo y no se
+   nota nada. */
+function campoGL(){
+  const cv=document.getElementById('burst'); if(!cv)return false;
+  /* preserveDrawingBuffer conserva el fotograma anterior, que es lo que hace
+     falta para la estela, PERO obliga al navegador a leer de vuelta el búfer y
+     eso frena la tarjeta: medido, 17 fps. En vez de eso se pinta en una textura
+     propia, que sí persiste sola, y al final se vuelca a pantalla. */
+  const gl=cv.getContext('webgl2',{alpha:false,antialias:false,
+    powerPreference:'high-performance'});
+  if(!gl)return false;
+
+  const VS=`#version 300 es
+  layout(location=0) in vec2 esquina;      // el cuadrado unidad
+  layout(location=1) in vec4 A;            // gx, ancho, tono, fase
+  layout(location=2) in vec4 B;            // velocidad, vida, alfa, profundidad
+  layout(location=3) in vec2 C;            // caída, banco (0 arriba, 1 abajo)
+  uniform vec2 R; uniform float T,U,desliz,scanY,grueso;
+  uniform vec4 M;                          // ratón: x, y, fuerza, alcance
+  uniform vec2 Mv;                         // velocidad del ratón
+  out float vAlfa; out float vTono; out float vScan;
+
+  void main(){
+    float k=fract(A.w + T*B.x*0.30*B.w/B.y);
+    float env=min(1.0,k*7.0)*pow(1.0-k,1.5);
+    float a=B.z*env;
+
+    float rec = C.y>0.5 ? (1.14 - k*C.x) : (-0.14 + k*C.x);
+    float x = A.x*U;
+    float y = floor(rec*R.y/U+0.5)*U + floor(desliz*B.w*(C.y>0.5?-1.0:1.0)/U+0.5)*U;
+    float w = A.y*U;
+
+    /* el cursor: empuje, giro y arrastre, con el recorrido topado */
+    if(M.z>0.01){
+      vec2 dd=vec2(x+w*0.5, y+U*0.5)-M.xy;
+      float d=length(dd);
+      if(d<M.w){
+        float q=1.0-d/M.w;
+        float f=q*q*(3.0-2.0*q)*M.z;
+        vec2 e=dd/max(d,1.0);
+        float tope=M.w*0.42;
+        float emp=min(f*U*11.0,tope);
+        float gir=min(f*U*4.2,tope*0.42);
+        vec2 o=e*emp + vec2(-e.y,e.x)*gir + Mv*(f*0.026);
+        x+=floor(o.x/U+0.5)*U;
+        y+=floor(o.y/U+0.5)*U;
+        a=min(1.0,a*(1.0+f*3.4));
+      }
+    }
+
+    /* la barra de escáner enciende lo que atraviesa */
+    float dS=abs(y+U*0.5-scanY);
+    float ins=0.0;
+    if(dS<grueso){ ins=1.0-dS/grueso; ins*=ins; a=min(1.0,a+ins*0.85); }
+
+    vec2 pos=vec2(x,y)+esquina*vec2(max(w-2.0,1.0),max(U-2.0,1.0))+vec2(1.0,1.0);
+    gl_Position=vec4((pos/R)*2.0-1.0,0.0,1.0);
+    gl_Position.y=-gl_Position.y;
+    vAlfa=a; vTono=A.z; vScan=ins;
+  }`;
+
+  const FS=`#version 300 es
+  precision highp float;
+  in float vAlfa; in float vTono; in float vScan;
+  uniform vec3 PAL[6];
+  out vec4 O;
+  void main(){
+    if(vAlfa<0.012) discard;
+    int idx=int(vTono+0.5);
+    vec3 c=PAL[0];
+    if(idx==1)c=PAL[1]; else if(idx==2)c=PAL[2]; else if(idx==3)c=PAL[3];
+    else if(idx==4)c=PAL[4]; else if(idx==5)c=PAL[5];
+    /* en el corazón de la barra el cubo tira a blanco, igual que en el canvas */
+    if(vScan>0.42){ float m=(vScan-0.42)/0.58; c=mix(c,vec3(1.0),m*0.8); }
+    O=vec4(c*vAlfa,vAlfa);        // se suma sobre lo ya pintado
+  }`;
+
+  /* la estela y el halo de la barra, en un cuadrado a pantalla completa */
+  const VS2=`#version 300 es
+  layout(location=0) in vec2 esquina;
+  void main(){ gl_Position=vec4(esquina*2.0-1.0,0.0,1.0); }`;
+  const FS_FADE=`#version 300 es
+  precision highp float; out vec4 O;
+  void main(){ O=vec4(0.0,0.0,0.0,0.22); }`;
+  /* el volcado de la textura a pantalla */
+  const FS_COPIA=`#version 300 es
+  precision highp float;
+  uniform sampler2D tex; uniform vec2 R;
+  out vec4 O;
+  void main(){ O=vec4(texture(tex,gl_FragCoord.xy/R).rgb,1.0); }`;
+  const FS_HALO=`#version 300 es
+  precision highp float;
+  uniform vec2 R; uniform float scanY,grueso;
+  out vec4 O;
+  void main(){
+    float d=abs(gl_FragCoord.y-(R.y-scanY));
+    float g=grueso*0.6;
+    float a=max(0.0,1.0-d/g);
+    a=a*a*0.16;
+    float linea=smoothstep(1.5,0.0,d)*0.22;
+    vec3 c=mix(vec3(0.184,0.420,1.0),vec3(0.659,0.769,1.0),0.5);
+    O=vec4(c*(a+linea),a+linea);
+  }`;
+
+  function compila(t,src){const o=gl.createShader(t);gl.shaderSource(o,src);gl.compileShader(o);
+    if(!gl.getShaderParameter(o,gl.COMPILE_STATUS)){console.warn(gl.getShaderInfoLog(o));return null}return o}
+  function programa(vs,fs){
+    const v=compila(gl.VERTEX_SHADER,vs), f=compila(gl.FRAGMENT_SHADER,fs);
+    if(!v||!f)return null;
+    const p=gl.createProgram();gl.attachShader(p,v);gl.attachShader(p,f);gl.linkProgram(p);
+    if(!gl.getProgramParameter(p,gl.LINK_STATUS)){console.warn(gl.getProgramInfoLog(p));return null}
+    return p;
+  }
+  const pCubos=programa(VS,FS), pFade=programa(VS2,FS_FADE),
+        pHalo=programa(VS2,FS_HALO), pCopia=programa(VS2,FS_COPIA);
+  if(!pCubos||!pFade||!pHalo||!pCopia)return false;
+
+  /* la textura donde se acumula el dibujo entre fotogramas */
+  let fbo=gl.createFramebuffer(), tex=gl.createTexture();
+  function lienzoInterno(w,h){
+    gl.bindTexture(gl.TEXTURE_2D,tex);
+    gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,w,h,0,gl.RGBA,gl.UNSIGNED_BYTE,null);
+    gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.NEAREST);
+    gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.NEAREST);
+    gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);
+    gl.bindFramebuffer(gl.FRAMEBUFFER,fbo);
+    gl.framebufferTexture2D(gl.FRAMEBUFFER,gl.COLOR_ATTACHMENT0,gl.TEXTURE_2D,tex,0);
+    gl.clearColor(0,0,0,1); gl.clear(gl.COLOR_BUFFER_BIT);
+    gl.bindFramebuffer(gl.FRAMEBUFFER,null);
+  }
+
+  const T=[[77,162,255],[42,91,255],[130,190,255],[255,255,255],[120,145,190],[30,60,150]];
+  const rnd=(a,b)=>a+Math.random()*(b-a);
+  const FINE=matchMedia('(hover:hover) and (pointer:fine)').matches;
+  const M={x:-1e5,y:-1e5,tx:-1e5,ty:-1e5,k:0,want:0,vx:0,vy:0};
+
+  const vao=gl.createVertexArray(); gl.bindVertexArray(vao);
+  const quad=gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER,quad);
+  gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([0,0, 1,0, 0,1, 1,1]),gl.STATIC_DRAW);
+  gl.enableVertexAttribArray(0); gl.vertexAttribPointer(0,2,gl.FLOAT,false,0,0);
+  const bufA=gl.createBuffer(), bufB=gl.createBuffer(), bufC=gl.createBuffer();
+  for(const [b,loc,n] of [[bufA,1,4],[bufB,2,4],[bufC,3,2]]){
+    gl.bindBuffer(gl.ARRAY_BUFFER,b);
+    gl.enableVertexAttribArray(loc);
+    gl.vertexAttribPointer(loc,n,gl.FLOAT,false,0,0);
+    gl.vertexAttribDivisor(loc,1);
+  }
+  const vaoPlano=gl.createVertexArray(); gl.bindVertexArray(vaoPlano);
+  gl.bindBuffer(gl.ARRAY_BUFFER,quad);
+  gl.enableVertexAttribArray(0); gl.vertexAttribPointer(0,2,gl.FLOAT,false,0,0);
+
+  let W=0,H=0,U=28,cols=1,N=0,dpr=1,desliz=0,live=true,t=0,last=0;
+  const uni={};
+  function loc(p,n){return gl.getUniformLocation(p,n)}
+
+  function size(){
+    dpr=Math.min(devicePixelRatio||1,1.5);
+    W=cv.clientWidth;H=cv.clientHeight;
+    cv.width=Math.round(W*dpr);cv.height=Math.round(H*dpr);
+    gl.viewport(0,0,cv.width,cv.height);
+    U=Math.max(15,Math.round(Math.min(cv.width,cv.height)/26));
+    cols=Math.ceil(cv.width/U);
+    N=cv.width<1200?120:cv.width<2000?200:270;
+    const A=new Float32Array(N*4), B=new Float32Array(N*4), C=new Float32Array(N*2);
+    for(let i=0;i<N;i++){
+      const abajo=Math.random()<0.42;
+      A[i*4]  =(Math.random()*cols)|0;
+      A[i*4+1]=Math.round(rnd(1,3));
+      A[i*4+2]=(Math.random()*T.length)|0;
+      A[i*4+3]=Math.random();
+      B[i*4]  =rnd(.4,1.1);
+      B[i*4+1]=rnd(.7,1.6);
+      B[i*4+2]=rnd(.30,.85);
+      B[i*4+3]=rnd(.45,1);
+      C[i*2]  =Math.pow(Math.random(),1.9)*(abajo?.62:.78)+.10;
+      C[i*2+1]=abajo?1:0;
+    }
+    gl.bindBuffer(gl.ARRAY_BUFFER,bufA);gl.bufferData(gl.ARRAY_BUFFER,A,gl.STATIC_DRAW);
+    gl.bindBuffer(gl.ARRAY_BUFFER,bufB);gl.bufferData(gl.ARRAY_BUFFER,B,gl.STATIC_DRAW);
+    gl.bindBuffer(gl.ARRAY_BUFFER,bufC);gl.bufferData(gl.ARRAY_BUFFER,C,gl.STATIC_DRAW);
+    gl.useProgram(pCubos);
+    gl.uniform3fv(loc(pCubos,'PAL'), new Float32Array(T.flatMap(c=>c.map(v=>v/255))));
+    lienzoInterno(cv.width,cv.height);
+  }
+  size(); addEventListener('resize',size,{passive:true});
+
+  if(FINE&&!CALM){
+    const hero=cv.closest('.hero')||cv.parentElement;
+    hero.addEventListener('pointermove',e=>{
+      if(e.pointerType==='touch')return;
+      const r=cv.getBoundingClientRect();
+      M.tx=(e.clientX-r.left)*dpr; M.ty=(e.clientY-r.top)*dpr; M.want=1;
+    },{passive:true});
+    hero.addEventListener('pointerleave',()=>{M.want=0},{passive:true});
+    hero.addEventListener('pointerdown',()=>{M.want=1.9},{passive:true});
+    hero.addEventListener('pointerup',()=>{M.want=1},{passive:true});
+  }
+  new IntersectionObserver(e=>{live=e[0].isIntersecting},{threshold:.02}).observe(cv);
+
+  /* ── el guardián ──
+     WebGL sobre una tarjeta gráfica va sobrado, pero en equipos sin
+     aceleración el navegador lo emula por software y entonces va MÁS LENTO que
+     el canvas. Así que se mide el primer segundo real de dibujo y, si no llega
+     a 40 fps, se apaga WebGL y entra el campo de canvas. El visitante no ve el
+     cambio: los dos pintan lo mismo. */
+  let cuadros=0, t0Med=0, vigilando=true, muerto=false;
+  function rendirse(){
+    muerto=true;
+    try{gl.getExtension('WEBGL_lose_context')?.loseContext()}catch(e){}
+    /* Un lienzo admite un solo tipo de contexto para siempre: una vez pedido
+       WebGL, ya no da canvas 2D. Así que se pone un lienzo nuevo en su sitio,
+       con el mismo id y los mismos estilos, y sobre ese arranca el campo 2D. */
+    const nuevo=document.createElement('canvas');
+    nuevo.id=cv.id; nuevo.className=cv.className;
+    nuevo.setAttribute('aria-hidden','true');
+    cv.replaceWith(nuevo);
+    window.__campo='canvas (webgl iba lento)';
+    campo2D();
+  }
+
+  function frame(ts){
+    if(muerto)return;
+    requestAnimationFrame(frame);
+    if(!live){last=ts;return}
+    if(vigilando){
+      if(!t0Med)t0Med=ts;
+      cuadros++;
+      if(ts-t0Med>1000){
+        vigilando=false;
+        const fps=cuadros*1000/(ts-t0Med);
+        if(fps<40){rendirse();return}
+      }
+    }
+    const dt=Math.min(.05,(ts-last)/1000||.016); last=ts; t+=dt;
+
+    M.k+=(M.want-M.k)*Math.min(1,dt*5.2);
+    if(M.tx>-1e4){
+      const px=M.x,py=M.y;
+      if(M.x<-1e4){M.x=M.tx;M.y=M.ty}
+      M.x+=(M.tx-M.x)*Math.min(1,dt*14);
+      M.y+=(M.ty-M.y)*Math.min(1,dt*14);
+      M.vx=(M.x-px)/Math.max(dt,.001);M.vy=(M.y-py)/Math.max(dt,.001);
+    }
+    desliz += ((scrollY*0.62*dpr) - desliz) * Math.min(1,dt*6);
+
+    const CICLO=7.2, q=(t%CICLO)/CICLO;
+    const vai=q<.5?q*2:(1-q)*2;
+    const suave=vai*vai*(3-2*vai);
+    const scanY=(-0.12+suave*1.24)*cv.height;
+    const grueso=Math.max(46*dpr, cv.height*0.085);
+
+    /* todo se pinta en la textura, que conserva el fotograma anterior */
+    gl.bindFramebuffer(gl.FRAMEBUFFER,fbo);
+    /* 1 · velar lo pintado, para la estela */
+    gl.enable(gl.BLEND);
+    gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);
+    gl.useProgram(pFade); gl.bindVertexArray(vaoPlano);
+    gl.drawArrays(gl.TRIANGLE_STRIP,0,4);
+
+    /* 2 · los cubos, sumando luz */
+    gl.blendFunc(gl.ONE,gl.ONE);
+    gl.useProgram(pCubos); gl.bindVertexArray(vao);
+    gl.uniform2f(loc(pCubos,'R'),cv.width,cv.height);
+    gl.uniform1f(loc(pCubos,'T'),t);
+    gl.uniform1f(loc(pCubos,'U'),U);
+    gl.uniform1f(loc(pCubos,'desliz'),desliz);
+    gl.uniform1f(loc(pCubos,'scanY'),scanY);
+    gl.uniform1f(loc(pCubos,'grueso'),grueso);
+    gl.uniform4f(loc(pCubos,'M'),M.x,M.y,M.k,Math.min(cv.width,cv.height)*0.44);
+    gl.uniform2f(loc(pCubos,'Mv'),M.vx,M.vy);
+    gl.drawArraysInstanced(gl.TRIANGLE_STRIP,0,4,N);
+
+    /* 3 · el halo de la barra */
+    gl.useProgram(pHalo); gl.bindVertexArray(vaoPlano);
+    gl.uniform2f(loc(pHalo,'R'),cv.width,cv.height);
+    gl.uniform1f(loc(pHalo,'scanY'),scanY);
+    gl.uniform1f(loc(pHalo,'grueso'),grueso);
+    gl.drawArrays(gl.TRIANGLE_STRIP,0,4);
+
+    /* 4 · volcar la textura a pantalla */
+    gl.bindFramebuffer(gl.FRAMEBUFFER,null);
+    gl.disable(gl.BLEND);
+    gl.useProgram(pCopia); gl.bindVertexArray(vaoPlano);
+    gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D,tex);
+    gl.uniform1i(loc(pCopia,'tex'),0);
+    gl.uniform2f(loc(pCopia,'R'),cv.width,cv.height);
+    gl.drawArrays(gl.TRIANGLE_STRIP,0,4);
+  }
+  requestAnimationFrame(ts=>{last=ts;frame(ts)});
+  window.__campo='webgl';
+  return true;
+}
+
+function campo2D(){
   const cv=document.getElementById('burst');if(!cv)return;
   const ctx=cv.getContext('2d',{alpha:false});
   /* la paleta es la de la web: azur, azul, plata y acero sobre negro */
   const T=[[77,162,255],[42,91,255],[130,190,255],[255,255,255],[120,145,190],[30,60,150]];
-  let W=0,H=0,dpr=1,P=[],live=true,last=0,t=0,U=28,cols=1,rows=1;
+  let W=0,H=0,dpr=1,P=[],live=true,last=0,t=0,U=28,cols=1,rows=1,desliz=0,halo=null,haloH=0;
   const rnd=(a,b)=>a+Math.random()*(b-a);
   const FINE=matchMedia('(hover:hover) and (pointer:fine)').matches;
   /* el puntero: posición suavizada y fuerza que sube al entrar y baja al salir */
@@ -3152,22 +3464,35 @@ const CALM=matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   function reset(p,seed){
     p.ci=(Math.random()*T.length)|0;
+    /* al arrancar se reparten por todo el recorrido; después, cada cubo que
+       muere vuelve a nacer arriba */
     p.k=seed?Math.random():0;
     p.sp=rnd(.4,1.1);
-    p.gy=(Math.random()*rows)|0;
-    p.fx=Math.random();
+    p.gx=(Math.random()*cols)|0;          /* columna fija: cae en vertical */
     p.w=Math.round(rnd(1,3));
-    p.al=rnd(.22,.72);
-    p.life=rnd(.6,1.2);
+    p.al=rnd(.30,.85);
+    p.life=rnd(.7,1.6);
+    /* la profundidad decide velocidad, tamaño de paso y cuánto le afecta el
+       scroll: los de delante corren más y se mueven más */
+    p.z=rnd(.45,1);
+    /* Medido en el vídeo: 28% de cubos arriba, 2% en el centro y 24% abajo.
+       Así que hay DOS bancos. Los de arriba caen desde el cielo; los de abajo
+       suben desde el canto inferior. En medio queda el hueco del titular. */
+    p.abajo = Math.random() < .42;
+    p.caida = Math.pow(Math.random(),1.9)*(p.abajo?.62:.78)+.10;
   }
   function size(){
-    dpr=Math.min(devicePixelRatio||1,2);
+    /* Los cubos son rectángulos de canto vivo: a 1,5 se ven idénticos que a 2,
+       y el lienzo pasa de 5,2 a 2,9 millones de píxeles. Importa porque cada
+       fotograma repinta el lienzo entero para dejar la estela, así que el
+       coste va con el área. En pantallas normales no cambia nada. */
+    dpr=Math.min(devicePixelRatio||1,1.5);
     W=cv.clientWidth;H=cv.clientHeight;
     cv.width=W*dpr;cv.height=H*dpr;ctx.setTransform(dpr,0,0,dpr,0,0);
     ctx.fillStyle='#000';ctx.fillRect(0,0,W,H);
     U=Math.max(15,Math.round(Math.min(W,H)/26));
     cols=Math.ceil(W/U);rows=Math.ceil(H/U);
-    const want=W<760?110:W<1300?200:290;
+    const want=W<760?120:W<1300?200:270;
     while(P.length<want)P.push({});
     P.length=want;
     P.forEach(p=>{if(p.k===undefined)reset(p,true)});
@@ -3179,12 +3504,12 @@ const CALM=matchMedia('(prefers-reduced-motion: reduce)').matches;
     const dt=Math.min(.05,(ts-last)/1000||.016);last=ts;t+=dt;
 
     /* el puntero persigue su destino: sin esto el fondo da tirones */
-    M.k+=(M.want-M.k)*Math.min(1,dt*3.4);
+    M.k+=(M.want-M.k)*Math.min(1,dt*5.2);
     if(M.tx>-1e4){
       const px=M.x,py=M.y;
       if(M.x<-1e4){M.x=M.tx;M.y=M.ty}
-      M.x+=(M.tx-M.x)*Math.min(1,dt*9);
-      M.y+=(M.ty-M.y)*Math.min(1,dt*9);
+      M.x+=(M.tx-M.x)*Math.min(1,dt*14);
+      M.y+=(M.ty-M.y)*Math.min(1,dt*14);
       M.vx=(M.x-px)/Math.max(dt,.001);M.vy=(M.y-py)/Math.max(dt,.001);
     }
 
@@ -3193,31 +3518,107 @@ const CALM=matchMedia('(prefers-reduced-motion: reduce)').matches;
     ctx.fillStyle='rgba(0,0,0,.22)';ctx.fillRect(0,0,W,H);
     ctx.globalCompositeOperation='lighter';
 
-    const R=Math.min(W,H)*.34;
+    /* ── la barra de escáner ──
+       Una banda horizontal que sube y baja sin parar. Los bloques que quedan
+       dentro de ella se encienden, con caída suave a los lados: se lee como si
+       algo estuviera leyendo el campo, no como una línea pintada encima. */
+    /* el scroll arrastra el campo: se guarda cuánto se ha bajado desde que la
+       portada está a la vista y se reparte por profundidad */
+    desliz += ((scrollY*0.62) - desliz) * Math.min(1,dt*6);
+
+    const CICLO=7.2;                       /* segundos de ida y vuelta */
+    const q=(t%CICLO)/CICLO;
+    const vaiven=q<.5 ? q*2 : (1-q)*2;     /* 0→1→0, sin saltos */
+    const suave=vaiven*vaiven*(3-2*vaiven);
+    const scanY=(-0.12+suave*1.24)*H;      /* entra y sale por los cantos */
+    const GRUESO=Math.max(46,H*0.085);
+
+    const R=Math.min(W,H)*.44;   /* alcance del cursor: un círculo claro */
     for(const p of P){
-      p.k+=dt*p.sp*.34/p.life;
+      p.k+=dt*p.sp*.30*p.z/p.life;
       if(p.k>1){reset(p,false);continue}
-      let x=Math.round(((p.fx+p.k)%1)*cols)*U;
-      let y=p.gy*U;
+      let x=p.gx*U;
+      /* cae desde encima del canto superior hasta donde le toque, y el scroll
+         lo arrastra: los de delante bajan más que los del fondo */
+      /* los de arriba bajan desde encima del canto; los de abajo suben desde
+         debajo del canto inferior */
+      const rec = p.abajo ? (1.14 - p.k*p.caida) : (-.14 + p.k*p.caida);
+      let y=Math.round(rec*H/U)*U + Math.round(desliz*p.z*(p.abajo?-1:1)/U)*U;
       const w=p.w*U, h=U;
-      const env=Math.sin(Math.min(1,p.k)*Math.PI);
+      /* aparece de golpe y se va apagando conforme baja: por eso el cielo va
+         cargado y el centro queda limpio para el titular */
+      const env=Math.min(1,p.k*7) * Math.pow(1-p.k,1.5);
       let a=p.al*env;
+
+      /* dentro de la banda, el bloque sube de brillo */
+      const dScan=Math.abs(y+U*.5-scanY);
+      let enScan=0;
+      if(dScan<GRUESO){
+        enScan=1-dScan/GRUESO;
+        enScan*=enScan;                    /* el borde cae rápido */
+        a=Math.min(1,a+enScan*.85);
+      }
 
       /* el puntero aparta los bloques cercanos y los enciende */
       if(M.k>.01){
-        const dx=x+w/2-M.x, dy=y+h/2-M.y, d=Math.hypot(dx,dy);
+        const dx=x+w/2-M.x, dy=y+h/2-M.y;
+        /* descarte rápido por caja antes de la raíz cuadrada: con el alcance
+           grande, calcular la distancia de todos costaba la mitad del cuadro */
+        if(dx>-R&&dx<R&&dy>-R&&dy<R){
+        const d=Math.hypot(dx,dy);
         if(d<R){
-          const f=Math.pow(1-d/R,2.2)*M.k;
-          x+=Math.round((dx/(d||1)*f*U*2.4 + M.vx*.006*f)/U)*U;
-          y+=Math.round((dy/(d||1)*f*U*1.6 + M.vy*.006*f)/U)*U;
-          a=Math.min(1,a*(1+f*2.2));
-        }
+          /* Tres fuerzas a la vez, para que el campo reaccione de verdad:
+             1) empuje radial, que aparta el cubo del puntero
+             2) giro, que lo desvía de lado y hace que el hueco se enrosque
+             3) arrastre, que lo lanza en la dirección en que va el ratón     */
+          /* La fuerza sube rápido cerca del puntero y se apaga antes de llegar
+             al borde, así el campo de alrededor no se vacía. Y el recorrido va
+             TOPADO: los cubos se amontonan en el anillo en vez de salir
+             volando fuera del encuadre, que era lo que pasaba antes. */
+          const q=1-d/R;
+          const f=q*q*(3-2*q)*M.k;
+          const inv=1/(d||1);
+          const ex=dx*inv, ey=dy*inv;
+          const tope=R*.42;
+          const empuje=Math.min(f*U*11, tope);
+          const giro  =Math.min(f*U*4.2, tope*.42);
+          const arras =f*.026;
+          const ox = ex*empuje - ey*giro + M.vx*arras;
+          const oy = ey*empuje + ex*giro + M.vy*arras;
+          x+=Math.round(ox/U)*U;
+          y+=Math.round(oy/U)*U;
+          a=Math.min(1,a*(1+f*3.4));
+        }}
       }
       if(a<.012)continue;
-      const c=T[p.ci];
-      ctx.fillStyle='rgba('+c[0]+','+c[1]+','+c[2]+','+a.toFixed(3)+')';
+      let c=T[p.ci];
+      /* en el corazón de la banda el bloque tira a blanco, como si la luz lo
+         saturara; fuera, conserva su color */
+      if(enScan>.42){
+        const m=(enScan-.42)/.58;
+        c=[c[0]+(255-c[0])*m*.8, c[1]+(255-c[1])*m*.8, c[2]+(255-c[2])*m*.55];
+      }
+      ctx.fillStyle='rgba('+(c[0]|0)+','+(c[1]|0)+','+(c[2]|0)+','+a.toFixed(3)+')';
       ctx.fillRect(Math.round(x)+1,Math.round(y)+1,Math.max(1,w-2),Math.max(1,h-2));
     }
+
+    /* el filo de la barra. El degradado se guarda y solo se traslada: crearlo
+       en cada fotograma costaba más que dibujar todos los cubos. */
+    if(!halo||haloH!==GRUESO){
+      halo=ctx.createLinearGradient(0,0,0,GRUESO*1.2);
+      halo.addColorStop(0,'rgba(47,107,255,0)');
+      halo.addColorStop(.5,'rgba(121,171,255,.16)');
+      halo.addColorStop(1,'rgba(47,107,255,0)');
+      haloH=GRUESO;
+    }
+    ctx.save();
+    ctx.translate(0,scanY-GRUESO*.6);
+    ctx.fillStyle=halo;
+    ctx.fillRect(0,0,W,GRUESO*1.2);
+    ctx.restore();
+    ctx.fillStyle='rgba(168,196,255,.22)';
+    ctx.fillRect(0,Math.round(scanY),W,1);
+
     ctx.globalCompositeOperation='source-over';
     requestAnimationFrame(frame);
   }
@@ -3237,7 +3638,12 @@ const CALM=matchMedia('(prefers-reduced-motion: reduce)').matches;
   }
   new IntersectionObserver(e=>{live=e[0].isIntersecting},{threshold:.02}).observe(cv);
   requestAnimationFrame(ts=>{last=ts;frame(ts)});
-})();
+}
+
+/* Se intenta WebGL; si el navegador no lo da, entra el campo de canvas y el
+   visitante no nota la diferencia. */
+if(!campoGL()){ window.__campo='canvas'; campo2D(); }
+
 
 
 /* ── chromatic band: a pan of neon light columns, painted with a long exposure ── */
@@ -4427,6 +4833,88 @@ const CALM=matchMedia('(prefers-reduced-motion: reduce)').matches;
   const dTop=nn=>{let y=0;while(nn){y+=nn.offsetTop;nn=nn.offsetParent}return y};
 
   const eOut=t=>1-Math.pow(1-t,3);
+  /* ══════ el vuelo ══════
+     Cuando la persiana cierra ya no queda una imagen quieta, sino un vuelo
+     hacia dentro: cubos que vienen de lejos y pasan de largo, con perspectiva
+     de verdad. Cuanto más se baja, más rápido va — así el tramo final de la
+     transición empuja hacia la sección siguiente en vez de frenar. */
+  const PAL=[[77,162,255],[42,91,255],[130,190,255],[255,255,255],[120,145,190],[30,60,150]];
+  let vuelo=null, vt=0, vlast=0;
+  const HONDO=9;          /* profundidad del corredor */
+  function haceVuelo(){
+    vuelo=[];
+    const cuantos=W<760?150:280;
+    for(let i=0;i<cuantos;i++){
+      vuelo.push({
+        x:(Math.random()*2-1)*1.5, y:(Math.random()*2-1)*1.5,
+        z:Math.random()*HONDO+0.35,
+        giro:Math.random()*Math.PI,
+        vg:(Math.random()*2-1)*0.5,
+        lado:0.12+Math.random()*0.30,
+        c:PAL[(Math.random()*PAL.length)|0],
+        a:0.30+Math.random()*0.7
+      });
+    }
+  }
+  function pintaVuelo(fuerza){
+    if(!vuelo)haceVuelo();
+    const ahora=performance.now()/1000;
+    const dt=Math.min(.05,(ahora-vlast)||.016); vlast=ahora; vt+=dt;
+
+    const cx=W/2, cy=H/2;
+    const foco=Math.min(W,H)*0.92;
+    /* la velocidad sube con lo avanzada que esté la transición */
+    const vel=(0.9+fuerza*3.4)*dt;
+
+    ctx.globalCompositeOperation='lighter';
+
+    /* un resplandor al fondo, hacia el que se vuela */
+    const g=ctx.createRadialGradient(cx,cy,0,cx,cy,Math.min(W,H)*0.7);
+    g.addColorStop(0,'rgba(47,107,255,'+(0.13*fuerza).toFixed(3)+')');
+    g.addColorStop(1,'rgba(47,107,255,0)');
+    ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+
+    for(const c of vuelo){
+      const zAntes=c.z;
+      c.z-=vel;
+      if(c.z<0.30){                       /* ha pasado de largo: vuelve al fondo */
+        c.z+=HONDO; c.x=(Math.random()*2-1)*1.5; c.y=(Math.random()*2-1)*1.5;
+      }
+      c.giro+=c.vg*dt;
+
+      const k=foco/c.z, kA=foco/zAntes;
+      const px=cx+c.x*k, py=cy+c.y*k;
+      const lado=Math.max(1.4, c.lado*k*0.30);
+      if(px<-lado*2||px>W+lado*2||py<-lado*2||py>H+lado*2)continue;
+
+      /* cerca se ve entero; de lejos se apaga */
+      const cerca=1-Math.min(1,(c.z-0.30)/HONDO);
+      let a=c.a*cerca*cerca*fuerza;
+      if(a<0.012)continue;
+
+      /* estela: de dónde venía a dónde está, que es lo que da la sensación
+         de velocidad sin desenfoque caro */
+      const ax=cx+c.x*kA, ay=cy+c.y*kA;
+      const dx=px-ax, dy=py-ay;
+      if(dx*dx+dy*dy>4){
+        ctx.strokeStyle='rgba('+c.c.join(',')+','+(a*0.55).toFixed(3)+')';
+        ctx.lineWidth=Math.max(1,lado*0.6);
+        ctx.beginPath(); ctx.moveTo(ax,ay); ctx.lineTo(px,py); ctx.stroke();
+      }
+
+      ctx.save();
+      ctx.translate(px,py);
+      ctx.rotate(c.giro);
+      ctx.fillStyle='rgba('+c.c.join(',')+','+a.toFixed(3)+')';
+      ctx.fillRect(-lado/2,-lado/2,lado,lado);
+      /* el filo claro de arriba, como en los cubos del stack */
+      ctx.fillStyle='rgba(255,255,255,'+(a*0.5).toFixed(3)+')';
+      ctx.fillRect(-lado/2,-lado/2,lado,Math.max(1,lado*0.16));
+      ctx.restore();
+    }
+    ctx.globalCompositeOperation='source-over';
+  }
+
   function draw(p){
     ctx.fillStyle='#F5F5F7';ctx.fillRect(0,0,W,H);
     const n=st.n;
@@ -4458,6 +4946,11 @@ const CALM=matchMedia('(prefers-reduced-motion: reduce)').matches;
         ctx.fillRect(x,ey-(down?1.5:0),w,1.5);
       }
     }
+    /* una vez cerrada la persiana quedaba negro puro: entran los cubos, que
+       además enlazan con el campo del roadmap que viene justo después */
+    const lleno=clm((p-.58)/.22);
+    if(lleno>.01)pintaVuelo(lleno);
+
     stage.classList.toggle('lit', p>.46 && p<.95);
     stage.classList.toggle('go', p<.80);
   }
@@ -4467,7 +4960,9 @@ const CALM=matchMedia('(prefers-reduced-motion: reduce)').matches;
   (function tick(){
     const top=dTop(sec), run=Math.max(1,sec.offsetHeight-innerHeight);
     const p=clm((scrollY-top)/run);
-    if(Math.abs(p-last)>.0015){last=p;draw(p)}
+    /* con la persiana cerrada se repinta siempre, para que los cubos respiren
+       aunque el visitante esté quieto */
+    if(Math.abs(p-last)>.0015 || p>.58){last=p;draw(p)}
     raf=requestAnimationFrame(tick);
   })();
 })();
@@ -4506,6 +5001,221 @@ const CALM=matchMedia('(prefers-reduced-motion: reduce)').matches;
         seed:Math.random()});
     }
     last=-1;
+  }
+
+  /* ══════ la subida ══════
+     Otra idea, no el vuelo del revés. Aquí son piezas de TINTA MACIZA que
+     suben del canto inferior y salen por arriba, como si el papel se
+     imprimiera al pasar. Van casi negras y con sombra propia, para que
+     recorten de verdad contra el blanco en vez de quedarse en gris.
+     Unas pocas en el azul de marca, que es lo que le da el acento. */
+  /* con color: el azul de marca en tres intensidades, un cian y el acero.
+     La tinta casi negra baja a un tercio, así el papel gana color sin perder
+     el contraste que hacía falta contra el blanco. */
+  const NEGRO=[10,12,16], AZUL=[47,107,255], AZULP=[27,73,224],
+        AZULC=[121,171,255], CIAN=[64,196,220], ACERO=[70,86,120];
+  let piezas=null, pt=0, pl=0;
+  function hacePiezas(){
+    piezas=[];
+    const base=Math.max(16,Math.round(Math.min(W,H)/22));
+    const cuantas=W<760?54:96;
+    for(let i=0;i<cuantas;i++){
+      const r=Math.random();
+      /* un tercio en tinta, el resto repartido entre los azules y el cian */
+      const tono = r<0.34 ? NEGRO
+                 : r<0.54 ? AZUL
+                 : r<0.68 ? AZULP
+                 : r<0.80 ? AZULC
+                 : r<0.90 ? CIAN
+                 : ACERO;
+      piezas.push({
+        x:Math.random(),
+        /* al crearse se reparten por TODO el alto, no solo bajo el canto: si
+           no, al abrirse el claro hay un par de segundos de papel vacío
+           mientras las primeras suben. Al morir sí vuelven por abajo. */
+        y:-0.2+Math.random()*1.7,
+        /* la mitad pequeñas y unas pocas grandes: sin esa mezcla se lee
+           como una lluvia uniforme y no como una composición */
+        lado:base*(Math.random()<.55 ? 0.28+Math.random()*0.5
+                                     : 0.9+Math.random()*1.7),
+        v:0.055+Math.random()*0.16,        /* pantallas por segundo */
+        giro:(Math.random()*2-1)*0.28,
+        vg:(Math.random()*2-1)*0.16,
+        c: tono,
+        /* los claros necesitan más cuerpo para recortar sobre el papel */
+        a: tono===NEGRO?0.92 : tono===AZULC?0.95 : tono===ACERO?0.55 : 0.90,
+        deriva:(Math.random()*2-1)*0.035
+      });
+    }
+  }
+  function pintaSubida(fuerza){
+    if(!piezas)hacePiezas();
+    const ahora=performance.now()/1000;
+    const dt=Math.min(.05,(ahora-pl)||.016); pl=ahora; pt+=dt;
+
+    for(const q of piezas){
+      q.y-=q.v*dt*(0.6+fuerza*1.5);
+      q.x+=q.deriva*dt*0.4;
+      q.giro+=q.vg*dt;
+      if(q.y<-0.35){ q.y=1.08+Math.random()*0.55; q.x=Math.random(); }
+
+      const px=q.x*W, py=q.y*H, L=q.lado;
+      if(py<-L*2||py>H+L*2)continue;
+
+      /* se apagan al acercarse al canto de arriba, para que no se corten */
+      const borde=Math.min(1, Math.max(0, (q.y+0.12)/0.28));
+      const a=q.a*fuerza*borde;
+      if(a<0.02)continue;
+
+      ctx.save();
+      ctx.translate(px,py);
+      ctx.rotate(q.giro);
+      /* la sombra: es lo que hace que la pieza se despegue del papel */
+      ctx.fillStyle='rgba(10,12,16,'+(a*0.16).toFixed(3)+')';
+      ctx.fillRect(-L/2+L*0.10, -L/2+L*0.13, L, L);
+      ctx.fillStyle='rgba('+q.c.join(',')+','+a.toFixed(3)+')';
+      ctx.fillRect(-L/2,-L/2,L,L);
+      /* un filo claro arriba: el mismo gesto de los cubos del stack */
+      ctx.fillStyle='rgba(255,255,255,'+(a*0.22).toFixed(3)+')';
+      ctx.fillRect(-L/2,-L/2,L,Math.max(1,L*0.08));
+      ctx.restore();
+    }
+  }
+
+  /* ══════════ EL SUELO ══════════
+     La que eligió. Los bloques se alejan por un plano hacia el horizonte,
+     como un libro mayor que se extiende: nacen cerca, grandes, y se van
+     empequeñeciendo y apagando conforme se van. Un velo oscuro en la línea
+     del horizonte, para que salgan de la nada. */
+  const SPAL=[[77,162,255],[42,91,255],[130,190,255],[235,240,250],[120,145,190],[30,60,150]];
+  let SU=null, suL=0, suVelo=null, suVeloH=0, suFil=null, suFilW=0, suCol=null, suColH=0;
+  const srnd=(a,b)=>a+Math.random()*(b-a);
+  /* Lienzo aparte que NO se borra: solo se vela un poco en cada fotograma.
+     De ahí salen las estelas largas que dejan los bloques al alejarse, que es
+     lo que dibuja las líneas de fuga hacia el horizonte. Sin esto quedan
+     bloques sueltos y se pierde la perspectiva. */
+  const scv=document.createElement('canvas');
+  const sctx=scv.getContext('2d');
+  let scvW=0, scvH=0;
+
+  function haceSuelo(){
+    SU=[];
+    const cuantos=W<760?260:420;
+    for(let i=0;i<cuantos;i++)SU.push({
+      u:srnd(-2.3,2.3), z:srnd(.05,1),
+      c:SPAL[(Math.random()*SPAL.length)|0],
+      a:srnd(.55,1), w:Math.random()<.3?2:1});
+  }
+
+  function pintaSuelo(fuerza){
+    if(!SU)haceSuelo();
+    const ahora=performance.now()/1000;
+    const dt=Math.min(.05,(ahora-suL)||.016); suL=ahora;
+
+    const d=Math.min(devicePixelRatio||1,2);
+    if(scvW!==Math.round(W*d)||scvH!==Math.round(H*d)){
+      scvW=scv.width=Math.round(W*d); scvH=scv.height=Math.round(H*d);
+      sctx.setTransform(d,0,0,d,0,0);
+      sctx.fillStyle='#04060B'; sctx.fillRect(0,0,W,H);
+    }
+    /* el velado: cuanto más bajo, más larga la estela */
+    sctx.fillStyle='rgba(4,6,11,.26)';
+    sctx.fillRect(0,0,W,H);
+
+    const cx=W/2, hor=H*.30;
+    const U=Math.max(16,Math.round(Math.min(W,H)/22));
+    /* se ordenan de lejos a cerca: los de delante tapan a los del fondo y por
+       eso se lee la profundidad */
+    const lista=SU.slice().sort((A,B)=>A.z-B.z);
+
+    for(const b of lista){
+      b.z -= dt*(0.55+fuerza*0.55);
+      if(b.z<.05){ b.z=1; b.u=srnd(-2.3,2.3);
+        b.c=SPAL[(Math.random()*SPAL.length)|0]; b.a=srnd(.55,1);
+        b.w=Math.random()<.3?2:1; }
+      const k=1/(.16+b.z*1.5);
+      const y=hor+(H*.62)*k*.30;
+      const x=cx+b.u*W*.55*k;
+      const lado=Math.max(2.2,U*k*.52);
+      if(y>H+lado||x<-lado*3||x>W+lado*3)continue;
+      const cerca=Math.min(1,(1-b.z)*2.2);
+      const al=b.a*cerca*.95*fuerza;
+      if(al<.015)continue;
+      sctx.fillStyle='rgba('+b.c[0]+','+b.c[1]+','+b.c[2]+','+al.toFixed(3)+')';
+      sctx.fillRect(x,y,lado*b.w,lado*.62);
+      /* el filo claro de arriba: es lo que da el canto del bloque */
+      sctx.fillStyle='rgba(255,255,255,'+(b.a*cerca*cerca*.22*fuerza).toFixed(3)+')';
+      sctx.fillRect(x,y,lado*b.w,Math.max(1,lado*.1));
+    }
+
+    /* el velo del horizonte, guardado: crearlo cada fotograma no compensa */
+    if(!suVelo||suVeloH!==H){
+      suVelo=sctx.createLinearGradient(0,hor-H*.1,0,hor+H*.16);
+      suVelo.addColorStop(0,'rgba(4,6,11,.95)');
+      suVelo.addColorStop(1,'rgba(4,6,11,0)');
+      suVeloH=H;
+    }
+    sctx.fillStyle=suVelo;
+    sctx.fillRect(0,0,W,hor+H*.16);
+
+    /* ── el tercio de arriba estaba vacío ──
+       OJO: esto va DESPUÉS del velo del horizonte. Antes lo pintaba antes y el
+       velo, que llega al 95% de opacidad justo a esa altura, se lo comía. ──
+       Se le pone un rótulo en mono con el mismo espaciado de la web y un
+       filete corto encima, que es el gesto editorial que ya usas. Aparece con
+       la escena y se retira cuando la grieta empieza a abrir. */
+    const rot='IN THE OPEN';
+    const cuerpo=Math.max(10, Math.min(W,H)*0.0165);
+    const esp=cuerpo*0.62;
+    sctx.font='400 '+cuerpo.toFixed(1)+"px 'DM Mono',ui-monospace,monospace";
+    let ancho=0;
+    for(const ch of rot) ancho+=sctx.measureText(ch).width+esp;
+    ancho-=esp;
+    const rx=W/2-ancho/2, ry=H*0.155;
+    const aRot=fuerza*0.85;
+    sctx.fillStyle='rgba(190,205,240,'+(aRot*0.55).toFixed(3)+')';
+    let cxr=rx;
+    for(const ch of rot){
+      sctx.fillText(ch,cxr,ry);
+      cxr+=sctx.measureText(ch).width+esp;
+    }
+    /* el filete corto encima, centrado */
+    /* el filete y la columna se guardan: crear dos degradados por fotograma
+       costaba más que dibujar el rótulo entero */
+    const fw=Math.min(W*0.30, 220);
+    if(!suFil||suFilW!==W){
+      suFil=sctx.createLinearGradient(W/2-fw/2,0,W/2+fw/2,0);
+      suFil.addColorStop(0,'rgba(121,171,255,0)');
+      suFil.addColorStop(.5,'rgba(121,171,255,.42)');
+      suFil.addColorStop(1,'rgba(121,171,255,0)');
+      suFilW=W;
+    }
+    sctx.globalAlpha=aRot;
+    sctx.fillStyle=suFil;
+    sctx.fillRect(W/2-fw/2, ry-cuerpo*2.1, fw, 1);
+    sctx.globalAlpha=1;
+
+    /* una columna de luz muy tenue bajando desde el rótulo hasta el horizonte:
+       ata la parte alta con el suelo en vez de dejarlas sueltas */
+    if(!suCol||suColH!==H){
+      suCol=sctx.createLinearGradient(0,ry+cuerpo,0,H*0.30);
+      suCol.addColorStop(0,'rgba(47,107,255,.10)');
+      suCol.addColorStop(1,'rgba(47,107,255,0)');
+      suColH=H;
+    }
+    sctx.globalAlpha=fuerza;
+    sctx.fillStyle=suCol;
+    sctx.fillRect(W/2-Math.min(W*0.22,260)/2, ry+cuerpo, Math.min(W*0.22,260), H*0.30-(ry+cuerpo));
+    sctx.globalAlpha=1;
+
+
+
+    /* y se vuelca sobre la escena, sumando luz para que no tape lo de debajo */
+    ctx.globalCompositeOperation='lighter';
+    ctx.globalAlpha=fuerza;
+    ctx.drawImage(scv,0,0,W,H);
+    ctx.globalAlpha=1;
+    ctx.globalCompositeOperation='source-over';
   }
 
   function draw(p){
@@ -4554,6 +5264,15 @@ const CALM=matchMedia('(prefers-reduced-motion: reduce)').matches;
       ctx.fillStyle='rgba('+PAPER.join(',')+','+end.toFixed(3)+')';
       ctx.fillRect(0,0,W,H);
     }
+    /* una vez impuesto el claro quedaba pantalla blanca lisa: salen los cubos
+       alejándose, que además enlazan con el pie que viene después */
+    /* mientras la grieta no ha abierto, siguen los cubos del vuelo anterior */
+    const antes=clm((.30-p)/.22);
+    if(antes>.01)pintaSuelo(antes);
+
+    const abierto=clm((p-.40)/.20);
+    if(abierto>.01)pintaSubida(abierto);
+
     stage.classList.toggle('lit', p>.66);
     stage.classList.toggle('go', p<.7);
   }
@@ -4562,8 +5281,11 @@ const CALM=matchMedia('(prefers-reduced-motion: reduce)').matches;
   addEventListener('resize',build,{passive:true});
   (function tick(){
     const top=dTop(sec), run=Math.max(1,sec.offsetHeight-innerHeight);
-    const p=clm((scrollY-top)/run);
-    if(Math.abs(p-last)>.0014){last=p;draw(p)}
+    /* La grieta no empezaba a abrirse hasta el 20% del recorrido, y ese primer
+       tramo era negro puro. Se adelanta el arranque: al entrar la sección la
+       transición ya está en marcha y no hay pantalla vacía. */
+    const p=clm((scrollY-top)/run*1.26 + 0.06);
+    if(Math.abs(p-last)>.0014 || p>.40 || p<.30){last=p;draw(p)}
     requestAnimationFrame(tick);
   })();
 })();
@@ -4880,6 +5602,81 @@ const CALM=matchMedia('(prefers-reduced-motion: reduce)').matches;
   },{rootMargin:'-50% 0px -50% 0px',threshold:0});
   secs.forEach(o=>io.observe(o.el));
   pon(0);
+})();
+
+
+/* ── el teletipo de las cuatro garantías ──
+   Se escribe al entrar en pantalla, una línea tras otra. El carácter en curso
+   pasa por unos cuantos símbolos antes de quedarse en el bueno: es lo que da
+   la sensación de que el texto se está descifrando y no solo apareciendo. */
+(function(){
+  const CALMA=matchMedia('(prefers-reduced-motion:reduce)').matches;
+  /* las cuatro garantías y, en el pie, los títulos de columna: son los dos
+     sitios donde una línea corta y en mayúsculas luce el efecto */
+  const filas=[...document.querySelectorAll('#solutions .rows b, footer .fgrid h4')];
+  if(!filas.length)return;
+  const SIM='ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789/\\<>[]{}#$%&*+=-';
+
+  /* con movimiento reducido no se monta nada: el texto se queda tal cual y no
+     hay doble invisible que pueda confundir a un lector de pantalla */
+  if(CALMA)return;
+
+  filas.forEach(el=>{
+    const txt=el.textContent;
+    el.textContent='';
+    el.classList.add('tec');
+    /* el doble invisible reserva el hueco exacto del texto final */
+    const fantasma=document.createElement('span');
+    fantasma.className='tec-fantasma'; fantasma.textContent=txt;
+    fantasma.setAttribute('aria-hidden','true');
+    const real=document.createElement('span');
+    real.className='tec-real';
+    el.append(fantasma,real);
+    el.__txt=txt; el.__real=real;
+  });
+
+  function escribe(el,retardo){
+    const txt=el.__txt, real=el.__real;
+    if(CALMA){real.textContent=txt;return}
+    /* Va sincronizado con el repintado, no con temporizadores: setTimeout se
+       retrasa mucho en una página con tanto movimiento —medido, 54ms por letra
+       donde pedía 9— y las líneas tardaban 1,4 segundos en firmar. Con el
+       reloj del navegador el tiempo es real. */
+    const MS_LETRA=17;      /* lo que tarda cada carácter */
+    const MS_SIMBOLO=34;    /* cada cuánto cambia el símbolo que gira */
+    const t0=performance.now()+retardo;
+    (function paso(){
+      const e=performance.now()-t0;
+      if(e<0){requestAnimationFrame(paso);return}
+      const i=Math.floor(e/MS_LETRA);
+      if(i>=txt.length){real.textContent=txt;return}
+      const fijo=txt.slice(0,i);
+      const c=txt[i];
+      if(c===' '){ real.textContent=txt.slice(0,i+1); }
+      else{
+        real.textContent='';
+        real.append(document.createTextNode(fijo));
+        const cur=document.createElement('span');
+        cur.className='tec-cur';
+        cur.textContent=SIM[(Math.floor(e/MS_SIMBOLO)+i*7)%SIM.length];
+        real.append(cur);
+      }
+      requestAnimationFrame(paso);
+    })();
+  }
+
+  /* Se observa el CONTENEDOR, no cada línea: las secciones llevan
+     content-visibility, así que las filas no tienen maqueta hasta que la
+     sección está casi encima y el margen de adelanto no servía de nada.
+     El contenedor sí se puede vigilar con antelación. */
+  const cajas=[...new Set(filas.map(f=>f.closest('#solutions, footer')))];
+  const io=new IntersectionObserver(es=>es.forEach(e=>{
+    if(!e.isIntersecting||e.target.__hecho)return;
+    e.target.__hecho=1;
+    const grupo=[...e.target.querySelectorAll('#solutions .rows b, footer .fgrid h4')];
+    grupo.forEach((el,i)=>escribe(el, i*45));
+  }),{threshold:0, rootMargin:'900px 0px'});
+  cajas.forEach(c=>io.observe(c));
 })();
 
 </script>
