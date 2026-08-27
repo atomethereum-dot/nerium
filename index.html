@@ -54,7 +54,7 @@
      cada uno en su propia fórmula: unos sumaban el área segura del móvil y
      otros no. Al esconderse la barra del navegador ese margen pasa de 0 a
      ~34px, así que los que la sumaban subían y los que no se quedaban quietos:
-     de ahí que el texto del idioma acabara cruzando la flecha.
+     de ahí que el rótulo de idioma acabara cruzando la flecha.
      Es el MAYOR de los dos, no la suma: sumarlos dejaba 48px de hueco bajo el
      grupo. Tomando el mayor son 14px con la barra visible y 34px sin ella, que
      es lo que necesita la barra de gestos y ni un píxel más. Todo lo demás se
@@ -1637,6 +1637,7 @@ body.light .subir{background:rgba(255,255,255,.7);border-color:rgba(11,13,18,.16
 .tec-cur{background:currentColor;color:var(--wash,#F1F2F4);padding:0 .02em}
 
 
+
 /* ══════ el cursor: dos corchetes ══════════════════════════
    Se cierran alrededor de lo que puedes pulsar. Solo con ratón o lápiz. */
 #cur{position:fixed;inset:0;z-index:130;pointer-events:none;width:100%;height:100%;display:none}
@@ -1916,6 +1917,39 @@ footer{background:#FBFCFD;border-top:1px solid rgba(11,13,18,.12);padding:clamp(
 body.light .hud-band,body.light .hud-count,body.light .hud .lang,
 body.light .hud-count b{color:var(--blue-d)}
 body.light .hud-band i{background:var(--blue-d)}
+
+/* ══════ separadores de puntos ══════
+   Los tenía como línea continua. En la referencia son una hilera de puntos, y
+   es lo que hace que la lista se lea como un registro y no como una tabla.
+   OJO: el ::after de estas filas YA estaba cogido por el filete azul que se
+   despliega al entrar la sección. Se respeta y los puntos van en el fondo de
+   la propia fila, con un degradado repetido: punto y hueco. */
+.rows{border-top:0;
+  background-image:repeating-linear-gradient(90deg,
+    rgba(11,13,18,.26) 0 2px, transparent 2px 10px);
+  background-size:100% 1px;background-repeat:no-repeat;background-position:0 0}
+.rows li{border-bottom:0;position:relative;
+  background-image:repeating-linear-gradient(90deg,
+    rgba(11,13,18,.26) 0 2px, transparent 2px 10px);
+  background-size:100% 1px;background-repeat:no-repeat;background-position:0 100%}
+
+/* En el pie el mismo gesto, PERO en la columna, no en el título: el h4 se
+   ajusta al ancho de la palabra —43px medidos— así que ahí el separador era
+   un muñón que no se veía. En el contenedor cruza la columna entera.
+   Y con más cuerpo: sobre papel casi blanco, .24 desaparece. */
+.fgrid h4{padding-bottom:11px;margin-bottom:0}
+.fgrid>div>h4{position:relative}
+.fgrid>div{position:relative;padding-top:0}
+.fgrid>div h4::after{content:"";position:absolute;left:0;bottom:0;
+  width:calc(100% + 0px);height:1px;pointer-events:none}
+.fgrid>div{
+  background-image:repeating-linear-gradient(90deg,
+    rgba(11,13,18,.42) 0 2px, transparent 2px 9px);
+  background-size:100% 1px;background-repeat:no-repeat;
+  background-position:0 27px}
+.fgrid>div>a:first-of-type{margin-top:9px}
+
+
 </style>
 </head>
 <body>
@@ -5642,8 +5676,13 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
        retrasa mucho en una página con tanto movimiento —medido, 54ms por letra
        donde pedía 9— y las líneas tardaban 1,4 segundos en firmar. Con el
        reloj del navegador el tiempo es real. */
-    const MS_LETRA=17;      /* lo que tarda cada carácter */
-    const MS_SIMBOLO=34;    /* cada cuánto cambia el símbolo que gira */
+    /* Historia de estos números: con temporizadores tardaba 1.355ms y llegaba
+       tarde; al pasarlo al reloj del repintado se fue a 469ms y entonces no se
+       veía. Este es el término medio: se aprecia el descifrado y aun así queda
+       firmado antes de que la sección se pase, porque arranca con 900px de
+       adelanto. */
+    const MS_LETRA=36;      /* lo que tarda cada carácter */
+    const MS_SIMBOLO=56;    /* cada cuánto cambia el símbolo que gira */
     const t0=performance.now()+retardo;
     (function paso(){
       const e=performance.now()-t0;
@@ -5674,7 +5713,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
     if(!e.isIntersecting||e.target.__hecho)return;
     e.target.__hecho=1;
     const grupo=[...e.target.querySelectorAll('#solutions .rows b, footer .fgrid h4')];
-    grupo.forEach((el,i)=>escribe(el, i*45));
+    grupo.forEach((el,i)=>escribe(el, i*110));
   }),{threshold:0, rootMargin:'900px 0px'});
   cajas.forEach(c=>io.observe(c));
 })();
