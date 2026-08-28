@@ -3,7 +3,7 @@
 Cobra en la moneda nativa de la cadena o en USDT. El mismo código sirve en
 Ethereum (ETH + USDT) y en BNB Chain (BNB + USDT).
 
-**El precio se fija en dólares, uno solo.** El contrato consulta a Chainlink
+**El precio se fija en dólares, uno solo.** El contrato consulta a los oráculos
 cuánto vale ETH o BNB en cada compra, así que 0,10 $ siguen siendo 0,10 $ aunque
 la moneda se mueva. Y como el precio vive en dólares, **el mismo número vale
 para las dos redes**: no hay que acordarse de que USDT tiene 6 decimales en
@@ -20,8 +20,8 @@ Ethereum y 18 en BNB Chain.
 | `startPresale(inicio, fin)` | Abre la ventana. Cero = ahora. Solo una vez |
 | `endPresale()` | Cierra antes de tiempo. Sin vuelta atrás |
 | `setHardCap(tokens)` | Tope total. Cero = sin tope |
-| `setMaxPriceAge(segundos)` | A partir de aquí se usa el respaldo. Por defecto 24 h |
-| `setFallbackNativeUsd(precio)` | Precio de respaldo de ETH/BNB en dólares, 8 decimales |
+| `setMaxPriceAge(segundos)` | A partir de aquí se descarta un oráculo. Por defecto 24 h |
+| `setFeeds([...])` | Reemplaza la lista de oráculos, en orden de preferencia |
 | `pause()` / `unpause()` | Detiene compras sin cerrar la venta |
 | `withdrawNative(a, importe)` | Retira ETH/BNB. Cero = todo |
 | `withdrawUsdt(a, importe)` | Retira USDT. Cero = todo |
@@ -39,30 +39,40 @@ Ethereum y 18 en BNB Chain.
 | `claim()` | Retira sus tokens cuando el reparto está abierto |
 | `quoteNative(wei)` / `quoteUsdt(importe)` | Cuántos tokens saldrían |
 | `nativeForUsd(usd)` | Cuánto ETH son X dólares. Para pintar la web |
-| `nativeUsdPrice()` | Cotización actual del oráculo |
+| `nativeUsdPrice()` | Cotización actual y si viene de un oráculo vivo |
+| `feedsStatus()` | Estado de cada oráculo: cuál está sano y a qué precio |
+| `feedCount()` | Cuántos oráculos hay configurados |
 | `isLive()` / `isOver()` | Estado |
 | `allocation(x)` / `claimable(x)` / `remainingTokens()` | Consulta |
 
 ## Despliegue
 
 ```
-constructor(IERC20 usdt, AggregatorV3Interface feed, uint8 decimalesDelToken, address dueño)
+constructor(IERC20 usdt, AggregatorV3Interface[] oraculos, uint8 decimalesDelToken, address dueño)
 ```
 
-| Red | USDT | Oráculo |
-|---|---|---|
-| Ethereum | `0xdAC17F958D2ee523a2206206994597C13D831ec7` | ETH/USD `0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419` |
-| BNB Chain | `0x55d398326f99059fF775485246999027B3197955` | BNB/USD `0x0567F2323251f0Aab15c8dFb1967E4e8A7D42aeE` |
+Los oráculos van **en orden de preferencia**. Pon al menos dos, y de proveedores
+distintos: dos oráculos del mismo proveedor caen juntos.
 
-**Verifica esas direcciones en docs.chain.link antes de desplegar.** Un oráculo
-equivocado es un contrato que vende a un precio inventado.
+| Red | USDT | Oráculo principal |
+|---|---|---|
+| Ethereum | `0xdAC17F958D2ee523a2206206994597C13D831ec7` | Chainlink ETH/USD `0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419` |
+| BNB Chain | `0x55d398326f99059fF775485246999027B3197955` | Chainlink BNB/USD `0x0567F2323251f0Aab15c8dFb1967E4e8A7D42aeE` |
+
+Como segundo y tercero sirve cualquier proveedor que exponga la interfaz de
+Chainlink: **API3, RedStone, Pyth o Band** a través de sus adaptadores. Busca sus
+direcciones para ETH/USD y BNB/USD en la documentación de cada uno.
+
+**Verifica todas las direcciones antes de desplegar.** Un oráculo equivocado es
+un contrato vendiendo a un precio inventado. El constructor exige que al menos
+uno responda en ese momento, así que una dirección muerta se detecta al
+desplegar, pero una dirección viva del par equivocado no.
 
 ## Orden de uso
 
 1. Desplegar. El dueño debe ser **un multisig**.
 2. `setPriceUsd(10000000)` — 0,10 $, el precio que anuncia la web.
-3. `setMinBuyUsd(100000000)` — 1 $. `setFallbackNativeUsd(...)` con la
-   cotización del día (3.000 $ = `300000000000`). `setHardCap(...)` si hay tope.
+3. `setMinBuyUsd(100000000)` — 1 $, y `setHardCap(...)` si quieres tope.
 4. `startPresale(0, fin)`.
 5. La gente compra. `withdrawNative` / `withdrawUsdt` cuando haga falta.
 6. `endPresale()` o esperar a la fecha.
@@ -82,19 +92,22 @@ Si el oráculo se mueve o cambias el precio entre que ve la cotización y se min
 su transacción, revierte en vez de darle de menos. La web debe llamar a
 `quoteNative` / `quoteUsdt` y enviar ese número con un margen.
 
-**LA VENTA NO SE PARA NUNCA.** Si el oráculo revierte, devuelve cero o se queda
-atascado más de `maxPriceAge`, el contrato cobra con `fallbackNativeUsd`, el
-precio de respaldo que fijas tú, y sigue vendiendo. La llamada al oráculo va en
-`try/catch`, así que ni siquiera un oráculo pausado o retirado detiene una
-compra. En cuanto el oráculo se recupera, el contrato vuelve solo a usarlo.
+**LA VENTA NO SE PARA NUNCA, y sin que nadie tenga que intervenir.** El precio
+no cuelga de un oráculo sino de varios. El contrato pregunta al primero de la
+lista; si no responde, o responde cero, o su dato tiene más de `maxPriceAge`,
+pasa al siguiente. Cada llamada va en `try/catch`, así que un oráculo pausado,
+migrado o retirado solo significa "prueba el siguiente".
 
-Por eso `startPresale` exige tener el respaldo puesto: sin él, la caída del
-oráculo sí pararía las compras en ETH y BNB.
+Que caigan todos a la vez es prácticamente imposible, pero incluso entonces se
+cobra con **el último precio bueno que el propio contrato guardó** en la compra
+anterior. Nadie tiene que poner nada a mano.
 
-**Vigila el evento `FallbackPriceUsed`.** Salta en cada compra cobrada sin
-oráculo, y significa que el precio de ETH o BNB lo estás poniendo tú a mano. Si
-lo dejas desactualizado mientras el oráculo está caído, vendes barato o caro sin
-enterarte.
+Y en cuanto el preferido se recupera, vuelve solo a usarlo.
+
+**Para vigilarlo sin adivinar:** `feedsStatus()` devuelve, oráculo por oráculo,
+si está sano y a qué precio. Y hay dos eventos: `OracleFellBack` cuando se usa
+uno que no es el primero, y `AllOraclesDown` —el único que merece una alerta—
+cuando ninguno responde.
 
 **USDT se toma como un dólar.** Es lo que hace todo el mundo, pero si USDT
 perdiera la paridad, el contrato no se entera.
@@ -126,8 +139,9 @@ npm install --save-dev hardhat@2 "@nomicfoundation/hardhat-toolbox@hh2" \
 npx hardhat test
 ```
 
-24 casos. Entre ellos: que el precio siga al dólar cuando ETH sube o baja, que
-**la venta siga funcionando con el oráculo rancio, devolviendo cero o reventando
-entero**, que vuelva solo al oráculo cuando se recupera, que el reparto no se
-abra antes de terminar la preventa, la protección del comprador, y que el dueño
-no pueda tocar los tokens de los compradores.
+26 casos. Entre ellos: que el precio siga al dólar cuando ETH sube o baja, que
+**la venta siga con el primer oráculo rancio, con los dos primeros caídos, con
+uno reventando entero, y con LOS TRES caídos a la vez**, que vuelva sola al
+preferido cuando se recupera, que `feedsStatus` señale cuál falla, que el
+reparto no se abra antes de terminar la preventa, la protección del comprador, y
+que el dueño no pueda tocar los tokens de los compradores.

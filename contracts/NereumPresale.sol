@@ -30,9 +30,12 @@ interface AggregatorV3Interface {
  *         Ethereum y para BNB Chain: se acabó el riesgo de confundir los 6
  *         decimales de USDT en Ethereum con los 18 de BNB Chain.
  *
- *         LA VENTA NO SE PARA NUNCA. Si el oráculo revierte, devuelve cero o se
- *         queda atascado, se cobra con un precio de respaldo que fija el
- *         proyecto. El contrato nunca deja de vender por culpa del oráculo.
+ *         LA VENTA NO SE PARA NUNCA, Y SIN QUE NADIE TENGA QUE INTERVENIR. El
+ *         precio no depende de un oráculo sino de VARIOS, en orden de
+ *         preferencia: se pregunta al primero y, si no responde o responde algo
+ *         inservible, se pasa al siguiente. Que caigan todos a la vez es
+ *         prácticamente imposible, pero incluso entonces se cobra con el último
+ *         precio bueno que el propio contrato guardó, y la venta continúa.
  *
  *         La compra anota lo que corresponde a cada dirección; el reparto se
  *         abre cuando la preventa ha terminado y el token está depositado.
@@ -50,16 +53,10 @@ contract NereumPresale is Ownable2Step, ReentrancyGuard, Pausable {
     ///         todo el contrato usa SafeERC20.
     IERC20 public immutable usdt;
 
-    /// @notice Oráculo de la moneda nativa contra el dólar.
-    ///         Ethereum ETH/USD:  0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419
-    ///         BNB Chain BNB/USD: 0x0567F2323251f0Aab15c8dFb1967E4e8A7D42aeE
-    AggregatorV3Interface public immutable nativeUsdFeed;
-
     uint8 public immutable saleTokenDecimals;
 
     uint256 private immutable _unit;      // 10**decimales del token en venta
     uint256 private immutable _usdtUnit;  // 10**decimales de USDT
-    uint256 private immutable _feedUnit;  // 10**decimales del oráculo
 
     // ─────────────────────────────── estado ───────────────────────────────────
 
@@ -70,17 +67,26 @@ contract NereumPresale is Ownable2Step, ReentrancyGuard, Pausable {
     /// @notice Compra mínima en dólares, 8 decimales. 1 $ se escribe 100000000.
     uint256 public minBuyUsd;
 
-    /// @notice A partir de esta antigüedad el precio del oráculo se considera
-    ///         inservible y se pasa al de respaldo. No detiene la venta.
+    /// @notice Un oráculo y sus decimales, que se leen una vez y se guardan para
+    ///         no gastar una llamada extra en cada compra.
+    struct Feed { AggregatorV3Interface oracle; uint256 unit; }
+
+    /// @notice Los oráculos, EN ORDEN DE PREFERENCIA. Se usa el primero que
+    ///         responda algo válido. Cualquier proveedor que exponga la interfaz
+    ///         de Chainlink sirve: la propia Chainlink, API3, RedStone, Pyth o
+    ///         Band a través de sus adaptadores.
+    Feed[] public feeds;
+
+    /// @notice A partir de esta antigüedad la respuesta de un oráculo se descarta
+    ///         y se prueba el siguiente.
     uint256 public maxPriceAge = 24 hours;
 
-    /// @notice Precio de respaldo de la moneda nativa en dólares, 8 decimales.
-    ///         LA VENTA NO SE PARA NUNCA: si el oráculo revierte, devuelve cero o
-    ///         se queda atascado, se cobra con este número. Es obligatorio tenerlo
-    ///         puesto antes de abrir, porque sin él la caída del oráculo sí pararía
-    ///         las compras en ETH o BNB.
-    ///         Mantenlo al día: mientras el oráculo esté caído, este es EL precio.
-    uint256 public fallbackNativeUsd;
+    /// @notice El último precio bueno que se leyó, y cuándo. Lo guarda el propio
+    ///         contrato en cada compra: es la red de seguridad para el caso, casi
+    ///         imposible, de que TODOS los oráculos fallen a la vez. Nadie tiene
+    ///         que ponerlo a mano.
+    uint256 public lastGoodPrice;
+    uint64 public lastGoodAt;
 
     uint64 public startTime;
     uint64 public endTime;
@@ -105,10 +111,12 @@ contract NereumPresale is Ownable2Step, ReentrancyGuard, Pausable {
     event PriceUsdUpdated(uint256 priceUsd);
     event MinBuyUsdUpdated(uint256 minBuyUsd);
     event MaxPriceAgeUpdated(uint256 seconds_);
-    event FallbackNativeUsdUpdated(uint256 price);
-    /// @notice Salta cada vez que una compra se cobra sin el oráculo. Vigílalo:
-    ///         significa que el precio lo estás poniendo tú a mano.
-    event FallbackPriceUsed(uint256 price);
+    event FeedsUpdated(uint256 count);
+    /// @notice El oráculo preferido no respondió y se usó otro de la lista.
+    event OracleFellBack(uint256 indexed usedIndex, uint256 price);
+    /// @notice Ninguno respondió y se cobró con el último precio guardado. Es el
+    ///         único caso que merece una alerta.
+    event AllOraclesDown(uint256 cachedPrice, uint64 cachedAt);
     event HardCapUpdated(uint256 hardCapTokens);
     event Purchased(address indexed buyer, bool paidInUsdt, uint256 paid, uint256 usdValue, uint256 tokens);
     event SaleTokenSet(address indexed token);
@@ -131,6 +139,7 @@ contract NereumPresale is Ownable2Step, ReentrancyGuard, Pausable {
     error HardCapReached();
     error SlippageTooHigh(uint256 got, uint256 min);
     error NoPriceAvailable();
+    error NoFeeds();
     error ClaimsNotOpen();
     error NothingToClaim();
     error SaleTokenAlreadySet();
@@ -148,24 +157,22 @@ contract NereumPresale is Ownable2Step, ReentrancyGuard, Pausable {
      * @param usdt_    USDT de la red.
      *                 Ethereum:  0xdAC17F958D2ee523a2206206994597C13D831ec7
      *                 BNB Chain: 0x55d398326f99059fF775485246999027B3197955
-     * @param feed_    Oráculo ETH/USD o BNB/USD de Chainlink.
+     * @param feeds_   Oráculos ETH/USD o BNB/USD, EN ORDEN DE PREFERENCIA.
+     *                  Pon al menos dos de proveedores distintos.
      * @param owner_   Quien administra. Usa un multisig.
      */
     constructor(
         IERC20 usdt_,
-        AggregatorV3Interface feed_,
+        AggregatorV3Interface[] memory feeds_,
         uint8 saleTokenDecimals_,
         address owner_
     ) Ownable(owner_) {
-        if (address(usdt_) == address(0) || address(feed_) == address(0) || owner_ == address(0)) {
-            revert ZeroAddress();
-        }
+        if (address(usdt_) == address(0) || owner_ == address(0)) revert ZeroAddress();
         usdt = usdt_;
-        nativeUsdFeed = feed_;
         saleTokenDecimals = saleTokenDecimals_;
         _unit = 10 ** saleTokenDecimals_;
         _usdtUnit = 10 ** IERC20Metadata(address(usdt_)).decimals();
-        _feedUnit = 10 ** feed_.decimals();
+        _setFeeds(feeds_);
     }
 
     // ──────────────────────────── administración ──────────────────────────────
@@ -190,18 +197,33 @@ contract NereumPresale is Ownable2Step, ReentrancyGuard, Pausable {
         emit MaxPriceAgeUpdated(seconds_);
     }
 
-    /// @notice Precio de respaldo de ETH o BNB en dólares, 8 decimales.
-    ///         3.000 $ se escribe 300000000000.
-    function setFallbackNativeUsd(uint256 price) external onlyOwner {
-        if (price == 0) revert PriceNotSet();
-        fallbackNativeUsd = price;
-        emit FallbackNativeUsdUpdated(price);
+    /// @notice Reemplaza la lista de oráculos, en orden de preferencia. Exige que
+    ///         al menos uno responda ahora mismo: una lista de oráculos muertos
+    ///         dejaría la venta colgando del precio guardado.
+    function setFeeds(AggregatorV3Interface[] calldata list) external onlyOwner {
+        _setFeeds(list);
     }
+
+    function _setFeeds(AggregatorV3Interface[] memory list) private {
+        if (list.length == 0) revert NoFeeds();
+        delete feeds;
+        for (uint256 i; i < list.length; ++i) {
+            if (address(list[i]) == address(0)) revert ZeroAddress();
+            feeds.push(Feed({oracle: list[i], unit: 10 ** list[i].decimals()}));
+        }
+        (uint256 price, bool ok, ) = _readOracles();
+        if (!ok) revert NoPriceAvailable();
+        lastGoodPrice = price;
+        lastGoodAt = uint64(block.timestamp);
+        emit FeedsUpdated(list.length);
+    }
+
+    function feedCount() external view returns (uint256) { return feeds.length; }
 
     function startPresale(uint64 start, uint64 end) external onlyOwner {
         if (finalized) revert PresaleAlreadyFinalized();
         if (startTime != 0) revert PresaleAlreadyScheduled();
-        if (priceUsd == 0 || fallbackNativeUsd == 0) revert PriceNotSet();
+        if (priceUsd == 0) revert PriceNotSet();
 
         uint64 s = start == 0 ? uint64(block.timestamp) : start;
         if (end <= s) revert BadWindow();
@@ -231,26 +253,62 @@ contract NereumPresale is Ownable2Step, ReentrancyGuard, Pausable {
     // ─────────────────────────────── oráculo ──────────────────────────────────
 
     /**
-     * @notice Cuánto vale una unidad de la moneda nativa en dólares, 8 decimales.
-     * @return price      La cotización que se va a usar.
-     * @return fromOracle Si salió del oráculo. Falso significa que se usó el
-     *                    respaldo porque el oráculo no servía.
-     *
-     * La llamada va en try/catch a propósito: si el oráculo revierte —porque lo
-     * pausan, lo migran o lo retiran— la compra NO se cae con él. Se cobra con el
-     * respaldo y la venta sigue.
+     * @dev Recorre los oráculos por orden y devuelve el primero que responda algo
+     *      válido. Cada llamada va en try/catch: un oráculo pausado, migrado o
+     *      retirado revierte, y aquí eso solo significa "pasa al siguiente", no
+     *      que se caiga la compra.
      */
-    function nativeUsdPrice() public view returns (uint256 price, bool fromOracle) {
-        try nativeUsdFeed.latestRoundData() returns (
-            uint80, int256 answer, uint256, uint256 updatedAt, uint80
-        ) {
-            if (answer > 0 && updatedAt != 0 && block.timestamp - updatedAt <= maxPriceAge) {
-                return ((uint256(answer) * USD) / _feedUnit, true);
-            }
-        } catch {}
+    function _readOracles() private view returns (uint256 price, bool ok, uint256 index) {
+        uint256 n = feeds.length;
+        for (uint256 i; i < n; ++i) {
+            Feed storage f = feeds[i];
+            try f.oracle.latestRoundData() returns (
+                uint80, int256 answer, uint256, uint256 updatedAt, uint80
+            ) {
+                if (answer > 0 && updatedAt != 0 && block.timestamp - updatedAt <= maxPriceAge) {
+                    return ((uint256(answer) * USD) / f.unit, true, i);
+                }
+            } catch {}
+        }
+        return (0, false, type(uint256).max);
+    }
 
-        if (fallbackNativeUsd == 0) revert NoPriceAvailable();
-        return (fallbackNativeUsd, false);
+    /**
+     * @notice Cuánto vale una unidad de la moneda nativa en dólares, 8 decimales.
+     * @return price La cotización que se va a usar.
+     * @return live  Si salió de un oráculo vivo. Falso significa que ninguno
+     *               respondió y se está usando el último precio guardado.
+     */
+    function nativeUsdPrice() public view returns (uint256 price, bool live) {
+        (uint256 p, bool ok, ) = _readOracles();
+        if (ok) return (p, true);
+        if (lastGoodPrice == 0) revert NoPriceAvailable();
+        return (lastGoodPrice, false);
+    }
+
+    /**
+     * @notice Estado de cada oráculo, para vigilarlos desde fuera sin adivinar.
+     *         Un `false` en `healthy` dice exactamente cuál está fallando.
+     */
+    function feedsStatus() external view returns (
+        address[] memory oracles, uint256[] memory prices, bool[] memory healthy
+    ) {
+        uint256 n = feeds.length;
+        oracles = new address[](n);
+        prices = new uint256[](n);
+        healthy = new bool[](n);
+        for (uint256 i; i < n; ++i) {
+            Feed storage f = feeds[i];
+            oracles[i] = address(f.oracle);
+            try f.oracle.latestRoundData() returns (
+                uint80, int256 answer, uint256, uint256 updatedAt, uint80
+            ) {
+                if (answer > 0 && updatedAt != 0 && block.timestamp - updatedAt <= maxPriceAge) {
+                    prices[i] = (uint256(answer) * USD) / f.unit;
+                    healthy[i] = true;
+                }
+            } catch {}
+        }
     }
 
     // ─────────────────────────────── compra ───────────────────────────────────
@@ -264,8 +322,20 @@ contract NereumPresale is Ownable2Step, ReentrancyGuard, Pausable {
         external payable nonReentrant whenNotPaused returns (uint256 tokens)
     {
         _requireLive();
-        (uint256 nativeUsd, bool fromOracle) = nativeUsdPrice();
-        if (!fromOracle) emit FallbackPriceUsed(nativeUsd);
+
+        /* Se lee aquí y no en la vista porque esta sí puede escribir: cada compra
+           con un oráculo sano deja guardado su precio, que es lo que sostiene la
+           venta si algún día caen todos. */
+        (uint256 nativeUsd, bool ok, uint256 idx) = _readOracles();
+        if (ok) {
+            lastGoodPrice = nativeUsd;
+            lastGoodAt = uint64(block.timestamp);
+            if (idx != 0) emit OracleFellBack(idx, nativeUsd);
+        } else {
+            nativeUsd = lastGoodPrice;
+            if (nativeUsd == 0) revert NoPriceAvailable();
+            emit AllOraclesDown(nativeUsd, lastGoodAt);
+        }
 
         uint256 usdValue = (msg.value * nativeUsd) / 1e18;
         tokens = _record(msg.sender, usdValue, minTokensOut);

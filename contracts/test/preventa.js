@@ -7,17 +7,22 @@ const U6 = (n) => ethers.parseUnits(String(n), 6);
 const USD = (n) => ethers.parseUnits(String(n), 8);   // dólares con 8 decimales
 
 describe("NereumPresale", function () {
-  let owner, ana, luis, tesoreria, usdt, feed, token, p;
+  let owner, ana, luis, tesoreria, usdt, feed, feed2, feed3, token, p;
   const PRECIO = USD("0.10");        // 0,10 $ por NRM, como dice la web
   const MINIMO = USD("1");           // 1 $ mínimo
 
   beforeEach(async () => {
     [owner, ana, luis, tesoreria] = await ethers.getSigners();
     usdt  = await (await ethers.getContractFactory("MockUSDT")).deploy(6);
-    feed  = await (await ethers.getContractFactory("MockFeed")).deploy(USD("3000")); // ETH a 3.000 $
+    const F = await ethers.getContractFactory("MockFeed");
+    feed  = await F.deploy(USD("3000"));      // principal: ETH a 3.000 $
+    feed2 = await F.deploy(USD("2900"));      // segundo proveedor
+    feed3 = await F.deploy(USD("2800"));      // tercero
     token = await (await ethers.getContractFactory("MockToken")).deploy();
-    p = await (await ethers.getContractFactory("NereumPresale"))
-          .deploy(await usdt.getAddress(), await feed.getAddress(), 18, owner.address);
+    p = await (await ethers.getContractFactory("NereumPresale")).deploy(
+      await usdt.getAddress(),
+      [await feed.getAddress(), await feed2.getAddress(), await feed3.getAddress()],
+      18, owner.address);
     for (const u of [ana, luis]) {
       await usdt.transfer(u.address, U6("1000000"));
       await usdt.connect(u).approve(await p.getAddress(), ethers.MaxUint256);
@@ -27,7 +32,6 @@ describe("NereumPresale", function () {
   const abrir = async (dur = 3600) => {
     await p.setPriceUsd(PRECIO);
     await p.setMinBuyUsd(MINIMO);
-    await p.setFallbackNativeUsd(USD("2500"));      // respaldo: ETH a 2.500 $
     await p.startPresale(0, (await time.latest()) + dur);
   };
 
@@ -59,55 +63,79 @@ describe("NereumPresale", function () {
     expect(await p.allocation(ana.address)).to.equal(E("15000"));
   });
 
-  it("SIGUE VENDIENDO con el oráculo rancio, usando el respaldo", async () => {
+  it("SIGUE VENDIENDO: si el primero está rancio, usa el segundo", async () => {
     await abrir();
-    await feed.setStale(90000);                      // 25 horas: pasado el límite
+    await feed.setStale(90000);
     await expect(p.connect(ana).buyWithNative(0, { value: E("1") }))
-      .to.emit(p, "FallbackPriceUsed").withArgs(USD("2500"));
-    expect(await p.allocation(ana.address)).to.equal(E("25000"));   // 2.500 / 0,10
+      .to.emit(p, "OracleFellBack").withArgs(1, USD("2900"));
+    expect(await p.allocation(ana.address)).to.equal(E("29000"));   // 2.900 / 0,10
   });
 
-  it("SIGUE VENDIENDO con el oráculo devolviendo cero", async () => {
+  it("SIGUE VENDIENDO: si caen los dos primeros, usa el tercero", async () => {
     await abrir();
-    await feed.set(0);
-    await p.connect(ana).buyWithNative(0, { value: E("1") });
-    expect(await p.allocation(ana.address)).to.equal(E("25000"));
+    await feed.setStale(90000);
+    await feed2.set(0);
+    await expect(p.connect(ana).buyWithNative(0, { value: E("1") }))
+      .to.emit(p, "OracleFellBack").withArgs(2, USD("2800"));
+    expect(await p.allocation(ana.address)).to.equal(E("28000"));
   });
 
-  it("SIGUE VENDIENDO aunque el oráculo reviente entero", async () => {
+  it("SIGUE VENDIENDO aunque un oráculo reviente entero: salta al siguiente", async () => {
     const roto = await (await ethers.getContractFactory("MockFeedRoto")).deploy();
-    const p2 = await (await ethers.getContractFactory("NereumPresale"))
-      .deploy(await usdt.getAddress(), await roto.getAddress(), 18, owner.address);
+    const F = await ethers.getContractFactory("MockFeed");
+    const bueno = await F.deploy(USD("3000"));
+    const p2 = await (await ethers.getContractFactory("NereumPresale")).deploy(
+      await usdt.getAddress(), [await roto.getAddress(), await bueno.getAddress()],
+      18, owner.address);
     await p2.setPriceUsd(PRECIO);
-    await p2.setFallbackNativeUsd(USD("2500"));
     await p2.startPresale(0, (await time.latest()) + 3600);
     await p2.connect(ana).buyWithNative(0, { value: E("1") });
-    expect(await p2.allocation(ana.address)).to.equal(E("25000"));
+    expect(await p2.allocation(ana.address)).to.equal(E("30000"));
   });
 
-  it("vuelve solo al oráculo en cuanto se recupera", async () => {
+  it("SIGUE VENDIENDO aunque caigan LOS TRES, con el último precio guardado", async () => {
+    await abrir();
+    await p.connect(ana).buyWithNative(0, { value: E("1") });      // guarda 3.000 $
+    for (const f of [feed, feed2, feed3]) await f.setStale(90000);
+    await expect(p.connect(luis).buyWithNative(0, { value: E("1") }))
+      .to.emit(p, "AllOraclesDown");
+    expect(await p.allocation(luis.address)).to.equal(E("30000"));  // el guardado
+  });
+
+  it("vuelve solo al primero en cuanto se recupera", async () => {
     await abrir();
     await feed.setStale(90000);
     await p.connect(ana).buyWithNative(0, { value: E("1") });
-    expect(await p.allocation(ana.address)).to.equal(E("25000"));   // respaldo
-    await feed.set(USD("3000"));                                    // vuelve en sí
+    expect(await p.allocation(ana.address)).to.equal(E("29000"));   // el segundo
+    await feed.set(USD("3000"));
     await p.connect(luis).buyWithNative(0, { value: E("1") });
-    expect(await p.allocation(luis.address)).to.equal(E("30000"));   // oráculo
+    expect(await p.allocation(luis.address)).to.equal(E("30000"));  // el primero otra vez
   });
 
-  it("no deja abrir la preventa sin precio de respaldo puesto", async () => {
-    await p.setPriceUsd(PRECIO);
-    await expect(p.startPresale(0, (await time.latest()) + 3600))
-      .to.be.revertedWithCustomError(p, "PriceNotSet");
+  it("feedsStatus dice exactamente cuál está fallando", async () => {
+    await abrir();
+    await feed2.setStale(90000);
+    const [dirs, precios, sanos] = await p.feedsStatus();
+    expect(dirs.length).to.equal(3);
+    expect(sanos[0]).to.equal(true);
+    expect(sanos[1]).to.equal(false);          // el segundo, señalado
+    expect(sanos[2]).to.equal(true);
+    expect(precios[0]).to.equal(USD("3000"));
+  });
+
+  it("no acepta una lista de oráculos vacía ni toda muerta", async () => {
+    await expect(p.setFeeds([])).to.be.revertedWithCustomError(p, "NoFeeds");
+    const roto = await (await ethers.getContractFactory("MockFeedRoto")).deploy();
+    await expect(p.setFeeds([await roto.getAddress()]))
+      .to.be.revertedWithCustomError(p, "NoPriceAvailable");
   });
 
   it("se adapta a un oráculo con otros decimales", async () => {
     const f18 = await (await ethers.getContractFactory("MockFeed")).deploy(E("3000"));
     await f18.setDecimals(18);
     const p2 = await (await ethers.getContractFactory("NereumPresale"))
-      .deploy(await usdt.getAddress(), await f18.getAddress(), 18, owner.address);
+      .deploy(await usdt.getAddress(), [await f18.getAddress()], 18, owner.address);
     await p2.setPriceUsd(PRECIO);
-    await p2.setFallbackNativeUsd(USD("2500"));
     await p2.startPresale(0, (await time.latest()) + 3600);
     await p2.connect(ana).buyWithNative(0, { value: E("1") });
     expect(await p2.allocation(ana.address)).to.equal(E("30000"));
@@ -234,7 +262,7 @@ describe("NereumPresale", function () {
 
   it("solo el dueño administra", async () => {
     for (const llamada of [
-      p.connect(ana).setPriceUsd(1), p.connect(ana).setFallbackNativeUsd(1), p.connect(ana).startPresale(0, 9999999999),
+      p.connect(ana).setPriceUsd(1), p.connect(ana).setFeeds([]), p.connect(ana).startPresale(0, 9999999999),
       p.connect(ana).endPresale(),   p.connect(ana).openClaims(),
       p.connect(ana).withdrawNative(ana.address, 0), p.connect(ana).withdrawUsdt(ana.address, 0),
     ]) await expect(llamada).to.be.revertedWithCustomError(p, "OwnableUnauthorizedAccount");
