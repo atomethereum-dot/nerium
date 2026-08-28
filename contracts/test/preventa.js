@@ -27,6 +27,7 @@ describe("NereumPresale", function () {
   const abrir = async (dur = 3600) => {
     await p.setPriceUsd(PRECIO);
     await p.setMinBuyUsd(MINIMO);
+    await p.setFallbackNativeUsd(USD("2500"));      // respaldo: ETH a 2.500 $
     await p.startPresale(0, (await time.latest()) + dur);
   };
 
@@ -58,21 +59,46 @@ describe("NereumPresale", function () {
     expect(await p.allocation(ana.address)).to.equal(E("15000"));
   });
 
-  it("rechaza un precio del oráculo rancio", async () => {
+  it("SIGUE VENDIENDO con el oráculo rancio, usando el respaldo", async () => {
     await abrir();
-    await feed.setStale(7200);                       // dos horas de antigüedad
+    await feed.setStale(90000);                      // 25 horas: pasado el límite
     await expect(p.connect(ana).buyWithNative(0, { value: E("1") }))
-      .to.be.revertedWithCustomError(p, "StaleOraclePrice");
-    // pero USDT sigue funcionando, que no depende del oráculo
-    await p.connect(ana).buyWithUsdt(U6("100"), 0);
-    expect(await p.allocation(ana.address)).to.equal(E("1000"));
+      .to.emit(p, "FallbackPriceUsed").withArgs(USD("2500"));
+    expect(await p.allocation(ana.address)).to.equal(E("25000"));   // 2.500 / 0,10
   });
 
-  it("rechaza un precio del oráculo negativo o cero", async () => {
+  it("SIGUE VENDIENDO con el oráculo devolviendo cero", async () => {
     await abrir();
     await feed.set(0);
-    await expect(p.connect(ana).buyWithNative(0, { value: E("1") }))
-      .to.be.revertedWithCustomError(p, "BadOraclePrice");
+    await p.connect(ana).buyWithNative(0, { value: E("1") });
+    expect(await p.allocation(ana.address)).to.equal(E("25000"));
+  });
+
+  it("SIGUE VENDIENDO aunque el oráculo reviente entero", async () => {
+    const roto = await (await ethers.getContractFactory("MockFeedRoto")).deploy();
+    const p2 = await (await ethers.getContractFactory("NereumPresale"))
+      .deploy(await usdt.getAddress(), await roto.getAddress(), 18, owner.address);
+    await p2.setPriceUsd(PRECIO);
+    await p2.setFallbackNativeUsd(USD("2500"));
+    await p2.startPresale(0, (await time.latest()) + 3600);
+    await p2.connect(ana).buyWithNative(0, { value: E("1") });
+    expect(await p2.allocation(ana.address)).to.equal(E("25000"));
+  });
+
+  it("vuelve solo al oráculo en cuanto se recupera", async () => {
+    await abrir();
+    await feed.setStale(90000);
+    await p.connect(ana).buyWithNative(0, { value: E("1") });
+    expect(await p.allocation(ana.address)).to.equal(E("25000"));   // respaldo
+    await feed.set(USD("3000"));                                    // vuelve en sí
+    await p.connect(luis).buyWithNative(0, { value: E("1") });
+    expect(await p.allocation(luis.address)).to.equal(E("30000"));   // oráculo
+  });
+
+  it("no deja abrir la preventa sin precio de respaldo puesto", async () => {
+    await p.setPriceUsd(PRECIO);
+    await expect(p.startPresale(0, (await time.latest()) + 3600))
+      .to.be.revertedWithCustomError(p, "PriceNotSet");
   });
 
   it("se adapta a un oráculo con otros decimales", async () => {
@@ -81,6 +107,7 @@ describe("NereumPresale", function () {
     const p2 = await (await ethers.getContractFactory("NereumPresale"))
       .deploy(await usdt.getAddress(), await f18.getAddress(), 18, owner.address);
     await p2.setPriceUsd(PRECIO);
+    await p2.setFallbackNativeUsd(USD("2500"));
     await p2.startPresale(0, (await time.latest()) + 3600);
     await p2.connect(ana).buyWithNative(0, { value: E("1") });
     expect(await p2.allocation(ana.address)).to.equal(E("30000"));
@@ -207,7 +234,7 @@ describe("NereumPresale", function () {
 
   it("solo el dueño administra", async () => {
     for (const llamada of [
-      p.connect(ana).setPriceUsd(1), p.connect(ana).startPresale(0, 9999999999),
+      p.connect(ana).setPriceUsd(1), p.connect(ana).setFallbackNativeUsd(1), p.connect(ana).startPresale(0, 9999999999),
       p.connect(ana).endPresale(),   p.connect(ana).openClaims(),
       p.connect(ana).withdrawNative(ana.address, 0), p.connect(ana).withdrawUsdt(ana.address, 0),
     ]) await expect(llamada).to.be.revertedWithCustomError(p, "OwnableUnauthorizedAccount");

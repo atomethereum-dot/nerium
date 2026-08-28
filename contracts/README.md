@@ -20,7 +20,8 @@ Ethereum y 18 en BNB Chain.
 | `startPresale(inicio, fin)` | Abre la ventana. Cero = ahora. Solo una vez |
 | `endPresale()` | Cierra antes de tiempo. Sin vuelta atrás |
 | `setHardCap(tokens)` | Tope total. Cero = sin tope |
-| `setMaxPriceAge(segundos)` | Antigüedad máxima del precio del oráculo. Por defecto 1 hora |
+| `setMaxPriceAge(segundos)` | A partir de aquí se usa el respaldo. Por defecto 24 h |
+| `setFallbackNativeUsd(precio)` | Precio de respaldo de ETH/BNB en dólares, 8 decimales |
 | `pause()` / `unpause()` | Detiene compras sin cerrar la venta |
 | `withdrawNative(a, importe)` | Retira ETH/BNB. Cero = todo |
 | `withdrawUsdt(a, importe)` | Retira USDT. Cero = todo |
@@ -60,7 +61,8 @@ equivocado es un contrato que vende a un precio inventado.
 
 1. Desplegar. El dueño debe ser **un multisig**.
 2. `setPriceUsd(10000000)` — 0,10 $, el precio que anuncia la web.
-3. `setMinBuyUsd(100000000)` — 1 $, y `setHardCap(...)` si quieres tope.
+3. `setMinBuyUsd(100000000)` — 1 $. `setFallbackNativeUsd(...)` con la
+   cotización del día (3.000 $ = `300000000000`). `setHardCap(...)` si hay tope.
 4. `startPresale(0, fin)`.
 5. La gente compra. `withdrawNative` / `withdrawUsdt` cuando haga falta.
 6. `endPresale()` o esperar a la fecha.
@@ -80,9 +82,19 @@ Si el oráculo se mueve o cambias el precio entre que ve la cotización y se min
 su transacción, revierte en vez de darle de menos. La web debe llamar a
 `quoteNative` / `quoteUsdt` y enviar ese número con un margen.
 
-**Si el oráculo se queda atascado, las compras en ETH/BNB revierten.** Es
-deliberado: mejor no vender que vender a una cotización rancia. Las compras en
-USDT siguen funcionando, porque no dependen del oráculo.
+**LA VENTA NO SE PARA NUNCA.** Si el oráculo revierte, devuelve cero o se queda
+atascado más de `maxPriceAge`, el contrato cobra con `fallbackNativeUsd`, el
+precio de respaldo que fijas tú, y sigue vendiendo. La llamada al oráculo va en
+`try/catch`, así que ni siquiera un oráculo pausado o retirado detiene una
+compra. En cuanto el oráculo se recupera, el contrato vuelve solo a usarlo.
+
+Por eso `startPresale` exige tener el respaldo puesto: sin él, la caída del
+oráculo sí pararía las compras en ETH y BNB.
+
+**Vigila el evento `FallbackPriceUsed`.** Salta en cada compra cobrada sin
+oráculo, y significa que el precio de ETH o BNB lo estás poniendo tú a mano. Si
+lo dejas desactualizado mientras el oráculo está caído, vendes barato o caro sin
+enterarte.
 
 **USDT se toma como un dólar.** Es lo que hace todo el mundo, pero si USDT
 perdiera la paridad, el contrato no se entera.
@@ -114,7 +126,8 @@ npm install --save-dev hardhat@2 "@nomicfoundation/hardhat-toolbox@hh2" \
 npx hardhat test
 ```
 
-21 casos. Entre ellos: que el precio siga al dólar cuando ETH sube o baja, que
-se rechace un precio de oráculo rancio o negativo, que el reparto no se abra
-antes de terminar la preventa, la protección del comprador, y que el dueño no
-pueda tocar los tokens de los compradores.
+24 casos. Entre ellos: que el precio siga al dólar cuando ETH sube o baja, que
+**la venta siga funcionando con el oráculo rancio, devolviendo cero o reventando
+entero**, que vuelva solo al oráculo cuando se recupera, que el reparto no se
+abra antes de terminar la preventa, la protección del comprador, y que el dueño
+no pueda tocar los tokens de los compradores.
