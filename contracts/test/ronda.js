@@ -6,7 +6,7 @@ const E = ethers.parseEther;
 const U6 = (n) => ethers.parseUnits(String(n), 6);
 const USD = (n) => ethers.parseUnits(String(n), 8);   // dólares con 8 decimales
 
-describe("NereumPresale", function () {
+describe("NereumFundingRound", function () {
   let owner, ana, luis, tesoreria, usdt, feed, feed2, feed3, token, p;
   const PRECIO = USD("0.10");        // 0,10 $ por NRM, como dice la web
   const MINIMO = USD("1");           // 1 $ mínimo
@@ -19,7 +19,7 @@ describe("NereumPresale", function () {
     feed2 = await F.deploy(USD("2900"));      // segundo proveedor
     feed3 = await F.deploy(USD("2800"));      // tercero
     token = await (await ethers.getContractFactory("MockToken")).deploy();
-    p = await (await ethers.getContractFactory("NereumPresale")).deploy(
+    p = await (await ethers.getContractFactory("NereumFundingRound")).deploy(
       await usdt.getAddress(),
       [await feed.getAddress(), await feed2.getAddress(), await feed3.getAddress()],
       18, owner.address);
@@ -32,7 +32,7 @@ describe("NereumPresale", function () {
   const abrir = async (dur = 3600) => {
     await p.setPriceUsd(PRECIO);
     await p.setMinBuyUsd(MINIMO);
-    await p.startPresale(0, (await time.latest()) + dur);
+    await p.startRound(0, (await time.latest()) + dur);
   };
 
   it("el precio en dólares es un solo número para las dos redes", async () => {
@@ -84,11 +84,11 @@ describe("NereumPresale", function () {
     const roto = await (await ethers.getContractFactory("MockFeedRoto")).deploy();
     const F = await ethers.getContractFactory("MockFeed");
     const bueno = await F.deploy(USD("3000"));
-    const p2 = await (await ethers.getContractFactory("NereumPresale")).deploy(
+    const p2 = await (await ethers.getContractFactory("NereumFundingRound")).deploy(
       await usdt.getAddress(), [await roto.getAddress(), await bueno.getAddress()],
       18, owner.address);
     await p2.setPriceUsd(PRECIO);
-    await p2.startPresale(0, (await time.latest()) + 3600);
+    await p2.startRound(0, (await time.latest()) + 3600);
     await p2.connect(ana).buyWithNative(0, { value: E("1") });
     expect(await p2.allocation(ana.address)).to.equal(E("30000"));
   });
@@ -133,10 +133,10 @@ describe("NereumPresale", function () {
   it("se adapta a un oráculo con otros decimales", async () => {
     const f18 = await (await ethers.getContractFactory("MockFeed")).deploy(E("3000"));
     await f18.setDecimals(18);
-    const p2 = await (await ethers.getContractFactory("NereumPresale"))
+    const p2 = await (await ethers.getContractFactory("NereumFundingRound"))
       .deploy(await usdt.getAddress(), [await f18.getAddress()], 18, owner.address);
     await p2.setPriceUsd(PRECIO);
-    await p2.startPresale(0, (await time.latest()) + 3600);
+    await p2.startRound(0, (await time.latest()) + 3600);
     await p2.connect(ana).buyWithNative(0, { value: E("1") });
     expect(await p2.allocation(ana.address)).to.equal(E("30000"));
   });
@@ -148,27 +148,27 @@ describe("NereumPresale", function () {
     await p.connect(ana).buyWithUsdt(U6("1"), 0);
   });
 
-  it("EL REPARTO SOLO SE ABRE AL TERMINAR LA PREVENTA", async () => {
+  it("EL REPARTO SOLO SE ABRE AL TERMINAR LA RONDA", async () => {
     await abrir();
     await p.connect(ana).buyWithNative(0, { value: E("1") });
     await p.setSaleToken(await token.getAddress());
     await token.transfer(await p.getAddress(), E("30000"));
 
-    await expect(p.openClaims()).to.be.revertedWithCustomError(p, "PresaleNotOver");
+    await expect(p.openClaims()).to.be.revertedWithCustomError(p, "RoundNotOver");
     await expect(p.connect(ana).claim()).to.be.revertedWithCustomError(p, "ClaimsNotOpen");
 
-    await p.endPresale();
+    await p.endRound();
     await p.openClaims();
     await p.connect(ana).claim();
     expect(await token.balanceOf(ana.address)).to.equal(E("30000"));
   });
 
-  it("también se abre si la preventa vence por fecha", async () => {
+  it("también se abre si la ronda vence por fecha", async () => {
     await abrir(100);
     await p.connect(ana).buyWithNative(0, { value: E("1") });
     await p.setSaleToken(await token.getAddress());
     await token.transfer(await p.getAddress(), E("30000"));
-    await expect(p.openClaims()).to.be.revertedWithCustomError(p, "PresaleNotOver");
+    await expect(p.openClaims()).to.be.revertedWithCustomError(p, "RoundNotOver");
     await time.increase(200);
     await p.openClaims();
   });
@@ -176,7 +176,7 @@ describe("NereumPresale", function () {
   it("no abre el reparto sin los tokens depositados", async () => {
     await abrir();
     await p.connect(ana).buyWithNative(0, { value: E("1") });
-    await p.endPresale();
+    await p.endRound();
     await p.setSaleToken(await token.getAddress());
     await expect(p.openClaims()).to.be.revertedWithCustomError(p, "NotEnoughTokensDeposited");
   });
@@ -192,7 +192,7 @@ describe("NereumPresale", function () {
   it("reparte una sola vez", async () => {
     await abrir();
     await p.connect(ana).buyWithNative(0, { value: E("1") });
-    await p.endPresale();
+    await p.endRound();
     await p.setSaleToken(await token.getAddress());
     await token.transfer(await p.getAddress(), E("30000"));
     await p.openClaims();
@@ -232,11 +232,11 @@ describe("NereumPresale", function () {
 
   it("cierra, y no se reabre", async () => {
     await abrir();
-    await p.endPresale();
+    await p.endRound();
     await expect(p.connect(ana).buyWithNative(0, { value: E("1") }))
-      .to.be.revertedWithCustomError(p, "PresaleNotLive");
-    await expect(p.startPresale(0, (await time.latest()) + 100))
-      .to.be.revertedWithCustomError(p, "PresaleAlreadyFinalized");
+      .to.be.revertedWithCustomError(p, "RoundNotLive");
+    await expect(p.startRound(0, (await time.latest()) + 100))
+      .to.be.revertedWithCustomError(p, "RoundAlreadyFinalized");
   });
 
   it("rechaza envíos directos", async () => {
@@ -262,8 +262,8 @@ describe("NereumPresale", function () {
 
   it("solo el dueño administra", async () => {
     for (const llamada of [
-      p.connect(ana).setPriceUsd(1), p.connect(ana).setFeeds([]), p.connect(ana).startPresale(0, 9999999999),
-      p.connect(ana).endPresale(),   p.connect(ana).openClaims(),
+      p.connect(ana).setPriceUsd(1), p.connect(ana).setFeeds([]), p.connect(ana).startRound(0, 9999999999),
+      p.connect(ana).endRound(),   p.connect(ana).openClaims(),
       p.connect(ana).withdrawNative(ana.address, 0), p.connect(ana).withdrawUsdt(ana.address, 0),
     ]) await expect(llamada).to.be.revertedWithCustomError(p, "OwnableUnauthorizedAccount");
   });

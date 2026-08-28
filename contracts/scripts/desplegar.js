@@ -1,12 +1,12 @@
 /**
- * Despliegue de la preventa de Nereum.
+ * Despliegue de la ronda de Nereum.
  *
  *   npx hardhat run scripts/desplegar.js --network ethereum
  *   npx hardhat run scripts/desplegar.js --network bsc
  *
  * ANTES de desplegar nada, el script interroga a cada oráculo y comprueba que
  * es el que dice ser. Si algo no cuadra, ABORTA sin gastar gas. Ese es el punto:
- * una dirección de oráculo equivocada no se nota a ojo y arruina la preventa
+ * una dirección de oráculo equivocada no se nota a ojo y arruina la ronda
  * entera, así que la verificación no es opcional ni va en un paso aparte donde
  * se pueda olvidar.
  */
@@ -60,7 +60,7 @@ async function main() {
   const [cuenta] = await ethers.getSigners();
   const proveedor = ethers.provider;
 
-  console.log(`\n─── Preventa de Nereum · ${cfg.nombre} ───`);
+  console.log(`\n─── Ronda de financiación de Nereum · ${cfg.nombre} ───`);
   console.log(`Desplegando desde: ${cuenta.address}`);
   console.log(`Saldo: ${ethers.formatEther(await proveedor.getBalance(cuenta.address))}\n`);
 
@@ -109,7 +109,7 @@ async function main() {
 
   /* ── 3 · desplegar ── */
   console.log("Desplegando…");
-  const P = await ethers.getContractFactory("NereumPresale");
+  const P = await ethers.getContractFactory("NereumFundingRound");
   const p = await P.deploy(cfg.usdt, cfg.oraculos, DECIMALES_NRM, cuenta.address);
   await p.waitForDeployment();
   const dir = await p.getAddress();
@@ -130,7 +130,7 @@ async function main() {
   console.log(`Contrato: ${dir}`);
   console.log("\nQueda por hacer, cuando decidas:");
   console.log("  1. Traspasar la propiedad a un multisig (transferOwnership + acceptOwnership)");
-  console.log("  2. startPresale(0, <fin en segundos unix>)  ← abre la venta");
+  console.log("  2. startRound(0, <fin en segundos unix>)  ← abre la venta");
   console.log("  3. Al terminar: setSaleToken(NRM), depositar los tokens, openClaims()");
 }
 

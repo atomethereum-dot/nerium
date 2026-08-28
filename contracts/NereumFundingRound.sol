@@ -19,7 +19,7 @@ interface AggregatorV3Interface {
 }
 
 /**
- * @title  Preventa de Nereum
+ * @title  Ronda de financiación de Nereum
  * @notice Se paga en la moneda nativa de la cadena (ETH en Ethereum, BNB en BNB
  *         Chain) o en USDT. El mismo código sirve en las dos redes.
  *
@@ -38,9 +38,9 @@ interface AggregatorV3Interface {
  *         precio bueno que el propio contrato guardó, y la venta continúa.
  *
  *         La compra anota lo que corresponde a cada dirección; el reparto se
- *         abre cuando la preventa ha terminado y el token está depositado.
+ *         abre cuando la ronda ha terminado y el token está depositado.
  */
-contract NereumPresale is Ownable2Step, ReentrancyGuard, Pausable {
+contract NereumFundingRound is Ownable2Step, ReentrancyGuard, Pausable {
     using SafeERC20 for IERC20;
 
     /// @dev Todos los importes en dólares llevan 8 decimales, que es la escala
@@ -106,8 +106,8 @@ contract NereumPresale is Ownable2Step, ReentrancyGuard, Pausable {
 
     // ─────────────────────────────── eventos ──────────────────────────────────
 
-    event PresaleScheduled(uint64 startTime, uint64 endTime);
-    event PresaleEnded(uint64 endedAt);
+    event RoundScheduled(uint64 startTime, uint64 endTime);
+    event RoundEnded(uint64 endedAt);
     event PriceUsdUpdated(uint256 priceUsd);
     event MinBuyUsdUpdated(uint256 minBuyUsd);
     event MaxPriceAgeUpdated(uint256 seconds_);
@@ -129,10 +129,10 @@ contract NereumPresale is Ownable2Step, ReentrancyGuard, Pausable {
 
     // ─────────────────────────────── errores ──────────────────────────────────
 
-    error PresaleNotLive();
-    error PresaleNotOver();
-    error PresaleAlreadyFinalized();
-    error PresaleAlreadyScheduled();
+    error RoundNotLive();
+    error RoundNotOver();
+    error RoundAlreadyFinalized();
+    error RoundAlreadyScheduled();
     error BadWindow();
     error PriceNotSet();
     error BelowMinimum(uint256 usdValue, uint256 minimum);
@@ -220,9 +220,9 @@ contract NereumPresale is Ownable2Step, ReentrancyGuard, Pausable {
 
     function feedCount() external view returns (uint256) { return feeds.length; }
 
-    function startPresale(uint64 start, uint64 end) external onlyOwner {
-        if (finalized) revert PresaleAlreadyFinalized();
-        if (startTime != 0) revert PresaleAlreadyScheduled();
+    function startRound(uint64 start, uint64 end) external onlyOwner {
+        if (finalized) revert RoundAlreadyFinalized();
+        if (startTime != 0) revert RoundAlreadyScheduled();
         if (priceUsd == 0) revert PriceNotSet();
 
         uint64 s = start == 0 ? uint64(block.timestamp) : start;
@@ -230,15 +230,15 @@ contract NereumPresale is Ownable2Step, ReentrancyGuard, Pausable {
 
         startTime = s;
         endTime = end;
-        emit PresaleScheduled(s, end);
+        emit RoundScheduled(s, end);
     }
 
-    /// @notice Cierra la preventa ya. No tiene vuelta atrás.
-    function endPresale() external onlyOwner {
-        if (finalized) revert PresaleAlreadyFinalized();
+    /// @notice Cierra la ronda ya. No tiene vuelta atrás.
+    function endRound() external onlyOwner {
+        if (finalized) revert RoundAlreadyFinalized();
         finalized = true;
         endTime = uint64(block.timestamp);
-        emit PresaleEnded(uint64(block.timestamp));
+        emit RoundEnded(uint64(block.timestamp));
     }
 
     function setHardCap(uint256 tokens) external onlyOwner {
@@ -381,9 +381,9 @@ contract NereumPresale is Ownable2Step, ReentrancyGuard, Pausable {
     }
 
     function _requireLive() private view {
-        if (finalized) revert PresaleNotLive();
+        if (finalized) revert RoundNotLive();
         if (startTime == 0 || block.timestamp < startTime || block.timestamp >= endTime) {
-            revert PresaleNotLive();
+            revert RoundNotLive();
         }
     }
 
@@ -404,13 +404,13 @@ contract NereumPresale is Ownable2Step, ReentrancyGuard, Pausable {
     }
 
     /**
-     * @notice Abre el reparto. Exige dos cosas: que la preventa haya TERMINADO
+     * @notice Abre el reparto. Exige dos cosas: que la ronda haya TERMINADO
      *         —por fecha o porque se cerró a mano— y que el contrato ya tenga
      *         depositado todo lo vendido, para que nadie reclame contra un saldo
      *         insuficiente y deje sin nada al que llegue último.
      */
     function openClaims() external onlyOwner {
-        if (!isOver()) revert PresaleNotOver();
+        if (!isOver()) revert RoundNotOver();
         if (address(saleToken) == address(0)) revert SaleTokenNotSet();
 
         uint256 need = totalTokensSold - totalTokensClaimed;
@@ -484,7 +484,7 @@ contract NereumPresale is Ownable2Step, ReentrancyGuard, Pausable {
             && block.timestamp >= startTime && block.timestamp < endTime;
     }
 
-    /// @notice La preventa ha terminado: se cerró a mano o pasó la fecha.
+    /// @notice La ronda ha terminado: se cerró a mano o pasó la fecha.
     function isOver() public view returns (bool) {
         return finalized || (startTime != 0 && block.timestamp >= endTime);
     }

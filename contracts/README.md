@@ -1,4 +1,4 @@
-# Preventa de Nereum
+# Ronda de financiación de Nereum
 
 Cobra en la moneda nativa de la cadena o en USDT. El mismo código sirve en
 Ethereum (ETH + USDT) y en BNB Chain (BNB + USDT).
@@ -17,8 +17,8 @@ Ethereum y 18 en BNB Chain.
 |---|---|
 | `setPriceUsd(precio)` | Precio de un token en dólares, 8 decimales. 0,10 $ = `10000000` |
 | `setMinBuyUsd(min)` | Compra mínima en dólares. 1 $ = `100000000` |
-| `startPresale(inicio, fin)` | Abre la ventana. Cero = ahora. Solo una vez |
-| `endPresale()` | Cierra antes de tiempo. Sin vuelta atrás |
+| `startRound(inicio, fin)` | Abre la ventana. Cero = ahora. Solo una vez |
+| `endRound()` | Cierra antes de tiempo. Sin vuelta atrás |
 | `setHardCap(tokens)` | Tope total. Cero = sin tope |
 | `setMaxPriceAge(segundos)` | A partir de aquí se descarta un oráculo. Por defecto 24 h |
 | `setFeeds([...])` | Reemplaza la lista de oráculos, en orden de preferencia |
@@ -26,7 +26,7 @@ Ethereum y 18 en BNB Chain.
 | `withdrawNative(a, importe)` | Retira ETH/BNB. Cero = todo |
 | `withdrawUsdt(a, importe)` | Retira USDT. Cero = todo |
 | `setSaleToken(token)` | Fija el NRM cuando exista. Solo una vez |
-| `openClaims()` | Abre el reparto. Exige preventa terminada y tokens depositados |
+| `openClaims()` | Abre el reparto. Exige ronda terminada y tokens depositados |
 | `withdrawUnsoldTokens(a, importe)` | Solo el excedente sobre lo debido |
 | `rescueForeignToken(...)` | Recupera tokens enviados por error |
 
@@ -111,16 +111,16 @@ actualiza la lista sobre la marcha.
 1. Desplegar. El dueño debe ser **un multisig**.
 2. `setPriceUsd(10000000)` — 0,10 $, el precio que anuncia la web.
 3. `setMinBuyUsd(100000000)` — 1 $, y `setHardCap(...)` si quieres tope.
-4. `startPresale(0, fin)`.
+4. `startRound(0, fin)`.
 5. La gente compra. `withdrawNative` / `withdrawUsdt` cuando haga falta.
-6. `endPresale()` o esperar a la fecha.
+6. `endRound()` o esperar a la fecha.
 7. `setSaleToken(NRM)`, transferir al contrato al menos `totalTokensSold`,
    y `openClaims()`.
 8. Cada comprador llama a `claim()`.
 
 ## Decisiones que conviene entender
 
-**El reparto solo se abre con la preventa terminada.** `openClaims()` revierte si
+**El reparto solo se abre con la ronda terminada.** `openClaims()` revierte si
 la venta sigue viva, y además exige que el contrato ya tenga depositado todo lo
 vendido: nadie debe poder reclamar contra un saldo insuficiente y dejar sin nada
 al último.
@@ -167,7 +167,7 @@ normal fallaría en Ethereum.
 - **Sin vesting.** Al abrir el reparto se retira el 100% de golpe.
 - **Sin lista blanca.**
 - **El dueño puede retirar lo recaudado en cualquier momento**, también con la
-  preventa abierta.
+  ronda abierta.
 
 ## Pruebas
 
@@ -183,7 +183,7 @@ Los del contrato, entre otros: que el precio siga al dólar cuando ETH sube o ba
 **la venta siga con el primer oráculo rancio, con los dos primeros caídos, con
 uno reventando entero, y con LOS TRES caídos a la vez**, que vuelva sola al
 preferido cuando se recupera, que `feedsStatus` señale cuál falla, que el
-reparto no se abra antes de terminar la preventa, la protección del comprador, y
+reparto no se abra antes de terminar la ronda, la protección del comprador, y
 que el dueño no pueda tocar los tokens de los compradores.
 
 Los de la verificación prueban **la misma función que ejecuta el despliegue**, no

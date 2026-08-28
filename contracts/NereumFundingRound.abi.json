@@ -158,32 +158,32 @@
   },
   {
     "inputs": [],
-    "name": "PresaleAlreadyFinalized",
-    "type": "error"
-  },
-  {
-    "inputs": [],
-    "name": "PresaleAlreadyScheduled",
-    "type": "error"
-  },
-  {
-    "inputs": [],
-    "name": "PresaleNotLive",
-    "type": "error"
-  },
-  {
-    "inputs": [],
-    "name": "PresaleNotOver",
-    "type": "error"
-  },
-  {
-    "inputs": [],
     "name": "PriceNotSet",
     "type": "error"
   },
   {
     "inputs": [],
     "name": "ReentrancyGuardReentrantCall",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "RoundAlreadyFinalized",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "RoundAlreadyScheduled",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "RoundNotLive",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "RoundNotOver",
     "type": "error"
   },
   {
@@ -464,38 +464,6 @@
     "inputs": [
       {
         "indexed": false,
-        "internalType": "uint64",
-        "name": "endedAt",
-        "type": "uint64"
-      }
-    ],
-    "name": "PresaleEnded",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "internalType": "uint64",
-        "name": "startTime",
-        "type": "uint64"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint64",
-        "name": "endTime",
-        "type": "uint64"
-      }
-    ],
-    "name": "PresaleScheduled",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
         "internalType": "uint256",
         "name": "priceUsd",
         "type": "uint256"
@@ -539,6 +507,38 @@
       }
     ],
     "name": "Purchased",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "uint64",
+        "name": "endedAt",
+        "type": "uint64"
+      }
+    ],
+    "name": "RoundEnded",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "uint64",
+        "name": "startTime",
+        "type": "uint64"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint64",
+        "name": "endTime",
+        "type": "uint64"
+      }
+    ],
+    "name": "RoundScheduled",
     "type": "event"
   },
   {
@@ -740,7 +740,7 @@
   },
   {
     "inputs": [],
-    "name": "endPresale",
+    "name": "endRound",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -1223,7 +1223,7 @@
         "type": "uint64"
       }
     ],
-    "name": "startPresale",
+    "name": "startRound",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
