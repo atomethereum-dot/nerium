@@ -8,67 +8,80 @@ import {Ownable2Step, Ownable} from "@openzeppelin/contracts/access/Ownable2Step
 import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import {Pausable} from "@openzeppelin/contracts/utils/Pausable.sol";
 
+/// @notice Lo mínimo de un oráculo de Chainlink. Se declara aquí en vez de traer
+///         el paquete entero: son cuatro líneas y deja el contrato sin más
+///         dependencias que OpenZeppelin, que es una cosa menos que auditar.
+interface AggregatorV3Interface {
+    function decimals() external view returns (uint8);
+    function latestRoundData() external view returns (
+        uint80 roundId, int256 answer, uint256 startedAt, uint256 updatedAt, uint80 answeredInRound
+    );
+}
+
 /**
  * @title  Preventa de Nereum
  * @notice Se paga en la moneda nativa de la cadena (ETH en Ethereum, BNB en BNB
- *         Chain) o en USDT. El mismo código sirve en las dos redes: lo único que
- *         cambia es la dirección de USDT y sus decimales, que se pasan al
- *         desplegar.
+ *         Chain) o en USDT. El mismo código sirve en las dos redes.
  *
- *         La compra NO entrega el token en el acto: anota cuánto le corresponde
- *         a cada dirección. El reparto se abre después, cuando el proyecto ha
- *         depositado el token en el contrato. Así la preventa puede arrancar
- *         antes de que el token exista, que es el caso habitual, y nadie compra
- *         contra un contrato vacío.
+ *         EL PRECIO SE FIJA EN DÓLARES, UNO SOLO. El contrato pregunta a
+ *         Chainlink cuánto vale ETH o BNB en cada compra, así que 0,10 $ siguen
+ *         siendo 0,10 $ aunque la moneda se mueva. Y como el precio vive en
+ *         dólares y no en unidades de cada moneda, el mismo número vale para
+ *         Ethereum y para BNB Chain: se acabó el riesgo de confundir los 6
+ *         decimales de USDT en Ethereum con los 18 de BNB Chain.
+ *
+ *         La compra anota lo que corresponde a cada dirección; el reparto se
+ *         abre cuando la preventa ha terminado y el token está depositado.
  */
 contract NereumPresale is Ownable2Step, ReentrancyGuard, Pausable {
     using SafeERC20 for IERC20;
 
+    /// @dev Todos los importes en dólares llevan 8 decimales, que es la escala
+    ///      en la que Chainlink publica ETH/USD y BNB/USD.
+    uint256 private constant USD = 1e8;
+
     // ─────────────────────────── configuración fija ───────────────────────────
 
     /// @notice USDT de la red. En Ethereum no devuelve bool en transfer, por eso
-    ///         todo el contrato usa SafeERC20 y nunca comprueba el valor devuelto.
+    ///         todo el contrato usa SafeERC20.
     IERC20 public immutable usdt;
 
-    /// @notice Decimales del token que se vende. Se fija al desplegar porque el
-    ///         token puede no existir todavía cuando arranca la preventa.
+    /// @notice Oráculo de la moneda nativa contra el dólar.
+    ///         Ethereum ETH/USD:  0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419
+    ///         BNB Chain BNB/USD: 0x0567F2323251f0Aab15c8dFb1967E4e8A7D42aeE
+    AggregatorV3Interface public immutable nativeUsdFeed;
+
     uint8 public immutable saleTokenDecimals;
 
-    /// @dev 10**saleTokenDecimals. Un "token entero" en unidades mínimas.
-    uint256 private immutable _unit;
+    uint256 private immutable _unit;      // 10**decimales del token en venta
+    uint256 private immutable _usdtUnit;  // 10**decimales de USDT
+    uint256 private immutable _feedUnit;  // 10**decimales del oráculo
 
     // ─────────────────────────────── estado ───────────────────────────────────
 
-    /// @notice Precio de UN token entero, en wei de la moneda nativa.
-    uint256 public priceNative;
+    /// @notice Precio de UN token entero en dólares, con 8 decimales.
+    ///         0,10 $ se escribe 10000000.
+    uint256 public priceUsd;
 
-    /// @notice Precio de UN token entero, en unidades mínimas de USDT.
-    ///         Ojo: USDT tiene 6 decimales en Ethereum y 18 en BNB Chain, así que
-    ///         el mismo precio en dólares es un número distinto en cada red.
-    uint256 public priceUsdt;
+    /// @notice Compra mínima en dólares, 8 decimales. 1 $ se escribe 100000000.
+    uint256 public minBuyUsd;
+
+    /// @notice Un precio del oráculo más viejo que esto no se acepta. Si Chainlink
+    ///         se queda atascado, las compras en moneda nativa revierten en vez de
+    ///         usar una cotización rancia. Las de USDT siguen funcionando.
+    uint256 public maxPriceAge = 1 hours;
 
     uint64 public startTime;
     uint64 public endTime;
-
-    /// @notice Una vez cerrada, la preventa no se puede reabrir.
     bool public finalized;
 
-    /// @notice Tope de tokens vendibles. Cero significa sin tope.
     uint256 public hardCapTokens;
-
-    /// @notice Compra mínima por operación, en unidades de cada medio de pago.
-    uint256 public minBuyNative;
-    uint256 public minBuyUsdt;
-
     uint256 public totalTokensSold;
     uint256 public totalTokensClaimed;
     uint256 public totalRaisedNative;
     uint256 public totalRaisedUsdt;
 
-    /// @notice El token que se entrega. Se fija cuando existe.
     IERC20 public saleToken;
-
-    /// @notice Mientras esté cerrado nadie puede reclamar.
     bool public claimOpen;
 
     mapping(address => uint256) public allocation;
@@ -78,10 +91,11 @@ contract NereumPresale is Ownable2Step, ReentrancyGuard, Pausable {
 
     event PresaleScheduled(uint64 startTime, uint64 endTime);
     event PresaleEnded(uint64 endedAt);
-    event PricesUpdated(uint256 priceNative, uint256 priceUsdt);
+    event PriceUsdUpdated(uint256 priceUsd);
+    event MinBuyUsdUpdated(uint256 minBuyUsd);
+    event MaxPriceAgeUpdated(uint256 seconds_);
     event HardCapUpdated(uint256 hardCapTokens);
-    event MinBuyUpdated(uint256 minBuyNative, uint256 minBuyUsdt);
-    event Purchased(address indexed buyer, bool paidInUsdt, uint256 paid, uint256 tokens);
+    event Purchased(address indexed buyer, bool paidInUsdt, uint256 paid, uint256 usdValue, uint256 tokens);
     event SaleTokenSet(address indexed token);
     event ClaimsOpened();
     event Claimed(address indexed buyer, uint256 tokens);
@@ -93,17 +107,21 @@ contract NereumPresale is Ownable2Step, ReentrancyGuard, Pausable {
     // ─────────────────────────────── errores ──────────────────────────────────
 
     error PresaleNotLive();
+    error PresaleNotOver();
     error PresaleAlreadyFinalized();
     error PresaleAlreadyScheduled();
     error BadWindow();
     error PriceNotSet();
-    error AmountTooSmall();
+    error BelowMinimum(uint256 usdValue, uint256 minimum);
     error HardCapReached();
     error SlippageTooHigh(uint256 got, uint256 min);
+    error StaleOraclePrice(uint256 updatedAt);
+    error BadOraclePrice(int256 answer);
     error ClaimsNotOpen();
     error NothingToClaim();
     error SaleTokenAlreadySet();
     error SaleTokenNotSet();
+    error WrongTokenDecimals(uint8 got, uint8 expected);
     error NotEnoughTokensDeposited(uint256 have, uint256 need);
     error CannotTouchBuyersTokens();
     error ZeroAddress();
@@ -113,27 +131,55 @@ contract NereumPresale is Ownable2Step, ReentrancyGuard, Pausable {
     // ───────────────────────────── constructor ────────────────────────────────
 
     /**
-     * @param usdt_              USDT de la red.
-     *                           Ethereum: 0xdAC17F958D2ee523a2206206994597C13D831ec7
-     *                           BNB Chain: 0x55d398326f99059fF775485246999027B3197955
-     * @param saleTokenDecimals_ Decimales del token en venta. Normalmente 18.
-     * @param owner_             Quien administra. Usa un multisig, no una llave suelta.
+     * @param usdt_    USDT de la red.
+     *                 Ethereum:  0xdAC17F958D2ee523a2206206994597C13D831ec7
+     *                 BNB Chain: 0x55d398326f99059fF775485246999027B3197955
+     * @param feed_    Oráculo ETH/USD o BNB/USD de Chainlink.
+     * @param owner_   Quien administra. Usa un multisig.
      */
-    constructor(IERC20 usdt_, uint8 saleTokenDecimals_, address owner_) Ownable(owner_) {
-        if (address(usdt_) == address(0) || owner_ == address(0)) revert ZeroAddress();
+    constructor(
+        IERC20 usdt_,
+        AggregatorV3Interface feed_,
+        uint8 saleTokenDecimals_,
+        address owner_
+    ) Ownable(owner_) {
+        if (address(usdt_) == address(0) || address(feed_) == address(0) || owner_ == address(0)) {
+            revert ZeroAddress();
+        }
         usdt = usdt_;
+        nativeUsdFeed = feed_;
         saleTokenDecimals = saleTokenDecimals_;
         _unit = 10 ** saleTokenDecimals_;
+        _usdtUnit = 10 ** IERC20Metadata(address(usdt_)).decimals();
+        _feedUnit = 10 ** feed_.decimals();
     }
 
     // ──────────────────────────── administración ──────────────────────────────
 
-    /// @notice Programa la ventana de la preventa. Solo se puede hacer una vez.
-    /// @param  start Momento de apertura. Cero significa "ahora mismo".
+    /// @notice Precio de un token en dólares, 8 decimales. 0,10 $ = 10000000.
+    function setPriceUsd(uint256 price) external onlyOwner {
+        if (price == 0) revert PriceNotSet();
+        priceUsd = price;
+        emit PriceUsdUpdated(price);
+    }
+
+    /// @notice Compra mínima en dólares, 8 decimales. 1 $ = 100000000.
+    function setMinBuyUsd(uint256 min) external onlyOwner {
+        minBuyUsd = min;
+        emit MinBuyUsdUpdated(min);
+    }
+
+    /// @notice Antigüedad máxima aceptable del precio del oráculo.
+    function setMaxPriceAge(uint256 seconds_) external onlyOwner {
+        if (seconds_ == 0) revert PriceNotSet();
+        maxPriceAge = seconds_;
+        emit MaxPriceAgeUpdated(seconds_);
+    }
+
     function startPresale(uint64 start, uint64 end) external onlyOwner {
         if (finalized) revert PresaleAlreadyFinalized();
         if (startTime != 0) revert PresaleAlreadyScheduled();
-        if (priceNative == 0 || priceUsdt == 0) revert PriceNotSet();
+        if (priceUsd == 0) revert PriceNotSet();
 
         uint64 s = start == 0 ? uint64(block.timestamp) : start;
         if (end <= s) revert BadWindow();
@@ -143,7 +189,7 @@ contract NereumPresale is Ownable2Step, ReentrancyGuard, Pausable {
         emit PresaleScheduled(s, end);
     }
 
-    /// @notice Cierra la preventa ya, sin esperar a la fecha. No tiene vuelta atrás.
+    /// @notice Cierra la preventa ya. No tiene vuelta atrás.
     function endPresale() external onlyOwner {
         if (finalized) revert PresaleAlreadyFinalized();
         finalized = true;
@@ -151,78 +197,72 @@ contract NereumPresale is Ownable2Step, ReentrancyGuard, Pausable {
         emit PresaleEnded(uint64(block.timestamp));
     }
 
-    /**
-     * @notice Fija los dos precios. Se puede hacer con la preventa en marcha: los
-     *         compradores van protegidos por el mínimo de tokens que exigen en su
-     *         propia transacción, así que un cambio de precio no puede darles
-     *         menos de lo que aceptaron.
-     */
-    function setPrices(uint256 native, uint256 usdt_) external onlyOwner {
-        if (native == 0 || usdt_ == 0) revert PriceNotSet();
-        priceNative = native;
-        priceUsdt = usdt_;
-        emit PricesUpdated(native, usdt_);
-    }
-
-    /// @notice Tope de tokens. Cero lo desactiva. No puede quedar por debajo de lo vendido.
     function setHardCap(uint256 tokens) external onlyOwner {
         if (tokens != 0 && tokens < totalTokensSold) revert HardCapReached();
         hardCapTokens = tokens;
         emit HardCapUpdated(tokens);
     }
 
-    function setMinBuy(uint256 native, uint256 usdt_) external onlyOwner {
-        minBuyNative = native;
-        minBuyUsdt = usdt_;
-        emit MinBuyUpdated(native, usdt_);
-    }
-
-    /// @notice Para la venta sin cerrarla. Útil para corregir algo sobre la marcha.
     function pause() external onlyOwner { _pause(); }
     function unpause() external onlyOwner { _unpause(); }
+
+    // ─────────────────────────────── oráculo ──────────────────────────────────
+
+    /// @notice Cuánto vale una unidad de la moneda nativa en dólares, 8 decimales.
+    function nativeUsdPrice() public view returns (uint256) {
+        (, int256 answer, , uint256 updatedAt, ) = nativeUsdFeed.latestRoundData();
+        if (answer <= 0) revert BadOraclePrice(answer);
+        if (updatedAt == 0 || block.timestamp - updatedAt > maxPriceAge) {
+            revert StaleOraclePrice(updatedAt);
+        }
+        return (uint256(answer) * USD) / _feedUnit;
+    }
 
     // ─────────────────────────────── compra ───────────────────────────────────
 
     /**
-     * @param minTokensOut Mínimo de tokens que el comprador acepta recibir. Es su
-     *                     protección: si el precio cambió entre que vio la
-     *                     cotización y se minó su transacción, esta revierte en
-     *                     vez de darle menos de lo esperado.
+     * @param minTokensOut Mínimo que el comprador acepta recibir. Es su protección
+     *                     frente a un movimiento del oráculo o un cambio de precio
+     *                     entre que ve la cotización y se mina su transacción.
      */
     function buyWithNative(uint256 minTokensOut)
         external payable nonReentrant whenNotPaused returns (uint256 tokens)
     {
         _requireLive();
-        if (msg.value < minBuyNative || msg.value == 0) revert AmountTooSmall();
-
-        tokens = (msg.value * _unit) / priceNative;
-        _record(msg.sender, tokens, minTokensOut);
+        uint256 usdValue = (msg.value * nativeUsdPrice()) / 1e18;
+        tokens = _record(msg.sender, usdValue, minTokensOut);
 
         totalRaisedNative += msg.value;
-        emit Purchased(msg.sender, false, msg.value, tokens);
+        emit Purchased(msg.sender, false, msg.value, usdValue, tokens);
     }
 
     function buyWithUsdt(uint256 amount, uint256 minTokensOut)
         external nonReentrant whenNotPaused returns (uint256 tokens)
     {
         _requireLive();
-        if (amount < minBuyUsdt || amount == 0) revert AmountTooSmall();
 
-        /* Se mide lo que entra de verdad. Si algún día USDT activase una comisión
-           de transferencia, cobrar por el importe pedido regalaría tokens. */
+        /* Se mide lo que entra de verdad, por si USDT activase algún día una
+           comisión de transferencia: cobrar por el importe pedido regalaría tokens. */
         uint256 before = usdt.balanceOf(address(this));
         usdt.safeTransferFrom(msg.sender, address(this), amount);
         uint256 received = usdt.balanceOf(address(this)) - before;
 
-        tokens = (received * _unit) / priceUsdt;
-        _record(msg.sender, tokens, minTokensOut);
+        /* USDT se toma como un dólar. Es lo que hace todo el mundo, pero conviene
+           saberlo: si USDT perdiera la paridad, este contrato no se entera. */
+        uint256 usdValue = (received * USD) / _usdtUnit;
+        tokens = _record(msg.sender, usdValue, minTokensOut);
 
         totalRaisedUsdt += received;
-        emit Purchased(msg.sender, true, received, tokens);
+        emit Purchased(msg.sender, true, received, usdValue, tokens);
     }
 
-    function _record(address buyer, uint256 tokens, uint256 minTokensOut) private {
-        if (tokens == 0) revert AmountTooSmall();
+    function _record(address buyer, uint256 usdValue, uint256 minTokensOut)
+        private returns (uint256 tokens)
+    {
+        if (usdValue < minBuyUsd) revert BelowMinimum(usdValue, minBuyUsd);
+
+        tokens = (usdValue * _unit) / priceUsd;
+        if (tokens == 0) revert BelowMinimum(usdValue, minBuyUsd);
         if (tokens < minTokensOut) revert SlippageTooHigh(tokens, minTokensOut);
 
         uint256 sold = totalTokensSold + tokens;
@@ -239,36 +279,36 @@ contract NereumPresale is Ownable2Step, ReentrancyGuard, Pausable {
         }
     }
 
-    /// @notice Un envío directo sin datos no lleva protección de precio, así que
-    ///         se rechaza en vez de aceptarlo a ciegas.
+    /// @notice Un envío directo no lleva protección de precio: se rechaza.
     receive() external payable { revert UseBuyFunction(); }
 
     // ─────────────────────────────── reparto ──────────────────────────────────
 
-    /// @notice Fija el token que se entregará. Solo una vez.
     function setSaleToken(IERC20 token) external onlyOwner {
         if (address(saleToken) != address(0)) revert SaleTokenAlreadySet();
         if (address(token) == address(0)) revert ZeroAddress();
 
-        /* Si los decimales no coinciden con los que se fijaron al desplegar, todas
-           las cantidades vendidas estarían mal. Mejor fallar aquí que repartir mal. */
-        if (IERC20Metadata(address(token)).decimals() != saleTokenDecimals) {
-            revert NotEnoughTokensDeposited(0, 0);
-        }
+        uint8 d = IERC20Metadata(address(token)).decimals();
+        if (d != saleTokenDecimals) revert WrongTokenDecimals(d, saleTokenDecimals);
+
         saleToken = token;
         emit SaleTokenSet(address(token));
     }
 
     /**
-     * @notice Abre el reparto. Exige que el contrato ya tenga depositado todo lo
-     *         vendido: nadie debe poder reclamar contra un saldo insuficiente y
-     *         dejar sin nada al que llegue último.
+     * @notice Abre el reparto. Exige dos cosas: que la preventa haya TERMINADO
+     *         —por fecha o porque se cerró a mano— y que el contrato ya tenga
+     *         depositado todo lo vendido, para que nadie reclame contra un saldo
+     *         insuficiente y deje sin nada al que llegue último.
      */
     function openClaims() external onlyOwner {
+        if (!isOver()) revert PresaleNotOver();
         if (address(saleToken) == address(0)) revert SaleTokenNotSet();
+
         uint256 need = totalTokensSold - totalTokensClaimed;
         uint256 have = saleToken.balanceOf(address(this));
         if (have < need) revert NotEnoughTokensDeposited(have, need);
+
         claimOpen = true;
         emit ClaimsOpened();
     }
@@ -290,7 +330,6 @@ contract NereumPresale is Ownable2Step, ReentrancyGuard, Pausable {
 
     // ────────────────────────────── retiradas ─────────────────────────────────
 
-    /// @notice Retira lo recaudado en moneda nativa. Cero retira todo el saldo.
     function withdrawNative(address payable to, uint256 amount) external onlyOwner nonReentrant {
         if (to == address(0)) revert ZeroAddress();
         uint256 value = amount == 0 ? address(this).balance : amount;
@@ -299,7 +338,6 @@ contract NereumPresale is Ownable2Step, ReentrancyGuard, Pausable {
         emit NativeWithdrawn(to, value);
     }
 
-    /// @notice Retira lo recaudado en USDT. Cero retira todo el saldo.
     function withdrawUsdt(address to, uint256 amount) external onlyOwner nonReentrant {
         if (to == address(0)) revert ZeroAddress();
         uint256 value = amount == 0 ? usdt.balanceOf(address(this)) : amount;
@@ -307,11 +345,7 @@ contract NereumPresale is Ownable2Step, ReentrancyGuard, Pausable {
         emit UsdtWithdrawn(to, value);
     }
 
-    /**
-     * @notice Retira el token en venta que sobre, nunca el que se debe a los
-     *         compradores. Es la garantía de que el proyecto no puede vaciar el
-     *         contrato y dejar a nadie sin reclamar.
-     */
+    /// @notice Solo el excedente sobre lo que se debe a los compradores.
     function withdrawUnsoldTokens(address to, uint256 amount) external onlyOwner nonReentrant {
         if (to == address(0)) revert ZeroAddress();
         if (address(saleToken) == address(0)) revert SaleTokenNotSet();
@@ -326,8 +360,6 @@ contract NereumPresale is Ownable2Step, ReentrancyGuard, Pausable {
         emit UnsoldTokensWithdrawn(to, value);
     }
 
-    /// @notice Recupera cualquier otro token enviado por error. No toca USDT ni el
-    ///         token en venta, que tienen sus propias vías con sus límites.
     function rescueForeignToken(IERC20 token, address to, uint256 amount)
         external onlyOwner nonReentrant
     {
@@ -339,21 +371,32 @@ contract NereumPresale is Ownable2Step, ReentrancyGuard, Pausable {
 
     // ──────────────────────────────── vistas ──────────────────────────────────
 
-    function isLive() external view returns (bool) {
+    function isLive() public view returns (bool) {
         return !finalized && !paused() && startTime != 0
             && block.timestamp >= startTime && block.timestamp < endTime;
     }
 
-    /// @notice Cuántos tokens saldrían por un pago dado. Es lo que debe llamar la
-    ///         web para calcular el mínimo que enviará el comprador.
+    /// @notice La preventa ha terminado: se cerró a mano o pasó la fecha.
+    function isOver() public view returns (bool) {
+        return finalized || (startTime != 0 && block.timestamp >= endTime);
+    }
+
+    /// @notice Cuántos tokens saldrían por un pago en moneda nativa. Es lo que
+    ///         debe llamar la web para calcular el mínimo que enviará el comprador.
     function quoteNative(uint256 amount) external view returns (uint256) {
-        if (priceNative == 0) return 0;
-        return (amount * _unit) / priceNative;
+        if (priceUsd == 0) return 0;
+        return (((amount * nativeUsdPrice()) / 1e18) * _unit) / priceUsd;
     }
 
     function quoteUsdt(uint256 amount) external view returns (uint256) {
-        if (priceUsdt == 0) return 0;
-        return (amount * _unit) / priceUsdt;
+        if (priceUsd == 0) return 0;
+        return (((amount * USD) / _usdtUnit) * _unit) / priceUsd;
+    }
+
+    /// @notice Cuánta moneda nativa hay que enviar para un importe en dólares.
+    ///         Útil para pintar "0,032 ETH" junto a "100 $" en la web.
+    function nativeForUsd(uint256 usdAmount) external view returns (uint256) {
+        return (usdAmount * 1e18) / nativeUsdPrice();
     }
 
     function remainingTokens() external view returns (uint256) {
