@@ -1563,6 +1563,18 @@ padding:0 clamp(14px,2.4vw,26px);
 @media(max-width:899px){
 .hud>i.tl,.hud>i.tr{top:calc(var(--bar) + 38px)}
 }
+.xf-txt{position:absolute;inset:0;z-index:4;pointer-events:none;
+display:flex;align-items:center;justify-content:center;
+padding:0 clamp(22px,7vw,120px);
+opacity:0; will-change:opacity}
+.xf-agua{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+font-weight:400;font-size:clamp(96px,23vw,300px);letter-spacing:-.062em;
+color:rgba(11,13,18,.042);white-space:nowrap;user-select:none}
+.xf-tit{position:relative;
+font-weight:400;font-size:clamp(30px,5.6vw,72px);letter-spacing:-.052em;
+line-height:1.06;text-align:center;text-wrap:balance;max-width:16ch;
+background:linear-gradient(96deg,#0A0C10 10%,#7C8598 92%);
+-webkit-background-clip:text;background-clip:text;color:transparent}
 </style>
 </head>
 <body>
@@ -1963,6 +1975,10 @@ Nereum</a>
 <section class="xf" id="xfade" data-bg="#000000" data-acc="#2F6BFF">
 <div class="xf-stage" id="xfStage">
 <canvas class="xf-cv" id="xfCv"></canvas>
+<div class="xf-txt" id="xfEsq" aria-hidden="true">
+<span class="xf-agua">Nereum</span>
+<p class="xf-tit">One chain, four layers.</p>
+</div>
 <div class="xf-word">Real-world asset chain</div>
 <div class="xf-go" aria-hidden="true">
 <i></i>
@@ -3914,6 +3930,7 @@ scrollTo({top:top+run*((i+.5)/cards.length),behavior:'smooth'});
 show(1);
 })();
 (function(){
+const esq=document.getElementById('xfEsq');
 const sec=document.getElementById('xfade'), stage=document.getElementById('xfStage'),
 cv=document.getElementById('xfCv');
 if(!sec||!cv)return;
@@ -3996,6 +4013,8 @@ ctx.globalCompositeOperation='source-over';
 }
 function draw(p){
 ctx.fillStyle='#F5F5F7';ctx.fillRect(0,0,W,H);
+const entrada=clm((0.34-p)/0.26);
+if(esq)esq.style.opacity=entrada.toFixed(3);
 const n=st.n;
 const close=clm(p/.80);
 for(let i=0;i<n;i++){
@@ -4018,7 +4037,7 @@ ctx.fillStyle='rgba(230,242,255,'+(.92*fadeEdge).toFixed(3)+')';
 ctx.fillRect(x,ey-(down?1.5:0),w,1.5);
 }
 }
-const lleno=clm((p-.58)/.22);
+const lleno=clm((p-.46)/.20);   
 if(lleno>.01)pintaVuelo(lleno);
 stage.classList.toggle('lit', p>.46 && p<.95);
 stage.classList.toggle('go', p<.80);
@@ -4028,7 +4047,7 @@ addEventListener('resize',()=>{build();last=-1},{passive:true});
 (function tick(){
 const top=dTop(sec), run=Math.max(1,sec.offsetHeight-innerHeight);
 const p=clm((scrollY-top)/run);
-if(Math.abs(p-last)>.0015 || p>.58){last=p;draw(p)}
+if(Math.abs(p-last)>.0015 || p>.46 || p<.30){last=p;draw(p)}
 raf=requestAnimationFrame(tick);
 })();
 })();
