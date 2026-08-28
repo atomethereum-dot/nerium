@@ -4547,8 +4547,8 @@ el.__txt=txt; el.__real=real;
 function escribe(el,retardo){
 const txt=el.__txt, real=el.__real;
 if(CALMA){real.textContent=txt;return}
-const MS_LETRA=36;      
-const MS_SIMBOLO=56;    
+const MS_LETRA=62;      
+const MS_SIMBOLO=84;    
 const t0=performance.now()+retardo;
 (function paso(){
 const e=performance.now()-t0;
@@ -4574,8 +4574,8 @@ const io=new IntersectionObserver(es=>es.forEach(e=>{
 if(!e.isIntersecting||e.target.__hecho)return;
 e.target.__hecho=1;
 const grupo=[...e.target.querySelectorAll('#solutions .rows b, footer .fgrid h4')];
-grupo.forEach((el,i)=>escribe(el, i*110));
-}),{threshold:0, rootMargin:'900px 0px'});
+grupo.forEach((el,i)=>escribe(el, i*190));
+}),{threshold:0, rootMargin:'420px 0px'});
 cajas.forEach(c=>io.observe(c));
 })();
 (function(){
