@@ -2,6 +2,8 @@
 pragma solidity ^0.8.24;
 contract MockFeed {
     uint8 public decimals = 8;
+    string public description = "ETH / USD";
+    function setDescription(string calldata d) external { description = d; }
     int256 public answer;
     uint256 public updatedAt;
     constructor(int256 a) { answer = a; updatedAt = block.timestamp; }

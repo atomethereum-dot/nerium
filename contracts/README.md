@@ -68,6 +68,44 @@ un contrato vendiendo a un precio inventado. El constructor exige que al menos
 uno responda en ese momento, así que una dirección muerta se detecta al
 desplegar, pero una dirección viva del par equivocado no.
 
+## Despliegue en una orden
+
+```
+cp .env.ejemplo .env        # y rellénalo
+npm install
+npx hardhat run scripts/desplegar.js --network ethereum
+npx hardhat run scripts/desplegar.js --network bsc
+```
+
+El script **verifica los oráculos antes de desplegar** y aborta sin gastar gas
+si alguno no cuadra. Comprueba, para cada uno:
+
+| Comprobación | Qué error caza |
+|---|---|
+| Hay contrato en esa dirección | Una errata al copiar |
+| Responde a `description()`, `decimals()`, `latestRoundData()` | No es un oráculo |
+| `description()` es exactamente el par esperado | **Un oráculo vivo del par equivocado** |
+| El precio cae en una banda razonable | Lo mismo, por si `description` engaña |
+| El dato tiene menos de 24 h | El oráculo está parado |
+| El precio es positivo | Oráculo roto |
+
+La tercera y la cuarta son las que importan: una dirección viva de BTC/USD en
+lugar de ETH/USD no se ve a ojo y haría vender los NRM al 3% de su precio. El
+script lo detecta antes de que exista el contrato.
+
+Tras desplegar deja el precio en 0,10 $ y el mínimo en 1 $, y te dice qué queda
+por hacer.
+
+### Añadir un segundo oráculo
+
+El script viene con Chainlink, que es el más asentado. Para añadir un segundo
+proveedor —API3, RedStone o Pyth con adaptador— mete su dirección en `oraculos`
+dentro de `scripts/desplegar.js`, DESPUÉS de la de Chainlink. La verificación se
+aplica igual.
+
+Si ya has desplegado, no hace falta redesplegar: `setFeeds([chainlink, otro])`
+actualiza la lista sobre la marcha.
+
 ## Orden de uso
 
 1. Desplegar. El dueño debe ser **un multisig**.
@@ -139,9 +177,16 @@ npm install --save-dev hardhat@2 "@nomicfoundation/hardhat-toolbox@hh2" \
 npx hardhat test
 ```
 
-26 casos. Entre ellos: que el precio siga al dólar cuando ETH sube o baja, que
+33 casos, 26 del contrato y 7 de la verificación previa al despliegue.
+
+Los del contrato, entre otros: que el precio siga al dólar cuando ETH sube o baja, que
 **la venta siga con el primer oráculo rancio, con los dos primeros caídos, con
 uno reventando entero, y con LOS TRES caídos a la vez**, que vuelva sola al
 preferido cuando se recupera, que `feedsStatus` señale cuál falla, que el
 reparto no se abra antes de terminar la preventa, la protección del comprador, y
 que el dueño no pueda tocar los tokens de los compradores.
+
+Los de la verificación prueban **la misma función que ejecuta el despliegue**, no
+una copia: que acepta un oráculo correcto y que rechaza el par equivocado, un
+precio absurdo, un oráculo parado, un precio cero, una dirección sin contrato y
+un contrato que no es un oráculo.
