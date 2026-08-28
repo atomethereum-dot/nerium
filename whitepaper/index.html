@@ -1,0 +1,1793 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nereum — Whitepaper</title>
+<link rel="stylesheet" href="/assets/fonts.css">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<style>
+/* ── los tokens de la marca, los mismos de la web ── */
+:root{
+  --blue:#2F6BFF; --blue-d:#1B49E0; --blue-lite:#79ABFF;
+  --ink:#0A0C10; --ink-2:#3A4150; --ink-3:#6B7484;
+  --paper:#FFFFFF; --paper-2:#FAFBFC; --linea:#E6E9EF; --linea-2:#EFF1F5;
+  --f:'Switzer','Inter Tight',system-ui,-apple-system,sans-serif;
+  --m:'DM Mono',ui-monospace,SFMono-Regular,monospace;
+  --ease:cubic-bezier(.16,.84,.26,1);
+  --e-step:steps(4,end);
+  --t1:.16s; --t2:.36s;
+  --lat:288px;      /* ancho de la barra lateral */
+  --rail:232px;     /* ancho del índice de la derecha */
+  --bar:56px;       /* alto de la cabecera */
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--paper);color:var(--ink);font-family:var(--f);
+  -webkit-font-smoothing:antialiased;font-size:15.5px;line-height:1.5}
+a{color:inherit;text-decoration:none}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+::selection{background:rgba(47,107,255,.16)}
+:focus-visible{outline:2px solid var(--blue);outline-offset:3px;border-radius:3px}
+
+/* ══════ cabecera ══════ */
+.hd{position:fixed;inset:0 0 auto 0;height:var(--bar);z-index:40;
+  background:rgba(255,255,255,.88);backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--linea);
+  display:flex;align-items:center;gap:18px;padding:0 20px}
+.marca{display:inline-flex;align-items:center;gap:10px;flex:0 0 auto}
+.marca svg{width:22px;height:22px}
+.marca b{font-weight:500;font-size:15px;letter-spacing:.16em;text-transform:uppercase;
+  /* el nombre acompaña al logotipo: gris de tinta, no negro puro */
+  color:#404857}
+.tag{font-family:var(--m);font-size:10px;letter-spacing:.16em;text-transform:uppercase;
+  background:var(--ink);color:#fff;padding:3px 7px;border-radius:3px}
+.hd-sp{flex:1}
+.buscar{display:flex;align-items:center;gap:9px;height:34px;padding:0 10px 0 12px;
+  border:1px solid var(--linea);border-radius:6px;color:var(--ink-3);
+  font-size:13.5px;min-width:200px;transition:border-color var(--t1) var(--ease)}
+.buscar:hover{border-color:#CDD3DE}
+.buscar svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:1.8}
+.buscar kbd{font-family:var(--m);font-size:10.5px;border:1px solid var(--linea);
+  border-radius:4px;padding:2px 5px;color:var(--ink-3);margin-left:auto}
+.menu-b{display:none;width:34px;height:34px;border:1px solid var(--linea);border-radius:6px;
+  align-items:center;justify-content:center}
+.menu-b svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:1.7}
+
+/* ══════ pestañas ══════ */
+.tabs{position:fixed;top:var(--bar);left:0;right:0;z-index:38;height:44px;
+  background:var(--paper);border-bottom:1px solid var(--linea);
+  display:flex;align-items:stretch;gap:4px;padding:0 20px;overflow-x:auto;
+  scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tabs a{display:inline-flex;align-items:center;gap:7px;padding:0 12px;font-size:14px;
+  color:var(--ink-2);position:relative;white-space:nowrap}
+.tabs a.on{color:var(--blue)}
+.tabs a.on::after{content:"";position:absolute;left:12px;right:12px;bottom:-1px;height:2px;
+  background:var(--blue)}
+.tabs svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:1.6}
+
+/* ══════ el armazón ══════ */
+.piso{display:grid;grid-template-columns:var(--lat) minmax(0,1fr) var(--rail);
+  max-width:1560px;margin:0 auto;padding-top:calc(var(--bar) + 44px)}
+
+/* ── barra lateral ── */
+.lat{position:sticky;top:calc(var(--bar) + 44px);align-self:start;
+  height:calc(100vh - var(--bar) - 44px);overflow-y:auto;
+  border-right:1px solid var(--linea);
+  /* sin relleno inferior grande: el pie ya ocupa su sitio al final */
+  padding:24px 14px 0 20px;
+  display:flex;flex-direction:column}
+.lat::-webkit-scrollbar{width:8px}
+.lat::-webkit-scrollbar-thumb{background:#E3E7EE;border-radius:8px}
+.gr{margin-bottom:22px;flex:0 0 auto}
+.gr h5{font-family:var(--m);font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--ink-3);padding:0 10px 8px}
+.gr a{display:block;padding:6px 10px;border-radius:5px;font-size:14px;color:var(--ink-2);
+  border-left:2px solid transparent;margin-left:-2px;
+  transition:color var(--t1) var(--ease),background var(--t1) var(--ease)}
+.gr a:hover{color:var(--ink);background:var(--paper-2)}
+.gr a.on{color:var(--blue);border-left-color:var(--blue);font-weight:500}
+/* El pie llevaba margen inferior negativo de 90px y se metía dentro del
+   relleno, tapando el último enlace de la lista —medido, 33px, el enlace
+   entero—. Ahora va empujado al final con margin-top:auto y ocupa su propio
+   espacio: sigue pegado abajo pero ya no pisa nada. */
+.pie-lat{position:sticky;bottom:0;margin:18px -14px 0 -20px;padding:14px 20px 18px;
+  background:linear-gradient(180deg,rgba(255,255,255,0),var(--paper) 34%);
+  margin-top:auto}
+.pie-lat div{display:flex;align-items:center;gap:9px;border:1px solid var(--linea);
+  border-radius:8px;padding:11px 13px;font-size:13px;color:var(--ink-3);background:var(--paper)}
+.pie-lat svg{width:16px;height:16px}
+
+/* ── contenido ── */
+.doc{padding:30px clamp(20px,3.4vw,54px) 120px;min-width:0}
+.miga{display:flex;align-items:center;gap:7px;font-size:13px;color:var(--ink-3);margin-bottom:20px}
+.miga a{color:var(--blue)}
+.miga svg{width:12px;height:12px;fill:none;stroke:currentColor;stroke-width:1.7;opacity:.5}
+.doc h1{font-weight:500;font-size:clamp(30px,3.4vw,40px);letter-spacing:-.032em;
+  line-height:1.12;margin-bottom:18px}
+.doc h2{font-weight:500;font-size:22px;letter-spacing:-.018em;margin:42px 0 14px;
+  scroll-margin-top:calc(var(--bar) + 60px)}
+.doc h3{font-weight:500;font-size:17px;margin:28px 0 10px}
+.doc p{color:var(--ink-2);margin-bottom:16px;max-width:74ch;text-wrap:pretty}
+.doc strong{color:var(--ink);font-weight:600}
+.doc ul,.doc ol{color:var(--ink-2);margin:0 0 16px 20px;max-width:74ch}
+.doc li{margin-bottom:7px}
+.doc a.enl{color:var(--blue);border-bottom:1px solid rgba(47,107,255,.28)}
+.doc a.enl:hover{border-bottom-color:var(--blue)}
+hr{border:0;border-top:1px solid var(--linea);margin:40px 0}
+
+/* fichas y tablas */
+.nota{border:1px solid var(--linea);border-left:3px solid var(--blue);border-radius:6px;
+  padding:14px 16px;margin:22px 0;background:var(--paper-2);max-width:74ch}
+.nota p:last-child{margin-bottom:0}
+.nota b{font-family:var(--m);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--blue);display:block;margin-bottom:6px}
+.aviso{border-left-color:#E0A32E}
+.aviso b{color:#B57C12}
+.pend{display:inline-flex;align-items:center;gap:6px;font-family:var(--m);font-size:11px;
+  letter-spacing:.08em;background:#FFF6E5;color:#8A6412;border:1px solid #F0DFBB;
+  border-radius:4px;padding:2px 7px;white-space:nowrap}
+table{border-collapse:collapse;width:100%;max-width:74ch;margin:20px 0;font-size:14.5px}
+th,td{text-align:left;padding:10px 14px;border-bottom:1px solid var(--linea)}
+th{font-family:var(--m);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--ink-3);font-weight:400}
+td{color:var(--ink-2)}
+td b{color:var(--ink)}
+.num{font-variant-numeric:tabular-nums}
+
+/* la pila de capas, dibujada con CSS */
+.pila{margin:30px 0;max-width:560px}
+.capa{position:relative;border:1px solid var(--linea);border-radius:6px;
+  padding:14px 16px;margin-bottom:10px;background:var(--paper);
+  display:flex;align-items:center;gap:14px;
+  transition:border-color var(--t2) var(--ease),transform var(--t2) var(--ease)}
+.capa:hover{border-color:var(--blue);transform:translateX(3px)}
+.capa i{font-style:normal;font-family:var(--m);font-size:11px;color:var(--blue);
+  min-width:26px}
+.capa b{font-weight:500;font-size:15px}
+.capa s{text-decoration:none;color:var(--ink-3);font-size:13.5px;margin-left:auto;
+  text-align:right}
+
+/* ── índice de la derecha ── */
+.rail{position:sticky;top:calc(var(--bar) + 44px);align-self:start;
+  height:calc(100vh - var(--bar) - 44px);overflow-y:auto;padding:30px 20px 60px 4px}
+.rail h5{display:flex;align-items:center;gap:8px;font-family:var(--m);font-size:10.5px;
+  letter-spacing:.16em;text-transform:uppercase;color:var(--ink-3);margin-bottom:12px}
+.rail h5 svg{width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:1.7}
+.rail a{display:block;padding:5px 0 5px 13px;font-size:13.5px;color:var(--ink-3);
+  border-left:2px solid var(--linea);transition:color var(--t1) var(--ease),
+  border-color var(--t1) var(--ease)}
+.rail a:hover{color:var(--ink-2)}
+.rail a.on{color:var(--blue);border-left-color:var(--blue)}
+
+/* ── pasar de página ── */
+.pasar{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:56px;max-width:74ch}
+.pasar a{border:1px solid var(--linea);border-radius:8px;padding:14px 16px;
+  transition:border-color var(--t1) var(--ease)}
+.pasar a:hover{border-color:var(--blue)}
+.pasar em{display:block;font-style:normal;font-family:var(--m);font-size:10.5px;
+  letter-spacing:.16em;text-transform:uppercase;color:var(--ink-3);margin-bottom:5px}
+.pasar b{font-weight:500;font-size:15px;color:var(--ink)}
+.pasar .der{text-align:right}
+
+/* ── buscador ── */
+.velo{position:fixed;inset:0;z-index:60;background:rgba(10,12,16,.36);
+  backdrop-filter:blur(3px);display:none;align-items:flex-start;justify-content:center;
+  padding:12vh 20px 20px}
+.velo.on{display:flex}
+.caja{width:min(560px,100%);background:var(--paper);border:1px solid var(--linea);
+  border-radius:10px;overflow:hidden;box-shadow:0 24px 70px -20px rgba(10,12,16,.28)}
+.caja input{width:100%;border:0;padding:16px 18px;font:inherit;font-size:16px;
+  border-bottom:1px solid var(--linea);outline:0}
+.res{max-height:52vh;overflow-y:auto;padding:8px}
+.res a{display:block;padding:10px 12px;border-radius:6px}
+.res a:hover,.res a.sel{background:var(--paper-2)}
+.res b{display:block;font-weight:500;font-size:14.5px}
+.res s{text-decoration:none;font-size:12.5px;color:var(--ink-3)}
+.res .vacio{padding:18px 12px;color:var(--ink-3);font-size:14px}
+
+@media(max-width:1180px){
+  .piso{grid-template-columns:var(--lat) minmax(0,1fr)}
+  .rail{display:none}
+}
+@media(max-width:900px){
+  :root{--lat:0px}
+  .piso{grid-template-columns:minmax(0,1fr)}
+  .menu-b{display:inline-flex}
+  .buscar{min-width:0}
+  .buscar span,.buscar kbd{display:none}
+  .buscar{width:34px;padding:0;justify-content:center}
+  .lat{position:fixed;top:calc(var(--bar) + 44px);left:0;bottom:0;width:min(300px,84vw);
+    background:var(--paper);z-index:39;transform:translateX(-102%);
+    transition:transform var(--t2) var(--ease);box-shadow:0 0 40px rgba(10,12,16,.10)}
+  .lat.abierta{transform:none}
+  .doc{padding:24px 20px 100px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto}}
+
+/* ══════ que nada empuje la página a lo ancho ══════
+   La etiqueta de pendiente llevaba nowrap, y al alargar los textos algunas
+   pasaron de setenta caracteres: no podían partirse y ensanchaban el documento
+   entero en móvil. Ahora parten, y las tablas anchas se desplazan solas en vez
+   de arrastrar la página. */
+.pend{white-space:normal;overflow-wrap:anywhere}
+.doc p,.doc li,.doc td,.doc th{overflow-wrap:anywhere}
+.doc table{display:block;overflow-x:auto;-webkit-overflow-scrolling:touch}
+@media(min-width:700px){ .doc table{display:table} }
+.doc code{overflow-wrap:anywhere}
+
+/* ══ el anillo del reparto, el mismo de la web ══ */
+.anillo{display:flex;align-items:center;gap:clamp(20px,4vw,52px);flex-wrap:wrap;
+  margin:26px 0;padding:clamp(18px,2.6vw,28px);
+  border:1px solid var(--linea);border-radius:10px;background:var(--paper-2)}
+.anillo svg{width:clamp(170px,22vw,214px);height:auto;flex:0 0 auto}
+.an-c{font-family:var(--f);font-size:30px;font-weight:500;fill:var(--ink);
+  letter-spacing:-.03em}
+.an-e{font-family:var(--m);font-size:8.5px;letter-spacing:.2em;fill:var(--ink-3)}
+.an-lista{list-style:none;margin:0;padding:0;flex:1 1 260px;min-width:230px}
+.an-lista li{display:flex;align-items:center;gap:10px;padding:7px 0;
+  border-bottom:1px solid var(--linea-2);font-size:14px;color:var(--ink-2)}
+.an-lista li:last-child{border-bottom:0}
+.an-lista i{width:9px;height:9px;border-radius:2px;flex:0 0 auto}
+.an-lista b{margin-left:auto;font-weight:500;color:var(--ink);
+  font-variant-numeric:tabular-nums}
+</style>
+</head>
+<body>
+
+<header class="hd">
+  <a class="marca" href="#/introduction">
+    <svg viewBox="0 0 672 672" aria-hidden="true">
+      <!-- plateado, no negro: sobre papel el blanco puro desaparece y el negro
+           pesa demasiado. Un degradado de metal se lee y no ensucia. -->
+      <defs><linearGradient id="plata" x1="0" y1="0" x2=".35" y2="1">
+        <stop offset="0" stop-color="#EDF0F5"/>
+        <stop offset=".42" stop-color="#C2C9D6"/>
+        <stop offset=".72" stop-color="#98A1B2"/>
+        <stop offset="1" stop-color="#79839A"/>
+      </linearGradient></defs>
+      <path fill="url(#plata)" d="M336 0 H464 V224 H672 V336 H560 V560 H464 V672 H336 A336 336 0 0 1 336 0 Z"/>
+      <rect fill="#2F6BFF" x="464" y="112" width="112" height="112"/>
+      <rect fill="#2F6BFF" x="560" y="336" width="112" height="112"/>
+    </svg>
+    <b>Nereum</b><span class="tag">Docs</span>
+  </a>
+  <span class="hd-sp"></span>
+  <button class="buscar" id="abrirBuscar" type="button">
+    <svg viewBox="0 0 20 20"><circle cx="9" cy="9" r="6"/><path d="M13.5 13.5 17 17"/></svg>
+    <span>Search…</span><kbd>Ctrl K</kbd>
+  </button>
+  <button class="menu-b" id="menuB" type="button" aria-label="Menu">
+    <svg viewBox="0 0 20 20"><path d="M3 6h14M3 10h14M3 14h14"/></svg>
+  </button>
+</header>
+
+<nav class="tabs">
+  <a href="#/introduction" class="on">Whitepaper</a>
+  <a href="#/architecture">
+    <svg viewBox="0 0 20 20"><path d="M10 2 18 6.5 10 11 2 6.5Z"/><path d="M2 13.5 10 18l8-4.5"/></svg>
+    Protocol
+  </a>
+</nav>
+
+<div class="piso">
+  <aside class="lat" id="lat">
+    <div class="gr">
+      <h5>Overview</h5>
+      <a href="#/introduction">Introduction</a>
+      <a href="#/vision">Vision</a>
+    </div>
+    <div class="gr">
+      <h5>The network</h5>
+      <a href="#/network">Nereum Network</a>
+      <a href="#/tokenization">Asset tokenization</a>
+    </div>
+    <div class="gr">
+      <h5>Trust</h5>
+      <a href="#/legal">Legal Document — Miami, FL</a>
+      <a href="#/audit">Audit</a>
+      <a href="#/kyc">Team KYC</a>
+      <a href="#/renounce">Contract — Owner renounced</a>
+      <a href="#/security">Security guarantees</a>
+    </div>
+    <div class="gr">
+      <h5>Token</h5>
+      <a href="#/whitelist">Whitelist</a>
+      <a href="#/dexscreener">DexScreener</a>
+    </div>
+    <div class="gr">
+      <h5>Company</h5>
+      <a href="#/team">Team</a>
+      <a href="#/press">News and mentions</a>
+      <a href="#/links">Official links</a>
+    </div>
+    <div class="pie-lat">
+      <div>
+        <svg viewBox="0 0 672 672" aria-hidden="true">
+          <defs><linearGradient id="plata2" x1="0" y1="0" x2=".35" y2="1">
+            <stop offset="0" stop-color="#EDF0F5"/>
+            <stop offset=".42" stop-color="#C2C9D6"/>
+            <stop offset=".72" stop-color="#98A1B2"/>
+            <stop offset="1" stop-color="#79839A"/>
+          </linearGradient></defs>
+          <path fill="url(#plata2)" d="M336 0 H464 V224 H672 V336 H560 V560 H464 V672 H336 A336 336 0 0 1 336 0 Z"/>
+          <rect fill="#2F6BFF" x="464" y="112" width="112" height="112"/>
+          <rect fill="#2F6BFF" x="560" y="336" width="112" height="112"/>
+        </svg>
+        nereum.xyz
+      </div>
+    </div>
+  </aside>
+
+  <main class="doc" id="doc"></main>
+
+  <aside class="rail">
+    <h5>
+      <svg viewBox="0 0 20 20"><path d="M4 5h12M4 10h12M4 15h8"/></svg>
+      On this page
+    </h5>
+    <div id="rail"></div>
+  </aside>
+</div>
+
+<div class="velo" id="velo">
+  <div class="caja">
+    <input id="q" type="text" placeholder="Search the whitepaper…" autocomplete="off">
+    <div class="res" id="res"></div>
+  </div>
+</div>
+
+<script>
+/* ══════════ el contenido ══════════
+   Lo que ya está publicado en la web va tal cual. Lo que todavía no existe
+   NO se inventa: lleva una marca visible de pendiente, para que se vea de un
+   vistazo qué falta antes de publicar esto. */
+const PEND = t => '<span class="pend">Pendiente · '+t+'</span>';
+
+const PAGS = {
+  introduction:{
+    grupo:'Overview', titulo:'Introduction',
+    html:`
+<p><strong>Nereum</strong> is a Layer 1 blockchain with its own validator set, its own
+consensus and its own token. It does everything a general-purpose chain does —
+accounts, transfers, smart contracts, fees — but it is built for one job in
+particular: <strong>putting real-world assets on-chain and keeping them
+governed</strong>.</p>
+
+<p>Nereum Labs LLC, registered in <strong>Miami, Florida</strong>, is the company behind
+it.</p>
+
+<div class="nota">
+  <b>The bet in one sentence</b>
+  <p>On a general-purpose chain, an asset is a token and the rules live somewhere
+  else. On Nereum the rules are part of the asset, enforced by the protocol on
+  every transfer — not by an agreement about the protocol.</p>
+</div>
+
+<h2 id="porque">Why a dedicated chain</h2>
+<p>Real-world assets can be tokenized on Ethereum, BNB Chain or Solana today, and
+most are. What those chains do not do is carry the conditions attached to the
+asset: which jurisdictions accept it, which holders qualify, what must be
+reported and when.</p>
+<p>So the conditions get enforced off-chain, and every transfer waits for a human
+or a service to confirm that a rule still holds. That wait is the cost, and it is
+what a purpose-built chain removes.</p>
+<p>Nereum is not the only network making this bet — <strong>Plume, Polymesh,
+Provenance and MANTRA</strong> are building in the same direction. ${PEND('what makes Nereum different from them')}</p>
+
+<h2 id="capas">One chain, four layers</h2>
+<p>An asset issued on Nereum passes through all four, every time it moves.</p>
+<div class="pila">
+  <div class="capa"><i>01</i><b>Issuance</b><s>What exists, and under whose authority</s></div>
+  <div class="capa"><i>02</i><b>Policy</b><s>The conditions that travel with it</s></div>
+  <div class="capa"><i>03</i><b>Access</b><s>Who may hold and move it</s></div>
+  <div class="capa"><i>04</i><b>Liquidity</b><s>Where it can be exchanged</s></div>
+</div>
+
+<h2 id="tecnica">How tokenization works here</h2>
+
+<h3>Compliance at transfer level</h3>
+<p>Every transfer is checked against the asset\u2019s policy set before it settles. A
+transfer that would put the asset in a wallet that does not qualify does not
+half-settle and get reversed — <strong>it never settles at all</strong>.</p>
+
+<h3>Identity without exposure</h3>
+<p>Holders prove they qualify through verifiable credentials issued by an approved
+party. The chain checks the credential, not the identity behind it: a
+counterparty learns that a holder is eligible without learning who they are.</p>
+
+<h3>Atomic delivery versus payment</h3>
+<p>Asset and payment change hands in the same transaction. Either both legs settle
+or neither does. This is what removes settlement risk, and it is the single
+biggest operational reason institutions look at this technology at all.</p>
+
+<h3>Attested off-chain state</h3>
+<p>A tokenized building is only as good as the link to the deed. Nereum records
+the reference to the underlying document and the attestation that binds them, so
+the on-chain record can always be traced to something enforceable off-chain.</p>
+
+<h3>Deterministic finality</h3>
+<p>Once a block is final it does not reorganise. For a payment that matters less;
+for a registry of ownership it is the whole point. ${PEND('consensus, block time and finality guarantee')}</p>
+
+<h3>Interoperability</h3>
+<p>An asset that can only live on one chain is not much use. Policy has to travel
+with it when it moves. ${PEND('bridge and cross-chain model')}</p>
+
+<h2 id="garantias">What backs this</h2>
+<table>
+  <tr><th>Item</th><th>Status</th></tr>
+  <tr><td><b>Registered company</b><br><span style="color:var(--ink-3)">Nereum Labs LLC · Miami, Florida</span></td>
+      <td>See <a class="enl" href="#/legal">Legal Document — Miami, FL</a></td></tr>
+  <tr><td><b>Team KYC</b><br><span style="color:var(--ink-3)">Founders verified by a third party</span></td>
+      <td>${PEND('issuer and reference')}</td></tr>
+  <tr><td><b>Contract audit</b><br><span style="color:var(--ink-3)">Independent security review</span></td>
+      <td>See <a class="enl" href="#/audit">Audit</a></td></tr>
+  <tr><td><b>Ownership renounced</b><br><span style="color:var(--ink-3)">No key can mint, pause or alter the contract</span></td>
+      <td>See <a class="enl" href="#/renounce">Contract — Owner renounced</a></td></tr>
+</table>
+
+<div class="nota">
+  <b>How to read this document</b>
+  <p>Where a figure has been published and can be checked, it is stated. Where it
+  has not been verified yet, it is marked as pending rather than presented as
+  fact. Nothing here is filled in to look complete.</p>
+</div>
+
+<h2 id="ruta">Where to start</h2>
+<p>If you read three pages, read <a class="enl" href="#/vision">the vision</a>,
+<a class="enl" href="#/security">the security guarantees</a> and
+<a class="enl" href="#/legal">the legal document</a>. The last two are the ones a
+sceptical reader checks first.</p>
+`},
+
+  vision:{
+    grupo:'Overview', titulo:'Vision',
+    html:`
+<p>Most of the world\u2019s value does not move. It sits in buildings, in private
+credit, in invoices and in funds — assets that are real, productive and almost
+impossible to sell on a Tuesday afternoon.</p>
+
+<p>Not because there are no buyers. Because <strong>proving who owns what, and who
+is allowed to buy it, still takes weeks and a chain of people who each get paid
+to be sure</strong>.</p>
+
+<p>Nereum exists to make that proof instant, permanent and machine-readable.</p>
+
+<div class="nota">
+  <b>The vision in one sentence</b>
+  <p>A world where owning a real asset on-chain is not a wrapper around
+  paperwork — it <em>is</em> the record, and the rules that govern it move with
+  it wherever it goes.</p>
+</div>
+
+<h2 id="apuesta">The architectural bet</h2>
+<p>Every tokenization project makes a choice: put the asset on a general-purpose
+chain and enforce the rules around it, or build a chain where the rules are part
+of the protocol.</p>
+<p>We took the second path, and it is a harder one. It means building consensus,
+validators and tooling from scratch instead of deploying a contract on an
+existing network. <strong>The reason is that the first path has been tried for
+years and always ends in the same place</strong>: the token moves at internet
+speed and the compliance behind it moves at fax speed.</p>
+
+<h2 id="horizontes">Three horizons</h2>
+<table>
+  <tr><th>Horizon</th><th>What it means</th></tr>
+  <tr><td><b>Near</b><br><span style="color:var(--ink-3)">Prove it works</span></td>
+      <td>A single asset class, issued end to end on Nereum, moving between qualified holders without a human in the settlement path.</td></tr>
+  <tr><td><b>Mid</b><br><span style="color:var(--ink-3)">Make it useful</span></td>
+      <td>Tokenized assets accepted as collateral. An asset is only liquid when someone will lend against it.</td></tr>
+  <tr><td><b>Long</b><br><span style="color:var(--ink-3)">Make it invisible</span></td>
+      <td>Issuers stop thinking about the chain, the same way a company today does not think about the payment rails behind a wire.</td></tr>
+</table>
+
+<h2 id="cambia">What changes, and for whom</h2>
+
+<h3>For issuers</h3>
+<p>An asset is issued once with its rules attached, and those rules keep applying
+without anyone re-checking them. Distribution stops being a legal project and
+becomes a technical one.</p>
+
+<h3>For holders</h3>
+<p>Ownership that can be verified without asking anyone, and sold without waiting
+for a settlement window. A share of a building becomes as transferable as a
+share of a company — and as auditable.</p>
+
+<h3>For markets</h3>
+<p>Assets that today trade once a decade become continuously priced. That is the
+part that compounds: <strong>liquidity does not just make an asset easier to
+sell, it changes what it is worth</strong>.</p>
+
+<h2 id="honesto">What we are not claiming</h2>
+<p>Tokenization does not make an illiquid asset liquid by itself. A token is only
+as good as the legal claim behind it and the market willing to buy it. Nereum
+removes the technical and compliance friction; <strong>it does not remove
+market risk, and no chain can</strong>.</p>
+<p>Anyone promising otherwise is selling something else.</p>
+
+<h2 id="medida">How we will know it worked</h2>
+<p>${PEND('measurable goal and date')} — the number that decides whether this
+worked: assets under tokenization, issuers live on mainnet, or settlement time
+against the traditional benchmark. A vision without a measurable outcome is a
+slogan.</p>
+`},
+
+  network:{
+    grupo:'The network', titulo:'Nereum Network',
+    html:`
+<p>Nereum Network is a <strong>Layer 1 blockchain</strong>: its own validator set,
+its own consensus, its own token and its own state. Nothing about it depends on
+another chain being available.</p>
+
+<p>It does everything you expect a blockchain to do — accounts, balances,
+transfers, smart contracts, fees, an explorer. Anything you can build on a
+general-purpose chain, you can build here.</p>
+
+<p>The difference is what it does <em>natively</em>. On other networks, real-world
+asset tokenization is an application: a contract someone deploys on top, with the
+compliance living outside it. <strong>On Nereum it is part of the protocol</strong>
+— the same layer that validates a transfer also validates whether that transfer
+is allowed to happen.</p>
+
+<div class="nota">
+  <b>Native means enforced, not offered</b>
+  <p>A contract on another chain can refuse a transfer. A protocol can make the
+  transfer impossible. That is the whole distinction, and it is why this is a
+  chain and not a contract.</p>
+</div>
+
+<h2 id="capas">One chain, four layers</h2>
+<p>Every asset issued on Nereum passes through all four, every time it moves.</p>
+<div class="pila">
+  <div class="capa"><i>01</i><b>Issuance</b><s>What exists, and under whose authority</s></div>
+  <div class="capa"><i>02</i><b>Policy</b><s>The conditions that travel with it</s></div>
+  <div class="capa"><i>03</i><b>Access</b><s>Who may hold and move it</s></div>
+  <div class="capa"><i>04</i><b>Liquidity</b><s>Where it can be exchanged</s></div>
+</div>
+
+<h3>01 · Issuance</h3>
+<p>Creates the on-chain record and binds it to what exists off-chain — a deed, a
+note, an invoice. It records the issuer, the authority under which they issue, a
+reference to the underlying document, and the policy set that will travel with
+the asset from that moment on.</p>
+
+<h3>02 · Policy</h3>
+<p>The conditions that must hold for a transfer to settle: jurisdiction, holder
+class, lock-up, reporting. Attached to the <strong>asset</strong>, not to the
+wallet holding it — which is why they survive every transfer, every venue and
+every change of owner.</p>
+<p>${PEND('who may amend a policy after issuance, under what process')}</p>
+
+<h3>03 · Access</h3>
+<p>Who may hold and move an asset, checked on <strong>every</strong> transfer
+rather than once at onboarding. Holders prove eligibility with verifiable
+credentials from an approved issuer: the chain checks the credential, not the
+person behind it.</p>
+<p>Controlled visibility works the same way — a counterparty sees what the policy
+allows and no more.</p>
+<p>${PEND('credential model: who issues, how revocation works')}</p>
+
+<h3>04 · Liquidity</h3>
+<p>Where the asset can be exchanged, and under what constraints. Covered below.</p>
+
+<h2 id="dex">The native exchange</h2>
+<p>A tokenized asset that cannot be traded is a certificate with extra steps. So
+Nereum ships with its <strong>own decentralised exchange, built into the
+network</strong> rather than deployed on top of it.</p>
+
+<h3>Why it has to be native</h3>
+<p>On a general-purpose chain, an asset with transfer restrictions and an
+automated market maker are in tension: the pool has to hold the asset, and the
+pool is not a qualified holder. Projects solve this with wrappers, allow-lists
+and workarounds — and every workaround is a place where the rule can be lost.</p>
+<p>When the exchange understands policy natively, <strong>the pool is a
+participant like any other and the rules simply apply to it</strong>.</p>
+
+<h3>What it does</h3>
+<ul>
+  <li><strong>Pair quotation.</strong> Any listed asset against NRM, stablecoins
+      or another asset, with continuous on-chain pricing.</li>
+  <li><strong>Atomic settlement.</strong> Asset and payment change hands in the
+      same transaction — both legs or neither.</li>
+  <li><strong>Policy-aware routing.</strong> An order that would end with the
+      asset in an ineligible wallet is never matched, not reversed afterwards.</li>
+  <li><strong>Transparent price history.</strong> Every trade is on-chain, so an
+      asset that used to be marked once a year becomes continuously priced.</li>
+</ul>
+<p>${PEND('market model: order book, AMM or hybrid, and fee structure')}</p>
+
+<h2 id="tecnico">Under the hood</h2>
+<table>
+  <tr><th>Item</th><th>Value</th></tr>
+  <tr><td>Consensus</td><td>${PEND('mechanism')}</td></tr>
+  <tr><td>Block time</td><td>${PEND('seconds')}</td></tr>
+  <tr><td>Finality</td><td>${PEND('deterministic, in N blocks')}</td></tr>
+  <tr><td>Throughput</td><td>${PEND('measured, not theoretical')}</td></tr>
+  <tr><td>Virtual machine</td><td>${PEND('EVM-compatible or custom')}</td></tr>
+  <tr><td>Validators at launch</td><td>${PEND('number and who runs them')}</td></tr>
+  <tr><td>Fees</td><td>${PEND('paid in NRM, typical cost per transfer')}</td></tr>
+</table>
+
+<div class="nota aviso">
+  <b>The table above is the one engineers read first</b>
+  <p>Everything else on this page describes intent. These seven rows describe
+  what the network actually is, and a reader who builds on chains will scroll
+  straight to them.</p>
+</div>
+
+<h2 id="interop">Beyond Nereum</h2>
+<p>An asset that can only live on one chain is not much use. Policy has to travel
+with it when it leaves — otherwise the guarantee ends at the bridge.</p>
+<p>${PEND('bridge and cross-chain model')}</p>
+`},
+
+  tokenization:{
+    grupo:'The network', titulo:'Asset tokenization',
+    html:`
+<p>Tokenizing an asset is not hard. Making it <strong>move</strong>, and keeping it
+enforceable while it moves, is the whole problem.</p>
+
+<p>This page is how an asset gets onto Nereum, what the chain records about it,
+and what happens when the on-chain record and the off-chain world disagree.</p>
+
+<h2 id="camino">From asset to token</h2>
+<table>
+  <tr><th>Step</th><th>What happens</th></tr>
+  <tr><td><b>01 · Origination</b></td>
+      <td>The asset and its documentation are established off-chain: title, valuation, the legal vehicle that holds it.</td></tr>
+  <tr><td><b>02 · Verification</b></td>
+      <td>An approved party attests that the documentation is what it claims to be. ${PEND('who verifies, and against what standard')}</td></tr>
+  <tr><td><b>03 · Issuance</b></td>
+      <td>The on-chain record is created and bound to the document by reference and hash.</td></tr>
+  <tr><td><b>04 · Policy binding</b></td>
+      <td>The conditions are attached to the asset itself, not to the first wallet that holds it.</td></tr>
+  <tr><td><b>05 · Distribution</b></td>
+      <td>It reaches qualified holders, each checked at transfer time rather than once at onboarding.</td></tr>
+</table>
+
+<h2 id="vinculo">The link to the real thing</h2>
+<p>A token representing a building is worth exactly as much as its link to the
+deed. Break that link and you have a number in a database.</p>
+<p>Nereum records three things that keep it intact:</p>
+<ul>
+  <li><strong>The reference.</strong> Which document, held where, under which registry entry.</li>
+  <li><strong>The hash.</strong> A fingerprint of that document, so any later alteration is detectable.</li>
+  <li><strong>The attestation.</strong> Who vouched for the binding, when, and under what authority.</li>
+</ul>
+<p>All three are on-chain. None of them requires trusting us: they are checkable
+by anyone with the document in hand.</p>
+
+<h2 id="clases">What can be tokenized</h2>
+<p>${PEND('asset classes supported at launch')} — real estate, private credit,
+invoices, funds. Listing classes that are not supported yet is the fastest way to
+lose a professional reader, so this list stays empty until each one is live.</p>
+
+<h2 id="custodia">Custody of the underlying</h2>
+<p>Nereum records the claim; it does not hold the asset. Something in the physical
+world still has to.</p>
+<p>${PEND('who holds the underlying, under what arrangement, and what happens if that custodian fails')}</p>
+
+<h2 id="ciclo">Life after issuance</h2>
+<p>Most tokenization projects describe issuance and stop. An asset lives for years
+after that, and the events that follow are where the design is really tested.</p>
+
+<h3>Income and distributions</h3>
+<p>Rent, coupons, repayments. Paid on-chain, proportionally, without a register
+being reconciled first.</p>
+<p>${PEND('distribution mechanism')}</p>
+
+<h3>Corporate actions</h3>
+<p>Revaluation, splits, changes to the terms. The record has to accept them
+without breaking the history that came before.</p>
+<p>${PEND('how amendments are recorded and who may make them')}</p>
+
+<h3>Redemption</h3>
+<p>The asset is sold, matured or repaid, and the token has to be retired against
+it. ${PEND('redemption and burn process')}</p>
+
+<h2 id="conflicto">When the record and reality disagree</h2>
+<div class="nota aviso">
+  <b>The question every serious reader asks</b>
+  <p>A tokenized building burns down. A borrower defaults. A court orders a
+  transfer the policy would refuse. What happens?</p>
+</div>
+<p>Every tokenization project is judged on this, and most whitepapers avoid it.
+The honest answer has three parts: what the protocol does automatically, what
+requires the issuer to act, and <strong>what a court can compel regardless of
+what the chain says</strong>.</p>
+<p>${PEND('the answer, written plainly')}</p>
+
+<h2 id="limites">What tokenization does not do</h2>
+<ul>
+  <li>It does not make an illiquid asset liquid. It removes friction; it does not create buyers.</li>
+  <li>It does not replace the legal claim. The token points at it.</li>
+  <li>It does not remove counterparty risk from the custodian or the issuer.</li>
+  <li>It does not make a bad asset good. A tokenized bad loan is a bad loan that settles faster.</li>
+</ul>
+`},
+
+  legal:{
+    grupo:'Trust', titulo:'Legal Document — Miami, FL',
+    html:`
+<p>A blockchain project asks strangers to send money to an address. The least it
+owes them in return is <strong>a legal person with a name, an address and a
+public filing</strong> — one that anyone can look up without permission, without
+an account, and without taking our word for anything.</p>
+
+<p>Nereum is operated by <strong>Nereum Labs LLC</strong>, a limited liability
+company registered in <strong>Miami, Florida, United States</strong>.</p>
+
+<p>That means there is a named entity, subject to a jurisdiction with functioning
+courts, that can be contacted, held to its public statements and sued if it
+breaks them. It is not a guarantee of anything. It is the floor below which a
+serious project should not operate.</p>
+
+<h2 id="ficha">The filing</h2>
+<table>
+  <tr><th>Item</th><th>Value</th></tr>
+  <tr><td>Legal name</td><td><b>Nereum Labs LLC</b></td></tr>
+  <tr><td>Entity type</td><td>Limited Liability Company</td></tr>
+  <tr><td>Jurisdiction</td><td>Miami, Florida, United States</td></tr>
+  <tr><td><b>Document number</b></td><td>${PEND('company number')}</td></tr>
+  <tr><td><b>Verification link</b></td><td>${PEND('direct link to the state filing')}</td></tr>
+  <tr><td>Date filed</td><td>${PEND('date')}</td></tr>
+  <tr><td>Status</td><td>${PEND('active / inactive')}</td></tr>
+  <tr><td>Registered agent</td><td>${PEND('name and address')}</td></tr>
+  <tr><td>Principal address</td><td>${PEND('address on file')}</td></tr>
+</table>
+
+<div class="nota">
+  <b>The two rows that matter</b>
+  <p>The document number and the verification link are the only entries on this
+  page that turn a claim into a fact. Everything else is us describing
+  ourselves; those two let you check it in under a minute.</p>
+</div>
+
+<h2 id="comprobar">Verify it yourself, in four steps</h2>
+<p>Florida keeps a free public business registry. You do not need us for any of
+this, and we would rather you did it than believed us:</p>
+<ol>
+  <li>Open the <strong>Florida Division of Corporations</strong> search
+      (sunbiz.org), the state's official registry.</li>
+  <li>Search by the entity name, or paste the document number listed above.</li>
+  <li>Confirm four things match what is written here: the exact legal name, the
+      filing date, the current status and the registered agent.</li>
+  <li>Open the annual reports on the record. A company that files on time is a
+      company that is still being run by someone.</li>
+</ol>
+
+<div class="nota aviso">
+  <b>If anything does not match</b>
+  <p>A discrepancy between this page and the state record is more important than
+  everything else in this document put together. If you find one, treat it as
+  the answer to every other question here.</p>
+</div>
+
+<h2 id="alcance">What incorporation does and does not mean</h2>
+<p>Registering a company is a filing, not an endorsement. Being specific about
+this matters, because plenty of projects present a certificate as if it were a
+licence.</p>
+
+<h3>What it does mean</h3>
+<ul>
+  <li>There is a real legal person behind the project, not an anonymous wallet.</li>
+  <li>It is subject to United States jurisdiction and to Florida law.</li>
+  <li>It has a registered agent who can legally be served — a physical address
+      where documents must be accepted.</li>
+  <li>Its filings are public and its status can be checked at any time, by
+      anyone, including years from now.</li>
+</ul>
+
+<h3>What it does not mean</h3>
+<ul>
+  <li><strong>No regulator has reviewed, approved or licensed this project.</strong>
+      Incorporation and financial regulation are different things.</li>
+  <li>It is not a securities registration, a money transmitter licence or a
+      broker-dealer authorisation.</li>
+  <li>It does not make the token a regulated product, and it does not make any
+      claim in this document more true.</li>
+  <li>Forming an LLC in Florida costs very little and takes a day. It proves
+      identity and reachability, not substance.</li>
+</ul>
+<p>Anyone presenting a company registration as a regulatory seal of approval is
+misrepresenting it, and we are not going to do that here.</p>
+
+<h2 id="quien">Who stands behind the entity</h2>
+<p>A company is only as accountable as the people named on it. The founders are
+verified by a third party — see <a class="enl" href="#/team">Team</a> — so the
+entity is not a shell with nobody attached.</p>
+<p>Together the filing and the identity verification answer the two questions a
+careful reader actually has: <em>does this thing exist legally</em>, and
+<em>is there a person who can be found if it goes wrong</em>.</p>
+
+<h2 id="terminos">Terms and policies</h2>
+<ul>
+  <li>Terms of service — ${PEND('link')}</li>
+  <li>Privacy policy — ${PEND('link')}</li>
+  <li>Token purchase terms — ${PEND('link')}</li>
+  <li>Excluded jurisdictions — ${PEND('list')}</li>
+</ul>
+
+<h2 id="aviso">Legal notice</h2>
+<ul>
+  <li>This document is for information only. It is not an offer of securities,
+      not investment advice, and not a solicitation in any jurisdiction where
+      such an offer would be unlawful.</li>
+  <li>Nothing here is a promise of future value, listing, price or performance.</li>
+  <li>Forward-looking statements describe intentions, not commitments. Plans
+      change, and a roadmap is not a contract.</li>
+  <li>Participation may be restricted or prohibited depending on where you live.
+      Checking that is your responsibility, and making it possible is ours.</li>
+  <li>Digital assets carry a risk of total loss. See
+      <a class="enl" href="#/security">Security guarantees</a> for the full list.</li>
+</ul>
+
+<div class="nota">
+  <b>Why this page sits early in the document</b>
+  <p>A reader who has to hunt for the legal notice has already reached a
+  conclusion by the time they find it. Putting it near the front costs us
+  nothing if the project is what it says it is.</p>
+</div>
+`},
+
+
+  security:{
+    grupo:'Trust', titulo:'Security guarantees',
+    html:`
+<p>This page collects everything that protects the person putting money in. Not
+the marketing version — the mechanisms, what each one covers, and where each one
+stops.</p>
+
+<p>They fall into two groups: what the <strong>protocol</strong> guarantees about
+a transfer, and what the <strong>project</strong> has put in place around the
+token sale. Both matter, and they fail in different ways.</p>
+
+<h2 id="protocolo">What the protocol guarantees</h2>
+<table>
+  <tr><th>Guarantee</th><th>What it means in practice</th></tr>
+  <tr><td><b>All-or-nothing settlement</b></td>
+      <td>A transfer settles as one unit. There is no state where the asset moved and the payment did not, or where a compliance check passed halfway. Either the whole transaction is in the ledger or none of it is.</td></tr>
+  <tr><td><b>Controlled visibility</b></td>
+      <td>Who can see what is a property of the asset, not a side agreement. A counterparty sees what the policy permits and nothing beyond it.</td></tr>
+  <tr><td><b>Always-on security</b></td>
+      <td>Rules are checked on every transfer for the life of the asset, not once at issuance. A holder who stops qualifying stops being able to transfer.</td></tr>
+  <tr><td><b>Performance under load</b></td>
+      <td>${PEND('measured throughput and finality under stress, not theoretical maximums')}</td></tr>
+</table>
+
+<h2 id="inversor">The schemes that protect investors</h2>
+<p>Six mechanisms, each covering a different way a project can fail its buyers.
+Five are already verifiable; the ones that are not say so.</p>
+
+<table>
+  <tr><th>Scheme</th><th>What it prevents</th><th>Status</th></tr>
+  <tr><td><b>Ownership renounced</b></td>
+      <td>The team minting new supply, freezing transfers, blacklisting a wallet or changing the rules after you buy.</td>
+      <td><a class="enl" href="#/renounce">Verifiable on-chain</a></td></tr>
+  <tr><td><b>Fixed supply</b></td>
+      <td>Silent dilution. 600,000,000 NRM at genesis, with no mint function anyone can call.</td>
+      <td><a class="enl" href="#/renounce">Verifiable on-chain</a></td></tr>
+  <tr><td><b>Independent audit</b></td>
+      <td>Code that has never been reviewed by anyone outside the team.</td>
+      <td><a class="enl" href="#/audit">Audit</a></td></tr>
+  <tr><td><b>Registered company</b></td>
+      <td>An anonymous entity with no jurisdiction and nobody to hold responsible.</td>
+      <td><a class="enl" href="#/legal">Miami, FL filing</a></td></tr>
+  <tr><td><b>Team KYC</b></td>
+      <td>Founders disappearing with no identity on record anywhere.</td>
+      <td><a class="enl" href="#/kyc">Team KYC</a></td></tr>
+  <tr><td><b>Team lock and vesting</b></td>
+      <td>Insiders selling into the first buyers on day one.</td>
+      <td>${PEND('lock term and vesting schedule')}</td></tr>
+  <tr><td><b>Liquidity lock</b></td>
+      <td>The pool being withdrawn after listing, leaving holders unable to sell.</td>
+      <td>${PEND('lock provider, amount and expiry')}</td></tr>
+</table>
+
+<div class="nota">
+  <b>Why each one on its own is not enough</b>
+  <p>A company with no named people is a shell. Named people with no audit is
+  trust in strangers. An audit with admin keys still open leaves the back door
+  unlocked. Renounced ownership with a team that can dump on day one protects
+  the contract and not the buyer. <strong>The protection is the combination,
+  not any single line in the table.</strong></p>
+</div>
+
+<h2 id="alcance">Where each layer stops</h2>
+<p>Being precise here is the difference between a security page and a sales
+page.</p>
+
+<h3>The protocol</h3>
+<p>Enforces policy on transfers. It cannot know whether the underlying asset
+still exists, whether an issuer is honest, or whether a document was forged
+before it was hashed.</p>
+
+<h3>The audit</h3>
+<p>Tells you the code was reviewed by someone independent at a point in time. It
+does not certify the code is safe forever, and it says nothing about code
+deployed after the review.</p>
+
+<h3>Renounced ownership</h3>
+<p>Removes the team's power over the contract permanently. It also removes the
+ability to patch a bug — for anyone. That trade-off is deliberate and it is
+explained in full on <a class="enl" href="#/renounce">that page</a>.</p>
+
+<h3>The KYC</h3>
+<p>Means a third party verified the founders' identities. It raises the cost of
+disappearing. It does not guarantee competence or good faith.</p>
+
+<h3>The company</h3>
+<p>Means a legal person exists in a jurisdiction with courts. It is not a licence
+and no regulator has approved anything.</p>
+
+<h2 id="riesgos">Risks, written plainly</h2>
+<p>Every mechanism above reduces a specific risk. None of them removes these:</p>
+<ul>
+  <li><strong>Total loss.</strong> You can lose everything you put in. This is
+      the most likely bad outcome, not the most extreme one.</li>
+  <li><strong>Execution.</strong> The network described in this document is not
+      finished. Building a Layer 1 is hard, and most attempts do not reach the
+      scale they aim for.</li>
+  <li><strong>Regulation.</strong> Rules for tokenized real-world assets are
+      unsettled and differ by jurisdiction. A rule change can make part of this
+      design unworkable in a given market.</li>
+  <li><strong>Liquidity.</strong> There may be no buyer when you want to sell, at
+      any price.</li>
+  <li><strong>Smart contract.</strong> Audited code still fails. Audits reduce
+      risk; they do not remove it.</li>
+  <li><strong>Custody of the underlying.</strong> If whoever holds the real asset
+      fails, the token points at something that is no longer there.</li>
+  <li><strong>Concentration.</strong> ${PEND('largest holder share')}</li>
+</ul>
+
+<h2 id="comprobar">Check it yourself, in ten minutes</h2>
+<ol>
+  <li>Open the contract address on a public explorer and confirm the
+      <code>owner</code> field returns the zero address.</li>
+  <li>Confirm total supply is 600,000,000 and there is no mint function.</li>
+  <li>Open the audit report on the auditor's own domain and check the commit
+      hash matches the deployed code.</li>
+  <li>Search the company on the Florida state registry.</li>
+  <li>Open the KYC certificate and confirm the issuing firm.</li>
+</ol>
+<p>Five checks, none of which require anything from us. If any of them does not
+come back the way this page describes, that discrepancy matters more than
+everything else written here.</p>
+
+<div class="nota aviso">
+  <b>This list is not decoration</b>
+  <p>It is read by exactly the people you most want to convince, and hedged
+  language reads as evasion. If a risk here ever stops being true, it should be
+  removed with an explanation — not quietly deleted.</p>
+</div>
+`},
+
+
+  audit:{
+    grupo:'Trust', titulo:'Audit',
+    html:`
+<p>An audit is an independent review of the contracts by a firm with no stake in
+the outcome. It is the only part of a project's security that an outsider can
+evaluate directly — which is why it carries so much weight, and why an audit
+badge with nothing behind it is worse than no badge at all.</p>
+
+<p>This page holds the review, the deployed addresses, and the reason both
+matter: <strong>Nereum has no owner</strong>. Once the code is running, nobody —
+including us — can change it. That makes the audit the last line of defence
+rather than one of several.</p>
+
+<h2 id="informe">The review</h2>
+<table>
+  <tr><th>Item</th><th>Value</th></tr>
+  <tr><td>Firm</td><td>${PEND('name of the auditing firm')}</td></tr>
+  <tr><td><b>Full report</b></td><td>${PEND('public link to the report')}</td></tr>
+  <tr><td><b>Report on the auditor site</b></td><td>${PEND('link on the firm own domain')}</td></tr>
+  <tr><td>Scope</td><td>${PEND('which contracts were reviewed')}</td></tr>
+  <tr><td>Commit reviewed</td><td>${PEND('exact commit hash')}</td></tr>
+  <tr><td>Date</td><td>${PEND('date of the report')}</td></tr>
+  <tr><td>Findings</td><td>${PEND('critical / high / medium / low')}</td></tr>
+  <tr><td>Resolved</td><td>${PEND('how many, and which remain open')}</td></tr>
+  <tr><td>Re-audit after fixes</td><td>${PEND('yes or no, and link')}</td></tr>
+</table>
+
+<div class="nota">
+  <b>Two links, not one</b>
+  <p>The report should be reachable both here and on the auditor's own domain.
+  A PDF hosted only by the project is a PDF the project controls; the same
+  report on the firm's site is one it does not.</p>
+</div>
+
+<h2 id="descentralizado">Nobody owns this</h2>
+<p>Nereum is built to belong to the people who hold it — its community and its
+investors — not to the team that wrote it. That is a design decision with
+consequences, and every part of it is verifiable on-chain:</p>
+
+<table>
+  <tr><th>Property</th><th>What it means</th><th>Check</th></tr>
+  <tr><td><b>No owner</b></td>
+      <td>Contract ownership has been renounced. There is no admin key, and no address with privileged rights over the contract.</td>
+      <td>See <a class="enl" href="#/renounce">Contract — Owner renounced</a></td></tr>
+  <tr><td><b>Fixed supply</b></td>
+      <td>600,000,000 NRM at genesis. No mint function that anyone can call, ever.</td>
+      <td>${PEND('contract address')}</td></tr>
+  <tr><td><b>No pause</b></td>
+      <td>Transfers cannot be frozen. Not by us, not by anyone.</td>
+      <td>${PEND('contract address')}</td></tr>
+  <tr><td><b>No blacklist</b></td>
+      <td>No address can be blocked by decree.</td>
+      <td>${PEND('contract address')}</td></tr>
+  <tr><td><b>Validators</b></td>
+      <td>Who produces blocks, and how open participation is.</td>
+      <td>${PEND('validator set and how to join')}</td></tr>
+  <tr><td><b>Governance</b></td>
+      <td>How protocol decisions are made, and by whom.</td>
+      <td>${PEND('governance model')}</td></tr>
+</table>
+
+<div class="nota aviso">
+  <b>Say it precisely, or do not say it</b>
+  <p>"Decentralised" means different things at the contract layer and at the
+  network layer. The first four rows above are already true and provable today.
+  The last two — validators and governance — are what decide whether the claim
+  holds for the <em>network</em>, and until they are filled in, the honest
+  statement is that the <strong>token contract</strong> has no owner.</p>
+  <p>Readers who matter know this distinction. Making it ourselves is worth more
+  than a superlative they would check and disprove.</p>
+</div>
+
+<h2 id="contratos">Deployed contracts</h2>
+<p>Every deployed address on a public explorer, so the code that was audited and
+the code that is running can be compared line by line.</p>
+<table>
+  <tr><th>Item</th><th>Value</th></tr>
+  <tr><td>Token</td><td><b>NRM</b></td></tr>
+  <tr><td>Contract address</td><td>${PEND('address')}</td></tr>
+  <tr><td>Chain</td><td>${PEND('chain')}</td></tr>
+  <tr><td>Verified source</td><td>${PEND('link to verified code on the explorer')}</td></tr>
+  <tr><td>Sale contract</td><td>${PEND('address')}</td></tr>
+  <tr><td>Ownership</td><td><b>Renounced</b> — see <a class="enl" href="#/renounce">that page</a></td></tr>
+</table>
+
+<h2 id="leer">How to read an audit report</h2>
+<p>Most people look at the number of findings. That is the least useful part.
+Four things matter more:</p>
+<ol>
+  <li><strong>The commit hash.</strong> An audit reviews one specific version of
+      the code. If the deployed contract does not match the audited commit, the
+      report describes software that is not running. This is the single most
+      common way an audit badge misleads.</li>
+  <li><strong>The scope.</strong> Which contracts were in, and which were left
+      out. A review of the token says nothing about the sale contract.</li>
+  <li><strong>The open findings.</strong> Every report has some. What matters is
+      which were accepted as risk, and the reasoning given.</li>
+  <li><strong>The date.</strong> Code changes. An audit from before the last
+      deployment is history, not assurance.</li>
+</ol>
+
+<h2 id="porque">Why the audit matters more here</h2>
+<p>On a project where the team keeps admin keys, a bug can be patched. That is a
+safety net, and it is also a back door — the same key that fixes a bug can drain
+a treasury.</p>
+<p>We gave up that key. It means no insider can act against holders, and it also
+means <strong>a flaw found after deployment cannot be patched by anyone</strong>.
+The only remedy would be a migration, which requires the whole holder base to
+move.</p>
+<p>That trade-off is why the review has to be real, public and current — and why
+it sits next to <a class="enl" href="#/renounce">the renounce page</a> rather
+than in place of it.</p>
+
+<h2 id="limites">What an audit cannot tell you</h2>
+<ul>
+  <li>Whether the economics of the project make sense.</li>
+  <li>Whether the team will do what they said with the funds raised.</li>
+  <li>Whether a bug exists that the reviewers did not find. Usually one does.</li>
+  <li>Whether the contract deployed afterwards matches the one reviewed — that
+      is what the commit hash is for.</li>
+  <li>Anything at all about the network's validators or governance.</li>
+</ul>
+
+<div class="nota aviso">
+  <b>Before this page goes live</b>
+  <p>Four things make an audit worth something: the firm, the commit hash, the
+  findings and a link that opens. Without all four it is a logo, and the readers
+  you most want to convince know the difference.</p>
+</div>
+`},
+
+
+  kyc:{
+    grupo:'Trust', titulo:'Team KYC',
+    html:`
+<p>The founders of Nereum have completed <strong>third-party identity
+verification</strong>. An independent firm has seen government identification for
+the people running this project and holds it on file.</p>
+
+<p>It is not a badge we bought to decorate a page. It is a name and a face on
+record with someone who is not us, and who can be compelled to produce them.</p>
+
+<h2 id="ficha">The verification</h2>
+<table>
+  <tr><th>Item</th><th>Value</th></tr>
+  <tr><td>Verified by</td><td>${PEND('name of the verification firm')}</td></tr>
+  <tr><td><b>Verification link</b></td><td>${PEND('public certificate or profile link')}</td></tr>
+  <tr><td><b>Certificate ID</b></td><td>${PEND('reference number')}</td></tr>
+  <tr><td>Date</td><td>${PEND('date of verification')}</td></tr>
+  <tr><td>Scope</td><td>${PEND('which founders were verified')}</td></tr>
+  <tr><td>On-chain certificate</td><td>${PEND('token or NFT reference, if issued')}</td></tr>
+</table>
+
+<div class="nota">
+  <b>The link is the whole point</b>
+  <p>A KYC claim without a certificate anyone can open is exactly as strong as
+  no claim at all. The verification link and the certificate ID are what turn
+  this page from a statement into something checkable.</p>
+</div>
+
+<h2 id="importa">Why this matters in a funding round</h2>
+<p>Most projects raising money at this stage are run by people you cannot name.
+That is normal in crypto and it is not automatically bad — plenty of serious
+software has shipped anonymously.</p>
+<p>But it changes what happens when something goes wrong. <strong>An anonymous
+team that disappears leaves nobody to pursue.</strong> There is no jurisdiction,
+no subpoena, no case. The money is simply gone, and the only recourse is a
+thread on social media.</p>
+<p>Verified founders change that arithmetic. It does not stop anyone from
+behaving badly, but it removes the cheapest exit — and everyone involved knows
+it before a single dollar is raised.</p>
+
+<h2 id="combinacion">What makes this uncommon</h2>
+<p>Team KYC on its own is not rare. Plenty of presales advertise a verification
+badge, and there are several firms that issue them.</p>
+<p>What is less common is the <strong>full set</strong> — and each part covers a
+gap the others leave open:</p>
+<table>
+  <tr><th>Proof</th><th>What it answers</th></tr>
+  <tr><td><b>Registered company</b></td>
+      <td>Does a legal entity exist, in a jurisdiction with courts?
+      <a class="enl" href="#/legal">Legal Document — Miami, FL</a></td></tr>
+  <tr><td><b>Team KYC</b></td>
+      <td>Is there a real, identified person behind that entity?</td></tr>
+  <tr><td><b>Contract audit</b></td>
+      <td>Has the code been reviewed by someone independent?
+      <a class="enl" href="#/audit">Audit</a></td></tr>
+  <tr><td><b>Owner renounced</b></td>
+      <td>Can the team act against holders after launch?
+      <a class="enl" href="#/renounce">Contract — Owner renounced</a></td></tr>
+</table>
+<p>A company without named people is a shell. Named people without an audit is
+trust in strangers. An audit without renounced ownership leaves the back door
+open. <strong>The four together are what accountability actually looks like</strong>,
+and each one is verifiable without asking us for anything.</p>
+
+<h2 id="privacidad">What is verified, and what stays private</h2>
+<p>Verification does not mean the founders' documents are published. The firm
+holds the identification; the public sees a certificate confirming it was
+checked.</p>
+<ul>
+  <li><strong>The firm sees</strong> government identification, and typically
+      runs a liveness check and sanctions screening.</li>
+  <li><strong>The public sees</strong> that verification was completed, by whom,
+      and when.</li>
+  <li><strong>Authorities can see</strong> the underlying identity, if legally
+      compelled through the firm.</li>
+</ul>
+<p>That balance is the point: accountability without publishing a passport on
+the internet.</p>
+
+<h2 id="limites">What KYC does not prove</h2>
+<ul>
+  <li>It does not vouch for competence. Verified people ship bad projects too.</li>
+  <li>It is not a background check unless the issuing firm says it is.</li>
+  <li>It does not guarantee good faith — it raises the cost of bad faith.</li>
+  <li>It says nothing about the code. That is what the
+      <a class="enl" href="#/audit">audit</a> is for.</li>
+</ul>
+
+<div class="nota aviso">
+  <b>Before this page goes live</b>
+  <p>Three fields decide whether this page is worth anything: the firm, the
+  certificate ID and a link that opens without an account. Until those are
+  filled in, this page is a promise about a promise.</p>
+</div>
+`},
+
+  renounce:{
+    grupo:'Trust', titulo:'Contract — Owner renounced',
+    html:`
+<p>Contract <b>NRM</b> — <strong>owner renounced</strong>. Ownership of the contract
+has been given up permanently, so no key held by anyone can mint new supply,
+pause transfers, blacklist an address or change the rules after deployment.</p>
+
+<p>This is the one guarantee in this section that anyone can verify on-chain in
+under a minute, without asking us for anything and without trusting a document we
+wrote about ourselves.</p>
+
+<h2 id="prueba">The contract</h2>
+<table>
+  <tr><th>Item</th><th>Value</th></tr>
+  <tr><td>Token</td><td><b>NRM</b></td></tr>
+  <tr><td>Network</td><td><b>Ethereum</b></td></tr>
+  <tr><td>Standard</td><td>ERC-20</td></tr>
+  <tr><td>Total supply</td><td class="num"><b>600,000,000</b> NRM — fixed at genesis</td></tr>
+  <tr><td>Buy / sell tax</td><td><b>0%</b> — no transfer fee written into the contract</td></tr>
+  <tr><td>Ownership</td><td><b>Renounced</b></td></tr>
+  <tr><td><b>Contract address</b></td><td>${PEND('address')}</td></tr>
+  <tr><td><b>Verify on Etherscan</b></td><td>${PEND('etherscan.io link to the contract')}</td></tr>
+  <tr><td><b>Renounce transaction</b></td><td>${PEND('etherscan.io link to the renounce tx')}</td></tr>
+  <tr><td>Verified source code</td><td>${PEND('link to the verified code tab')}</td></tr>
+  <tr><td>Date renounced</td><td>${PEND('date')}</td></tr>
+</table>
+
+<div class="nota">
+  <b>Zero tax is a contract property, not a policy</b>
+  <p>A 0% tax means there is no fee function in the code at all — not a fee set
+  to zero that someone could raise later. With ownership renounced, nobody could
+  raise it even if one existed.</p>
+</div>
+
+<h2 id="reparto">Supply distribution</h2>
+<p>The 600,000,000 NRM at genesis, and where each part goes. Same figures as the
+website.</p>
+
+<div class="anillo">
+  <svg viewBox="0 0 200 200" role="img" aria-label="Reparto del suministro">
+    <g transform="rotate(-90 100 100)" fill="none" stroke-width="26">
+      <circle cx="100" cy="100" r="74" stroke="#2A5BFF" stroke-dasharray="232.5 232.5" stroke-dashoffset="0"/>
+      <circle cx="100" cy="100" r="74" stroke="#2E86FF" stroke-dasharray="69.7 395.2" stroke-dashoffset="-232.5"/>
+      <circle cx="100" cy="100" r="74" stroke="#1B3FCC" stroke-dasharray="46.5 418.5" stroke-dashoffset="-302.2"/>
+      <circle cx="100" cy="100" r="74" stroke="#1A2436" stroke-dasharray="23.2 441.7" stroke-dashoffset="-348.7"/>
+      <circle cx="100" cy="100" r="74" stroke="#8A93A6" stroke-dasharray="23.2 441.7" stroke-dashoffset="-372.0"/>
+      <circle cx="100" cy="100" r="74" stroke="#BFC7D4" stroke-dasharray="23.2 441.7" stroke-dashoffset="-395.2"/>
+      <circle cx="100" cy="100" r="74" stroke="#A8CBFF" stroke-dasharray="23.2 441.7" stroke-dashoffset="-418.5"/>
+      <circle cx="100" cy="100" r="74" stroke="#7FC0FF" stroke-dasharray="23.2 441.7" stroke-dashoffset="-441.7"/>
+    </g>
+    <text x="100" y="95" text-anchor="middle" class="an-c">600M</text>
+    <text x="100" y="112" text-anchor="middle" class="an-e">NRM · FIXED</text>
+  </svg>
+  <ul class="an-lista">
+    <li><i style="background:#2A5BFF"></i>Private sale<b>50.0%</b></li>
+    <li><i style="background:#2E86FF"></i>CEX listing<b>15.0%</b></li>
+    <li><i style="background:#1B3FCC"></i>Marketing<b>10.0%</b></li>
+    <li><i style="background:#1A2436"></i>Reserve<b>5.0%</b></li>
+    <li><i style="background:#8A93A6"></i>Team · locked<b>5.0%</b></li>
+    <li><i style="background:#BFC7D4"></i>Advisors<b>5.0%</b></li>
+    <li><i style="background:#A8CBFF"></i>Development<b>5.0%</b></li>
+    <li><i style="background:#7FC0FF"></i>Airdrop<b>5.0%</b></li>
+  </ul>
+</div>
+<p>Vesting schedules for each allocation are on
+<a class="enl" href="#/whitelist">the whitelist page</a>. A distribution without
+them says almost nothing.</p>
+
+<h2 id="comprobar">How to check it yourself</h2>
+<ol>
+  <li>Open the contract on <strong>Etherscan</strong> using the link above.</li>
+  <li>Read the <code>owner</code> field. On a renounced contract it returns the
+      zero address — <code>0x0000…0000</code>.</li>
+  <li>Find the renounce transaction in the contract's history and confirm who
+      sent it, and when.</li>
+  <li>Check that no privileged function has been called since.</li>
+</ol>
+<p>The whole check takes about a minute and requires nothing from us.</p>
+
+<h2 id="quita">What renouncing removes</h2>
+<ul>
+  <li><strong>Minting.</strong> Supply is fixed at 600,000,000 NRM and cannot grow.</li>
+  <li><strong>Pausing.</strong> Nobody can freeze transfers, including us.</li>
+  <li><strong>Blacklisting.</strong> No address can be blocked by decree.</li>
+  <li><strong>Rule changes.</strong> Fees, limits and logic are what they are.</li>
+</ul>
+<p>These are the four powers most commonly abused in token projects, and giving
+them up is permanent. There is no undo.</p>
+
+<h2 id="alcance">What renouncing does not do</h2>
+<p>It does <strong>not</strong> fix a bug that is already in the code. Once
+ownership is gone, a flaw cannot be patched — by us or by anyone. If a
+vulnerability is found after renouncing, the only remedy is a migration, which
+needs the whole holder base to move.</p>
+<p>That is a real trade-off, not a technicality. Renouncing removes the risk of an
+insider acting against holders and increases the cost of an honest mistake. We
+think that is the right side to err on for a fixed-supply token, and you should
+know it was a choice.</p>
+<p>It is also why this page sits next to <a class="enl" href="#/audit">the
+audit</a> rather than in place of it. Renouncing is only responsible if the code
+was reviewed first.</p>
+
+<div class="nota aviso">
+  <b>Before this page goes live</b>
+  <p>A renounce claim without the transaction hash is worth nothing. The address
+  and the hash are the entire page; everything else is explanation.</p>
+</div>
+`},
+
+  whitelist:{
+    grupo:'Token', titulo:'Whitelist',
+    html:`
+<p>The whitelist is the pre-listing allocation: the window in which NRM is sold
+before it trades on the open market, at a fixed price set by the project.</p>
+
+<div class="nota">
+  <b>Where to join</b>
+  <p><a class="enl" href="https://nereum.xyz"><strong>nereum.xyz</strong></a> — the
+  only address where the whitelist is open. Everything else is on
+  <a class="enl" href="#/links">Official links</a>. If you were sent anywhere
+  else, it is not us.</p>
+</div>
+
+<h2 id="token">The token</h2>
+<table>
+  <tr><th>Item</th><th>Value</th></tr>
+  <tr><td>Symbol</td><td><b>NRM</b></td></tr>
+  <tr><td>Network</td><td><b>Ethereum</b> · ERC-20</td></tr>
+  <tr><td>Total supply</td><td class="num"><b>600,000,000</b> — fixed at genesis, cannot grow</td></tr>
+  <tr><td>Buy / sell tax</td><td><b>0%</b></td></tr>
+  <tr><td>Whitelist price</td><td class="num"><b>$0.10</b></td></tr>
+  <tr><td>Price at listing</td><td class="num"><b>$0.50</b> — Uniswap v3</td></tr>
+  <tr><td>Contract</td><td>Ownership renounced — see <a class="enl" href="#/renounce">that page</a></td></tr>
+</table>
+
+<h2 id="condiciones">Terms of the round</h2>
+<table>
+  <tr><th>Item</th><th>Value</th></tr>
+  <tr><td>Minimum</td><td class="num"><b>$1</b></td></tr>
+  <tr><td>Maximum per wallet</td><td class="num"><b>$10,000</b></td></tr>
+  <tr><td>Target</td><td class="num"><b>$6,000,000</b></td></tr>
+  <tr><td>Raised to date</td><td>${PEND('on-chain figure, linked to the address')}</td></tr>
+  <tr><td>Accepted payment</td><td>${PEND('which assets and chains')}</td></tr>
+  <tr><td>Token delivery</td><td>${PEND('immediate or at listing')}</td></tr>
+  <tr><td>Buyer vesting</td><td>${PEND('none, or the schedule')}</td></tr>
+  <tr><td>Round closes</td><td>${PEND('date or condition')}</td></tr>
+  <tr><td>Refunds</td><td>${PEND('policy, and under what conditions')}</td></tr>
+</table>
+
+<h2 id="caracteristicas">What this round gives you</h2>
+<table>
+  <tr><th>Feature</th><th>What it means for a buyer</th></tr>
+  <tr><td><b>Entry at $0.10</b></td>
+      <td>The lowest price the project will sell at. NRM opens at $0.50 on Uniswap v3, where the opening price is set by the pool's range.</td></tr>
+  <tr><td><b>$1 minimum</b></td>
+      <td>Deliberately low. A round that starts at four figures is a round designed to exclude most people.</td></tr>
+  <tr><td><b>$10,000 cap per wallet</b></td>
+      <td>Limits how much of the round one buyer can take, which keeps the holder base wider and the post-listing sell pressure less concentrated.</td></tr>
+  <tr><td><b>Fixed supply, 0% tax</b></td>
+      <td>What you buy cannot be diluted by new minting, and no fee is taken from your transfers.</td></tr>
+  <tr><td><b>Renounced contract</b></td>
+      <td>After you buy, nobody can pause transfers, blacklist your wallet or change the rules — including us.</td></tr>
+  <tr><td><b>Verifiable project</b></td>
+      <td>Registered company, team KYC and an independent audit, each with a link that opens. See <a class="enl" href="#/security">Security guarantees</a>.</td></tr>
+</table>
+
+<h2 id="reparto">Distribution of supply</h2>
+<table>
+  <tr><th>Allocation</th><th>Share</th><th>Tokens</th><th>Vesting</th></tr>
+  <tr><td>Private sale</td><td class="num">50.0%</td><td class="num">300,000,000</td><td>${PEND('schedule')}</td></tr>
+  <tr><td>CEX listing</td><td class="num">15.0%</td><td class="num">90,000,000</td><td>${PEND('schedule')}</td></tr>
+  <tr><td>Marketing</td><td class="num">10.0%</td><td class="num">60,000,000</td><td>${PEND('schedule')}</td></tr>
+  <tr><td>Reserve</td><td class="num">5.0%</td><td class="num">30,000,000</td><td>${PEND('schedule')}</td></tr>
+  <tr><td>Team</td><td class="num">5.0%</td><td class="num">30,000,000</td><td>Locked · ${PEND('term')}</td></tr>
+  <tr><td>Advisors</td><td class="num">5.0%</td><td class="num">30,000,000</td><td>${PEND('schedule')}</td></tr>
+  <tr><td>Development</td><td class="num">5.0%</td><td class="num">30,000,000</td><td>${PEND('schedule')}</td></tr>
+  <tr><td>Airdrop</td><td class="num">5.0%</td><td class="num">30,000,000</td><td>${PEND('schedule')}</td></tr>
+</table>
+<p>The ring on <a class="enl" href="#/renounce">the contract page</a> shows the
+same figures.</p>
+
+<h2 id="uso">Use of funds</h2>
+<p>What the money raised is spent on, and in what proportion.</p>
+<p>${PEND('breakdown: engineering, audits, legal, listings, liquidity, operations')}</p>
+<p>A raise without a stated use of funds asks buyers to trust an intention they
+were never told.</p>
+
+<h2 id="como">How to take part</h2>
+<ol>
+  <li>Go to <a class="enl" href="https://nereum.xyz"><strong>nereum.xyz</strong></a>
+      and type the address yourself rather than following a link from a message.</li>
+  <li>Connect a wallet you control. Never a seed phrase — no legitimate sale asks
+      for one, ever.</li>
+  <li>Check the contract address on the page against the one on
+      <a class="enl" href="#/links">Official links</a>, character by character.
+      The first and last four are not enough.</li>
+  <li>Choose an amount between $1 and $10,000 and confirm.</li>
+</ol>
+
+<div class="nota aviso">
+  <b>Nobody will message you first</b>
+  <p>We do not send private messages, we do not run a support account that
+  contacts you, and we do not announce a sale anywhere other than the addresses
+  on <a class="enl" href="#/links">Official links</a>. Anyone who does either is
+  not us, no matter how convincing the profile looks.</p>
+</div>
+
+<h2 id="leer">How to read this page</h2>
+<p>Two numbers decide whether the rest of it means anything:</p>
+<ol>
+  <li><strong>The raised figure</strong> has to be the on-chain amount, linked to
+      an address anyone can open. A raise number that cannot be checked does more
+      damage than no number at all.</li>
+  <li><strong>The vesting schedules.</strong> Half the supply released on day one
+      and half released over four years are completely different projects with
+      identical pie charts.</li>
+</ol>
+
+<h2 id="listado">How the listing price is set</h2>
+<p>NRM lists at <strong>$0.50 on Uniswap v3</strong>. That price is not an
+estimate: on Uniswap v3, liquidity is concentrated within a price range chosen
+when the pool is created, so <strong>the opening price is a parameter of the
+pool</strong>, not something the market discovers on the first trade.</p>
+
+<table>
+  <tr><th>Item</th><th>Value</th></tr>
+  <tr><td>Venue</td><td><b>Uniswap v3</b> · Ethereum</td></tr>
+  <tr><td>Opening price</td><td class="num"><b>$0.50</b></td></tr>
+  <tr><td>Pair</td><td>${PEND('NRM against which asset')}</td></tr>
+  <tr><td>Fee tier</td><td>${PEND('0.05% / 0.3% / 1%')}</td></tr>
+  <tr><td>Initial range</td><td>${PEND('lower and upper bound')}</td></tr>
+  <tr><td>Liquidity committed</td><td>${PEND('amount')}</td></tr>
+  <tr><td>Liquidity lock</td><td>${PEND('provider, term and proof link')}</td></tr>
+  <tr><td>Pool address</td><td>${PEND('address, once created')}</td></tr>
+</table>
+
+<div class="nota">
+  <b>Why concentrated liquidity matters here</b>
+  <p>On a v2-style pool, liquidity is spread across every possible price and most
+  of it sits where nobody trades. On v3 it is placed within a chosen band, so the
+  same capital produces far more depth around the opening price — which means
+  less slippage on the first trades and a price that holds instead of gapping on
+  the first sell.</p>
+</div>
+
+<p>What happens after the pool opens is decided by buyers and sellers like on any
+market. The two rows that determine how solid that opening is are the
+<strong>liquidity committed</strong> and the <strong>lock</strong>: depth is what
+makes a price hold, and a locked pool is what stops it being withdrawn.</p>
+`},
+
+
+  dexscreener:{
+    grupo:'Token', titulo:'DexScreener',
+    html:`
+<p>Where the NRM price, liquidity and trade history can be tracked once the token
+is trading — by anyone, without an account.</p>
+
+<h2 id="par">The pair</h2>
+<table>
+  <tr><th>Item</th><th>Value</th></tr>
+  <tr><td>Token</td><td><b>NRM</b></td></tr>
+  <tr><td>Contract address</td><td>${PEND('address')}</td></tr>
+  <tr><td>Chain</td><td>${PEND('chain')}</td></tr>
+  <tr><td>Pair</td><td>${PEND('pair address')}</td></tr>
+  <tr><td>DexScreener</td><td>${PEND('link to the pair')}</td></tr>
+</table>
+
+<h2 id="usar">What to look at, in order</h2>
+<p>Price is the least informative number on the screen. Four things tell you more:</p>
+<ol>
+  <li><strong>Liquidity, and whether it is locked.</strong> A pool that can be
+      withdrawn at any moment is not liquidity, it is a promise. Look for the lock
+      and its expiry date.</li>
+  <li><strong>Holder concentration.</strong> If a handful of wallets hold most of
+      the supply, the price on screen is whatever they decide it is.</li>
+  <li><strong>Age of the pair.</strong> When it was created, and by whom. A pair
+      created hours ago has no price history worth reading.</li>
+  <li><strong>Volume against liquidity.</strong> High volume in a thin pool is
+      usually the same funds going back and forth.</li>
+</ol>
+
+<h2 id="verificar">Verify the address before you trade</h2>
+<p>Anyone can create a pair and name the token whatever they like. DexScreener
+lists what exists, not what is legitimate.</p>
+<p>The only contract that is ours is the address listed on this page and on
+<a class="enl" href="#/links">Official links</a>. <strong>If a pair does not
+match that exact address, it is not NRM</strong> — no matter what the ticker
+says, how convincing the chart looks or who sent you the link.</p>
+
+<h2 id="cuando">Until the token trades</h2>
+<div class="nota aviso">
+  <b>Why there is no link yet</b>
+  <p>This page has no link because there is nothing to link to. Publishing a
+  DexScreener page before the pair exists is an open invitation for someone to
+  create a fake one and point people at it — and the page would lend it
+  credibility.</p>
+</div>
+`},
+
+  team:{
+    grupo:'Company', titulo:'Team',
+    html:`
+<p>Who is building Nereum, what they have built before, and what a reader can
+verify about them.</p>
+
+<h2 id="quienes">Core team</h2>
+<p>${PEND('names, roles, and a public profile for each')}</p>
+<p>For each person this should say what they do on this project, what they did
+before, and where that can be checked — a company, a repository, a paper. A list
+of first names and job titles is not information.</p>
+
+<h2 id="kyc">Identity verification</h2>
+<table>
+  <tr><th>Item</th><th>Value</th></tr>
+  <tr><td>Verified by</td><td>${PEND('issuer')}</td></tr>
+  <tr><td>Date</td><td>${PEND('date')}</td></tr>
+  <tr><td>Reference</td><td>${PEND('public reference or badge link')}</td></tr>
+  <tr><td>Scope</td><td>${PEND('which founders were verified')}</td></tr>
+</table>
+<p>KYC by a third party means someone independent has seen government
+identification for the people named above and holds it on file. It raises the
+cost of disappearing considerably. It does not vouch for competence, and it is
+not a background check unless the issuer says it is.</p>
+
+<h2 id="asesores">Advisors</h2>
+<p>${PEND('names, and what each one actually contributes')}</p>
+<p>An advisor list is only worth including if each name comes with a specific
+contribution. Logos of people who attended one call do more harm than an empty
+section.</p>
+
+<h2 id="anonimo">Named or anonymous</h2>
+<p>Both are defensible positions, and plenty of serious projects have shipped
+anonymously. What is not defensible is implying a named team exists without
+listing one.</p>
+<p>If the team stays anonymous, this page should say so plainly and explain what
+stands in its place: locked contracts, funds in escrow, KYC held by a third party
+who can identify the founders to a regulator, or a multi-signature arrangement
+with named external parties.</p>
+
+<div class="nota">
+  <b>Why readers open this page second</b>
+  <p>After the legal filing, the team is the next thing a careful reader checks —
+  because every other claim in a whitepaper depends on the people making it.</p>
+</div>
+`},
+
+  press:{
+    grupo:'Company', titulo:'News and mentions',
+    html:`
+<p>Independent coverage of Nereum: articles, interviews and mentions published by
+someone other than us.</p>
+
+<div class="nota aviso">
+  <b>Read this before filling the page in</b>
+  <p>Only coverage that exists and opens belongs here. Each entry needs a
+  publication, a date and a working link. A mention that cannot be opened is the
+  fastest way to lose a reader who was ready to trust you — and it is one of the
+  first things a careful person checks.</p>
+</div>
+
+<h2 id="cobertura">Coverage</h2>
+<p>${PEND('publication, date and link for each mention')}</p>
+
+<h2 id="cuenta">What counts as coverage</h2>
+<p>The distinction matters, because readers make it whether or not the page does:</p>
+<ul>
+  <li><strong>Editorial coverage.</strong> A journalist chose to write about the
+      project. This is the only kind that carries independent weight.</li>
+  <li><strong>Paid placement.</strong> A press release distributed to syndication
+      networks. Legitimate, common, and worth labelling as such — many outlets
+      republish these automatically and they are easy to recognise.</li>
+  <li><strong>Interviews and podcasts.</strong> Useful, but the project chose what
+      to say. Worth listing separately from editorial.</li>
+  <li><strong>Aggregators and listings.</strong> A database entry is not coverage.</li>
+</ul>
+<p>Labelling each entry honestly costs nothing and buys credibility from exactly
+the readers who would otherwise check and find out.</p>
+
+<h2 id="prensa">Press kit</h2>
+<p>${PEND('logo files, brand guidelines, founder photos and a press contact address')}</p>
+<p>Making it easy for a journalist to write about you correctly is the cheapest
+communications work there is.</p>
+
+<h2 id="contacto">Media enquiries</h2>
+<p>${PEND('email address and expected response time')}</p>
+`},
+
+  links:{
+    grupo:'Company', titulo:'Official links',
+    html:`
+<div class="nota aviso">
+  <b>Read this before anything else on this page</b>
+  <p><strong>These are the only official addresses of Nereum.</strong> Anything
+  not listed here is not us — no matter how convincing the name, the logo, the
+  follower count or the person who sent it to you.</p>
+  <p>This page is the reference. If a link does not appear on it, treat it as
+  hostile until it does.</p>
+</div>
+
+<p>Impersonation is the most common attack on a project at this stage, and it
+requires no technical skill at all. A cloned site, a group chat one character
+off, a support account that messages first — every one of them works because
+people have nowhere authoritative to check.</p>
+
+<p>This page is that place. Bookmark it.</p>
+
+<h2 id="canales">Official channels</h2>
+<table>
+  <tr><th>Channel</th><th>Address</th></tr>
+  <tr><td><b>Website</b></td>
+      <td><a class="enl" href="https://nereum.xyz">nereum.xyz</a></td></tr>
+  <tr><td><b>Whitepaper</b></td>
+      <td><a class="enl" href="https://nereum.xyz/whitepaper">nereum.xyz/whitepaper</a></td></tr>
+  <tr><td><b>Whitelist</b></td>
+      <td><a class="enl" href="https://nereum.xyz">nereum.xyz</a> — the only place the round is open</td></tr>
+  <tr><td><b>X</b></td><td>${PEND('handle')}</td></tr>
+  <tr><td><b>Telegram</b></td><td>${PEND('group link')}</td></tr>
+  <tr><td>Discord</td><td>${PEND('link')}</td></tr>
+  <tr><td>GitHub</td><td>${PEND('organisation')}</td></tr>
+  <tr><td>Contact</td><td>${PEND('email')}</td></tr>
+</table>
+
+<h2 id="contratos">Contract addresses</h2>
+<p>The only addresses that belong to NRM. A token with the same ticker and a
+different address is a different token.</p>
+<table>
+  <tr><th>Item</th><th>Address</th></tr>
+  <tr><td>Network</td><td><b>Ethereum</b> · ERC-20</td></tr>
+  <tr><td><b>NRM token</b></td><td>${PEND('address, with Etherscan link')}</td></tr>
+  <tr><td>Sale contract</td><td>${PEND('address')}</td></tr>
+  <tr><td>Uniswap v3 pool</td><td>${PEND('address, once created')}</td></tr>
+</table>
+
+<h2 id="patrones">How impersonation actually works</h2>
+<p>Five patterns cover nearly all of it. None of them is sophisticated, and every
+one of them still works:</p>
+<ul>
+  <li><strong>The support account that messages you first.</strong>
+      <strong>We never do.</strong> Not for help, not for verification, not to
+      offer you an allocation. If someone contacts you claiming to be Nereum,
+      that alone is the answer.</li>
+  <li><strong>The domain one character off.</strong> Look for swapped letters,
+      an added hyphen, or a different ending — <em>.xyz</em> is ours. Read the
+      address bar, not the text of the link.</li>
+  <li><strong>The group chat with the same name.</strong> Anyone can create one.
+      Only the link on this page is ours.</li>
+  <li><strong>The token with the same ticker.</strong> Anyone can deploy a
+      contract called NRM. Only the address on this page is ours.</li>
+  <li><strong>The seed phrase request.</strong> No sale, no wallet, no support
+      agent and no legitimate project on earth needs your seed phrase or private
+      key. There is no exception and no situation where this is normal.</li>
+</ul>
+
+<h2 id="antes">Before you send anything, anywhere</h2>
+<ol>
+  <li>Type <strong>nereum.xyz</strong> into the address bar yourself, rather than
+      following a link you were sent.</li>
+  <li>Come back to this page and compare the contract address character by
+      character. The first four and last four are not enough — address spoofing
+      tools match exactly those.</li>
+  <li>Check the domain in the address bar, not the text of the link. Text can say
+      anything.</li>
+  <li>If something is being rushed — a countdown, a closing allocation, a
+      "last chance" — slow down. <strong>Real deadlines survive you taking five
+      minutes to verify.</strong></li>
+</ol>
+
+<h2 id="reportar">If you find a fake</h2>
+<p>Report it, and warn the people around you before you do anything else. A fake
+that gets taken down in an hour costs someone nothing; the same fake left running
+overnight costs someone everything.</p>
+<p>${PEND('email or form to report impersonation')}</p>
+
+<div class="nota">
+  <b>One page, kept current</b>
+  <p>This list is only useful if it is complete and up to date. A channel that
+  gets abandoned should be removed from here, not left to rot — a stale official
+  link is an opportunity handed to somebody else.</p>
+</div>
+`}
+
+};
+
+const ORDEN=['introduction','vision','network','tokenization','legal','audit',
+  'kyc','renounce','security','whitelist','dexscreener','team','press','links'];
+
+const doc=document.getElementById('doc'), rail=document.getElementById('rail');
+const lat=document.getElementById('lat');
+
+function pinta(id){
+  const p=PAGS[id]||PAGS.introduction;
+  const i=ORDEN.indexOf(id);
+  const ant=i>0?ORDEN[i-1]:null, sig=i<ORDEN.length-1?ORDEN[i+1]:null;
+  doc.innerHTML=`
+    <div class="miga">
+      <a href="#/introduction">${p.grupo}</a>
+      <svg viewBox="0 0 20 20"><path d="M7 4l6 6-6 6"/></svg>
+      <span>${p.titulo}</span>
+    </div>
+    <h1>${p.titulo}</h1>
+    ${p.html}
+    <div class="pasar">
+      ${ant?`<a href="#/${ant}"><em>Previous</em><b>${PAGS[ant].titulo}</b></a>`:'<span></span>'}
+      ${sig?`<a class="der" href="#/${sig}"><em>Next</em><b>${PAGS[sig].titulo}</b></a>`:'<span></span>'}
+    </div>`;
+  /* el índice de la derecha se construye desde los titulares de la página */
+  const hs=[...doc.querySelectorAll('h2[id]')];
+  rail.innerHTML=hs.map(h=>`<a href="#${h.id}" data-id="${h.id}">${h.textContent}</a>`).join('');
+  document.querySelectorAll('.gr a').forEach(a=>
+    a.classList.toggle('on', a.getAttribute('href')==='#/'+id));
+  doc.scrollIntoView({block:'start'});
+  scrollTo(0,0);
+  lat.classList.remove('abierta');
+  document.title='Nereum — '+p.titulo;
+}
+
+function ruta(){
+  const h=location.hash.replace('#/','').split('#')[0];
+  pinta(PAGS[h]?h:'introduction');
+}
+addEventListener('hashchange',()=>{ if(location.hash.startsWith('#/')) ruta(); });
+
+/* ── la navegación va por dentro, no por la barra de direcciones ──
+   Con enlaces de almohadilla, dentro de un visor incrustado el navegador los
+   trata como salida a otra página y no llega a cambiar de sección. Se atiende
+   la pulsación aquí mismo: se pinta la página y, si se puede, se actualiza la
+   dirección para que el enlace siga siendo compartible. Si no se puede, la
+   navegación funciona igual. */
+document.addEventListener('click', e=>{
+  const a=e.target.closest('a[href^="#"]');
+  if(!a)return;
+  const h=a.getAttribute('href');
+
+  if(h.startsWith('#/')){                       /* cambiar de sección */
+    e.preventDefault();
+    const id=h.slice(2).split('#')[0];
+    if(!PAGS[id])return;
+    pinta(id);
+    try{ history.replaceState(null,'',h); }catch(_){}
+    return;
+  }
+  /* un titular de la misma página: se baja hasta él sin tocar la dirección */
+  const destino=document.getElementById(h.slice(1));
+  if(destino){
+    e.preventDefault();
+    destino.scrollIntoView({block:'start',behavior:'smooth'});
+    try{ history.replaceState(null,'',h); }catch(_){}
+  }
+});
+
+ruta();
+
+/* el titular activo en el índice de la derecha */
+const io=new IntersectionObserver(es=>{
+  es.forEach(e=>{
+    if(!e.isIntersecting)return;
+    rail.querySelectorAll('a').forEach(a=>
+      a.classList.toggle('on', a.dataset.id===e.target.id));
+  });
+},{rootMargin:'-80px 0px -70% 0px'});
+const obs=()=>doc.querySelectorAll('h2[id]').forEach(h=>io.observe(h));
+new MutationObserver(obs).observe(doc,{childList:true});
+obs();
+
+/* ── buscador ── */
+const velo=document.getElementById('velo'), q=document.getElementById('q'), res=document.getElementById('res');
+const INDICE=ORDEN.map(id=>{
+  const d=document.createElement('div'); d.innerHTML=PAGS[id].html;
+  return {id, titulo:PAGS[id].titulo, grupo:PAGS[id].grupo,
+    texto:(PAGS[id].titulo+' '+d.textContent).toLowerCase()};
+});
+function busca(v){
+  const t=v.trim().toLowerCase();
+  if(!t){res.innerHTML=INDICE.slice(0,6).map(fila).join('');return}
+  const r=INDICE.filter(p=>p.texto.includes(t));
+  res.innerHTML=r.length?r.map(fila).join('')
+    :'<div class="vacio">Nothing found for “'+v+'”.</div>';
+}
+const fila=p=>`<a href="#/${p.id}"><b>${p.titulo}</b><s>${p.grupo}</s></a>`;
+function abre(){velo.classList.add('on');q.value='';busca('');q.focus()}
+function cierra(){velo.classList.remove('on')}
+document.getElementById('abrirBuscar').onclick=abre;
+velo.addEventListener('click',e=>{if(e.target===velo)cierra()});
+q.addEventListener('input',()=>busca(q.value));
+res.addEventListener('click',e=>{if(e.target.closest('a'))cierra()});
+addEventListener('keydown',e=>{
+  if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='k'){e.preventDefault();abre()}
+  else if(e.key==='Escape')cierra();
+  else if(e.key==='Enter'&&velo.classList.contains('on')){
+    const a=res.querySelector('a');
+    if(a){ const id=a.getAttribute('href').slice(2); if(PAGS[id])pinta(id); cierra(); }
+  }
+});
+document.getElementById('menuB').onclick=()=>lat.classList.toggle('abierta');
+</script>
+</body>
+</html>
