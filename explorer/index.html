@@ -1,0 +1,2100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<meta name="theme-color" content="#F7F8FA">
+<title>Nereum Explorer</title>
+<link rel="stylesheet" href="/assets/fonts.css">
+<style>
+:root{
+  /* los mismos tokens que el sitio de nereum.xyz */
+  --blue:#2F6BFF; --blue-lite:#79ABFF; --blue-d:#1B49E0; --blue-deep:#0A2564;
+  --blue-l:rgba(47,107,255,.09);
+  --paper:#FFFFFF; --paper2:#F2F3F5;
+  --ink:#0A0C10; --ink-2:rgba(10,12,16,.62); --ink-3:rgba(10,12,16,.44);
+  --linea:rgba(10,12,16,.13); --linea-2:rgba(10,12,16,.07);
+  --fondo:#F7F8FA; --panel:#FFFFFF;
+  --verde:#0B8A5C; --verde-l:rgba(11,138,92,.09);
+  --rojo:#C7332F; --rojo-l:rgba(199,51,47,.08);
+  --ambar:#9A6B12; --ambar-l:rgba(154,107,18,.09);
+  --f:'Switzer','Inter Tight',system-ui,-apple-system,sans-serif;
+  --tit:'Switzer','Inter Tight',system-ui,sans-serif;
+  --m:'DM Mono',ui-monospace,monospace;
+  --e-step:steps(4,end); --t1:.11s; --t2:.26s;
+  --ease:cubic-bezier(.16,.84,.26,1);
+  --sombra:none;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{color:var(--ink);font-family:var(--f);
+  font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased;
+  min-height:100vh;
+  background:
+    radial-gradient(1500px 640px at 50% -22%, #C4D7FF, transparent 64%),
+    radial-gradient(820px 440px at 4% -8%, #B2C9FF, transparent 60%),
+    radial-gradient(900px 700px at 96% 24%, #DCE6FA, transparent 62%),
+    radial-gradient(1200px 900px at 30% 118%, #DFE7F7, transparent 60%),
+    linear-gradient(180deg, #E4EDFF 0, #F0F3F9 640px, var(--fondo) 1300px);
+  background-attachment:fixed}
+#malla{position:fixed;inset:0;z-index:0;pointer-events:none;
+  width:100%;height:100%;display:block}
+/* una veladura extra sobre la cabecera, para que el azul llegue hasta arriba */
+.hd{box-shadow:0 1px 0 rgba(47,107,255,.12)}
+.hd,.wrap{position:relative;z-index:1}
+a{color:inherit;text-decoration:none}
+button{font:inherit;cursor:pointer;border:0;background:none;color:inherit}
+input,select,textarea{font:inherit;color:inherit}
+
+/* ══ cabecera ══ */
+.hd{position:sticky;top:0;z-index:60;background:rgba(247,249,255,.66);
+  backdrop-filter:blur(20px) saturate(170%);border-bottom:1px solid rgba(47,107,255,.13)}
+.hd-in{max-width:1280px;margin:0 auto;padding:0 20px;height:60px;
+  display:flex;align-items:center;gap:18px}
+.marca{display:flex;align-items:center;gap:9px;flex:0 0 auto}
+.marca svg{width:20px;height:20px;color:var(--ink)}
+.marca b{font-family:var(--tit);font-size:17px;font-weight:500;letter-spacing:-.01em}
+.marca s{text-decoration:none;font-family:var(--m);font-size:9px;letter-spacing:.18em;
+  border:1px solid var(--linea);color:var(--ink-3);padding:2px 7px;border-radius:3px}
+.nav{display:flex;gap:2px;margin-left:8px}
+.nav a{padding:7px 12px;border-radius:6px;font-size:14px;color:var(--ink-2);
+  transition:background .18s var(--ease),color .18s var(--ease)}
+.nav a:hover{background:var(--linea-2);color:var(--ink)}
+.nav a.on{background:var(--blue-l);color:var(--blue);font-weight:500}
+.hd-sp{flex:1}
+.buscar{position:relative;flex:0 1 320px}
+.buscar input{width:100%;height:36px;padding:0 12px 0 34px;border:1px solid var(--linea);
+  border-radius:9px;background:var(--linea-2);font-size:13.5px;outline:none;
+  color:var(--ink);transition:border-color .18s var(--ease),background .18s var(--ease)}
+.buscar input::placeholder{color:var(--ink-3)}
+.buscar input:focus{background:var(--panel)}
+.buscar input:focus{border-color:var(--blue)}
+.buscar svg{position:absolute;left:11px;top:11px;width:14px;height:14px;
+  fill:none;stroke:var(--ink-3);stroke-width:1.6}
+/* el relleno sube EN CUATRO ESCALONES, como en el sitio */
+.btn{position:relative;display:inline-flex;align-items:center;gap:7px;height:36px;
+  padding:0 17px;border-radius:4px;background:var(--blue);color:#fff;
+  font-size:13.5px;font-weight:500;overflow:hidden;isolation:isolate;
+  transition:color var(--t1) var(--ease)}
+.btn::before{content:'';position:absolute;inset:0;z-index:-1;background:var(--ink);
+  transform:scaleY(0);transform-origin:bottom;
+  transition:transform var(--t2) var(--e-step)}
+.btn:hover::before{transform:scaleY(1)}
+.btn:active{transform:translateY(1px)}
+.btn:hover{background:var(--blue-d)}
+.btn.sec{background:transparent;border:1px solid var(--linea);color:var(--ink);
+  font-weight:500}
+.btn.sec::before{background:var(--ink)}
+.btn.sec:hover{color:#fff;border-color:var(--ink)}
+.btn svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:1.7}
+.menuB{display:none}
+
+/* ══ estructura ══ */
+.wrap{max-width:1280px;margin:0 auto;padding:26px 20px 80px}
+h1{font-size:clamp(24px,2.6vw,32px);font-weight:500;letter-spacing:-.03em;
+  margin-bottom:4px}
+h2{font-size:16px;font-weight:500;letter-spacing:-.02em}
+.sub{color:var(--ink-3);font-size:13.5px;margin-bottom:22px}
+.miga{font-family:var(--m);font-size:11.5px;color:var(--ink-3);margin-bottom:14px;
+  display:flex;gap:7px;align-items:center;flex-wrap:wrap}
+.miga a:hover{color:var(--blue)}
+
+/* ══ tarjetas ══ */
+.panel{background:rgba(255,255,255,.955);border:1px solid var(--linea);
+  border-radius:13px;overflow:hidden;
+  box-shadow:0 1px 2px rgba(10,12,16,.03),0 10px 30px rgba(47,107,255,.05)}
+.panel-h{padding:14px 18px;border-bottom:1px solid var(--linea-2);
+  display:flex;align-items:center;justify-content:space-between;gap:12px}
+.panel-b{padding:6px 0}
+.rejilla{display:grid;gap:16px}
+.r4{grid-template-columns:repeat(4,1fr)}
+.r3{grid-template-columns:repeat(3,1fr)}
+.r2{grid-template-columns:1fr 1fr}
+.stat{background:rgba(255,255,255,.955);border:1px solid var(--linea);
+  border-radius:12px;padding:16px 18px;position:relative;overflow:hidden;
+  box-shadow:0 1px 2px rgba(10,12,16,.03),0 10px 30px rgba(47,107,255,.05)}
+.stat::after{content:'';position:absolute;top:0;left:0;width:38px;height:2px;
+  background:var(--blue)}
+.stat i{display:block;font-family:var(--m);font-size:10px;letter-spacing:.15em;
+  text-transform:uppercase;color:var(--ink-3);font-style:normal;margin-bottom:7px}
+.stat b{display:block;font-size:27px;font-weight:500;letter-spacing:-.03em;
+  font-variant-numeric:tabular-nums}
+.stat s{text-decoration:none;font-size:12.5px;color:var(--ink-3)}
+
+/* ══ movimiento ══ */
+@keyframes sube{from{opacity:0;transform:translateY(9px)}to{opacity:1;transform:none}}
+@keyframes entra{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+@keyframes nueva{0%{background:rgba(47,107,255,.18)}100%{background:transparent}}
+#app>*{animation:sube .26s var(--ease) both}
+#app>*:nth-child(2){animation-delay:.02s}
+#app>*:nth-child(3){animation-delay:.045s}
+#app>*:nth-child(4){animation-delay:.07s}
+#app>*:nth-child(5){animation-delay:.095s}
+.tb tbody tr{animation:entra .22s var(--ease) both}
+.tb tbody tr:nth-child(1){animation-delay:.008s}
+.tb tbody tr:nth-child(2){animation-delay:.020s}
+.tb tbody tr:nth-child(3){animation-delay:.032s}
+.tb tbody tr:nth-child(4){animation-delay:.044s}
+.tb tbody tr:nth-child(5){animation-delay:.056s}
+.tb tbody tr:nth-child(6){animation-delay:.068s}
+.tb tbody tr:nth-child(7){animation-delay:.080s}
+.tb tbody tr:nth-child(8){animation-delay:.092s}
+.tb tbody tr.rec{animation:entra .22s var(--ease) both, nueva 1.1s var(--ease)}
+.stat b{transition:opacity .16s var(--ease)}
+.stat b.cambia{opacity:.28}
+.chk{animation:entra .2s var(--ease) both}
+.chk:nth-child(2){animation-delay:.03s} .chk:nth-child(3){animation-delay:.06s}
+.chk:nth-child(4){animation-delay:.09s} .chk:nth-child(5){animation-delay:.12s}
+.chk:nth-child(6){animation-delay:.15s} .chk:nth-child(7){animation-delay:.18s}
+.fila,.tb tbody tr,.nav a,.chip,.cop,.pie-col a{transition-duration:.11s !important}
+@media(prefers-reduced-motion:reduce){#app>*,.tb tbody tr,.chk{animation:none}}
+
+/* ══ tabla densa ══ */
+.tb{width:100%;border-collapse:collapse;font-size:13.5px}
+.tb th{text-align:left;padding:9px 18px;font-family:var(--m);font-size:10px;
+  letter-spacing:.15em;text-transform:uppercase;color:var(--ink-3);font-weight:500;
+  border-bottom:1px solid var(--linea);white-space:nowrap;background:var(--linea-2)}
+.tb th.d{text-align:right}
+.tb td{padding:11px 18px;border-bottom:1px solid var(--linea-2);vertical-align:middle}
+.tb tr:last-child td{border-bottom:0}
+.tb tbody tr{transition:background .14s var(--ease)}
+.tb tbody tr:hover{background:var(--linea-2)}
+.tb td.d{text-align:right;font-variant-numeric:tabular-nums}
+.tb td.m{font-family:var(--m);font-size:12.5px}
+.tb .p{color:var(--ink-3);font-size:12px}
+.tb .n{font-weight:500}
+.tbw{overflow-x:auto}
+.tbw::-webkit-scrollbar{height:6px}
+.tbw::-webkit-scrollbar-thumb{background:var(--linea);border-radius:3px}
+
+/* ══ filas ══ */
+.fila{display:flex;align-items:center;gap:14px;padding:12px 18px;
+  border-bottom:1px solid var(--linea-2);transition:background .15s var(--ease)}
+.fila:last-child{border-bottom:0}
+.fila:hover{background:var(--linea-2)}
+.fila .ic{border:1px solid var(--linea)}
+.fila .ic{width:34px;height:34px;border-radius:9px;background:var(--linea-2);
+  display:grid;place-items:center;flex:0 0 auto}
+.fila .ic svg{width:15px;height:15px;fill:none;stroke:var(--ink-2);stroke-width:1.6}
+.fila .pr{flex:1;min-width:0}
+.fila .pr b{display:block;font-size:14px;font-weight:500}
+.fila .pr s{text-decoration:none;display:block;font-size:12.5px;color:var(--ink-3);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fila .der{text-align:right;flex:0 0 auto}
+.fila .der b{display:block;font-size:13.5px;font-weight:500;font-variant-numeric:tabular-nums}
+.fila .der s{text-decoration:none;font-size:12px;color:var(--ink-3)}
+.mono{font-family:var(--m);font-size:12.5px}
+.enl{color:var(--blue);text-decoration:none}
+.enl:hover{text-decoration:underline;text-underline-offset:3px}
+
+/* ══ etiquetas ══ */
+.tag{display:inline-flex;align-items:center;gap:5px;height:22px;padding:0 8px;
+  border-radius:5px;font-family:var(--m);font-size:10.5px;letter-spacing:.06em;
+  text-transform:uppercase;font-weight:500}
+.tag.ok{background:var(--verde-l);color:var(--verde)}
+.tag.no{background:var(--rojo-l);color:var(--rojo)}
+.tag.esp{background:var(--ambar-l);color:var(--ambar)}
+.tag.az{background:var(--blue-l);color:var(--blue)}
+.tag.gr{background:var(--linea-2);color:var(--ink-2)}
+
+/* ══ tabla de detalle ══ */
+.det{width:100%;border-collapse:collapse}
+.det tr{border-bottom:1px solid var(--linea-2)}
+.det tr:last-child{border-bottom:0}
+.det td{padding:12px 18px;vertical-align:top;font-size:14px}
+.det td:first-child{width:210px;color:var(--ink-3);font-size:13.5px;
+  font-family:var(--m);font-size:12px;letter-spacing:.04em}
+.det td:last-child{word-break:break-word}
+
+/* ══ formulario ══ */
+.form{display:grid;gap:16px;padding:20px}
+.campo label{display:block;font-size:13px;font-weight:500;margin-bottom:6px}
+.campo .ay{display:block;font-size:12.5px;color:var(--ink-3);margin-bottom:7px}
+.campo input,.campo select,.campo textarea{width:100%;height:42px;padding:0 13px;
+  border:1px solid var(--linea);border-radius:9px;background:var(--linea-2);
+  font-size:14px;outline:none;color:var(--ink);
+  transition:border-color .18s var(--ease),background .18s var(--ease)}
+.campo input::placeholder{color:var(--ink-3)}
+.campo select{appearance:none;
+  background-image:linear-gradient(45deg,transparent 50%,var(--ink-3) 50%),
+    linear-gradient(135deg,var(--ink-3) 50%,transparent 50%);
+  background-position:calc(100% - 17px) 18px,calc(100% - 12px) 18px;
+  background-size:5px 5px,5px 5px;background-repeat:no-repeat}
+.campo textarea{height:auto;padding:10px 12px;resize:vertical;min-height:76px}
+.campo input:focus,.campo select:focus,.campo textarea:focus{border-color:var(--blue);
+  background:var(--panel)}
+.campo.mal input,.campo.mal select{border-color:var(--rojo)}
+.err{display:none;font-size:12.5px;color:var(--rojo);margin-top:5px}
+.campo.mal .err{display:block}
+.chips{display:flex;flex-wrap:wrap;gap:7px}
+.chip{display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 13px;
+  border:1px solid var(--linea);border-radius:8px;font-size:13px;color:var(--ink-2);
+  background:var(--linea-2);transition:all .18s var(--ease)}
+.chip:hover{border-color:var(--blue);color:var(--blue)}
+.chip.on{background:var(--blue);border-color:var(--blue);color:#fff;font-weight:500}
+.chip svg{width:12px;height:12px;fill:none;stroke:currentColor;stroke-width:2}
+
+/* ══ pasos ══ */
+.pasos{display:flex;gap:0;padding:16px 20px;border-bottom:1px solid var(--linea-2)}
+.paso{flex:1;display:flex;align-items:center;gap:9px;font-size:13px;color:var(--ink-3)}
+.paso i{width:26px;height:26px;border-radius:50%;border:1px solid var(--linea);
+    background:var(--linea-2);
+  display:grid;place-items:center;font-family:var(--m);font-size:11px;font-style:normal;
+  flex:0 0 auto}
+.paso.on{color:var(--ink);font-weight:500}
+.paso.on i{background:var(--blue);border-color:var(--blue);color:#fff;font-weight:500}
+.paso.hecho i{background:var(--verde-l);border-color:var(--verde);color:var(--verde)}
+.paso.hecho{color:var(--ink-2)}
+
+/* ══ registro de comprobaciones ══ */
+.chk{display:flex;align-items:flex-start;gap:11px;padding:11px 18px;
+  border-bottom:1px solid var(--linea-2);font-size:13.5px}
+.chk:last-child{border-bottom:0}
+.chk .b{width:20px;height:20px;border-radius:50%;flex:0 0 auto;display:grid;
+  place-items:center;margin-top:1px}
+.chk .b svg{width:11px;height:11px;fill:none;stroke-width:2.4;stroke-linecap:round;
+  stroke-linejoin:round}
+.chk.ok .b{background:var(--verde-l)} .chk.ok .b svg{stroke:var(--verde)}
+.chk.no .b{background:var(--rojo-l)}  .chk.no .b svg{stroke:var(--rojo)}
+.chk.esp .b{background:var(--linea-2)} .chk.esp .b svg{stroke:var(--ink-3)}
+.chk .t{flex:1}
+.chk .t b{display:block;font-weight:500}
+.chk .t s{text-decoration:none;color:var(--ink-3);font-size:12.5px}
+
+/* ══ avisos ══ */
+.aviso{padding:14px 18px;border-radius:9px;font-size:13.5px;line-height:1.55;
+  display:flex;gap:11px;align-items:flex-start}
+.aviso.ok{background:var(--verde-l);color:#0A6E4C}
+.aviso.no{background:var(--rojo-l);color:#9B2626}
+.aviso.inf{background:var(--blue-l);color:var(--blue-d)}
+.aviso svg{width:16px;height:16px;flex:0 0 auto;margin-top:2px;fill:none;
+  stroke:currentColor;stroke-width:1.8}
+
+/* ══ punto vivo ══ */
+.vivo{display:inline-flex;align-items:center;gap:6px;font-family:var(--m);
+  font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--verde)}
+.vivo i{width:7px;height:7px;border-radius:50%;background:var(--verde);
+  animation:lat 2s infinite}
+@keyframes lat{0%,100%{opacity:1}50%{opacity:.25}}
+
+.vacio{padding:44px 20px;text-align:center;color:var(--ink-3);font-size:14px}
+.pie{margin-top:34px;padding-top:20px;border-top:1px solid var(--linea);
+  font-size:12.5px;color:var(--ink-3);display:flex;justify-content:space-between;gap:14px;
+  flex-wrap:wrap}
+
+.barra{height:6px;border-radius:3px;background:var(--linea-2);overflow:hidden;margin-top:7px}
+.barra i{display:block;height:100%;background:var(--blue);transition:width .5s var(--ease)}
+
+/* ══ móvil ══ */
+@media(max-width:900px){
+  .r4{grid-template-columns:1fr 1fr}
+  .r3,.r2{grid-template-columns:1fr}
+}
+@media(max-width:720px){
+  .hd-in{height:56px;gap:10px}
+  .nav{display:none;position:fixed;top:56px;left:0;right:0;background:var(--panel);
+    border-bottom:1px solid var(--linea);flex-direction:column;padding:8px;gap:2px;
+    box-shadow:var(--sombra)}
+  .nav.abierto{display:flex}
+  .nav{background:var(--panel)}
+  .nav a{padding:11px 14px}
+  .menuB{display:grid;place-items:center;width:34px;height:34px;border-radius:7px;
+    border:1px solid var(--linea)}
+  .menuB svg{width:16px;height:16px;fill:none;stroke:var(--ink-2);stroke-width:1.7}
+.menuB{background:transparent}
+  /* en la cabecera del móvil solo cabe la lupa: el campo se abre en un panel */
+  .buscar{display:none}
+  .hd .btn span{display:none}
+  .hd .btn{padding:0 11px}
+  .r4{grid-template-columns:1fr 1fr}
+  .det td:first-child{width:auto;display:block;padding-bottom:2px}
+  .det td:last-child{display:block;padding-top:0}
+  .pasos{overflow-x:auto}
+  .paso{flex:0 0 auto;padding-right:16px}
+  .paso s{display:none}
+  h1{font-size:20px}
+}
+
+/* ══ el pie ══ */
+.pie{margin-top:46px;padding-top:30px;border-top:1px solid var(--linea);
+  display:block;font-size:13.5px;color:var(--ink-3)}
+.pie-top{display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr;gap:30px;
+  padding-bottom:28px}
+.pie-marca svg{width:22px;height:22px;display:block;margin-bottom:11px}
+.pie-marca b{display:block;font-size:14.5px;font-weight:500;color:var(--ink);
+  margin-bottom:7px}
+.pie-marca p{font-size:13px;line-height:1.6;max-width:38ch;margin-bottom:13px}
+.pie-est{display:flex;gap:12px;align-items:center;font-size:11.5px}
+.pie-col h6{font-family:var(--m);font-size:10px;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--ink);font-weight:500;margin-bottom:11px}
+.pie-col a{display:block;padding:4px 0;font-size:13.5px;color:var(--ink-3);
+  transition:color .16s var(--ease)}
+.pie-col a:hover{color:var(--blue)}
+.pie-bajo{display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap;
+  padding:16px 0 0;border-top:1px solid var(--linea-2);font-size:12.5px}
+
+/* ══ la lupa ══ */
+.lupa{display:none;place-items:center;width:36px;height:36px;border-radius:8px;
+  border:1px solid var(--linea);flex:0 0 auto}
+@media(max-width:720px){ .lupa{display:grid} }
+.lupa svg{width:15px;height:15px;fill:none;stroke:var(--ink-2);stroke-width:1.7}
+.velo{position:fixed;inset:0;z-index:90;background:rgba(10,12,16,.42);
+  backdrop-filter:blur(6px);display:none;padding:76px 16px 16px}
+.velo.on{display:block;animation:entra .22s var(--ease)}
+.velo-c{max-width:620px;margin:0 auto;background:var(--panel);border-radius:12px;
+  border:1px solid var(--linea);overflow:hidden;
+  box-shadow:0 24px 60px rgba(10,12,16,.22)}
+.velo-c input{width:100%;height:52px;padding:0 18px;border:0;font-size:16px;
+  outline:none;background:transparent;color:var(--ink)}
+.velo-c .ay{padding:11px 18px;border-top:1px solid var(--linea-2);
+  font-size:12.5px;color:var(--ink-3)}
+
+@media(max-width:900px){ .pie-top{grid-template-columns:1fr 1fr;gap:24px} }
+@media(max-width:560px){ .pie-top{grid-template-columns:1fr;gap:22px} }
+
+.cop{display:inline-grid;place-items:center;width:24px;height:24px;border-radius:5px;
+  border:1px solid var(--linea);vertical-align:middle;margin-left:6px;
+  transition:border-color .16s var(--ease),background .16s var(--ease)}
+.cop:hover{border-color:var(--blue);background:var(--blue-l)}
+.cop svg{width:12px;height:12px;fill:none;stroke:var(--ink-2);stroke-width:1.5}
+.cop:hover svg{stroke:var(--blue)}
+#graf{display:block;width:100%}
+
+/* ══ gráficas ══ */
+.chispa{display:block;width:100%;height:26px;margin-top:9px}
+.ch-l{fill:none;stroke:var(--blue);stroke-width:1.6;stroke-linejoin:round;
+  stroke-linecap:round}
+.ch-a{fill:rgba(47,107,255,.10);stroke:none}
+.ch-p{fill:var(--blue)}
+.bt{display:grid;grid-template-columns:1fr 2fr auto;gap:14px;align-items:center;
+  padding:8px 0}
+.bt-c{display:flex;align-items:center;gap:8px;min-width:0}
+.bt-p{width:8px;height:8px;border-radius:2px;flex:0 0 auto}
+.bt-c b{font-size:13.5px;font-weight:500;white-space:nowrap;overflow:hidden;
+  text-overflow:ellipsis}
+.bt-c s{text-decoration:none;font-family:var(--m);font-size:11.5px;color:var(--ink-3);
+  flex:0 0 auto}
+.bt-b{height:7px;border-radius:4px;background:var(--linea-2);overflow:hidden}
+.bt-b i{display:block;height:100%;border-radius:4px;
+  animation:crece .5s var(--ease) both}
+.bt-n{font-family:var(--m);font-size:12px;color:var(--ink-2);
+  font-variant-numeric:tabular-nums;min-width:44px;text-align:right}
+@keyframes crece{from{width:0 !important}}
+.anillo{width:136px;height:136px}
+.an-s{transition:opacity .12s var(--ease);cursor:default}
+.anillo:hover .an-s{opacity:.42}
+.anillo .an-s:hover{opacity:1}
+.an-n{font-family:var(--f);font-size:24px;font-weight:500;fill:var(--ink)}
+.an-t{font-family:var(--m);font-size:9px;fill:var(--ink-3);letter-spacing:.14em}
+.gtip{position:fixed;z-index:80;pointer-events:none;opacity:0;
+  background:var(--ink);color:#fff;border-radius:7px;padding:8px 11px;
+  font-size:12px;line-height:1.45;box-shadow:0 8px 24px rgba(10,12,16,.24);
+  transition:opacity .1s var(--ease);white-space:nowrap}
+.gtip.on{opacity:1}
+.gtip b{display:block;font-family:var(--m);font-size:11px;margin-bottom:2px}
+.gtip span{display:block;color:rgba(255,255,255,.72)}
+.gtip span.no{color:#FF9A9A}
+@media(max-width:900px){ .bt{grid-template-columns:1fr 1.4fr auto;gap:10px} }
+
+/* ══ la cinta live ══ */
+.cinta{position:sticky;top:60px;z-index:50;display:flex;align-items:center;
+  height:38px;background:rgba(247,249,255,.78);backdrop-filter:blur(14px);
+  border-bottom:1px solid rgba(47,107,255,.12);overflow:hidden}
+.cinta-e{flex:0 0 auto;padding:0 14px 0 max(20px,calc((100vw - 1280px)/2 + 20px));
+  border-right:1px solid var(--linea-2);height:100%;display:flex;align-items:center}
+.cinta-p{flex:1;overflow:hidden;height:100%;
+  -webkit-mask-image:linear-gradient(90deg,#000 0,#000 86%,transparent);
+  mask-image:linear-gradient(90deg,#000 0,#000 86%,transparent)}
+.cinta-t{display:flex;align-items:center;height:100%;gap:0}
+.ct-i{display:inline-flex;align-items:center;gap:7px;padding:0 14px;height:100%;
+  border-right:1px solid var(--linea-2);white-space:nowrap;flex:0 0 auto;
+  animation:ctIn .34s var(--ease) both}
+.ct-i i{width:6px;height:6px;border-radius:50%;background:var(--blue);flex:0 0 auto}
+.ct-i.no i{background:var(--rojo)}
+.ct-i b{font-family:var(--m);font-size:11.5px;font-weight:400;color:var(--ink-2)}
+.ct-i s{text-decoration:none;font-family:var(--m);font-size:11px;color:var(--ink-3)}
+.ct-i u{text-decoration:none;font-size:11.5px;color:var(--ink);
+  font-variant-numeric:tabular-nums}
+.ct-i:hover{background:rgba(47,107,255,.06)}
+.ct-i.nuevo{animation:ctIn .34s var(--ease) both}
+@keyframes ctIn{from{opacity:0;transform:translateX(-26px)}to{opacity:1;transform:none}}
+@media(max-width:720px){
+  .cinta{top:56px;height:34px}
+  .cinta-e{padding-left:16px}
+  .ct-i s{display:none}
+}
+@media(prefers-reduced-motion:reduce){ .ct-i{animation:none} }
+
+/* ══ el anillo ══ */
+.anillo{width:172px;height:172px;overflow:visible}
+.an-g .an-s{transition:transform .16s var(--ease),opacity .12s var(--ease);
+  transform-origin:80px 80px;
+  filter:drop-shadow(0 2px 5px rgba(47,107,255,.22))}
+.anillo:hover .an-s{opacity:.34}
+.anillo .an-s:hover{opacity:1;transform:translate(var(--mx),var(--my)) scale(1.035)}
+.an-n{font-family:var(--f);font-size:29px;font-weight:500;fill:var(--ink);
+  letter-spacing:-.03em}
+.an-t{font-family:var(--m);font-size:9px;fill:var(--ink-3);letter-spacing:.16em}
+@keyframes anillIn{from{opacity:0;transform:rotate(-16deg) scale(.9)}
+  to{opacity:1;transform:none}}
+.an-g{animation:anillIn .5s var(--ease) both;transform-origin:80px 80px}
+
+/* los encabezados de panel, con un punto de luz */
+.panel-h{background:linear-gradient(180deg,rgba(47,107,255,.035),transparent)}
+
+/* ══ la intro ══
+   Un momento de marca de dos segundos: el símbolo se dibuja, los cuadrados
+   entran en escalones y el nombre aparece. Se puede saltar tocando. */
+.intro{position:fixed;inset:0;z-index:200;display:grid;place-items:center;
+  background:
+    radial-gradient(900px 520px at 50% 34%, #123A9E, transparent 70%),
+    linear-gradient(180deg,#05070C,#0A1024);
+  animation:introSale .5s var(--ease) 1.9s both}
+.intro.fuera{display:none}
+.intro-c{display:grid;place-items:center;gap:20px;text-align:center;padding:24px}
+.intro-l{width:78px;height:78px;overflow:visible}
+.il-p{opacity:0;transform:scale(.82) rotate(-8deg);transform-origin:336px 336px;
+  animation:ilP .68s var(--ease) .1s both;
+  filter:drop-shadow(0 8px 26px rgba(47,107,255,.5))}
+.il-r{opacity:0;transform:translateY(-40px)}
+.il-r1{animation:ilR .34s var(--ease) .62s both}
+.il-r2{animation:ilR .34s var(--ease) .76s both}
+@keyframes ilP{from{opacity:0;transform:scale(.82) rotate(-8deg)}
+  to{opacity:1;transform:none}}
+@keyframes ilR{from{opacity:0;transform:translateY(-46px)}to{opacity:1;transform:none}}
+.intro-t b{display:block;font-size:clamp(28px,5vw,46px);font-weight:500;
+  letter-spacing:-.035em;color:#fff;opacity:0;
+  animation:introUp .5s var(--ease) .84s both}
+.intro-t b span{color:#79ABFF}
+.intro-t s{display:block;text-decoration:none;margin-top:9px;font-family:var(--m);
+  font-size:11.5px;letter-spacing:.24em;text-transform:uppercase;
+  color:rgba(255,255,255,.5);opacity:0;
+  animation:introUp .5s var(--ease) 1.0s both}
+@keyframes introUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+.intro-b{width:132px;height:2px;border-radius:2px;background:rgba(255,255,255,.14);
+  overflow:hidden;opacity:0;animation:introUp .3s var(--ease) 1.1s both}
+.intro-b i{display:block;height:100%;width:0;background:#79ABFF;
+  animation:introBar .8s var(--ease) 1.15s both}
+@keyframes introBar{to{width:100%}}
+@keyframes introSale{to{opacity:0;visibility:hidden}}
+@media(prefers-reduced-motion:reduce){
+  .intro{animation:introSale .3s linear .7s both}
+  .il-p,.il-r,.intro-t b,.intro-t s,.intro-b,.intro-b i{animation:none;opacity:1;transform:none}
+  .intro-b i{width:100%}
+}
+
+/* ══ la portada ══ */
+.hero{display:grid;grid-template-columns:1.05fr .95fr;gap:34px;align-items:center;
+  padding:14px 0 30px}
+.hero-t .tag{margin-bottom:14px}
+.hero-t h1{font-size:clamp(30px,4.2vw,50px);font-weight:500;letter-spacing:-.04em;
+  line-height:1.05;margin-bottom:14px}
+.hero-t h1 em{font-style:normal;color:var(--blue)}
+.hero-t p{font-size:15.5px;color:var(--ink-2);max-width:46ch;line-height:1.6;
+  margin-bottom:20px}
+.hero-a{display:flex;gap:10px;flex-wrap:wrap}
+.hero-c{background:rgba(255,255,255,.7);border:1px solid var(--linea);
+  border-radius:14px;padding:16px;box-shadow:0 14px 44px rgba(47,107,255,.09)}
+.cad-h{display:flex;justify-content:space-between;align-items:center;
+  margin-bottom:13px;font-family:var(--m);font-size:10px;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--ink-3)}
+.cadena{display:flex;align-items:stretch;overflow:hidden}
+.cd-b{position:relative;flex:1;min-width:0;padding:12px 9px;border-radius:9px;
+  background:var(--panel);border:1px solid var(--linea);margin-right:14px;
+  text-align:center;transition:transform .14s var(--ease),border-color .14s var(--ease)}
+.cd-b:last-child{margin-right:0}
+.cd-b::after{content:'';position:absolute;right:-14px;top:50%;width:14px;height:1px;
+  background:var(--linea)}
+.cd-b:last-child::after{display:none}
+.cd-b:hover{transform:translateY(-3px);border-color:var(--blue)}
+.cd-b b{display:block;font-size:11.5px;font-weight:500;color:var(--ink);margin-bottom:7px}
+.cd-p{display:flex;flex-wrap:wrap;gap:2px;justify-content:center;min-height:16px;
+  margin-bottom:7px}
+.cd-p i{width:4px;height:4px;border-radius:1px;background:var(--blue)}
+.cd-p i.no{background:var(--rojo)}
+.cd-p i.v{background:var(--linea);width:14px}
+.cd-b s{text-decoration:none;font-family:var(--m);font-size:9.5px;color:var(--ink-3)}
+.cd-b.nuevo{animation:cdIn .3s var(--ease) both}
+@keyframes cdIn{from{opacity:0;transform:translateX(22px) scale(.94)}to{opacity:1;transform:none}}
+@media(max-width:900px){
+  .hero{grid-template-columns:1fr;gap:24px;padding-bottom:22px}
+  .cd-b:nth-child(n+6){display:none}
+}
+@media(max-width:560px){ .cd-b:nth-child(n+5){display:none} }
+</style>
+</head>
+<body>
+
+<div class="intro" id="intro">
+  <div class="intro-c">
+    <svg class="intro-l" viewBox="0 0 672 672" aria-hidden="true">
+      <defs><linearGradient id="il" x1="0" y1="0" x2=".35" y2="1">
+        <stop offset="0" stop-color="#EDF0F5"/><stop offset=".42" stop-color="#C2C9D6"/>
+        <stop offset=".72" stop-color="#98A1B2"/><stop offset="1" stop-color="#79839A"/>
+      </linearGradient></defs>
+      <path class="il-p" fill="url(#il)"
+        d="M336 0 H464 V224 H672 V336 H560 V560 H464 V672 H336 A336 336 0 0 1 336 0 Z"/>
+      <rect class="il-r il-r1" fill="#2F6BFF" x="464" y="112" width="112" height="112"/>
+      <rect class="il-r il-r2" fill="#2F6BFF" x="560" y="336" width="112" height="112"/>
+    </svg>
+    <div class="intro-t">
+      <b>Nereum <span>Explorer</span></b>
+      <s>The public record of the network</s>
+    </div>
+    <div class="intro-b"><i></i></div>
+  </div>
+</div>
+
+<header class="hd">
+  <div class="hd-in">
+    <button class="menuB" id="menuB" aria-label="Menu">
+      <svg viewBox="0 0 20 20"><path d="M3 6h14M3 10h14M3 14h14"/></svg>
+    </button>
+    <a class="marca" href="#/" data-ir="/">
+      <svg viewBox="0 0 672 672" aria-hidden="true">
+        <defs><linearGradient id="plata" x1="0" y1="0" x2=".35" y2="1">
+          <stop offset="0" stop-color="#EDF0F5"/>
+          <stop offset=".42" stop-color="#C2C9D6"/>
+          <stop offset=".72" stop-color="#98A1B2"/>
+          <stop offset="1" stop-color="#79839A"/>
+        </linearGradient></defs>
+        <path fill="url(#plata)" d="M336 0 H464 V224 H672 V336 H560 V560 H464 V672 H336 A336 336 0 0 1 336 0 Z"/>
+        <rect fill="#2F6BFF" x="464" y="112" width="112" height="112"/>
+        <rect fill="#2F6BFF" x="560" y="336" width="112" height="112"/>
+      </svg>
+      <b>Nereum</b><s>EXPLORER</s>
+    </a>
+    <nav class="nav" id="nav">
+      <a href="#/" data-ir="/">Overview</a>
+      <a href="#/activos" data-ir="/activos">Assets</a>
+      <a href="#/bloques" data-ir="/bloques">Blocks</a>
+      <a href="#/txs" data-ir="/txs">Transactions</a>
+      <a href="#/cuentas" data-ir="/cuentas">Accounts</a>
+      <a href="#/validadores" data-ir="/validadores">Validators</a>
+    </nav>
+    <div class="hd-sp"></div>
+    <div class="buscar">
+      <svg viewBox="0 0 20 20"><circle cx="9" cy="9" r="6"/><path d="M13.5 13.5 L17 17"/></svg>
+      <input id="q" type="search" placeholder="Block, transaction, account or asset"
+             autocomplete="off" spellcheck="false">
+    </div>
+    <button class="lupa" id="lupaB" type="button" aria-label="Search">
+      <svg viewBox="0 0 20 20"><circle cx="9" cy="9" r="6"/><path d="M13.5 13.5 L17 17"/></svg>
+    </button>
+    <button class="btn" id="tokBtn">
+      <svg viewBox="0 0 20 20"><path d="M10 4v12M4 10h12"/></svg>
+      <span>Tokenize</span>
+    </button>
+  </div>
+</header>
+
+<div class="cinta" id="cinta" aria-hidden="true">
+  <div class="cinta-e"><span class="vivo"><i></i>live</span></div>
+  <div class="cinta-p"><div class="cinta-t" id="cintaT"></div></div>
+</div>
+<canvas id="malla" aria-hidden="true"></canvas>
+<div class="velo" id="velo">
+  <div class="velo-c">
+    <input id="qm" type="search" placeholder="Block, transaction, account or asset"
+           autocomplete="off" spellcheck="false">
+    <div class="ay">Enter a block number, a hash, an address or an asset name</div>
+  </div>
+</div>
+<main class="wrap" id="app"></main>
+
+<script>
+/* ══════════════════════════════════════════════════════════════
+   NEREUM EXPLORER · simulación completa
+   Toda la cadena vive en memoria: bloques que se producen solos,
+   transacciones, cuentas con credenciales y activos tokenizados
+   con su política. Nada sale a la red.
+   ══════════════════════════════════════════════════════════════ */
+
+const RND=(s=>()=>((s=s*1664525+1013904223>>>0)/4294967296))(20260830);
+const ent=(a,b)=>a+Math.floor(RND()*(b-a+1));
+const elige=a=>a[Math.floor(RND()*a.length)];
+const hex=n=>Array.from({length:n},()=>'0123456789abcdef'[Math.floor(RND()*16)]).join('');
+const dir=()=>'nrm1'+hex(38);
+const hash=()=>'0x'+hex(64);
+const num=n=>n.toLocaleString('en-US');
+const dec=(n,d=2)=>n.toLocaleString('en-US',{minimumFractionDigits:d,maximumFractionDigits:d});
+const corto=(s,a=10,b=8)=>s.length<=a+b+2?s:s.slice(0,a)+'…'+s.slice(-b);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+/* ── el estado de la cadena ── */
+const JUR=['Spain','Germany','France','Netherlands','Portugal','Italy',
+           'United States','United Kingdom','Switzerland','Singapore'];
+const CLASES=['Professional','Institutional','Qualified retail'];
+const TIPOS=[
+  {t:'Real estate', d:'A share in an income-producing property'},
+  {t:'Private credit', d:'A loan secured against real collateral'},
+  {t:'Invoice', d:'Commercial paper with a maturity'},
+  {t:'Corporate debt', d:'A bond issued by a company'},
+  {t:'Fund', d:'A share in an investment vehicle'}];
+
+const CH={
+  altura:0, bloques:[], txs:[], cuentas:[], activos:[], emisores:[],
+  rechazos:0, arranque:Date.now()
+};
+
+function nuevaAccount(op={}){
+  const c={
+    dir: op.dir||dir(),
+    nombre: op.nombre||null,
+    tipo: op.tipo||'Holder',
+    jur: op.jur||elige(JUR),
+    clase: op.clase||elige(CLASES),
+    credencial: op.credencial!==undefined?op.credencial:(RND()>0.18),
+    emisorCred: elige(['Onfido','Sumsub','Jumio','Fractal ID']),
+    caduca: new Date(Date.now()+ent(30,400)*864e5),
+    saldo: +(RND()*180000).toFixed(2),
+    tenencias: [],
+    desde: Date.now()-ent(1,900)*864e5
+  };
+  CH.cuentas.push(c); return c;
+}
+
+function nuevoAsset(op={}){
+  const ti=op.tipo||elige(TIPOS);
+  const a={
+    id:'NRA-'+String(CH.activos.length+1).padStart(4,'0'),
+    simbolo: op.simbolo||('A'+hex(3).toUpperCase()),
+    nombre: op.nombre||(ti.t+' · '+elige(['Madrid','Berlin','Lisbon','Amsterdam','Milan','Valencia'])),
+    tipo: ti.t, desc: op.desc||ti.d,
+    emisor: op.emisor||elige(CH.emisores),
+    suministro: op.suministro||ent(2,60)*1000,
+    decimales: 2,
+    valor: op.valor||ent(40,900)*1000,
+    doc: op.doc||('Escritura '+hex(6).toUpperCase()),
+    huella: op.huella||hash(),
+    politica: op.politica||{
+      jur: JUR.slice(0,ent(3,6)),
+      classes: CLASES.slice(0,ent(1,3)),
+      bloqueo: elige([0,30,90,180,365]),
+      maxHolders: elige([50,100,250,500])
+    },
+    emitido: op.emitido||(Date.now()-ent(1,240)*864e5),
+    titulares: [], transferencias: 0, rechazadas: 0,
+    bloque: op.bloque||null
+  };
+  CH.activos.push(a); return a;
+}
+
+function nuevaTx(op){
+  const t=Object.assign({
+    hash: hash(), tipo:'Transfer', bloque:null, ts:Date.now(),
+    de:null, a:null, activo:null, cantidad:0, estado:'ok',
+    comprobaciones:[], comision:+(RND()*0.004+0.0006).toFixed(5), motivo:null
+  }, op);
+  CH.txs.unshift(t);
+  if(t.estado==='no') CH.rechazos++;
+  return t;
+}
+
+/* ── el motor de política: lo que decide si una transferencia liquida ── */
+function comprueba(activo, de, a, cantidad){
+  const c=[];
+  c.push({n:'Firma válida', d:'The sending account controls the key', r:true});
+  const saldo=(de.tenencias.find(x=>x.id===activo.id)||{}).cant||0;
+  c.push({n:'Saldo suficiente', d:`Tiene ${dec(saldo)} y transfiere ${dec(cantidad)}`,
+          r: saldo>=cantidad});
+  c.push({n:'Policy loaded', d:`Rule set for ${activo.id}`, r:true});
+  c.push({n:'Recipient credential',
+          d: a.credencial?`Verified by ${a.emisorCred}`:'No valid credential',
+          r: a.credencial});
+  const jurOk=activo.politica.jur.includes(a.jur);
+  c.push({n:'Jurisdiction allowed',
+          d: jurOk?`${a.jur} is in the policy`:`${a.jur} is not in the policy`,
+          r: jurOk});
+  const claseOk=activo.politica.classes.includes(a.clase);
+  c.push({n:'Holder class',
+          d: claseOk?`${a.clase} califica`:`${a.clase} does not qualify for this asset`,
+          r: claseOk});
+  const tit=activo.titulares.length + (a.tenencias.find(x=>x.id===activo.id)?0:1);
+  const cupoOk=tit<=activo.politica.maxHolders;
+  c.push({n:'Holder cap',
+          d:`${tit} de ${activo.politica.maxHolders} allowed`, r:cupoOk});
+  const pasa=c.every(x=>x.r);
+  return {c, pasa, motivo: pasa?null:(c.find(x=>!x.r)||{}).n};
+}
+
+function mueve(activo, de, a, cantidad){
+  const q=de.tenencias.find(x=>x.id===activo.id);
+  q.cant-=cantidad; if(q.cant<=0.0001) de.tenencias=de.tenencias.filter(x=>x.id!==activo.id);
+  const r=a.tenencias.find(x=>x.id===activo.id);
+  if(r) r.cant+=cantidad; else a.tenencias.push({id:activo.id, cant:cantidad});
+  activo.titulares=CH.cuentas.filter(x=>x.tenencias.some(y=>y.id===activo.id)).map(x=>x.dir);
+  activo.transferencias++;
+}
+
+function nuevoBlock(txs){
+  const b={
+    n: ++CH.altura, hash: hash(), ts: Date.now(),
+    validador: elige(CH.emisores).dir,
+    txs: txs.map(t=>t.hash), gas: ent(21000, 340000),
+    tam: ent(1200, 9800)
+  };
+  txs.forEach(t=>{ t.bloque=b.n; });
+  CH.bloques.unshift(b);
+  if(CH.bloques.length>240) CH.bloques.length=240;
+  if(CH.txs.length>600) CH.txs.length=600;
+  return b;
+}
+
+/* ── se siembra una cadena con historia ── */
+(function siembra(){
+  ['Iberian Real Estate SGIIC','Nordic Credit Partners','Atlas Invoice Finance',
+   'Meridian Capital','Delta Asset Management'].forEach(nom=>{
+    CH.emisores.push(nuevaAccount({nombre:nom, tipo:'Issuer', credencial:true,
+      clase:'Institutional'}));
+  });
+  for(let i=0;i<64;i++) nuevaAccount();
+  for(let i=0;i<9;i++){
+    const a=nuevoAsset();
+    const n=ent(4,14);
+    for(let k=0;k<n;k++){
+      const c=elige(CH.cuentas.filter(x=>x.tipo==='Holder'));
+      const cant=+(a.suministro/n*(0.5+RND())).toFixed(2);
+      const t=c.tenencias.find(x=>x.id===a.id);
+      if(t) t.cant+=cant; else c.tenencias.push({id:a.id, cant});
+    }
+    a.titulares=CH.cuentas.filter(x=>x.tenencias.some(y=>y.id===a.id)).map(x=>x.dir);
+  }
+  for(let i=0;i<150;i++){
+    const lote=[];
+    const cuantas=ent(0,4);
+    for(let k=0;k<cuantas;k++) lote.push(txAleatoria());
+    nuevoBlock(lote);
+  }
+})();
+
+function txAleatoria(){
+  const a=elige(CH.activos);
+  const tenedores=CH.cuentas.filter(x=>x.tenencias.some(y=>y.id===a.id && y.cant>1));
+  if(!tenedores.length) return nuevaTx({tipo:'Query', activo:a.id, estado:'ok',
+    comprobaciones:[{n:'Lectura de estado', d:'No change to the ledger', r:true}]});
+  const de=elige(tenedores);
+  /* la mayoría of transfers reales las gente que SÍ califica:
+     eligiendo el receptor al azar salían casi todas rechazadas, que da una
+     imagen falsa de la red */
+  const todos=CH.cuentas.filter(x=>x.tipo==='Holder' && x.dir!==de.dir);
+  const buenos=todos.filter(x=>x.credencial
+    && a.politica.jur.includes(x.jur) && a.politica.classes.includes(x.clase));
+  const a2 = (buenos.length && RND()<0.88) ? elige(buenos) : elige(todos);
+  const disp=(de.tenencias.find(x=>x.id===a.id)||{}).cant||0;
+  const cant=+(disp*(0.05+RND()*0.4)).toFixed(2);
+  const {c,pasa,motivo}=comprueba(a,de,a2,cant);
+  if(pasa) mueve(a,de,a2,cant); else a.rechazadas++;
+  return nuevaTx({tipo:'Transfer', de:de.dir, a:a2.dir, activo:a.id,
+    cantidad:cant, estado: pasa?'ok':'no', comprobaciones:c, motivo});
+}
+
+
+/* ══════════════════════════════════════════════════════════════
+   FONDO · la misma rejilla del sitio
+   Celdas cuyo turno sale de su distancia a un foco, así que la onda
+   nace de un punto y se propaga en vez de encenderse toda a la vez.
+   Va lentísima: es fondo, no espectáculo.
+   ══════════════════════════════════════════════════════════════ */
+(function(){
+  const cv=document.getElementById('malla');
+  if(!cv) return;
+  const ctx=cv.getContext('2d');
+  const clm=(v,a=0,b=1)=>Math.min(b,Math.max(a,v));
+  let W=0,H=0,piezas=[],t0=performance.now();
+
+  function arma(){
+    const d=Math.min(devicePixelRatio||1,2);
+    W=innerWidth; H=innerHeight;
+    cv.width=W*d; cv.height=H*d; ctx.setTransform(d,0,0,d,0,0);
+    const cuantas=Math.round(clm(W/17, 40, 86));
+    piezas=[];
+    for(let i=0;i<cuantas;i++){
+      piezas.push({
+        x: Math.random()*W,
+        t: Math.random(),                  /* por dónde va de su recorrido */
+        v: 0.034+Math.random()*0.052,      /* velocidad de subida */
+        w: 16+Math.random()*58,            /* tamaño */
+        r: (Math.random()-.5)*0.5,         /* inclinación */
+        az: Math.random()>0.78,            /* una de cada cinco, en azul */
+        p: 0.30+Math.random()*0.60         /* profundidad */
+      });
+    }
+  }
+
+  /* ── el vuelo ──
+     Piezas de tinta que suben del canto inferior y salen por arriba: el mismo
+     gesto que la transición del sitio. Las de delante van más rápidas y más
+     opacas; las del fondo, lentas y casi transparentes. Sin retícula. */
+  function pinta(now){
+    const dt=Math.min((now-t0)/1000, .05); t0=now;
+    ctx.clearRect(0,0,W,H);
+    for(const q of piezas){
+      q.t += q.v*dt*(0.55+q.p);
+      if(q.t>1.16){ q.t=-0.16; q.x=Math.random()*W; }
+      const y = H*1.08 - q.t*(H*1.26);
+      const a = Math.sin(clm(q.t,0,1)*Math.PI) * q.p * 0.24;
+      if(a<=0.002) continue;
+      const l = q.w*(0.6+q.p*0.9);
+      ctx.save();
+      ctx.translate(q.x, y); ctx.rotate(q.r*0.32);
+      ctx.fillStyle = q.az
+        ? 'rgba(47,107,255,'+(a*1.6).toFixed(3)+')'
+        : 'rgba(10,12,16,'+(a*0.62).toFixed(3)+')';
+      ctx.fillRect(-l/2, -l*0.30, l, l*0.60);
+      ctx.restore();
+    }
+    requestAnimationFrame(pinta);
+  }
+
+  arma();
+  let tmp; addEventListener('resize', ()=>{ clearTimeout(tmp); tmp=setTimeout(arma,180); });
+  if(!matchMedia('(prefers-reduced-motion: reduce)').matches){
+    t0=performance.now(); requestAnimationFrame(pinta);
+  }
+})();
+
+/* ── la cadena de bloques ──
+   Los últimos siete enlazados. Cada uno entra por la derecha y empuja a los
+   demás: se ve la cadena creciendo, que es lo que hace una cadena. */
+function pinBloque(b,i){
+  const t=CH.txs.filter(x=>x.bloque===b.n);
+  const ok=t.filter(x=>x.estado==='ok').length;
+  return `<a class="cd-b" href="#/bloque/${b.n}" style="--i:${i}">
+    <b class="mono">${num(b.n)}</b>
+    <div class="cd-p">${Array.from({length:Math.min(12,t.length)},(_,k)=>
+      `<i class="${k<ok?'':'no'}"></i>`).join('')||'<i class="v"></i>'}</div>
+    <s>${t.length} tx</s></a>`;
+}
+function armaCadena(){
+  const c=document.getElementById('cadena'); if(!c) return;
+  c.innerHTML=CH.bloques.slice(0,7).map(pinBloque).join('');
+}
+function empujaCadena(){
+  const c=document.getElementById('cadena'); if(!c) return;
+  const d=document.createElement('div');
+  d.innerHTML=pinBloque(CH.bloques[0],0);
+  const el=d.firstElementChild; el.classList.add('nuevo');
+  c.prepend(el);
+  while(c.children.length>7) c.lastElementChild.remove();
+}
+
+/* ── el contador que sube ── */
+function sube(el, destino){
+  if(!el) return;
+  const de=parseInt((el.dataset.v||el.textContent).replace(/[^\d]/g,''),10)||0;
+  if(de===destino){ el.textContent=num(destino); el.dataset.v=destino; return; }
+  const t0=performance.now(), dur=420;
+  const paso=now=>{
+    const k=Math.min(1,(now-t0)/dur), e=1-Math.pow(1-k,3);
+    el.textContent=num(Math.round(de+(destino-de)*e));
+    if(k<1) requestAnimationFrame(paso); else el.dataset.v=destino;
+  };
+  requestAnimationFrame(paso);
+}
+
+/* ── la cinta ──
+   Las últimas transferencias pasando bajo la cabecera. Es lo que que la
+   red se sienta viva antes de leer nada. */
+function pinCinta(t){
+  const a=CH.activos.find(x=>x.id===t.activo);
+  const ok=t.estado==='ok';
+  return `<a class="ct-i ${ok?'':'no'}" href="#/tx/${t.hash}">
+    <i></i><b>${corto(t.hash,8,4)}</b>
+    <s>${a?esc(a.simbolo):'—'}</s>
+    <u>${t.cantidad?dec(t.cantidad):'—'}</u></a>`;
+}
+function empujaCinta(){
+  const c=document.getElementById('cintaT'); if(!c) return;
+  const ult=CH.txs[0]; if(!ult) return;
+  const d=document.createElement('div');
+  d.innerHTML=pinCinta(ult);
+  const el=d.firstElementChild; el.classList.add('nuevo');
+  c.prepend(el);
+  while(c.children.length>16) c.lastElementChild.remove();
+}
+function armaCinta(){
+  const c=document.getElementById('cintaT'); if(!c) return;
+  c.innerHTML=CH.txs.slice(0,14).map(pinCinta).join('');
+}
+
+/* ══ enrutado ══ */
+const app=document.getElementById('app');
+let RUTA='/';
+
+function ir(r){ if(location.hash.slice(1)!==r) location.hash=r; else pinta(); }
+function pinta(){
+  RUTA=location.hash.slice(1)||'/';
+  const [_,base,arg]=RUTA.split('/');
+  document.querySelectorAll('.nav a').forEach(a=>
+    a.classList.toggle('on', a.dataset.ir===('/'+(base||''))));
+  const V={'':vOverview, activos:vAssets, activo:vAsset, bloques:vBlocks,
+           bloque:vBlock, txs:vTxs, tx:vTx, cuentas:vAccounts, cuenta:vAccount,
+           tokenizar:vTokenize, transferir:vTransferir,
+           validadores:vValidators, red:vRed};
+  const f=V[base||''];
+  app.innerHTML = f? f(arg?decodeURIComponent(arg):null) : vNoHay();
+  window.scrollTo(0,0);
+  if(document.getElementById('graf')){ dibujaGraf(); refrescaStatus(); armaCadena(); }
+  document.querySelectorAll('[data-cop]').forEach(b=>b.onclick=e=>{
+    e.stopPropagation();
+    navigator.clipboard?.writeText(b.dataset.cop);
+    const o=b.innerHTML; b.innerHTML='<svg viewBox="0 0 20 20"><path d="M4 10l4 4 8-9"/></svg>';
+    setTimeout(()=>b.innerHTML=o,1100);
+  });
+  document.getElementById('nav').classList.remove('abierto');
+}
+addEventListener('hashchange', pinta);
+
+/* ══ piezas reutilizables ══ */
+const ICO={
+  bloque:'<path d="M10 2 L17 6 V14 L10 18 L3 14 V6 Z"/>',
+  tx:'<path d="M4 7h12m-4-4 4 4-4 4M16 13H4m4 4-4-4 4-4"/>',
+  activo:'<rect x="3" y="3" width="14" height="14" rx="2"/><path d="M7 10h6"/>',
+  cuenta:'<circle cx="10" cy="7" r="3.2"/><path d="M4 17c0-3.3 2.7-5 6-5s6 1.7 6 5"/>',
+  ok:'<path d="M4 10l4 4 8-9"/>', no:'<path d="M5 5l10 10M15 5L5 15"/>',
+  esp:'<circle cx="10" cy="10" r="6"/>'
+};
+const ic=k=>`<div class="ic"><svg viewBox="0 0 20 20">${ICO[k]}</svg></div>`;
+const cop=v=>`<button class="cop" data-cop="${esc(v)}" title="Copy" type="button">
+  <svg viewBox="0 0 20 20"><rect x="7" y="7" width="9" height="9" rx="1.5"/>
+  <path d="M13 5H5a1 1 0 0 0-1 1v8"/></svg></button>`;
+const hace=ts=>{
+  const s=Math.floor((Date.now()-ts)/1000);
+  if(s<60) return `${s} s`;
+  if(s<3600) return `${Math.floor(s/60)} min`;
+  if(s<86400) return `${Math.floor(s/3600)} h`;
+  return `${Math.floor(s/86400)} d`;
+};
+const miga=(...p)=>`<div class="miga">${p.map((x,i)=>
+  (i?'<span>›</span>':'')+(x.r?`<a class="enl" href="#${x.r}">${esc(x.t)}</a>`:esc(x.t))
+).join('')}</div>`;
+
+function filaBlock(b){
+  return `<tr onclick="ir('/bloque/${b.n}')" style="cursor:pointer">
+    <td class="m n">${num(b.n)}</td>
+    <td class="m">${corto(b.hash,10,8)}</td>
+    <td>${b.txs.length}</td>
+    <td class="m p">${corto(b.validador,8,6)}</td>
+    <td class="d p">${num(b.gas)}</td>
+    <td class="d p">${hace(b.ts)}</td>
+  </tr>`;
+}
+function tablaBlocks(bs){
+  return `<div class="tbw"><table class="tb">
+    <thead><tr><th>Altura</th><th>Hash</th><th>Txs</th><th>Validator</th>
+      <th class="d">Gas</th><th class="d">When</th></tr></thead>
+    <tbody>${bs.map(filaBlock).join('')}</tbody></table></div>`;
+}
+function filaTx(t){
+  const a=CH.activos.find(x=>x.id===t.activo);
+  return `<tr onclick="ir('/tx/${t.hash}')" style="cursor:pointer">
+    <td class="m n">${corto(t.hash,10,6)}</td>
+    <td><span class="tag ${t.estado==='ok'?'ok':'no'}">${t.estado==='ok'?'Settled':'Rejected'}</span></td>
+    <td class="p">${esc(t.tipo)}</td>
+    <td class="m">${a?esc(a.simbolo):'—'}</td>
+    <td class="d">${t.cantidad?dec(t.cantidad):'—'}</td>
+    <td class="d m p">${t.bloque?num(t.bloque):'—'}</td>
+    <td class="d p">${hace(t.ts)}</td>
+  </tr>`;
+}
+function tablaTxs(ts){
+  return `<div class="tbw"><table class="tb">
+    <thead><tr><th>Hash</th><th>Status</th><th>Type</th><th>Asset</th>
+      <th class="d">Amount</th><th class="d">Block</th><th class="d">When</th></tr></thead>
+    <tbody>${ts.map(filaTx).join('')}</tbody></table></div>`;
+}
+function filaAsset(a){
+  return `<tr onclick="ir('/activo/${a.id}')" style="cursor:pointer">
+    <td class="m n">${esc(a.id)}</td>
+    <td class="n">${esc(a.nombre)}</td>
+    <td class="m">${esc(a.simbolo)}</td>
+    <td class="p">${esc(a.tipo)}</td>
+    <td class="d">${num(a.suministro)}</td>
+    <td class="d">${a.titulares.length}</td>
+    <td class="d">$${num(a.valor)}</td>
+  </tr>`;
+}
+function tablaAssets(as){
+  return `<div class="tbw"><table class="tb">
+    <thead><tr><th>Identifier</th><th>Name</th><th>Symbol</th><th>Type</th>
+      <th class="d">Supply</th><th class="d">Holders</th>
+      <th class="d">Value</th></tr></thead>
+    <tbody>${as.map(filaAsset).join('')}</tbody></table></div>`;
+}
+function filaAccount(c){
+  const v=c.tenencias.reduce((s,t)=>{
+    const a=CH.activos.find(x=>x.id===t.id); return s+(a? t.cant/a.suministro*a.valor:0)},0);
+  return `<tr onclick="ir('/cuenta/${c.dir}')" style="cursor:pointer">
+    <td class="m n">${corto(c.dir,12,6)}</td>
+    <td>${c.nombre?esc(c.nombre):'<span class="p">—</span>'}</td>
+    <td class="p">${esc(c.jur)}</td>
+    <td class="p">${esc(c.clase)}</td>
+    <td><span class="tag ${c.credencial?'ok':'no'}">${c.credencial?'Valid':'Missing'}</span></td>
+    <td class="d">${c.tenencias.length}</td>
+    <td class="d">$${num(Math.round(v))}</td>
+  </tr>`;
+}
+function tablaAccounts(cs){
+  return `<div class="tbw"><table class="tb">
+    <thead><tr><th>Address</th><th>Name</th><th>Jurisdiction</th><th>Clase</th>
+      <th>Credential</th><th class="d">Assets</th><th class="d">Value</th></tr></thead>
+    <tbody>${cs.map(filaAccount).join('')}</tbody></table></div>`;
+}
+
+/* ══ vistas ══ */
+function vOverview(){
+  const ult=CH.txs.slice(0,8), ub=CH.bloques.slice(0,8);
+  const tot=CH.activos.reduce((s,a)=>s+a.valor,0);
+  const titulares=CH.cuentas.filter(c=>c.tenencias.length).length;
+  return `
+  <section class="hero">
+    <div class="hero-t">
+      <span class="tag az">Testnet</span>
+      <h1>The public record of <em>Nereum</em></h1>
+      <p>Every block, every transfer and the policy attached to every asset.
+      Verifiable by anyone, with no account and no permission.</p>
+      <div class="hero-a">
+        <button class="btn" onclick="TOK.paso=1;ir('/tokenizar')">Tokenize an asset</button>
+        <button class="btn sec" onclick="ir('/red')">Network status</button>
+      </div>
+    </div>
+    <div class="hero-c">
+      <div class="cad-h"><span class="vivo"><i></i>live</span>
+        <span class="mono">block production</span></div>
+      <div class="cadena" id="cadena"></div>
+    </div>
+  </section>
+
+  <div class="rejilla r4" style="margin-bottom:16px">
+    <div class="stat"><i>Block height</i><b id="sAlt">${num(CH.altura)}</b>
+      <s>one every 0.9 s</s>${chispa('alt')}</div>
+    <div class="stat"><i>Tokenized assets</i><b id="sAct">${num(CH.activos.length)}</b>
+      <s>$${num(Math.round(tot/1e6))}M in declared value</s>${chispa('act')}</div>
+    <div class="stat"><i>Holders with a position</i><b id="sTit">${num(titulares)}</b>
+      <s>of ${num(CH.cuentas.length)} accounts</s>${chispa('tit')}</div>
+    <div class="stat"><i>Rejected transfers</i><b id="sRec">${num(CH.rechazos)}</b>
+      <s>never entered the ledger</s>${chispa('rec')}</div>
+  </div>
+
+  <div class="aviso inf" style="margin-bottom:16px">
+    <svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="7"/><path d="M10 9v5M10 6.5v.01"/></svg>
+    <div>This is a <strong>full simulation</strong>: the chain runs in your browser, blocks are
+    produced on their own, and every transfer goes through the same policy engine the
+    whitepaper describes. Nothing is sent to any network.</div>
+  </div>
+
+  <div class="rejilla r2" style="margin-bottom:16px">
+    <div class="panel">
+      <div class="panel-h"><h2>Network activity</h2>
+        <span class="tag gr">last 40 blocks</span></div>
+      <div style="padding:16px 18px 12px"><canvas id="graf" height="132"></canvas></div>
+    </div>
+    <div class="panel">
+      <div class="panel-h"><h2>Network status</h2><span class="vivo"><i></i>operational</span></div>
+      <table class="det">
+        <tr><td>Block time</td><td><b>0.9 s</b>
+          <span style="color:var(--ink-3)"> · average of the last 40</span></td></tr>
+        <tr><td>Transfers per block</td><td><b id="rTpb">—</b></td></tr>
+        <tr><td>Finality</td><td><span class="tag ok">Deterministic</span>
+          <span style="color:var(--ink-3)"> · a final block does not reorganise</span></td></tr>
+        <tr><td>Policy</td><td>Checked in the protocol, before writing</td></tr>
+        <tr><td>Rejection rate</td><td><b id="rRech">—</b>
+          <span style="color:var(--ink-3)"> of transfers</span></td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="rejilla r3" style="margin-bottom:16px">
+    <div class="panel" style="grid-column:span 2">
+      <div class="panel-h"><h2>Tokenized value by asset type</h2>
+        <span class="tag gr">$${num(Math.round(tot/1e6))}M in total</span></div>
+      <div style="padding:18px" id="repType">${barrasType()}</div>
+    </div>
+    <div class="panel">
+      <div class="panel-h"><h2>Split</h2></div>
+      <div style="padding:14px 18px 18px;display:grid;place-items:center">
+        ${anilloType()}
+      </div>
+    </div>
+  </div>
+
+  <div class="rejilla r2">
+    <div class="panel">
+      <div class="panel-h"><h2>Latest blocks</h2>
+        <a class="enl mono" href="#/bloques">View all</a></div>
+      <div id="ultBlocks">${tablaBlocks(ub)}</div>
+    </div>
+    <div class="panel">
+      <div class="panel-h"><h2>Latest transactions</h2>
+        <a class="enl mono" href="#/txs">View all</a></div>
+      <div id="ultTxs">${tablaTxs(ult)}</div>
+    </div>
+  </div>
+
+  <div class="panel" style="margin-top:16px">
+    <div class="panel-h"><h2>Recent assets</h2>
+      <a class="enl mono" href="#/activos">View all</a></div>
+    ${tablaAssets(CH.activos.slice(-5).reverse())}
+  </div>
+
+  ${piePagina()}`;
+}
+
+function vAssets(){
+  return `
+  ${miga({t:'Explorer',r:'/'},{t:'Assets'})}
+  <h1>Tokenized assets</h1>
+  <div class="sub">${CH.activos.length} assets issued on the network</div>
+  <div class="panel">
+    <div class="panel-h"><h2>All assets</h2>
+      <button class="btn" onclick="ir('/tokenizar')">
+        <svg viewBox="0 0 20 20"><path d="M10 4v12M4 10h12"/></svg><span>Tokenize asset</span>
+      </button></div>
+    ${tablaAssets(CH.activos.slice().reverse())}
+  </div>
+  ${piePagina()}`;
+}
+
+function vAsset(id){
+  const a=CH.activos.find(x=>x.id===id);
+  if(!a) return vNoHay('No asset exists with that identifier');
+  const em=CH.cuentas.find(c=>c.dir===a.emisor.dir)||a.emisor;
+  const txs=CH.txs.filter(t=>t.activo===a.id).slice(0,10);
+  const tit=CH.cuentas.filter(c=>c.tenencias.some(t=>t.id===a.id))
+    .map(c=>({c, cant:c.tenencias.find(t=>t.id===a.id).cant}))
+    .sort((x,y)=>y.cant-x.cant);
+  return `
+  ${miga({t:'Explorer',r:'/'},{t:'Assets',r:'/activos'},{t:a.id})}
+  <h1>${esc(a.nombre)}</h1>
+  <div class="sub">${esc(a.id)} · ${esc(a.simbolo)} · ${esc(a.tipo)}</div>
+
+  <div class="rejilla r4" style="margin-bottom:16px">
+    <div class="stat"><i>Supply</i><b>${num(a.suministro)}</b><s>${esc(a.simbolo)}</s></div>
+    <div class="stat"><i>Declared value</i><b>$${num(a.valor)}</b>
+      <s>$${dec(a.valor/a.suministro)} per unit</s></div>
+    <div class="stat"><i>Holders</i><b>${tit.length}</b>
+      <s>max ${a.politica.maxHolders}
+      <span class="barra"><i style="width:${Math.min(100,tit.length/a.politica.maxHolders*100)}%"></i></span></s></div>
+    <div class="stat"><i>Transfers</i><b>${num(a.transferencias)}</b>
+      <s>${num(a.rechazadas)} rechazadas</s></div>
+  </div>
+
+  <div class="rejilla r2">
+    <div class="panel">
+      <div class="panel-h"><h2>The asset policy</h2>
+        <span class="tag az">Applied on every transfer</span></div>
+      <table class="det">
+        <tr><td>Jurisdictions allowed</td><td>${a.politica.jur.map(j=>
+          `<span class="tag gr" style="margin:1px 3px 1px 0">${esc(j)}</span>`).join('')}</td></tr>
+        <tr><td>Holder classes</td><td>${a.politica.classes.map(c=>
+          `<span class="tag gr" style="margin:1px 3px 1px 0">${esc(c)}</span>`).join('')}</td></tr>
+        <tr><td>Holding period</td><td>${a.politica.bloqueo?a.politica.bloqueo+' days':'No lock-up'}</td></tr>
+        <tr><td>Holder cap</td><td>${num(a.politica.maxHolders)}</td></tr>
+      </table>
+    </div>
+    <div class="panel">
+      <div class="panel-h"><h2>Link to the document</h2></div>
+      <table class="det">
+        <tr><td>Issuer</td><td><a class="enl" href="#/cuenta/${em.dir}">${esc(em.nombre||corto(em.dir))}</a></td></tr>
+        <tr><td>Document</td><td>${esc(a.doc)}</td></tr>
+        <tr><td>Document fingerprint</td><td class="mono">${corto(a.huella,20,12)}</td></tr>
+        <tr><td>Issued</td><td>${new Date(a.emitido).toLocaleDateString('en-US')}</td></tr>
+        ${a.bloque?`<tr><td>Issuance block</td><td><a class="enl" href="#/bloque/${a.bloque}">${num(a.bloque)}</a></td></tr>`:''}
+      </table>
+    </div>
+  </div>
+
+  <div class="panel" style="margin-top:16px">
+    <div class="panel-h"><h2>Holders</h2>
+      <button class="btn sec" onclick="ir('/transferir/${a.id}')">Simulate transfer</button></div>
+    ${tit.length?`<div class="tbw"><table class="tb">
+      <thead><tr><th>Address</th><th>Jurisdiction</th><th>Clase</th>
+        <th class="d">Amount</th><th class="d">Percentage</th></tr></thead>
+      <tbody>${tit.slice(0,12).map(({c,cant})=>`
+        <tr onclick="ir('/cuenta/${c.dir}')" style="cursor:pointer">
+          <td class="m n">${c.nombre?esc(c.nombre):corto(c.dir,12,6)}</td>
+          <td class="p">${esc(c.jur)}</td><td class="p">${esc(c.clase)}</td>
+          <td class="d">${dec(cant)} ${esc(a.simbolo)}</td>
+          <td class="d">${dec(cant/a.suministro*100)} %</td>
+        </tr>`).join('')}</tbody></table></div>`
+      :'<div class="vacio">No holders yet</div>'}
+  </div>
+
+  <div class="panel" style="margin-top:16px">
+    <div class="panel-h"><h2>Asset movements</h2></div>
+    ${txs.length?tablaTxs(txs):'<div class="vacio">No movements recorded</div>'}
+  </div>
+  ${piePagina()}`;
+}
+
+function vBlocks(){
+  return `
+  ${miga({t:'Explorer',r:'/'},{t:'Blocks'})}
+  <h1>Blocks</h1>
+  <div class="sub">Altura actual ${num(CH.altura)} · <span class="vivo"><i></i>live</span></div>
+  <div class="panel"><div id="listaBlocks">${tablaBlocks(CH.bloques.slice(0,40))}</div></div>
+  ${piePagina()}`;
+}
+
+function vBlock(n){
+  const b=CH.bloques.find(x=>String(x.n)===String(n));
+  if(!b) return vNoHay('That block is outside the window this explorer keeps');
+  const txs=CH.txs.filter(t=>t.bloque===b.n);
+  const i=CH.bloques.indexOf(b);
+  return `
+  ${miga({t:'Explorer',r:'/'},{t:'Blocks',r:'/bloques'},{t:'Block '+num(b.n)})}
+  <h1>Block ${num(b.n)}</h1>
+  <div class="sub">${hace(b.ts)} · ${new Date(b.ts).toLocaleString('en-US')}</div>
+  <div class="panel">
+    <table class="det">
+      <tr><td>Altura</td><td>${num(b.n)}</td></tr>
+      <tr><td>Hash</td><td class="mono">${esc(b.hash)} ${cop(b.hash)}</td></tr>
+      <tr><td>Validator</td><td class="mono"><a class="enl" href="#/cuenta/${b.validador}">${corto(b.validador,16,10)}</a></td></tr>
+      <tr><td>Transactions</td><td>${txs.length}</td></tr>
+      <tr><td>Gas consumido</td><td>${num(b.gas)}</td></tr>
+      <tr><td>Size</td><td>${num(b.tam)} bytes</td></tr>
+      <tr><td>Finality</td><td><span class="tag ok">Final</span>
+        <span style="color:var(--ink-3);font-size:13px"> · no puede reorganizarse</span></td></tr>
+    </table>
+  </div>
+  <div class="rejilla r2" style="margin-top:16px">
+    <button class="btn sec" style="width:100%;height:44px"
+      ${i>=CH.bloques.length-1?'disabled style="opacity:.4;width:100%;height:44px"':`onclick="ir('/bloque/${b.n-1}')"`}>
+      ← Previous block</button>
+    <button class="btn sec" style="width:100%;height:44px"
+      ${i<=0?'disabled style="opacity:.4;width:100%;height:44px"':`onclick="ir('/bloque/${b.n+1}')"`}>
+      Next block →</button>
+  </div>
+  <div class="panel" style="margin-top:16px">
+    <div class="panel-h"><h2>Block transactions</h2></div>
+    ${txs.length?tablaTxs(txs):'<div class="vacio">Block with no transactions</div>'}
+  </div>
+  ${piePagina()}`;
+}
+
+function vTxs(){
+  return `
+  ${miga({t:'Explorer',r:'/'},{t:'Transactions'})}
+  <h1>Transactions</h1>
+  <div class="sub">${num(CH.txs.length)} in the recent window · ${num(CH.rechazos)} rejected by policy</div>
+  <div class="panel"><div id="listaTxs">${tablaTxs(CH.txs.slice(0,40))}</div></div>
+  ${piePagina()}`;
+}
+
+function vTx(h){
+  const t=CH.txs.find(x=>x.hash===h);
+  if(!t) return vNoHay('No transaction exists with that hash');
+  const a=CH.activos.find(x=>x.id===t.activo);
+  return `
+  ${miga({t:'Explorer',r:'/'},{t:'Transactions',r:'/txs'},{t:corto(t.hash,10,6)})}
+  <h1>Transaction</h1>
+  <div class="sub mono">${esc(t.hash)} ${cop(t.hash)}</div>
+
+  <div class="aviso ${t.estado==='ok'?'ok':'no'}" style="margin-bottom:16px">
+    <svg viewBox="0 0 20 20">${t.estado==='ok'?ICO.ok:ICO.no}</svg>
+    <div>${t.estado==='ok'
+      ? '<strong>Settled.</strong> Every check passed and the transfer was written to the ledger.'
+      : `<strong>Rejected: ${esc(t.motivo||'política del activo')}.</strong>
+         There is no intermediate state to unwind, because the transfer was never written.`}</div>
+  </div>
+
+  <div class="panel">
+    <table class="det">
+      <tr><td>Status</td><td><span class="tag ${t.estado==='ok'?'ok':'no'}">
+        ${t.estado==='ok'?'Settled':'Rejected'}</span></td></tr>
+      <tr><td>Type</td><td>${esc(t.tipo)}</td></tr>
+      ${t.bloque?`<tr><td>Block</td><td><a class="enl" href="#/bloque/${t.bloque}">${num(t.bloque)}</a></td></tr>`:''}
+      <tr><td>Timestamp</td><td>${new Date(t.ts).toLocaleString('en-US')} · ${hace(t.ts)}</td></tr>
+      ${t.de?`<tr><td>From</td><td class="mono"><a class="enl" href="#/cuenta/${t.de}">${esc(t.de)}</a></td></tr>`:''}
+      ${t.a?`<tr><td>To</td><td class="mono"><a class="enl" href="#/cuenta/${t.a}">${esc(t.a)}</a></td></tr>`:''}
+      ${a?`<tr><td>Asset</td><td><a class="enl" href="#/activo/${a.id}">${esc(a.nombre)}</a>
+        <span style="color:var(--ink-3)"> · ${esc(a.id)}</span></td></tr>`:''}
+      ${t.cantidad?`<tr><td>Amount</td><td>${dec(t.cantidad)} ${a?esc(a.simbolo):''}</td></tr>`:''}
+      <tr><td>Fee</td><td>${dec(t.comision,5)} NRM</td></tr>
+    </table>
+  </div>
+
+  <div class="panel" style="margin-top:16px">
+    <div class="panel-h"><h2>Protocol checks</h2>
+      <span class="tag ${t.estado==='ok'?'ok':'no'}">
+        ${t.comprobaciones.filter(c=>c.r).length} de ${t.comprobaciones.length}</span></div>
+    <div class="panel-b" style="padding:0">
+      ${t.comprobaciones.map(c=>`
+        <div class="chk ${c.r?'ok':'no'}">
+          <div class="b"><svg viewBox="0 0 20 20">${c.r?ICO.ok:ICO.no}</svg></div>
+          <div class="t"><b>${esc(c.n)}</b><s>${esc(c.d)}</s></div>
+        </div>`).join('')}
+    </div>
+  </div>
+  ${piePagina()}`;
+}
+
+function vAccounts(){
+  const cs=CH.cuentas.slice().sort((a,b)=>b.tenencias.length-a.tenencias.length).slice(0,40);
+  return `
+  ${miga({t:'Explorer',r:'/'},{t:'Accounts'})}
+  <h1>Accounts</h1>
+  <div class="sub">${num(CH.cuentas.length)} accounts · ${num(CH.emisores.length)} issuers</div>
+  <div class="panel">${tablaAccounts(cs)}</div>
+  ${piePagina()}`;
+}
+
+function vAccount(d){
+  const c=CH.cuentas.find(x=>x.dir===d);
+  if(!c) return vNoHay('No account exists at that address');
+  const txs=CH.txs.filter(t=>t.de===c.dir||t.a===c.dir).slice(0,10);
+  const val=c.tenencias.reduce((s,t)=>{
+    const a=CH.activos.find(x=>x.id===t.id); return s+(a?t.cant/a.suministro*a.valor:0)},0);
+  return `
+  ${miga({t:'Explorer',r:'/'},{t:'Accounts',r:'/cuentas'},{t:corto(c.dir,10,6)})}
+  <h1>${c.nombre?esc(c.nombre):'Account'}</h1>
+  <div class="sub mono">${esc(c.dir)} ${cop(c.dir)}</div>
+
+  <div class="rejilla r4" style="margin-bottom:16px">
+    <div class="stat"><i>Value in assets</i><b>$${num(Math.round(val))}</b>
+      <s>${c.tenencias.length} posición(es)</s></div>
+    <div class="stat"><i>NRM balance</i><b>${dec(c.saldo)}</b><s>for fees</s></div>
+    <div class="stat"><i>Jurisdiction</i><b style="font-size:17px">${esc(c.jur)}</b>
+      <s>${esc(c.clase)}</s></div>
+    <div class="stat"><i>Credential</i>
+      <b style="font-size:17px;color:${c.credencial?'var(--verde)':'var(--rojo)'}">
+        ${c.credencial?'Valid':'Missing'}</b>
+      <s>${c.credencial?esc(c.emisorCred):'cannot receive regulated assets'}</s></div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-h"><h2>Eligibility credential</h2></div>
+    <table class="det">
+      <tr><td>Status</td><td><span class="tag ${c.credencial?'ok':'no'}">
+        ${c.credencial?'Verificada':'No credential'}</span></td></tr>
+      <tr><td>Issued by</td><td>${c.credencial?esc(c.emisorCred):'—'}</td></tr>
+      <tr><td>Expires</td><td>${c.credencial?c.caduca.toLocaleDateString('en-US'):'—'}</td></tr>
+      <tr><td>What the chain sees</td><td>That the address qualifies. Never the name, the document or the date of birth behind it.</td></tr>
+    </table>
+  </div>
+
+  <div class="panel" style="margin-top:16px">
+    <div class="panel-h"><h2>Positions</h2></div>
+    ${c.tenencias.length?`<div class="tbw"><table class="tb">
+      <thead><tr><th>Asset</th><th>Name</th><th>Type</th>
+        <th class="d">Amount</th><th class="d">Value</th></tr></thead>
+      <tbody>${c.tenencias.map(t=>{
+        const a=CH.activos.find(x=>x.id===t.id); if(!a) return '';
+        return `<tr onclick="ir('/activo/${a.id}')" style="cursor:pointer">
+          <td class="m n">${esc(a.id)}</td><td>${esc(a.nombre)}</td>
+          <td class="p">${esc(a.tipo)}</td>
+          <td class="d">${dec(t.cant)} ${esc(a.simbolo)}</td>
+          <td class="d">$${num(Math.round(t.cant/a.suministro*a.valor))}</td>
+        </tr>`;}).join('')}</tbody></table></div>`
+      :'<div class="vacio">This account holds no positions</div>'}
+  </div>
+
+  <div class="panel" style="margin-top:16px">
+    <div class="panel-h"><h2>Movements</h2></div>
+    ${txs.length?tablaTxs(txs):'<div class="vacio">No movements</div>'}
+  </div>
+  ${piePagina()}`;
+}
+
+/* ══ tokenizar: el flujo principal ══ */
+const TOK={paso:1, datos:{jur:[], classes:[]}};
+
+function vTokenize(){
+  const p=TOK.paso;
+  const et=['Describe the asset','Attach documentation','Define the policy','Issue'];
+  return `
+  ${miga({t:'Explorer',r:'/'},{t:'Assets',r:'/activos'},{t:'Tokenize'})}
+  <h1>Tokenize an asset</h1>
+  <div class="sub">Four steps. When you finish, the asset exists on-chain with its policy bound to it.</div>
+
+  <div class="panel">
+    <div class="pasos">${et.map((e,i)=>`
+      <div class="paso ${p===i+1?'on':''} ${p>i+1?'hecho':''}">
+        <i>${p>i+1?'✓':i+1}</i><s>${e}</s></div>`).join('')}</div>
+    <div id="tokCuerpo">${[vTok1,vTok2,vTok3,vTok4][p-1]()}</div>
+  </div>
+  ${piePagina()}`;
+}
+
+function vTok1(){
+  const d=TOK.datos;
+  return `<div class="form">
+    <div class="campo" id="c-nombre">
+      <label>Asset name</label>
+      <span class="ay">How it will appear in the explorer and in holders' wallets.</span>
+      <input id="f-nombre" value="${esc(d.nombre||'')}" placeholder="Chamberi Building · Madrid">
+      <div class="err">Enter a name of at least three characters</div>
+    </div>
+    <div class="rejilla r2">
+      <div class="campo" id="c-simbolo">
+        <label>Symbol</label>
+        <span class="ay">Between 2 and 6 letters.</span>
+        <input id="f-simbolo" value="${esc(d.simbolo||'')}" placeholder="CHAM" maxlength="6"
+               style="text-transform:uppercase">
+        <div class="err">Between 2 and 6 letters, no spaces</div>
+      </div>
+      <div class="campo">
+        <label>Asset type</label>
+        <span class="ay">Determines what documentation is expected.</span>
+        <select id="f-tipo">${TIPOS.map(t=>
+          `<option ${d.tipo===t.t?'selected':''}>${t.t}</option>`).join('')}</select>
+      </div>
+    </div>
+    <div class="rejilla r2">
+      <div class="campo" id="c-sum">
+        <label>Units to issue</label>
+        <span class="ay">How many parts the asset is divided into.</span>
+        <input id="f-sum" type="number" min="1" value="${d.suministro||10000}">
+        <div class="err">Must be a number greater than zero</div>
+      </div>
+      <div class="campo" id="c-valor">
+        <label>Declared value (USD)</label>
+        <span class="ay">Valuation of the whole asset.</span>
+        <input id="f-valor" type="number" min="1" value="${d.valor||1200000}">
+        <div class="err">Must be a number greater than zero</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:10px;justify-content:flex-end">
+      <button class="btn sec" onclick="ir('/activos')">Cancel</button>
+      <button class="btn" onclick="tokPaso1()">Continue</button>
+    </div>
+  </div>`;
+}
+
+function vTok2(){
+  const d=TOK.datos;
+  return `<div class="form">
+    <div class="aviso inf">
+      <svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="7"/><path d="M10 9v5M10 6.5v.01"/></svg>
+      <div>The chain does not store the document: it stores <strong>a reference and a
+      fingerprint</strong>. If the file is altered later, the fingerprint no longer matches.</div>
+    </div>
+    <div class="campo" id="c-doc">
+      <label>Document backing the asset</label>
+      <span class="ay">Deed, note, contract or invoice.</span>
+      <input id="f-doc" value="${esc(d.doc||'')}" placeholder="Public deed 4821/2026">
+      <div class="err">State which document backs the asset</div>
+    </div>
+    <div class="campo" id="c-cust">
+      <label>Documentation custodian</label>
+      <span class="ay">Who holds the original off-chain.</span>
+      <input id="f-cust" value="${esc(d.custodio||'')}" placeholder="Alvarez Notary · Madrid">
+      <div class="err">State who holds the original</div>
+    </div>
+    <div class="campo">
+      <label>Attesting party</label>
+      <span class="ay">Attests the document is what it claims to be.</span>
+      <select id="f-att">
+        <option>Independent auditor</option>
+        <option>Notary</option>
+        <option>Depositary institution</option>
+        <option>Certified appraiser</option>
+      </select>
+    </div>
+    <div style="display:flex;gap:10px;justify-content:space-between">
+      <button class="btn sec" onclick="tokAtras()">← Back</button>
+      <button class="btn" onclick="tokPaso2()">Continue</button>
+    </div>
+  </div>`;
+}
+
+function vTok3(){
+  const d=TOK.datos;
+  return `<div class="form">
+    <div class="aviso inf">
+      <svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="7"/><path d="M10 9v5M10 6.5v.01"/></svg>
+      <div>This is what makes Nereum different: these conditions are <strong>bound to the
+      asset</strong>, and the protocol checks them on every later transfer, not just once now.</div>
+    </div>
+    <div class="campo" id="c-jur">
+      <label>Jurisdictions allowed</label>
+      <span class="ay">Only holders in these countries may hold it.</span>
+      <div class="chips">${JUR.map(j=>
+        `<button class="chip ${d.jur.includes(j)?'on':''}" onclick="tokJur('${j}')">${j}</button>`).join('')}</div>
+      <div class="err">Choose at least one jurisdiction</div>
+    </div>
+    <div class="campo" id="c-cla">
+      <label>Holder classes</label>
+      <span class="ay">Which investor category qualifies.</span>
+      <div class="chips">${CLASES.map(c=>
+        `<button class="chip ${d.classes.includes(c)?'on':''}" onclick="tokClase('${c}')">${c}</button>`).join('')}</div>
+      <div class="err">Choose at least one class</div>
+    </div>
+    <div class="rejilla r2">
+      <div class="campo">
+        <label>Holding period</label>
+        <span class="ay">Minimum time before a transfer is allowed.</span>
+        <select id="f-bloq">
+          ${[0,30,90,180,365].map(b=>
+            `<option value="${b}" ${d.bloqueo===b?'selected':''}>${b?b+' days':'No lock-up'}</option>`).join('')}
+        </select>
+      </div>
+      <div class="campo" id="c-max">
+        <label>Maximum holder cap</label>
+        <span class="ay">Many jurisdictions require one.</span>
+        <input id="f-max" type="number" min="1" value="${d.maxHolders||250}">
+        <div class="err">Must be a number greater than zero</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:10px;justify-content:space-between">
+      <button class="btn sec" onclick="tokAtras()">← Back</button>
+      <button class="btn" onclick="tokPaso3()">Review and issue</button>
+    </div>
+  </div>`;
+}
+
+function vTok4(){
+  const d=TOK.datos;
+  return `<div class="form">
+    <div class="aviso inf">
+      <svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="7"/><path d="M10 9v5M10 6.5v.01"/></svg>
+      <div>Review before issuing. Once issued, the policy is bound to the asset and governs every
+      transfer it makes.</div>
+    </div>
+    <table class="det" style="border:1px solid var(--linea);border-radius:9px">
+      <tr><td>Name</td><td><strong>${esc(d.nombre)}</strong></td></tr>
+      <tr><td>Symbol</td><td>${esc(d.simbolo)}</td></tr>
+      <tr><td>Type</td><td>${esc(d.tipo)}</td></tr>
+      <tr><td>Unidades</td><td>${num(d.suministro)}</td></tr>
+      <tr><td>Declared value</td><td>${num(d.valor)} · ${dec(d.valor/d.suministro)} per unit</td></tr>
+      <tr><td>Document</td><td>${esc(d.doc)}</td></tr>
+      <tr><td>Custodian</td><td>${esc(d.custodio)}</td></tr>
+      <tr><td>Attested by</td><td>${esc(d.att)}</td></tr>
+      <tr><td>Jurisdicciones</td><td>${d.jur.map(j=>
+        `<span class="tag gr" style="margin:1px 3px 1px 0">${esc(j)}</span>`).join('')}</td></tr>
+      <tr><td>Clases</td><td>${d.classes.map(c=>
+        `<span class="tag gr" style="margin:1px 3px 1px 0">${esc(c)}</span>`).join('')}</td></tr>
+      <tr><td>Permanencia</td><td>${d.bloqueo?d.bloqueo+' days':'No lock-up'}</td></tr>
+      <tr><td>Holder cap</td><td>${num(d.maxHolders)}</td></tr>
+    </table>
+    <div style="display:flex;gap:10px;justify-content:space-between">
+      <button class="btn sec" onclick="tokAtras()">← Back</button>
+      <button class="btn" id="emitirBtn" onclick="tokEmite()">Issue on-chain</button>
+    </div>
+  </div>`;
+}
+
+function mal(id, si){ const e=document.getElementById(id); if(e)e.classList.toggle('mal', si); return si; }
+
+function tokPaso1(){
+  const d=TOK.datos;
+  d.nombre=document.getElementById('f-nombre').value.trim();
+  d.simbolo=document.getElementById('f-simbolo').value.trim().toUpperCase();
+  d.tipo=document.getElementById('f-tipo').value;
+  d.suministro=parseInt(document.getElementById('f-sum').value,10);
+  d.valor=parseInt(document.getElementById('f-valor').value,10);
+  let e=false;
+  e=mal('c-nombre', d.nombre.length<3)||e;
+  e=mal('c-simbolo', !/^[A-Z]{2,6}$/.test(d.simbolo))||e;
+  e=mal('c-sum', !(d.suministro>0))||e;
+  e=mal('c-valor', !(d.valor>0))||e;
+  if(e) return;
+  TOK.paso=2; pinta();
+}
+function tokPaso2(){
+  const d=TOK.datos;
+  d.doc=document.getElementById('f-doc').value.trim();
+  d.custodio=document.getElementById('f-cust').value.trim();
+  d.att=document.getElementById('f-att').value;
+  let e=false;
+  e=mal('c-doc', d.doc.length<3)||e;
+  e=mal('c-cust', d.custodio.length<3)||e;
+  if(e) return;
+  TOK.paso=3; pinta();
+}
+function tokPaso3(){
+  const d=TOK.datos;
+  d.bloqueo=parseInt(document.getElementById('f-bloq').value,10);
+  d.maxHolders=parseInt(document.getElementById('f-max').value,10);
+  let e=false;
+  e=mal('c-jur', d.jur.length===0)||e;
+  e=mal('c-cla', d.classes.length===0)||e;
+  e=mal('c-max', !(d.maxHolders>0))||e;
+  if(e) return;
+  TOK.paso=4; pinta();
+}
+function tokAtras(){ if(TOK.paso>1){ TOK.paso--; pinta(); } }
+function tokJur(j){
+  const a=TOK.datos.jur, i=a.indexOf(j);
+  if(i<0) a.push(j); else a.splice(i,1);
+  pinta();
+}
+function tokClase(c){
+  const a=TOK.datos.classes, i=a.indexOf(c);
+  if(i<0) a.push(c); else a.splice(i,1);
+  pinta();
+}
+function tokEmite(){
+  const d=TOK.datos;
+  const em=CH.emisores[0];
+  const a=nuevoAsset({
+    nombre:d.nombre, simbolo:d.simbolo,
+    tipo:TIPOS.find(t=>t.t===d.tipo)||TIPOS[0],
+    desc:d.doc, emisor:em, suministro:d.suministro, valor:d.valor,
+    doc:d.doc, huella:hash(), emitido:Date.now(),
+    politica:{jur:d.jur.slice(), classes:d.classes.slice(),
+              bloqueo:d.bloqueo, maxHolders:d.maxHolders}
+  });
+  em.tenencias.push({id:a.id, cant:a.suministro});
+  a.titulares=[em.dir];
+  const tx=nuevaTx({tipo:'Issuance', de:null, a:em.dir, activo:a.id,
+    cantidad:a.suministro, estado:'ok',
+    comprobaciones:[
+      {n:'Emisor autorizado', d:esc(em.nombre)+' may issue on this network', r:true},
+      {n:'Document referenciado', d:esc(d.doc)+' · custody: '+esc(d.custodio), r:true},
+      {n:'Huella registrada', d:'Any later alteration will be detectable', r:true},
+      {n:'Política atada al activo', d:d.jur.length+' jurisdictions · '+d.classes.length+' classes', r:true},
+      {n:'Supply fijado', d:num(a.suministro)+' units, with no mint function', r:true}
+    ]});
+  const b=nuevoBlock([tx]);
+  a.bloque=b.n;
+  TOK.paso=1; TOK.datos={jur:[], classes:[]};
+  location.hash='/activo/'+a.id;
+}
+
+/* ══ transferir: demuestra el rechazo ══ */
+function vTransferir(id){
+  const a=CH.activos.find(x=>x.id===id);
+  if(!a) return vNoHay('No existe ese activo');
+  const tenedores=CH.cuentas.filter(c=>c.tenencias.some(t=>t.id===a.id && t.cant>0));
+  const otros=CH.cuentas.filter(c=>c.tipo==='Holder').slice(0,40);
+  return `
+  ${miga({t:'Explorer',r:'/'},{t:'Assets',r:'/activos'},
+         {t:a.id,r:'/activo/'+a.id},{t:'Transferir'})}
+  <h1>Simulate a transfer</h1>
+  <div class="sub">${esc(a.nombre)} · ${esc(a.id)}</div>
+
+  <div class="aviso inf" style="margin-bottom:16px">
+    <svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="7"/><path d="M10 9v5M10 6.5v.01"/></svg>
+    <div>Pick a recipient that <strong>does not meet</strong> the policy — another jurisdiction,
+    another class, or no credential — and watch the transfer never get written.</div>
+  </div>
+
+  <div class="panel">
+    <div class="form">
+      <div class="campo">
+        <label>From</label>
+        <select id="t-de">${tenedores.map(c=>
+          `<option value="${c.dir}">${c.nombre?esc(c.nombre):corto(c.dir,16,8)} · ${
+            dec(c.tenencias.find(t=>t.id===a.id).cant)} ${esc(a.simbolo)}</option>`).join('')}</select>
+      </div>
+      <div class="campo">
+        <label>To</label>
+        <span class="ay">The policy allows ${a.politica.jur.join(', ')} ·
+          ${a.politica.classes.join(', ')}</span>
+        <select id="t-a">${otros.map(c=>{
+          const ok=a.politica.jur.includes(c.jur)&&a.politica.classes.includes(c.clase)&&c.credencial;
+          return `<option value="${c.dir}">${ok?'✓':'✗'} ${corto(c.dir,14,6)} · ${
+            esc(c.jur)} · ${esc(c.clase)}${c.credencial?'':' · no credential'}</option>`;
+        }).join('')}</select>
+      </div>
+      <div class="campo" id="c-cant">
+        <label>Amount</label>
+        <input id="t-cant" type="number" min="0.01" step="0.01" value="100">
+        <div class="err">Enter an amount greater than zero</div>
+      </div>
+      <div style="display:flex;gap:10px;justify-content:space-between">
+        <button class="btn sec" onclick="ir('/activo/${a.id}')">← Back to the asset</button>
+        <button class="btn" onclick="hazTransfer('${a.id}')">Send transfer</button>
+      </div>
+    </div>
+  </div>
+  <div id="resultado"></div>
+  ${piePagina()}`;
+}
+
+function hazTransfer(id){
+  const a=CH.activos.find(x=>x.id===id);
+  const de=CH.cuentas.find(c=>c.dir===document.getElementById('t-de').value);
+  const a2=CH.cuentas.find(c=>c.dir===document.getElementById('t-a').value);
+  const cant=parseFloat(document.getElementById('t-cant').value);
+  if(mal('c-cant', !(cant>0))) return;
+  const {c,pasa,motivo}=comprueba(a,de,a2,cant);
+  if(pasa) mueve(a,de,a2,cant); else a.rechazadas++;
+  const tx=nuevaTx({tipo:'Transfer', de:de.dir, a:a2.dir, activo:a.id,
+    cantidad:cant, estado: pasa?'ok':'no', comprobaciones:c, motivo});
+  nuevoBlock([tx]);
+  document.getElementById('resultado').innerHTML=`
+    <div class="panel" style="margin-top:16px">
+      <div class="panel-h"><h2>Result</h2>
+        <span class="tag ${pasa?'ok':'no'}">${pasa?'Settled':'Rejected'}</span></div>
+      <div class="aviso ${pasa?'ok':'no'}" style="margin:14px 18px;border-radius:9px">
+        <svg viewBox="0 0 20 20">${pasa?ICO.ok:ICO.no}</svg>
+        <div>${pasa
+          ? '<strong>Settled.</strong> The asset changed hands in a single operation.'
+          : `<strong>Rejected: ${esc(motivo)}.</strong> The transfer was not written, so there is nothing to reverse or reconcile.`}</div>
+      </div>
+      <div class="panel-b" style="padding:0">
+        ${c.map(x=>`<div class="chk ${x.r?'ok':'no'}">
+          <div class="b"><svg viewBox="0 0 20 20">${x.r?ICO.ok:ICO.no}</svg></div>
+          <div class="t"><b>${esc(x.n)}</b><s>${esc(x.d)}</s></div></div>`).join('')}
+      </div>
+      <div style="padding:14px 18px;border-top:1px solid var(--linea-2)">
+        <a class="btn sec" href="#/tx/${tx.hash}">View the transaction</a>
+      </div>
+    </div>`;
+  document.getElementById('resultado').scrollIntoView({behavior:'smooth', block:'start'});
+}
+
+function vValidators(){
+  const vs=CH.emisores.map(e=>{
+    const prod=CH.bloques.filter(b=>b.validador===e.dir);
+    return {e, n:prod.length, ult:prod[0]};
+  }).sort((a,b)=>b.n-a.n);
+  const tot=vs.reduce((s,v)=>s+v.n,0)||1;
+  return `
+  ${miga({t:'Explorer',r:'/'},{t:'Validators'})}
+  <h1>Validators</h1>
+  <div class="sub">${vs.length} producing blocks in the recent window</div>
+  <div class="panel">
+    <div class="tbw"><table class="tb">
+      <thead><tr><th>Address</th><th>Name</th><th class="d">Blocks</th>
+        <th class="d">Share</th><th>Split</th><th class="d">Last</th></tr></thead>
+      <tbody>${vs.map(v=>`
+        <tr onclick="ir('/cuenta/${v.e.dir}')" style="cursor:pointer">
+          <td class="m n">${corto(v.e.dir,12,6)}</td>
+          <td>${esc(v.e.nombre||'—')}</td>
+          <td class="d">${num(v.n)}</td>
+          <td class="d">${(v.n/tot*100).toFixed(1)} %</td>
+          <td style="min-width:130px"><span class="barra">
+            <i style="width:${(v.n/tot*100).toFixed(1)}%"></i></span></td>
+          <td class="d p">${v.ult?hace(v.ult.ts):'—'}</td>
+        </tr>`).join('')}</tbody></table></div>
+  </div>
+  ${piePagina()}`;
+}
+
+function vRed(){
+  const t=CH.txs.filter(x=>x.tipo==='Transfer');
+  const no=t.filter(x=>x.estado==='no').length;
+  const motivos={};
+  t.filter(x=>x.estado==='no').forEach(x=>{ motivos[x.motivo]=(motivos[x.motivo]||0)+1 });
+  const orden=Object.entries(motivos).sort((a,b)=>b[1]-a[1]);
+  return `
+  ${miga({t:'Explorer',r:'/'},{t:'Network status'})}
+  <h1>Network status</h1>
+  <div class="sub">Testnet · <span class="vivo"><i></i>operational</span></div>
+
+  <div class="rejilla r4" style="margin-bottom:16px">
+    <div class="stat"><i>Altura</i><b>${num(CH.altura)}</b><s>one block every 0.9 s</s></div>
+    <div class="stat"><i>Validators</i><b>${num(CH.emisores.length)}</b><s>producing blocks</s></div>
+    <div class="stat"><i>Transfers</i><b>${num(t.length)}</b><s>in the recent window</s></div>
+    <div class="stat"><i>Rejection rate</i><b>${t.length?(no/t.length*100).toFixed(1):'0'} %</b>
+      <s>${num(no)} never entered</s></div>
+  </div>
+
+  <div class="rejilla r2">
+    <div class="panel">
+      <div class="panel-h"><h2>Protocol parameters</h2></div>
+      <table class="det">
+        <tr><td>Block time</td><td>0.9 s</td></tr>
+        <tr><td>Finality</td><td><span class="tag ok">Deterministic</span></td></tr>
+        <tr><td>Checks per transfer</td><td>7</td></tr>
+        <tr><td>Where the policy is enforced</td><td>In the protocol, before writing</td></tr>
+        <tr><td>Compatibilidad</td><td>EVM</td></tr>
+      </table>
+    </div>
+    <div class="panel">
+      <div class="panel-h"><h2>Why transfers are rejected</h2>
+        <span class="tag no">${num(no)} rechazos</span></div>
+      ${orden.length?`<div class="tbw"><table class="tb">
+        <thead><tr><th>Check that failed</th><th class="d">Veces</th>
+          <th>Peso</th></tr></thead>
+        <tbody>${orden.map(([m,c])=>`<tr>
+          <td class="n">${esc(m)}</td><td class="d">${num(c)}</td>
+          <td style="min-width:120px"><span class="barra">
+            <i style="width:${(c/no*100).toFixed(0)}%"></i></span></td>
+        </tr>`).join('')}</tbody></table></div>`
+        :'<div class="vacio">No transfer rejected yet</div>'}
+    </div>
+  </div>
+  ${piePagina()}`;
+}
+
+function vNoHay(m){
+  return `<div class="panel"><div class="vacio">
+    <div style="font-size:17px;color:var(--ink);font-weight:500;margin-bottom:6px">No results</div>
+    ${esc(m||'We found nothing matching that identifier')}
+    <div style="margin-top:16px"><button class="btn sec" onclick="ir('/')">Back to the overview</button></div>
+  </div></div>`;
+}
+
+function piePagina(){
+  const cols=[
+    {t:'Explore', l:[['Overview','/'],['Blocks','/bloques'],
+      ['Transactions','/txs'],['Accounts','/cuentas'],['Validators','/validadores']]},
+    {t:'Assets', l:[['All assets','/activos'],['Tokenize an asset','/tokenizar'],
+      ...CH.activos.slice(-3).reverse().map(a=>[a.nombre.length>26?a.nombre.slice(0,24)+'…':a.nombre,'/activo/'+a.id])]},
+    {t:'The network', l:[['Network status','/red'],['Latest blocks','/bloques'],
+      ['Rejected transfers','/txs'],['Issuers','/cuentas']]}
+  ];
+  return `<footer class="pie">
+    <div class="pie-top">
+      <div class="pie-marca">
+        <svg viewBox="0 0 672 672" aria-hidden="true">
+          <defs><linearGradient id="pf" x1="0" y1="0" x2=".35" y2="1">
+            <stop offset="0" stop-color="#EDF0F5"/><stop offset=".42" stop-color="#C2C9D6"/>
+            <stop offset=".72" stop-color="#98A1B2"/><stop offset="1" stop-color="#79839A"/>
+          </linearGradient></defs>
+          <path fill="url(#pf)" d="M336 0 H464 V224 H672 V336 H560 V560 H464 V672 H336 A336 336 0 0 1 336 0 Z"/>
+          <rect fill="#2F6BFF" x="464" y="112" width="112" height="112"/>
+          <rect fill="#2F6BFF" x="560" y="336" width="112" height="112"/>
+        </svg>
+        <b>Nereum Explorer</b>
+        <p>The public record of the network. Every block, every transfer and the policy on every
+        asset, open to anyone and with no account required.</p>
+        <div class="pie-est"><span class="vivo"><i></i>Testnet</span>
+          <span class="mono">altura ${num(CH.altura)}</span></div>
+      </div>
+      ${cols.map(c=>`<div class="pie-col"><h6>${c.t}</h6>
+        ${c.l.map(([t,r])=>`<a href="#${r}">${esc(t)}</a>`).join('')}</div>`).join('')}
+    </div>
+    <div class="pie-bajo">
+      <span>Browser simulation · not connected to any network</span>
+      <span class="mono">${num(CH.activos.length)} activos · ${num(CH.txs.length)} transacciones</span>
+    </div>
+  </footer>`;
+}
+
+/* ── minigráfica de una tarjeta ──
+   Doce puntos con la evolución reciente. Es una pista de tendencia, no un
+   gráfico para leer valores: por eso va sin ejes ni números. */
+function chispa(k){
+  const bs=CH.bloques.slice(0,12).reverse();
+  let d=[];
+  if(k==='alt') d=bs.map((b,i)=>i+1);
+  else if(k==='rec') d=bs.map(b=>CH.txs.filter(x=>x.bloque===b.n&&x.estado==='no').length);
+  else if(k==='act') d=bs.map((b,i)=>CH.activos.filter(a=>!a.bloque||a.bloque<=b.n).length);
+  else d=bs.map(b=>CH.txs.filter(x=>x.bloque===b.n&&x.estado==='ok').length);
+  if(!d.length) return '';
+  const mx=Math.max(1,...d), mn=Math.min(...d);
+  const W=100,H=26;
+  const pts=d.map((v,i)=>[i/(d.length-1||1)*W, H-2-((v-mn)/((mx-mn)||1))*(H-5)]);
+  const linea=pts.map((p,i)=>(i?'L':'M')+p[0].toFixed(1)+' '+p[1].toFixed(1)).join(' ');
+  const area=linea+` L${W} ${H} L0 ${H} Z`;
+  return `<svg class="chispa" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">
+    <path class="ch-a" d="${area}"/><path class="ch-l" d="${linea}"/>
+    <circle class="ch-p" cx="${pts[pts.length-1][0].toFixed(1)}"
+      cy="${pts[pts.length-1][1].toFixed(1)}" r="2"/></svg>`;
+}
+
+/* ── el valor por tipo de activo ── */
+function porType(){
+  const m={};
+  CH.activos.forEach(a=>{ m[a.tipo]=(m[a.tipo]||0)+a.valor });
+  return Object.entries(m).sort((a,b)=>b[1]-a[1]);
+}
+const TONOS=['#2F6BFF','#5B8BFF','#79ABFF','#A8C6FF','#0A2564','#98A1B2'];
+
+function barrasType(){
+  const t=porType(), tot=t.reduce((s,x)=>s+x[1],0)||1;
+  return t.map(([k,v],i)=>`
+    <div class="bt">
+      <div class="bt-c"><span class="bt-p" style="background:${TONOS[i%TONOS.length]}"></span>
+        <b>${esc(k)}</b><s>$${num(Math.round(v/1000))}k</s></div>
+      <div class="bt-b"><i style="width:${(v/tot*100).toFixed(1)}%;
+        background:${TONOS[i%TONOS.length]}"></i></div>
+      <div class="bt-n">${(v/tot*100).toFixed(1)} %</div>
+    </div>`).join('');
+}
+
+/* ── el anillo ──
+   Con volumen: cada sector lleva su propio degradado, hay un halo detrás, un
+   filo claro entre sectores y una sombra interior que hunde el centro. */
+function anilloType(){
+  const t=porType(), tot=t.reduce((s,x)=>s+x[1],0)||1;
+  const R=62, r=39, cx=80, cy=80;
+  const HUECO=0.018;
+  let ang=-Math.PI/2, arcos='', defs='';
+  t.forEach(([k,v],i)=>{
+    const frac=v/tot;
+    const a1=ang+HUECO, a2=ang+frac*Math.PI*2-HUECO;
+    if(a2<=a1){ ang+=frac*Math.PI*2; return; }
+    const gr=(a2-a1)>Math.PI?1:0;
+    const p=(rad,a)=>[cx+Math.cos(a)*rad, cy+Math.sin(a)*rad];
+    const [x1,y1]=p(R,a1), [x2,y2]=p(R,a2), [x3,y3]=p(r,a2), [x4,y4]=p(r,a1);
+    const c=TONOS[i%TONOS.length];
+    const gid='ag'+i;
+    /* el degradado va en la dirección del sector, no siempre en vertical */
+    const mx=Math.cos((a1+a2)/2), my=Math.sin((a1+a2)/2);
+    defs+=`<linearGradient id="${gid}" x1="${(0.5-mx*0.5).toFixed(2)}"
+      y1="${(0.5-my*0.5).toFixed(2)}" x2="${(0.5+mx*0.5).toFixed(2)}"
+      y2="${(0.5+my*0.5).toFixed(2)}">
+      <stop offset="0" stop-color="${c}" stop-opacity=".72"/>
+      <stop offset="1" stop-color="${c}"/></linearGradient>`;
+    arcos+=`<path class="an-s" fill="url(#${gid})"
+      d="M${x1.toFixed(1)} ${y1.toFixed(1)}
+         A${R} ${R} 0 ${gr} 1 ${x2.toFixed(1)} ${y2.toFixed(1)}
+         L${x3.toFixed(1)} ${y3.toFixed(1)}
+         A${r} ${r} 0 ${gr} 0 ${x4.toFixed(1)} ${y4.toFixed(1)} Z"
+      style="--mx:${(mx*4).toFixed(2)}px;--my:${(my*4).toFixed(2)}px"
+      ><title>${esc(k)} · ${(v/tot*100).toFixed(1)} %</title></path>`;
+    ang+=frac*Math.PI*2;
+  });
+  return `<svg class="anillo" viewBox="0 0 160 160">
+    <defs>${defs}
+      <radialGradient id="halo"><stop offset=".55" stop-color="#2F6BFF" stop-opacity="0"/>
+        <stop offset="1" stop-color="#2F6BFF" stop-opacity=".18"/></radialGradient>
+      <radialGradient id="hueco"><stop offset=".62" stop-color="#0A0C10" stop-opacity=".10"/>
+        <stop offset="1" stop-color="#0A0C10" stop-opacity="0"/></radialGradient>
+    </defs>
+    <circle cx="80" cy="80" r="76" fill="url(#halo)"/>
+    <g class="an-g">${arcos}</g>
+    <circle cx="80" cy="80" r="39" fill="url(#hueco)"/>
+    <text class="an-n" x="80" y="76" text-anchor="middle">${CH.activos.length}</text>
+    <text class="an-t" x="80" y="94" text-anchor="middle">activos</text></svg>`;
+}
+
+/* ── la gráfica de actividad ──
+   Transfers per block en los últimos cuarenta, con las rechazadas
+   marcadas aparte. Se redibuja sola cuando llega un bloque. */
+function dibujaGraf(){
+  const cv=document.getElementById('graf'); if(!cv) return;
+  const ctx=cv.getContext('2d');
+  const d=Math.min(devicePixelRatio||1,2);
+  const W=cv.clientWidth, H=132;
+  cv.width=W*d; cv.height=H*d; ctx.setTransform(d,0,0,d,0,0);
+  ctx.clearRect(0,0,W,H);
+  const bs=CH.bloques.slice(0,40).reverse();
+  if(!bs.length) return;
+  const datos=bs.map(b=>{
+    const t=CH.txs.filter(x=>x.bloque===b.n);
+    return {ok:t.filter(x=>x.estado==='ok').length, no:t.filter(x=>x.estado==='no').length};
+  });
+  const max=Math.max(3, ...datos.map(x=>x.ok+x.no));
+  const w=W/datos.length, an=Math.max(3, w*0.56);
+  /* la retícula de referencia, tres líneas nada más */
+  ctx.strokeStyle='rgba(10,12,16,.07)'; ctx.lineWidth=1;
+  for(let k=0;k<=2;k++){
+    const y=Math.round(H-8-(H-24)*k/2)+.5;
+    ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke();
+  }
+  datos.forEach((v,i)=>{
+    const x=i*w+(w-an)/2;
+    const hOk=(H-24)*v.ok/max, hNo=(H-24)*v.no/max;
+    if(hOk>0){ ctx.fillStyle='rgba(47,107,255,.85)';
+      ctx.fillRect(x, H-8-hOk, an, hOk); }
+    if(hNo>0){ ctx.fillStyle='rgba(199,51,47,.75)';
+      ctx.fillRect(x, H-8-hOk-hNo, an, hNo); }
+  });
+  ctx.fillStyle='rgba(10,12,16,.42)';
+  ctx.font='10px "DM Mono", monospace';
+  ctx.fillText(String(max), 2, 12);
+
+  /* el puntero: al pasar por encima se marca la barra y sale su detalle */
+  cv.onmousemove=e=>{
+    const R=cv.getBoundingClientRect();
+    const i=Math.floor((e.clientX-R.left)/(R.width/datos.length));
+    if(i<0||i>=datos.length) return;
+    const b=bs[i], v=datos[i];
+    let g=document.getElementById('grafTip');
+    if(!g){ g=document.createElement('div'); g.id='grafTip'; g.className='gtip';
+      document.body.appendChild(g); }
+    g.innerHTML=`<b>Block ${num(b.n)}</b>
+      <span>${v.ok} liquidada${v.ok===1?'':'s'}</span>
+      ${v.no?`<span class="no">${v.no} rechazada${v.no===1?'':'s'}</span>`:''}`;
+    g.style.left=Math.min(innerWidth-160, e.clientX+12)+'px';
+    g.style.top=(e.clientY-52)+'px';
+    g.classList.add('on');
+  };
+  cv.onmouseleave=()=>{ const g=document.getElementById('grafTip'); if(g)g.classList.remove('on'); };
+}
+function refrescaStatus(){
+  const t=CH.txs.filter(x=>x.tipo==='Transfer');
+  const no=t.filter(x=>x.estado==='no').length;
+  const tpb=(CH.txs.filter(x=>x.bloque).length/Math.max(1,Math.min(CH.bloques.length,40))).toFixed(1);
+  const e1=document.getElementById('rTpb'); if(e1)e1.textContent=tpb;
+  const e2=document.getElementById('rRech');
+  if(e2)e2.textContent = t.length? (no/t.length*100).toFixed(1)+' %' : '—';
+}
+
+/* ══ buscador ══ */
+document.getElementById('q').addEventListener('keydown', e=>{
+  if(e.key!=='Enter') return;
+  const v=e.target.value.trim();
+  if(!v) return;
+  if(/^\d+$/.test(v) && CH.bloques.some(b=>b.n===+v)) return ir('/bloque/'+v);
+  if(CH.txs.some(t=>t.hash===v)) return ir('/tx/'+v);
+  if(CH.cuentas.some(c=>c.dir===v)) return ir('/cuenta/'+v);
+  const a=CH.activos.find(x=>x.id.toLowerCase()===v.toLowerCase()
+    || x.simbolo.toLowerCase()===v.toLowerCase()
+    || x.nombre.toLowerCase().includes(v.toLowerCase()));
+  if(a) return ir('/activo/'+a.id);
+  app.innerHTML=vNoHay('Nothing matches "'+esc(v)+'". Try a block number, a hash, an address or an asset name.');
+});
+
+document.getElementById('tokBtn').onclick=()=>{ TOK.paso=1; ir('/tokenizar'); };
+
+/* el panel de búsqueda, para el móvil y para quien pulse la lupa */
+const velo=document.getElementById('velo'), qm=document.getElementById('qm');
+function abreSearch(){ velo.classList.add('on'); qm.value=''; setTimeout(()=>qm.focus(),40); }
+function cierraSearch(){ velo.classList.remove('on'); }
+document.getElementById('lupaB').onclick=abreSearch;
+velo.onclick=e=>{ if(e.target===velo) cierraSearch(); };
+addEventListener('keydown', e=>{
+  if(e.key==='Escape') cierraSearch();
+  if((e.key==='/'||((e.metaKey||e.ctrlKey)&&e.key==='k')) &&
+     document.activeElement.tagName!=='INPUT'){ e.preventDefault(); abreSearch(); }
+});
+qm.addEventListener('keydown', e=>{
+  if(e.key!=='Enter') return;
+  cierraSearch();
+  const q=document.getElementById('q');
+  q.value=e.target.value;
+  q.dispatchEvent(new KeyboardEvent('keydown',{key:'Enter'}));
+});
+document.getElementById('menuB').onclick=()=>
+  document.getElementById('nav').classList.toggle('abierto');
+document.querySelectorAll('[data-ir]').forEach(a=>
+  a.addEventListener('click', e=>{ e.preventDefault(); ir(a.dataset.ir); }));
+
+/* ══ la cadena sigue viva ══ */
+setInterval(()=>{
+  const lote=[];
+  const n=ent(4,12);                    /* la red tiene que verse en movimiento */
+  for(let k=0;k<n;k++) lote.push(txAleatoria());
+  nuevoBlock(lote);
+  if(typeof empujaCinta==='function') empujaCinta();
+  const base=(location.hash.slice(1)||'/').split('/')[1]||'';
+  if(base===''){ 
+    sube(document.getElementById('sAlt'), CH.altura);
+    sube(document.getElementById('sRec'), CH.rechazos);
+    sube(document.getElementById('sAct'), CH.activos.length);
+    sube(document.getElementById('sTit'), CH.cuentas.filter(c=>c.tenencias.length).length);
+    empujaCadena();
+    if(document.getElementById('graf')){
+      dibujaGraf(); refrescaStatus();
+      const rt=document.getElementById('repType'); if(rt)rt.innerHTML=barrasType();
+    }
+    const ub=document.getElementById('ultBlocks');
+    if(ub){ ub.innerHTML=tablaBlocks(CH.bloques.slice(0,8));
+      const f=ub.querySelector('tbody tr'); if(f)f.classList.add('rec'); }
+    const ut=document.getElementById('ultTxs');
+    if(ut){ ut.innerHTML=tablaTxs(CH.txs.slice(0,8));
+      const f=ut.querySelector('tbody tr'); if(f)f.classList.add('rec'); }
+  } else if(base==='bloques'){
+    const l=document.getElementById('listaBlocks');
+    if(l) l.innerHTML=tablaBlocks(CH.bloques.slice(0,40));
+  } else if(base==='txs'){
+    const l=document.getElementById('listaTxs');
+    if(l) l.innerHTML=tablaTxs(CH.txs.slice(0,40));
+  }
+}, 900);
+
+armaCinta();
+pinta();
+
+/* la intro se retira sola, y también si el visitante toca antes */
+(function(){
+  const el=document.getElementById('intro');
+  if(!el) return;
+  const fuera=()=>el.classList.add('fuera');
+  setTimeout(fuera, 2450);
+  el.addEventListener('click', fuera);
+  addEventListener('keydown', e=>{ if(e.key==='Escape'||e.key===' ') fuera(); }, {once:true});
+})();
+</script>
+</body>
+</html>
