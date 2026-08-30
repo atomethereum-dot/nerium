@@ -221,11 +221,31 @@ td b{color:var(--ink)}
    pasaron de setenta caracteres: no podían partirse y ensanchaban el documento
    entero en móvil. Ahora parten, y las tablas anchas se desplazan solas en vez
    de arrastrar la página. */
+/* Partir por cualquier sitio solo donde hace falta —etiquetas largas,
+   direcciones y código—. En una celda estrecha destroza las palabras:
+   "Origin / ation", "credenti / al". */
 .pend{white-space:normal;overflow-wrap:anywhere}
-.doc p,.doc li,.doc td,.doc th{overflow-wrap:anywhere}
-.doc table{display:block;overflow-x:auto;-webkit-overflow-scrolling:touch}
-@media(min-width:700px){ .doc table{display:table} }
 .doc code{overflow-wrap:anywhere}
+.doc p,.doc li{overflow-wrap:break-word}
+.doc td,.doc th{overflow-wrap:break-word;hyphens:none}
+
+/* ══ las tablas en móvil ══
+   Debajo de 700px una tabla de dos o tres columnas deja la primera tan
+   estrecha que el texto cae en vertical. Cada fila pasa a ser un bloque:
+   el primer dato como titulillo y el resto debajo. */
+@media(max-width:699px){
+  .doc table{display:block;border-collapse:separate}
+  .doc table tr:first-child{display:none}
+  .doc table tr{display:block;padding:14px 0;
+    border-bottom:1px solid var(--linea-2)}
+  .doc table tr:last-child{border-bottom:0}
+  .doc table td{display:block;border:0;padding:0 0 5px;
+    font-size:14.5px;line-height:1.5;color:var(--ink-2)}
+  .doc table td:first-child{font-weight:500;color:var(--ink);
+    margin-bottom:5px;padding-bottom:0}
+  .doc table td:last-child{padding-bottom:0}
+  .doc table td.num{font-variant-numeric:tabular-nums}
+}
 
 /* ══ el anillo del reparto, el mismo de la web ══ */
 .anillo{display:flex;align-items:center;gap:clamp(20px,4vw,52px);flex-wrap:wrap;
@@ -364,6 +384,65 @@ td b{color:var(--ink)}
 /* El grano se rasteriza al imprimir y multiplicaba el peso del PDF por
    cincuenta: en papel no aporta y se apaga. */
 @media print{ .fg-grano{display:none} }
+
+/* En escritorio la primera columna se quedaba en 108px y las etiquetas de dos
+   palabras caían en vertical. Se le da un ancho mínimo cómodo. */
+@media(min-width:700px){
+  .doc table td:first-child,.doc table th:first-child{min-width:180px}
+  .doc table td:first-child b{white-space:nowrap}
+  /* la última columna de las tablas de tres suele ser un enlace corto y
+     también se quedaba estrecha */
+  .doc table td:last-child:not(:first-child),
+  .doc table th:last-child:not(:first-child){min-width:150px}
+}
+
+.lang-b{display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 11px;
+  border:1px solid var(--linea);border-radius:6px;color:var(--ink-2);font-size:12.5px;
+  font-family:var(--m);letter-spacing:.06em;
+  transition:border-color var(--t1) var(--ease),color var(--t1) var(--ease)}
+.lang-b:hover{border-color:var(--blue);color:var(--blue)}
+.lang-b svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:1.4}
+@media(max-width:560px){.lang-b span{font-size:11px}}
+
+/* Fuera la franja oscura que tapaba la figura. No hace falta nada en su lugar:
+   medido, el texto conserva 11 de contraste sobre el fondo de todas las
+   figuras. Un filo bajo las letras subía el PDF de 0,47 a 0,71 MB sin mejorar
+   la lectura. */
+.fg-fil{stroke-width:1.4}
+
+/* ══ los dibujos geométricos ══
+   Figuras puras al final de cada sección: trazo fino, fondo claro y el azul
+   solo donde marca algo. */
+.esq{margin:46px 0 6px;padding:26px 0 0;border-top:1px solid var(--linea-2)}
+.esq svg{display:block;width:100%;height:auto}
+.g-lin{fill:none;stroke:var(--ink-3);stroke-width:1.3;stroke-linejoin:round}
+.g-azul{fill:none;stroke:var(--blue);stroke-width:1.6;stroke-linecap:round}
+.g-azul.g-punt{stroke-dasharray:5 5}
+.g-gui{fill:none;stroke:var(--linea);stroke-width:1}
+.g-eje{stroke:var(--linea);stroke-width:1.4}
+.g-caja{fill:#FFFFFF;stroke:var(--linea);stroke-width:1.2}
+.g-caja.g-mar{stroke:var(--blue);fill:rgba(47,107,255,.06)}
+.g-caja.g-int{stroke:var(--blue);fill:rgba(47,107,255,.05)}
+.g-celda{fill:#FFFFFF;stroke:var(--linea-2);stroke-width:1}
+.g-celda.g-mar{stroke:var(--blue);fill:rgba(47,107,255,.10)}
+.g-nodo{fill:#FFFFFF;stroke:var(--ink-3);stroke-width:1.3}
+.g-nodo.g-a{fill:var(--ink-3)}
+.g-pto{fill:var(--blue);stroke:none}
+.g-nucleo{fill:rgba(47,107,255,.06);stroke:var(--blue);stroke-width:1.4}
+.g-anillo{fill:none;stroke:var(--linea);stroke-width:1.2}
+.g-orb{fill:none;stroke:var(--linea);stroke-width:1.2}
+.g-orb.g-punt{stroke-dasharray:5 6}
+.g-area{fill:rgba(47,107,255,.09);stroke:var(--blue);stroke-width:1.4}
+.g-fl{fill:none;stroke:var(--blue);stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.g-x{fill:none;stroke:var(--ink-3);stroke-width:1.4;stroke-linecap:round}
+.g-check{fill:none;stroke:var(--blue);stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+.g-pie{font-family:var(--f);font-size:13px;fill:var(--ink-3);font-style:italic}
+/* el SVG escala con el ancho: en un móvil el pie caía a 6px, así que se
+   agranda en unidades del viewBox para que llegue a unos 12 reales */
+@media(max-width:699px){ .g-pie{font-size:31px} }
+@media(max-width:420px){ .g-pie{font-size:34px} }
+@media print{ #impreso .esq{break-inside:avoid;margin-top:9mm} } }
+.g-num{font-family:var(--m);font-size:11px;fill:var(--blue);letter-spacing:.08em}
 </style>
 </head>
 <body>
@@ -390,6 +469,10 @@ td b{color:var(--ink)}
     <svg viewBox="0 0 20 20"><circle cx="9" cy="9" r="6"/><path d="M13.5 13.5 17 17"/></svg>
     <span>Search…</span><kbd>Ctrl K</kbd>
   </button>
+  <button class="lang-b" id="langB" type="button" title="English / Español">
+    <svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="7.2"/><path d="M3 10h14M10 3a15 15 0 0 1 0 14M10 3a15 15 0 0 0 0 14"/></svg>
+    <span id="langT">ES</span>
+  </button>
   <button class="pdf-b" id="pdfB" type="button" title="Descargar en PDF">
     <svg viewBox="0 0 20 20"><path d="M10 3v9M6.5 8.5 10 12l3.5-3.5"/><path d="M4 15h12"/></svg>
     <span>PDF</span>
@@ -401,10 +484,7 @@ td b{color:var(--ink)}
 
 <nav class="tabs">
   <a href="#/introduction" class="on">Whitepaper</a>
-  <a href="#/architecture">
-    <svg viewBox="0 0 20 20"><path d="M10 2 18 6.5 10 11 2 6.5Z"/><path d="M2 13.5 10 18l8-4.5"/></svg>
-    Protocol
-  </a>
+
 </nav>
 
 <div class="piso">
@@ -415,31 +495,28 @@ td b{color:var(--ink)}
       <a href="#/vision">Vision</a>
     </div>
     <div class="gr">
-      <h5>The network</h5>
-      <a href="#/network">NereumEVM — Blockchain</a>
-      <a href="#/tokenization">Asset tokenization</a>
-    </div>
-    <div class="gr">
-      <h5>Protocol</h5>
-      <a href="#/architecture">Architecture</a>
-      <a href="#/compliance">Compliance engine</a>
-      <a href="#/identity">Identity and credentials</a>
-      <a href="#/validators">Validators and staking</a>
-      <a href="#/interop">Interoperability</a>
-      <a href="#/roadmap">Roadmap</a>
-    </div>
-    <div class="gr">
       <h5>Trust</h5>
       <a href="#/legal">Legal Document — Miami, FL</a>
       <a href="#/audit">Audit</a>
       <a href="#/kyc">Team KYC</a>
-      <a href="#/renounce">Contract — Owner renounced</a>
-      <a href="#/security">Security guarantees</a>
     </div>
     <div class="gr">
       <h5>Token</h5>
-      <a href="#/whitelist">Whitelist</a>
+      <a href="#/whitelist">Join the whitelist</a>
       <a href="#/dexscreener">DexScreener</a>
+    </div>
+    <div class="gr">
+      <h5>Protocol</h5>
+      <a href="#/network">NereumEVM — Blockchain</a>
+      <a href="#/tokenization">Asset tokenization</a>
+      <a href="#/scan">Nereum Explorer</a>
+      <a href="#/dex">Nereum DEX</a>
+      <a href="#/nusd">NUSD</a>
+      <a href="#/forge">Nereum Forge</a>
+      <a href="#/vaults">Nereum Vaults</a>
+      <a href="#/feed">Nereum Feed</a>
+      <a href="#/link">Nereum Link</a>
+      <a href="#/wallet">Wallet and tooling</a>
     </div>
     <div class="gr">
       <h5>Company</h5>
@@ -471,7 +548,7 @@ td b{color:var(--ink)}
   <aside class="rail">
     <h5>
       <svg viewBox="0 0 20 20"><path d="M4 5h12M4 10h12M4 15h8"/></svg>
-      On this page
+      <span class="rail-t">On this page</span>
     </h5>
     <div id="rail"></div>
   </aside>
@@ -682,6 +759,79 @@ SOL.corte=()=>{
   return [v,f];
 };
 
+/* losa ancha y baja: el cimiento */
+SOL.losa=()=>{
+  const v=[[-1.7,-0.34,-1.1],[1.7,-0.34,-1.1],[1.7,-0.34,1.1],[-1.7,-0.34,1.1],
+           [-1.7,0.34,-1.1],[1.7,0.34,-1.1],[1.7,0.34,1.1],[-1.7,0.34,1.1]];
+  const f=[[0,1,2,3],[4,5,6,7],[0,1,5,4],[2,3,7,6],[1,2,6,5],[0,3,7,4]];
+  return [v,f];
+};
+/* cuña larga que se pierde en el horizonte */
+SOL.horizonte=()=>{
+  const v=[[-2.2,0.5,-0.9],[2.2,0.5,-0.9],[2.2,0.5,0.9],[-2.2,0.5,0.9],
+           [-1.5,-0.55,-0.4],[1.5,-0.55,-0.4],[1.5,-0.55,0.4],[-1.5,-0.55,0.4]];
+  const f=[[0,1,2,3],[4,5,6,7],[0,1,5,4],[2,3,7,6],[1,2,6,5],[0,3,7,4]];
+  return [v,f];
+};
+/* anillo octogonal */
+SOL.anillo=()=>{
+  const v=[],f=[],N=8,R=1.35,r=0.72,h=0.34;
+  for(const y of [-h,h]) for(let i=0;i<N;i++){
+    const a=(i/N)*Math.PI*2;
+    v.push([Math.cos(a)*R, y, Math.sin(a)*R]);
+  }
+  for(const y of [-h,h]) for(let i=0;i<N;i++){
+    const a=(i/N)*Math.PI*2;
+    v.push([Math.cos(a)*r, y, Math.sin(a)*r]);
+  }
+  const B=0,T=N,bi=2*N,ti=3*N;
+  for(let i=0;i<N;i++){ const j=(i+1)%N;
+    f.push([B+i,B+j,T+j,T+i]);          /* pared exterior */
+    f.push([bi+i,bi+j,ti+j,ti+i]);      /* pared interior */
+    f.push([T+i,T+j,ti+j,ti+i]);        /* tapa */
+    f.push([B+i,B+j,bi+j,bi+i]);        /* fondo */
+  }
+  return [v,f];
+};
+/* placas apiladas y desplazadas */
+SOL.placas=()=>{
+  const v=[],f=[];
+  [[-0.55,0.86,1.35],[0,0.30,1.15],[0.55,-0.26,0.95]].forEach(([dx,y,w])=>{
+    const b=v.length, h=0.20, d=0.92;
+    v.push([dx-w,y-h,-d],[dx+w,y-h,-d],[dx+w,y-h,d],[dx-w,y-h,d],
+           [dx-w,y+h,-d],[dx+w,y+h,-d],[dx+w,y+h,d],[dx-w,y+h,d]);
+    f.push([b,b+1,b+2,b+3],[b+4,b+5,b+6,b+7],
+           [b,b+1,b+5,b+4],[b+2,b+3,b+7,b+6],[b+1,b+2,b+6,b+5],[b,b+3,b+7,b+4]);
+  });
+  return [v,f];
+};
+/* bloque partido en dos mitades separadas */
+SOL.partido=()=>{
+  const v=[],f=[];
+  [[-0.12,-1.5,-0.1],[0.12,0.1,1.5]].forEach(([dx,x0,x1])=>{
+    const b=v.length, y=1.0, z=1.0;
+    v.push([x0+dx,-y,-z],[x1+dx,-y,-z],[x1+dx,-y,z],[x0+dx,-y,z],
+           [x0+dx, y,-z],[x1+dx, y,-z],[x1+dx, y,z],[x0+dx, y,z]);
+    f.push([b,b+1,b+2,b+3],[b+4,b+5,b+6,b+7],
+           [b,b+1,b+5,b+4],[b+2,b+3,b+7,b+6],[b+1,b+2,b+6,b+5],[b,b+3,b+7,b+4]);
+  });
+  return [v,f];
+};
+/* torre de tres cuerpos que se estrechan */
+SOL.torre=()=>{
+  const v=[],f=[];
+  let y=-1.35;
+  [[1.15,0.9],[0.85,0.85],[0.55,0.8]].forEach(([w,h])=>{
+    const b=v.length;
+    v.push([-w,y,-w],[w,y,-w],[w,y,w],[-w,y,w],
+           [-w,y+h,-w],[w,y+h,-w],[w,y+h,w],[-w,y+h,w]);
+    f.push([b,b+1,b+2,b+3],[b+4,b+5,b+6,b+7],
+           [b,b+1,b+5,b+4],[b+2,b+3,b+7,b+6],[b+1,b+2,b+6,b+5],[b,b+3,b+7,b+4]);
+    y+=h;
+  });
+  return [v,f];
+};
+
 /* ── la composición, copiada de la referencia ──
    El sólido es ENORME y se sale del encuadre por arriba y por la derecha:
    solo se ve un trozo, con dos o tres planos grandes. El texto va abajo a la
@@ -705,14 +855,6 @@ function figuraCard(id, solido, titulo, bajada, esquina, opt){
   <rect width="1000" height="530" fill="url(#${id}vig)"/>
   <g clip-path="url(#${id}clip)">${renderiza(id, v, f, o)}</g>
   <rect class="fg-grano" width="1000" height="530" filter="url(#${id}grano)" opacity=".5" style="mix-blend-mode:overlay"/>
-  <defs>
-    <linearGradient id="${id}velo" x1="0" y1="1" x2="0.55" y2="0">
-      <stop offset="0" stop-color="#070707" stop-opacity=".97"/>
-      <stop offset=".45" stop-color="#070707" stop-opacity=".80"/>
-      <stop offset="1" stop-color="#070707" stop-opacity="0"/>
-    </linearGradient>
-  </defs>
-  <rect x="0" y="230" width="660" height="300" fill="url(#${id}velo)"/>
   <text class="fg-esq" x="70" y="372">${esquina}</text>
   <text class="fg-tit" x="70" y="428">${titulo.toUpperCase()}</text>
   <line class="fg-fil" x1="70" y1="452" x2="392" y2="452"/>
@@ -721,6 +863,60 @@ function figuraCard(id, solido, titulo, bajada, esquina, opt){
 }
 
 const DIAG={
+  introduction: figuraCard('j','losa',       'Introduction',
+                  'A Layer 1 built for real-world assets', 'OVERVIEW',
+                  {escala:340, cx:840, cy:120, ax:-0.40, ay:0.56}),
+  vision:       figuraCard('k','horizonte',  'Vision',
+                  'Value that can finally move', 'OVERVIEW',
+                  {escala:300, cx:830, cy:150, ax:-0.22, ay:0.44}),
+  legal:        figuraCard('l','columna',    'Legal document',
+                  'Nereum Labs LLC · Miami, Florida', 'TRUST',
+                  {escala:270, cx:850, cy:30, ax:-0.30, ay:0.70}),
+  audit:        figuraCard('m','corte',      'Audit',
+                  'Reviewed by an independent firm', 'TRUST',
+                  {escala:390, cx:880, cy:0, ax:-0.26, ay:0.88}),
+  kyc:          figuraCard('n','prisma',     'Team KYC',
+                  'Founders verified by a third party', 'TRUST',
+                  {escala:340, cx:850, cy:50, ax:-0.30, ay:0.58, luz:[-0.46,-0.72,0.52], rango:0.94}),
+  scan:         figuraCard('o','placas',     'Nereum Explorer',
+                  'The explorer · read the chain', 'THE NETWORK',
+                  {escala:300, cx:830, cy:90, ax:-0.34, ay:0.60}),
+  dex:          figuraCard('u','anillo',     'Nereum DEX',
+                  'The native exchange', 'THE NETWORK',
+                  {escala:330, cx:850, cy:80, ax:-0.40, ay:0.52}),
+  nusd:         figuraCard('v','cubo',       'NUSD',
+                  'The settlement asset', 'THE NETWORK',
+                  {escala:390, cx:880, cy:10, ax:-0.30, ay:0.74}),
+  forge:        figuraCard('w','piramide',   'Nereum Forge',
+                  'The issuance engine', 'THE NETWORK',
+                  {escala:420, cx:870, cy:-20, ax:-0.26, ay:0.70}),
+  vaults:       figuraCard('x','torre',      'Nereum Vaults',
+                  'Yield on tokenized assets', 'THE NETWORK',
+                  {escala:280, cx:840, cy:70, ax:-0.34, ay:0.58}),
+  feed:         figuraCard('y','octaedro',   'Nereum Feed',
+                  'Data and attestation', 'THE NETWORK',
+                  {escala:330, cx:840, cy:110, ax:-0.18, ay:0.46}),
+  link:         figuraCard('z','cuna',       'Nereum Link',
+                  'Reach beyond the chain', 'THE NETWORK',
+                  {escala:300, cx:830, cy:80, ax:-0.32, ay:0.64}),
+  wallet:       figuraCard('A','partido',    'Wallet and tooling',
+                  'Credentials and developer access', 'THE NETWORK',
+                  {escala:290, cx:850, cy:80, ax:-0.28, ay:0.76}),
+  dexscreener:  figuraCard('p','escalon',    'DexScreener',
+                  'Price, liquidity and trade history', 'TOKEN',
+                  {escala:360, cx:860, cy:60, ax:-0.30, ay:0.50}),
+  team:         figuraCard('q','torre',      'Team',
+                  'Who is building it, and what can be verified', 'COMPANY',
+                  {escala:280, cx:840, cy:60, ax:-0.36, ay:0.64}),
+  press:        figuraCard('r','partido',    'News and mentions',
+                  'Independent coverage, and what counts as coverage', 'COMPANY',
+                  {escala:290, cx:850, cy:80, ax:-0.28, ay:0.72}),
+  links:        figuraCard('s','anillo',     'Official links',
+                  'The only addresses that belong to Nereum', 'COMPANY',
+                  {escala:330, cx:850, cy:90, ax:-0.46, ay:0.40}),
+  faq:          figuraCard('t','icosaedro',  'Questions',
+                  'What a careful reader actually asks', 'COMPANY',
+                  {escala:400, cx:870, cy:80, ax:-0.34, ay:0.28}),
   network:      figuraCard('a','escalon',   'One chain, four layers',
                   'Issuance · Policy · Access · Liquidity', 'THE NETWORK',
                   {escala:400, cx:840, cy:70, ax:-0.30, ay:0.58}),
@@ -736,205 +932,1486 @@ const DIAG={
   identity:     figuraCard('e','prisma',    'Identity and credentials',
                   'Eligibility proven, identity never written', 'PROTOCOL',
                   {escala:360, cx:860, cy:40, ax:-0.30, ay:0.42, luz:[-0.20,-0.86,0.46], rango:0.88}),
-  validators:   figuraCard('f','icosaedro', 'Validators and staking',
-                  'Who produces blocks, and what they have at risk', 'PROTOCOL',
-                  {escala:480, cx:880, cy:60, ax:-0.28, ay:0.52}),
   interop:      figuraCard('g','cuna',      'Interoperability',
                   'The policy has to cross with the asset', 'PROTOCOL',
                   {escala:300, cx:820, cy:80, ax:-0.32, ay:0.60}),
   roadmap:      figuraCard('h','escalera',  'Roadmap',
                   'Five phases. Each one live before the next begins', 'PROTOCOL',
                   {escala:250, cx:790, cy:120, ax:-0.36, ay:0.62}),
-  whitelist:    figuraCard('i','corte',     'Whitelist',
+  whitelist:    figuraCard('i','corte',     'Join the whitelist',
                   'Fixed supply, zero tax, ownership renounced', 'TOKEN',
                   {escala:380, cx:900, cy:-10, ax:-0.20, ay:0.94})
+};
+
+/* ══════════════════════════════════════════════════════════════
+   VERSIÓN EN ESPAÑOL
+   Traducción adaptada, no literal: se mantiene el argumento y el
+   tono, no la sintaxis inglesa.
+   ══════════════════════════════════════════════════════════════ */
+const GRUPOS_ES={'Overview':'Resumen','Trust':'Garantías','Protocol':'Protocolo',
+  'Token':'Token','Company':'La empresa'};
+
+const UI_ES={buscar:'Buscar…', enEsta:'En esta página', anterior:'Anterior',
+  siguiente:'Siguiente', indice:'Índice'};
+
+/* ══════════════════════════════════════════════════════════════
+   DIBUJOS GEOMÉTRICOS
+   Uno al final de cada sección. Figuras puras —trazo fino, fondo
+   claro, el azul solo donde marca— con un pie de una línea. No
+   son esquemas de cajas: son dibujos que explican la idea.
+   ══════════════════════════════════════════════════════════════ */
+const G={};
+
+/* parte un texto en líneas de un ancho dado */
+function _lineas(t, max){
+  const p=String(t).split(' '); const out=[]; let l='';
+  p.forEach(w=>{
+    if((l+' '+w).trim().length>max){ out.push(l.trim()); l=w; } else l+=' '+w;
+  });
+  if(l.trim()) out.push(l.trim());
+  return out;
+}
+
+/* dos recorridos: uno quebrado y largo, otro recto */
+G.recorridos=()=>`
+  <path class="g-lin" d="M60 78 L150 46 L240 106 L330 40 L420 112 L510 52 L600 100 L690 62 L780 92 L880 78"/>
+  ${[150,240,330,420,510,600,690,780].map(x=>`<circle class="g-nodo" cx="${x}" cy="${
+    {150:46,240:106,330:40,420:112,510:52,600:100,690:62,780:92}[x]}" r="4"/>`).join('')}
+  <circle class="g-nodo g-a" cx="60" cy="78" r="5"/>
+  <circle class="g-nodo g-a" cx="880" cy="78" r="5"/>
+  <path class="g-azul" d="M60 178 H880"/>
+  <circle class="g-pto" cx="60" cy="178" r="5"/>
+  <circle class="g-pto" cx="880" cy="178" r="5"/>`;
+
+/* cuatro marcos concéntricos */
+G.marcos=()=>`
+  ${[0,1,2,3].map(i=>{
+    const d=i*22, w=680-d*2, h=196-d*2;
+    return `<rect class="g-caja ${i===3?'g-int':''}" x="${150+d}" y="${20+d}"
+      width="${w}" height="${h}" rx="4"/>`;
+  }).join('')}
+  <circle class="g-pto" cx="490" cy="118" r="6"/>
+  ${[0,1,2,3].map(i=>{
+    const d=i*22;
+    return `<line class="g-gui" x1="${150+d}" y1="${20+d}" x2="${118}" y2="${20+d}"/>
+      <text class="g-num" x="106" y="${24+d}" text-anchor="end">0${4-i}</text>`;
+  }).join('')}`;
+
+/* una pieza atraviesa una compuerta */
+G.compuerta=()=>`
+  <rect class="g-caja" x="70" y="86" width="60" height="60" rx="3"/>
+  <path class="g-fl" d="M150 116 h60 m-9 -6 l9 6 l-9 6"/>
+  <path class="g-azul" d="M300 26 V206 M680 26 V206"/>
+  <path class="g-gui" d="M300 60 H680 M300 116 H680 M300 172 H680"/>
+  <path class="g-fl" d="M770 116 h60 m-9 -6 l9 6 l-9 6"/>
+  <rect class="g-caja g-mar" x="850" y="86" width="60" height="60" rx="3"/>
+  <path class="g-x" d="M478 226 l16 16 M494 226 l-16 16"/>
+  <path class="g-gui" d="M486 206 V222"/>`;
+
+/* núcleo con radios */
+G.radios=(n)=>{
+  const cx=490, cy=132, R=270, r=112;
+  return `
+  <ellipse class="g-nucleo" cx="${cx}" cy="${cy}" rx="74" ry="46"/>
+  ${Array.from({length:n||8},(_,i)=>{
+    const a=(i/(n||8))*Math.PI*2 - Math.PI/2;
+    const x1=cx+Math.cos(a)*82, y1=cy+Math.sin(a)*52;
+    const x2=cx+Math.cos(a)*R,  y2=cy+Math.sin(a)*r;
+    return `<line class="g-gui" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}"/>
+      <circle class="g-nodo" cx="${x2}" cy="${y2}" r="5"/>`;
+  }).join('')}`;
+};
+
+/* escalera ascendente */
+G.escalones=(n)=>{
+  const k=n||3, w=210, base=210;
+  return Array.from({length:k},(_,i)=>{
+    const h=64+i*46, x=180+i*(w+34);
+    return `<g>
+      <rect class="g-caja ${i===k-1?'g-mar':''}" x="${x}" y="${base-h}" width="${w}" height="${h}" rx="4"/>
+      <line class="g-azul" x1="${x}" y1="${base-h}" x2="${x+w}" y2="${base-h}"/>
+    </g>`;
+  }).join('')+`<line class="g-eje" x1="120" y1="${base}" x2="900" y2="${base}"/>`;
+};
+
+/* muchas piezas convergen en una */
+G.embudo=()=>{
+  const arr=[];
+  for(let i=0;i<9;i++){
+    const x=110+i*84;
+    arr.push(`<rect class="g-caja" x="${x}" y="26" width="46" height="34" rx="3"/>
+      <path class="g-gui" d="M${x+23} 64 L490 148"/>`);
+  }
+  return arr.join('')+`
+    <rect class="g-caja g-mar" x="390" y="150" width="200" height="66" rx="4"/>
+    <circle class="g-pto" cx="490" cy="183" r="6"/>`;
+};
+
+/* dos mitades que encajan */
+G.encaje=()=>`
+  <path class="g-caja" d="M150 46 H430 a34 34 0 0 1 0 68 a34 34 0 0 0 0 68 H150 Z"/>
+  <path class="g-caja g-mar" d="M830 46 H550 a34 34 0 0 0 0 68 a34 34 0 0 1 0 68 H830 Z"/>
+  <path class="g-fl" d="M452 116 h32 m-9 -6 l9 6 l-9 6"/>
+  <path class="g-fl" d="M528 116 h-32 m9 -6 l-9 6 l9 6"/>`;
+
+/* rejilla con una celda marcada */
+G.rejilla=()=>{
+  const cols=14, filas=5, w=52, h=34, x0=126, y0=26;
+  const cel=[];
+  for(let f=0;f<filas;f++) for(let c=0;c<cols;c++){
+    const mar = (f===2&&c===6);
+    cel.push(`<rect class="g-celda ${mar?'g-mar':''}" x="${x0+c*w}" y="${y0+f*h}"
+      width="${w-6}" height="${h-6}" rx="2"/>`);
+  }
+  return cel.join('')+`
+    <circle class="g-anillo" cx="${x0+6*w+23}" cy="${y0+2*h+14}" r="42"/>
+    <line class="g-azul" x1="${x0+6*w+53}" y1="${y0+2*h+44}" x2="${x0+6*w+96}" y2="${y0+2*h+82}"/>`;
+};
+
+/* dos órbitas: una pieza fija y otra que viaja */
+G.orbita=()=>`
+  <ellipse class="g-orb" cx="330" cy="116" rx="190" ry="92"/>
+  <ellipse class="g-orb g-punt" cx="700" cy="116" rx="190" ry="92"/>
+  <rect class="g-caja g-mar" x="296" y="88" width="68" height="56" rx="4"/>
+  <circle class="g-pto" cx="700" cy="116" r="7"/>
+  <path class="g-fl" d="M470 116 h60 m-9 -6 l9 6 l-9 6"/>
+  <path class="g-gui" d="M520 116 h-60"/>`;
+
+/* sello: círculos concéntricos con marca */
+G.sello=()=>`
+  <circle class="g-anillo" cx="490" cy="134" r="92"/>
+  <circle class="g-anillo" cx="490" cy="134" r="72"/>
+  <circle class="g-nucleo" cx="490" cy="134" r="50"/>
+  <path class="g-check" d="M466 134 l16 16 l30 -34"/>
+  ${[0,1,2,3,4,5,6,7].map(i=>{
+    const a=(i/8)*Math.PI*2;
+    return `<line class="g-gui" x1="${490+Math.cos(a)*100}" y1="${134+Math.sin(a)*100}"
+      x2="${490+Math.cos(a)*126}" y2="${134+Math.sin(a)*126}"/>`;
+  }).join('')}`;
+
+/* curva de profundidad concentrada */
+G.curva=()=>`
+  <line class="g-eje" x1="120" y1="196" x2="880" y2="196"/>
+  <path class="g-area" d="M180 196 L330 196 L400 62 L600 62 L670 196 L820 196 Z"/>
+  <line class="g-azul g-punt" x1="500" y1="40" x2="500" y2="206"/>
+  <circle class="g-pto" cx="500" cy="62" r="6"/>`;
+
+/* cadena de bloques enlazados */
+G.cadena=()=>{
+  const n=7, w=96, g=28, y=76;
+  return Array.from({length:n},(_,i)=>{
+    const x=110+i*(w+g);
+    return `<g>
+      <rect class="g-caja ${i<4?'g-mar':''}" x="${x}" y="${y}" width="${w}" height="${w}" rx="4"/>
+      ${i<n-1?`<line class="g-azul" x1="${x+w}" y1="${y+w/2}" x2="${x+w+g}" y2="${y+w/2}"/>`:''}
+    </g>`;
+  }).join('');
+};
+
+/* ── el marco común ── */
+function dibujo(tipo, pie, arg){
+  const f=G[tipo]; if(!f) return '';
+  const alto={recorridos:230, marcos:250, compuerta:270, radios:266, escalones:250,
+              embudo:250, encaje:230, rejilla:250, orbita:230, sello:274,
+              curva:240, cadena:230}[tipo]||250;
+  /* en pantalla estrecha el pie va más grande y no cabe en una línea:
+     se parte y el alto del marco crece con él */
+  const estrecho = window.innerWidth < 700;
+  const ls = estrecho ? _lineas(pie, 42) : [pie];
+  const salto = estrecho ? 38 : 20;
+  return `<svg viewBox="0 0 980 ${alto+24+ls.length*salto}" role="img" aria-label="${pie}">
+    <g>${f(arg)}</g>
+    ${ls.map((l,i)=>`<text class="g-pie" x="490" y="${alto+18+i*salto}"
+      text-anchor="middle">${l}</text>`).join('')}
+  </svg>`;
+}
+
+function esquema(id){
+  const d=(DIBUJOS[id]||{});
+  if(!d.tipo) return '';
+  const pie=d[LANG]||'';
+  return '<figure class="esq">'+dibujo(d.tipo, pie, d.arg)+'</figure>';
+}
+
+/* qué dibujo lleva cada sección, y su pie en los dos idiomas */
+const DIBUJOS={
+introduction:{tipo:'recorridos',
+  en:'The same transfer: many manual steps above, one settled step below',
+  es:'La misma transferencia: arriba muchos pasos manuales, abajo uno solo'},
+vision:{tipo:'escalones', arg:3,
+  en:'Each phase only begins when the previous one is live',
+  es:'Cada fase empieza solo cuando la anterior está viva'},
+legal:{tipo:'sello',
+  en:'A named entity in a jurisdiction, verifiable in a public register',
+  es:'Una entidad con nombre en una jurisdicción, verificable en un registro público'},
+audit:{tipo:'rejilla',
+  en:'An independent review reads the deployed code, line by line',
+  es:'Una revisión independiente lee el código desplegado, línea a línea'},
+kyc:{tipo:'radios', arg:4,
+  en:'Four proofs around one centre: none of them works alone',
+  es:'Cuatro pruebas alrededor de un centro: ninguna funciona sola'},
+whitelist:{tipo:'embudo',
+  en:'Many participants, one allocation, one published cap per wallet',
+  es:'Muchos participantes, una asignación y un tope publicado por cartera'},
+dexscreener:{tipo:'curva',
+  en:'Depth concentrated around the opening price',
+  es:'Profundidad concentrada alrededor del precio de apertura'},
+network:{tipo:'marcos',
+  en:'Four layers around the same asset, checked on every transfer',
+  es:'Cuatro capas alrededor del mismo activo, comprobadas en cada transferencia'},
+tokenization:{tipo:'encaje',
+  en:'The document and the record, bound so neither moves without the other',
+  es:'El documento y el registro, atados para que ninguno se mueva sin el otro'},
+scan:{tipo:'rejilla',
+  en:'Every block open to anyone, with no account and no permission',
+  es:'Cada bloque abierto a cualquiera, sin cuenta y sin permiso'},
+dex:{tipo:'compuerta',
+  en:'Only a transfer that satisfies the policy reaches the other side',
+  es:'Solo una transferencia que cumple la política llega al otro lado'},
+nusd:{tipo:'encaje',
+  en:'Asset and payment settle as one movement, or not at all',
+  es:'Activo y pago liquidan como un solo movimiento, o no liquidan'},
+forge:{tipo:'sello',
+  en:'The policy is stamped onto the asset at the moment of issuance',
+  es:'La política se sella sobre el activo en el momento de la emisión'},
+vaults:{tipo:'embudo',
+  en:'Many assets, one position, one published mandate',
+  es:'Muchos activos, una posición y un mandato publicado'},
+feed:{tipo:'radios', arg:6,
+  en:'Signed data from outside, converging on a single record',
+  es:'Datos firmados desde fuera, convergiendo en un único registro'},
+link:{tipo:'orbita',
+  en:'The asset stays in place; only the exposure travels',
+  es:'El activo se queda donde está; solo viaja la exposición'},
+wallet:{tipo:'marcos',
+  en:'Credentials travel with the holder, not with the operator',
+  es:'Las credenciales viajan con el titular, no con el operador'},
+team:{tipo:'sello',
+  en:'Identity verified by an independent party and kept on file',
+  es:'Identidad verificada por un tercero independiente y conservada en archivo'},
+press:{tipo:'radios', arg:4,
+  en:'Independent coverage, separated from what the project chose to say',
+  es:'Cobertura independiente, separada de lo que el proyecto eligió decir'},
+links:{tipo:'radios', arg:5,
+  en:'One authorised centre; everything outside it is impersonation',
+  es:'Un único centro autorizado; todo lo de fuera es suplantación'},
+faq:{tipo:'cadena',
+  en:'What is already final, and what is still ahead',
+  es:'Lo que ya es definitivo y lo que todavía está por delante'}
+};
+
+const PAGS_ES={
+
+introduction:{grupo:'Resumen', titulo:'Introducción', html:`
+<p><strong>Nereum es una blockchain de capa 1 con la tokenización de activos
+reales integrada en el protocolo:</strong> inmuebles, crédito privado, deuda,
+facturas y fondos emitidos, gobernados y liquidados directamente en la red.</p>
+
+<p>Detrás está <strong>Nereum Labs LLC</strong>, registrada en <strong>Miami,
+Florida</strong>.</p>
+
+<h2 id="problema">El problema</h2>
+<p>La mayor parte del valor del mundo está en activos que no se pueden mover con
+agilidad. No por falta de demanda, sino porque el proceso que los transfiere
+sigue siendo manual.</p>
+<p>Cada operación exige verificar que el comprador reúne las condiciones exigidas
+—jurisdicción, categoría de inversor, periodo de permanencia—, revisar la
+documentación y actualizar un registro privado. Ese trabajo lo hace una persona,
+en días hábiles, y lo cobra un intermediario en cada transmisión.</p>
+<p>El resultado es un mercado donde la liquidación tarda semanas y el activo se
+valora una vez al año en lugar de cotizar de forma continua.</p>
+
+<h2 id="tokenizar">Qué aporta tokenizar</h2>
+<p>Tokenizar consiste en representar el derecho sobre ese activo como un registro
+en una cadena pública: consultable en cualquier momento, transferible en segundos
+y con un historial que no depende de la contabilidad de una entidad concreta.</p>
+<p>Esto ya se hace hoy sobre cadenas de propósito general. La limitación no está
+en la representación del activo, sino en dónde se aplican sus reglas.</p>
+
+<h2 id="diferencia">Qué hace Nereum diferente</h2>
+<p>Cuando un activo con restricciones de transferencia se emite sobre Ethereum,
+BNB Chain o Solana, el token vive en la cadena pero <strong>la política que lo
+gobierna vive fuera de ella</strong>. La red valida la firma y el saldo; el
+cumplimiento se resuelve en un sistema aparte, después de que la transferencia se
+haya registrado.</p>
+<p>Eso obliga a corregir a posteriori: revertir operaciones, reconciliar
+registros o, en el peor caso, asumir que un activo restringido acabó en manos que
+no calificaban.</p>
+
+<p><strong>En Nereum la política forma parte del activo y se evalúa en la propia
+validación de la transferencia.</strong> Las condiciones se atan en el momento de
+la emisión y acompañan al activo en cada transmisión posterior. La red comprueba
+la elegibilidad del emisor y del receptor en el mismo paso en que comprueba el
+saldo y la firma.</p>
+<p>Si alguna condición no se cumple, la transferencia <strong>no se
+liquida</strong>. No existe un estado intermedio que revertir, porque nunca llegó
+a escribirse.</p>
+
+<h2 id="resuelve">Qué resuelve</h2>
+<table>
+  <tr><th>Modelo actual</th><th>Sobre Nereum</th></tr>
+  <tr><td>Liquidación en días o semanas</td><td>Liquidación atómica en segundos</td></tr>
+  <tr><td>Cumplimiento verificado a posteriori por un tercero</td><td>Verificado por el protocolo antes de registrar</td></tr>
+  <tr><td>Coste de intermediación en cada transmisión</td><td>Sin verificación manual por operación</td></tr>
+  <tr><td>Valoración periódica</td><td>Precio continuo y auditable en cadena</td></tr>
+  <tr><td>Registro privado, opaco al tenedor</td><td>Registro público, consultable sin permiso</td></tr>
+  <tr><td>La regla puede perderse al cambiar de mercado</td><td>La política viaja con el activo</td></tr>
+</table>
+
+<h2 id="posicion">Posición frente a otras redes</h2>
+<p>Existen otras redes orientadas a activos reales, algunas con financiación y
+recorrido considerables. La diferencia relevante no es el volumen anunciado, sino
+<strong>en qué capa sitúa cada una el cumplimiento</strong>.</p>
+<p>La mayoría lo implementa como una capa de aplicaciones sobre una cadena
+existente. Nereum lo implementa en el protocolo. Es una decisión más costosa
+—obliga a construir consenso, validadores y herramientas propios en lugar de
+desplegar un contrato— y es la que permite garantizar que la regla se aplica en
+toda transferencia, en cualquier mercado y durante toda la vida del activo.</p>
+
+<h2 id="garantias">Qué respalda este proyecto</h2>
+<table>
+  <tr><th>Elemento</th><th>Dónde comprobarlo</th></tr>
+  <tr><td><b>Empresa registrada</b><br><span style="color:var(--ink-3)">Nereum Labs LLC · Miami, Florida</span></td>
+      <td>Ver <a class="enl" href="#/legal">Documento legal — Miami, FL</a></td></tr>
+  <tr><td><b>KYC del equipo</b><br><span style="color:var(--ink-3)">Fundadores verificados por un tercero</span></td>
+      <td>Ver <a class="enl" href="#/kyc">KYC del equipo</a></td></tr>
+  <tr><td><b>Auditoría del contrato</b><br><span style="color:var(--ink-3)">Revisión de seguridad independiente</span></td>
+      <td>Ver <a class="enl" href="#/audit">Auditoría</a></td></tr>
+</table>
+
+<h2 id="ruta">Por dónde empezar</h2>
+<p>Si solo lees tres páginas, lee <a class="enl" href="#/vision">la visión</a>,
+<a class="enl" href="#/legal">el documento legal</a> y
+<a class="enl" href="#/audit">la auditoría</a>. Las dos últimas son las que
+comprueba primero cualquier lector con criterio.</p>
+`},
+
+vision:{grupo:'Resumen', titulo:'Visión', html:`
+<p><strong>Situar a Nereum entre los protocolos de tokenización de activos
+reales más utilizados</strong>, por ser la red donde emitir, gobernar y liquidar
+un activo regulado resulta técnicamente más simple que en cualquier alternativa.</p>
+
+<h2 id="mercado">El mercado al que se dirige</h2>
+<p>Los activos del mundo real —inmuebles, crédito privado, deuda corporativa,
+efectos comerciales, participaciones en fondos— generan rendimiento de forma
+continua y se transmiten con una fricción que no se ha reducido de manera
+significativa en décadas.</p>
+<p>La consecuencia no es solo operativa. Un activo cuya transmisión exige semanas
+incorpora un descuento por iliquidez en su valoración. <strong>Reducir esa
+fricción no acelera únicamente la operación: modifica el precio del
+activo.</strong></p>
+
+<h2 id="tecnologia">La base técnica</h2>
+<p>La tesis de Nereum es que el cumplimiento debe residir en el protocolo y no en
+una capa de aplicaciones sobre él.</p>
+<p>Esa decisión permite que un instrumento con restricciones de transferencia
+circule con las propiedades de un token nativo —liquidación atómica, finalidad
+determinista, disponibilidad continua— sin renunciar a las condiciones que lo
+hacen conforme.</p>
+<p>Sobre esa base se despliega el resto de la infraestructura: explorador de
+bloques, bolsa nativa consciente de la política, activo de liquidación estable,
+motor de emisión sin desarrollo a medida, bóvedas de exposición agregada y una
+capa de datos y atestación que mantiene el vínculo entre el token y su
+documentación.</p>
+<p>Ninguna de esas piezas es accesoria: cada una cubre un requisito sin el cual la
+red no resulta utilizable de extremo a extremo.</p>
+
+<h2 id="horizontes">Fases de adopción</h2>
+<table>
+  <tr><th>Fase</th><th>Objetivo</th></tr>
+  <tr><td><b>Validación</b></td>
+      <td>Una clase de activo emitida íntegramente en Nereum y transmitida entre titulares cualificados sin intervención humana en la ruta de liquidación.</td></tr>
+  <tr><td><b>Utilidad</b></td>
+      <td>Aceptación de activos tokenizados como colateral. Un activo alcanza liquidez real cuando existe crédito disponible contra él.</td></tr>
+  <tr><td><b>Integración</b></td>
+      <td>La infraestructura deja de ser un factor de decisión para el emisor, del mismo modo que hoy no lo son las vías de pago interbancarias.</td></tr>
+</table>
+
+<h2 id="cambia">Impacto por perfil</h2>
+
+<h3>Emisores</h3>
+<p>La política se define una vez, en la emisión, y el protocolo la aplica de forma
+permanente. La distribución del activo deja de requerir revisión jurídica en cada
+transmisión.</p>
+
+<h3>Tenedores</h3>
+<p>Titularidad verificable de forma independiente y transmisible sin sujeción a
+ventanas de liquidación. Una participación fraccionada adquiere el
+comportamiento operativo de un valor cotizado.</p>
+
+<h3>Mercados</h3>
+<p>Activos con valoración periódica pasan a disponer de precio continuo, lo que
+habilita crédito colateralizado, carteras compuestas y mercados secundarios con
+profundidad medible.</p>
+
+<h2 id="diferencia">Fundamento de la propuesta</h2>
+<p>Otros proyectos compiten por el mismo mercado y varios cuentan con ventaja en
+capital y en calendario. El factor diferencial no es la prioridad temporal, sino
+la capa en la que cada uno resuelve el cumplimiento.</p>
+<p>Construir una capa 1 completa exige más recursos que desplegar un contrato
+sobre una red existente. A cambio proporciona una garantía que no puede añadirse
+posteriormente: <strong>que la política es inseparable del activo</strong>.</p>
+<p>El objetivo declarado no es el liderazgo por volumen, sino constituir la
+opción técnicamente evidente para emitir un activo real en cadena.</p>
+`},
+
+legal:{grupo:'Garantías', titulo:'Documento legal — Miami, FL', html:`
+<p>Un proyecto blockchain pide a desconocidos que manden dinero a una dirección.
+Lo mínimo que les debe a cambio es <strong>una persona jurídica con nombre,
+dirección y un registro público</strong>: uno que cualquiera pueda consultar sin
+permiso, sin cuenta y sin fiarse de nuestra palabra.</p>
+
+<p>Nereum lo opera <strong>Nereum Labs LLC</strong>, una sociedad de
+responsabilidad limitada registrada en <strong>Miami, Florida, Estados
+Unidos</strong>.</p>
+
+<p>Eso significa que hay una entidad con nombre, sujeta a una jurisdicción con
+tribunales que funcionan, a la que se puede contactar, exigir el cumplimiento de
+lo que declara públicamente y demandar si lo incumple. No es una garantía de
+nada. Es el suelo por debajo del cual un proyecto serio no debería operar.</p>
+
+<h2 id="ficha">El registro</h2>
+<table>
+  <tr><th>Elemento</th><th>Valor</th></tr>
+  <tr><td>Denominación</td><td><b>Nereum Labs LLC</b></td></tr>
+  <tr><td>Tipo de entidad</td><td>Sociedad de responsabilidad limitada</td></tr>
+  <tr><td>Jurisdicción</td><td>Miami, Florida, Estados Unidos</td></tr>
+  <tr><td><b>Número de expediente</b></td><td>${PEND('número de empresa')}</td></tr>
+  <tr><td><b>Enlace de verificación</b></td><td>${PEND('enlace directo al registro estatal')}</td></tr>
+  <tr><td>Fecha de constitución</td><td>${PEND('fecha')}</td></tr>
+  <tr><td>Estado</td><td>${PEND('activa / inactiva')}</td></tr>
+  <tr><td>Agente registrado</td><td>${PEND('nombre y dirección')}</td></tr>
+</table>
+
+<h2 id="comprobar">Compruébalo tú mismo, en cuatro pasos</h2>
+<p>Florida mantiene un registro mercantil público y gratuito. No nos necesitas
+para nada de esto, y preferimos que lo hagas a que nos creas:</p>
+<ol>
+  <li>Abre el buscador de la <strong>División de Corporaciones de Florida</strong>
+      (sunbiz.org), el registro oficial del estado.</li>
+  <li>Busca por la denominación o pega el número de expediente de arriba.</li>
+  <li>Confirma que coinciden cuatro cosas: el nombre legal exacto, la fecha de
+      constitución, el estado actual y el agente registrado.</li>
+  <li>Abre los informes anuales del expediente. Una empresa que presenta a tiempo
+      es una empresa que alguien sigue llevando.</li>
+</ol>
+
+<h2 id="quien">Quién responde detrás de la entidad</h2>
+<p>Una empresa es tan responsable como las personas que figuran en ella. Los
+fundadores están verificados por un tercero —ver <a class="enl" href="#/kyc">KYC
+del equipo</a>— así que la entidad no es una carcasa sin nadie detrás.</p>
+
+`},
+
+audit:{grupo:'Garantías', titulo:'Auditoría', html:`
+<p>Una auditoría es una revisión independiente de los contratos por una firma que
+no tiene nada en juego. Es la única parte de la seguridad de un proyecto que
+alguien de fuera puede evaluar directamente, y por eso pesa tanto — y por eso una
+insignia de auditoría sin nada detrás es peor que no tener ninguna.</p>
+
+<p>Esta página contiene la revisión, las direcciones desplegadas y la razón por la
+que ambas importan: <strong>Nereum no tiene dueño</strong>. Una vez que el código
+está corriendo, nadie —nosotros incluidos— puede cambiarlo. Eso convierte a la
+auditoría en la última línea de defensa, no en una de varias.</p>
+
+<h2 id="informe">La revisión</h2>
+<table>
+  <tr><th>Elemento</th><th>Valor</th></tr>
+  <tr><td>Firma</td><td>${PEND('nombre de la firma auditora')}</td></tr>
+  <tr><td><b>Informe completo</b></td><td>${PEND('enlace público al informe')}</td></tr>
+  <tr><td><b>Informe en la web del auditor</b></td><td>${PEND('enlace en el dominio de la propia firma')}</td></tr>
+  <tr><td>Alcance</td><td>${PEND('qué contratos se revisaron')}</td></tr>
+  <tr><td>Commit revisado</td><td>${PEND('hash exacto del commit')}</td></tr>
+  <tr><td>Fecha</td><td>${PEND('fecha del informe')}</td></tr>
+  <tr><td>Hallazgos</td><td>${PEND('críticos / altos / medios / bajos')}</td></tr>
+  <tr><td>Resueltos</td><td>${PEND('cuántos, y cuáles siguen abiertos')}</td></tr>
+</table>
+
+<h2 id="descentralizado">Esto no tiene dueño</h2>
+<p>Nereum está construida para pertenecer a quienes la tienen —su comunidad y sus
+inversores— no al equipo que la escribió. Es una decisión de diseño con
+consecuencias, y cada parte se puede verificar en cadena:</p>
+
+<table>
+  <tr><th>Propiedad</th><th>Qué significa</th><th>Comprobación</th></tr>
+  <tr><td><b>Suministro fijo</b></td>
+      <td>600.000.000 NRM en el génesis. No existe función de acuñación que nadie pueda invocar, nunca.</td>
+      <td>${PEND('dirección del contrato')}</td></tr>
+  <tr><td><b>Sin pausa</b></td>
+      <td>Las transferencias no se pueden congelar. Ni por nosotros ni por nadie.</td>
+      <td>${PEND('dirección del contrato')}</td></tr>
+  <tr><td><b>Sin lista negra</b></td>
+      <td>Ninguna dirección puede ser bloqueada por decreto.</td>
+      <td>${PEND('dirección del contrato')}</td></tr>
+</table>
+
+<h2 id="contratos">Contratos desplegados</h2>
+<p>Cada dirección desplegada en un explorador público, para poder comparar línea
+a línea el código auditado con el código que corre.</p>
+<table>
+  <tr><th>Elemento</th><th>Valor</th></tr>
+  <tr><td>Token</td><td><b>NRM</b></td></tr>
+  <tr><td>Dirección del contrato</td><td>${PEND('dirección')}</td></tr>
+  <tr><td>Red</td><td>${PEND('red')}</td></tr>
+  <tr><td>Código verificado</td><td>${PEND('enlace al código verificado en el explorador')}</td></tr>
+  <tr><td>Propiedad</td><td><b>Renunciada</b> — ver esa página</td></tr>
+</table>
+
+<h2 id="leer">Cómo se lee un informe de auditoría</h2>
+<p>Casi todo el mundo mira el número de hallazgos. Es lo menos útil. Importan más
+otras cuatro cosas:</p>
+<ol>
+  <li><strong>El hash del commit.</strong> Una auditoría revisa una versión
+      concreta del código. Si el contrato desplegado no coincide con el commit
+      auditado, el informe describe un programa que no está corriendo. Es la
+      forma más común en que una insignia de auditoría engaña.</li>
+  <li><strong>El alcance.</strong> Qué contratos entraron y cuáles quedaron
+      fuera. Una revisión del token no dice nada del contrato de venta.</li>
+  <li><strong>Los hallazgos abiertos.</strong> Todos los informes tienen alguno.
+      Lo que importa es cuáles se aceptaron como riesgo y con qué razonamiento.</li>
+  <li><strong>La fecha.</strong> El código cambia. Una auditoría anterior al
+      último despliegue es historia, no garantía.</li>
+</ol>
+
+<h2 id="porque">Por qué aquí la auditoría importa más</h2>
+<p>En un proyecto donde el equipo conserva las claves de administrador, un fallo
+se puede parchear. Eso es una red de seguridad, y también es una puerta trasera:
+la misma clave que arregla un fallo puede vaciar una tesorería.</p>
+<p>Nosotros renunciamos a esa clave. Significa que <strong>nadie de dentro puede
+actuar contra los tenedores</strong>.</p>
+`},
+
+kyc:{grupo:'Garantías', titulo:'KYC del equipo', html:`
+<p>Los fundadores de Nereum han completado una <strong>verificación de identidad
+por un tercero</strong>. Una firma independiente ha visto la documentación oficial
+de las personas que llevan este proyecto y la conserva en su archivo.</p>
+
+<p>No es una insignia comprada para decorar una página. Es un nombre y una cara
+en el archivo de alguien que no somos nosotros, y al que se le puede exigir que
+los aporte.</p>
+
+<h2 id="importa">Por qué importa en una ronda de financiación</h2>
+<p>La mayoría de los proyectos que captan dinero en esta fase están llevados por
+personas a las que no puedes poner nombre. Es normal en cripto y no es
+automáticamente malo: hay software serio que se ha entregado de forma anónima.</p>
+<p>Pero cambia lo que pasa cuando algo sale mal. <strong>Un equipo anónimo que
+desaparece no deja a quién perseguir.</strong> No hay jurisdicción, ni citación,
+ni caso. El dinero simplemente ya no está, y el único recurso es un hilo en
+redes.</p>
+
+<h2 id="combinacion">Qué es lo poco común</h2>
+<p>El KYC de equipo por sí solo no es raro. Muchas preventas anuncian una
+insignia de verificación, y hay varias firmas que las emiten.</p>
+<p>Lo menos común es el <strong>conjunto completo</strong>, y cada pieza tapa un
+hueco que dejan las otras:</p>
+<table>
+  <tr><th>Prueba</th><th>Qué responde</th></tr>
+  <tr><td><b>Empresa registrada</b></td>
+      <td>¿Existe una entidad legal, en una jurisdicción con tribunales?
+      <a class="enl" href="#/legal">Documento legal — Miami, FL</a></td></tr>
+  <tr><td><b>KYC del equipo</b></td>
+      <td>¿Hay una persona real identificada detrás de esa entidad?</td></tr>
+  <tr><td><b>Auditoría</b></td>
+      <td>¿Ha revisado alguien independiente el código?
+      <a class="enl" href="#/audit">Auditoría</a></td></tr>
+</table>
+<p>Una empresa sin nombres es una carcasa. Nombres sin auditoría es confiar en
+desconocidos. Una auditoría sin renuncia de propiedad deja la puerta trasera
+abierta. <strong>Las cuatro juntas son lo que de verdad significa responder</strong>,
+y cada una se verifica sin pedirnos nada.</p>
+
+<h2 id="privacidad">Qué se verifica y qué queda privado</h2>
+<p>Verificar no significa publicar los documentos de los fundadores. La firma
+conserva la identificación; el público ve un certificado que confirma que se
+comprobó.</p>
+<ul>
+  <li><strong>La firma ve</strong> la documentación oficial, y normalmente hace
+      una prueba de vida y un cribado de sanciones.</li>
+  <li><strong>El público ve</strong> que la verificación se completó, por quién y
+      cuándo.</li>
+  <li><strong>Las autoridades pueden ver</strong> la identidad subyacente, si hay
+      un requerimiento legal a través de la firma.</li>
+</ul>
+<p>Ese equilibrio es el objetivo: responsabilidad sin publicar un pasaporte en
+internet.</p>
+
+`},
+
+network:{grupo:'Protocolo', titulo:'NereumEVM — Blockchain', html:`
+<p><strong>NereumEVM es una blockchain de capa 1 con la tokenización de activos
+integrada en el protocolo.</strong></p>
+
+<p>Es una blockchain completa: sus propios validadores, su propio consenso, su
+propio token y su propio estado. Es compatible con EVM, así que ejecuta contratos
+inteligentes estándar y cualquier desarrollador que haya trabajado en Ethereum
+puede construir aquí sin aprender nada nuevo.</p>
+
+<p>Lo que añade es una capa nativa para activos del mundo real. En una cadena de
+propósito general desplegarías un contrato para representar un edificio, una
+factura o un fondo, y luego gestionarías las reglas por separado. <strong>En
+Nereum el activo y sus reglas son un mismo objeto, y de los dos se encarga el
+protocolo.</strong></p>
+
+<h3>Qué significa en la práctica</h3>
+<p>Un emisor tokeniza un activo directamente en la cadena: el inmueble, el
+préstamo, la factura. Al crearlo, el activo lleva consigo las condiciones que lo
+gobiernan: qué jurisdicciones pueden tenerlo, qué clase de titular califica, si
+hay periodo de permanencia y qué hay que reportar.</p>
+
+<p>A partir de ahí esas condiciones viajan con el activo. Cada vez que cambia de
+manos, la red las comprueba como parte de validar la transferencia, en el mismo
+paso y a la misma velocidad con la que comprueba el saldo y la firma.</p>
+
+<p>El resultado es que un activo tokenizado se comporta como cualquier otro
+token —se mueve en segundos, liquida en cadena y se puede guardar en cualquier
+cartera de la red— mientras las reglas que lo convierten en un instrumento
+regulado siguen atadas a él.</p>
+
+<h2 id="capas">Una cadena, cuatro capas</h2>
+<p>Todo activo emitido en Nereum pasa por las cuatro cada vez que se mueve.</p>
+<div class="pila">
+  <div class="capa"><i>01</i><b>Emisión</b><s>Qué existe y bajo qué autoridad</s></div>
+  <div class="capa"><i>02</i><b>Política</b><s>Las condiciones que viajan con él</s></div>
+  <div class="capa"><i>03</i><b>Acceso</b><s>Quién puede tenerlo y moverlo</s></div>
+  <div class="capa"><i>04</i><b>Liquidez</b><s>Dónde se puede intercambiar</s></div>
+</div>
+
+<h3>01 · Emisión</h3>
+<p>Crea el registro en cadena y lo ata a lo que existe fuera de ella: una
+escritura, un pagaré, una factura. Registra al emisor, la autoridad bajo la que
+emite, una referencia al documento subyacente y el conjunto de políticas que
+viajará con el activo a partir de ese momento.</p>
+
+<h3>02 · Política</h3>
+<p>Las condiciones que deben cumplirse para que una transferencia liquide:
+jurisdicción, clase de titular, periodo de bloqueo, reporte. Atadas al
+<strong>activo</strong>, no a la cartera que lo tiene — por eso sobreviven a cada
+transferencia, cada mercado y cada cambio de dueño.</p>
+
+<h3>03 · Acceso</h3>
+<p>Quién puede tener y mover un activo, comprobado en <strong>cada</strong>
+transferencia y no una sola vez al darse de alta. Los titulares demuestran
+elegibilidad con credenciales verificables de un emisor aprobado: la cadena
+comprueba la credencial, no a la persona que hay detrás.</p>
+
+<h3>04 · Liquidez</h3>
+<p>Dónde se puede intercambiar el activo y bajo qué restricciones.</p>
+`},
+
+tokenization:{grupo:'Protocolo', titulo:'Tokenización de activos', html:`
+<p>Tokenizar un activo no es difícil. Hacerlo <strong>mover</strong>, y que siga
+siendo exigible mientras se mueve, ese es el problema entero.</p>
+
+<p>Esta página explica cómo llega un activo a Nereum, qué registra la cadena
+sobre él, y qué pasa cuando el registro y el mundo real no coinciden.</p>
+
+<h2 id="camino">De activo a token</h2>
+<table>
+  <tr><th>Paso</th><th>Qué ocurre</th></tr>
+  <tr><td><b>01 · Originación</b></td>
+      <td>El activo y su documentación se establecen fuera de la cadena: título, valoración, el vehículo jurídico que lo tiene.</td></tr>
+  <tr><td><b>02 · Verificación</b></td>
+      <td>Una parte aprobada certifica que la documentación es lo que dice ser.</td></tr>
+  <tr><td><b>03 · Emisión</b></td>
+      <td>Se crea el registro en cadena y se ata al documento por referencia y huella.</td></tr>
+  <tr><td><b>04 · Vinculación de política</b></td>
+      <td>Las condiciones se atan al activo mismo, no a la primera cartera que lo tiene.</td></tr>
+  <tr><td><b>05 · Distribución</b></td>
+      <td>Llega a titulares cualificados, cada uno comprobado en el momento de transferir y no una sola vez al darse de alta.</td></tr>
+</table>
+
+<h2 id="vinculo">El vínculo con lo real</h2>
+<p>Un token que representa un edificio vale exactamente lo que valga su vínculo
+con la escritura. Rompe ese vínculo y lo que queda es un número en una base de
+datos.</p>
+<p>Nereum registra tres cosas que lo mantienen intacto:</p>
+<ul>
+  <li><strong>La referencia.</strong> Qué documento, custodiado dónde, bajo qué asiento registral.</li>
+  <li><strong>La huella.</strong> Una firma digital de ese documento, de forma que cualquier alteración posterior sea detectable.</li>
+  <li><strong>La atestación.</strong> Quién respondió por ese vínculo, cuándo y bajo qué autoridad.</li>
+</ul>
+<p>Las tres están en cadena. Ninguna exige confiar en nosotros: las puede
+comprobar cualquiera que tenga el documento delante.</p>
+
+<h2 id="custodia">Custodia del subyacente</h2>
+<p>Nereum registra el derecho; no guarda el activo. Algo en el mundo físico tiene
+que hacerlo.</p>
+
+<h2 id="ciclo">La vida después de la emisión</h2>
+<p>Casi todos los proyectos de tokenización describen la emisión y ahí se paran.
+Un activo vive años después de eso, y los sucesos que vienen luego son donde el
+diseño se pone a prueba de verdad.</p>
+
+<h3>Rentas y distribuciones</h3>
+<p>Alquileres, cupones, amortizaciones. Pagados en cadena, de forma proporcional,
+sin que antes haya que reconciliar un registro.</p>
+
+<h3>Acciones corporativas</h3>
+<p>Revalorizaciones, desdoblamientos, cambios en las condiciones. El registro
+tiene que aceptarlos sin romper el historial anterior.</p>
+
+<h3>Amortización</h3>
+<p>El activo se vende, vence o se repaga, y el token tiene que retirarse contra
+él.</p>
+
+<h2 id="conflicto">Cuando el registro y la realidad no coinciden</h2>
+<p>Todo proyecto de tokenización se juzga por esto, y la mayoría de los
+whitepapers lo esquivan. La respuesta honesta tiene tres partes: qué hace el
+protocolo automáticamente, qué exige que actúe el emisor, y <strong>qué puede
+imponer un juez pese a lo que diga la cadena</strong>.</p>
+
+<h2 id="limites">Lo que la tokenización no hace</h2>
+<ul>
+  <li>No vuelve líquido un activo ilíquido. Elimina fricción; no crea compradores.</li>
+  <li>No sustituye al derecho legal. El token apunta a él.</li>
+  <li>No elimina el riesgo de contraparte del custodio ni del emisor.</li>
+  <li>No convierte un activo malo en bueno. Un préstamo malo tokenizado es un
+      préstamo malo que liquida más rápido.</li>
+</ul>
+`},
+
+scan:{grupo:'Protocolo', titulo:'Nereum Explorer', html:`
+<p><strong>Nereum Explorer es el explorador de bloques de la red:</strong> una web
+pública que lee la cadena y muestra lo que hay en ella — cada bloque, cada
+transacción, cada dirección y cada contrato desplegado.</p>
+
+<h2 id="que">Qué muestra</h2>
+<p>Abres una dirección y ves su historial completo: qué tiene, qué ha enviado,
+qué ha recibido y cuándo. Abres un contrato y ves su código fuente verificado,
+así que el programa que está corriendo se puede comparar línea a línea con el
+código que el equipo publicó.</p>
+<p>De un activo tokenizado muestra además lo que un explorador de propósito
+general no puede: la política atada al activo, cuántos titulares cualificados
+tiene y la referencia del documento contra el que se emitió.</p>
+
+<h2 id="como">Cómo funciona</h2>
+<p>Nereum Explorer mantiene su propia copia de la cadena e indexa cada bloque conforme se
+produce. No tiene acceso privilegiado ni custodia nada: lee los mismos datos
+públicos que lee cualquier nodo, y los organiza para que una persona pueda
+usarlos.</p>
+<p>Por eso es sustituible. Si Nereum Explorer desapareciera mañana, cualquiera podría
+levantar su propio explorador contra la misma cadena y ver exactamente lo mismo.</p>
+
+<h2 id="resuelve">Qué problema resuelve</h2>
+<p>Una blockchain sin explorador es una base de datos que nadie puede leer. Los
+datos son públicos en teoría e inalcanzables en la práctica, porque leerlos
+directamente significa levantar un nodo y escribir software.</p>
+<p>Nereum Explorer es lo que convierte <em>"puedes verificarlo tú mismo"</em> de afirmación
+en instrucción. Todas las pruebas de este documento —el suministro, el contrato,
+la propiedad, los titulares— terminan en una dirección que alguien tiene que
+poder abrir. Nereum Explorer es donde la abre.</p>
+`},
+
+dex:{grupo:'Protocolo', titulo:'Nereum DEX', html:`
+<p><strong>Nereum DEX es la bolsa integrada en la red:</strong> donde se compran
+y venden los activos tokenizados, con precio continuo y liquidación en cadena.</p>
+
+<h2 id="que">Qué hace</h2>
+<ul>
+  <li><strong>Cotización de pares.</strong> Cualquier activo listado se negocia
+      contra NUSD, NRM u otro activo, con un precio que se actualiza en cada
+      operación en vez de una vez al trimestre.</li>
+  <li><strong>Liquidación atómica.</strong> El activo y el pago cambian de manos
+      en la misma transacción. Las dos patas o ninguna: no hay una ventana en la
+      que una parte ha entregado y la otra no.</li>
+  <li><strong>Enrutado consciente de la política.</strong> Una orden que dejaría
+      el activo en una cartera que no califica no llega a casarse.</li>
+  <li><strong>Historial público de precios.</strong> Cada operación queda en la
+      cadena, así que un activo que se valoraba una vez al año pasa a tener un
+      precio continuo y auditable.</li>
+</ul>
+
+<h2 id="como">Cómo funciona</h2>
+<p>La bolsa forma parte del protocolo, no es un contrato desplegado encima.
+Cuando se envía una operación, la misma validación que comprueba el saldo y la
+firma comprueba también la política del activo, para las dos partes y para el
+propio fondo de liquidez.</p>
+<p>Ese último punto es la razón de que tenga que ser nativa. En una cadena de
+propósito general, un activo con restricciones de transferencia y un creador de
+mercado automático entran en conflicto: el fondo tiene que sostener el activo, y
+un fondo no es un titular cualificado. Los proyectos lo sortean con envoltorios y
+listas blancas. Aquí el fondo es sencillamente un participante más y las reglas
+se le aplican igual.</p>
+
+<h2 id="resuelve">Qué problema resuelve</h2>
+<p>Un activo tokenizado que no se puede negociar es un certificado con pasos de
+más. Todo el argumento de poner un edificio en una cadena es que pase a ser tan
+transferible como una acción — y eso solo ocurre si hay dónde transferirlo.</p>
+<p>La bolsa es además lo que produce el precio. Un activo sin mercado tiene una
+valoración; un activo con mercado tiene un precio, y la diferencia le importa a
+todo el que tenga que contabilizarlo, prestar contra él o venderlo.</p>
+`},
+
+nusd:{grupo:'Protocolo', titulo:'NUSD', html:`
+<p><strong>NUSD es el activo de liquidación de la red:</strong> una unidad
+estable, nativa de la cadena, en la que se denomina la parte del pago de cada
+operación.</p>
+
+<h2 id="que">Qué es</h2>
+<p>Un NUSD vale un dólar y está respaldado por reservas custodiadas fuera de la
+cadena. Se comporta como cualquier otro token de la red —se mueve en segundos,
+liquida en cadena y se guarda en cualquier cartera— pero su valor no se mueve
+frente a la moneda en la que están valorados los activos subyacentes.</p>
+
+<h2 id="como">Cómo funciona</h2>
+<p>Un titular obtiene NUSD depositando dólares o un activo estable equivalente en
+el emisor, que acuña la cantidad correspondiente. El rescate funciona igual al
+revés: devuelves los NUSD y recibes los dólares.</p>
+<p>Lo que hace creíble a una moneda estable no es su nombre sino su reserva: qué
+la respalda, quién la custodia, quién la audita y cómo se rescata a la par. Esas
+cuatro respuestas tienen que ser públicas antes de que circule a escala.</p>
+
+<h2 id="resuelve">Qué problema resuelve</h2>
+<p>La entrega contra pago necesita una pata de pago. Si alguien vende un bono
+tokenizado, el comprador paga con algo — y para que las dos patas liquiden en la
+misma transacción, ese algo tiene que vivir en el mismo libro.</p>
+<p>Sin un activo de liquidación estable en la cadena, el pago ocurre en otro
+sitio: una transferencia bancaria, un exchange, otra red. En el momento en que
+eso pasa, la liquidación deja de ser atómica y vuelve el riesgo de que una parte
+entregue y la otra no.</p>
+<p>La alternativa —liquidar en un token volátil— es peor. Nadie valora un pagaré
+a cinco años en un activo que puede moverse un diez por ciento mientras la
+transacción confirma. <strong>NUSD es lo que hace que la liquidación atómica
+signifique algo en la práctica</strong> y no solo en el diagrama.</p>
+`},
+
+forge:{grupo:'Protocolo', titulo:'Nereum Forge', html:`
+<p><strong>Nereum Forge es el motor de emisión:</strong> donde un activo se
+convierte en token sin que nadie escriba un contrato inteligente.</p>
+
+<h2 id="que">Qué hace</h2>
+<p>El emisor describe el activo, adjunta su documentación, selecciona las
+condiciones que deben viajar con él y emite. Lo que sale es un token en la
+cadena, atado al documento subyacente y gobernado por la política que se eligió
+al crearlo.</p>
+
+<h2 id="como">Cómo funciona</h2>
+<ol>
+  <li><strong>Describir el activo.</strong> Qué es, quién lo emite, bajo qué
+      autoridad legal y qué vehículo lo sostiene.</li>
+  <li><strong>Adjuntar la documentación.</strong> La escritura, el pagaré, la
+      factura. Forge registra una referencia y una huella del archivo, de modo
+      que cualquier alteración posterior es detectable.</li>
+  <li><strong>Elegir la política.</strong> Qué jurisdicciones pueden tenerlo, qué
+      clase de titular califica, si hay periodo mínimo de permanencia, qué hay
+      que reportar y a quién.</li>
+  <li><strong>Emitir.</strong> El token se crea con la política ya atada. A
+      partir de ahí la red la hace cumplir en cada transferencia.</li>
+</ol>
+
+<h2 id="resuelve">Qué problema resuelve</h2>
+<p>Tokenizar un activo hoy significa contratar a alguien para escribir y auditar
+un contrato a medida en cada emisión. Eso cuesta dinero y meses, y hace que cada
+activo de la red se comporte de forma ligeramente distinta, porque cada contrato
+lo escribió una persona diferente.</p>
+<p>Forge sustituye eso por un proceso descrito. Las mismas condiciones de
+política están disponibles para todos los emisores, se comportan igual en todos
+los activos, y las hace cumplir el protocolo en vez de lo que el autor del
+contrato se acordara de incluir.</p>
+<p>Esta es la capa que decide si la red se usa. Una cadena es infraestructura;
+<strong>el motor de emisión es lo que convierte "tenemos una capa 1" en "un
+emisor puede listar un activo el martes"</strong>.</p>
+`},
+
+vaults:{grupo:'Protocolo', titulo:'Nereum Vaults', html:`
+<p><strong>Las bóvedas de Nereum son cestas gestionadas de activos
+tokenizados:</strong> depositas un activo estable y recibes exposición a una
+cartera custodiada en cadena.</p>
+
+<h2 id="que">Qué son</h2>
+<p>Una bóveda mantiene un conjunto de instrumentos tokenizados —deuda pública,
+crédito privado, facturas— y emite un token que representa una parte del
+conjunto. Quien tiene ese token tiene derecho a su proporción de lo que los
+activos subyacentes produzcan.</p>
+
+<h2 id="como">Cómo funcionan</h2>
+<p>El titular deposita NUSD y recibe tokens de la bóveda. La bóveda usa ese
+depósito para adquirir activos según un mandato publicado: qué puede tener, en
+qué proporciones y con qué límites.</p>
+<p>Los ingresos del subyacente —alquileres, cupones, amortizaciones— llegan en
+cadena y se reparten proporcionalmente entre los titulares, sin que antes haya
+que reconciliar un registro. Para salir, el titular rescata el token de la bóveda
+o lo vende en la <a class="enl" href="#/dex">bolsa</a>.</p>
+<p>Todo lo que la bóveda tiene es visible en <a class="enl" href="#/scan">Nereum
+Explorer</a>: los activos, las cantidades y los movimientos. Una bóveda no es una
+promesa sobre una cartera; es una cartera que cualquiera puede inspeccionar.</p>
+
+<h2 id="resuelve">Qué problema resuelve</h2>
+<p>Los activos reales son difíciles de tener directamente para un particular.
+Cada uno hay que evaluarlo por separado —el prestatario, el inmueble, la
+contraparte— y los mínimos suelen estar muy por encima de lo que comprometería un
+inversor minorista.</p>
+<p>La bóveda convierte eso en una sola decisión. En vez de analizar un préstamo
+concreto, el titular toma exposición a una cesta diversificada bajo un mandato
+declarado, con la misma visibilidad en cadena que tendría sobre cualquier otro
+token.</p>
+<p>Es además lo que le da a la red un uso para el capital que no es
+institucional. Forge trae a los emisores; las bóvedas traen a todos los demás.</p>
+`},
+
+feed:{grupo:'Protocolo', titulo:'Nereum Feed', html:`
+<p><strong>Nereum Feed es la capa de datos y atestación:</strong> lo que conecta
+lo que pasa en el mundo con lo que la cadena sabe.</p>
+
+<h2 id="que">Qué transporta</h2>
+<ul>
+  <li><strong>Valoraciones.</strong> Cuánto vale un activo ahora mismo, y quién lo dice.</li>
+  <li><strong>Precios de referencia.</strong> Tipos e índices contra los que se valoran los instrumentos.</li>
+  <li><strong>Acciones corporativas.</strong> Revalorizaciones, desdoblamientos, cambios de condiciones, impagos.</li>
+  <li><strong>Atestaciones.</strong> Declaraciones firmadas que atan un token al documento que hay detrás.</li>
+</ul>
+
+<h2 id="como">Cómo funciona</h2>
+<p>Los datos llegan a la cadena a través de proveedores aprobados que firman lo
+que publican. La firma es lo importante: una entrada en Feed no es un número
+anónimo, es una declaración de una parte con nombre a la que se le puede exigir.</p>
+<p>Una atestación funciona igual. Al emitir un activo, una parte verificadora
+firma que la documentación es lo que dice ser. Esa firma se queda en la cadena,
+así que el vínculo entre token y documento se puede comprobar años después por
+alguien que no estaba allí.</p>
+
+<h2 id="resuelve">Qué problema resuelve</h2>
+<p>Un token que representa un edificio vale exactamente lo que valga su vínculo
+con la escritura. Rompe el vínculo y lo que queda es un número en una base de
+datos: técnicamente correcto y económicamente inútil.</p>
+<p>Feed es lo que mantiene ese vínculo intacto y, más importante, <strong>lo que
+lo hace auditable sin confiar en nosotros</strong>. Cualquiera puede comprobar
+quién certificó qué y cuándo, y comparar la huella del documento en la cadena con
+el documento que tiene delante.</p>
+<p>Es también lo que permite que un activo siga estando al día. Un edificio
+revalorizado en marzo, un préstamo que impaga en junio: sin una capa de datos
+nada de eso llega a la cadena, y el registro deja poco a poco de describir la
+realidad.</p>
+`},
+
+link:{grupo:'Protocolo', titulo:'Nereum Link', html:`
+<p><strong>Nereum Link reparte el rendimiento de los activos nativos de Nereum a
+titulares de otras cadenas</strong>, sin que el activo salga del libro donde se
+aplican sus reglas.</p>
+
+<h2 id="como">Cómo funciona</h2>
+<p>El activo subyacente se queda en Nereum. Lo que viaja es un token espejo en la
+cadena de destino que representa la exposición económica —el rendimiento— y no la
+propiedad del activo.</p>
+<p>Los ingresos producidos en Nereum se encaminan a los titulares del token
+espejo estén donde estén. El activo no se mueve, la política no tiene que
+interpretarla una cadena que no la entiende, y el valor bloqueado se queda donde
+está asegurado.</p>
+
+<h2 id="porque">Por qué no un puente normal</h2>
+<p>Un puente estándar bloquea un token en una cadena y acuña una representación
+en otra. Para un activo con restricciones de transferencia, esa representación
+llega a un sitio que no sabe nada de su política — y desde ese momento cualquiera
+puede tenerlo, en cualquier parte, sin importar lo que dijeran las condiciones
+originales.</p>
+<p>El cumplimiento no cruzó. Solo lo hizo el saldo. Es la forma más común en que
+un activo conforme deja de serlo sin que nadie se dé cuenta.</p>
+<p>Link está construido al revés: <strong>el activo se queda donde están las
+reglas, y solo viaja la exposición económica</strong>.</p>
+
+<h2 id="resuelve">Qué problema resuelve</h2>
+<p>La mayor parte del capital nunca se va a mover a una red nueva. Quien tiene
+monedas estables en Ethereum no va a cruzar un puente, aprender una cartera nueva
+y asumir el riesgo de una cadena desconocida para ganar unos puntos de
+rendimiento.</p>
+<p>Link elimina ese requisito. El titular se queda donde está, en la cartera que
+ya usa, y el rendimiento va hacia él. Para la red significa alcance sin depender
+de convencer a nadie de que migre — que es lo más difícil que tiene que hacer una
+cadena nueva.</p>
+`},
+
+wallet:{grupo:'Protocolo', titulo:'Cartera y herramientas', html:`
+<p><strong>La cartera guarda credenciales además de activos, y las herramientas
+de desarrollo permiten construir sobre la red sin pedir permiso a nadie.</strong></p>
+
+<h2 id="cartera">La cartera</h2>
+<p>Una cartera normal guarda claves y saldos. En Nereum el titular necesita
+llevar además las credenciales que demuestran que califica para tener un activo
+concreto: emitidas por una parte verificadora, presentadas al transferir y
+comprobadas por el protocolo.</p>
+<p>La cartera guarda esas credenciales junto a los activos y las presenta sola
+cuando una transferencia lo requiere. El titular no gestiona su elegibilidad como
+un trámite aparte: viaja con él.</p>
+<p>Esto importa por cómo está diseñada la red. Aquí la elegibilidad es algo que
+el titular <em>demuestra</em>, no algo que un operador <em>concede</em> — y eso
+solo funciona si el titular tiene la prueba en la mano.</p>
+
+<h2 id="dev">Herramientas de desarrollo</h2>
+<ul>
+  <li><strong>SDK.</strong> Bibliotecas para emitir activos, leer políticas y
+      enviar transferencias, para que una aplicación no tenga que hablar con la
+      cadena a nivel de bytes.</li>
+  <li><strong>Documentación pública.</strong> Cada interfaz documentada y legible
+      sin necesidad de cuenta.</li>
+  <li><strong>Red de pruebas y grifo.</strong> Una copia completa de la red con
+      tokens gratuitos, para poder probar cualquier cosa antes de que cueste
+      nada.</li>
+  <li><strong>Puntos de acceso públicos.</strong> Una forma de leer la cadena y
+      enviar transacciones sin tener que montar infraestructura primero.</li>
+</ul>
+
+<h2 id="resuelve">Qué problema resuelve</h2>
+<p>Las redes que exigen una conversación antes de poder construir en ellas no se
+usan. Un desarrollador que compara tres cadenas un sábado usará aquella cuya
+documentación abre y cuya red de pruebas funciona, y no contactará con ninguno de
+los equipos.</p>
+<p>Las herramientas existen para que esa decisión caiga de nuestro lado sin que
+nadie tenga que vender nada. Y la cartera existe para que la capa de cumplimiento,
+que es el sentido entero de la red, no se convierta en papeleo para quien tiene
+el activo.</p>
+`},
+
+whitelist:{grupo:'Token', titulo:'Únase a la whitelist', html:`
+<p>La whitelist es la asignación previa a la cotización: la ventana en la que NRM
+se vende antes de negociarse en el mercado abierto, a un precio fijo marcado por
+el proyecto.</p>
+
+<p>Se entra en <a class="enl" href="https://nereum.xyz"><strong>nereum.xyz</strong></a>,
+la única dirección donde la whitelist está abierta. El resto de canales están en
+<a class="enl" href="#/links">Enlaces oficiales</a>.</p>
+
+<h2 id="token">El token</h2>
+<table>
+  <tr><th>Elemento</th><th>Valor</th></tr>
+  <tr><td>Símbolo</td><td><b>NRM</b></td></tr>
+  <tr><td>Red</td><td><b>Ethereum</b> · ERC-20</td></tr>
+  <tr><td>Suministro total</td><td class="num"><b>600.000.000</b> — fijo en el génesis, no puede crecer</td></tr>
+  <tr><td>Impuesto de compra y venta</td><td><b>0%</b></td></tr>
+  <tr><td>Precio en whitelist</td><td class="num"><b>$0,10</b></td></tr>
+  <tr><td>Precio de salida</td><td class="num"><b>$0,50</b> — Uniswap v3</td></tr>
+  <tr><td>Contrato</td><td>Propiedad renunciada — ver esa página</td></tr>
+</table>
+
+<h2 id="condiciones">Condiciones de la ronda</h2>
+<table>
+  <tr><th>Elemento</th><th>Valor</th></tr>
+  <tr><td>Mínimo</td><td class="num"><b>$1</b></td></tr>
+  <tr><td>Máximo por cartera</td><td class="num"><b>$10.000</b></td></tr>
+  <tr><td>Objetivo</td><td class="num"><b>$6.000.000</b></td></tr>
+</table>
+
+<h2 id="caracteristicas">Qué te da esta ronda</h2>
+<table>
+  <tr><th>Característica</th><th>Qué significa para el comprador</th></tr>
+  <tr><td><b>Entrada a $0,10</b></td>
+      <td>El precio más bajo al que va a vender el proyecto. NRM abre a $0,50 en Uniswap v3, donde el precio de apertura lo fija el rango del fondo.</td></tr>
+  <tr><td><b>Mínimo de $1</b></td>
+      <td>Deliberadamente bajo. Una ronda que empieza en cuatro cifras es una ronda diseñada para excluir a casi todo el mundo.</td></tr>
+  <tr><td><b>Tope de $10.000 por cartera</b></td>
+      <td>Limita cuánto de la ronda se puede llevar un solo comprador, lo que mantiene la base de tenedores más amplia y la presión de venta menos concentrada.</td></tr>
+  <tr><td><b>Suministro fijo, 0% de impuesto</b></td>
+      <td>Lo que compras no se puede diluir con nuevas acuñaciones, y no se te cobra nada por transferir.</td></tr>
+  <tr><td><b>Contrato renunciado</b></td>
+      <td>Después de comprar, nadie puede pausar transferencias, bloquear tu cartera ni cambiar las reglas — nosotros incluidos.</td></tr>
+</table>
+
+<h2 id="reparto">Reparto del suministro</h2>
+<table>
+  <tr><th>Asignación</th><th>Porcentaje</th><th>Tokens</th></tr>
+  <tr><td>Venta privada</td><td class="num">50,0%</td><td class="num">300.000.000</td></tr>
+  <tr><td>Listado en CEX</td><td class="num">15,0%</td><td class="num">90.000.000</td></tr>
+  <tr><td>Marketing</td><td class="num">10,0%</td><td class="num">60.000.000</td></tr>
+  <tr><td>Reserva</td><td class="num">5,0%</td><td class="num">30.000.000</td></tr>
+  <tr><td>Equipo · bloqueado</td><td class="num">5,0%</td><td class="num">30.000.000</td></tr>
+  <tr><td>Asesores</td><td class="num">5,0%</td><td class="num">30.000.000</td></tr>
+  <tr><td>Desarrollo</td><td class="num">5,0%</td><td class="num">30.000.000</td></tr>
+  <tr><td>Airdrop</td><td class="num">5,0%</td><td class="num">30.000.000</td></tr>
+</table>
+
+<h2 id="como">Cómo participar</h2>
+<ol>
+  <li>Ve a <a class="enl" href="https://nereum.xyz"><strong>nereum.xyz</strong></a>
+      escribiendo la dirección tú mismo, en vez de seguir un enlace de un mensaje.</li>
+  <li>Conecta una cartera que controles. Nunca una frase semilla — ninguna venta
+      legítima la pide, jamás.</li>
+  <li>Compara la dirección del contrato de la página con la de
+      <a class="enl" href="#/links">Enlaces oficiales</a>, carácter a carácter.
+      Los primeros y los últimos cuatro no bastan.</li>
+  <li>Elige un importe entre $1 y $10.000 y confirma.</li>
+</ol>
+
+<p>No mandamos mensajes privados, no tenemos ninguna cuenta de soporte que
+contacte a nadie, y no anunciamos ventas fuera de las direcciones listadas en
+<a class="enl" href="#/links">Enlaces oficiales</a>.</p>
+
+<h2 id="listado">Cómo se fija el precio de salida</h2>
+<p>NRM sale a <strong>$0,50 en Uniswap v3</strong>. Ese precio no es una
+estimación: en Uniswap v3 la liquidez se concentra dentro de un rango elegido al
+crear el fondo, así que <strong>el precio de apertura es un parámetro del
+fondo</strong>.</p>
+
+`},
+
+dexscreener:{grupo:'Token', titulo:'DexScreener', html:`
+<p>Dónde seguir el precio, la liquidez y el historial de operaciones de NRM una
+vez que el token cotice — por cualquiera, sin necesidad de cuenta.</p>
+
+<h2 id="usar">Qué mirar, y en qué orden</h2>
+<p>El precio es el número menos informativo de la pantalla. Cuatro cosas dicen
+más:</p>
+<ol>
+  <li><strong>La liquidez, y si está bloqueada.</strong> Un fondo que se puede
+      retirar en cualquier momento no es liquidez, es una promesa. Busca el
+      bloqueo y su fecha de vencimiento.</li>
+  <li><strong>La concentración de titulares.</strong> Si un puñado de carteras
+      tiene la mayor parte del suministro, el precio de la pantalla es el que
+      ellas decidan.</li>
+  <li><strong>La antigüedad del par.</strong> Cuándo se creó y por quién. Un par
+      creado hace horas no tiene historial de precios que merezca leerse.</li>
+  <li><strong>El volumen contra la liquidez.</strong> Mucho volumen en un fondo
+      escaso suele ser el mismo dinero yendo y viniendo.</li>
+</ol>
+
+<h2 id="verificar">Verifica la dirección antes de operar</h2>
+<p>Cualquiera puede crear un par y llamar al token como quiera. DexScreener
+muestra lo que existe, no lo que es legítimo.</p>
+<p>El único contrato que es nuestro es la dirección que aparece en esta página y
+en <a class="enl" href="#/links">Enlaces oficiales</a>. <strong>Si un par no
+coincide con esa dirección exacta, no es NRM</strong> — da igual lo que diga el
+símbolo, lo convincente que parezca el gráfico o quién te haya mandado el
+enlace.</p>
+
+`},
+
+team:{grupo:'La empresa', titulo:'Equipo', html:`
+<p>Quién construye Nereum, qué ha construido antes y qué puede verificar un lector
+sobre ellos.</p>
+
+<h2 id="kyc">Verificación de identidad</h2>
+<p>El KYC realizado por un tercero significa que alguien independiente ha visto la
+documentación oficial de las personas nombradas y la conserva en archivo. Eleva
+considerablemente el coste de desaparecer. No avala la competencia, y no es una
+investigación de antecedentes salvo que la firma emisora diga que lo es.</p>
+<p>Los detalles están en <a class="enl" href="#/kyc">KYC del equipo</a>.</p>
+
+<h2 id="anonimo">Con nombres o anónimo</h2>
+<p>Las dos posturas son defendibles, y bastantes proyectos serios se han
+entregado de forma anónima. Lo que no es defendible es insinuar que existe un
+equipo con nombres sin listarlo.</p>
+<p>Si el equipo permanece anónimo, esta página debería decirlo con claridad y
+explicar qué ocupa su lugar: contratos bloqueados, fondos en depósito, un KYC
+custodiado por un tercero que pueda identificar a los fundadores ante un
+regulador, o un esquema de firma múltiple con partes externas nombradas.</p>
+
+`},
+
+press:{grupo:'La empresa', titulo:'Noticias y menciones', html:`
+<p>Cobertura independiente de Nereum: artículos, entrevistas y menciones
+publicadas por alguien que no somos nosotros.</p>
+
+<h2 id="cuenta">Qué cuenta como cobertura</h2>
+<p>La distinción importa, porque los lectores la hacen aunque la página no la
+haga:</p>
+<ul>
+  <li><strong>Cobertura editorial.</strong> Un periodista decidió escribir sobre
+      el proyecto. Es la única que tiene peso independiente.</li>
+  <li><strong>Nota de prensa pagada.</strong> Distribuida a redes de sindicación.
+      Es legítima, es común, y conviene etiquetarla como tal: muchos medios las
+      republican automáticamente y son fáciles de reconocer.</li>
+  <li><strong>Entrevistas y pódcast.</strong> Útiles, pero el proyecto eligió qué
+      decir. Conviene listarlas aparte de lo editorial.</li>
+  <li><strong>Agregadores y listados.</strong> Una ficha en una base de datos no
+      es cobertura.</li>
+</ul>
+<p>Etiquetar cada entrada con honestidad no cuesta nada y gana credibilidad justo
+con los lectores que si no lo comprobarían y se enterarían.</p>
+`},
+
+links:{grupo:'La empresa', titulo:'Enlaces oficiales', html:`
+<p><strong>Estas son las únicas direcciones oficiales de Nereum.</strong> Lo que
+no aparezca en esta página no es nuestro, da igual lo convincente que sea el
+nombre, el logotipo o quién lo haya enviado.</p>
+
+<p>La suplantación es el ataque más común contra un proyecto en esta fase, y no
+requiere ninguna habilidad técnica. Un sitio clonado, un grupo con una letra
+cambiada, una cuenta de soporte que escribe primero: todos funcionan porque la
+gente no tiene un sitio autorizado donde comprobar.</p>
+
+<p>Esta página es ese sitio. Guárdala en marcadores.</p>
+
+<h2 id="canales">Canales oficiales</h2>
+<table>
+  <tr><th>Canal</th><th>Dirección</th></tr>
+  <tr><td><b>Web</b></td>
+      <td><a class="enl" href="https://nereum.xyz">nereum.xyz</a></td></tr>
+  <tr><td><b>Whitepaper</b></td>
+      <td><a class="enl" href="https://nereum.xyz/whitepaper">nereum.xyz/whitepaper</a></td></tr>
+  <tr><td><b>Whitelist</b></td>
+      <td><a class="enl" href="https://nereum.xyz">nereum.xyz</a> — el único sitio donde la ronda está abierta</td></tr>
+</table>
+
+<h2 id="patrones">Cómo funciona la suplantación de verdad</h2>
+<p>Cinco patrones cubren casi todo. Ninguno es sofisticado, y todos siguen
+funcionando:</p>
+<ul>
+  <li><strong>La cuenta de soporte que te escribe primero.</strong>
+      <strong>Nosotros nunca lo hacemos.</strong> Ni para ayudar, ni para
+      verificar, ni para ofrecerte una asignación. Que alguien te contacte
+      diciendo ser Nereum ya es la respuesta.</li>
+  <li><strong>El dominio con una letra cambiada.</strong> Fíjate en letras
+      intercambiadas, un guion añadido o una terminación distinta — la nuestra es
+      <em>.xyz</em>. Lee la barra de direcciones, no el texto del enlace.</li>
+  <li><strong>El grupo con el mismo nombre.</strong> Cualquiera puede crear uno.
+      Solo el enlace de esta página es el nuestro.</li>
+  <li><strong>El token con el mismo símbolo.</strong> Cualquiera puede desplegar
+      un contrato llamado NRM. Solo la dirección de esta página es la nuestra.</li>
+  <li><strong>La petición de frase semilla.</strong> Ninguna venta, ninguna
+      cartera, ningún agente de soporte y ningún proyecto legítimo del mundo
+      necesita tu frase semilla ni tu clave privada. No hay excepción ni
+      situación en la que eso sea normal.</li>
+</ul>
+
+<h2 id="antes">Antes de enviar nada a ninguna parte</h2>
+<ol>
+  <li>Escribe <strong>nereum.xyz</strong> en la barra de direcciones tú mismo, en
+      vez de seguir un enlace que te hayan mandado.</li>
+  <li>Vuelve a esta página y compara la dirección del contrato carácter a
+      carácter. Los primeros y los últimos cuatro no bastan — las herramientas de
+      suplantación de direcciones hacen coincidir justo esos.</li>
+  <li>Comprueba el dominio en la barra de direcciones, no el texto del enlace. El
+      texto puede decir cualquier cosa.</li>
+  <li>Si algo se está metiendo prisa —una cuenta atrás, una asignación que se
+      cierra, una "última oportunidad"— frena. <strong>Los plazos reales
+      sobreviven a que te tomes cinco minutos para comprobar.</strong></li>
+</ol>
+`},
+
+faq:{grupo:'La empresa', titulo:'Preguntas', html:`
+<p>Las preguntas que de verdad hace un lector cuidadoso, respondidas
+directamente.</p>
+
+<h2 id="proyecto">Sobre el proyecto</h2>
+
+<h3>¿Qué lo diferencia de tokenizar en Ethereum?</h3>
+<p>En Ethereum el token está en cadena y las reglas que lo gobiernan no. Aquí las
+reglas las hace cumplir el protocolo en cada transferencia, antes de liquidar: si
+alguna comprobación falla, la transferencia no entra en el libro.</p>
+
+<h3>¿Quién es el equipo?</h3>
+<p>Verificado por un tercero —ver <a class="enl" href="#/kyc">KYC del
+equipo</a>— y operando a través de una empresa registrada en Miami, Florida, que
+cualquiera puede consultar en el registro del estado.</p>
+
+<h2 id="token">Sobre el token</h2>
+
+<h3>¿Se puede crear más NRM?</h3>
+<p>No. El suministro está fijado en 600.000.000 en el génesis y no existe función
+de acuñación que nadie pueda invocar. Con la propiedad renunciada, tampoco se
+podría añadir después.</p>
+
+<h3>¿Hay impuesto al comprar o vender?</h3>
+<p>No. No hay ninguna función de comisión en el contrato — no es una comisión
+puesta a cero que pudiera subirse después.</p>
+
+<h3>¿Pueden congelar o bloquear mi cartera?</h3>
+<p>No. Se ha renunciado a la propiedad del contrato, así que no existe ninguna
+dirección con poder para pausar transferencias ni bloquear a un titular.
+</p>
+
+<h3>¿Dónde cotiza NRM y a qué precio?</h3>
+<p>A $0,50 en Uniswap v3. Como v3 concentra la liquidez en un rango elegido, el
+precio de apertura es un parámetro del fondo. Ver
+<a class="enl" href="#/whitelist">Whitelist</a>.</p>
+
+<h2 id="participar">Sobre participar</h2>
+
+<h3>¿Cómo entro en la whitelist?</h3>
+<p>En <a class="enl" href="https://nereum.xyz">nereum.xyz</a>, y en ningún otro
+sitio. Escribe la dirección tú mismo en vez de seguir un enlace que te hayan
+mandado.</p>
+
+<h3>¿Alguien de Nereum me va a escribir primero?</h3>
+<p>Nunca. Ni para soporte, ni para verificar, ni para ofrecer una asignación.
+Quien lo haga nos está suplantando — ver
+<a class="enl" href="#/links">Enlaces oficiales</a>.</p>
+`}
+
 };
 
 const PAGS = {
   introduction:{
     grupo:'Overview', titulo:'Introduction',
     html:`
-<p><strong>Nereum</strong> is a Layer 1 blockchain with its own validator set, its own
-consensus and its own token. It does everything a general-purpose chain does —
-accounts, transfers, smart contracts, fees — but it is built for one job in
-particular: <strong>putting real-world assets on-chain and keeping them
-governed</strong>.</p>
+<p><strong>Nereum is a Layer 1 blockchain with real-world asset tokenization
+built into the protocol:</strong> property, private credit, debt, invoices and
+funds issued, governed and settled directly on the network.</p>
 
-<p>Nereum Labs LLC, registered in <strong>Miami, Florida</strong>, is the company behind
-it.</p>
+<p><strong>Nereum Labs LLC</strong>, registered in <strong>Miami, Florida</strong>,
+is the company behind it.</p>
 
-<div class="nota">
-  <b>The bet in one sentence</b>
-  <p>On a general-purpose chain, an asset is a token and the rules live somewhere
-  else. On Nereum the rules are part of the asset, enforced by the protocol on
-  every transfer — not by an agreement about the protocol.</p>
-</div>
+<h2 id="problema">The problem</h2>
+<p>Most of the world's value sits in assets that cannot be moved with any
+agility. Not for lack of demand, but because the process that transfers them is
+still manual.</p>
+<p>Every transaction requires verifying that the buyer meets the conditions
+attached to the asset — jurisdiction, investor category, holding period —
+reviewing the documentation and updating a private register. That work is done by
+a person, on business days, and charged by an intermediary on every transfer.</p>
+<p>The result is a market where settlement takes weeks and the asset is valued
+once a year rather than priced continuously.</p>
 
-<h2 id="porque">Why a dedicated chain</h2>
-<p>Real-world assets can be tokenized on Ethereum, BNB Chain or Solana today, and
-most are. What those chains do not do is carry the conditions attached to the
-asset: which jurisdictions accept it, which holders qualify, what must be
-reported and when.</p>
-<p>So the conditions get enforced off-chain, and every transfer waits for a human
-or a service to confirm that a rule still holds. That wait is the cost, and it is
-what a purpose-built chain removes.</p>
-<p>Nereum is not the only network making this bet — <strong>Plume, Polymesh,
-Provenance and MANTRA</strong> are building in the same direction.</p>
+<h2 id="tokenizar">What tokenization adds</h2>
+<p>Tokenization represents the right over that asset as a record on a public
+chain: readable at any time, transferable in seconds, with a history that does not
+depend on the bookkeeping of any single institution.</p>
+<p>This is already done on general-purpose chains. The limitation is not in
+representing the asset, but in where its rules are enforced.</p>
 
-<h2 id="capas">One chain, four layers</h2>
-<p>An asset issued on Nereum passes through all four, every time it moves.</p>
-<div class="pila">
-  <div class="capa"><i>01</i><b>Issuance</b><s>What exists, and under whose authority</s></div>
-  <div class="capa"><i>02</i><b>Policy</b><s>The conditions that travel with it</s></div>
-  <div class="capa"><i>03</i><b>Access</b><s>Who may hold and move it</s></div>
-  <div class="capa"><i>04</i><b>Liquidity</b><s>Where it can be exchanged</s></div>
-</div>
+<h2 id="diferencia">What makes Nereum different</h2>
+<p>When an asset with transfer restrictions is issued on Ethereum, BNB Chain or
+Solana, the token lives on the chain but <strong>the policy governing it lives
+outside it</strong>. The network validates the signature and the balance;
+compliance is resolved in a separate system, after the transfer has been
+recorded.</p>
+<p>That forces correction after the fact: reversing transactions, reconciling
+registers or, at worst, accepting that a restricted asset ended up with a holder
+who did not qualify.</p>
 
-<h2 id="tecnica">How tokenization works here</h2>
+<p><strong>On Nereum the policy is part of the asset and is evaluated during
+transfer validation itself.</strong> The conditions are bound at issuance and
+accompany the asset through every subsequent transfer. The network checks the
+eligibility of sender and recipient in the same step in which it checks the
+balance and the signature.</p>
+<p>If any condition is not met, the transfer <strong>does not settle</strong>.
+There is no intermediate state to reverse, because it was never written.</p>
 
-<h3>Compliance at transfer level</h3>
-<p>Every transfer is checked against the asset\u2019s policy set before it settles. A
-transfer that would put the asset in a wallet that does not qualify does not
-half-settle and get reversed — <strong>it never settles at all</strong>.</p>
-
-<h3>Identity without exposure</h3>
-<p>Holders prove they qualify through verifiable credentials issued by an approved
-party. The chain checks the credential, not the identity behind it: a
-counterparty learns that a holder is eligible without learning who they are.</p>
-
-<h3>Atomic delivery versus payment</h3>
-<p>Asset and payment change hands in the same transaction. Either both legs settle
-or neither does. This is what removes settlement risk, and it is the single
-biggest operational reason institutions look at this technology at all.</p>
-
-<h3>Attested off-chain state</h3>
-<p>A tokenized building is only as good as the link to the deed. Nereum records
-the reference to the underlying document and the attestation that binds them, so
-the on-chain record can always be traced to something enforceable off-chain.</p>
-
-<h3>Deterministic finality</h3>
-<p>Once a block is final it does not reorganise. For a payment that matters less;
-for a registry of ownership it is the whole point.</p>
-
-<h3>Interoperability</h3>
-<p>An asset that can only live on one chain is not much use. Policy has to travel
-with it when it moves.</p>
-
-<h2 id="garantias">What backs this</h2>
+<h2 id="resuelve">What it solves</h2>
 <table>
-  <tr><th>Item</th><th>Status</th></tr>
-  <tr><td><b>Registered company</b><br><span style="color:var(--ink-3)">Nereum Labs LLC · Miami, Florida</span></td>
-      <td>See <a class="enl" href="#/legal">Legal Document — Miami, FL</a></td></tr>
-  <tr><td><b>Contract audit</b><br><span style="color:var(--ink-3)">Independent security review</span></td>
-      <td>See <a class="enl" href="#/audit">Audit</a></td></tr>
-  <tr><td><b>Ownership renounced</b><br><span style="color:var(--ink-3)">No key can mint, pause or alter the contract</span></td>
-      <td>See <a class="enl" href="#/renounce">Contract — Owner renounced</a></td></tr>
+  <tr><th>Current model</th><th>On Nereum</th></tr>
+  <tr><td>Settlement in days or weeks</td><td>Atomic settlement in seconds</td></tr>
+  <tr><td>Compliance verified after the fact by a third party</td><td>Verified by the protocol before recording</td></tr>
+  <tr><td>Intermediation cost on every transfer</td><td>No manual verification per transaction</td></tr>
+  <tr><td>Periodic valuation</td><td>Continuous, auditable on-chain price</td></tr>
+  <tr><td>Private register, opaque to the holder</td><td>Public register, readable without permission</td></tr>
+  <tr><td>The rule can be lost when the asset changes venue</td><td>The policy travels with the asset</td></tr>
 </table>
 
-<div class="nota">
-  <b>How to read this document</b>
-  <p>Where a figure has been published and can be checked, it is stated. Where it
-  has not been verified yet, it is marked as pending rather than presented as
-  fact. Nothing here is filled in to look complete.</p>
-</div>
+<h2 id="posicion">Position relative to other networks</h2>
+<p>Other networks target real-world assets, some with considerable funding and
+track record. The relevant difference is not announced volume, but <strong>which
+layer each one places compliance in</strong>.</p>
+<p>Most implement it as an application layer on an existing chain. Nereum
+implements it in the protocol. That is the more expensive decision — it requires
+building consensus, validators and tooling from scratch rather than deploying a
+contract — and it is what makes it possible to guarantee that the rule applies on
+every transfer, in every venue, for the life of the asset.</p>
+
+<h2 id="garantias">What backs this project</h2>
+<table>
+  <tr><th>Item</th><th>Where to verify it</th></tr>
+  <tr><td><b>Registered company</b><br><span style="color:var(--ink-3)">Nereum Labs LLC · Miami, Florida</span></td>
+      <td>See <a class="enl" href="#/legal">Legal Document — Miami, FL</a></td></tr>
+  <tr><td><b>Team KYC</b><br><span style="color:var(--ink-3)">Founders verified by a third party</span></td>
+      <td>See <a class="enl" href="#/kyc">Team KYC</a></td></tr>
+  <tr><td><b>Contract audit</b><br><span style="color:var(--ink-3)">Independent security review</span></td>
+      <td>See <a class="enl" href="#/audit">Audit</a></td></tr>
+</table>
 
 <h2 id="ruta">Where to start</h2>
 <p>If you read three pages, read <a class="enl" href="#/vision">the vision</a>,
-<a class="enl" href="#/security">the security guarantees</a> and
-<a class="enl" href="#/legal">the legal document</a>. The last two are the ones a
-sceptical reader checks first.</p>
+<a class="enl" href="#/legal">the legal document</a> and
+<a class="enl" href="#/audit">the audit</a>. The last two are the ones any
+discerning reader checks first.</p>
 `},
 
   vision:{
     grupo:'Overview', titulo:'Vision',
     html:`
-<p>Most of the world\u2019s value does not move. It sits in buildings, in private
-credit, in invoices and in funds — assets that are real, productive and almost
-impossible to sell on a Tuesday afternoon.</p>
+<p><strong>To place Nereum among the most widely used real-world asset
+tokenization protocols</strong>, by being the network where issuing, governing and
+settling a regulated asset is technically simpler than on any alternative.</p>
 
-<p>Not because there are no buyers. Because <strong>proving who owns what, and who
-is allowed to buy it, still takes weeks and a chain of people who each get paid
-to be sure</strong>.</p>
+<h2 id="mercado">The market it addresses</h2>
+<p>Real-world assets — property, private credit, corporate debt, commercial paper,
+fund interests — generate yield continuously and transfer with a friction that has
+not meaningfully decreased in decades.</p>
+<p>The consequence is not only operational. An asset whose transfer takes weeks
+carries an illiquidity discount in its valuation. <strong>Reducing that friction
+does not merely accelerate the transaction: it changes what the asset is
+worth.</strong></p>
 
-<p>Nereum exists to make that proof instant, permanent and machine-readable.</p>
+<h2 id="tecnologia">The technical basis</h2>
+<p>Nereum's thesis is that compliance belongs in the protocol rather than in an
+application layer above it.</p>
+<p>That decision allows an instrument with transfer restrictions to circulate with
+the properties of a native token — atomic settlement, deterministic finality,
+continuous availability — without giving up the conditions that make it
+compliant.</p>
+<p>The rest of the infrastructure is built on that base: a block explorer, a
+policy-aware native exchange, a stable settlement asset, an issuance engine that
+requires no bespoke development, vaults for aggregated exposure, and a data and
+attestation layer that maintains the link between a token and its
+documentation.</p>
+<p>None of those components is incidental: each covers a requirement without which
+the network is not usable end to end.</p>
 
-<div class="nota">
-  <b>The vision in one sentence</b>
-  <p>A world where owning a real asset on-chain is not a wrapper around
-  paperwork — it <em>is</em> the record, and the rules that govern it move with
-  it wherever it goes.</p>
-</div>
-
-<h2 id="apuesta">The architectural bet</h2>
-<p>Every tokenization project makes a choice: put the asset on a general-purpose
-chain and enforce the rules around it, or build a chain where the rules are part
-of the protocol.</p>
-<p>We took the second path, and it is a harder one. It means building consensus,
-validators and tooling from scratch instead of deploying a contract on an
-existing network. <strong>The reason is that the first path has been tried for
-years and always ends in the same place</strong>: the token moves at internet
-speed and the compliance behind it moves at fax speed.</p>
-
-<h2 id="horizontes">Three horizons</h2>
+<h2 id="horizontes">Adoption phases</h2>
 <table>
-  <tr><th>Horizon</th><th>What it means</th></tr>
-  <tr><td><b>Near</b><br><span style="color:var(--ink-3)">Prove it works</span></td>
-      <td>A single asset class, issued end to end on Nereum, moving between qualified holders without a human in the settlement path.</td></tr>
-  <tr><td><b>Mid</b><br><span style="color:var(--ink-3)">Make it useful</span></td>
-      <td>Tokenized assets accepted as collateral. An asset is only liquid when someone will lend against it.</td></tr>
-  <tr><td><b>Long</b><br><span style="color:var(--ink-3)">Make it invisible</span></td>
-      <td>Issuers stop thinking about the chain, the same way a company today does not think about the payment rails behind a wire.</td></tr>
+  <tr><th>Phase</th><th>Objective</th></tr>
+  <tr><td><b>Validation</b></td>
+      <td>One asset class issued entirely on Nereum and transferred between qualified holders with no human intervention in the settlement path.</td></tr>
+  <tr><td><b>Utility</b></td>
+      <td>Tokenized assets accepted as collateral. An asset reaches genuine liquidity when credit is available against it.</td></tr>
+  <tr><td><b>Integration</b></td>
+      <td>The infrastructure ceases to be a decision factor for the issuer, in the same way interbank payment rails are not one today.</td></tr>
 </table>
 
-<h2 id="cambia">What changes, and for whom</h2>
+<h2 id="cambia">Impact by participant</h2>
 
-<h3>For issuers</h3>
-<p>An asset is issued once with its rules attached, and those rules keep applying
-without anyone re-checking them. Distribution stops being a legal project and
-becomes a technical one.</p>
+<h3>Issuers</h3>
+<p>Policy is defined once, at issuance, and the protocol enforces it permanently.
+Distributing the asset no longer requires legal review on every transfer.</p>
 
-<h3>For holders</h3>
-<p>Ownership that can be verified without asking anyone, and sold without waiting
-for a settlement window. A share of a building becomes as transferable as a
-share of a company — and as auditable.</p>
+<h3>Holders</h3>
+<p>Ownership that is independently verifiable and transferable without settlement
+windows. A fractional interest acquires the operational behaviour of a listed
+security.</p>
 
-<h3>For markets</h3>
-<p>Assets that today trade once a decade become continuously priced. That is the
-part that compounds: <strong>liquidity does not just make an asset easier to
-sell, it changes what it is worth</strong>.</p>
+<h3>Markets</h3>
+<p>Assets with periodic valuation gain a continuous price, which enables
+collateralized credit, composite portfolios and secondary markets with measurable
+depth.</p>
 
-<h2 id="honesto">What we are not claiming</h2>
-<p>Tokenization does not make an illiquid asset liquid by itself. A token is only
-as good as the legal claim behind it and the market willing to buy it. Nereum
-removes the technical and compliance friction; <strong>it does not remove
-market risk, and no chain can</strong>.</p>
-<p>Anyone promising otherwise is selling something else.</p>
-
+<h2 id="diferencia">The basis of the proposition</h2>
+<p>Other projects compete for the same market and several hold an advantage in
+capital and schedule. The differentiating factor is not who arrived first, but the
+layer at which each resolves compliance.</p>
+<p>Building a complete Layer 1 requires more resources than deploying a contract
+on an existing network. In return it provides a guarantee that cannot be added
+afterwards: <strong>that the policy is inseparable from the asset</strong>.</p>
+<p>The stated objective is not leadership by volume, but to constitute the
+technically obvious option for issuing a real-world asset on-chain.</p>
 `},
 
   network:{
-    grupo:'The network', titulo:'NereumEVM — Blockchain',
+    grupo:'Protocol', titulo:'NereumEVM — Blockchain',
     html:`
-<p><strong>NereumEVM</strong> is a <strong>Layer 1 blockchain</strong>: its own validator set,
-its own consensus, its own token and its own state. Nothing about it depends on
-another chain being available.</p>
+<p><strong>NereumEVM is a Layer 1 blockchain with asset tokenization built into
+the protocol.</strong></p>
 
-<p>It does everything you expect a blockchain to do — accounts, balances,
-transfers, smart contracts, fees, an explorer. Anything you can build on a
-general-purpose chain, you can build here.</p>
+<p>It is a complete blockchain: its own validators, its own consensus, its own
+token and its own state. It is EVM-compatible, so it runs standard smart
+contracts and any developer who has built on Ethereum can build here without
+learning anything new.</p>
 
-<p>The difference is what it does <em>natively</em>. On other networks, real-world
-asset tokenization is an application: a contract someone deploys on top, with the
-compliance living outside it. <strong>On Nereum it is part of the protocol</strong>
-— the same layer that validates a transfer also validates whether that transfer
-is allowed to happen.</p>
+<p>What it adds is a native layer for real-world assets. On a general-purpose
+chain you would deploy a contract to represent a building, an invoice or a fund,
+and then handle the rules around it separately. <strong>On Nereum the asset and
+its rules are one object, and the protocol handles both.</strong></p>
 
-<div class="nota">
-  <b>Native means enforced, not offered</b>
-  <p>A contract on another chain can refuse a transfer. A protocol can make the
-  transfer impossible. That is the whole distinction, and it is why this is a
-  chain and not a contract.</p>
-</div>
+<h3>What that means in practice</h3>
+<p>An issuer tokenizes an asset directly on the chain: the property, the loan,
+the invoice. When it is created, it carries the conditions that govern it —
+which jurisdictions may hold it, which class of holder qualifies, any holding
+period, what has to be reported.</p>
+
+<p>From then on those conditions travel with the asset. Every time it changes
+hands, the network checks them as part of validating the transfer, in the same
+step and at the same speed as it checks the balance and the signature.</p>
+
+<p>The result is that a tokenized asset behaves like any other token — it moves
+in seconds, it settles on-chain, it can be held in any wallet on the network —
+while the rules that make it a regulated instrument stay attached to it.</p>
 
 <h2 id="capas">One chain, four layers</h2>
 <p>Every asset issued on Nereum passes through all four, every time it moves.</p>
@@ -967,96 +2444,10 @@ allows and no more.</p>
 
 <h3>04 · Liquidity</h3>
 <p>Where the asset can be exchanged, and under what constraints. Covered below.</p>
-
-<h2 id="dex">The native exchange</h2>
-<p>A tokenized asset that cannot be traded is a certificate with extra steps. So
-Nereum ships with its <strong>own decentralised exchange, built into the
-network</strong> rather than deployed on top of it.</p>
-
-<h3>Why it has to be native</h3>
-<p>On a general-purpose chain, an asset with transfer restrictions and an
-automated market maker are in tension: the pool has to hold the asset, and the
-pool is not a qualified holder. Projects solve this with wrappers, allow-lists
-and workarounds — and every workaround is a place where the rule can be lost.</p>
-<p>When the exchange understands policy natively, <strong>the pool is a
-participant like any other and the rules simply apply to it</strong>.</p>
-
-<h3>What it does</h3>
-<ul>
-  <li><strong>Pair quotation.</strong> Any listed asset against NRM, stablecoins
-      or another asset, with continuous on-chain pricing.</li>
-  <li><strong>Atomic settlement.</strong> Asset and payment change hands in the
-      same transaction — both legs or neither.</li>
-  <li><strong>Policy-aware routing.</strong> An order that would end with the
-      asset in an ineligible wallet is never matched, not reversed afterwards.</li>
-  <li><strong>Transparent price history.</strong> Every trade is on-chain, so an
-      asset that used to be marked once a year becomes continuously priced.</li>
-</ul>
-
-<h2 id="migracion">The token, before and after genesis</h2>
-<p>Nereum is a Layer 1. A Layer 1 has its own native token, used to pay for
-computation and to secure the network. NRM will be that token.</p>
-
-<p>Today it is not yet: <strong>NRM circulates as an ERC-20 on Ethereum</strong>
-while the funding round is open and mainnet is not live. This is deliberate, and
-it is worth explaining rather than leaving someone to notice it on their own.</p>
-
-<h3>Why it starts as an ERC-20</h3>
-<ul>
-  <li><strong>The chain does not exist yet.</strong> A native token needs a
-      running network to live on. Until genesis there is nothing to be native to.</li>
-  <li><strong>Buyers get a real asset now.</strong> An ERC-20 on Ethereum can be
-      held in any wallet, verified on Etherscan and traded on Uniswap from day
-      one, rather than being an IOU until an unknown date.</li>
-  <li><strong>It is verifiable today.</strong> Fixed supply, zero tax and
-      renounced ownership are all checkable right now — see
-      <a class="enl" href="#/renounce">Contract — Owner renounced</a>. A promise
-      of a future native token is not checkable at all.</li>
-</ul>
-
-<h3>The migration</h3>
-<p>At genesis, ERC-20 holders exchange their tokens for native NRM at
-<strong>one for one</strong>. The ERC-20 supply is retired against what is
-issued, so the total never exceeds 600,000,000.</p>
-
-<table>
-  <tr><th>Item</th><th>Value</th></tr>
-  <tr><td>Exchange rate</td><td><b>1 : 1</b> — one ERC-20 NRM for one native NRM</td></tr>
-  <tr><td>Total after migration</td><td class="num"><b>600,000,000</b> — unchanged</td></tr>
-</table>
-
-<div class="nota aviso">
-  <b>The row that decides whether this is fair</b>
-  <p>"If you do nothing" is the one holders should read first. A migration with a
-  short deadline and no fallback turns a missed announcement into a total loss.
-  Whatever the answer is, it belongs in writing before anyone buys — not in a
-  post published the week the window opens.</p>
-</div>
-
-<div class="nota">
-  <b>Why say this at all</b>
-  <p>An engineer who reads "Layer 1" and then finds an ERC-20 contract on
-  Ethereum will assume one of two things: that the chain does not exist, or that
-  the whitepaper is careless. Both are worse than the truth, which is that this
-  is the normal path for a Layer 1 raising before genesis.</p>
-</div>
-
-<h2 id="tecnico">Under the hood</h2>
-
-<div class="nota aviso">
-  <b>The table above is the one engineers read first</b>
-  <p>Everything else on this page describes intent. These seven rows describe
-  what the network actually is, and a reader who builds on chains will scroll
-  straight to them.</p>
-</div>
-
-<h2 id="interop">Beyond Nereum</h2>
-<p>An asset that can only live on one chain is not much use. Policy has to travel
-with it when it leaves — otherwise the guarantee ends at the bridge.</p>
 `},
 
   tokenization:{
-    grupo:'The network', titulo:'Asset tokenization',
+    grupo:'Protocol', titulo:'Asset tokenization',
     html:`
 <p>Tokenizing an asset is not hard. Making it <strong>move</strong>, and keeping it
 enforceable while it moves, is the whole problem.</p>
@@ -1089,8 +2480,6 @@ deed. Break that link and you have a number in a database.</p>
 <p>All three are on-chain. None of them requires trusting us: they are checkable
 by anyone with the document in hand.</p>
 
-<h2 id="clases">What can be tokenized</h2>
-
 <h2 id="custodia">Custody of the underlying</h2>
 <p>Nereum records the claim; it does not hold the asset. Something in the physical
 world still has to.</p>
@@ -1112,11 +2501,6 @@ without breaking the history that came before.</p>
 it.</p>
 
 <h2 id="conflicto">When the record and reality disagree</h2>
-<div class="nota aviso">
-  <b>The question every serious reader asks</b>
-  <p>A tokenized building burns down. A borrower defaults. A court orders a
-  transfer the policy would refuse. What happens?</p>
-</div>
 <p>Every tokenization project is judged on this, and most whitepapers avoid it.
 The honest answer has three parts: what the protocol does automatically, what
 requires the issuer to act, and <strong>what a court can compel regardless of
@@ -1131,244 +2515,300 @@ what the chain says</strong>.</p>
 </ul>
 `},
 
-  architecture:{
-    grupo:'Protocol', titulo:'Architecture',
+  scan:{
+    grupo:'Protocol', titulo:'Nereum Explorer',
     html:`
-<p>The specification of the network: how blocks are produced, when a transaction
-becomes irreversible, and what the chain can actually sustain under load.</p>
+<p><strong>Nereum Explorer is the network's block explorer:</strong> a public website
+that reads the chain and shows what is on it — every block, every transaction,
+every address and every deployed contract.</p>
 
-<p>This is the page an engineer opens first, and the one where vague answers do
-the most damage. Every row below is either a number or marked as missing.</p>
+<h2 id="que">What it shows</h2>
+<p>Open any address and you see its full history: what it holds, what it has
+sent, what it has received, and when. Open a contract and you see its verified
+source code, so the program that is running can be compared line by line with
+the code the team published.</p>
+<p>For a tokenized asset it also shows what a general-purpose explorer cannot:
+the policy attached to the asset, how many qualified holders it has, and the
+document reference it was issued against.</p>
 
-<h2 id="consenso">Consensus and block production</h2>
-<table>
-  <tr><th>Item</th><th>Value</th></tr>
-  <tr><td>Gas token</td><td><b>NRM</b></td></tr>
-</table>
+<h2 id="como">How it works</h2>
+<p>Nereum Explorer runs its own copy of the chain and indexes every block as it is produced.
+It does not have privileged access and it does not hold anything: it reads the
+same public data any node reads, and organises it so a person can use it.</p>
+<p>That is why it can be replaced. If Nereum Explorer disappears tomorrow, anyone can run
+their own explorer against the same chain and see exactly the same thing.</p>
 
-<div class="nota">
-  <b>Why finality matters more here than on a payment chain</b>
-  <p>For a payment, a probabilistic finality of a few minutes is tolerable. For a
-  <em>registry of ownership</em> it is not: if a block can be reorganised, then
-  for that window nobody can say with certainty who owns the asset. A registry
-  that is only probably correct is not a registry.</p>
-</div>
-
-<h2 id="rendimiento">Performance, measured</h2>
-<p>Theoretical maximums are marketing. These figures should come from a public
-test whose method anyone can reproduce.</p>
-
-<h2 id="estado">Network status</h2>
-
-<div class="nota aviso">
-  <b>Until these rows are filled</b>
-  <p>A whitepaper that describes consensus in adjectives instead of numbers is
-  describing an intention. Being explicit about which rows are still empty is
-  worth more than filling them with words — because the reader finds out either
-  way, and only one version keeps their trust.</p>
-</div>
+<h2 id="resuelve">The problem it solves</h2>
+<p>A blockchain without an explorer is a database nobody can read. The data is
+public in theory and unreachable in practice, because reading it directly means
+running a node and writing software.</p>
+<p>Nereum Explorer is what turns <em>"you can verify this yourself"</em> from a claim into an
+instruction. Every proof in this document — the supply, the contract, the
+ownership, the holders — ends at an address someone has to be able to open. Nereum Explorer
+is where they open it.</p>
 `},
 
-  compliance:{
-    grupo:'Protocol', titulo:'Compliance engine',
+  dex:{
+    grupo:'Protocol', titulo:'Nereum DEX',
     html:`
-<p>The part that makes Nereum different from a token on a general-purpose chain:
-<strong>the rules are evaluated by the protocol, on every transfer, before
-settlement</strong>.</p>
+<p><strong>Nereum DEX is the exchange built into the network:</strong> where
+tokenized assets are bought and sold, priced continuously and settled on-chain.</p>
 
-<p>This page describes exactly what happens between someone pressing send and the
-transaction being final.</p>
-
-<h2 id="camino">What happens on a transfer</h2>
-<table>
-  <tr><th>Step</th><th>What is checked</th></tr>
-  <tr><td><b>01 · Signature</b></td>
-      <td>Standard: does the sender control the account. Same as any chain.</td></tr>
-  <tr><td><b>02 · Asset policy</b></td>
-      <td>The policy set attached to this asset is loaded. Not the wallet's policy — the asset's.</td></tr>
-  <tr><td><b>03 · Sender eligibility</b></td>
-      <td>Does the sender still qualify to hold it? Eligibility can expire; it is re-checked, not assumed.</td></tr>
-  <tr><td><b>04 · Recipient eligibility</b></td>
-      <td>Does the recipient qualify — jurisdiction, holder class, any lock-up in force?</td></tr>
-  <tr><td><b>05 · Transfer conditions</b></td>
-      <td>Limits, holding periods, whitelisted venues, anything else the policy encodes.</td></tr>
-  <tr><td><b>06 · Settlement</b></td>
-      <td>If every check passes, the transfer settles atomically. If any fails, <strong>it never enters the ledger at all</strong>.</td></tr>
-</table>
-
-<div class="nota">
-  <b>Rejected, not reversed</b>
-  <p>This is the distinction that matters. On other systems a non-compliant
-  transfer settles and then has to be unwound — a correction, an off-chain
-  reconciliation, sometimes a legal process. Here it simply does not happen.
-  There is no state to unwind because the state was never written.</p>
-</div>
-
-<h2 id="politica">What a policy can express</h2>
+<h2 id="que">What it does</h2>
 <ul>
-  <li><strong>Jurisdiction.</strong> Which countries may hold, and which may not.</li>
-  <li><strong>Holder class.</strong> Accredited, institutional, retail, or a custom class defined by the issuer.</li>
-  <li><strong>Lock-up.</strong> Minimum holding period before a transfer is permitted.</li>
-  <li><strong>Transfer limits.</strong> Maximum size, maximum frequency, maximum holders.</li>
-  <li><strong>Venue restrictions.</strong> Which markets the asset may reach.</li>
-  <li><strong>Reporting.</strong> What must be recorded when it moves, and to whom it is visible.</li>
+  <li><strong>Pair quotation.</strong> Any listed asset trades against NUSD, NRM
+      or another asset, with a price that updates on every trade rather than once
+      a quarter.</li>
+  <li><strong>Atomic settlement.</strong> The asset and the payment change hands
+      in the same transaction. Both legs or neither — there is no window where
+      one side has delivered and the other has not.</li>
+  <li><strong>Policy-aware routing.</strong> An order that would end with the
+      asset in a wallet that does not qualify is never matched in the first
+      place.</li>
+  <li><strong>Public price history.</strong> Every trade is recorded on the
+      chain, so an asset that used to be valued once a year has a continuous,
+      auditable price.</li>
 </ul>
 
-<h2 id="cambios">Changing a policy after issuance</h2>
-<p>Regulation changes. A policy that can never be amended is unusable in the real
-world; a policy anyone can amend is not a policy at all.</p>
-<div class="nota aviso">
-  <b>This is the hardest design question on the page</b>
-  <p>Whoever can change a policy can, in effect, freeze or free any holder. The
-  answer needs to name who holds that power, what limits it, and how a holder
-  finds out — before anyone buys.</p>
-</div>
+<h2 id="como">How it works</h2>
+<p>The exchange is part of the protocol rather than a contract deployed on top of
+it. When a trade is submitted, the same validation that checks the balance and
+the signature also checks the asset's policy — for both sides of the trade and
+for the liquidity pool itself.</p>
+<p>That last point is the reason it has to be native. On a general-purpose chain,
+an asset with transfer restrictions and an automated market maker are in
+conflict: the pool has to hold the asset, and a pool is not a qualified holder.
+Projects work around it with wrappers and allow-lists. Here the pool is simply a
+participant like any other, and the rules apply to it the same way.</p>
 
-<h2 id="coste">What this costs</h2>
-<p>Checks are not free. Every condition evaluated on-chain is computation someone
-pays for.</p>
-<p>Publishing this honestly is itself a signal. A project that has measured the
-cost of its own compliance layer has built one.</p>
+<h2 id="resuelve">The problem it solves</h2>
+<p>A tokenized asset that cannot be traded is a certificate with extra steps. The
+whole argument for putting a building on a chain is that it becomes as
+transferable as a share — and that only happens if there is somewhere to
+transfer it.</p>
+<p>The DEX is also what produces the price. An asset with no market has a
+valuation; an asset with a market has a price, and the difference matters to
+everyone who has to mark it, lend against it or sell it.</p>
 `},
 
-  identity:{
-    grupo:'Protocol', titulo:'Identity and credentials',
+  nusd:{
+    grupo:'Protocol', titulo:'NUSD',
     html:`
-<p>Compliance requires knowing who may hold an asset. Doing that without turning
-the ledger into a public database of people is the difficult part.</p>
+<p><strong>NUSD is the network's settlement asset:</strong> a stable unit, native
+to the chain, that the payment side of every trade is denominated in.</p>
 
-<p>Nereum uses <strong>verifiable credentials</strong>: the chain checks a
-cryptographic proof that a holder qualifies, without the identity behind it ever
-being written on-chain.</p>
+<h2 id="que">What it is</h2>
+<p>One NUSD is worth one dollar and is backed by reserves held off-chain. It
+behaves like any other token on the network — it moves in seconds, settles
+on-chain and can be held in any wallet — but its value does not move against the
+currency the underlying assets are priced in.</p>
+
+<h2 id="como">How it works</h2>
+<p>A holder acquires NUSD by depositing dollars or an equivalent stable asset
+with the issuer, who mints the corresponding amount. Redemption runs the same
+way in reverse: return the NUSD, receive the dollars.</p>
+<p>What makes a stablecoin credible is not its name but its reserve: what backs
+it, who holds it, who audits it, and how a holder redeems it at par. Those four
+answers belong in public before it circulates at scale.</p>
+
+<h2 id="resuelve">The problem it solves</h2>
+<p>Delivery versus payment needs a payment leg. If someone sells a tokenized bond,
+the buyer pays with something — and for the two legs to settle in the same
+transaction, that something has to live on the same ledger.</p>
+<p>Without a stable settlement asset on the chain, the payment happens somewhere
+else: a wire, an exchange, another network. The moment it does, the settlement
+stops being atomic, and the risk that one side delivers and the other does not
+comes straight back.</p>
+<p>The alternative — settling in a volatile token — is worse. Nobody prices a
+five-year note in an asset that can move ten per cent while the transaction
+confirms. <strong>NUSD is what makes atomic settlement mean something in
+practice</strong>, rather than only in the architecture diagram.</p>
+`},
+
+  forge:{
+    grupo:'Protocol', titulo:'Nereum Forge',
+    html:`
+<p><strong>Nereum Forge is the issuance engine:</strong> where an asset becomes a
+token without anyone writing a smart contract.</p>
+
+<h2 id="que">What it does</h2>
+<p>An issuer describes the asset, attaches its documentation, selects the
+conditions that must travel with it, and issues. What comes out is a token on
+the chain, bound to the underlying document and governed by the policy that was
+chosen at creation.</p>
 
 <h2 id="como">How it works</h2>
 <ol>
-  <li>A holder is verified once by an approved issuer — a KYC provider, a bank, a
-      regulator-recognised body.</li>
-  <li>The issuer signs a credential stating what the holder qualifies as. Not who
-      they are: <em>what they qualify as</em>.</li>
-  <li>The holder presents that credential when transacting.</li>
-  <li>The protocol verifies the signature and the credential's validity, and
-      checks it against the asset's policy.</li>
+  <li><strong>Describe the asset.</strong> What it is, who issues it, under what
+      legal authority, and what vehicle holds it.</li>
+  <li><strong>Attach the documentation.</strong> The deed, the note, the invoice.
+      Forge records a reference to it and a fingerprint of the file, so any later
+      alteration is detectable.</li>
+  <li><strong>Choose the policy.</strong> Which jurisdictions may hold it, which
+      class of holder qualifies, any minimum holding period, what has to be
+      reported and to whom.</li>
+  <li><strong>Issue.</strong> The token is created with the policy already
+      attached. From that point the network enforces it on every transfer.</li>
 </ol>
-<p>The chain learns that an address is eligible. It never learns a name, a
-document number or a date of birth.</p>
 
-<h2 id="ve">Who sees what</h2>
-<table>
-  <tr><th>Party</th><th>What they can see</th></tr>
-  <tr><td><b>The public ledger</b></td><td>That a transfer settled between two eligible addresses. No identity.</td></tr>
-  <tr><td><b>The counterparty</b></td><td>Whatever the asset's policy permits — typically that the other side qualifies, and nothing more.</td></tr>
-  <tr><td><b>The credential issuer</b></td><td>The underlying identity. They performed the verification and hold the documents.</td></tr>
-</table>
-
-<h2 id="revocacion">Expiry and revocation</h2>
-<p>Eligibility is not permanent. Someone moves country, a licence lapses, a
-sanctions list changes. A credential system without revocation is a system that
-was correct once.</p>
-
-<div class="nota">
-  <b>Why this design and not a whitelist</b>
-  <p>A simple address whitelist works until it does not: it has to be maintained
-  by someone, it grows without limit, and whoever controls it controls who can
-  transact. Credentials move that authority to the party that actually performed
-  the verification, and make eligibility something a holder proves rather than
-  something an operator grants.</p>
-</div>
+<h2 id="resuelve">The problem it solves</h2>
+<p>Tokenizing an asset today means hiring someone to write and audit a custom
+contract for each issuance. That costs money and months, and it means every
+asset on the network behaves slightly differently, because every contract was
+written by a different person.</p>
+<p>Forge replaces that with a described process. The same policy conditions are
+available to every issuer, they behave identically across assets, and they are
+enforced by the protocol rather than by whatever the contract author remembered
+to include.</p>
+<p>This is the layer that decides whether the network gets used at all. A chain
+is infrastructure; <strong>the issuance engine is what turns "we have a Layer 1"
+into "an issuer can list an asset on Tuesday"</strong>.</p>
 `},
 
-  validators:{
-    grupo:'Protocol', titulo:'Validators and staking',
+  vaults:{
+    grupo:'Protocol', titulo:'Nereum Vaults',
     html:`
-<p>Who produces blocks, what they are paid, and what happens if they misbehave.
-On a chain that records ownership of real assets, this is not a detail — it is
-the answer to <em>who could rewrite history</em>.</p>
+<p><strong>Nereum Vaults are managed baskets of tokenized assets:</strong> deposit
+a stable asset, receive exposure to a portfolio held on-chain.</p>
 
-<h2 id="conjunto">The validator set</h2>
+<h2 id="que">What they are</h2>
+<p>A vault holds a set of tokenized instruments — treasuries, private credit,
+invoices — and issues a token representing a share of the whole. The holder of
+that token is entitled to their proportion of whatever the underlying assets
+produce.</p>
 
-<div class="nota aviso">
-  <b>The row that decides the word "decentralised"</b>
-  <p>A contract with no owner and a validator set run entirely by one team is
-  decentralised at the contract layer and centralised at the network layer.
-  Both statements can be true at once, and only naming which is which keeps the
-  claim honest. See <a class="enl" href="#/audit">Audit</a> for the contract
-  side.</p>
-</div>
+<h2 id="como">How they work</h2>
+<p>A holder deposits NUSD and receives vault tokens in return. The vault uses the
+deposit to acquire assets according to a published mandate: what it may hold,
+in what proportions, and under what limits.</p>
+<p>Income from the underlying — rent, coupons, repayments — arrives on-chain and
+is distributed proportionally to vault token holders, without a register having
+to be reconciled first. To leave, a holder redeems the vault token or sells it
+on the <a class="enl" href="#/dex">DEX</a>.</p>
+<p>Everything the vault holds is visible on <a class="enl" href="#/scan">Nereum
+Explorer</a>: the assets, the amounts and the movements. A vault is not a promise
+about a portfolio; it is a portfolio anyone can inspect.</p>
 
-<h2 id="staking">Staking and rewards</h2>
-<p>With a fixed supply of 600,000,000 NRM and no mint function, rewards cannot
-come from new issuance.</p>
-
-<h2 id="castigo">Slashing</h2>
-<p>What a validator loses for being offline, for signing two blocks at the same
-height, or for censoring transactions.</p>
-<p>Slashing is what makes staking a security mechanism rather than a savings
-account. Without it, a validator has nothing at risk.</p>
-
-<h2 id="gobernanza">Governance</h2>
-<p>How protocol changes are proposed, decided and deployed.</p>
+<h2 id="resuelve">The problem it solves</h2>
+<p>Real-world assets are hard for an individual to hold directly. Each one needs
+to be evaluated on its own terms — the borrower, the property, the counterparty —
+and the minimums are usually far beyond what a retail participant would commit.</p>
+<p>The vault turns that into a single decision. Instead of underwriting a
+specific loan, a holder takes exposure to a diversified basket under a stated
+mandate, with the same on-chain visibility they would have over any other token.</p>
+<p>It is also what gives the network a use for capital that is not
+institutional. Forge brings the issuers, and the vaults bring everyone else.</p>
 `},
 
-  interop:{
-    grupo:'Protocol', titulo:'Interoperability',
+  feed:{
+    grupo:'Protocol', titulo:'Nereum Feed',
     html:`
-<p>An asset that can only exist on one chain is a database entry with extra
-steps. The hard part is not moving the token — it is <strong>moving the rules
-with it</strong>.</p>
+<p><strong>Nereum Feed is the data and attestation layer:</strong> what connects
+what happens in the world to what the chain knows.</p>
 
-<h2 id="problema">Why bridging is different here</h2>
-<p>A standard bridge locks a token on one chain and mints a representation on
-another. For an asset with transfer restrictions, that representation arrives on
-a chain that knows nothing about its policy — and from that moment the guarantee
-is gone.</p>
-<p>Anyone can then hold it, anywhere, regardless of what the original policy
-said. The compliance did not travel; only the balance did.</p>
-
-<div class="nota">
-  <b>The guarantee ends at the bridge, unless it is designed not to</b>
-  <p>This is the single most common way a compliant asset stops being compliant.
-  It is worth being explicit about how Nereum handles it — including if the
-  answer at launch is that assets do not leave.</p>
-</div>
-
-<h2 id="modelo">The model</h2>
-
-<h2 id="riesgo">Bridge risk, stated plainly</h2>
-<p>Bridges are the most attacked component in this industry. More value has been
-lost to bridge exploits than to any other category of failure.</p>
+<h2 id="que">What it carries</h2>
 <ul>
-  <li>A bridge holds real assets in a contract, which makes it a permanent target.</li>
-  <li>It usually depends on a validator or oracle set outside the chain's own
-      security model.</li>
-  <li>Its failure mode is total: the wrapped representation becomes worthless
-      while the locked original is gone.</li>
+  <li><strong>Valuations.</strong> What an asset is currently worth, and who said so.</li>
+  <li><strong>Reference prices.</strong> Rates and benchmarks that instruments are priced against.</li>
+  <li><strong>Corporate actions.</strong> Revaluations, splits, amendments to terms, defaults.</li>
+  <li><strong>Attestations.</strong> Signed statements binding a token to the document behind it.</li>
 </ul>
-<p><strong>Saying that a bridge is not live yet is a stronger position than
-claiming one that has not been attacked yet.</strong></p>
 
+<h2 id="como">How it works</h2>
+<p>Data reaches the chain through approved providers who sign what they publish.
+The signature is the point: an entry on Feed is not an anonymous number, it is a
+statement by a named party who can be held to it.</p>
+<p>An attestation works the same way. When an asset is issued, a verifying party
+signs a statement that the documentation is what it claims to be. That signature
+stays on the chain, so the binding between token and document can be checked
+years later by someone who was not there.</p>
+
+<h2 id="resuelve">The problem it solves</h2>
+<p>A token representing a building is worth exactly as much as its link to the
+deed. Break the link and what remains is a number in a database — technically
+sound, economically worthless.</p>
+<p>Feed is what keeps the link intact and, more importantly, <strong>auditable
+without trusting us</strong>. Anyone can check who attested to what and when,
+and compare the document fingerprint on the chain with the document in hand.</p>
+<p>It is also what lets an asset stay current. A building revalued in March, a
+loan that goes into default in June — without a data layer none of that reaches
+the chain, and the record slowly stops describing reality.</p>
 `},
 
-  roadmap:{
-    grupo:'Protocol', titulo:'Roadmap',
+  link:{
+    grupo:'Protocol', titulo:'Nereum Link',
     html:`
-<p>Five phases. No dates we cannot hold, and a rule that keeps them honest:
-<strong>a phase moves only when the one before it is live on mainnet</strong>.</p>
+<p><strong>Nereum Link distributes the yield of Nereum-native assets to holders
+on other chains</strong>, without the asset itself leaving the ledger where its
+rules are enforced.</p>
 
-<p>That rule is the whole point. A roadmap with parallel workstreams and quarterly
-targets is a roadmap designed to always look on schedule.</p>
+<h2 id="como">How it works</h2>
+<p>The underlying asset stays on Nereum. What travels is a mirrored token on the
+destination chain that represents the economic exposure — the yield — rather than
+ownership of the asset.</p>
+<p>Income produced on Nereum is routed to holders of the mirrored token wherever
+they are. The asset never moves, the policy never has to be interpreted by a
+chain that does not understand it, and the value locked stays where it is
+secured.</p>
 
-<h2 id="fases">The phases</h2>
+<h2 id="porque">Why not a normal bridge</h2>
+<p>A standard bridge locks a token on one chain and mints a representation on
+another. For an asset with transfer restrictions, that representation arrives
+somewhere that knows nothing about its policy — and from that moment anyone can
+hold it, anywhere, regardless of what the original conditions said.</p>
+<p>The compliance did not cross. Only the balance did. It is the most common way
+a compliant asset quietly stops being compliant.</p>
+<p>Link is built the other way round: <strong>the asset stays where the rules
+are, and only the economic exposure travels</strong>.</p>
 
-<h2 id="hecho">What counts as done</h2>
-<p>Each phase needs a test that someone outside the team can run. Without one,
-"complete" means whatever we say it means.</p>
+<h2 id="resuelve">The problem it solves</h2>
+<p>Most capital will never move to a new network. Someone holding stablecoins on
+Ethereum is not going to bridge, learn a new wallet and take on an unfamiliar
+chain's risk in order to earn a few points of yield.</p>
+<p>Link removes that requirement. The holder stays where they are, in the wallet
+they already use, and the yield comes to them. For the network it means reach
+that does not depend on convincing anyone to migrate — which is the hardest thing
+a new chain has to do.</p>
+`},
 
-<div class="nota">
-  <b>How to hold us to this</b>
-  <p>Every phase above should end with something checkable on a public explorer
-  or in a public repository. If a phase is marked complete and you cannot verify
-  it yourself, that is the moment to ask why.</p>
-</div>
+  wallet:{
+    grupo:'Protocol', titulo:'Wallet and tooling',
+    html:`
+<p><strong>The wallet holds credentials as well as assets, and the developer
+tooling lets anyone build on the network without asking permission.</strong></p>
+
+<h2 id="cartera">The wallet</h2>
+<p>A normal wallet stores keys and balances. On Nereum a holder also needs to
+carry the credentials that prove they qualify to hold a given asset — issued by a
+verifying party, presented at transfer time, checked by the protocol.</p>
+<p>The wallet stores those credentials alongside the assets and presents them
+automatically when a transfer requires it. The holder does not manage
+eligibility as a separate process; it travels with them.</p>
+<p>This matters because of how the network is designed. Eligibility here is
+something a holder <em>proves</em>, not something an operator <em>grants</em> —
+and that only works if the holder actually has the proof in hand.</p>
+
+<h2 id="dev">Developer tooling</h2>
+<ul>
+  <li><strong>SDK.</strong> Libraries for issuing assets, reading policy and
+      submitting transfers, so an application does not have to talk to the chain
+      at the byte level.</li>
+  <li><strong>Public documentation.</strong> Every interface documented and
+      readable without an account.</li>
+  <li><strong>Testnet and faucet.</strong> A full copy of the network with free
+      tokens, so anything can be tried before it costs anything.</li>
+  <li><strong>Public endpoints.</strong> A way to read the chain and submit
+      transactions without running infrastructure first.</li>
+</ul>
+
+<h2 id="resuelve">The problem it solves</h2>
+<p>Networks that require a conversation before you can build on them do not get
+built on. A developer evaluating three chains on a Saturday will use the one
+whose documentation opens and whose testnet works, and will never contact any of
+the teams.</p>
+<p>The tooling exists so that decision goes our way without anyone having to sell
+anything. And the wallet exists so the compliance layer, which is the whole point
+of the network, does not turn into paperwork for the person holding the asset.</p>
 `},
 
   faq:{
@@ -1379,13 +2819,10 @@ answer is not settled yet, it says so.</p>
 
 <h2 id="proyecto">About the project</h2>
 
-<h3>Is the network live?</h3>
-
 <h3>What makes this different from tokenizing on Ethereum?</h3>
 <p>On Ethereum the token is on-chain and the rules governing it are not. Here the
-rules are enforced by the protocol on every transfer. See
-<a class="enl" href="#/compliance">Compliance engine</a> for exactly what happens
-between send and settlement.</p>
+rules are enforced by the protocol on every transfer, before settlement: if any
+check fails, the transfer never enters the ledger.</p>
 
 <h3>Who is the team?</h3>
 <p>Verified by a third party — see <a class="enl" href="#/kyc">Team KYC</a> — and
@@ -1404,34 +2841,12 @@ that could be raised later.</p>
 
 <h3>Can my wallet be frozen or blacklisted?</h3>
 <p>No. Contract ownership has been renounced, so there is no address with the
-power to pause transfers or block a holder. Verify it yourself on
-<a class="enl" href="#/renounce">the contract page</a>.</p>
-
-<h3>What happens if a bug is found after launch?</h3>
-<p>It cannot be patched — by us or by anyone. That is the direct consequence of
-renouncing ownership, and the reason the audit matters as much as it does. The
-only remedy would be a migration requiring the whole holder base to move.</p>
+power to pause transfers or block a holder. </p>
 
 <h3>Where does NRM list, and at what price?</h3>
 <p>At $0.50 on Uniswap v3. Because v3 concentrates liquidity in a chosen range,
 the opening price is a parameter of the pool. See
 <a class="enl" href="#/whitelist">Whitelist</a>.</p>
-
-<h2 id="riesgo">About risk</h2>
-
-<h3>What is the most likely way I lose money here?</h3>
-<p>Total loss through execution failure. Building a Layer 1 is hard and most
-attempts do not reach the scale they aim for. That is a more likely outcome than
-any exotic scenario, and it is listed first in
-<a class="enl" href="#/security">Security guarantees</a> for that reason.</p>
-
-<h3>Is this regulated?</h3>
-<p>No. Nereum Labs LLC is a registered company; that is a filing, not a licence.
-No regulator has reviewed or approved this project.</p>
-
-<h3>Can I sell whenever I want?</h3>
-<p>Nothing in the contract stops you. Whether there is a buyer at a price you
-accept depends on the market, and no chain design changes that.</p>
 
 <h2 id="participar">About taking part</h2>
 
@@ -1476,13 +2891,6 @@ serious project should not operate.</p>
   <tr><td>Principal address</td><td>${PEND('address on file')}</td></tr>
 </table>
 
-<div class="nota">
-  <b>The two rows that matter</b>
-  <p>The document number and the verification link are the only entries on this
-  page that turn a claim into a fact. Everything else is us describing
-  ourselves; those two let you check it in under a minute.</p>
-</div>
-
 <h2 id="comprobar">Verify it yourself, in four steps</h2>
 <p>Florida keeps a free public business registry. You do not need us for any of
 this, and we would rather you did it than believed us:</p>
@@ -1496,42 +2904,6 @@ this, and we would rather you did it than believed us:</p>
       company that is still being run by someone.</li>
 </ol>
 
-<div class="nota aviso">
-  <b>If anything does not match</b>
-  <p>A discrepancy between this page and the state record is more important than
-  everything else in this document put together. If you find one, treat it as
-  the answer to every other question here.</p>
-</div>
-
-<h2 id="alcance">What incorporation does and does not mean</h2>
-<p>Registering a company is a filing, not an endorsement. Being specific about
-this matters, because plenty of projects present a certificate as if it were a
-licence.</p>
-
-<h3>What it does mean</h3>
-<ul>
-  <li>There is a real legal person behind the project, not an anonymous wallet.</li>
-  <li>It is subject to United States jurisdiction and to Florida law.</li>
-  <li>It has a registered agent who can legally be served — a physical address
-      where documents must be accepted.</li>
-  <li>Its filings are public and its status can be checked at any time, by
-      anyone, including years from now.</li>
-</ul>
-
-<h3>What it does not mean</h3>
-<ul>
-  <li><strong>No regulator has reviewed, approved or licensed this project.</strong>
-      Incorporation and financial regulation are different things.</li>
-  <li>It is not a securities registration, a money transmitter licence or a
-      broker-dealer authorisation.</li>
-  <li>It does not make the token a regulated product, and it does not make any
-      claim in this document more true.</li>
-  <li>Forming an LLC in Florida costs very little and takes a day. It proves
-      identity and reachability, not substance.</li>
-</ul>
-<p>Anyone presenting a company registration as a regulatory seal of approval is
-misrepresenting it, and we are not going to do that here.</p>
-
 <h2 id="quien">Who stands behind the entity</h2>
 <p>A company is only as accountable as the people named on it. The founders are
 verified by a third party — see <a class="enl" href="#/team">Team</a> — so the
@@ -1540,156 +2912,6 @@ entity is not a shell with nobody attached.</p>
 careful reader actually has: <em>does this thing exist legally</em>, and
 <em>is there a person who can be found if it goes wrong</em>.</p>
 
-<h2 id="terminos">Terms and policies</h2>
-<ul>
-  <li>Terms of service — ${PEND('link')}</li>
-  <li>Privacy policy — ${PEND('link')}</li>
-  <li>Token purchase terms — ${PEND('link')}</li>
-  <li>Excluded jurisdictions — ${PEND('list')}</li>
-</ul>
-
-<h2 id="aviso">Legal notice</h2>
-<ul>
-  <li>This document is for information only. It is not an offer of securities,
-      not investment advice, and not a solicitation in any jurisdiction where
-      such an offer would be unlawful.</li>
-  <li>Nothing here is a promise of future value, listing, price or performance.</li>
-  <li>Forward-looking statements describe intentions, not commitments. Plans
-      change, and a roadmap is not a contract.</li>
-  <li>Participation may be restricted or prohibited depending on where you live.
-      Checking that is your responsibility, and making it possible is ours.</li>
-  <li>Digital assets carry a risk of total loss. See
-      <a class="enl" href="#/security">Security guarantees</a> for the full list.</li>
-</ul>
-
-<div class="nota">
-  <b>Why this page sits early in the document</b>
-  <p>A reader who has to hunt for the legal notice has already reached a
-  conclusion by the time they find it. Putting it near the front costs us
-  nothing if the project is what it says it is.</p>
-</div>
-`},
-
-  security:{
-    grupo:'Trust', titulo:'Security guarantees',
-    html:`
-<p>This page collects everything that protects the person putting money in. Not
-the marketing version — the mechanisms, what each one covers, and where each one
-stops.</p>
-
-<p>They fall into two groups: what the <strong>protocol</strong> guarantees about
-a transfer, and what the <strong>project</strong> has put in place around the
-token sale. Both matter, and they fail in different ways.</p>
-
-<h2 id="protocolo">What the protocol guarantees</h2>
-<table>
-  <tr><th>Guarantee</th><th>What it means in practice</th></tr>
-  <tr><td><b>All-or-nothing settlement</b></td>
-      <td>A transfer settles as one unit. There is no state where the asset moved and the payment did not, or where a compliance check passed halfway. Either the whole transaction is in the ledger or none of it is.</td></tr>
-  <tr><td><b>Controlled visibility</b></td>
-      <td>Who can see what is a property of the asset, not a side agreement. A counterparty sees what the policy permits and nothing beyond it.</td></tr>
-  <tr><td><b>Always-on security</b></td>
-      <td>Rules are checked on every transfer for the life of the asset, not once at issuance. A holder who stops qualifying stops being able to transfer.</td></tr>
-</table>
-
-<h2 id="inversor">The schemes that protect investors</h2>
-<p>Six mechanisms, each covering a different way a project can fail its buyers.
-Five are already verifiable; the ones that are not say so.</p>
-
-<table>
-  <tr><th>Scheme</th><th>What it prevents</th><th>Status</th></tr>
-  <tr><td><b>Ownership renounced</b></td>
-      <td>The team minting new supply, freezing transfers, blacklisting a wallet or changing the rules after you buy.</td>
-      <td><a class="enl" href="#/renounce">Verifiable on-chain</a></td></tr>
-  <tr><td><b>Fixed supply</b></td>
-      <td>Silent dilution. 600,000,000 NRM at genesis, with no mint function anyone can call.</td>
-      <td><a class="enl" href="#/renounce">Verifiable on-chain</a></td></tr>
-  <tr><td><b>Independent audit</b></td>
-      <td>Code that has never been reviewed by anyone outside the team.</td>
-      <td><a class="enl" href="#/audit">Audit</a></td></tr>
-  <tr><td><b>Registered company</b></td>
-      <td>An anonymous entity with no jurisdiction and nobody to hold responsible.</td>
-      <td><a class="enl" href="#/legal">Miami, FL filing</a></td></tr>
-  <tr><td><b>Team KYC</b></td>
-      <td>Founders disappearing with no identity on record anywhere.</td>
-      <td><a class="enl" href="#/kyc">Team KYC</a></td></tr>
-</table>
-
-<div class="nota">
-  <b>Why each one on its own is not enough</b>
-  <p>A company with no named people is a shell. Named people with no audit is
-  trust in strangers. An audit with admin keys still open leaves the back door
-  unlocked. Renounced ownership with a team that can dump on day one protects
-  the contract and not the buyer. <strong>The protection is the combination,
-  not any single line in the table.</strong></p>
-</div>
-
-<h2 id="alcance">Where each layer stops</h2>
-<p>Being precise here is the difference between a security page and a sales
-page.</p>
-
-<h3>The protocol</h3>
-<p>Enforces policy on transfers. It cannot know whether the underlying asset
-still exists, whether an issuer is honest, or whether a document was forged
-before it was hashed.</p>
-
-<h3>The audit</h3>
-<p>Tells you the code was reviewed by someone independent at a point in time. It
-does not certify the code is safe forever, and it says nothing about code
-deployed after the review.</p>
-
-<h3>Renounced ownership</h3>
-<p>Removes the team's power over the contract permanently. It also removes the
-ability to patch a bug — for anyone. That trade-off is deliberate and it is
-explained in full on <a class="enl" href="#/renounce">that page</a>.</p>
-
-<h3>The KYC</h3>
-<p>Means a third party verified the founders' identities. It raises the cost of
-disappearing. It does not guarantee competence or good faith.</p>
-
-<h3>The company</h3>
-<p>Means a legal person exists in a jurisdiction with courts. It is not a licence
-and no regulator has approved anything.</p>
-
-<h2 id="riesgos">Risks, written plainly</h2>
-<p>Every mechanism above reduces a specific risk. None of them removes these:</p>
-<ul>
-  <li><strong>Total loss.</strong> You can lose everything you put in. This is
-      the most likely bad outcome, not the most extreme one.</li>
-  <li><strong>Execution.</strong> The network described in this document is not
-      finished. Building a Layer 1 is hard, and most attempts do not reach the
-      scale they aim for.</li>
-  <li><strong>Regulation.</strong> Rules for tokenized real-world assets are
-      unsettled and differ by jurisdiction. A rule change can make part of this
-      design unworkable in a given market.</li>
-  <li><strong>Liquidity.</strong> There may be no buyer when you want to sell, at
-      any price.</li>
-  <li><strong>Smart contract.</strong> Audited code still fails. Audits reduce
-      risk; they do not remove it.</li>
-  <li><strong>Custody of the underlying.</strong> If whoever holds the real asset
-      fails, the token points at something that is no longer there.</li>
-</ul>
-
-<h2 id="comprobar">Check it yourself, in ten minutes</h2>
-<ol>
-  <li>Open the contract address on a public explorer and confirm the
-      <code>owner</code> field returns the zero address.</li>
-  <li>Confirm total supply is 600,000,000 and there is no mint function.</li>
-  <li>Open the audit report on the auditor's own domain and check the commit
-      hash matches the deployed code.</li>
-  <li>Search the company on the Florida state registry.</li>
-  <li>Open the KYC certificate and confirm the issuing firm.</li>
-</ol>
-<p>Five checks, none of which require anything from us. If any of them does not
-come back the way this page describes, that discrepancy matters more than
-everything else written here.</p>
-
-<div class="nota aviso">
-  <b>This list is not decoration</b>
-  <p>It is read by exactly the people you most want to convince, and hedged
-  language reads as evasion. If a risk here ever stops being true, it should be
-  removed with an explanation — not quietly deleted.</p>
-</div>
 `},
 
   audit:{
@@ -1719,13 +2941,6 @@ rather than one of several.</p>
   <tr><td>Re-audit after fixes</td><td>${PEND('yes or no, and link')}</td></tr>
 </table>
 
-<div class="nota">
-  <b>Two links, not one</b>
-  <p>The report should be reachable both here and on the auditor's own domain.
-  A PDF hosted only by the project is a PDF the project controls; the same
-  report on the firm's site is one it does not.</p>
-</div>
-
 <h2 id="descentralizado">Nobody owns this</h2>
 <p>Nereum is built to belong to the people who hold it — its community and its
 investors — not to the team that wrote it. That is a design decision with
@@ -1733,9 +2948,6 @@ consequences, and every part of it is verifiable on-chain:</p>
 
 <table>
   <tr><th>Property</th><th>What it means</th><th>Check</th></tr>
-  <tr><td><b>No owner</b></td>
-      <td>Contract ownership has been renounced. There is no admin key, and no address with privileged rights over the contract.</td>
-      <td>See <a class="enl" href="#/renounce">Contract — Owner renounced</a></td></tr>
   <tr><td><b>Fixed supply</b></td>
       <td>600,000,000 NRM at genesis. No mint function that anyone can call, ever.</td>
       <td>${PEND('contract address')}</td></tr>
@@ -1745,24 +2957,10 @@ consequences, and every part of it is verifiable on-chain:</p>
   <tr><td><b>No blacklist</b></td>
       <td>No address can be blocked by decree.</td>
       <td>${PEND('contract address')}</td></tr>
-  <tr><td><b>Validators</b></td>
-      <td>Who produces blocks, and how open participation is.</td>
-      <td>${PEND('validator set and how to join')}</td></tr>
   <tr><td><b>Governance</b></td>
       <td>How protocol decisions are made, and by whom.</td>
       <td>${PEND('governance model')}</td></tr>
 </table>
-
-<div class="nota aviso">
-  <b>Say it precisely, or do not say it</b>
-  <p>"Decentralised" means different things at the contract layer and at the
-  network layer. The first four rows above are already true and provable today.
-  The last two — validators and governance — are what decide whether the claim
-  holds for the <em>network</em>, and until they are filled in, the honest
-  statement is that the <strong>token contract</strong> has no owner.</p>
-  <p>Readers who matter know this distinction. Making it ourselves is worth more
-  than a superlative they would check and disprove.</p>
-</div>
 
 <h2 id="contratos">Deployed contracts</h2>
 <p>Every deployed address on a public explorer, so the code that was audited and
@@ -1774,7 +2972,7 @@ the code that is running can be compared line by line.</p>
   <tr><td>Chain</td><td>${PEND('chain')}</td></tr>
   <tr><td>Verified source</td><td>${PEND('link to verified code on the explorer')}</td></tr>
   <tr><td>Sale contract</td><td>${PEND('address')}</td></tr>
-  <tr><td>Ownership</td><td><b>Renounced</b> — see <a class="enl" href="#/renounce">that page</a></td></tr>
+  <tr><td>Ownership</td><td><b>Renounced</b> — see that page</td></tr>
 </table>
 
 <h2 id="leer">How to read an audit report</h2>
@@ -1797,13 +2995,8 @@ Four things matter more:</p>
 <p>On a project where the team keeps admin keys, a bug can be patched. That is a
 safety net, and it is also a back door — the same key that fixes a bug can drain
 a treasury.</p>
-<p>We gave up that key. It means no insider can act against holders, and it also
-means <strong>a flaw found after deployment cannot be patched by anyone</strong>.
-The only remedy would be a migration, which requires the whole holder base to
-move.</p>
-<p>That trade-off is why the review has to be real, public and current — and why
-it sits next to <a class="enl" href="#/renounce">the renounce page</a> rather
-than in place of it.</p>
+<p>We gave up that key. It means <strong>no insider can act against
+holders</strong>.</p>
 
 <h2 id="limites">What an audit cannot tell you</h2>
 <ul>
@@ -1812,15 +3005,8 @@ than in place of it.</p>
   <li>Whether a bug exists that the reviewers did not find. Usually one does.</li>
   <li>Whether the contract deployed afterwards matches the one reviewed — that
       is what the commit hash is for.</li>
-  <li>Anything at all about the network's validators or governance.</li>
 </ul>
 
-<div class="nota aviso">
-  <b>Before this page goes live</b>
-  <p>Four things make an audit worth something: the firm, the commit hash, the
-  findings and a link that opens. Without all four it is a logo, and the readers
-  you most want to convince know the difference.</p>
-</div>
 `},
 
   kyc:{
@@ -1833,15 +3019,6 @@ the people running this project and holds it on file.</p>
 <p>It is not a badge we bought to decorate a page. It is a name and a face on
 record with someone who is not us, and who can be compelled to produce them.</p>
 
-<h2 id="ficha">The verification</h2>
-
-<div class="nota">
-  <b>The link is the whole point</b>
-  <p>A KYC claim without a certificate anyone can open is exactly as strong as
-  no claim at all. The verification link and the certificate ID are what turn
-  this page from a statement into something checkable.</p>
-</div>
-
 <h2 id="importa">Why this matters in a funding round</h2>
 <p>Most projects raising money at this stage are run by people you cannot name.
 That is normal in crypto and it is not automatically bad — plenty of serious
@@ -1850,9 +3027,6 @@ software has shipped anonymously.</p>
 team that disappears leaves nobody to pursue.</strong> There is no jurisdiction,
 no subpoena, no case. The money is simply gone, and the only recourse is a
 thread on social media.</p>
-<p>Verified founders change that arithmetic. It does not stop anyone from
-behaving badly, but it removes the cheapest exit — and everyone involved knows
-it before a single dollar is raised.</p>
 
 <h2 id="combinacion">What makes this uncommon</h2>
 <p>Team KYC on its own is not rare. Plenty of presales advertise a verification
@@ -1869,9 +3043,6 @@ gap the others leave open:</p>
   <tr><td><b>Contract audit</b></td>
       <td>Has the code been reviewed by someone independent?
       <a class="enl" href="#/audit">Audit</a></td></tr>
-  <tr><td><b>Owner renounced</b></td>
-      <td>Can the team act against holders after launch?
-      <a class="enl" href="#/renounce">Contract — Owner renounced</a></td></tr>
 </table>
 <p>A company without named people is a shell. Named people without an audit is
 trust in strangers. An audit without renounced ownership leaves the back door
@@ -1893,140 +3064,18 @@ checked.</p>
 <p>That balance is the point: accountability without publishing a passport on
 the internet.</p>
 
-<h2 id="limites">What KYC does not prove</h2>
-<ul>
-  <li>It does not vouch for competence. Verified people ship bad projects too.</li>
-  <li>It is not a background check unless the issuing firm says it is.</li>
-  <li>It does not guarantee good faith — it raises the cost of bad faith.</li>
-  <li>It says nothing about the code. That is what the
-      <a class="enl" href="#/audit">audit</a> is for.</li>
-</ul>
-
-<div class="nota aviso">
-  <b>Before this page goes live</b>
-  <p>Three fields decide whether this page is worth anything: the firm, the
-  certificate ID and a link that opens without an account. Until those are
-  filled in, this page is a promise about a promise.</p>
-</div>
-`},
-
-  renounce:{
-    grupo:'Trust', titulo:'Contract — Owner renounced',
-    html:`
-<p>Contract <b>NRM</b> — <strong>owner renounced</strong>. Ownership of the contract
-has been given up permanently, so no key held by anyone can mint new supply,
-pause transfers, blacklist an address or change the rules after deployment.</p>
-
-<p>This is the one guarantee in this section that anyone can verify on-chain in
-under a minute, without asking us for anything and without trusting a document we
-wrote about ourselves.</p>
-
-<h2 id="prueba">The contract</h2>
-<table>
-  <tr><th>Item</th><th>Value</th></tr>
-  <tr><td>Token</td><td><b>NRM</b></td></tr>
-  <tr><td>Network</td><td><b>Ethereum</b></td></tr>
-  <tr><td>Standard</td><td>ERC-20</td></tr>
-  <tr><td>Total supply</td><td class="num"><b>600,000,000</b> NRM — fixed at genesis</td></tr>
-  <tr><td>Buy / sell tax</td><td><b>0%</b> — no transfer fee written into the contract</td></tr>
-  <tr><td>Ownership</td><td><b>Renounced</b></td></tr>
-</table>
-
-<div class="nota">
-  <b>Zero tax is a contract property, not a policy</b>
-  <p>A 0% tax means there is no fee function in the code at all — not a fee set
-  to zero that someone could raise later. With ownership renounced, nobody could
-  raise it even if one existed.</p>
-</div>
-
-<h2 id="reparto">Supply distribution</h2>
-<p>The 600,000,000 NRM at genesis, and where each part goes. Same figures as the
-website.</p>
-
-<div class="anillo">
-  <svg viewBox="0 0 200 200" role="img" aria-label="Reparto del suministro">
-    <g transform="rotate(-90 100 100)" fill="none" stroke-width="26">
-      <circle cx="100" cy="100" r="74" stroke="#2A5BFF" stroke-dasharray="232.5 232.5" stroke-dashoffset="0"/>
-      <circle cx="100" cy="100" r="74" stroke="#2E86FF" stroke-dasharray="69.7 395.2" stroke-dashoffset="-232.5"/>
-      <circle cx="100" cy="100" r="74" stroke="#1B3FCC" stroke-dasharray="46.5 418.5" stroke-dashoffset="-302.2"/>
-      <circle cx="100" cy="100" r="74" stroke="#1A2436" stroke-dasharray="23.2 441.7" stroke-dashoffset="-348.7"/>
-      <circle cx="100" cy="100" r="74" stroke="#8A93A6" stroke-dasharray="23.2 441.7" stroke-dashoffset="-372.0"/>
-      <circle cx="100" cy="100" r="74" stroke="#BFC7D4" stroke-dasharray="23.2 441.7" stroke-dashoffset="-395.2"/>
-      <circle cx="100" cy="100" r="74" stroke="#A8CBFF" stroke-dasharray="23.2 441.7" stroke-dashoffset="-418.5"/>
-      <circle cx="100" cy="100" r="74" stroke="#7FC0FF" stroke-dasharray="23.2 441.7" stroke-dashoffset="-441.7"/>
-    </g>
-    <text x="100" y="95" text-anchor="middle" class="an-c">600M</text>
-    <text x="100" y="112" text-anchor="middle" class="an-e">NRM · FIXED</text>
-  </svg>
-  <ul class="an-lista">
-    <li><i style="background:#2A5BFF"></i>Private sale<b>50.0%</b></li>
-    <li><i style="background:#2E86FF"></i>CEX listing<b>15.0%</b></li>
-    <li><i style="background:#1B3FCC"></i>Marketing<b>10.0%</b></li>
-    <li><i style="background:#1A2436"></i>Reserve<b>5.0%</b></li>
-    <li><i style="background:#8A93A6"></i>Team · locked<b>5.0%</b></li>
-    <li><i style="background:#BFC7D4"></i>Advisors<b>5.0%</b></li>
-    <li><i style="background:#A8CBFF"></i>Development<b>5.0%</b></li>
-    <li><i style="background:#7FC0FF"></i>Airdrop<b>5.0%</b></li>
-  </ul>
-</div>
-<p>Vesting schedules for each allocation are on
-<a class="enl" href="#/whitelist">the whitelist page</a>. A distribution without
-them says almost nothing.</p>
-
-<h2 id="comprobar">How to check it yourself</h2>
-<ol>
-  <li>Open the contract on <strong>Etherscan</strong> using the link above.</li>
-  <li>Read the <code>owner</code> field. On a renounced contract it returns the
-      zero address — <code>0x0000…0000</code>.</li>
-  <li>Find the renounce transaction in the contract's history and confirm who
-      sent it, and when.</li>
-  <li>Check that no privileged function has been called since.</li>
-</ol>
-<p>The whole check takes about a minute and requires nothing from us.</p>
-
-<h2 id="quita">What renouncing removes</h2>
-<ul>
-  <li><strong>Minting.</strong> Supply is fixed at 600,000,000 NRM and cannot grow.</li>
-  <li><strong>Pausing.</strong> Nobody can freeze transfers, including us.</li>
-  <li><strong>Blacklisting.</strong> No address can be blocked by decree.</li>
-  <li><strong>Rule changes.</strong> Fees, limits and logic are what they are.</li>
-</ul>
-<p>These are the four powers most commonly abused in token projects, and giving
-them up is permanent. There is no undo.</p>
-
-<h2 id="alcance">What renouncing does not do</h2>
-<p>It does <strong>not</strong> fix a bug that is already in the code. Once
-ownership is gone, a flaw cannot be patched — by us or by anyone. If a
-vulnerability is found after renouncing, the only remedy is a migration, which
-needs the whole holder base to move.</p>
-<p>That is a real trade-off, not a technicality. Renouncing removes the risk of an
-insider acting against holders and increases the cost of an honest mistake. We
-think that is the right side to err on for a fixed-supply token, and you should
-know it was a choice.</p>
-<p>It is also why this page sits next to <a class="enl" href="#/audit">the
-audit</a> rather than in place of it. Renouncing is only responsible if the code
-was reviewed first.</p>
-
-<div class="nota aviso">
-  <b>Before this page goes live</b>
-  <p>A renounce claim without the transaction hash is worth nothing. The address
-  and the hash are the entire page; everything else is explanation.</p>
-</div>
 `},
 
   whitelist:{
-    grupo:'Token', titulo:'Whitelist',
+    grupo:'Token', titulo:'Join the whitelist',
     html:`
 <p>The whitelist is the pre-listing allocation: the window in which NRM is sold
 before it trades on the open market, at a fixed price set by the project.</p>
 
-<div class="nota">
-  <b>Where to join</b>
-  <p><a class="enl" href="https://nereum.xyz"><strong>nereum.xyz</strong></a> — the
-  only address where the whitelist is open. Everything else is on
-  <a class="enl" href="#/links">Official links</a>. If you were sent anywhere
-  else, it is not us.</p>
-</div>
+<p>The whitelist is open at
+<a class="enl" href="https://nereum.xyz"><strong>nereum.xyz</strong></a> and
+nowhere else. Every other channel is listed on
+<a class="enl" href="#/links">Official links</a>.</p>
 
 <h2 id="token">The token</h2>
 <table>
@@ -2037,7 +3086,7 @@ before it trades on the open market, at a fixed price set by the project.</p>
   <tr><td>Buy / sell tax</td><td><b>0%</b></td></tr>
   <tr><td>Whitelist price</td><td class="num"><b>$0.10</b></td></tr>
   <tr><td>Price at listing</td><td class="num"><b>$0.50</b> — Uniswap v3</td></tr>
-  <tr><td>Contract</td><td>Ownership renounced — see <a class="enl" href="#/renounce">that page</a></td></tr>
+  <tr><td>Contract</td><td>Ownership renounced — see that page</td></tr>
 </table>
 
 <h2 id="condiciones">Terms of the round</h2>
@@ -2061,8 +3110,6 @@ before it trades on the open market, at a fixed price set by the project.</p>
       <td>What you buy cannot be diluted by new minting, and no fee is taken from your transfers.</td></tr>
   <tr><td><b>Renounced contract</b></td>
       <td>After you buy, nobody can pause transfers, blacklist your wallet or change the rules — including us.</td></tr>
-  <tr><td><b>Verifiable project</b></td>
-      <td>Registered company, team KYC and an independent audit, each with a link that opens. See <a class="enl" href="#/security">Security guarantees</a>.</td></tr>
 </table>
 
 <h2 id="reparto">Distribution of supply</h2>
@@ -2077,8 +3124,6 @@ before it trades on the open market, at a fixed price set by the project.</p>
   <tr><td>Development</td><td class="num">5.0%</td><td class="num">30,000,000</td></tr>
   <tr><td>Airdrop</td><td class="num">5.0%</td><td class="num">30,000,000</td></tr>
 </table>
-<p>The ring on <a class="enl" href="#/renounce">the contract page</a> shows the
-same figures.</p>
 
 <h2 id="uso">Use of funds</h2>
 <p>What the money raised is spent on, and in what proportion.</p>
@@ -2097,13 +3142,9 @@ were never told.</p>
   <li>Choose an amount between $1 and $10,000 and confirm.</li>
 </ol>
 
-<div class="nota aviso">
-  <b>Nobody will message you first</b>
-  <p>We do not send private messages, we do not run a support account that
-  contacts you, and we do not announce a sale anywhere other than the addresses
-  on <a class="enl" href="#/links">Official links</a>. Anyone who does either is
-  not us, no matter how convincing the profile looks.</p>
-</div>
+<p>We do not send private messages, we do not run a support account that
+contacts anyone, and we do not announce sales anywhere other than the addresses
+listed on <a class="enl" href="#/links">Official links</a>.</p>
 
 <h2 id="leer">How to read this page</h2>
 <p>Two numbers decide whether the rest of it means anything:</p>
@@ -2120,7 +3161,7 @@ were never told.</p>
 <p>NRM lists at <strong>$0.50 on Uniswap v3</strong>. That price is not an
 estimate: on Uniswap v3, liquidity is concentrated within a price range chosen
 when the pool is created, so <strong>the opening price is a parameter of the
-pool</strong>, not something the market discovers on the first trade.</p>
+pool</strong>.</p>
 
 <table>
   <tr><th>Item</th><th>Value</th></tr>
@@ -2128,19 +3169,6 @@ pool</strong>, not something the market discovers on the first trade.</p>
   <tr><td>Opening price</td><td class="num"><b>$0.50</b></td></tr>
 </table>
 
-<div class="nota">
-  <b>Why concentrated liquidity matters here</b>
-  <p>On a v2-style pool, liquidity is spread across every possible price and most
-  of it sits where nobody trades. On v3 it is placed within a chosen band, so the
-  same capital produces far more depth around the opening price — which means
-  less slippage on the first trades and a price that holds instead of gapping on
-  the first sell.</p>
-</div>
-
-<p>What happens after the pool opens is decided by buyers and sellers like on any
-market. The two rows that determine how solid that opening is are the
-<strong>liquidity committed</strong> and the <strong>lock</strong>: depth is what
-makes a price hold, and a locked pool is what stops it being withdrawn.</p>
 `},
 
   dexscreener:{
@@ -2178,13 +3206,6 @@ match that exact address, it is not NRM</strong> — no matter what the ticker
 says, how convincing the chart looks or who sent you the link.</p>
 
 <h2 id="cuando">Until the token trades</h2>
-<div class="nota aviso">
-  <b>Why there is no link yet</b>
-  <p>This page has no link because there is nothing to link to. Publishing a
-  DexScreener page before the pair exists is an open invitation for someone to
-  create a fake one and point people at it — and the page would lend it
-  credibility.</p>
-</div>
 `},
 
   team:{
@@ -2218,11 +3239,6 @@ stands in its place: locked contracts, funds in escrow, KYC held by a third part
 who can identify the founders to a regulator, or a multi-signature arrangement
 with named external parties.</p>
 
-<div class="nota">
-  <b>Why readers open this page second</b>
-  <p>After the legal filing, the team is the next thing a careful reader checks —
-  because every other claim in a whitepaper depends on the people making it.</p>
-</div>
 `},
 
   press:{
@@ -2230,16 +3246,6 @@ with named external parties.</p>
     html:`
 <p>Independent coverage of Nereum: articles, interviews and mentions published by
 someone other than us.</p>
-
-<div class="nota aviso">
-  <b>Read this before filling the page in</b>
-  <p>Only coverage that exists and opens belongs here. Each entry needs a
-  publication, a date and a working link. A mention that cannot be opened is the
-  fastest way to lose a reader who was ready to trust you — and it is one of the
-  first things a careful person checks.</p>
-</div>
-
-<h2 id="cobertura">Coverage</h2>
 
 <h2 id="cuenta">What counts as coverage</h2>
 <p>The distinction matters, because readers make it whether or not the page does:</p>
@@ -2265,14 +3271,9 @@ communications work there is.</p>
   links:{
     grupo:'Company', titulo:'Official links',
     html:`
-<div class="nota aviso">
-  <b>Read this before anything else on this page</b>
-  <p><strong>These are the only official addresses of Nereum.</strong> Anything
-  not listed here is not us — no matter how convincing the name, the logo, the
-  follower count or the person who sent it to you.</p>
-  <p>This page is the reference. If a link does not appear on it, treat it as
-  hostile until it does.</p>
-</div>
+<p><strong>These are the only official addresses of Nereum.</strong> Anything not
+listed on this page is not ours, no matter how convincing the name, the logo or
+the person who sent it.</p>
 
 <p>Impersonation is the most common attack on a project at this stage, and it
 requires no technical skill at all. A cloned site, a group chat one character
@@ -2339,20 +3340,16 @@ one of them still works:</p>
 that gets taken down in an hour costs someone nothing; the same fake left running
 overnight costs someone everything.</p>
 
-<div class="nota">
-  <b>One page, kept current</b>
-  <p>This list is only useful if it is complete and up to date. A channel that
-  gets abandoned should be removed from here, not left to rot — a stale official
-  link is an opportunity handed to somebody else.</p>
-</div>
 `}
 
 };
 
-const ORDEN=['introduction','vision','network','tokenization',
-  'architecture','compliance','identity','validators','interop','roadmap',
-  'legal','audit','kyc','renounce','security',
-  'whitelist','dexscreener','team','press','links','faq'];
+const ORDEN=['introduction','vision',
+  'legal','audit','kyc',
+  'whitelist','dexscreener',
+  'network','tokenization',
+  'scan','dex','nusd','forge','vaults','feed','link','wallet',
+  'team','press','links','faq'];
 
 const doc=document.getElementById('doc'), rail=document.getElementById('rail');
 const lat=document.getElementById('lat');
@@ -2361,8 +3358,39 @@ const lat=document.getElementById('lat');
 function figura(id){
   return DIAG[id] ? '<figure class="fig">'+DIAG[id]+'</figure>' : '';
 }
+/* ── idioma ──
+   Un solo interruptor: cambia el diccionario de páginas, los nombres de los
+   grupos de la barra lateral y los textos de la interfaz. La elección se
+   recuerda si el navegador lo permite. */
+let LANG='en';
+function T(){ return LANG==='es'?PAGS_ES:PAGS; }
+const UI_EN={buscar:'Search…', enEsta:'On this page', anterior:'Previous',
+  siguiente:'Next', indice:'Contents'};
+function U(){ return LANG==='es'?UI_ES:UI_EN; }
+
+function aplicaIdioma(){
+  const P=T();
+  /* la barra lateral */
+  document.querySelectorAll('.gr').forEach(g=>{
+    const h=g.querySelector('h5');
+    const orig=h.dataset.en||(h.dataset.en=h.textContent.trim());
+    h.textContent = LANG==='es' ? (GRUPOS_ES[orig]||orig) : orig;
+    g.querySelectorAll('a').forEach(a=>{
+      const id=a.getAttribute('href').slice(2);
+      if(P[id])a.textContent=P[id].titulo;
+    });
+  });
+  /* la interfaz */
+  const bs=document.querySelector('.buscar span'); if(bs)bs.textContent=U().buscar;
+  const rt=document.querySelector('.rail-t'); if(rt)rt.textContent=U().enEsta;
+  const lt=document.getElementById('langT');
+  if(lt)lt.textContent = LANG==='es' ? 'EN' : 'ES';
+  document.documentElement.lang = LANG;
+}
+
 function pinta(id){
-  const p=PAGS[id]||PAGS.introduction;
+  const P=T();
+  const p=P[id]||P.introduction;
   const i=ORDEN.indexOf(id);
   const ant=i>0?ORDEN[i-1]:null, sig=i<ORDEN.length-1?ORDEN[i+1]:null;
   doc.innerHTML=`
@@ -2374,9 +3402,10 @@ function pinta(id){
     <h1>${p.titulo}</h1>
     ${figura(id)}
     ${p.html}
+    ${esquema(id)}
     <div class="pasar">
-      ${ant?`<a href="#/${ant}"><em>Previous</em><b>${PAGS[ant].titulo}</b></a>`:'<span></span>'}
-      ${sig?`<a class="der" href="#/${sig}"><em>Next</em><b>${PAGS[sig].titulo}</b></a>`:'<span></span>'}
+      ${ant?`<a href="#/${ant}"><em>${U().anterior}</em><b>${P[ant].titulo}</b></a>`:'<span></span>'}
+      ${sig?`<a class="der" href="#/${sig}"><em>${U().siguiente}</em><b>${P[sig].titulo}</b></a>`:'<span></span>'}
     </div>`;
   /* el índice de la derecha se construye desde los titulares de la página */
   const hs=[...doc.querySelectorAll('h2[id]')];
@@ -2391,7 +3420,7 @@ function pinta(id){
 
 function ruta(){
   const h=location.hash.replace('#/','').split('#')[0];
-  pinta(PAGS[h]?h:'introduction');
+  pinta(T()[h]?h:'introduction');
 }
 addEventListener('hashchange',()=>{ if(location.hash.startsWith('#/')) ruta(); });
 
@@ -2439,11 +3468,18 @@ obs();
 
 /* ── buscador ── */
 const velo=document.getElementById('velo'), q=document.getElementById('q'), res=document.getElementById('res');
-const INDICE=ORDEN.map(id=>{
-  const d=document.createElement('div'); d.innerHTML=PAGS[id].html;
-  return {id, titulo:PAGS[id].titulo, grupo:PAGS[id].grupo,
-    texto:(PAGS[id].titulo+' '+d.textContent).toLowerCase()};
-});
+/* el índice del buscador se rehace al cambiar de idioma: si no, buscar en
+   español no encontraría nada */
+let INDICE=[];
+function armaIndice(){
+  const P=T();
+  INDICE=ORDEN.map(id=>{
+    if(!P[id])return null;
+    const d=document.createElement('div'); d.innerHTML=P[id].html;
+    return {id, titulo:P[id].titulo, grupo:P[id].grupo,
+      texto:(P[id].titulo+' '+d.textContent).toLowerCase()};
+  }).filter(Boolean);
+}
 function busca(v){
   const t=v.trim().toLowerCase();
   if(!t){res.innerHTML=INDICE.slice(0,6).map(fila).join('');return}
@@ -2463,10 +3499,20 @@ addEventListener('keydown',e=>{
   else if(e.key==='Escape')cierra();
   else if(e.key==='Enter'&&velo.classList.contains('on')){
     const a=res.querySelector('a');
-    if(a){ const id=a.getAttribute('href').slice(2); if(PAGS[id])pinta(id); cierra(); }
+    if(a){ const id=a.getAttribute('href').slice(2); if(T()[id])pinta(id); cierra(); }
   }
 });
 document.getElementById('menuB').onclick=()=>lat.classList.toggle('abierta');
+
+/* el conmutador de idioma */
+document.getElementById('langB').onclick=()=>{
+  LANG = LANG==='es' ? 'en' : 'es';
+  try{ localStorage.setItem('nereum-lang', LANG); }catch(e){}
+  aplicaIdioma(); armaIndice();
+  pinta(location.hash.startsWith('#/')?location.hash.slice(2):'introduction');
+};
+try{ const g=localStorage.getItem('nereum-lang'); if(g==='es')LANG='es'; }catch(e){}
+aplicaIdioma(); armaIndice();
 
 /* ── descargar en PDF ──
    Sin librerías: se arma un documento con TODAS las secciones, se llama a la
@@ -2489,22 +3535,22 @@ document.getElementById('menuB').onclick=()=>lat.classList.toggle('abierta');
   function arma(){
     const hoy=new Date().toLocaleDateString('en-GB',{year:'numeric',month:'long',day:'numeric'});
     let h='<div class="pr-portada">'+LOGO+
-      '<h1>Nereum</h1><div class="lema">Real-world asset chain</div>'+
+      '<h1>Nereum</h1><div class="lema">'+(LANG==='es'?'Cadena de activos reales':'Real-world asset chain')+'</div>'+
       '<div class="filete"></div>'+
       '<div class="meta">Whitepaper<br>'+hoy+'<br>nereum.xyz</div></div>';
-    h+='<div class="pr-indice"><h2>Contents</h2><ol>';
+    h+='<div class="pr-indice"><h2>'+U().indice+'</h2><ol>';
     let grupo=null, i=0;
     for(const id of ORDEN){
-      const p=PAGS[id]; if(!p)continue;
+      const p=T()[id]; if(!p)continue;
       i++;
       if(p.grupo!==grupo){ grupo=p.grupo; h+='<li class="gr-t">'+grupo+'</li>'; }
       h+='<li><b>'+String(i).padStart(2,'0')+'</b>'+p.titulo+'</li>';
     }
     h+='</ol></div>';
     for(const id of ORDEN){
-      const p=PAGS[id]; if(!p)continue;
+      const p=T()[id]; if(!p)continue;
       h+='<div class="pr-sec"><div class="pr-eti">'+p.grupo+'</div>'+
-         '<h1>'+p.titulo+'</h1>'+figura(id)+p.html+'</div>';
+         '<h1>'+p.titulo+'</h1>'+figura(id)+p.html+esquema(id)+'</div>';
     }
     caja.innerHTML=h;
   }
