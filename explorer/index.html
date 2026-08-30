@@ -522,6 +522,20 @@ h2{font-size:16px;font-weight:500;letter-spacing:-.02em}
   .cd-b:nth-child(n+6){display:none}
 }
 @media(max-width:560px){ .cd-b:nth-child(n+5){display:none} }
+
+/* ══ la fase de desarrollo, en el pie ══ */
+.fase{display:flex;align-items:center;gap:11px;flex-wrap:wrap}
+.fase b{font-family:var(--m);font-size:10px;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--blue);font-weight:500;
+  background:var(--blue-l);padding:4px 9px;border-radius:4px}
+.fase-b{display:block;width:118px;height:5px;border-radius:3px;
+  background:var(--linea-2);overflow:hidden;flex:0 0 auto}
+.fase-b u{display:block;height:100%;border-radius:3px;text-decoration:none;
+  background:linear-gradient(90deg,var(--blue-d),var(--blue));
+  animation:crece .7s var(--ease) both}
+.fase s{text-decoration:none;font-size:12.5px;color:var(--ink-3);
+  font-variant-numeric:tabular-nums}
+@media(max-width:560px){ .fase-b{width:96px} }
 </style>
 </head>
 <body>
@@ -666,7 +680,7 @@ function nuevoAsset(op={}){
     suministro: op.suministro||ent(2,60)*1000,
     decimales: 2,
     valor: op.valor||ent(40,900)*1000,
-    doc: op.doc||('Escritura '+hex(6).toUpperCase()),
+    doc: op.doc||('Deed '+hex(6).toUpperCase()),
     huella: op.huella||hash(),
     politica: op.politica||{
       jur: JUR.slice(0,ent(3,6)),
@@ -695,9 +709,9 @@ function nuevaTx(op){
 /* ── el motor de política: lo que decide si una transferencia liquida ── */
 function comprueba(activo, de, a, cantidad){
   const c=[];
-  c.push({n:'Firma válida', d:'The sending account controls the key', r:true});
+  c.push({n:'Valid signature', d:'The sending account controls the key', r:true});
   const saldo=(de.tenencias.find(x=>x.id===activo.id)||{}).cant||0;
-  c.push({n:'Saldo suficiente', d:`Tiene ${dec(saldo)} y transfiere ${dec(cantidad)}`,
+  c.push({n:'Sufficient balance', d:`Holds ${dec(saldo)}, transferring ${dec(cantidad)}`,
           r: saldo>=cantidad});
   c.push({n:'Policy loaded', d:`Rule set for ${activo.id}`, r:true});
   c.push({n:'Recipient credential',
@@ -773,7 +787,7 @@ function txAleatoria(){
   const a=elige(CH.activos);
   const tenedores=CH.cuentas.filter(x=>x.tenencias.some(y=>y.id===a.id && y.cant>1));
   if(!tenedores.length) return nuevaTx({tipo:'Query', activo:a.id, estado:'ok',
-    comprobaciones:[{n:'Lectura de estado', d:'No change to the ledger', r:true}]});
+    comprobaciones:[{n:'State read', d:'No change to the ledger', r:true}]});
   const de=elige(tenedores);
   /* la mayoría of transfers reales las gente que SÍ califica:
      eligiendo el receptor al azar salían casi todas rechazadas, que da una
@@ -932,7 +946,8 @@ function pinta(){
   const V={'':vOverview, activos:vAssets, activo:vAsset, bloques:vBlocks,
            bloque:vBlock, txs:vTxs, tx:vTx, cuentas:vAccounts, cuenta:vAccount,
            tokenizar:vTokenize, transferir:vTransferir,
-           validadores:vValidators, red:vRed};
+           validadores:vValidators, red:vRed,
+           rechazadas:vRejected, emisores:vIssuers};
   const f=V[base||''];
   app.innerHTML = f? f(arg?decodeURIComponent(arg):null) : vNoHay();
   window.scrollTo(0,0);
@@ -1178,7 +1193,7 @@ function vAsset(id){
       <s>max ${a.politica.maxHolders}
       <span class="barra"><i style="width:${Math.min(100,tit.length/a.politica.maxHolders*100)}%"></i></span></s></div>
     <div class="stat"><i>Transfers</i><b>${num(a.transferencias)}</b>
-      <s>${num(a.rechazadas)} rechazadas</s></div>
+      <s>${num(a.rechazadas)} rejected</s></div>
   </div>
 
   <div class="rejilla r2">
@@ -1256,7 +1271,7 @@ function vBlock(n){
       <tr><td>Gas consumido</td><td>${num(b.gas)}</td></tr>
       <tr><td>Size</td><td>${num(b.tam)} bytes</td></tr>
       <tr><td>Finality</td><td><span class="tag ok">Final</span>
-        <span style="color:var(--ink-3);font-size:13px"> · no puede reorganizarse</span></td></tr>
+        <span style="color:var(--ink-3);font-size:13px"> · cannot be reorganised</span></td></tr>
     </table>
   </div>
   <div class="rejilla r2" style="margin-top:16px">
@@ -1354,7 +1369,7 @@ function vAccount(d){
 
   <div class="rejilla r4" style="margin-bottom:16px">
     <div class="stat"><i>Value in assets</i><b>$${num(Math.round(val))}</b>
-      <s>${c.tenencias.length} posición(es)</s></div>
+      <s>${c.tenencias.length} position(s)</s></div>
     <div class="stat"><i>NRM balance</i><b>${dec(c.saldo)}</b><s>for fees</s></div>
     <div class="stat"><i>Jurisdiction</i><b style="font-size:17px">${esc(c.jur)}</b>
       <s>${esc(c.clase)}</s></div>
@@ -1402,6 +1417,20 @@ function vAccount(d){
 const TOK={paso:1, datos:{jur:[], classes:[]}};
 
 function vTokenize(){
+  /* blindaje: si se entra a un paso avanzado sin haber pasado por los
+     anteriores, faltan datos y el resumen reventaría */
+  if(!TOK.datos) TOK.datos={jur:[],clases:[]};
+  if(!Array.isArray(TOK.datos.jur)) TOK.datos.jur=[];
+  if(!Array.isArray(TOK.datos.classes)) TOK.datos.classes=[];
+  /* el resumen del paso 4 formatea números: si falta cualquiera de ellos hay
+     que volver al principio en vez de reventar */
+  const d0=TOK.datos;
+  const completo1 = d0.nombre && d0.simbolo && d0.suministro>0 && d0.valor>0;
+  const completo2 = completo1 && d0.doc && d0.custodio;
+  const completo3 = completo2 && d0.maxHolders>0 && d0.bloqueo!==undefined;
+  if(TOK.paso>=2 && !completo1) TOK.paso=1;
+  if(TOK.paso>=3 && !completo2) TOK.paso=1;
+  if(TOK.paso>=4 && !completo3) TOK.paso=1;
   const p=TOK.paso;
   const et=['Describe the asset','Attach documentation','Define the policy','Issue'];
   return `
@@ -1562,11 +1591,11 @@ function vTok4(){
       <tr><td>Document</td><td>${esc(d.doc)}</td></tr>
       <tr><td>Custodian</td><td>${esc(d.custodio)}</td></tr>
       <tr><td>Attested by</td><td>${esc(d.att)}</td></tr>
-      <tr><td>Jurisdicciones</td><td>${d.jur.map(j=>
+      <tr><td>Jurisdictions</td><td>${d.jur.map(j=>
         `<span class="tag gr" style="margin:1px 3px 1px 0">${esc(j)}</span>`).join('')}</td></tr>
-      <tr><td>Clases</td><td>${d.classes.map(c=>
+      <tr><td>Classes</td><td>${d.classes.map(c=>
         `<span class="tag gr" style="margin:1px 3px 1px 0">${esc(c)}</span>`).join('')}</td></tr>
-      <tr><td>Permanencia</td><td>${d.bloqueo?d.bloqueo+' days':'No lock-up'}</td></tr>
+      <tr><td>Holding period</td><td>${d.bloqueo?d.bloqueo+' days':'No lock-up'}</td></tr>
       <tr><td>Holder cap</td><td>${num(d.maxHolders)}</td></tr>
     </table>
     <div style="display:flex;gap:10px;justify-content:space-between">
@@ -1645,7 +1674,7 @@ function tokEmite(){
       {n:'Emisor autorizado', d:esc(em.nombre)+' may issue on this network', r:true},
       {n:'Document referenciado', d:esc(d.doc)+' · custody: '+esc(d.custodio), r:true},
       {n:'Huella registrada', d:'Any later alteration will be detectable', r:true},
-      {n:'Política atada al activo', d:d.jur.length+' jurisdictions · '+d.classes.length+' classes', r:true},
+      {n:'Policy bound to the asset', d:d.jur.length+' jurisdictions · '+d.classes.length+' classes', r:true},
       {n:'Supply fijado', d:num(a.suministro)+' units, with no mint function', r:true}
     ]});
   const b=nuevoBlock([tx]);
@@ -1813,6 +1842,80 @@ function vRed(){
   ${piePagina()}`;
 }
 
+function vRejected(){
+  const t=CH.txs.filter(x=>x.estado==='no');
+  const m={}; t.forEach(x=>{ m[x.motivo]=(m[x.motivo]||0)+1 });
+  const orden=Object.entries(m).sort((a,b)=>b[1]-a[1]);
+  const tot=CH.txs.filter(x=>x.tipo==='Transfer').length||1;
+  return `
+  ${miga({t:'Explorer',r:'/'},{t:'Transactions',r:'/txs'},{t:'Rejected'})}
+  <h1>Rejected transfers</h1>
+  <div class="sub">${num(t.length)} of ${num(tot)} transfers · none of them entered the ledger</div>
+
+  <div class="rejilla r3" style="margin-bottom:16px">
+    ${orden.slice(0,3).map(([k,c])=>`
+      <div class="stat"><i>${esc(k)}</i><b>${num(c)}</b>
+        <s>${(c/t.length*100).toFixed(0)} % of rejections</s></div>`).join('')}
+  </div>
+
+  <div class="panel">
+    <div class="panel-h"><h2>Every rejected transfer</h2>
+      <span class="tag no">${num(t.length)}</span></div>
+    ${t.length?`<div class="tbw"><table class="tb">
+      <thead><tr><th>Hash</th><th>Check that failed</th><th>Asset</th>
+        <th class="d">Amount</th><th class="d">Block</th><th class="d">When</th></tr></thead>
+      <tbody>${t.slice(0,60).map(x=>{
+        const a=CH.activos.find(y=>y.id===x.activo);
+        return `<tr onclick="ir('/tx/${x.hash}')" style="cursor:pointer">
+          <td class="m n">${corto(x.hash,10,6)}</td>
+          <td><span class="tag no">${esc(x.motivo||'policy')}</span></td>
+          <td class="m">${a?esc(a.simbolo):'—'}</td>
+          <td class="d">${x.cantidad?dec(x.cantidad):'—'}</td>
+          <td class="d m p">${x.bloque?num(x.bloque):'—'}</td>
+          <td class="d p">${hace(x.ts)}</td></tr>`;}).join('')}
+      </tbody></table></div>`:'<div class="vacio">No transfer rejected yet</div>'}
+  </div>
+  ${piePagina()}`;
+}
+
+function vIssuers(){
+  const es=CH.emisores.map(e=>{
+    const ac=CH.activos.filter(a=>a.emisor && a.emisor.dir===e.dir);
+    return {e, ac, val:ac.reduce((s,a)=>s+a.valor,0),
+            bl:CH.bloques.filter(b=>b.validador===e.dir).length};
+  }).sort((a,b)=>b.val-a.val);
+  return `
+  ${miga({t:'Explorer',r:'/'},{t:'Accounts',r:'/cuentas'},{t:'Issuers'})}
+  <h1>Issuers</h1>
+  <div class="sub">${es.length} entities authorised to issue on this network</div>
+
+  <div class="rejilla r3" style="margin-bottom:16px">
+    <div class="stat"><i>Issuers</i><b>${num(es.length)}</b><s>with issuing rights</s></div>
+    <div class="stat"><i>Assets issued</i><b>${num(CH.activos.length)}</b>
+      <s>across all issuers</s></div>
+    <div class="stat"><i>Declared value</i><b>$${num(Math.round(
+      CH.activos.reduce((s,a)=>s+a.valor,0)/1e6))}M</b><s>total on the network</s></div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-h"><h2>Authorised issuers</h2></div>
+    <div class="tbw"><table class="tb">
+      <thead><tr><th>Name</th><th>Address</th><th>Jurisdiction</th>
+        <th class="d">Assets</th><th class="d">Declared value</th>
+        <th class="d">Blocks produced</th></tr></thead>
+      <tbody>${es.map(x=>`
+        <tr onclick="ir('/cuenta/${x.e.dir}')" style="cursor:pointer">
+          <td class="n">${esc(x.e.nombre||'—')}</td>
+          <td class="m p">${corto(x.e.dir,12,6)}</td>
+          <td class="p">${esc(x.e.jur)}</td>
+          <td class="d">${x.ac.length}</td>
+          <td class="d">$${num(x.val)}</td>
+          <td class="d">${num(x.bl)}</td></tr>`).join('')}
+      </tbody></table></div>
+  </div>
+  ${piePagina()}`;
+}
+
 function vNoHay(m){
   return `<div class="panel"><div class="vacio">
     <div style="font-size:17px;color:var(--ink);font-weight:500;margin-bottom:6px">No results</div>
@@ -1828,7 +1931,7 @@ function piePagina(){
     {t:'Assets', l:[['All assets','/activos'],['Tokenize an asset','/tokenizar'],
       ...CH.activos.slice(-3).reverse().map(a=>[a.nombre.length>26?a.nombre.slice(0,24)+'…':a.nombre,'/activo/'+a.id])]},
     {t:'The network', l:[['Network status','/red'],['Latest blocks','/bloques'],
-      ['Rejected transfers','/txs'],['Issuers','/cuentas']]}
+      ['Rejected transfers','/rechazadas'],['Issuers','/emisores']]}
   ];
   return `<footer class="pie">
     <div class="pie-top">
@@ -1846,14 +1949,18 @@ function piePagina(){
         <p>The public record of the network. Every block, every transfer and the policy on every
         asset, open to anyone and with no account required.</p>
         <div class="pie-est"><span class="vivo"><i></i>Testnet</span>
-          <span class="mono">altura ${num(CH.altura)}</span></div>
+          <span class="mono">height ${num(CH.altura)}</span></div>
       </div>
       ${cols.map(c=>`<div class="pie-col"><h6>${c.t}</h6>
         ${c.l.map(([t,r])=>`<a href="#${r}">${esc(t)}</a>`).join('')}</div>`).join('')}
     </div>
     <div class="pie-bajo">
-      <span>Browser simulation · not connected to any network</span>
-      <span class="mono">${num(CH.activos.length)} activos · ${num(CH.txs.length)} transacciones</span>
+      <span class="fase">
+        <b>Testnet phase</b>
+        <i class="fase-b"><u style="width:75%"></u></i>
+        <s>Development 75% complete</s>
+      </span>
+      <span class="mono">${num(CH.activos.length)} assets · ${num(CH.txs.length)} transactions</span>
     </div>
   </footer>`;
 }
@@ -1944,7 +2051,7 @@ function anilloType(){
     <g class="an-g">${arcos}</g>
     <circle cx="80" cy="80" r="39" fill="url(#hueco)"/>
     <text class="an-n" x="80" y="76" text-anchor="middle">${CH.activos.length}</text>
-    <text class="an-t" x="80" y="94" text-anchor="middle">activos</text></svg>`;
+    <text class="an-t" x="80" y="94" text-anchor="middle">assets</text></svg>`;
 }
 
 /* ── la gráfica de actividad ──
