@@ -1,17 +1,11 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <!-- Baldosa con degradado de azul profundo a negro. El logotipo va SIEMPRE
-       en blanco con los cuadrados en el azul de marca: no depende del tema
-       del navegador, se ve igual en claro y en oscuro. -->
-  <defs>
-    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#173A8C"/>
-      <stop offset="1" stop-color="#05070C"/>
-    </linearGradient>
-  </defs>
-  <rect width="512" height="512" rx="112" fill="url(#g)"/>
-  <g transform="translate(54,54) scale(0.6012)">
-    <path fill="#FFFFFF" d="M336 0 H464 V224 H672 V336 H560 V560 H464 V672 H336 A336 336 0 0 1 336 0 Z"/>
-    <rect fill="#2F6BFF" x="464" y="112" width="112" height="112"/>
-    <rect fill="#2F6BFF" x="560" y="336" width="112" height="112"/>
-  </g>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 672 672">
+  <defs><linearGradient id="plata" x1="0" y1="0" x2=".35" y2="1">
+    <stop offset="0" stop-color="#EDF0F5"/>
+    <stop offset=".42" stop-color="#C2C9D6"/>
+    <stop offset=".72" stop-color="#98A1B2"/>
+    <stop offset="1" stop-color="#79839A"/>
+  </linearGradient></defs>
+  <path fill="url(#plata)" d="M336 0 H464 V224 H672 V336 H560 V560 H464 V672 H336 A336 336 0 0 1 336 0 Z"/>
+  <rect fill="#2F6BFF" x="464" y="112" width="112" height="112"/>
+  <rect fill="#2F6BFF" x="560" y="336" width="112" height="112"/>
 </svg>

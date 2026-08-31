@@ -10,14 +10,30 @@ Baldosa con degradado de azul profundo a negro. El logotipo va SIEMPRE en
 blanco con los cuadrados en el azul de marca: NO cambia con el tema del
 navegador, se ve igual en claro y en oscuro.
 Van como archivos y no incrustados, porque Safari e iOS ignoran los
-iconos escritos como datos dentro del HTML. El .ico lleva tres tamaños
-dentro (16, 32 y 48) para Safari antiguo, marcadores y vistas previas. -->
+iconos escritos como datos dentro del HTML. El .ico lleva seis tamaños
+dentro (16 a 256) para Windows, marcadores y navegadores antiguos. -->
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48 64x64 128x128 256x256">
 <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
 <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png">
+<!-- iOS no escoge por densidad, escoge por tamaño declarado: dándole el suyo a
+cada aparato (iPhone 120, iPad 152, iPad Pro 167, y 180 como respaldo moderno)
+no reescala ninguno. -->
 <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="apple-touch-icon" sizes="167x167" href="/apple-touch-icon-167.png">
+<link rel="apple-touch-icon" sizes="152x152" href="/apple-touch-icon-152.png">
+<link rel="apple-touch-icon" sizes="120x120" href="/apple-touch-icon-120.png">
+<!-- pestaña anclada de Safari en macOS: silueta plana, el color lo pone el usuario -->
+<link rel="mask-icon" href="/mask-icon.svg" color="#2F6BFF">
 <link rel="manifest" href="/site.webmanifest">
+<meta name="application-name" content="Nereum">
+<meta name="apple-mobile-web-app-title" content="Nereum">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<!-- mosaico de Windows: solo lo miran IE11 y el Edge antiguo, pero no estorba -->
+<meta name="msapplication-TileColor" content="#05070C">
+<meta name="msapplication-TileImage" content="/mstile-150.png">
 <meta name="theme-color" content="#05070C">
 <!-- ── vista previa al compartir el enlace ──
 La imagen va con URL ABSOLUTA: los rastreadores de WhatsApp, X, Telegram,
