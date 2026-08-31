@@ -536,6 +536,42 @@ h2{font-size:16px;font-weight:500;letter-spacing:-.02em}
 .fase s{text-decoration:none;font-size:12.5px;color:var(--ink-3);
   font-variant-numeric:tabular-nums}
 @media(max-width:560px){ .fase-b{width:96px} }
+
+/* ══ la franja de testnet ══ */
+.tnet{display:grid;grid-template-columns:1fr auto;gap:26px;align-items:center;
+  margin-bottom:16px;padding:14px 18px;border-radius:9px;
+  background:var(--blue-l)}
+.tnet-h{display:flex;align-items:center;gap:12px;margin-bottom:9px}
+.tnet-h b{font-size:19px;font-weight:500;letter-spacing:-.02em}
+.tnet-l p{font-size:14px;color:var(--ink-2);line-height:1.6;max-width:64ch;
+  margin-bottom:13px}
+.tnet-bar{height:7px;border-radius:4px;background:rgba(10,12,16,.10);overflow:hidden;
+  margin-bottom:12px;max-width:520px}
+.tnet-bar i{display:block;height:100%;border-radius:4px;
+  background:linear-gradient(90deg,var(--blue-d),var(--blue-lite));
+  animation:crece .8s var(--ease) both}
+.tnet-hit{display:flex;flex-wrap:wrap;gap:7px}
+.hit{display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 10px;
+  border-radius:6px;font-size:12px;background:rgba(255,255,255,.8);
+  border:1px solid rgba(47,107,255,.14);color:var(--ink-2)}
+.hit em{font-style:normal;font-size:10px}
+.hit.done{color:var(--verde);border-color:rgba(11,138,92,.28)}
+.hit.curso{color:var(--blue);border-color:rgba(47,107,255,.32);
+  background:rgba(47,107,255,.07)}
+.hit.pend{color:var(--ink-3)}
+.tnet-r{display:flex;gap:14px;flex:0 0 auto}
+.tnet-n{padding:12px 16px;border-radius:9px;background:rgba(255,255,255,.8);
+  border:1px solid rgba(47,107,255,.14);min-width:118px}
+.tnet-n i{display:block;font-family:var(--m);font-size:9.5px;letter-spacing:.15em;
+  text-transform:uppercase;color:var(--ink-3);font-style:normal;margin-bottom:5px}
+.tnet-n b{display:block;font-size:22px;font-weight:500;letter-spacing:-.03em;
+  font-variant-numeric:tabular-nums}
+.tnet-n s{text-decoration:none;font-size:11.5px;color:var(--ink-3)}
+@media(max-width:900px){
+  .tnet{grid-template-columns:1fr;gap:14px;padding:14px 18px}
+  .tnet-r{width:100%}
+  .tnet-n{flex:1;min-width:0}
+}
 </style>
 </head>
 <body>
@@ -1093,12 +1129,29 @@ function vOverview(){
       <s>never entered the ledger</s>${chispa('rec')}</div>
   </div>
 
-  <div class="aviso inf" style="margin-bottom:16px">
-    <svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="7"/><path d="M10 9v5M10 6.5v.01"/></svg>
-    <div>This is a <strong>full simulation</strong>: the chain runs in your browser, blocks are
-    produced on their own, and every transfer goes through the same policy engine the
-    whitepaper describes. Nothing is sent to any network.</div>
-  </div>
+  <section class="tnet">
+    <div class="tnet-l">
+      <div class="tnet-h">
+        <span class="vivo"><i></i>Testnet</span>
+        <b>75% to mainnet</b>
+      </div>
+      <p>The chain is producing blocks, assets are being issued, and
+      <strong>every transfer is cleared by the same policy engine that will govern
+      mainnet</strong>. What runs here is the protocol itself, not a mock-up.</p>
+      <div class="tnet-bar"><i style="width:75%"></i></div>
+      <div class="tnet-hit">
+        ${[['Protocol','done'],['Issuance engine','done'],['Policy engine','done'],
+           ['External audit','curso'],['Public launch','pend']].map(([t,e])=>`
+          <span class="hit ${e}">
+            <em>${e==='done'?'✓':e==='curso'?'●':'○'}</em>${t}</span>`).join('')}
+      </div>
+    </div>
+    <div class="tnet-r">
+      <div class="tnet-n"><i>Live now</i><b>${num(CH.altura)}</b><s>blocks produced</s></div>
+      <div class="tnet-n"><i>Cleared</i><b>${num(CH.txs.filter(x=>x.estado==='ok').length)}</b>
+        <s>transfers settled</s></div>
+    </div>
+  </section>
 
   <div class="rejilla r2" style="margin-bottom:16px">
     <div class="panel">
