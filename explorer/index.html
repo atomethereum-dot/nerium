@@ -960,7 +960,6 @@ function txAleatoria(){
         t: Math.random(),                  /* por dónde va de su recorrido */
         v: 0.034+Math.random()*0.052,      /* velocidad de subida */
         w: 16+Math.random()*58,            /* tamaño */
-        r: (Math.random()-.5)*0.5,         /* inclinación */
         az: Math.random()>0.78,            /* una de cada cinco, en azul */
         p: 0.30+Math.random()*0.60         /* profundidad */
       });
@@ -981,13 +980,14 @@ function txAleatoria(){
       const a = Math.sin(clm(q.t,0,1)*Math.PI) * q.p * 0.24;
       if(a<=0.002) continue;
       const l = q.w*(0.6+q.p*0.9);
-      ctx.save();
-      ctx.translate(q.x, y); ctx.rotate(q.r*0.32);
+      /* sin rotación: las piezas suben RECTAS. Con inclinación se veían
+         torcidas y ensuciaban la retícula del contenido */
       ctx.fillStyle = q.az
         ? 'rgba(47,107,255,'+(a*1.6).toFixed(3)+')'
         : 'rgba(10,12,16,'+(a*0.62).toFixed(3)+')';
-      ctx.fillRect(-l/2, -l*0.30, l, l*0.60);
-      ctx.restore();
+      /* redondeadas al píxel, o los bordes salen difuminados */
+      ctx.fillRect(Math.round(q.x-l/2), Math.round(y-l*0.30),
+                   Math.round(l), Math.round(l*0.60));
     }
     requestAnimationFrame(pinta);
   }
