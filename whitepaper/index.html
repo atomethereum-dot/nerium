@@ -4,8 +4,38 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Nereum — Whitepaper</title>
+<meta name="theme-color" content="#FFFFFF">
 <link rel="stylesheet" href="/assets/fonts.css">
+
+<!-- ══ iconos ══
+     El SVG lo usan Chrome, Firefox, Edge y Safari 15+, y es el que manda: al
+     ser vectorial no se pixela a ningun tamano. El .ico lleva SEIS medidas
+     dentro (16 a 256) para Windows, marcadores y navegadores antiguos; el
+     atributo sizes las declara de verdad, no "any", que le dice al navegador
+     que escale una sola imagen y es lo que se veia borroso. -->
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48 64x64 128x128 256x256">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png">
+<!-- iOS no escoge por densidad, escoge por tamano declarado: dandole el suyo a
+     cada aparato (iPhone 120, iPad 152, iPad Pro 167, y 180 como respaldo
+     moderno) no reescala ninguno. Van opacos porque iOS no admite
+     transparencia en la pantalla de inicio y la rellenaria de negro. -->
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="apple-touch-icon" sizes="167x167" href="/apple-touch-icon-167.png">
+<link rel="apple-touch-icon" sizes="152x152" href="/apple-touch-icon-152.png">
+<link rel="apple-touch-icon" sizes="120x120" href="/apple-touch-icon-120.png">
+<!-- pestana anclada de Safari en macOS: silueta plana, el color lo pone el usuario -->
+<link rel="mask-icon" href="/mask-icon.svg" color="#2F6BFF">
+<link rel="manifest" href="/whitepaper/site.webmanifest">
+<meta name="application-name" content="Nereum Whitepaper">
+<meta name="apple-mobile-web-app-title" content="Whitepaper">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<!-- mosaico de Windows: solo lo miran IE11 y el Edge antiguo, pero no estorba -->
+<meta name="msapplication-TileColor" content="#05070C">
+<meta name="msapplication-TileImage" content="/mstile-150.png">
 <style>
 /* ── los tokens de la marca, los mismos de la web ── */
 :root{
