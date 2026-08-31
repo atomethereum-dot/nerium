@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 672 672">
+<!-- Safari, al anclar una pestana, ignora el color y pinta la silueta con el
+     tono que elija el usuario. Por eso va en negro plano y de una sola pieza:
+     el degradado y los cuadros azules aqui no existirian. -->
+<path d="M336 0 H464 V224 H672 V336 H560 V560 H464 V672 H336 A336 336 0 0 1 336 0 Z"/>
+<rect x="464" y="112" width="112" height="112"/>
+<rect x="560" y="336" width="112" height="112"/>
+</svg>

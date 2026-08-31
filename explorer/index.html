@@ -5,7 +5,62 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="light">
 <meta name="theme-color" content="#F7F8FA">
-<title>Nereum Explorer</title>
+<title>Nereum Explorer | The public record of the Network</title>
+<meta name="description" content="Every block, every transfer and the policy attached to every asset on Nereum. Verifiable by anyone, with no account and no permission.">
+<link rel="canonical" href="https://nereum.xyz/explorer/">
+
+<!-- ══ iconos ══
+     El SVG lo usan Chrome, Firefox, Edge y Safari 15+, y es el que manda: al
+     ser vectorial no se pixela a ningun tamano. El .ico lleva SEIS medidas
+     dentro (16 a 256) para Windows, marcadores y navegadores antiguos; el
+     atributo sizes las declara de verdad, no "any", que le dice al navegador
+     que escale una sola imagen y es lo que se veia borroso. -->
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48 64x64 128x128 256x256">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png">
+<!-- iOS no escoge por densidad, escoge por tamano declarado: dandole el suyo a
+     cada aparato (iPhone 120, iPad 152, iPad Pro 167, y 180 como respaldo
+     moderno) no reescala ninguno. Van opacos porque iOS no admite
+     transparencia en la pantalla de inicio y la rellenaria de negro. -->
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="apple-touch-icon" sizes="167x167" href="/apple-touch-icon-167.png">
+<link rel="apple-touch-icon" sizes="152x152" href="/apple-touch-icon-152.png">
+<link rel="apple-touch-icon" sizes="120x120" href="/apple-touch-icon-120.png">
+<!-- pestana anclada de Safari en macOS: silueta plana, el color lo pone el usuario -->
+<link rel="mask-icon" href="/mask-icon.svg" color="#2F6BFF">
+<link rel="manifest" href="/explorer/site.webmanifest">
+<meta name="application-name" content="Nereum Explorer">
+<meta name="apple-mobile-web-app-title" content="Explorer">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<!-- mosaico de Windows: solo lo miran IE11 y el Edge antiguo, pero no estorba -->
+<meta name="msapplication-TileColor" content="#05070C">
+<meta name="msapplication-TileImage" content="/mstile-150.png">
+
+<!-- ══ vista previa al compartir el enlace ══
+     La imagen va en ABSOLUTO: un scraper no resuelve rutas relativas. Mide
+     2400x1260, el doble del 1200x630 de siempre, para que en una pantalla
+     retina y en un monitor grande se vea nitida en vez de reescalada. -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Nereum">
+<meta property="og:url" content="https://nereum.xyz/explorer/">
+<meta property="og:title" content="Nereum Explorer | The public record of the Network">
+<meta property="og:description" content="Every block, every transfer and the policy attached to every asset. Verifiable by anyone, with no account and no permission.">
+<meta property="og:image" content="https://nereum.xyz/explorer/og.jpg">
+<meta property="og:image:secure_url" content="https://nereum.xyz/explorer/og.jpg">
+<meta property="og:image:type" content="image/jpeg">
+<meta property="og:image:width" content="2400">
+<meta property="og:image:height" content="1260">
+<meta property="og:image:alt" content="Nereum Explorer — the public record of the network">
+<meta property="og:locale" content="en_US">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Nereum Explorer | The public record of the Network">
+<meta name="twitter:description" content="Every block, every transfer and the policy attached to every asset. Verifiable by anyone, with no account and no permission.">
+<meta name="twitter:image" content="https://nereum.xyz/explorer/og.jpg">
+<meta name="twitter:image:alt" content="Nereum Explorer — the public record of the network">
+
 <link rel="stylesheet" href="/assets/fonts.css">
 <style>
 :root{
