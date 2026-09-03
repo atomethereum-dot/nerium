@@ -1476,6 +1476,33 @@ footer{padding-bottom:calc(76px + env(safe-area-inset-bottom))}
     padding:0 8px 0 15px !important;
   }
 }
+
+/* ══ el rótulo de la sección de seguridad ══
+   Iba con el gris claro de las secciones oscuras, sobre fondo blanco: no se
+   leía y dejaba la parte de arriba vacía. Ahora es el mismo chip con punto
+   que lleva la whitelist. */
+.sec-live{display:inline-flex;align-items:center;gap:9px;font-family:var(--m);
+  font-size:10.5px;letter-spacing:.24em;text-transform:uppercase;color:#0B0D12}
+.sec-live i{width:6px;height:6px;border-radius:50%;background:#12A45E;
+  box-shadow:0 0 0 4px rgba(18,164,94,.16);animation:salePulse 2.2s ease-in-out infinite}
+/* y el titular arranca más cerca del rótulo, para que no quede el hueco */
+.sec-head .sec-live{margin-bottom:14px}
+@media(prefers-reduced-motion:reduce){ .sec-live i{animation:none} }
+
+/* ══ la sección de seguridad, más arriba ══
+   El bloque iba centrado en la pantalla y dejaba un vacío grande encima del
+   rótulo. Ahora arranca arriba, con el aire justo. */
+/* arranca arriba en vez de centrado */
+.sec-stage{align-content:start !important}
+@media(min-width:900px){
+  #security{padding-top:clamp(46px,6vh,72px) !important}
+}
+@media(max-width:899px){
+  /* en móvil el relleno lo pone solo el escenario: sumar también el de la
+     sección bajaba el bloque en vez de subirlo */
+  #security{padding-top:0 !important}
+  .sec-stage{padding-top:clamp(14px,2.4vh,28px) !important}
+}
 </style>
 </head>
 <body>
@@ -1701,7 +1728,7 @@ footer{padding-bottom:calc(76px + env(safe-area-inset-bottom))}
  <div class="sec-stage">
   <div class="wrap">
     <div class="sec-head">
-      <div class="k rv">Security</div>
+      <div class="rv"><span class="sec-live"><i></i>Security</span></div>
       <h2 class="sec-h">Three things you can check before you send a dollar.</h2>
       <p class="sec-sub">A new chain asks for trust up front. These are the three places where ours is verifiable by someone who is not us.</p>
     </div>
