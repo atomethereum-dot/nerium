@@ -106,7 +106,11 @@ canvas,svg,img{display:block;max-width:100%}
 .wrap{width:min(1360px,100% - 32px);margin-inline:auto}
 @media(min-width:900px){.wrap{width:min(1360px,100% - 64px)}}
 .mono{font-family:var(--m)}
-.hud{position:fixed;inset:0;z-index:60;pointer-events:none}
+/* ══ el HUD se queda en la portada ══
+   Iba clavado a la pantalla y sus marcas de esquina te seguían durante todo
+   el scroll. Ahora vive al principio del documento y ocupa una pantalla: se
+   queda arriba y se va con el contenido. */
+.hud{position:absolute;inset:0 0 auto 0;height:100dvh;z-index:60;pointer-events:none}
 .hud>i{position:absolute;width:11px;height:11px;opacity:.5}
 .hud>i::before,.hud>i::after{content:"";position:absolute;background:rgba(255,255,255,.55)}
 .hud>i::before{left:0;top:0;width:1px;height:11px}
@@ -796,7 +800,7 @@ body.light .hud-band{color:rgba(10,12,16,.6)}
 body.light .srail{color:#0B0D12}
 .secure{background:#fff;color:var(--ink);padding:var(--s6) 0 var(--s6)}
 .sec-head{max-width:56ch;margin-bottom:var(--s4)}
-.sec-h{font-weight:300;font-size:var(--fs-h2);line-height:1.02;letter-spacing:-.046em;
+.sec-h{font-weight:300;font-size:var(--fs-h2);line-height:1.02;letter-spacing:-.045em;
   color:var(--ink);max-width:20ch;margin:14px 0 16px}
 .sec-sub{font-size:clamp(14.5px,1.4vw,17px);line-height:1.55;color:rgba(11,13,18,.56);max-width:48ch}
 .sec-grid{display:grid;gap:clamp(14px,1.6vw,22px);grid-template-columns:minmax(0,1fr)}
@@ -1006,7 +1010,7 @@ footer .fmark-logo{--fmg-a:.24;--fmg-b:.05}
   .sec-stage{position:sticky;top:0;min-height:100dvh;display:grid;align-content:center;
     padding:calc(var(--bar) + 2vh) 0 3vh;overflow:hidden}
   .sec-head{margin-bottom:clamp(20px,3vh,32px)}
-  .sec-h{font-size:calc(var(--fs-h2)*.86)}
+  
   .sec-sub{font-size:14px}
   .sec-dots{display:flex;gap:8px;align-items:center;margin:0 0 clamp(14px,2.2vh,22px)}
   .sec-dots i{width:22px;height:2px;border-radius:1px;background:rgba(11,13,18,.16);
@@ -1022,7 +1026,7 @@ footer .fmark-logo{--fmg-a:.24;--fmg-b:.05}
 @media(min-width:900px){.sec-dots{display:none}}
 @media(max-width:899px) and (max-height:780px){
   .secure .sec-grid .sec-card{padding:16px 16px 14px}
-  .sec-h{font-size:calc(var(--fs-h2)*.74)}
+  
   .sec-sub{font-size:12.5px}
   .sec-head{margin-bottom:14px}
   .sec-p{font-size:13px;line-height:1.5}
@@ -1034,7 +1038,7 @@ footer .fmark-logo{--fmg-a:.24;--fmg-b:.05}
 @media(max-width:899px) and (max-height:720px){
   .sec-sub{display:none}
   .sec-head{margin-bottom:10px}
-  .sec-h{font-size:calc(var(--fs-h2)*.64)}
+  
   .secure .sec-grid .sec-card{padding:13px 13px 11px}
   .sec-p{font-size:12px;line-height:1.45}
   .sec-fields>div{padding:4px 0}
@@ -1067,13 +1071,9 @@ p,li{text-wrap:pretty}
 }.ffield{contain:paint;isolation:isolate}.ffield i{transform:translateZ(0);backface-visibility:hidden}
 .chroma{contain:paint}
 @supports (animation-timeline: scroll()){
-  .lee{position:fixed;left:0;top:var(--bar);height:2px;z-index:39;
-    width:100%;transform-origin:0 50%;transform:scaleX(0);
-    background:linear-gradient(90deg,var(--blue),var(--blue-lite));
-    animation:leeGrow linear both;animation-timeline:scroll(root block)}
-  @keyframes leeGrow{to{transform:scaleX(1)}}
+  
 }
-@supports not (animation-timeline: scroll()){ .lee{display:none} }
+@supports not (animation-timeline: scroll()){ }
 .luz{isolation:isolate}
 .luz:not([style*="position"]):where(:not(.rm-card):not(.sec-card)){position:relative}
 .luz::after{content:"";position:absolute;inset:0;border-radius:inherit;
@@ -1142,8 +1142,7 @@ body.cur-on input,body.cur-on textarea{cursor:text}
 body.light .hud-count{color:rgba(10,12,16,.55)}
 .nav>a.on{color:#fff}
 .nav>a.on{color:#fff}
-.prog{position:fixed;top:0;left:0;height:2px;width:0;background:var(--blue);z-index:90;
-  transform-origin:left;pointer-events:none}
+
 #scroll{position:relative;z-index:1}
 body.sm{overscroll-behavior-y:none}
 .ws{display:inline-block;overflow:hidden;vertical-align:top;padding-bottom:.1em;margin-bottom:-.1em}
@@ -1285,7 +1284,7 @@ section{position:relative;z-index:1}
 footer{background:#FBFCFD;border-top:1px solid rgba(11,13,18,.12);padding:clamp(46px,5vw,72px) 0 26px;
   font-family:var(--m);font-size:11.5px}
 .fgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:26px 18px}
-@media(min-width:1120px){.fgrid{grid-template-columns:repeat(5,1fr)}}
+@media(min-width:1430px){.fgrid{grid-template-columns:repeat(6,1fr)}}
 .fgrid h4{font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:rgba(11,13,18,.42);
   margin-bottom:12px}
 .fgrid a{display:block;padding:3px 0;color:rgba(11,13,18,.68);transition:color .18s}
@@ -1361,7 +1360,6 @@ body.light .hud-band i{background:var(--blue-d)}
 .nav>a:hover{background:rgba(255,255,255,.10);color:#fff}
 .get{height:36px;padding:0 16px;border-radius:6px;color:#fff;font-size:14px}
 .burger{width:36px;height:36px;border-radius:6px}
-.hd .lee,.lee{border-radius:0 0 var(--pr) var(--pr)}
 @media(max-width:899px){
   .hd{inset:10px 10px auto 10px;height:56px;padding:0 8px 0 15px}
   .hd.away{transform:translateY(calc(-100% - 14px))}
@@ -1427,9 +1425,7 @@ footer{padding-bottom:calc(76px + env(safe-area-inset-bottom))}
    Protocol tiene diez entradas, muchas más que las demás columnas, así que la
    rejilla las reparte por ancho disponible en vez de a partes iguales. */
 .fgrid{align-items:start}
-@media(min-width:1000px){
-  .fgrid{grid-template-columns:repeat(5,minmax(0,1fr))}
-}
+
 /* ══ el pie en móvil ══
    En dos columnas de 170px los títulos largos se partían en dos líneas y
    "Company" quedaba flotando en el hueco que dejaba Protocol, que tiene diez
@@ -1442,8 +1438,43 @@ footer{padding-bottom:calc(76px + env(safe-area-inset-bottom))}
 
 /* entre tableta y escritorio estrecho, tres columnas: cinco dejan menos de
    160px por columna y parten los títulos largos */
-@media(min-width:761px) and (max-width:1119px){
+@media(min-width:761px) and (max-width:1429px){
   .fgrid{grid-template-columns:repeat(3,minmax(0,1fr));gap:26px 20px}
+}
+
+/* ══ la barra se queda quieta ══
+   Se escondía al bajar y volvía al subir. Ahora está siempre a la vista: la
+   clase que la desplazaba deja de mover nada. */
+.hd.away, .hd.anclada.away{transform:none !important}
+/* ══ fuera los enlaces del centro en escritorio ══ */
+@media(min-width:901px){
+  .hd .nav{display:none}
+}
+
+/* ══ la cabecera se queda EN SU SITIO DEL DOCUMENTO ══
+   Iba clavada a la pantalla (position:fixed): se quedaba delante todo el rato
+   y por eso parecía que bajaba y subía con el scroll. Ahora vive donde está
+   escrita, arriba de la página, y se va con el contenido al desplazar.
+   Conserva su diseño: píldora flotante con margen y esquinas redondeadas. */
+.hd{position:absolute !important}
+.hd.anclada{
+  inset:14px 14px auto 14px !important;
+  height:60px !important;
+  border-radius:var(--pr) !important;
+  padding:0 8px 0 18px !important;
+  background:linear-gradient(var(--pf),var(--pf)),var(--pbase) !important;
+  border:1px solid var(--pb) !important;
+  box-shadow:0 18px 46px -22px rgba(0,0,0,.94) !important;
+}
+.hd.away, .hd.anclada.away{transform:none !important}
+/* sin transición de posición: no queda nada que animar */
+.hd{transition:background .3s !important}
+@media(max-width:899px){
+  .hd.anclada{
+    inset:10px 10px auto 10px !important;
+    height:56px !important;
+    padding:0 8px 0 15px !important;
+  }
 }
 </style>
 </head>
@@ -1470,7 +1501,6 @@ footer{padding-bottom:calc(76px + env(safe-area-inset-bottom))}
   </div>
   <i class="pre-bar" id="preBar"></i>
 </div>
-<i class="prog" id="prog"></i>
 <div class="hud" aria-hidden="true">
   <i class="tl"></i><i class="tr"></i><i class="br"></i>
   <span class="lang">English &#8250;</span>
@@ -1756,9 +1786,9 @@ footer{padding-bottom:calc(76px + env(safe-area-inset-bottom))}
 
         <div class="raise">
           <div class="raise-head">
-            <b id="saleRaised">$0</b><span class="mono">raised of $6,000,000</span>
+            <b id="saleRaised">$0</b><span class="mono">raised of $15,000,000</span>
           </div>
-          <div class="raise-bar"><i id="saleFill"></i><i class="raise-tip" id="saleTip"><em>47.5%</em></i></div>
+          <div class="raise-bar"><i id="saleFill"></i><i class="raise-tip" id="saleTip"><em>85.0%</em></i></div>
           <div class="raise-foot mono"><span>Minimum $1</span><span>Maximum $10,000 per wallet</span></div>
         </div>
       </div>
@@ -2090,7 +2120,7 @@ footer{padding-bottom:calc(76px + env(safe-area-inset-bottom))}
       <div><h4>Overview</h4><a href="https://nereum.xyz/whitepaper#/introduction">Introduction</a><a href="https://nereum.xyz/whitepaper#/vision">Vision</a></div>
       <div><h4>Trust</h4><a href="https://nereum.xyz/whitepaper#/legal">Legal Document — Miami, FL</a><a href="https://nereum.xyz/whitepaper#/audit">Audit</a><a href="https://nereum.xyz/whitepaper#/kyc">Team KYC</a></div>
       <div><h4>Token</h4><a href="https://nereum.xyz/whitepaper#/whitelist">Join the whitelist</a><a href="https://nereum.xyz/whitepaper#/dexscreener">DexScreener</a></div>
-      <div><h4>Protocol</h4><a href="https://nereum.xyz/whitepaper#/network">NereumEVM — Blockchain</a><a href="https://nereum.xyz/whitepaper#/scan">NereumEVM — Explorer</a><a href="https://nereum.xyz/whitepaper#/tokenization">Asset tokenization</a><a href="https://nereum.xyz/whitepaper#/dex">Nereum DEX</a><a href="https://nereum.xyz/whitepaper#/nusd">NUSD</a><a href="https://nereum.xyz/whitepaper#/forge">Nereum Forge</a><a href="https://nereum.xyz/whitepaper#/vaults">Nereum Vaults</a><a href="https://nereum.xyz/whitepaper#/feed">Nereum Feed</a><a href="https://nereum.xyz/whitepaper#/link">Nereum Link</a><a href="https://nereum.xyz/whitepaper#/wallet">Wallet and tooling</a></div>
+      <div><h4>Protocol</h4><a href="https://nereum.xyz/whitepaper#/network">NereumEVM — Blockchain</a><a href="https://nereum.xyz/whitepaper#/scan">NereumEVM — Explorer</a><a href="https://nereum.xyz/whitepaper#/tokenization">Asset tokenization</a><a href="https://nereum.xyz/whitepaper#/dex">Nereum DEX</a><a href="https://nereum.xyz/whitepaper#/nusd">NUSD</a></div><div><h4>Products</h4><a href="https://nereum.xyz/whitepaper#/forge">Nereum Forge</a><a href="https://nereum.xyz/whitepaper#/vaults">Nereum Vaults</a><a href="https://nereum.xyz/whitepaper#/feed">Nereum Feed</a><a href="https://nereum.xyz/whitepaper#/link">Nereum Link</a><a href="https://nereum.xyz/whitepaper#/wallet">Wallet and tooling</a></div>
       <div><h4>Company</h4><a href="https://nereum.xyz/whitepaper#/team">Team</a><a href="https://nereum.xyz/whitepaper#/press">News and mentions</a><a href="https://nereum.xyz/whitepaper#/links">Official links</a><a href="https://nereum.xyz/whitepaper#/faq">Questions</a></div>
     </div>
     <div class="fmark" aria-hidden="true"><span>NEREUM</span><svg class="fmark-logo" viewBox="0 0 672 672">
@@ -2112,7 +2142,7 @@ footer{padding-bottom:calc(76px + env(safe-area-inset-bottom))}
 </footer>
 </div>
 
-<i class="lee" aria-hidden="true"></i>
+
 <button class="subir" id="subir" type="button" aria-label="Volver arriba">
   <svg viewBox="0 0 24 24"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
 </button>
@@ -2160,7 +2190,7 @@ const CALM=matchMedia('(prefers-reduced-motion: reduce)').matches;
   const fine=matchMedia('(hover:hover) and (pointer:fine)').matches;
   const wide=matchMedia('(min-width:1000px)').matches;
   const smooth=fine&&wide&&!CALM;
-  const el=document.getElementById('scroll'),prog=document.getElementById('prog');
+  const el=document.getElementById('scroll');
   const S={y:0,t:0,v:0,vh:innerHeight,h:0};
   const jobs=[];
   const docTop=n=>{let y=0;while(n){y+=n.offsetTop;n=n.offsetParent}return y};
@@ -2205,7 +2235,6 @@ const CALM=matchMedia('(prefers-reduced-motion: reduce)').matches;
       const prev=S.y;S.y=scrollY;S.v=S.y-prev;
     }
     const max=Math.max(1,document.documentElement.scrollHeight-S.vh);
-    if(prog)prog.style.width=(cl(S.y/max)*100).toFixed(2)+'%';
     for(const j of jobs)j.run(S);
     requestAnimationFrame(frame);
   }
@@ -3577,7 +3606,8 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
   render(500,false);
   const fill=document.getElementById('saleFill'),tip=document.getElementById('saleTip'),
         amt=document.getElementById('saleRaised');
-  const RAISED=2847300, TARGET=6000000, PCT=RAISED/TARGET*100;
+  /* cifras de prueba: 85% de un tope de 15.000.000 */
+  const RAISED=12750000, TARGET=15000000, PCT=RAISED/TARGET*100;
   window.__ronda={raised:RAISED, target:TARGET, pct:PCT};
   const slow=matchMedia('(prefers-reduced-motion: reduce)').matches;
   let ran=false;
@@ -3915,7 +3945,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
   addEventListener('scroll',()=>{
     const y=scrollY, d=y-prev; prev=y;
     if(hd.classList.contains('open')){        // con el menú abierto, quieta
-      if(hidden){hidden=false;hd.classList.remove('away')}
+      if(hidden){hidden=false;hd.classList.remove('away')}   /* nunca se esconde */
       return;
     }
     if(y<bar*1.5){                            // arriba del todo, siempre visible
