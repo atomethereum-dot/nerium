@@ -1573,7 +1573,7 @@ footer{padding-bottom:calc(76px + env(safe-area-inset-bottom))}
     <div class="sh-mesh"><i></i><i></i><i></i><i></i></div>
     <div class="lockup" id="lockup">
       <i class="lk-bar" aria-hidden="true"></i>
-      <span class="lk-word" id="lkWord"></span>
+      <span class="lk-word" id="lkWord" translate="no"></span>
     </div>
     <div class="lk-tag" id="lkTag"><i></i><span>Real-world asset chain</span></div>
     <div class="sh-grain"></div>
@@ -4757,6 +4757,81 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
     let tmp; addEventListener('resize',()=>{clearTimeout(tmp);tmp=setTimeout(arma,180)});
     requestAnimationFrame(pinta);
   });
+})();
+</script>
+<script>
+/* ══ que el traductor del navegador entienda la página ══
+   Los titulares —y el párrafo de la cita— se parten en palabras para animar
+   su entrada, y el de portada se parte además en letras. Los traductores del
+   navegador (el de Chrome y el de Google) traducen nodo de texto a nodo de
+   texto: con la frase troceada traducen cada palabra por su cuenta y
+   devuelven algo que no llega a ser una frase, y lo que va letra a letra no
+   lo traducen en absoluto.
+
+   Aquí se guarda la frase entera de cada trozo nada más partirse, y en cuanto
+   se detecta que la página está traducida se devuelve de una pieza para que
+   el traductor la lea como lo que es. Se pierde la animación de entrada de
+   esos titulares, que es justo lo que sobra cuando alguien está leyendo la
+   página en otro idioma. */
+(function(){
+  /* los mismos que trocea la animación, ya marcados con .sp */
+  const PARTIDOS='h1.sp, h2.sp, .say p.sp, .rows b.sp, .duo h3.sp, .start b.sp, .card b.sp';
+  const original=new WeakMap();
+
+  /* el troceo por letras marca los espacios con <i class="sp"> vacíos:
+     textContent devolvería las palabras pegadas unas a otras */
+  function frase(el){
+    let t;
+    if(el.querySelector(':scope > i.sp')){
+      t=[...el.childNodes].map(n=>
+        (n.nodeType===1&&n.tagName==='I'&&n.classList.contains('sp'))?' ':n.textContent
+      ).join('');
+    }else{
+      t=el.textContent;
+    }
+    return t.replace(/\s+/g,' ').trim();
+  }
+
+  function guardar(){
+    document.querySelectorAll(PARTIDOS).forEach(el=>{
+      if(original.has(el))return;
+      const t=frase(el);
+      if(t)original.set(el,t);
+    });
+  }
+
+  let devuelto=false;
+  const vigias=[];
+  function entero(){
+    if(devuelto)return; devuelto=true;
+    /* una vez devuelta la frase no hay nada más que vigilar */
+    vigias.forEach(v=>v.disconnect());
+    document.querySelectorAll(PARTIDOS).forEach(el=>{
+      const t=original.get(el);
+      /* un nodo de texto nuevo: el traductor observa el DOM y lo recoge */
+      if(t)el.replaceChildren(document.createTextNode(t));
+    });
+  }
+
+  /* Chrome y Google marcan la raíz al traducir: le ponen translated-ltr
+     (o -rtl). Basta con vigilar esa clase, que es un solo atributo de un
+     solo elemento; observar todo el árbol para cazar los <font> con que
+     envuelven lo traducido costaba fotogramas en cada scroll. */
+  function traducida(){
+    return /\btranslated-(ltr|rtl)\b/.test(document.documentElement.className);
+  }
+
+  guardar();
+  addEventListener('load',guardar);
+
+  if(traducida()||document.querySelector('.goog-te-banner-frame'))entero();
+  const raiz=new MutationObserver(()=>{ if(traducida())entero(); });
+  raiz.observe(document.documentElement,{attributes:true,attributeFilter:['class','lang']});
+  vigias.push(raiz);
+  /* red de seguridad por si algún traductor no toca la clase de la raíz:
+     mirar una cadena cada dos segundos no le cuesta nada al navegador */
+  const reloj=setInterval(()=>{ if(traducida())entero(); },2000);
+  vigias.push({disconnect:()=>clearInterval(reloj)});
 })();
 </script>
 </body>
