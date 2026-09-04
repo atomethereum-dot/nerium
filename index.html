@@ -1515,6 +1515,66 @@ footer{padding-bottom:calc(76px + env(safe-area-inset-bottom))}
   .hud .lang{left:12px;bottom:var(--hud-b) !important}
   .hud-band{right:12px;bottom:calc(var(--hud-b) + 20px) !important}
 }
+
+/* ══ el remate de la sección de seguridad ══
+   1 · el relleno de abajo dejaba una franja clara bajo las tarjetas
+   2 · sobraba recorrido después de la última tarjeta, y al soltarse el
+       anclado la siguiente sección entraba de golpe
+   3 · faltaba decir que hay que seguir bajando */
+.secure{padding-bottom:clamp(28px,3.4vw,48px) !important}
+@media(max-width:899px){
+  /* 240vh en vez de 280: tres tarjetas a 80vh cada una, sin sobras al final */
+  .secure{height:240vh !important}
+}
+/* el aviso */
+.sec-cue{display:flex;align-items:center;gap:9px;margin:0 0 12px;
+  font-family:var(--m);font-size:9.5px;letter-spacing:.2em;text-transform:uppercase;
+  color:rgba(11,13,18,.4);
+  opacity:0;transform:translateY(4px);
+  transition:opacity .45s var(--ease),transform .45s var(--ease)}
+.sec-cue.on{opacity:1;transform:none}
+.sec-cue i{width:14px;height:14px;flex:0 0 auto;border-radius:50%;
+  border:1px solid rgba(11,13,18,.22);position:relative}
+.sec-cue i::after{content:'';position:absolute;left:50%;top:50%;width:3px;height:3px;
+  border-right:1px solid rgba(11,13,18,.5);border-bottom:1px solid rgba(11,13,18,.5);
+  transform:translate(-50%,-70%) rotate(45deg);
+  animation:secCue 1.9s ease-in-out infinite}
+@keyframes secCue{
+  0%,100%{transform:translate(-50%,-90%) rotate(45deg);opacity:.35}
+  50%{transform:translate(-50%,-30%) rotate(45deg);opacity:1}
+}
+@media(prefers-reduced-motion:reduce){ .sec-cue i::after{animation:none} }
+@media(min-width:900px){ .sec-cue{display:none} }
+
+@media(max-width:899px){
+  /* la tarjeta ocupa lo que sobra: antes quedaba una franja blanca debajo, y
+     el pie de la sección se salía del escenario */
+  /* En columna flexible la tarjeta se lleva el espacio sobrante. Con rejilla
+     no funcionaba: align-content:start deja cada fila a su tamaño y la fila
+     de 1fr no crecía. */
+  .secure .sec-foot{display:none}
+  .secure .sec-stage{display:flex;flex-direction:column}
+  .secure .sec-stage>.wrap{display:flex;flex-direction:column;flex:1;min-height:0}
+  .secure .sec-grid{flex:1;min-height:0}
+}
+
+@media(max-width:899px){
+  /* La flecha de bajar, el selector de idioma y la banda van fijos en el
+     canto inferior y se montaban sobre el enlace de la tarjeta. Se reserva
+     ese carril para que la tarjeta acabe por encima de ellos. */
+  .secure .sec-stage{padding-bottom:clamp(66px,10vh,92px) !important}
+}
+@media(max-width:899px) and (max-height:620px){
+  /* en pantallas muy cortas no cabe todo: se recorta lo prescindible —el
+     párrafo y el aviso— para que la tarjeta conserve altura y el enlace
+     quede por encima de los mandos del canto inferior */
+  .secure .sec-stage{padding-bottom:70px !important;padding-top:6px !important}
+  .secure .sec-head{margin-bottom:8px}
+  .secure .sec-sub{display:none}
+  .secure .sec-cue{display:none}
+  .secure .sec-dots{margin-bottom:8px}
+  .secure .sec-p{display:none}
+}
 </style>
 </head>
 <body>
@@ -1744,7 +1804,8 @@ footer{padding-bottom:calc(76px + env(safe-area-inset-bottom))}
       <h2 class="sec-h">Three things you can check before you send a dollar.</h2>
       <p class="sec-sub">A new chain asks for trust up front. These are the three places where ours is verifiable by someone who is not us.</p>
     </div>
-    <div class="sec-dots" aria-hidden="true"><i class="on"></i><i></i><i></i></div>
+    <div class="sec-cue" id="secCue" aria-hidden="true"><i></i><span>Keep scrolling</span></div>
+      <div class="sec-dots" aria-hidden="true"><i class="on"></i><i></i><i></i></div>
     <div class="sec-grid">
       <article class="sec-card rv on" data-i="0">
         <div class="sec-top">
@@ -4468,6 +4529,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
   if(!cards.length)return;
   const dTop=n=>{let y=0;while(n){y+=n.offsetTop;n=n.offsetParent}return y};
   let cur=-1, pinned=false;
+  const cue=document.getElementById('secCue');
   const check=()=>{pinned=getComputedStyle(cards[0]).position==='absolute';
     if(!pinned){cards.forEach(c=>c.classList.remove('on'));cur=-1}
     else if(cur<0)show(0)};
@@ -4482,6 +4544,8 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
       const top=dTop(sec), run=Math.max(1,sec.offsetHeight-innerHeight);
       const p=Math.min(1,Math.max(0,(scrollY-top)/run));
       show(Math.min(cards.length-1,Math.floor(p*cards.length*.999)));
+      /* el aviso acompaña mientras quede alguna tarjeta por delante */
+      if(cue) cue.classList.toggle('on', p<.90);
     }
     requestAnimationFrame(tick);
   })();
