@@ -1606,6 +1606,33 @@ body.rtl .sec-fields>div,body.rtl .ficha div,body.rtl .fila{flex-direction:row-r
 body.rtl .lang{left:auto;right:16px}
 body.rtl .lang-menu{left:auto;right:12px}
 body.rtl .hud-band{right:auto;left:16px}
+
+/* ══ en árabe la interfaz del canto inferior se refleja entera ══
+   El idioma y la banda ya se voltean solos, pero el contador, el botón de
+   bajar y el de subir se quedaban en su lado de siempre: el contador acababa
+   debajo del idioma y el botón de bajar debajo de la banda. Reflejados los
+   tres, el árabe queda igual que el inglés visto en un espejo. */
+html[dir="rtl"] .hud-count{left:16px !important;right:auto !important}
+html[dir="rtl"] .scrollbtn{right:14px !important;left:auto !important}
+html[dir="rtl"] .subir{left:16px !important;right:auto !important}
+@media(max-width:760px){
+  html[dir="rtl"] .hud-count{left:14px !important}
+}
+@media(max-width:899px){
+  html[dir="rtl"] .scrollbtn{right:14px !important}
+}
+
+/* ══ el carril de abajo tiene que contar con el botón de subir ══
+   La sección de seguridad reserva sitio para los mandos fijos, pero midiendo
+   solo los bajos: el botón de volver arriba es 42px de alto y arranca por
+   encima de ellos, así que seguía tapando la esquina del enlace de la
+   tarjeta. El carril llega ahora hasta su borde superior. */
+@media(max-width:899px){
+  .secure .sec-stage{padding-bottom:calc(var(--hud-b) + 98px) !important}
+}
+@media(max-width:899px) and (max-height:620px){
+  .secure .sec-stage{padding-bottom:calc(var(--hud-b) + 98px) !important}
+}
 </style>
 </head>
 <body>
@@ -5115,22 +5142,42 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
      (o -rtl). Basta con vigilar esa clase, que es un solo atributo de un
      solo elemento; observar todo el árbol para cazar los <font> con que
      envuelven lo traducido costaba fotogramas en cada scroll. */
+  /* Si el selector de idioma de la página ya ha traducido, esto no se mete:
+     ese sistema recompone los titulares por su cuenta y devolverlos al inglés
+     desde aquí sería pisarle la traducción. Se mira su ajuste guardado y NO
+     html.lang, porque el traductor de Chrome también reescribe html.lang y
+     entonces esto se apagaría justo cuando hace falta. */
+  function propio(){
+    try{ return localStorage.getItem('nereum-lang') || 'en'; }catch(e){ return 'en'; }
+  }
+  /* Chrome y Google marcan la raíz al traducir: le ponen translated-ltr o -rtl */
   function traducida(){
-    /* si el selector de idioma de la página ya ha traducido, esto no se mete:
-       ese sistema recompone los titulares por su cuenta y devolverlos al
-       inglés desde aquí sería pisarle la traducción */
-    if(document.documentElement.lang!=='en')return false;
-    return /\btranslated-(ltr|rtl)\b/.test(document.documentElement.className);
+    if(propio()!=='en')return false;
+    return /\btranslated-(ltr|rtl)\b/.test(document.documentElement.className)
+        || !!document.querySelector('.goog-te-banner-frame,#goog-gt-tt');
   }
 
   guardar();
   addEventListener('load',guardar);
 
-  if(traducida()||document.querySelector('.goog-te-banner-frame'))entero();
+  if(traducida())entero();
   const raiz=new MutationObserver(()=>{ if(traducida())entero(); });
   raiz.observe(document.documentElement,{attributes:true,attributeFilter:['class','lang']});
   vigias.push(raiz);
-  /* red de seguridad por si algún traductor no toca la clase de la raíz:
+  /* Y por si el traductor empieza por el texto antes de marcar la raíz: se
+     vigila la aparición de los <font> con que envuelve lo que traduce, pero
+     solo dentro de los titulares partidos —dieciocho elementos que por su
+     cuenta no cambian nunca—, y no en todo el documento, que costaba
+     fotogramas en cada scroll. */
+  document.querySelectorAll(PARTIDOS).forEach(el=>{
+    const v=new MutationObserver(ms=>{
+      for(const m of ms)for(const n of m.addedNodes)
+        if(n.nodeType===1&&n.tagName==='FONT'&&propio()==='en'){entero();return}
+    });
+    v.observe(el,{childList:true,subtree:true});
+    vigias.push(v);
+  });
+  /* red de seguridad por si algún traductor no hace ninguna de las dos cosas:
      mirar una cadena cada dos segundos no le cuesta nada al navegador */
   const reloj=setInterval(()=>{ if(traducida())entero(); },2000);
   vigias.push({disconnect:()=>clearInterval(reloj)});
