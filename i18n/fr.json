@@ -9,7 +9,6 @@
 "Performance under load": "Performance sous charge",
 "Three things you can check before you send a dollar.": "Trois choses à vérifier avant d'envoyer un dollar.",
 "One price now. One price at listing.": "Un prix aujourd'hui. Un prix à la cotation.",
-"Six hundred million NRM, fixed at genesis.": "Six cents millions de NRM, fixés dès la genèse.",
 "Two pieces, both already running.": "Deux briques, toutes deux déjà en service.",
 "Stay in the loop": "Restez informé",
 "Nereum explainer: the full stack, built on one engine": "Nereum expliqué : toute la pile, bâtie sur un seul moteur",
@@ -100,7 +99,6 @@
 "Listing price": "Prix de cotation",
 "at market open": "à l'ouverture du marché",
 "from whitelist to listing": "de la liste blanche à la cotation",
-"raised of $15,000,000": "levés sur 15 000 000 $",
 "Minimum $1": "Minimum 1 $",
 "Maximum $10,000 per wallet": "Maximum 10 000 $ par portefeuille",
 "Buy NRM": "Acheter des NRM",
@@ -198,5 +196,7 @@
 "Where value settles": "Où la valeur se règle",
 "Minimum purchase is $1": "L'achat minimum est de 1 $",
 "Maximum is $10,000 per wallet": "Le maximum est de 10 000 $ par portefeuille",
-"IN THE OPEN": "EN CLAIR"
+"IN THE OPEN": "EN CLAIR",
+"One hundred and sixty million NRM, fixed at genesis.": "Cent soixante millions de NRM, fixés dès la genèse.",
+"raised of $16,000,000": "levés sur 16 000 000 $"
 }

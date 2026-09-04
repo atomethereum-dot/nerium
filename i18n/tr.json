@@ -9,7 +9,6 @@
 "Performance under load": "Yük altında performans",
 "Three things you can check before you send a dollar.": "Bir dolar göndermeden önce doğrulayabileceğiniz üç şey.",
 "One price now. One price at listing.": "Şimdi tek fiyat. Listelemede tek fiyat.",
-"Six hundred million NRM, fixed at genesis.": "Altı yüz milyon NRM, doğuşta sabitlendi.",
 "Two pieces, both already running.": "İki parça, ikisi de çalışır durumda.",
 "Stay in the loop": "Gelişmelerden haberdar olun",
 "Nereum explainer: the full stack, built on one engine": "Nereum anlatımı: tek bir motor üzerine kurulu tam yığın",
@@ -100,7 +99,6 @@
 "Listing price": "Listelenme fiyatı",
 "at market open": "piyasa açılışında",
 "from whitelist to listing": "beyaz listeden listelenmeye",
-"raised of $15,000,000": "toplandı, hedef 15.000.000 $",
 "Minimum $1": "En az 1 $",
 "Maximum $10,000 per wallet": "Cüzdan başına en fazla 10.000 $",
 "Buy NRM": "NRM satın al",
@@ -198,5 +196,7 @@
 "Where value settles": "Değerin mutabakata vardığı yer",
 "Minimum purchase is $1": "En düşük alım 1 $",
 "Maximum is $10,000 per wallet": "Cüzdan başına en fazla 10.000 $",
-"IN THE OPEN": "AÇIKÇA"
+"IN THE OPEN": "AÇIKÇA",
+"One hundred and sixty million NRM, fixed at genesis.": "Yüz altmış milyon NRM, doğuşta sabitlendi.",
+"raised of $16,000,000": "toplandı, hedef 16.000.000 $"
 }

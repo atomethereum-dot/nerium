@@ -9,7 +9,6 @@
 "Performance under load": "高負荷時の性能",
 "Three things you can check before you send a dollar.": "1ドルを送る前に確認できる三つのこと。",
 "One price now. One price at listing.": "いまの価格がひとつ。上場時の価格がひとつ。",
-"Six hundred million NRM, fixed at genesis.": "6億 NRM、ジェネシスで固定。",
 "Two pieces, both already running.": "二つの要素、どちらもすでに稼働中。",
 "Stay in the loop": "最新情報を受け取る",
 "Nereum explainer: the full stack, built on one engine": "Nereum 解説：ひとつのエンジンで構築したフルスタック",
@@ -100,7 +99,6 @@
 "Listing price": "上場価格",
 "at market open": "取引開始時",
 "from whitelist to listing": "ホワイトリストから上場まで",
-"raised of $15,000,000": "調達済み、目標 $15,000,000",
 "Minimum $1": "最低 $1",
 "Maximum $10,000 per wallet": "ウォレットあたり上限 $10,000",
 "Buy NRM": "NRM を購入",
@@ -198,5 +196,7 @@
 "Where value settles": "価値が決済される場所",
 "Minimum purchase is $1": "最低購入額は $1 です",
 "Maximum is $10,000 per wallet": "ウォレットあたりの上限は $10,000 です",
-"IN THE OPEN": "オープンに"
+"IN THE OPEN": "オープンに",
+"One hundred and sixty million NRM, fixed at genesis.": "1億6千万 NRM、ジェネシスで固定。",
+"raised of $16,000,000": "調達済み、目標 $16,000,000"
 }

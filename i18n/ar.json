@@ -9,7 +9,6 @@
 "Performance under load": "الأداء تحت الحِمل",
 "Three things you can check before you send a dollar.": "ثلاثة أمور يمكنك التحقق منها قبل أن ترسل دولاراً واحداً.",
 "One price now. One price at listing.": "سعر واحد الآن. سعر واحد عند الإدراج.",
-"Six hundred million NRM, fixed at genesis.": "ستمائة مليون NRM، مثبَّتة منذ التكوين.",
 "Two pieces, both already running.": "قطعتان، كلتاهما تعملان بالفعل.",
 "Stay in the loop": "ابقَ على اطلاع",
 "Nereum explainer: the full stack, built on one engine": "شرح Nereum: الحزمة الكاملة مبنية على محرك واحد",
@@ -100,7 +99,6 @@
 "Listing price": "سعر الإدراج",
 "at market open": "عند افتتاح السوق",
 "from whitelist to listing": "من القائمة البيضاء إلى الإدراج",
-"raised of $15,000,000": "تم جمعها من أصل 15,000,000 دولار",
 "Minimum $1": "الحد الأدنى 1 دولار",
 "Maximum $10,000 per wallet": "الحد الأقصى 10,000 دولار لكل محفظة",
 "Buy NRM": "شراء NRM",
@@ -198,5 +196,7 @@
 "Where value settles": "حيث تُسوّى القيمة",
 "Minimum purchase is $1": "الحد الأدنى للشراء دولار واحد",
 "Maximum is $10,000 per wallet": "الحد الأقصى 10,000 دولار لكل محفظة",
-"IN THE OPEN": "في العلن"
+"IN THE OPEN": "في العلن",
+"One hundred and sixty million NRM, fixed at genesis.": "مائة وستون مليون NRM، مثبَّتة منذ التكوين.",
+"raised of $16,000,000": "تم جمعها من أصل 16,000,000 دولار"
 }

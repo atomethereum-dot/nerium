@@ -9,7 +9,6 @@
 "Performance under load": "高负载下的性能",
 "Three things you can check before you send a dollar.": "在你投入一美元之前，可以核实的三件事。",
 "One price now. One price at listing.": "现在一个价格。上线时一个价格。",
-"Six hundred million NRM, fixed at genesis.": "六亿枚 NRM，创世时即已固定。",
 "Two pieces, both already running.": "两个部分，都已在运行。",
 "Stay in the loop": "保持关注",
 "Nereum explainer: the full stack, built on one engine": "Nereum 详解：完整技术栈，构建于同一引擎之上",
@@ -100,7 +99,6 @@
 "Listing price": "上线价格",
 "at market open": "开盘时",
 "from whitelist to listing": "从白名单到上线",
-"raised of $15,000,000": "已募集，目标 15,000,000 美元",
 "Minimum $1": "最低 1 美元",
 "Maximum $10,000 per wallet": "每个钱包上限 10,000 美元",
 "Buy NRM": "购买 NRM",
@@ -198,5 +196,7 @@
 "Where value settles": "价值在何处结算",
 "Minimum purchase is $1": "最低购买额为 1 美元",
 "Maximum is $10,000 per wallet": "每个钱包上限为 10,000 美元",
-"IN THE OPEN": "公开透明"
+"IN THE OPEN": "公开透明",
+"One hundred and sixty million NRM, fixed at genesis.": "一亿六千万枚 NRM，创世时即已固定。",
+"raised of $16,000,000": "已募集，目标 16,000,000 美元"
 }

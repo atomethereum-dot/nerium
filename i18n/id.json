@@ -9,7 +9,6 @@
 "Performance under load": "Kinerja saat beban tinggi",
 "Three things you can check before you send a dollar.": "Tiga hal yang bisa Anda periksa sebelum mengirim satu dolar.",
 "One price now. One price at listing.": "Satu harga sekarang. Satu harga saat pencatatan.",
-"Six hundred million NRM, fixed at genesis.": "Enam ratus juta NRM, ditetapkan sejak genesis.",
 "Two pieces, both already running.": "Dua bagian, keduanya sudah berjalan.",
 "Stay in the loop": "Ikuti terus kabarnya",
 "Nereum explainer: the full stack, built on one engine": "Penjelasan Nereum: seluruh tumpukan, dibangun di atas satu mesin",
@@ -100,7 +99,6 @@
 "Listing price": "Harga pencatatan",
 "at market open": "saat pasar dibuka",
 "from whitelist to listing": "dari daftar putih ke pencatatan",
-"raised of $15,000,000": "terkumpul dari $15.000.000",
 "Minimum $1": "Minimum $1",
 "Maximum $10,000 per wallet": "Maksimum $10.000 per dompet",
 "Buy NRM": "Beli NRM",
@@ -198,5 +196,7 @@
 "Where value settles": "Tempat nilai diselesaikan",
 "Minimum purchase is $1": "Pembelian minimum adalah $1",
 "Maximum is $10,000 per wallet": "Maksimum $10.000 per dompet",
-"IN THE OPEN": "SECARA TERBUKA"
+"IN THE OPEN": "SECARA TERBUKA",
+"One hundred and sixty million NRM, fixed at genesis.": "Seratus enam puluh juta NRM, ditetapkan sejak genesis.",
+"raised of $16,000,000": "terkumpul dari $16.000.000"
 }

@@ -9,7 +9,6 @@
 "Performance under load": "Производительность под нагрузкой",
 "Three things you can check before you send a dollar.": "Три вещи, которые можно проверить, прежде чем отправить доллар.",
 "One price now. One price at listing.": "Одна цена сейчас. Одна цена при листинге.",
-"Six hundred million NRM, fixed at genesis.": "Шестьсот миллионов NRM, зафиксировано в генезис-блоке.",
 "Two pieces, both already running.": "Две части, обе уже работают.",
 "Stay in the loop": "Оставайтесь в курсе",
 "Nereum explainer: the full stack, built on one engine": "Nereum по существу: весь стек на одном движке",
@@ -100,7 +99,6 @@
 "Listing price": "Цена листинга",
 "at market open": "на открытии рынка",
 "from whitelist to listing": "от белого списка до листинга",
-"raised of $15,000,000": "собрано из $15 000 000",
 "Minimum $1": "Минимум $1",
 "Maximum $10,000 per wallet": "Максимум $10 000 на кошелёк",
 "Buy NRM": "Купить NRM",
@@ -198,5 +196,7 @@
 "Where value settles": "Где происходит расчёт стоимости",
 "Minimum purchase is $1": "Минимальная покупка — $1",
 "Maximum is $10,000 per wallet": "Максимум — $10 000 на кошелёк",
-"IN THE OPEN": "ОТКРЫТО"
+"IN THE OPEN": "ОТКРЫТО",
+"One hundred and sixty million NRM, fixed at genesis.": "Сто шестьдесят миллионов NRM, зафиксировано в генезис-блоке.",
+"raised of $16,000,000": "собрано из $16 000 000"
 }

@@ -9,7 +9,6 @@
 "Performance under load": "Hiệu năng khi tải cao",
 "Three things you can check before you send a dollar.": "Ba điều bạn có thể kiểm chứng trước khi gửi một đô la.",
 "One price now. One price at listing.": "Một mức giá bây giờ. Một mức giá khi niêm yết.",
-"Six hundred million NRM, fixed at genesis.": "Sáu trăm triệu NRM, cố định ngay từ khối khởi tạo.",
 "Two pieces, both already running.": "Hai phần, cả hai đều đã vận hành.",
 "Stay in the loop": "Cập nhật thông tin",
 "Nereum explainer: the full stack, built on one engine": "Giải thích về Nereum: toàn bộ ngăn xếp, xây trên một cỗ máy duy nhất",
@@ -100,7 +99,6 @@
 "Listing price": "Giá niêm yết",
 "at market open": "khi thị trường mở",
 "from whitelist to listing": "từ danh sách trắng đến niêm yết",
-"raised of $15,000,000": "đã huy động trên mục tiêu 15.000.000 $",
 "Minimum $1": "Tối thiểu 1 $",
 "Maximum $10,000 per wallet": "Tối đa 10.000 $ mỗi ví",
 "Buy NRM": "Mua NRM",
@@ -198,5 +196,7 @@
 "Where value settles": "Nơi giá trị được thanh toán",
 "Minimum purchase is $1": "Mức mua tối thiểu là 1 $",
 "Maximum is $10,000 per wallet": "Mức tối đa là 10.000 $ mỗi ví",
-"IN THE OPEN": "CÔNG KHAI"
+"IN THE OPEN": "CÔNG KHAI",
+"One hundred and sixty million NRM, fixed at genesis.": "Một trăm sáu mươi triệu NRM, cố định ngay từ khối khởi tạo.",
+"raised of $16,000,000": "đã huy động trên mục tiêu 16.000.000 $"
 }

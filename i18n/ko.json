@@ -9,7 +9,6 @@
 "Performance under load": "부하 상태의 성능",
 "Three things you can check before you send a dollar.": "1달러를 보내기 전에 직접 확인할 수 있는 세 가지.",
 "One price now. One price at listing.": "지금 하나의 가격. 상장 시 하나의 가격.",
-"Six hundred million NRM, fixed at genesis.": "6억 NRM, 제네시스에서 고정.",
 "Two pieces, both already running.": "두 가지 모두 이미 가동 중입니다.",
 "Stay in the loop": "소식 받아보기",
 "Nereum explainer: the full stack, built on one engine": "Nereum 해설: 하나의 엔진 위에 구축된 전체 스택",
@@ -100,7 +99,6 @@
 "Listing price": "상장 가격",
 "at market open": "시장 개장 시",
 "from whitelist to listing": "화이트리스트에서 상장까지",
-"raised of $15,000,000": "모집, 목표 $15,000,000",
 "Minimum $1": "최소 $1",
 "Maximum $10,000 per wallet": "지갑당 최대 $10,000",
 "Buy NRM": "NRM 구매",
@@ -198,5 +196,7 @@
 "Where value settles": "가치가 결제되는 곳",
 "Minimum purchase is $1": "최소 구매 금액은 $1입니다",
 "Maximum is $10,000 per wallet": "지갑당 최대 금액은 $10,000입니다",
-"IN THE OPEN": "공개적으로"
+"IN THE OPEN": "공개적으로",
+"One hundred and sixty million NRM, fixed at genesis.": "1억 6천만 NRM, 제네시스에서 고정.",
+"raised of $16,000,000": "모집, 목표 $16,000,000"
 }
