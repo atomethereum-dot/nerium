@@ -52,7 +52,12 @@ const SDK=`window.NereumWC={EthereumProvider:{init:async function(o){
       if(method==='eth_chainId')return prov._cid;
       // el cambio de red y la firma viajan por el relay y tardan: la cartera
       // no se abre sola, que es justo de lo que va esta prueba
-      if(method==='wallet_switchEthereumChain'){ await new Promise(r=>setTimeout(r,30000)); return null; }
+      if(method==='wallet_switchEthereumChain'){
+        const pedida=parseInt(params[0].chainId,16);
+        // igual que handleSwitchChain: si la cadena esta aprobada en la sesion
+        // el SDK la cambia el solo y no molesta a la cartera
+        if((window.__aprobadas||[1,56]).includes(pedida)){ prov._cid=params[0].chainId; return null; }
+        await new Promise(r=>setTimeout(r,30000)); return null; }
       if(method==='eth_sendTransaction'){ window.__tx=params[0]; window.__txs.push(params[0]);
         if(window.__firmaLenta) await new Promise(r=>setTimeout(r,30000));
         return '0x'+String(window.__txs.length).repeat(64).slice(0,64); }
@@ -103,34 +108,34 @@ chk('y ofrece abrir MetaMask para emparejar',
 await pg.evaluate(()=>window.__aprobar()); await pg.waitForTimeout(1800);
 chk('aprobada, el selector se cierra', await pg.locator('.nrm-fondo').count(), 0);
 
-// el widget arranca en ETH y la cartera esta en BNB Chain
-chk('el boton pide cambiar de red', (await pg.locator('#wCta').textContent()).trim(), 'Switch to Ethereum');
+// El widget arranca en ETH y la SESION de WalletConnect apunta a BNB, que es
+// lo que pasa al volver de una compra en BNB: en MetaMask se ve Ethereum, pero
+// la red de WalletConnect es la de la sesion. Antes el boton decia «Switch to
+// Ethereum» y no habia forma de entenderlo desde fuera.
+chk('el boton NO pide cambiar de red por WalletConnect',
+    (await pg.locator('#wCta').textContent()).trim(), 'Enter an amount');
+chk('  aunque la sesion siga en BNB',
+    await pg.evaluate(()=>window.__pedidos.length>0), true);
+
+await pg.locator('#wUsd').fill('0,05'); await pg.waitForTimeout(700);
+chk('  y deja poner el importe',
+    await pg.evaluate(()=>document.getElementById('wCta').textContent.indexOf('Buy')===0), true);
 
 // el toque simulado de Playwright no siempre llega a #wCta en movil; el
 // click desde dentro de la pagina recorre el mismo camino de codigo
 await pg.evaluate(()=>document.getElementById('wCta').click());
-await pg.waitForTimeout(1500);
-chk('se pidio el cambio a la cartera',
+await pg.waitForTimeout(1800);
+chk('la compra alinea la red ella sola',
     await pg.evaluate(()=>window.__pedidos.includes('wallet_switchEthereumChain')), true);
-chk('sale la hoja para volver a la cartera', await pg.locator('.nrm-fondo').count(), 1);
+chk('  sin enseñar la hoja para un cambio que no sale al teléfono',
+    await pg.evaluate(()=>{const f=[...document.querySelectorAll('.nrm-fondo')];
+      return f.some(x=>/Switch network/i.test(x.textContent));}), false);
+chk('sale la hoja para firmar', await pg.locator('.nrm-fondo').count(), 1);
 chk('   y lleva el boton de abrir MetaMask',
     await pg.locator('.nrm-fondo a[href^="metamask://"]').count(), 1);
 
 
 // ── ya en Ethereum: comprar con ETH ─────────────────────────────────────────
-await pg.evaluate(()=>{ const p=document.querySelector('.nrm-fondo .nrm-ico[aria-label=Close]');
-  if(p) p.click(); });
-await pg.evaluate(()=>{ window.__cid('0x1'); });      // la cartera ya cambio
-await pg.waitForTimeout(1600);
-chk('en Ethereum el boton pide importe', (await pg.locator('#wCta').textContent()).trim(), 'Enter an amount');
-
-await pg.locator('#wUsd').fill('0,05');               // coma: el teclado de iOS
-await pg.waitForTimeout(700);
-chk('la coma cuenta como decimal',
-    await pg.evaluate(()=>document.getElementById('wCta').textContent.indexOf('Buy')===0), true);
-
-await pg.evaluate(()=>document.getElementById('wCta').click());
-await pg.waitForTimeout(1600);
 const tx = await pg.evaluate(()=>window.__tx);
 chk('se firma una transaccion', !!tx, true);
 chk('   al contrato de venta', (tx&&tx.to||'').toLowerCase(),
@@ -140,6 +145,25 @@ chk('   y el valor que se escribio', BigInt(tx&&tx.value||'0x0').toString(), (5n
 chk('sale la hoja para firmar en MetaMask',
     await pg.locator('.nrm-fondo a[href^="metamask://"]').count(), 1);
 
+
+// ── si la cadena NO esta aprobada en la sesion, si sale al telefono ────────
+// Ahi el SDK reenvia la peticion a la cartera y puede tardar: la hoja tiene
+// que aparecer, con retraso pero aparecer, o volvemos al bloqueo mudo.
+{
+  const {ctx:ctx3, pg:pg3} = await abrir({cid0:'0x38', lenta:false});
+  await pg3.evaluate(()=>{ window.__aprobadas=[56]; });   // Ethereum sin aprobar
+  await pg3.evaluate(()=>document.getElementById('wCta').click()); await pg3.waitForTimeout(1000);
+  await pg3.locator('.nrm-w',{hasText:'MetaMask'}).first().click(); await pg3.waitForTimeout(700);
+  await pg3.evaluate(()=>window.__aprobar()); await pg3.waitForTimeout(1800);
+  await pg3.locator('#wUsd').fill('0,05'); await pg3.waitForTimeout(700);
+  await pg3.evaluate(()=>document.getElementById('wCta').click());
+  await pg3.waitForTimeout(600);
+  chk('cadena sin aprobar: al principio no molesta', await pg3.locator('.nrm-fondo').count(), 0);
+  await pg3.waitForTimeout(1600);
+  chk('  pero si tarda, enseña cómo volver a la cartera',
+      await pg3.locator('.nrm-fondo a[href^="metamask://"]').count(), 1);
+  await ctx3.close();
+}
 
 // ── USDT en Ethereum: el permiso hay que ponerlo a cero primero ─────────────
 // Tether en Ethereum no deja cambiar un permiso distinto de cero. Este camino

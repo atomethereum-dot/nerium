@@ -414,7 +414,13 @@
     if (q.tipo === 'wc') {
       if (!haySesionWC()) { olvidar(); return Promise.resolve(false); }
       return iniciarWC().then(function (prov) {
-        if (!prov.session) { olvidar(); return false; }
+        /* Que exista una sesión guardada no quiere decir que siga viva: si
+           caducó, eth_accounts sigue devolviendo su cuenta de memoria y la
+           página se quedaría creyéndose conectada a un fantasma, con un botón
+           que manda peticiones que nadie va a ver. */
+        var ss = prov.session;
+        var viva = ss && (!ss.expiry || ss.expiry * 1000 > Date.now());
+        if (!viva) { olvidar(); return false; }
         return enchufar(prov, nombreWC(prov), true).then(function () { return true; });
       }).catch(function () { return false; });
     }
@@ -489,10 +495,10 @@
       .then(function (prov) { wcProv = prov; return prov; });
   }
 
-  function cambiarRed(cid) {
+  function cambiarRed(cid, demora) {
     var c = CADENAS[cid];
 
-    var pedida = pedirALaCartera('wallet_switchEthereumChain', [{ chainId: c.hex }])
+    var pedida = pedirALaCartera('wallet_switchEthereumChain', [{ chainId: c.hex }], demora)
       .catch(function (e) {
         /* 4902 = la cartera no conoce la red. Pasa siempre con BNB Chain en
            MetaMask recién instalado. */
@@ -502,7 +508,7 @@
             chainId: c.hex, chainName: c.nombre,
             nativeCurrency: { name: c.moneda, symbol: c.simbolo, decimals: 18 },
             rpcUrls: [c.rpc[0]], blockExplorerUrls: [c.explorador]
-          }]);
+          }], demora);
         }
         throw e;
       });
@@ -577,9 +583,17 @@
      wallet…» sin decir a dónde ir. Quien venía de comprar en BNB y quería
      comprar en Ethereum se topaba justo con eso: el botón decía «Switch to
      Ethereum», lo pulsaba, y ahí se acababa todo. */
-  function pedirALaCartera(metodo, params) {
+  function pedirALaCartera(metodo, params, demora) {
     var p = sesion.prov.request({ method: metodo, params: params });
-    volverACartera();
+    if (!demora) { volverACartera(); return p; }
+    /* Con demora: hay peticiones que WalletConnect resuelve él solo, sin salir
+       al teléfono —cambiar a una red ya aprobada en la sesión es una de ellas—,
+       y ahí una hoja diciendo «abre tu cartera» aparecería y se iría sola en el
+       mismo parpadeo. Se espera un momento: si contesta, no se enseña nada; si
+       de verdad ha salido hacia la app, se enseña. */
+    var reloj = setTimeout(volverACartera, demora);
+    var parar = function () { clearTimeout(reloj); };
+    p.then(parar, parar);
     return p;
   }
 
@@ -1551,7 +1565,20 @@
     if (e.pausada)   { cta.textContent = 'Round paused';     cta.disabled = true; return; }
     if (!e.viva)     { cta.textContent = 'Round not open yet'; cta.disabled = true; return; }
     if (!sesion.cuenta) { cta.textContent = 'Connect wallet'; return; }
-    if (sesion.cid !== c.id) { cta.textContent = 'Switch to ' + c.nombre; return; }
+    /* Por WalletConnect la red NO es la que enseñe la app de la cartera: es la
+       de la sesión, y la lleva el proveedor. Volvía de la compra en BNB
+       apuntando a BNB, así que con Ethereum elegido el botón decía «Switch to
+       Ethereum» aunque en MetaMask se viera Ethereum, y no había forma de
+       entenderlo desde fuera.
+
+       Y no hace falta pedírselo a nadie: cambiar a una red ya aprobada en la
+       sesión es una operación local del SDK, y la firma viaja con su cadena
+       dentro, así que la cartera se pone en la red al confirmar. Se alinea
+       sola dentro de la compra. Con una extensión sí hace falta el cambio
+       explícito, y ahí se sigue pidiendo. */
+    if (!sesion.wc && sesion.cid !== c.id) {
+      cta.textContent = 'Switch to ' + c.nombre; return;
+    }
     if (pago === 0n) { cta.textContent = 'Enter an amount'; cta.disabled = true; return; }
     var u = usdDe(pago);
     cta.textContent = u === null ? 'Connect wallet'
@@ -1580,7 +1607,7 @@
 
     if (e.ok && e.terminada && e.reparto) return reclamar();
     if (!sesion.cuenta) return abrirCarteras();
-    if (sesion.cid !== c.id) {
+    if (!sesion.wc && sesion.cid !== c.id) {
       /* Dice qué se está pidiendo, no un «confirma» a secas: lo que llega a la
          cartera es un cambio de red, no la compra. */
       trabajando('Switch network in your wallet…');
@@ -1590,6 +1617,15 @@
     }
     comprar();
   });
+
+  /* Que el proveedor apunte a la red de la compra antes de firmar. Si ya está,
+     no hace nada; si la cadena está aprobada en la sesión, el SDK lo resuelve
+     sin salir al teléfono, y por eso la hoja de «abre tu cartera» va con
+     retraso: solo aparece si la petición ha salido de verdad. */
+  function alinearRed(c) {
+    if (sesion.cid === c.id) return Promise.resolve();
+    return cambiarRed(c.id, 1200);
+  }
 
   function comprar() {
     var c = red(), m = medio();
@@ -1611,7 +1647,9 @@
     /* El tope es por cartera y para toda la ronda, sumando ETH y USDT. Se
        comprueba antes de firmar para no hacerle gastar gas en un revert. */
     trabajando('Checking…');
-    llamar(c.id, c.venta, SEL.remaining + encA(sesion.cuenta)).then(function (r) {
+    alinearRed(c).then(function () {
+      return llamar(c.id, c.venta, SEL.remaining + encA(sesion.cuenta));
+    }).then(function (r) {
       var queda = decU(palabras(r)[0]);
       if (queda < usd8) {
         libre();
@@ -1681,7 +1719,7 @@
   function reclamar() {
     var c = red();
     if (!sesion.cuenta) return abrirCarteras();
-    if (sesion.cid !== c.id) {
+    if (!sesion.wc && sesion.cid !== c.id) {
       /* Dice qué se está pidiendo, no un «confirma» a secas: lo que llega a la
          cartera es un cambio de red, no la compra. */
       trabajando('Switch network in your wallet…');
@@ -1690,7 +1728,8 @@
       });
     }
     trabajando('Confirm in your wallet…');
-    enviar({ to: c.venta, data: SEL.claim })
+    alinearRed(c)
+      .then(function () { return enviar({ to: c.venta, data: SEL.claim }); })
       .then(function (h) { return confirmar(h, 'NRM sent to your wallet.'); })
       .catch(function (e) { libre(); aviso(motivo(e), true); });
   }
