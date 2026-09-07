@@ -382,25 +382,35 @@
 
   function cambiarRed(cid) {
     var c = CADENAS[cid];
-    return sesion.prov.request({
-      method: 'wallet_switchEthereumChain',
-      params: [{ chainId: c.hex }]
-    }).catch(function (e) {
-      /* 4902 = la cartera no conoce la red. Pasa siempre con BNB Chain en
-         MetaMask recién instalado. */
-      if (e && (e.code === 4902 || (e.data && e.data.originalError &&
-          e.data.originalError.code === 4902))) {
-        return sesion.prov.request({
-          method: 'wallet_addEthereumChain',
-          params: [{
+
+    var pedida = pedirALaCartera('wallet_switchEthereumChain', [{ chainId: c.hex }])
+      .catch(function (e) {
+        /* 4902 = la cartera no conoce la red. Pasa siempre con BNB Chain en
+           MetaMask recién instalado. */
+        if (e && (e.code === 4902 || (e.data && e.data.originalError &&
+            e.data.originalError.code === 4902))) {
+          return pedirALaCartera('wallet_addEthereumChain', [{
             chainId: c.hex, chainName: c.nombre,
             nativeCurrency: { name: c.moneda, symbol: c.simbolo, decimals: 18 },
             rpcUrls: [c.rpc[0]], blockExplorerUrls: [c.explorador]
-          }]
-        });
-      }
-      throw e;
-    }).then(function () { sesion.cid = cid; });
+          }]);
+        }
+        throw e;
+      });
+
+    /* Y una red de seguridad: hay carteras que cambian de red, lo cuentan por
+       chainChanged, y dejan la petición colgada para siempre. Sin esto la
+       página se quedaba en «Switch network in your wallet…» con la cartera ya
+       en la red pedida, que por fuera se ve igual que si no funcionara nada. */
+    var reloj = null;
+    var yaEsta = new Promise(function (ok) {
+      reloj = setInterval(function () { if (sesion.cid === cid) ok(); }, 400);
+    });
+    var soltar = function () { clearInterval(reloj); };
+
+    return Promise.race([pedida, yaEsta]).then(
+      function () { soltar(); sesion.cid = cid; },
+      function (e) { soltar(); throw e; });
   }
 
   /* A dónde saltar para que el visitante vea la petición que acaba de mandarse.
@@ -448,11 +458,25 @@
     return null;
   }
 
-  function enviar(tx) {
-    tx.from = sesion.cuenta;
-    var p = sesion.prov.request({ method: 'eth_sendTransaction', params: [tx] });
+  /* Toda petición que el visitante tiene que aprobar EN SU CARTERA sale por
+     aquí, y en el mismo paso se le enseña cómo volver a la app.
+
+     Antes esto vivía dentro de enviar(), así que solo lo tenían las firmas de
+     transacción. El cambio de red no: por WalletConnect esa petición viaja por
+     el relay y llega al teléfono como una notificación que puede no verse, la
+     cartera no pasa a primer plano, y la página se quedaba en «Confirm in your
+     wallet…» sin decir a dónde ir. Quien venía de comprar en BNB y quería
+     comprar en Ethereum se topaba justo con eso: el botón decía «Switch to
+     Ethereum», lo pulsaba, y ahí se acababa todo. */
+  function pedirALaCartera(metodo, params) {
+    var p = sesion.prov.request({ method: metodo, params: params });
     volverACartera();
     return p;
+  }
+
+  function enviar(tx) {
+    tx.from = sesion.cuenta;
+    return pedirALaCartera('eth_sendTransaction', [tx]);
   }
 
   /* Espera a que la transacción entre en un bloque. Se pregunta por el RPC
@@ -1441,7 +1465,9 @@
     if (e.ok && e.terminada && e.reparto) return reclamar();
     if (!sesion.cuenta) return abrirCarteras();
     if (sesion.cid !== c.id) {
-      trabajando('Confirm in your wallet…');
+      /* Dice qué se está pidiendo, no un «confirma» a secas: lo que llega a la
+         cartera es un cambio de red, no la compra. */
+      trabajando('Switch network in your wallet…');
       return cambiarRed(c.id).then(function () { return refrescar(); })
         .then(function () { libre(); pintar(); })
         .catch(function (err) { libre(); aviso(motivo(err), true); });
@@ -1540,7 +1566,9 @@
     var c = red();
     if (!sesion.cuenta) return abrirCarteras();
     if (sesion.cid !== c.id) {
-      trabajando('Confirm in your wallet…');
+      /* Dice qué se está pidiendo, no un «confirma» a secas: lo que llega a la
+         cartera es un cambio de red, no la compra. */
+      trabajando('Switch network in your wallet…');
       return cambiarRed(c.id).then(function () { libre(); }).catch(function (e) {
         libre(); aviso(motivo(e), true);
       });
