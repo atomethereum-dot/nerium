@@ -176,10 +176,26 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 .doc h3{font-weight:500;font-size:17px;margin:28px 0 10px}
 .doc p{color:var(--ink-2);margin-bottom:16px;max-width:74ch;text-wrap:pretty}
 .doc strong{color:var(--ink);font-weight:600}
+/* un strong DENTRO de un enlace hereda el azul del enlace, no la tinta.
+   Vale también para #impreso, que es donde se arma el PDF. */
+.doc a strong, .doc a b, .doc a em,
+#impreso a strong, #impreso a b, #impreso a em{color:inherit}
+#impreso a.enl{color:var(--blue)}
 .doc ul,.doc ol{color:var(--ink-2);margin:0 0 16px 20px;max-width:74ch}
 .doc li{margin-bottom:7px}
-.doc a.enl{color:var(--blue);border-bottom:1px solid rgba(47,107,255,.28)}
-.doc a.enl:hover{border-bottom-color:var(--blue)}
+.doc a.enl{color:var(--blue);font-weight:500;border-bottom:0;
+  text-decoration:underline;text-decoration-thickness:1.5px;
+  text-underline-offset:3px;text-decoration-color:rgba(47,107,255,.5);
+  transition:text-decoration-color .16s ease, background .16s ease}
+.doc a.enl:hover{text-decoration-color:var(--blue);background:rgba(47,107,255,.09);
+  border-radius:3px;box-shadow:0 0 0 3px rgba(47,107,255,.09)}
+
+/* los que salen del documento llevan además la flecha de salida */
+.enl[href^="https://nereum.xyz/explorer"]::after{
+  content:'';display:inline-block;width:.6em;height:.6em;margin-left:.32em;
+  background:currentColor;
+  -webkit-mask:no-repeat center/contain url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' d='M6 3h7v7M13 3 3.5 12.5'/%3E%3C/svg%3E");
+  mask:no-repeat center/contain url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' d='M6 3h7v7M13 3 3.5 12.5'/%3E%3C/svg%3E")}
 hr{border:0;border-top:1px solid var(--linea);margin:40px 0}
 
 /* fichas y tablas */
@@ -228,12 +244,15 @@ td b{color:var(--ink)}
 
 /* ── pasar de página ── */
 .pasar{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:56px;max-width:74ch}
+/* la navegación entre secciones también es azul, para que se vea que es
+   pulsable igual que el resto de enlaces */
 .pasar a{border:1px solid var(--linea);border-radius:8px;padding:14px 16px;
-  transition:border-color var(--t1) var(--ease)}
+  transition:border-color var(--t1) var(--ease),background var(--t1) var(--ease)}
+.pasar a:hover{border-color:var(--blue);background:rgba(47,107,255,.05)}
 .pasar a:hover{border-color:var(--blue)}
 .pasar em{display:block;font-style:normal;font-family:var(--m);font-size:10.5px;
   letter-spacing:.16em;text-transform:uppercase;color:var(--ink-3);margin-bottom:5px}
-.pasar b{font-weight:500;font-size:15px;color:var(--ink)}
+.pasar b{font-weight:500;font-size:15px;color:var(--blue)}
 .pasar .der{text-align:right}
 
 /* ── buscador ── */
@@ -498,6 +517,38 @@ td b{color:var(--ink)}
 @media(max-width:420px){ .g-pie{font-size:34px} }
 @media print{ #impreso .esq{break-inside:avoid;margin-top:9mm} } }
 .g-num{font-family:var(--m);font-size:11px;fill:var(--blue);letter-spacing:.08em}
+
+/* ══ la leyenda del anillo ══ */
+.anillo-ley{display:grid;gap:2px;flex:1 1 260px;min-width:240px}
+.al-fila{display:grid;grid-template-columns:10px 1fr auto auto;align-items:center;
+  gap:10px;padding:7px 0;border-bottom:1px solid var(--linea);font-size:13.5px}
+.al-fila:last-child{border-bottom:0}
+.al-fila i{width:10px;height:10px;border-radius:2px}
+.al-fila b{font-weight:500;font-variant-numeric:tabular-nums}
+.al-fila s{text-decoration:none;font-family:var(--m,ui-monospace,monospace);font-size:11.5px;
+  color:var(--tinta-2,#6B727E);min-width:88px;text-align:right;font-variant-numeric:tabular-nums}
+.an-n{text-anchor:middle;font-size:30px;font-weight:300;letter-spacing:-.03em;fill:var(--tinta,#0B0D12)}
+.an-k{text-anchor:middle;font-size:7.4px;letter-spacing:.2em;fill:var(--tinta-2,#6B727E)}
+@media(max-width:600px){ .al-fila s{display:none} }
+
+/* ══ el enlace del contrato ══
+   En azul y con una flecha, para que se vea a la primera que se puede pulsar.
+   El código va en el mismo azul, que si no el enlace parecía texto plano. */
+.enl.ctr{white-space:nowrap}
+.enl.ctr code{color:var(--blue);font-weight:500;background:rgba(47,107,255,.07);
+  padding:2px 6px;border-radius:4px;font-size:.84em;letter-spacing:-.01em}
+/* la dirección es larga: en pantalla estrecha se parte, pero la flecha
+   sigue pegada a ella */
+@media(max-width:720px){
+  .enl.ctr{white-space:normal}
+  .enl.ctr code{word-break:break-all;font-size:.8em}
+}
+.enl.ctr:hover code{background:rgba(47,107,255,.14)}
+.enl.ctr::after{
+  content:'';display:inline-block;width:.62em;height:.62em;margin-left:.36em;
+  vertical-align:-.02em;background:currentColor;
+  -webkit-mask:no-repeat center/contain url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 3h7v7M13 3 3.5 12.5'/%3E%3C/svg%3E");
+  mask:no-repeat center/contain url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 3h7v7M13 3 3.5 12.5'/%3E%3C/svg%3E")}
 </style>
 </head>
 <body>
@@ -563,8 +614,8 @@ td b{color:var(--ink)}
     <div class="gr">
       <h5>Protocol</h5>
       <a href="#/network">NereumEVM — Blockchain</a>
+      <a href="#/scan">NereumEVM — Explorer</a>
       <a href="#/tokenization">Asset tokenization</a>
-      <a href="#/scan">Nereum Explorer</a>
       <a href="#/dex">Nereum DEX</a>
       <a href="#/nusd">NUSD</a>
       <a href="#/forge">Nereum Forge</a>
@@ -933,7 +984,7 @@ const DIAG={
   kyc:          figuraCard('n','prisma',     'Team KYC',
                   'Founders verified by a third party', 'TRUST',
                   {escala:340, cx:850, cy:50, ax:-0.30, ay:0.58, luz:[-0.46,-0.72,0.52], rango:0.94}),
-  scan:         figuraCard('o','placas',     'Nereum Explorer',
+  scan:         figuraCard('o','placas',     'NereumEVM — Explorer',
                   'The explorer · read the chain', 'THE NETWORK',
                   {escala:300, cx:830, cy:90, ax:-0.34, ay:0.60}),
   dex:          figuraCard('u','anillo',     'Nereum DEX',
@@ -1490,14 +1541,14 @@ consecuencias, y cada parte se puede verificar en cadena:</p>
 <table>
   <tr><th>Propiedad</th><th>Qué significa</th><th>Comprobación</th></tr>
   <tr><td><b>Suministro fijo</b></td>
-      <td>600.000.000 NRM en el génesis. No existe función de acuñación que nadie pueda invocar, nunca.</td>
-      <td>${PEND('dirección del contrato')}</td></tr>
+      <td>160.000.000 NRM en el génesis. No existe función de acuñación que nadie pueda invocar, nunca.</td>
+      <td><a href="https://etherscan.io/address/0x9eAb4Ab3D08d0cAc72ACAcEA19904aF2f0D69228#code" target="_blank" rel="noopener">Etherscan &#8599;</a></td></tr>
   <tr><td><b>Sin pausa</b></td>
       <td>Las transferencias no se pueden congelar. Ni por nosotros ni por nadie.</td>
-      <td>${PEND('dirección del contrato')}</td></tr>
+      <td><a href="https://etherscan.io/address/0x9eAb4Ab3D08d0cAc72ACAcEA19904aF2f0D69228#code" target="_blank" rel="noopener">Etherscan &#8599;</a></td></tr>
   <tr><td><b>Sin lista negra</b></td>
       <td>Ninguna dirección puede ser bloqueada por decreto.</td>
-      <td>${PEND('dirección del contrato')}</td></tr>
+      <td><a href="https://etherscan.io/address/0x9eAb4Ab3D08d0cAc72ACAcEA19904aF2f0D69228#code" target="_blank" rel="noopener">Etherscan &#8599;</a></td></tr>
 </table>
 
 <h2 id="contratos">Contratos desplegados</h2>
@@ -1506,9 +1557,9 @@ a línea el código auditado con el código que corre.</p>
 <table>
   <tr><th>Elemento</th><th>Valor</th></tr>
   <tr><td>Token</td><td><b>NRM</b></td></tr>
-  <tr><td>Dirección del contrato</td><td>${PEND('dirección')}</td></tr>
-  <tr><td>Red</td><td>${PEND('red')}</td></tr>
-  <tr><td>Código verificado</td><td>${PEND('enlace al código verificado en el explorador')}</td></tr>
+  <tr><td>Dirección del contrato</td><td><a href="https://etherscan.io/address/0x9eAb4Ab3D08d0cAc72ACAcEA19904aF2f0D69228" target="_blank" rel="noopener"><code>0x9eAb4Ab3D08d0cAc72ACAcEA19904aF2f0D69228</code></a></td></tr>
+  <tr><td>Red</td><td><b>Ethereum</b> · ERC-20</td></tr>
+  <tr><td>Código verificado</td><td><a href="https://etherscan.io/address/0x9eAb4Ab3D08d0cAc72ACAcEA19904aF2f0D69228#code" target="_blank" rel="noopener">Ver en Etherscan &#8599;</a></td></tr>
   <tr><td>Propiedad</td><td><b>Renunciada</b> — ver esa página</td></tr>
 </table>
 
@@ -1593,19 +1644,19 @@ internet.</p>
 `},
 
 network:{grupo:'Protocolo', titulo:'NereumEVM — Blockchain', html:`
-<p><strong>NereumEVM es una blockchain de capa 1 con la tokenización de activos
-integrada en el protocolo.</strong></p>
+<p><strong>Esta es la cadena en sí: la máquina que decide qué se escribe y qué
+no.</strong></p>
 
 <p>Es una blockchain completa: sus propios validadores, su propio consenso, su
 propio token y su propio estado. Es compatible con EVM, así que ejecuta contratos
 inteligentes estándar y cualquier desarrollador que haya trabajado en Ethereum
 puede construir aquí sin aprender nada nuevo.</p>
 
-<p>Lo que añade es una capa nativa para activos del mundo real. En una cadena de
-propósito general desplegarías un contrato para representar un edificio, una
-factura o un fondo, y luego gestionarías las reglas por separado. <strong>En
-Nereum el activo y sus reglas son un mismo objeto, y de los dos se encarga el
-protocolo.</strong></p>
+<p>Donde se aparta de cualquier otra red es en lo que comprueba. Todas verifican
+que una firma es real y que un saldo existe. NereumEVM verifica una tercera cosa
+—si ese titular puede recibir ese activo— y se lo pregunta al activo, porque aquí
+<strong>un activo no es solo un saldo: lleva encima las condiciones que le ató su
+emisor.</strong></p>
 
 <h3>Qué significa en la práctica</h3>
 <p>Un emisor tokeniza un activo directamente en la cadena: el inmueble, el
@@ -1617,10 +1668,11 @@ hay periodo de permanencia y qué hay que reportar.</p>
 manos, la red las comprueba como parte de validar la transferencia, en el mismo
 paso y a la misma velocidad con la que comprueba el saldo y la firma.</p>
 
-<p>El resultado es que un activo tokenizado se comporta como cualquier otro
-token —se mueve en segundos, liquida en cadena y se puede guardar en cualquier
-cartera de la red— mientras las reglas que lo convierten en un instrumento
-regulado siguen atadas a él.</p>
+<p>Por eso esto tenía que ser una cadena y no una aplicación. Una regla que se
+despliega encima de una red se puede rodear: lleva el activo a un mercado que no
+ejecuta tu contrato y la regla deja de viajar con él. Una regla que aplican los
+validadores no se puede dejar atrás, porque en esta red no hay ningún sitio donde
+no rija.</p>
 
 <h2 id="capas">Una cadena, cuatro capas</h2>
 <p>Todo activo emitido en Nereum pasa por las cuatro cada vez que se mueve.</p>
@@ -1656,6 +1708,10 @@ comprueba la credencial, no a la persona que hay detrás.</p>
 tokenization:{grupo:'Protocolo', titulo:'Tokenización de activos', html:`
 <p>Tokenizar un activo no es difícil. Hacerlo <strong>mover</strong>, y que siga
 siendo exigible mientras se mueve, ese es el problema entero.</p>
+
+<p>El proceso de emisión que describe esta página está abierto. Recórrelo tú
+mismo en <a class="enl" href="https://nereum.xyz/explorer/#/tokenize"><strong>nereum.xyz/explorer/#/tokenize</strong></a>:
+describe el activo, adjunta su documentación, elige la política y emite.</p>
 
 <p>Esta página explica cómo llega un activo a Nereum, qué registra la cadena
 sobre él, y qué pasa cuando el registro y el mundo real no coinciden.</p>
@@ -1725,10 +1781,11 @@ imponer un juez pese a lo que diga la cadena</strong>.</p>
 </ul>
 `},
 
-scan:{grupo:'Protocolo', titulo:'Nereum Explorer', html:`
-<p><strong>Nereum Explorer es el explorador de bloques de la red:</strong> una web
-pública que lee la cadena y muestra lo que hay en ella — cada bloque, cada
-transacción, cada dirección y cada contrato desplegado.</p>
+scan:{grupo:'Protocolo', titulo:'NereumEVM — Explorer', html:`
+<p><strong>NereumEVM Explorer es el explorador de bloques de la red:</strong> una web
+pública en <a class="enl" href="https://nereum.xyz/explorer"><strong>nereum.xyz/explorer</strong></a> que
+lee la cadena y muestra lo que hay en ella — cada bloque, cada transacción, cada
+dirección y cada contrato desplegado.</p>
 
 <h2 id="que">Qué muestra</h2>
 <p>Abres una dirección y ves su historial completo: qué tiene, qué ha enviado,
@@ -1740,21 +1797,21 @@ general no puede: la política atada al activo, cuántos titulares cualificados
 tiene y la referencia del documento contra el que se emitió.</p>
 
 <h2 id="como">Cómo funciona</h2>
-<p>Nereum Explorer mantiene su propia copia de la cadena e indexa cada bloque conforme se
+<p>NereumEVM Explorer mantiene su propia copia de la cadena e indexa cada bloque conforme se
 produce. No tiene acceso privilegiado ni custodia nada: lee los mismos datos
 públicos que lee cualquier nodo, y los organiza para que una persona pueda
 usarlos.</p>
-<p>Por eso es sustituible. Si Nereum Explorer desapareciera mañana, cualquiera podría
+<p>Por eso es sustituible. Si NereumEVM Explorer desapareciera mañana, cualquiera podría
 levantar su propio explorador contra la misma cadena y ver exactamente lo mismo.</p>
 
 <h2 id="resuelve">Qué problema resuelve</h2>
 <p>Una blockchain sin explorador es una base de datos que nadie puede leer. Los
 datos son públicos en teoría e inalcanzables en la práctica, porque leerlos
 directamente significa levantar un nodo y escribir software.</p>
-<p>Nereum Explorer es lo que convierte <em>"puedes verificarlo tú mismo"</em> de afirmación
+<p>NereumEVM Explorer es lo que convierte <em>"puedes verificarlo tú mismo"</em> de afirmación
 en instrucción. Todas las pruebas de este documento —el suministro, el contrato,
 la propiedad, los titulares— terminan en una dirección que alguien tiene que
-poder abrir. Nereum Explorer es donde la abre.</p>
+poder abrir. NereumEVM Explorer es donde la abre.</p>
 `},
 
 dex:{grupo:'Protocolo', titulo:'Nereum DEX', html:`
@@ -1887,7 +1944,7 @@ qué proporciones y con qué límites.</p>
 cadena y se reparten proporcionalmente entre los titulares, sin que antes haya
 que reconciliar un registro. Para salir, el titular rescata el token de la bóveda
 o lo vende en la <a class="enl" href="#/dex">bolsa</a>.</p>
-<p>Todo lo que la bóveda tiene es visible en <a class="enl" href="#/scan">Nereum
+<p>Todo lo que la bóveda tiene es visible en <a class="enl" href="#/scan">NereumEVM
 Explorer</a>: los activos, las cantidades y los movimientos. Una bóveda no es una
 promesa sobre una cartera; es una cartera que cualquiera puede inspeccionar.</p>
 
@@ -2030,10 +2087,10 @@ la única dirección donde la whitelist está abierta. El resto de canales está
   <tr><th>Elemento</th><th>Valor</th></tr>
   <tr><td>Símbolo</td><td><b>NRM</b></td></tr>
   <tr><td>Red</td><td><b>Ethereum</b> · ERC-20</td></tr>
-  <tr><td>Suministro total</td><td class="num"><b>600.000.000</b> — fijo en el génesis, no puede crecer</td></tr>
+  <tr><td>Suministro total</td><td class="num"><b>160.000.000</b> — fijo en el génesis, no puede crecer</td></tr>
   <tr><td>Impuesto de compra y venta</td><td><b>0%</b></td></tr>
-  <tr><td>Precio en whitelist</td><td class="num"><b>$0,10</b></td></tr>
-  <tr><td>Precio de salida</td><td class="num"><b>$0,50</b> — Uniswap v3</td></tr>
+  <tr><td>Precio en whitelist</td><td class="num"><b>$0,20</b></td></tr>
+  <tr><td>Precio de salida</td><td class="num"><b>$1,00</b> — Uniswap v3</td></tr>
   <tr><td>Contrato</td><td>Propiedad renunciada — ver esa página</td></tr>
 </table>
 
@@ -2042,14 +2099,14 @@ la única dirección donde la whitelist está abierta. El resto de canales está
   <tr><th>Elemento</th><th>Valor</th></tr>
   <tr><td>Mínimo</td><td class="num"><b>$1</b></td></tr>
   <tr><td>Máximo por cartera</td><td class="num"><b>$10.000</b></td></tr>
-  <tr><td>Objetivo</td><td class="num"><b>$6.000.000</b></td></tr>
+  <tr><td>Objetivo</td><td class="num"><b>$16.000.000</b></td></tr>
 </table>
 
 <h2 id="caracteristicas">Qué te da esta ronda</h2>
 <table>
   <tr><th>Característica</th><th>Qué significa para el comprador</th></tr>
-  <tr><td><b>Entrada a $0,10</b></td>
-      <td>El precio más bajo al que va a vender el proyecto. NRM abre a $0,50 en Uniswap v3, donde el precio de apertura lo fija el rango del fondo.</td></tr>
+  <tr><td><b>Entrada a $0,20</b></td>
+      <td>El precio más bajo al que va a vender el proyecto. NRM abre a $1,00 en Uniswap v3, donde el precio de apertura lo fija el rango del fondo.</td></tr>
   <tr><td><b>Mínimo de $1</b></td>
       <td>Deliberadamente bajo. Una ronda que empieza en cuatro cifras es una ronda diseñada para excluir a casi todo el mundo.</td></tr>
   <tr><td><b>Tope de $10.000 por cartera</b></td>
@@ -2061,16 +2118,17 @@ la única dirección donde la whitelist está abierta. El resto de canales está
 </table>
 
 <h2 id="reparto">Reparto del suministro</h2>
+<div class="anillo"><svg viewBox="0 0 200 200" role="img" aria-label="SUMINISTRO TOTAL"><circle cx="100" cy="100" r="78" fill="none" stroke="#2F6BFF" stroke-width="26" stroke-dasharray="245.04 245.04" stroke-dashoffset="0.00" transform="rotate(-90 100 100)"/><circle cx="100" cy="100" r="78" fill="none" stroke="#5B8CFF" stroke-width="26" stroke-dasharray="73.51 416.58" stroke-dashoffset="-245.04" transform="rotate(-90 100 100)"/><circle cx="100" cy="100" r="78" fill="none" stroke="#86A9FF" stroke-width="26" stroke-dasharray="49.01 441.08" stroke-dashoffset="-318.56" transform="rotate(-90 100 100)"/><circle cx="100" cy="100" r="78" fill="none" stroke="#A9C2FF" stroke-width="26" stroke-dasharray="24.50 465.58" stroke-dashoffset="-367.57" transform="rotate(-90 100 100)"/><circle cx="100" cy="100" r="78" fill="none" stroke="#8E97A8" stroke-width="26" stroke-dasharray="24.50 465.58" stroke-dashoffset="-392.07" transform="rotate(-90 100 100)"/><circle cx="100" cy="100" r="78" fill="none" stroke="#A6AEBC" stroke-width="26" stroke-dasharray="24.50 465.58" stroke-dashoffset="-416.58" transform="rotate(-90 100 100)"/><circle cx="100" cy="100" r="78" fill="none" stroke="#BEC4CF" stroke-width="26" stroke-dasharray="24.50 465.58" stroke-dashoffset="-441.08" transform="rotate(-90 100 100)"/><circle cx="100" cy="100" r="78" fill="none" stroke="#D6DAE2" stroke-width="26" stroke-dasharray="24.50 465.58" stroke-dashoffset="-465.58" transform="rotate(-90 100 100)"/><text x="100" y="96" class="an-n">160M</text><text x="100" y="114" class="an-k">SUMINISTRO TOTAL</text></svg><div class="anillo-ley"><div class="al-fila"><i style="background:#2F6BFF"></i><span>Venta privada</span><b>50,0%</b><s>80.000.000</s></div><div class="al-fila"><i style="background:#5B8CFF"></i><span>Listado en CEX</span><b>15,0%</b><s>24.000.000</s></div><div class="al-fila"><i style="background:#86A9FF"></i><span>Marketing</span><b>10,0%</b><s>16.000.000</s></div><div class="al-fila"><i style="background:#A9C2FF"></i><span>Reserva</span><b>5,0%</b><s>8.000.000</s></div><div class="al-fila"><i style="background:#8E97A8"></i><span>Equipo · bloqueado</span><b>5,0%</b><s>8.000.000</s></div><div class="al-fila"><i style="background:#A6AEBC"></i><span>Asesores</span><b>5,0%</b><s>8.000.000</s></div><div class="al-fila"><i style="background:#BEC4CF"></i><span>Desarrollo</span><b>5,0%</b><s>8.000.000</s></div><div class="al-fila"><i style="background:#D6DAE2"></i><span>Airdrop</span><b>5,0%</b><s>8.000.000</s></div></div></div>
 <table>
   <tr><th>Asignación</th><th>Porcentaje</th><th>Tokens</th></tr>
-  <tr><td>Venta privada</td><td class="num">50,0%</td><td class="num">300.000.000</td></tr>
-  <tr><td>Listado en CEX</td><td class="num">15,0%</td><td class="num">90.000.000</td></tr>
-  <tr><td>Marketing</td><td class="num">10,0%</td><td class="num">60.000.000</td></tr>
-  <tr><td>Reserva</td><td class="num">5,0%</td><td class="num">30.000.000</td></tr>
-  <tr><td>Equipo · bloqueado</td><td class="num">5,0%</td><td class="num">30.000.000</td></tr>
-  <tr><td>Asesores</td><td class="num">5,0%</td><td class="num">30.000.000</td></tr>
-  <tr><td>Desarrollo</td><td class="num">5,0%</td><td class="num">30.000.000</td></tr>
-  <tr><td>Airdrop</td><td class="num">5,0%</td><td class="num">30.000.000</td></tr>
+  <tr><td>Venta privada</td><td class="num">50,0%</td><td class="num">80.000.000</td></tr>
+  <tr><td>Listado en CEX</td><td class="num">15,0%</td><td class="num">24.000.000</td></tr>
+  <tr><td>Marketing</td><td class="num">10,0%</td><td class="num">16.000.000</td></tr>
+  <tr><td>Reserva</td><td class="num">5,0%</td><td class="num">8.000.000</td></tr>
+  <tr><td>Equipo · bloqueado</td><td class="num">5,0%</td><td class="num">8.000.000</td></tr>
+  <tr><td>Asesores</td><td class="num">5,0%</td><td class="num">8.000.000</td></tr>
+  <tr><td>Desarrollo</td><td class="num">5,0%</td><td class="num">8.000.000</td></tr>
+  <tr><td>Airdrop</td><td class="num">5,0%</td><td class="num">8.000.000</td></tr>
 </table>
 
 <h2 id="como">Cómo participar</h2>
@@ -2090,7 +2148,7 @@ contacte a nadie, y no anunciamos ventas fuera de las direcciones listadas en
 <a class="enl" href="#/links">Enlaces oficiales</a>.</p>
 
 <h2 id="listado">Cómo se fija el precio de salida</h2>
-<p>NRM sale a <strong>$0,50 en Uniswap v3</strong>. Ese precio no es una
+<p>NRM sale a <strong>$1,00 en Uniswap v3</strong>. Ese precio no es una
 estimación: en Uniswap v3 la liquidez se concentra dentro de un rango elegido al
 crear el fondo, así que <strong>el precio de apertura es un parámetro del
 fondo</strong>.</p>
@@ -2189,10 +2247,17 @@ gente no tiene un sitio autorizado donde comprobar.</p>
   <tr><th>Canal</th><th>Dirección</th></tr>
   <tr><td><b>Web</b></td>
       <td><a class="enl" href="https://nereum.xyz">nereum.xyz</a></td></tr>
+  <tr><td><b>Contrato NRM</b></td>
+      <td><a class="enl ctr" href="https://etherscan.io/address/0x9eAb4Ab3D08d0cAc72ACAcEA19904aF2f0D69228" target="_blank" rel="noopener"><code>0x9eAb4Ab3D08d0cAc72ACAcEA19904aF2f0D69228</code></a> — la única dirección del token</td></tr>
   <tr><td><b>Whitepaper</b></td>
       <td><a class="enl" href="https://nereum.xyz/whitepaper">nereum.xyz/whitepaper</a></td></tr>
+  <tr><td><b>Explorador</b></td>
+      <td><a class="enl" href="https://nereum.xyz/explorer">nereum.xyz/explorer</a> — donde se puede
+      comprobar cada afirmación de este documento</td></tr>
   <tr><td><b>Whitelist</b></td>
       <td><a class="enl" href="https://nereum.xyz">nereum.xyz</a> — el único sitio donde la ronda está abierta</td></tr>
+  <tr><td><b>X</b></td>
+      <td><a class="enl" href="https://x.com/nereumlab">x.com/nereumlab</a> — la única cuenta desde la que publicamos</td></tr>
 </table>
 
 <h2 id="patrones">Cómo funciona la suplantación de verdad</h2>
@@ -2250,9 +2315,10 @@ cualquiera puede consultar en el registro del estado.</p>
 <h2 id="token">Sobre el token</h2>
 
 <h3>¿Se puede crear más NRM?</h3>
-<p>No. El suministro está fijado en 600.000.000 en el génesis y no existe función
+<p>No. El suministro está fijado en 160.000.000 en el génesis y no existe función
 de acuñación que nadie pueda invocar. Con la propiedad renunciada, tampoco se
-podría añadir después.</p>
+podría añadir después. Comprueba tú mismo el suministro y el contrato en
+<a class="enl" href="https://nereum.xyz/explorer">nereum.xyz/explorer</a>.</p>
 
 <h3>¿Hay impuesto al comprar o vender?</h3>
 <p>No. No hay ninguna función de comisión en el contrato — no es una comisión
@@ -2260,11 +2326,12 @@ puesta a cero que pudiera subirse después.</p>
 
 <h3>¿Pueden congelar o bloquear mi cartera?</h3>
 <p>No. Se ha renunciado a la propiedad del contrato, así que no existe ninguna
-dirección con poder para pausar transferencias ni bloquear a un titular.
-</p>
+dirección con poder para pausar transferencias ni bloquear a un titular. El campo
+de propietario figura como la dirección cero, y puedes verificarlo en
+<a class="enl" href="https://nereum.xyz/explorer">nereum.xyz/explorer</a>.</p>
 
 <h3>¿Dónde cotiza NRM y a qué precio?</h3>
-<p>A $0,50 en Uniswap v3. Como v3 concentra la liquidez en un rango elegido, el
+<p>A $1,00 en Uniswap v3. Como v3 concentra la liquidez en un rango elegido, el
 precio de apertura es un parámetro del fondo. Ver
 <a class="enl" href="#/whitelist">Whitelist</a>.</p>
 
@@ -2441,18 +2508,19 @@ technically obvious option for issuing a real-world asset on-chain.</p>
   network:{
     grupo:'Protocol', titulo:'NereumEVM — Blockchain',
     html:`
-<p><strong>NereumEVM is a Layer 1 blockchain with asset tokenization built into
-the protocol.</strong></p>
+<p><strong>This is the chain itself: the machine that decides what gets
+written and what does not.</strong></p>
 
 <p>It is a complete blockchain: its own validators, its own consensus, its own
 token and its own state. It is EVM-compatible, so it runs standard smart
 contracts and any developer who has built on Ethereum can build here without
 learning anything new.</p>
 
-<p>What it adds is a native layer for real-world assets. On a general-purpose
-chain you would deploy a contract to represent a building, an invoice or a fund,
-and then handle the rules around it separately. <strong>On Nereum the asset and
-its rules are one object, and the protocol handles both.</strong></p>
+<p>Where it departs from every other network is in what it checks. All of them
+verify that a signature is real and that a balance exists. NereumEVM verifies a
+third thing — whether this holder may receive this asset — and it asks the asset,
+because here <strong>an asset is not only a balance: it carries the conditions
+its issuer attached to it.</strong></p>
 
 <h3>What that means in practice</h3>
 <p>An issuer tokenizes an asset directly on the chain: the property, the loan,
@@ -2464,9 +2532,11 @@ period, what has to be reported.</p>
 hands, the network checks them as part of validating the transfer, in the same
 step and at the same speed as it checks the balance and the signature.</p>
 
-<p>The result is that a tokenized asset behaves like any other token — it moves
-in seconds, it settles on-chain, it can be held in any wallet on the network —
-while the rules that make it a regulated instrument stay attached to it.</p>
+<p>That is why this had to be a chain and not an application. A rule deployed on
+top of a network can be routed around — move the asset to a venue that does not
+run your contract and the rule stops travelling with it. A rule the validators
+enforce cannot be left behind, because there is nowhere on this network where it
+does not apply.</p>
 
 <h2 id="capas">One chain, four layers</h2>
 <p>Every asset issued on Nereum passes through all four, every time it moves.</p>
@@ -2506,6 +2576,10 @@ allows and no more.</p>
     html:`
 <p>Tokenizing an asset is not hard. Making it <strong>move</strong>, and keeping it
 enforceable while it moves, is the whole problem.</p>
+
+<p>The issuance flow described on this page is open now. Run it yourself at
+<a class="enl" href="https://nereum.xyz/explorer/#/tokenize"><strong>nereum.xyz/explorer/#/tokenize</strong></a>:
+describe the asset, attach its documentation, choose the policy and issue.</p>
 
 <p>This page is how an asset gets onto Nereum, what the chain records about it,
 and what happens when the on-chain record and the off-chain world disagree.</p>
@@ -2571,11 +2645,12 @@ what the chain says</strong>.</p>
 `},
 
   scan:{
-    grupo:'Protocol', titulo:'Nereum Explorer',
+    grupo:'Protocol', titulo:'NereumEVM — Explorer',
     html:`
-<p><strong>Nereum Explorer is the network's block explorer:</strong> a public website
-that reads the chain and shows what is on it — every block, every transaction,
-every address and every deployed contract.</p>
+<p><strong>NereumEVM Explorer is the network's block explorer:</strong> a public
+website at <a class="enl" href="https://nereum.xyz/explorer"><strong>nereum.xyz/explorer</strong></a> that
+reads the chain and shows what is on it — every block, every transaction, every
+address and every deployed contract.</p>
 
 <h2 id="que">What it shows</h2>
 <p>Open any address and you see its full history: what it holds, what it has
@@ -2587,19 +2662,19 @@ the policy attached to the asset, how many qualified holders it has, and the
 document reference it was issued against.</p>
 
 <h2 id="como">How it works</h2>
-<p>Nereum Explorer runs its own copy of the chain and indexes every block as it is produced.
+<p>NereumEVM Explorer runs its own copy of the chain and indexes every block as it is produced.
 It does not have privileged access and it does not hold anything: it reads the
 same public data any node reads, and organises it so a person can use it.</p>
-<p>That is why it can be replaced. If Nereum Explorer disappears tomorrow, anyone can run
+<p>That is why it can be replaced. If NereumEVM Explorer disappears tomorrow, anyone can run
 their own explorer against the same chain and see exactly the same thing.</p>
 
 <h2 id="resuelve">The problem it solves</h2>
 <p>A blockchain without an explorer is a database nobody can read. The data is
 public in theory and unreachable in practice, because reading it directly means
 running a node and writing software.</p>
-<p>Nereum Explorer is what turns <em>"you can verify this yourself"</em> from a claim into an
+<p>NereumEVM Explorer is what turns <em>"you can verify this yourself"</em> from a claim into an
 instruction. Every proof in this document — the supply, the contract, the
-ownership, the holders — ends at an address someone has to be able to open. Nereum Explorer
+ownership, the holders — ends at an address someone has to be able to open. NereumEVM Explorer
 is where they open it.</p>
 `},
 
@@ -2740,7 +2815,7 @@ in what proportions, and under what limits.</p>
 is distributed proportionally to vault token holders, without a register having
 to be reconciled first. To leave, a holder redeems the vault token or sells it
 on the <a class="enl" href="#/dex">DEX</a>.</p>
-<p>Everything the vault holds is visible on <a class="enl" href="#/scan">Nereum
+<p>Everything the vault holds is visible on <a class="enl" href="#/scan">NereumEVM
 Explorer</a>: the assets, the amounts and the movements. A vault is not a promise
 about a portfolio; it is a portfolio anyone can inspect.</p>
 
@@ -2887,8 +2962,10 @@ up on the state registry.</p>
 <h2 id="token">About the token</h2>
 
 <h3>Can more NRM be created?</h3>
-<p>No. Supply is fixed at 600,000,000 at genesis and there is no mint function
-anyone can call. With ownership renounced, none could be added later either.</p>
+<p>No. Supply is fixed at 160,000,000 at genesis and there is no mint function
+anyone can call. With ownership renounced, none could be added later either.
+Check the supply and the contract yourself on
+<a class="enl" href="https://nereum.xyz/explorer">nereum.xyz/explorer</a>.</p>
 
 <h3>Is there a tax on buying or selling?</h3>
 <p>No. There is no fee function in the contract at all — not a fee set to zero
@@ -2896,10 +2973,12 @@ that could be raised later.</p>
 
 <h3>Can my wallet be frozen or blacklisted?</h3>
 <p>No. Contract ownership has been renounced, so there is no address with the
-power to pause transfers or block a holder. </p>
+power to pause transfers or block a holder. The owner field reads as the zero
+address, and you can verify it on
+<a class="enl" href="https://nereum.xyz/explorer">nereum.xyz/explorer</a>.</p>
 
 <h3>Where does NRM list, and at what price?</h3>
-<p>At $0.50 on Uniswap v3. Because v3 concentrates liquidity in a chosen range,
+<p>At $1.00 on Uniswap v3. Because v3 concentrates liquidity in a chosen range,
 the opening price is a parameter of the pool. See
 <a class="enl" href="#/whitelist">Whitelist</a>.</p>
 
@@ -3004,14 +3083,14 @@ consequences, and every part of it is verifiable on-chain:</p>
 <table>
   <tr><th>Property</th><th>What it means</th><th>Check</th></tr>
   <tr><td><b>Fixed supply</b></td>
-      <td>600,000,000 NRM at genesis. No mint function that anyone can call, ever.</td>
-      <td>${PEND('contract address')}</td></tr>
+      <td>160,000,000 NRM at genesis. No mint function that anyone can call, ever.</td>
+      <td><a href="https://etherscan.io/address/0x9eAb4Ab3D08d0cAc72ACAcEA19904aF2f0D69228#code" target="_blank" rel="noopener">Etherscan &#8599;</a></td></tr>
   <tr><td><b>No pause</b></td>
       <td>Transfers cannot be frozen. Not by us, not by anyone.</td>
-      <td>${PEND('contract address')}</td></tr>
+      <td><a href="https://etherscan.io/address/0x9eAb4Ab3D08d0cAc72ACAcEA19904aF2f0D69228#code" target="_blank" rel="noopener">Etherscan &#8599;</a></td></tr>
   <tr><td><b>No blacklist</b></td>
       <td>No address can be blocked by decree.</td>
-      <td>${PEND('contract address')}</td></tr>
+      <td><a href="https://etherscan.io/address/0x9eAb4Ab3D08d0cAc72ACAcEA19904aF2f0D69228#code" target="_blank" rel="noopener">Etherscan &#8599;</a></td></tr>
   <tr><td><b>Governance</b></td>
       <td>How protocol decisions are made, and by whom.</td>
       <td>${PEND('governance model')}</td></tr>
@@ -3023,10 +3102,9 @@ the code that is running can be compared line by line.</p>
 <table>
   <tr><th>Item</th><th>Value</th></tr>
   <tr><td>Token</td><td><b>NRM</b></td></tr>
-  <tr><td>Contract address</td><td>${PEND('address')}</td></tr>
-  <tr><td>Chain</td><td>${PEND('chain')}</td></tr>
-  <tr><td>Verified source</td><td>${PEND('link to verified code on the explorer')}</td></tr>
-  <tr><td>Sale contract</td><td>${PEND('address')}</td></tr>
+  <tr><td>Contract address</td><td><a href="https://etherscan.io/address/0x9eAb4Ab3D08d0cAc72ACAcEA19904aF2f0D69228" target="_blank" rel="noopener"><code>0x9eAb4Ab3D08d0cAc72ACAcEA19904aF2f0D69228</code></a></td></tr>
+  <tr><td>Chain</td><td><b>Ethereum</b> · ERC-20</td></tr>
+  <tr><td>Verified source</td><td><a href="https://etherscan.io/address/0x9eAb4Ab3D08d0cAc72ACAcEA19904aF2f0D69228#code" target="_blank" rel="noopener">View on Etherscan &#8599;</a></td></tr>
   <tr><td>Ownership</td><td><b>Renounced</b> — see that page</td></tr>
 </table>
 
@@ -3137,10 +3215,10 @@ nowhere else. Every other channel is listed on
   <tr><th>Item</th><th>Value</th></tr>
   <tr><td>Symbol</td><td><b>NRM</b></td></tr>
   <tr><td>Network</td><td><b>Ethereum</b> · ERC-20</td></tr>
-  <tr><td>Total supply</td><td class="num"><b>600,000,000</b> — fixed at genesis, cannot grow</td></tr>
+  <tr><td>Total supply</td><td class="num"><b>160,000,000</b> — fixed at genesis, cannot grow</td></tr>
   <tr><td>Buy / sell tax</td><td><b>0%</b></td></tr>
-  <tr><td>Whitelist price</td><td class="num"><b>$0.10</b></td></tr>
-  <tr><td>Price at listing</td><td class="num"><b>$0.50</b> — Uniswap v3</td></tr>
+  <tr><td>Whitelist price</td><td class="num"><b>$0.20</b></td></tr>
+  <tr><td>Price at listing</td><td class="num"><b>$1.00</b> — Uniswap v3</td></tr>
   <tr><td>Contract</td><td>Ownership renounced — see that page</td></tr>
 </table>
 
@@ -3149,14 +3227,14 @@ nowhere else. Every other channel is listed on
   <tr><th>Item</th><th>Value</th></tr>
   <tr><td>Minimum</td><td class="num"><b>$1</b></td></tr>
   <tr><td>Maximum per wallet</td><td class="num"><b>$10,000</b></td></tr>
-  <tr><td>Target</td><td class="num"><b>$6,000,000</b></td></tr>
+  <tr><td>Target</td><td class="num"><b>$16,000,000</b></td></tr>
 </table>
 
 <h2 id="caracteristicas">What this round gives you</h2>
 <table>
   <tr><th>Feature</th><th>What it means for a buyer</th></tr>
-  <tr><td><b>Entry at $0.10</b></td>
-      <td>The lowest price the project will sell at. NRM opens at $0.50 on Uniswap v3, where the opening price is set by the pool's range.</td></tr>
+  <tr><td><b>Entry at $0.20</b></td>
+      <td>The lowest price the project will sell at. NRM opens at $1.00 on Uniswap v3, where the opening price is set by the pool's range.</td></tr>
   <tr><td><b>$1 minimum</b></td>
       <td>Deliberately low. A round that starts at four figures is a round designed to exclude most people.</td></tr>
   <tr><td><b>$10,000 cap per wallet</b></td>
@@ -3168,16 +3246,17 @@ nowhere else. Every other channel is listed on
 </table>
 
 <h2 id="reparto">Distribution of supply</h2>
+<div class="anillo"><svg viewBox="0 0 200 200" role="img" aria-label="TOTAL SUPPLY"><circle cx="100" cy="100" r="78" fill="none" stroke="#2F6BFF" stroke-width="26" stroke-dasharray="245.04 245.04" stroke-dashoffset="0.00" transform="rotate(-90 100 100)"/><circle cx="100" cy="100" r="78" fill="none" stroke="#5B8CFF" stroke-width="26" stroke-dasharray="73.51 416.58" stroke-dashoffset="-245.04" transform="rotate(-90 100 100)"/><circle cx="100" cy="100" r="78" fill="none" stroke="#86A9FF" stroke-width="26" stroke-dasharray="49.01 441.08" stroke-dashoffset="-318.56" transform="rotate(-90 100 100)"/><circle cx="100" cy="100" r="78" fill="none" stroke="#A9C2FF" stroke-width="26" stroke-dasharray="24.50 465.58" stroke-dashoffset="-367.57" transform="rotate(-90 100 100)"/><circle cx="100" cy="100" r="78" fill="none" stroke="#8E97A8" stroke-width="26" stroke-dasharray="24.50 465.58" stroke-dashoffset="-392.07" transform="rotate(-90 100 100)"/><circle cx="100" cy="100" r="78" fill="none" stroke="#A6AEBC" stroke-width="26" stroke-dasharray="24.50 465.58" stroke-dashoffset="-416.58" transform="rotate(-90 100 100)"/><circle cx="100" cy="100" r="78" fill="none" stroke="#BEC4CF" stroke-width="26" stroke-dasharray="24.50 465.58" stroke-dashoffset="-441.08" transform="rotate(-90 100 100)"/><circle cx="100" cy="100" r="78" fill="none" stroke="#D6DAE2" stroke-width="26" stroke-dasharray="24.50 465.58" stroke-dashoffset="-465.58" transform="rotate(-90 100 100)"/><text x="100" y="96" class="an-n">160M</text><text x="100" y="114" class="an-k">TOTAL SUPPLY</text></svg><div class="anillo-ley"><div class="al-fila"><i style="background:#2F6BFF"></i><span>Private sale</span><b>50.0%</b><s>80,000,000</s></div><div class="al-fila"><i style="background:#5B8CFF"></i><span>CEX listing</span><b>15.0%</b><s>24,000,000</s></div><div class="al-fila"><i style="background:#86A9FF"></i><span>Marketing</span><b>10.0%</b><s>16,000,000</s></div><div class="al-fila"><i style="background:#A9C2FF"></i><span>Reserve</span><b>5.0%</b><s>8,000,000</s></div><div class="al-fila"><i style="background:#8E97A8"></i><span>Team · locked</span><b>5.0%</b><s>8,000,000</s></div><div class="al-fila"><i style="background:#A6AEBC"></i><span>Advisors</span><b>5.0%</b><s>8,000,000</s></div><div class="al-fila"><i style="background:#BEC4CF"></i><span>Development</span><b>5.0%</b><s>8,000,000</s></div><div class="al-fila"><i style="background:#D6DAE2"></i><span>Airdrop</span><b>5.0%</b><s>8,000,000</s></div></div></div>
 <table>
   <tr><th>Allocation</th><th>Share</th><th>Tokens</th></tr>
-  <tr><td>Private sale</td><td class="num">50.0%</td><td class="num">300,000,000</td></tr>
-  <tr><td>CEX listing</td><td class="num">15.0%</td><td class="num">90,000,000</td></tr>
-  <tr><td>Marketing</td><td class="num">10.0%</td><td class="num">60,000,000</td></tr>
-  <tr><td>Reserve</td><td class="num">5.0%</td><td class="num">30,000,000</td></tr>
-  <tr><td>Team · locked</td><td class="num">5.0%</td><td class="num">30,000,000</td></tr>
-  <tr><td>Advisors</td><td class="num">5.0%</td><td class="num">30,000,000</td></tr>
-  <tr><td>Development</td><td class="num">5.0%</td><td class="num">30,000,000</td></tr>
-  <tr><td>Airdrop</td><td class="num">5.0%</td><td class="num">30,000,000</td></tr>
+  <tr><td>Private sale</td><td class="num">50.0%</td><td class="num">80,000,000</td></tr>
+  <tr><td>CEX listing</td><td class="num">15.0%</td><td class="num">24,000,000</td></tr>
+  <tr><td>Marketing</td><td class="num">10.0%</td><td class="num">16,000,000</td></tr>
+  <tr><td>Reserve</td><td class="num">5.0%</td><td class="num">8,000,000</td></tr>
+  <tr><td>Team · locked</td><td class="num">5.0%</td><td class="num">8,000,000</td></tr>
+  <tr><td>Advisors</td><td class="num">5.0%</td><td class="num">8,000,000</td></tr>
+  <tr><td>Development</td><td class="num">5.0%</td><td class="num">8,000,000</td></tr>
+  <tr><td>Airdrop</td><td class="num">5.0%</td><td class="num">8,000,000</td></tr>
 </table>
 
 <h2 id="uso">Use of funds</h2>
@@ -3213,7 +3292,7 @@ listed on <a class="enl" href="#/links">Official links</a>.</p>
 </ol>
 
 <h2 id="listado">How the listing price is set</h2>
-<p>NRM lists at <strong>$0.50 on Uniswap v3</strong>. That price is not an
+<p>NRM lists at <strong>$1.00 on Uniswap v3</strong>. That price is not an
 estimate: on Uniswap v3, liquidity is concentrated within a price range chosen
 when the pool is created, so <strong>the opening price is a parameter of the
 pool</strong>.</p>
@@ -3221,7 +3300,7 @@ pool</strong>.</p>
 <table>
   <tr><th>Item</th><th>Value</th></tr>
   <tr><td>Venue</td><td><b>Uniswap v3</b> · Ethereum</td></tr>
-  <tr><td>Opening price</td><td class="num"><b>$0.50</b></td></tr>
+  <tr><td>Opening price</td><td class="num"><b>$1.00</b></td></tr>
 </table>
 
 `},
@@ -3344,8 +3423,13 @@ people have nowhere authoritative to check.</p>
       <td><a class="enl" href="https://nereum.xyz">nereum.xyz</a></td></tr>
   <tr><td><b>Whitepaper</b></td>
       <td><a class="enl" href="https://nereum.xyz/whitepaper">nereum.xyz/whitepaper</a></td></tr>
+  <tr><td><b>Explorer</b></td>
+      <td><a class="enl" href="https://nereum.xyz/explorer">nereum.xyz/explorer</a> — where every claim in
+      this document can be checked</td></tr>
   <tr><td><b>Whitelist</b></td>
       <td><a class="enl" href="https://nereum.xyz">nereum.xyz</a> — the only place the round is open</td></tr>
+  <tr><td><b>X</b></td>
+      <td><a class="enl" href="https://x.com/nereumlab">x.com/nereumlab</a> — the only account we post from</td></tr>
 </table>
 
 <h2 id="contratos">Contract addresses</h2>
@@ -3353,6 +3437,7 @@ people have nowhere authoritative to check.</p>
 different address is a different token.</p>
 <table>
   <tr><th>Item</th><th>Address</th></tr>
+  <tr><td><b>NRM contract</b></td><td><a class="enl ctr" href="https://etherscan.io/address/0x9eAb4Ab3D08d0cAc72ACAcEA19904aF2f0D69228" target="_blank" rel="noopener"><code>0x9eAb4Ab3D08d0cAc72ACAcEA19904aF2f0D69228</code></a> — the only address of the token</td></tr>
   <tr><td>Network</td><td><b>Ethereum</b> · ERC-20</td></tr>
 </table>
 
@@ -3402,8 +3487,8 @@ overnight costs someone everything.</p>
 const ORDEN=['introduction','vision',
   'legal','audit','kyc',
   'whitelist','dexscreener',
-  'network','tokenization',
-  'scan','dex','nusd','forge','vaults','feed','link','wallet',
+  'network','scan','tokenization',
+  'dex','nusd','forge','vaults','feed','link','wallet',
   'team','press','links','faq'];
 
 const doc=document.getElementById('doc'), rail=document.getElementById('rail');
@@ -3566,7 +3651,8 @@ document.getElementById('langB').onclick=()=>{
   aplicaIdioma(); armaIndice();
   pinta(location.hash.startsWith('#/')?location.hash.slice(2):'introduction');
 };
-try{ const g=localStorage.getItem('nereum-lang'); if(g==='es')LANG='es'; }catch(e){}
+/* el documento SIEMPRE abre en inglés: antes recordaba el idioma elegido, y a
+   quien lo hubiera puesto en español le salía así al volver */
 aplicaIdioma(); armaIndice();
 
 /* ── descargar en PDF ──
