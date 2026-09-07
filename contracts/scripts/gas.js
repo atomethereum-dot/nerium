@@ -8,35 +8,63 @@
  */
 const { ethers } = require("hardhat");
 const { time } = require("@nomicfoundation/hardhat-network-helpers");
-const E=ethers.parseEther, U6=(n)=>ethers.parseUnits(String(n),6), USD=(n)=>ethers.parseUnits(String(n),8);
-async function g(tx){ const r=await (await tx).wait(); return Number(r.gasUsed); }
-(async()=>{
-  const [owner,ana,luis]=await ethers.getSigners();
-  const usdt=await (await ethers.getContractFactory("MockUSDT")).deploy(6);
-  const F=await ethers.getContractFactory("MockFeed");
-  const f1=await F.deploy(USD("3000")), f2=await F.deploy(USD("2990"));
-  const P=await ethers.getContractFactory("NereumSeedRound");
-  const p=await P.deploy(await usdt.getAddress(),[await f1.getAddress(),await f2.getAddress()],
-    18,owner.address,USD("0.2"),USD("0.2"),USD("10000"));
-  const dep=Number((await (await p.deploymentTransaction()).wait()).gasUsed);
-  for(const u of [ana,luis]){ await usdt.transfer(u.address,U6("100000"));
-    await usdt.connect(u).approve(await p.getAddress(),ethers.MaxUint256); }
-  await p.startRound(0,(await time.latest())+3600);
-  const n1=await g(p.connect(ana).buyWithNative(0,{value:E("0.1")}));
-  const n2=await g(p.connect(ana).buyWithNative(0,{value:E("0.1")}));
-  const u1=await g(p.connect(luis).buyWithUsdt(U6("100"),0));
-  const u2=await g(p.connect(luis).buyWithUsdt(U6("100"),0));
+const E = ethers.parseEther;
+const U6 = (n) => ethers.parseUnits(String(n), 6);
+const USD = (n) => ethers.parseUnits(String(n), 8);
+const g = async (tx) => Number((await (await tx).wait()).gasUsed);
+
+(async () => {
+  const [owner, ana, luis] = await ethers.getSigners();
+  const usdt = await (await ethers.getContractFactory("MockUSDT")).deploy(6);
+  const F = await ethers.getContractFactory("MockFeed");
+  const f1 = await F.deploy(USD("3000")), f2 = await F.deploy(USD("2990"));
+  const P = await ethers.getContractFactory("NereumSeedRound");
+  const p = await P.deploy(await usdt.getAddress(), [await f1.getAddress(), await f2.getAddress()],
+    18, owner.address, USD("0.2"), USD("0.2"), USD("10000"));
+  const dep = Number((await (await p.deploymentTransaction()).wait()).gasUsed);
+  for (const u of [ana, luis]) await usdt.transfer(u.address, U6("100000"));
+  await p.startRound(0, (await time.latest()) + 3600);
+
+  /* ana estrena el contrato: su compra paga tambien las posiciones que se
+     comparten entre todos —el precio guardado y los totales— y por eso es la
+     mas cara de todas. */
+  const apA = await g(usdt.connect(ana).approve(await p.getAddress(), ethers.MaxUint256));
+  const primeraDeTodas = await g(p.connect(ana).buyWithUsdt(U6("100"), 0));
+
+  /* luis llega despues: solo paga lo suyo */
+  const apL = await g(usdt.connect(luis).approve(await p.getAddress(), ethers.MaxUint256));
+  const primeraDeLuis = await g(p.connect(luis).buyWithUsdt(U6("100"), 0));
+  const repetida = await g(p.connect(luis).buyWithUsdt(U6("100"), 0));
+
+  const nat1 = await g(p.connect(ana).buyWithNative(0, { value: E("0.1") }));
+  const nat2 = await g(p.connect(ana).buyWithNative(0, { value: E("0.1") }));
   await f1.setStale(90000);
-  const nf=await g(p.connect(ana).buyWithNative(0,{value:E("0.1")}));
-  const tok=await (await ethers.getContractFactory("MockToken")).deploy();
+  const natCaido = await g(p.connect(ana).buyWithNative(0, { value: E("0.1") }));
+
+  const tok = await (await ethers.getContractFactory("MockToken")).deploy();
   await p.setSaleToken(await tok.getAddress());
-  await tok.transfer(await p.getAddress(),E("100000"));
+  await tok.transfer(await p.getAddress(), E("100000"));
   await p.endRound(); await p.openClaims();
-  const c=await g(p.connect(ana).claim());
-  const wn=await g(p.withdrawNative(owner.address,0));
-  const wu=await g(p.withdrawUsdt(owner.address,0));
-  const filas=[["despliegue",dep],["buyWithNative (1ª de esa cartera)",n1],["buyWithNative (siguientes)",n2],
-    ["buyWithUsdt (1ª de esa cartera)",u1],["buyWithUsdt (siguientes)",u2],
-    ["buyWithNative con el 1º caído",nf],["claim",c],["withdrawNative",wn],["withdrawUsdt",wu]];
-  for(const [k,v] of filas) console.log(k.padEnd(36), String(v).padStart(8));
-})().catch(e=>{console.error(e);process.exit(1)});
+  const rec = await g(p.connect(ana).claim());
+  const retN = await g(p.withdrawNative(owner.address, 0));
+  const retU = await g(p.withdrawUsdt(owner.address, 0));
+
+  const filas = [
+    ["despliegue", dep],
+    ["approve de USDT (una sola vez por cartera)", apA],
+    ["buyWithUsdt · primera compra de la ronda", primeraDeTodas],
+    ["buyWithUsdt · primera de esa cartera", primeraDeLuis],
+    ["buyWithUsdt · siguientes", repetida],
+    ["buyWithNative · primera de esa cartera", nat1],
+    ["buyWithNative · siguientes", nat2],
+    ["buyWithNative · con el primer oraculo caido", natCaido],
+    ["claim", rec],
+    ["withdrawNative", retN],
+    ["withdrawUsdt", retU],
+  ];
+  for (const [k, v] of filas) console.log(k.padEnd(44), String(v).padStart(9));
+  console.log("".padEnd(44), "".padStart(9, "─"));
+  console.log("primera compra en USDT (approve + compra)".padEnd(44),
+              String(apA + primeraDeTodas).padStart(9));
+  if (apA !== apL) console.log("(approve de luis:", apL + ")");
+})().catch((e) => { console.error(e); process.exit(1); });
