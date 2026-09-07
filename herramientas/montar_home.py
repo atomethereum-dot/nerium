@@ -13,12 +13,14 @@ todo lo que se hizo aqui y el archivo subido no trae:
   6. el bloque que devuelve las frases enteras al traductor del navegador
   7. la etiqueta que carga assets/dapp.js, la capa que conecta los contratos
   8. el cambio de «Whitelist» a «Seed Round», texto y traducciones
+  9. la marca nueva: el cubo, en lugar del semidisco
 """
 import sys, os
 
 AQUI = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, AQUI)
 import seedround
+import marca
 subido, publicado = sys.argv[1], '/home/user/nerium/index.html'
 z = open(subido, encoding='utf-8').read()
 p = open(publicado, encoding='utf-8').read()
@@ -112,9 +114,15 @@ if DAPP not in rest:
 # diseño nuevo vuelve a traer el texto viejo si no se rehace aquí.
 rest = seedround.aplicar(rest)
 
+# ── 9 · la marca ──
+# Los <symbol> del logotipo viajan dentro del archivo subido, igual que las
+# traducciones: sin esto, cada diseno nuevo devolveria el semidisco.
+rest = marca.aplicar(rest)
+
 salida = pre + rest
 open(publicado, 'w', encoding='utf-8').write(salida)
 print("montado:", len(salida), "bytes ·", salida.count('var(--hud-b)'), "usos de --hud-b ·",
       "traductor:", 'si' if 'translated-(ltr' in salida else 'NO', "·",
       "dapp:", 'si' if 'assets/dapp.js' in salida else 'NO', "·",
-      "whitelist restante:", salida.lower().count('whitelist'))
+      "whitelist restante:", salida.lower().count('whitelist'), "·",
+      "marca:", 'cubo' if 'nrmPlata' in salida else 'LA VIEJA')

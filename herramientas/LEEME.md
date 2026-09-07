@@ -23,6 +23,9 @@ bloque de traducciones viaja dentro del index.html que se sube, así que un
 diseño nuevo vuelve a traer el texto viejo—. Es idempotente: pasarlo sobre algo
 ya convertido no hace nada.
 
+`marca.py` es la tercera: los dos `<symbol>` del cubo. Va por el mismo motivo —
+el logotipo viaja dentro del index.html que se sube— y también es idempotente.
+
 El whitepaper no tiene script de montaje: si llega uno nuevo, el cambio hay que
 rehacerlo a mano, y `probar_seed.mjs` avisa si se olvidó.
 
