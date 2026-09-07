@@ -563,12 +563,16 @@
       ['M16 4v9.7l8.2 3.7z', .6], ['M16 4 7.8 17.4 16 13.7z', 1],
       ['M16 23.2V28l8.2-11.4z', .6], ['M16 28v-4.8L7.8 16.6z', 1],
       ['m16 21.6 8.2-4.8-8.2-3.7z', .4], ['m7.8 16.8 8.2 4.8v-8.5z', .8] ] },
-    BNB: { fondo: '#F0B90B', partes: [
-      ['M16 5.8 19.4 9.2 16 12.6 12.6 9.2z', 1],
-      ['M9.2 12.6 12.6 16 9.2 19.4 5.8 16z', 1],
-      ['M22.8 12.6 26.2 16 22.8 19.4 19.4 16z', 1],
-      ['M16 19.4 19.4 22.8 16 26.2 12.6 22.8z', 1],
-      ['M16 12.6 19.4 16 16 19.4 12.6 16z', 1] ] },
+    /* La marca de BNB no son cinco rombos: son dos galones, arriba y abajo, y
+       tres rombos. Va con su geometría original —un lienzo de 126,61— metida
+       en un grupo a escala, que es más fiable que reescribir a mano cada punto
+       para que quepa en 32. */
+    BNB: { fondo: '#F0B90B', caja: 'translate(4 4) scale(0.18956)', partes: [
+      ['M38.73 53.2 63.31 28.62l24.59 24.59 14.3-14.3L63.31 0 24.43 38.9z', 1],
+      ['M0 63.31 14.3 49l14.3 14.3-14.3 14.31z', 1],
+      ['M38.73 73.41 63.31 98l24.59-24.59 14.31 14.29-.01.01-38.89 38.9-38.88-38.88-.02-.02z', 1],
+      ['M98 63.3 112.3 49l14.31 14.3-14.31 14.31z', 1],
+      ['M77.83 63.3 63.31 48.78 52.58 59.51l-1.23 1.24-2.54 2.53-.02.02.02.02 14.5 14.51 14.52-14.52.01-.01z', 1] ] },
     USDT: { fondo: '#26A17B', partes: [
       ['M17.9 15.6v-2.3h5.3V9.8H8.8v3.5h5.3v2.3c-4.3.2-7.6 1-7.6 2.1s3.3 1.9 7.6 2.1v6.7h3.8v-6.7' +
        'c4.3-.2 7.6-1 7.6-2.1s-3.3-1.9-7.6-2.1m0 3.6c-.1 0-.7.1-1.9.1-1 0-1.7 0-1.9-.1' +
@@ -586,12 +590,18 @@
     c.setAttribute('cx', '16'); c.setAttribute('cy', '16'); c.setAttribute('r', '16');
     c.setAttribute('fill', m.fondo);
     svg.appendChild(c);
+    var dentro = svg;
+    if (m.caja) {
+      dentro = document.createElementNS(NS, 'g');
+      dentro.setAttribute('transform', m.caja);
+      svg.appendChild(dentro);
+    }
     m.partes.forEach(function (par) {
       var p = document.createElementNS(NS, 'path');
       p.setAttribute('d', par[0]);
       p.setAttribute('fill', '#fff');
       if (par[1] !== 1) p.setAttribute('fill-opacity', String(par[1]));
-      svg.appendChild(p);
+      dentro.appendChild(p);
     });
     return svg;
   }
