@@ -94,6 +94,12 @@ async function abrir(eth, bsc, cerrarPanel=false){
  const {ctx,pg}=await abrir(red(10000n*E18,200000000000n,10000n*E18,cerrada), red(0n,0n,0n,cerrada));
  chk('sale lo reclamable', (await pg.locator('.pos-rec').textContent()), 'Ready to claim10,000 NRM');
  chk('y el botón invita a reclamar', await pg.locator('#wCta').textContent(), 'Claim your NRM');
+ chk('la calculadora se retira', await pg.locator('#wPay').isVisible(), false);
+ chk('y el importe también', await pg.locator('#wUsd').isVisible(), false);
+ chk('el rótulo lo dice', await pg.locator('#presale .w-top span').first().textContent(), 'Seed Round closed');
+ chk('y el pie explica el reparto', await pg.locator('#wNote').textContent(),
+     'Claims are open. Your NRM goes straight to this wallet.');
+ chk('el panel sigue ahí', await pg.locator('.nrm-pos').isVisible(), true);
  await pg.locator('#presale .widget').screenshot({path:'/tmp/p_claim.png'});
  await ctx.close();
 }

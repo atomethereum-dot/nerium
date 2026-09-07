@@ -514,7 +514,33 @@
 
   var usdActual = 500;
 
+  var caja = cta.closest('.widget');
+  var rotulo = caja ? caja.querySelector('.w-top span') : null;
+  var rotuloOrig = rotulo ? rotulo.textContent : '';
+
+  /* La ronda no puede reabrirse —isOver() es finalized o pasada la fecha, y
+     ninguna de las dos vuelve atrás— así que esto es un cambio de una sola
+     dirección, pero se guarda el texto original igualmente por si el diseño
+     que llegue mañana trae otro. */
+  function modoCerrada(cerrada, reparto) {
+    if (caja) caja.classList.toggle('nrm-fin', !!cerrada);
+    if (rotulo) rotulo.textContent = cerrada ? 'Seed Round closed' : rotuloOrig;
+    if (!cerrada) return;
+    nota.classList.remove('bad');
+    nota.textContent = reparto
+      ? 'Claims are open. Your NRM goes straight to this wallet.'
+      : 'The round is closed. Claims open once the tokens are deposited.';
+  }
+
   function pintar(desdeInput) {
+    var ec = est();
+    if (ec.ok && ec.terminada) {
+      modoCerrada(true, ec.reparto);
+      pintarCta();
+      pintarPanel();
+      return;
+    }
+    modoCerrada(false);
     var mn = minUsd(), mx = maxUsd(), pr = precio();
     var usd = usdActual;
     var malo = usd < mn || usd > mx;
@@ -582,6 +608,12 @@
     e.textContent = [
       '.nrm-pos{margin-top:14px;padding:14px 15px 13px;border:1px solid rgba(10,12,16,.12);',
       'border-radius:14px;font-size:13px;line-height:1.45}',
+      /* Con la ronda cerrada la calculadora ya no calcula nada que se pueda
+         comprar: se retira entera y el recuadro queda para el reparto. */
+      '.widget.nrm-fin .w-lab,.widget.nrm-fin .w-pay,.widget.nrm-fin .w-field,',
+      '.widget.nrm-fin .w-eq,.widget.nrm-fin .w-range,.widget.nrm-fin .w-chips,',
+      '.widget.nrm-fin .w-swap,.widget.nrm-fin .w-out{display:none!important}',
+      '.widget.nrm-fin .w-cta{margin-top:2px}',
       '.nrm-pos .pos-cab{display:flex;align-items:center;justify-content:space-between;',
       'gap:10px;margin-bottom:10px;font-size:11px;opacity:.5}',
       /* La dirección va en monoespaciada y tal cual: en mayúsculas el 0x se lee
