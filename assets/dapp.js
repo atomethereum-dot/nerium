@@ -17,7 +17,7 @@
   /* Project ID de https://cloud.reown.com — gratis. Mientras esté vacío, la web
      conecta con carteras de navegador (MetaMask, Rabby, Trust, Coinbase, OKX,
      Brave, Phantom…) pero NO ofrece WalletConnect, porque el relay lo exige. */
-  var PROYECTO_WC = '';
+  var PROYECTO_WC = '87eced186475c03170cf7792da6a9ecd';
 
   /* La misma dirección en las dos redes. No es casualidad: se desplegó desde la
      misma cuenta con el nonce 0 en ambas. */
@@ -253,8 +253,15 @@
   function cargarScript(src) {
     return new Promise(function (ok, mal) {
       var s = document.createElement('script');
+      var reloj = setTimeout(function () {
+        mal(new Error('WalletConnect could not load. Check your connection.'));
+      }, 20000);
       s.src = src; s.async = true;
-      s.onload = ok; s.onerror = function () { mal(new Error('no cargó ' + src)); };
+      s.onload = function () { clearTimeout(reloj); ok(); };
+      s.onerror = function () {
+        clearTimeout(reloj);
+        mal(new Error('WalletConnect could not load. Check your connection.'));
+      };
       document.head.appendChild(s);
     });
   }
@@ -272,6 +279,11 @@
         chains: [1],
         optionalChains: [56],
         showQrModal: true,
+        /* Sin rpcMap, las lecturas viajan por el relay hasta la cartera del
+           móvil y vuelven: lentas y a merced de que la app esté despierta. Con
+           él, eth_call sale por estos nodos y solo se molesta a la cartera para
+           firmar, que es lo único que solo ella puede hacer. */
+        rpcMap: { 1: CADENAS[1].rpc[0], 56: CADENAS[56].rpc[0] },
         metadata: {
           name: 'Nereum',
           description: 'Nereum Seed Round',

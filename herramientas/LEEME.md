@@ -27,6 +27,7 @@ por EIP-6963.
 ```
 node herramientas/probar_dapp.mjs      # 26 comprobaciones del flujo de compra
 node herramientas/probar_estados.mjs   # los cinco estados de la ronda
+node herramientas/probar_wc.mjs        # WalletConnect y el CDN caido
 ```
 
 `probar_dapp.mjs` comprueba lo que de verdad importa: que el `value` en wei, el
