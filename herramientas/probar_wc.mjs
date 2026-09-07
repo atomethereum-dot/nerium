@@ -59,7 +59,8 @@ async function montar(extra={}, movil=false){
   await pg.route('**explorer-api.walletconnect.com/v3/logo/**', r=>
     r.request().url().indexOf('/logo/lg/') > 0
       ? r.fulfill({status:404, body:''})
-      : r.fulfill({status:200,contentType:'image/png',body:Buffer.from(PIX.split(',')[1],'base64')}));
+      : r.fulfill({status:200,contentType:'image/png',
+          body:fs.readFileSync('iconos/reg_'+((r.request().url().match(/logo\/\w+\/(\w+)/)||[])[1]||'t1')+'.png')}));
   // El paquete se sirve desde el propio sitio: se sustituye por el simulado.
   await pg.route('**/assets/walletconnect.js', r=>
     extra.sinSdk ? r.abort() : r.fulfill({status:200,contentType:'text/javascript',body:SDK}));
@@ -92,6 +93,13 @@ async function montar(extra={}, movil=false){
  chk('la instalada lleva su punto', await pg.locator('.nrm-w i').count(), 1);
  chk('los logos son imágenes', await pg.locator('.nrm-w img.nrm-av').count(), 4);
  // `lg` y no `md`: a 3× un icono de 46 puntos son 138 píxeles reales.
+ // Ni en la lista ni en la hoja: un logo no lleva placa detrás.
+ chk('los logos de la lista van sin fondo',
+     await pg.locator('.nrm-w img.nrm-av').first().evaluate(el=>{
+       const cs=getComputedStyle(el); return cs.backgroundColor+'|'+cs.boxShadow; }),
+     'rgba(0, 0, 0, 0)|none');
+ chk('y el monograma sí lo conserva',
+     await pg.locator('.nrm-w div.nrm-av').first().evaluate(el=>getComputedStyle(el).boxShadow !== 'none'), true);
  chk('si el grande no está, se cae al mediano y no al monograma',
      (await pg.locator('.nrm-w img.nrm-av').first().getAttribute('src')).includes('/logo/md/'), true);
  chk('la extensión sin icono cae en monograma',

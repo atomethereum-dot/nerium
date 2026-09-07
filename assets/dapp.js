@@ -1723,8 +1723,10 @@
       'margin:0 auto 2px}',
       /* La placa gris y la sombra son para el monograma, que sin ellas es una
          letra suelta. Un logo de verdad trae su propia forma, y ponerle un
-         cuadro detrás le inventa un fondo que no tiene. */
-      'img.nrm-av.nrm-grandota{background:none;box-shadow:none;object-fit:contain}',
+         cuadro detrás le inventa un fondo que no tiene: ni en la hoja ni en la
+         lista. `contain` en lugar de `cover` para no recortar el que no sea
+         exactamente cuadrado. */
+      'img.nrm-av{background:none;box-shadow:none;object-fit:contain}',
       '.nrm-av{width:46px;height:46px;border-radius:13px;object-fit:cover;',
       'background:rgba(10,12,16,.06);display:flex;align-items:center;justify-content:center;',
       'color:#fff;font-size:18px;font-weight:600;box-shadow:0 1px 3px rgba(0,0,0,.12)}',
