@@ -22,7 +22,7 @@ const REGISTRO={listings:{
   d:{name:'MetaMask',    image_id:'t4',mobile:{native:'metamask://',universal:'https://metamask.app.link'}}
 }};
 // Un EthereumProvider falso servido en lugar del CDN: mismo camino de codigo.
-const SDK=`window.EthereumProvider={init:async function(o){
+const SDK=`window.NereumWC={EthereumProvider:{init:async function(o){
   window.__wcInit=o;
   const oy={};
   return { on:(e,f)=>{(oy[e]=oy[e]||[]).push(f)}, removeListener(){},
@@ -30,7 +30,7 @@ const SDK=`window.EthereumProvider={init:async function(o){
       await new Promise(r=>setTimeout(r,60000)); },
     request: async function({method}){ if(method==='eth_requestAccounts')return['0x2222222222222222222222222222222222222222'];
       if(method==='eth_chainId')return '0x1'; throw new Error(method); } };
-}};`;
+}}};`;
 
 const nav=await chromium.launch({executablePath:'/opt/pw-browsers/chromium-1194/chrome-linux/chrome',args:['--no-sandbox']});
 const Rs=[]; const chk=(n,a,b)=>Rs.push({n,ok:String(a)===String(b),a,b});
@@ -57,7 +57,8 @@ async function montar(extra={}, movil=false){
     extra.sinRegistro ? r.abort() : r.fulfill({status:200,contentType:'application/json',body:JSON.stringify(REGISTRO)}));
   await pg.route('**explorer-api.walletconnect.com/v3/logo/**', r=>
     r.fulfill({status:200,contentType:'image/png',body:Buffer.from(PIX.split(',')[1],'base64')}));
-  await pg.route('**cdn.jsdelivr.net/**', r=>
+  // El paquete se sirve desde el propio sitio: se sustituye por el simulado.
+  await pg.route('**/assets/walletconnect.js', r=>
     extra.sinSdk ? r.abort() : r.fulfill({status:200,contentType:'text/javascript',body:SDK}));
   return {ctx,pg};
 }
@@ -145,8 +146,16 @@ async function montar(extra={}, movil=false){
  await pg.locator('.nrm-w b',{hasText:'Trust Wallet'}).click();
  await pg.waitForTimeout(1500);
  chk('en móvil no dibuja QR', await pg.locator('.nrm-qr .marco').count(), 0);
- chk('ofrece reintentar', await pg.locator('.nrm-copiar').first().textContent(), 'Open Trust Wallet');
- chk('y copiar el enlace', await pg.locator('.nrm-copiar').last().textContent(), 'Copy link');
+ chk('ofrece abrir la app', await pg.locator('a.nrm-copiar').textContent(), 'Open Trust Wallet');
+ // Un <a> de verdad: Chrome en Android bloquea el salto a un esquema propio si
+ // la navegación no sale de un gesto, y pulsar un enlace sí lo es.
+ chk('y es un enlace, no un botón',
+     await pg.locator('a.nrm-copiar').evaluate(el => el.tagName), 'A');
+ chk('con el esquema de la cartera',
+     (await pg.locator('a.nrm-copiar').getAttribute('href')).startsWith('trust://wc?uri=wc%3A'), true);
+ chk('y copiar el enlace', await pg.locator('button.nrm-copiar').textContent(), 'Copy link');
+ chk('la URI se pide al abrir el selector, no al elegir',
+     await pg.evaluate(() => !!window.__wcInit), true);
  await pg.locator('.nrm-caja').screenshot({path:'/tmp/m_movil.png'});
  await ctx.close();
 }
@@ -195,6 +204,26 @@ async function montar(extra={}, movil=false){
  await pg.waitForTimeout(400);
  chk('que devuelve la lista', (await pg.locator('.nrm-w').count())>0, true);
  await pg.locator('.nrm-caja').screenshot({path:'/tmp/flecha.png'});
+ await ctx.close();
+}
+
+// ── 5 · el paquete de verdad, sin simular ──────────────────────────────────
+// Esta es la que habría cazado el fallo: el UMD publicado deja su objeto en
+// window["@walletconnect/ethereum-provider"] y no en window.EthereumProvider,
+// así que la web cargaba el archivo y luego llamaba a un undefined.
+{
+ const ctx=await nav.newContext({viewport:{width:1400,height:1000}});
+ const pg=await ctx.newPage();
+ await pg.goto('http://127.0.0.1:8934/index.html',{waitUntil:'domcontentloaded'});
+ const r = await pg.evaluate(async ()=>{
+   await new Promise((ok,mal)=>{ const s=document.createElement('script');
+     s.src='assets/walletconnect.js'; s.onload=ok; s.onerror=()=>mal(new Error('no cargó'));
+     document.head.appendChild(s); });
+   const P = window.NereumWC && window.NereumWC.EthereumProvider;
+   return { hay: typeof P, init: typeof (P && P.init) };
+ });
+ chk('el paquete deja su objeto donde toca', r.hay, 'function');
+ chk('y con init llamable', r.init, 'function');
  await ctx.close();
 }
 

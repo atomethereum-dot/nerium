@@ -315,11 +315,19 @@
   function iniciarWC() {
     if (!PROYECTO_WC) return Promise.reject(new Error('WalletConnect is not configured.'));
     if (wcProv) return Promise.resolve(wcProv);
-    return cargarScript(
-        'https://cdn.jsdelivr.net/npm/@walletconnect/ethereum-provider@2.24.0/dist/index.umd.js',
-        'WalletConnect')
+    /* El paquete va servido desde aquí y no desde un CDN. El UMD que publica
+       WalletConnect no vale suelto: deja su objeto en
+       window["@walletconnect/ethereum-provider"], no en window.EthereumProvider,
+       y además espera viem, bs58 y lit como globales del navegador, que no
+       están. Este archivo es el mismo paquete compilado con todo dentro —ver
+       herramientas/LEEME.md para rehacerlo— y de paso la conexión deja de
+       depender de que el visitante alcance un CDN. */
+    return cargarScript('assets/walletconnect.js', 'WalletConnect')
       .then(function () {
-        return window.EthereumProvider.init({
+        if (!window.NereumWC || !window.NereumWC.EthereumProvider) {
+          throw new Error('WalletConnect could not start. Reload and try again.');
+        }
+        return window.NereumWC.EthereumProvider.init({
           projectId: PROYECTO_WC,
           chains: [1],
           optionalChains: [56],

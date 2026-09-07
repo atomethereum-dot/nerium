@@ -53,6 +53,31 @@ el registro o el SDK no responden.
 esperados. Un fallo ahí es dinero mal enviado, así que conviene ejecutarlo
 después de tocar cualquier cosa del cálculo.
 
+## `assets/walletconnect.js` — cómo se rehace
+
+No se puede usar el UMD que publica WalletConnect: deja su objeto en
+`window["@walletconnect/ethereum-provider"]` y no en `window.EthereumProvider`,
+y además espera `viem`, `bs58` y `lit` como globales del navegador, que no
+existen. Hay que compilarlo con todo dentro:
+
+```
+mkdir wc && cd wc && npm init -y
+npm i @walletconnect/ethereum-provider@2.24.0 esbuild
+cat > entrada.js <<'EOF'
+import { EthereumProvider } from '@walletconnect/ethereum-provider';
+window.NereumWC = { EthereumProvider: EthereumProvider };
+EOF
+./node_modules/.bin/esbuild entrada.js --bundle --format=iife --platform=browser \
+  --target=es2020 --minify --legal-comments=none \
+  --define:process.env.NODE_ENV='"production"' --outfile=../assets/walletconnect.js
+```
+
+Son 2 MB (577 KB comprimidos) y solo se descargan cuando alguien pulsa
+WalletConnect. `probar_bundle.mjs` comprueba que el archivo compilado expone un
+proveedor con `init`, `on`, `connect` y `request`, y `probar_wc.mjs` lo carga
+sobre la web de verdad: esa es la comprobación que habría cazado el fallo del
+nombre del global.
+
 ## `orden.mjs`, `medir.mjs` y `salto.mjs`
 
 No prueban nada: miden. `orden.mjs` recorre las secciones llevando cada una a
