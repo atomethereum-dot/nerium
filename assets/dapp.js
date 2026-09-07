@@ -415,6 +415,83 @@
     return (e && e.message) ? e.message.slice(0, 140) : 'Transaction failed.';
   }
 
+  /* ───────────────────── quedarse donde uno estaba ───────────────────────── */
+
+  /* Al recargar, el navegador guarda una posición en píxeles y la repone. Pero
+     esta página cambia de alto mientras carga —fuentes, imágenes, lienzos que
+     se dimensionan— así que esos píxeles ya no caen donde caían y el visitante
+     aparece en otra sección. Se guarda la sección y el desplazamiento dentro
+     de ella, que sí sobreviven al cambio de alto.
+
+     En sessionStorage a propósito: solo vale para recargar esta pestaña. Quien
+     llegue de nuevo desde un enlace tiene que empezar arriba. */
+  (function () {
+    var CLAVE = 'nrm:vista';
+    var almacen = null;
+    try { almacen = window.sessionStorage; } catch (e) { return; }
+    if (!almacen) return;
+    try { if ('scrollRestoration' in history) history.scrollRestoration = 'manual'; } catch (e) {}
+
+    function cima(n) { var y = 0; while (n) { y += n.offsetTop; n = n.offsetParent; } return y; }
+    function partes() { return [].slice.call(document.querySelectorAll('main > section[id]')); }
+
+    function guardar() {
+      var y = window.scrollY || window.pageYOffset || 0;
+      if (y < 40) { try { almacen.removeItem(CLAVE); } catch (e) {} return; }
+      var cual = null, suya = -1;
+      partes().forEach(function (sec) {
+        var t = cima(sec);
+        if (t <= y + 4 && t > suya) { suya = t; cual = sec; }
+      });
+      if (!cual) return;
+      try {
+        almacen.setItem(CLAVE, JSON.stringify({ id: cual.id, d: Math.round(y - suya) }));
+      } catch (e) {}
+    }
+
+    var espera = 0;
+    addEventListener('scroll', function () {
+      if (espera) return;
+      espera = setTimeout(function () { espera = 0; guardar(); }, 250);
+    }, { passive: true });
+    addEventListener('pagehide', guardar);
+    addEventListener('beforeunload', guardar);
+
+    var donde = null;
+    try { donde = JSON.parse(almacen.getItem(CLAVE) || 'null'); } catch (e) {}
+    if (!donde || !donde.id) return;
+
+    /* Si el visitante toca algo antes de que termine de asentarse, manda él:
+       nada peor que la página tirando de ti mientras intentas leer. */
+    var suyo = false;
+    var mio = function () { suyo = true; };
+    ['wheel', 'touchstart', 'keydown', 'pointerdown'].forEach(function (ev) {
+      addEventListener(ev, mio, { once: true, passive: true });
+    });
+
+    function ir() {
+      if (suyo) return;
+      var sec = document.getElementById(donde.id);
+      if (!sec) return;
+      var y = Math.max(0, cima(sec) + (donde.d || 0));
+      if (Math.abs((window.scrollY || 0) - y) > 2) window.scrollTo(0, y);
+    }
+
+    function asentar() {
+      ir();
+      /* El alto sigue moviéndose un rato después de load. Se reponen unas
+         cuantas veces y se deja de insistir. */
+      var n = 0;
+      var reloj = setInterval(function () {
+        ir();
+        if (++n > 8 || suyo) clearInterval(reloj);
+      }, 120);
+    }
+
+    if (document.readyState === 'complete') asentar();
+    else addEventListener('load', asentar);
+  })();
+
   /* ─────────────────────────────── el widget ─────────────────────────────── */
 
   var pay = document.getElementById('wPay');
@@ -463,9 +540,9 @@
     b.addEventListener('click', function () {
       botones.forEach(function (x) { x.classList.remove('on'); });
       b.classList.add('on');
-      var antes = pago === null ? null : usdDe(pago);
+      var antes = pago === 0n ? null : usdDe(pago);
       elegido = i;
-      pago = null;
+      pago = 0n;
       if (antes !== null) {
         var u = unidDeUsd(Number(antes) / 1e8);
         if (u !== null) pago = u;
@@ -560,9 +637,10 @@
   }
 
   /* Lo que se paga, en unidades de la moneda elegida. Es el único origen de
-     verdad: el resto de la vista se deriva de aquí. */
-  var pago = null;
-  var USD_INICIAL = 500;
+     verdad: el resto de la vista se deriva de aquí. Arranca vacío: un importe
+     puesto de antemano es una cifra que alguien puede firmar sin haberla
+     elegido. */
+  var pago = 0n;
 
 
 
@@ -599,20 +677,23 @@
     var dec = decimales(), cif = cifras(), sim = simbolo();
     if (unidad) unidad.textContent = sim;
 
-    /* Con una moneda nativa no hay importe posible hasta que se sepa el precio:
-       ni convertir el arranque, ni validar lo que se teclee. */
-    if (pago === null) {
-      var arranque = unidDeUsd(USD_INICIAL);
-      if (arranque === null) {
-        usdIn.value = '';
-        eq.textContent = 'Reading the price on ' + c.nombre + '…';
-        nrmOut.value = '';
-        pintarCta();
-        pintarPanel();
-        pintarBarra();
-        return;
-      }
-      pago = arranque;
+    var mn0 = minUsd();
+    if (pago === 0n) {
+      if (!desdeInput) usdIn.value = '';
+      usdIn.placeholder = '0.00';
+      nrmOut.value = '';
+      val.textContent = dinero(0);
+      gain.textContent = '+' + dinero(0);
+      range.value = String(Math.log10(mn0));
+      campo.classList.remove('bad');
+      nota.classList.remove('bad');
+      nota.textContent = 'Min ' + dinero(mn0, mn0 < 1 ? 2 : 0) + ' · max ' +
+        dinero(maxUsd()) + ' per wallet · live oracle price';
+      eq.textContent = e.ok ? '' : 'Reading the price on ' + c.nombre + '…';
+      pintarCta();
+      pintarPanel();
+      pintarBarra();
+      return;
     }
 
     var usd = usdDe(pago);
@@ -941,7 +1022,8 @@
     if (!e.viva)     { cta.textContent = 'Round not open yet'; cta.disabled = true; return; }
     if (!sesion.cuenta) { cta.textContent = 'Connect wallet'; return; }
     if (sesion.cid !== c.id) { cta.textContent = 'Switch to ' + c.nombre; return; }
-    var u = pago === null ? null : usdDe(pago);
+    if (pago === 0n) { cta.textContent = 'Enter an amount'; cta.disabled = true; return; }
+    var u = usdDe(pago);
     cta.textContent = u === null ? 'Connect wallet'
       : 'Buy ' + nrm(tokensPor(u)) + ' NRM';
   }
@@ -973,7 +1055,7 @@
 
   function comprar() {
     var c = red(), m = medio();
-    if (pago === null || pago === 0n) { aviso('Enter an amount first.', true); return; }
+    if (pago === 0n) { aviso('Enter an amount first.', true); return; }
 
     /* Se envía exactamente lo que hay en el campo. El contrato sacará de ahí
        los dólares con la misma cuenta que hace la vista, así que lo que firma

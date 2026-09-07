@@ -109,15 +109,20 @@ await pg.waitForTimeout(1500);
 
 chk('precio por NRM', await pg.locator('#wRate').textContent(), '1 NRM = $0.20');
 
-// El campo va en la moneda de pago: arranca en el equivalente a $500.
-const weiEsp = (50000000000n*10n**18n + PRECIO_NATIVO - 1n) / PRECIO_NATIVO;
-const ethEsp = (weiEsp/10n**18n).toString() + '.' + (weiEsp%10n**18n).toString().padStart(18,'0').slice(0,6).replace(/0+$/,'');
-chk('el campo está en ETH', await pg.locator('#wUsd').inputValue(), ethEsp);
+// El campo arranca vacío y va en la moneda de pago.
+chk('arranca sin importe', await pg.locator('#wUsd').inputValue(), '');
 chk('y la unidad lo dice',  await pg.locator('#presale .w-field em').first().textContent(), 'ETH');
-chk('los dólares van debajo', await pg.locator('#wEq').textContent(), '≈ $500 on Ethereum');
-chk('NRM por ese importe', await pg.locator('#wNrm').inputValue(), '2,500');
 chk('nota de límites',    await pg.locator('#wNote').textContent(),
     'Min $0.20 · max $10,000 per wallet · live oracle price');
+
+// Se escribe el importe en ETH: eso es exactamente lo que se firmará.
+const weiEsp = 200000000000000000n;                 // 0,2 ETH
+const usdReal = weiEsp * PRECIO_NATIVO / 10n**18n;  // lo que contará el contrato
+await pg.locator('#wUsd').fill('0.2');
+await pg.locator('#wUsd').blur();
+await pg.waitForTimeout(350);
+chk('los dólares van debajo', await pg.locator('#wEq').textContent(), '≈ $501 on Ethereum');
+chk('NRM por ese importe', await pg.locator('#wNrm').inputValue(), '2,506');
 chk('pie de la barra',    (await pg.locator('#presale .raise-foot').textContent()).trim(),
     'Minimum $0.20Maximum $10,000 per wallet');
 
@@ -135,7 +140,7 @@ chk('la instalada va primera', await pg.locator('.nrm-w b').first().textContent(
 await pg.locator('.nrm-w').first().click();
 await pg.waitForTimeout(900);
 chk('el modal se cierra al conectar', await pg.locator('.nrm-fondo').count(), 0);
-chk('CTA conectado', await pg.locator('#wCta').textContent(), 'Buy 2,500 NRM');
+chk('CTA conectado', await pg.locator('#wCta').textContent(), 'Buy 2,506 NRM');
 
 // ── 4 · compra con ETH ───────────────────────────────────────────────────────
 await pg.locator('#wCta').click();
@@ -144,7 +149,6 @@ const tx1 = (await pg.evaluate(() => window.__tx))[0] || {};
 chk('destino de la compra', (tx1.to||'').toLowerCase(), '0xacbf1add75139d0e926d57ec715fdab8bee04a89');
 chk('firma exactamente lo escrito', BigInt(tx1.value||0).toString(), weiEsp.toString());
 chk('selector buyWithNative', (tx1.data||'').slice(0,10), '0x31ad36ab');
-const usdReal = weiEsp * PRECIO_NATIVO / 10n**18n;
 const minEsp = (usdReal * 10n**18n / PRECIO_USD) * 9900n / 10000n;
 chk('minTokensOut (1% holgura)', BigInt('0x'+(tx1.data||'').slice(10)).toString(), minEsp.toString());
 
@@ -152,6 +156,7 @@ chk('minTokensOut (1% holgura)', BigInt('0x'+(tx1.data||'').slice(10)).toString(
 await pg.evaluate(()=>{ window.__tx.length=0; });
 await pg.locator('#wPay button').nth(1).click();
 await pg.waitForTimeout(400);
+chk('al cambiar de moneda se conserva el valor', await pg.locator('#wEq').textContent(), '≈ $501 on BNB Chain');
 chk('CTA pide cambiar de red', await pg.locator('#wCta').textContent(), 'Switch to BNB Chain');
 await pg.locator('#wCta').click();
 await pg.waitForTimeout(600);

@@ -57,6 +57,10 @@ async function abrir(eth, bsc, cerrarPanel=false){
 {
  const {ctx,pg}=await abrir(red(0n,0n,0n), red(0n,0n,0n));
  chk('el panel aparece al conectar', await pg.locator('.nrm-pos').isVisible(), true);
+ // Ya conectado y con el campo vacío, lo que falta es el importe.
+ chk('el botón pide importe', await pg.locator('#wCta').textContent(), 'Enter an amount');
+ chk('y está bloqueado',      await pg.locator('#wCta').isDisabled(), true);
+ chk('el campo sigue vacío',  await pg.locator('#wUsd').inputValue(), '');
  chk('muestra la dirección', await pg.locator('.pos-dir').textContent(), '0xf222…6aa6');
  chk('dice que aún no compró', (await pg.locator('.nrm-pos .pos-pie').first().textContent()),
      'No purchase from this wallet yet.');
