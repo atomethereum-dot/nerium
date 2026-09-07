@@ -301,7 +301,10 @@
     return prov.request({ method: 'eth_requestAccounts' }).then(function (cs) {
       if (!cs || !cs.length) throw new Error('sin cuenta');
       return prov.request({ method: 'eth_chainId' }).then(function (h) {
-        sesion = { prov: prov, cuenta: cs[0], cid: parseInt(h, 16), nombre: nombre || '' };
+        sesion = { prov: prov, cuenta: cs[0], cid: parseInt(h, 16), nombre: nombre || '',
+                   /* Por WalletConnect la firma ocurre en otra app: hay que
+                      saber cómo volver a ella. */
+                   wc: prov === wcProv, volver: volverA(prov) };
         if (prov.on) {
           prov.on('accountsChanged', function (a) {
             sesion.cuenta = (a && a[0]) || null;
@@ -400,9 +403,39 @@
     }).then(function () { sesion.cid = cid; });
   }
 
+  /* A dónde saltar para que el visitante vea la petición que acaba de mandarse.
+     WalletConnect solo abre la cartera al emparejar; cada firma posterior llega
+     como una notificación que el teléfono puede no enseñar, y la web se queda
+     diciendo «confirma en tu cartera» sin decir dónde. La propia sesión trae la
+     dirección de vuelta que la cartera declaró; si no la trae, se usa la del
+     registro de la que se eligió. */
+  /* Quién está al otro lado. La sesión lo dice una vez emparejada, y es lo que
+     hay que enseñar: «Open WalletConnect» no lleva a ninguna app, «Open
+     MetaMask» sí. */
+  function nombreWC(prov) {
+    try {
+      var m = prov && prov.session && prov.session.peer && prov.session.peer.metadata;
+      if (m && m.name) return m.name;
+    } catch (e) {}
+    return (carteraElegida && carteraElegida.nombre) || 'WalletConnect';
+  }
+
+  function volverA(prov) {
+    try {
+      var m = prov && prov.session && prov.session.peer && prov.session.peer.metadata;
+      var r = m && m.redirect;
+      if (r && (r.native || r.universal)) return r.native || r.universal;
+    } catch (e) {}
+    var w = carteraElegida;
+    if (w && w.movil) return w.movil.native || w.movil.universal || null;
+    return null;
+  }
+
   function enviar(tx) {
     tx.from = sesion.cuenta;
-    return sesion.prov.request({ method: 'eth_sendTransaction', params: [tx] });
+    var p = sesion.prov.request({ method: 'eth_sendTransaction', params: [tx] });
+    volverACartera();
+    return p;
   }
 
   /* Espera a que la transacción entre en un bloque. Se pregunta por el RPC
@@ -1282,6 +1315,35 @@
   /* ─────────────────────────── el botón principal ─────────────────────────── */
 
   var ocupado = false;
+  var carteraElegida = null;      /* la del registro que se eligió, si fue esa vía */
+  var enlaceVolver = null;
+
+  /* Con la cartera en otra app, «Confirm in your wallet…» no dice dónde. Esto
+     pone el camino de vuelta: un enlace de verdad, porque saltar a un esquema
+     propio desde JavaScript fuera de un gesto lo bloquea el navegador. */
+  function volverACartera() {
+    if (!MOVIL || !sesion.wc || !sesion.volver) return;
+    if (!document.getElementById('nrmVolverCss')) {
+      var e = document.createElement('style');
+      e.id = 'nrmVolverCss';
+      e.textContent = '.nrm-volver{display:block;margin:10px 0 0;padding:12px;border-radius:6px;' +
+        'border:1px solid var(--blue,#2F6BFF);color:var(--blue,#2F6BFF);background:none;' +
+        'font:inherit;font-size:14px;font-weight:500;text-align:center;text-decoration:none}';
+      document.head.appendChild(e);
+    }
+    if (!enlaceVolver) {
+      enlaceVolver = document.createElement('a');
+      enlaceVolver.className = 'nrm-volver';
+      cta.parentNode.insertBefore(enlaceVolver, cta.nextSibling);
+    }
+    var base = sesion.volver;
+    enlaceVolver.href = /^http/.test(base) ? base
+      : (base.charAt(base.length - 1) === '/' ? base : base + '/');
+    enlaceVolver.textContent = 'Open ' + (sesion.nombre || 'your wallet');
+    enlaceVolver.hidden = false;
+  }
+
+  function ocultarVolver() { if (enlaceVolver) enlaceVolver.hidden = true; }
 
   function pintarCta() {
     if (ocupado) return;
@@ -1314,7 +1376,12 @@
     ocupado = true; cta.disabled = true;
     cta.classList.add('espera'); cta.textContent = txt;
   }
-  function libre() { ocupado = false; cta.classList.remove('espera'); pintarCta(); }
+  function libre() {
+    ocupado = false;
+    cta.classList.remove('espera');
+    ocultarVolver();
+    pintarCta();
+  }
   function aviso(txt, malo) {
     nota.textContent = txt;
     nota.classList.toggle('bad', !!malo);
@@ -1882,7 +1949,7 @@
         wcUri = uri; wcEstado = 'lista';
         if (wcEspera) { var w = wcEspera; wcEspera = null; mostrarWC(w, uri, false); }
       });
-      return prov.connect().then(function () { return enchufar(prov, 'WalletConnect'); });
+      return prov.connect().then(function () { return enchufar(prov, nombreWC(prov)); });
     }).then(function () { return refrescar(); })
       .then(function () { cerrar(); libre(); pintar(); })
       .catch(function (e) {
@@ -1959,6 +2026,7 @@
       aviso(motivo(wcFallo), true);
       return;
     }
+    carteraElegida = w;
     /* Con la URI ya pedida, el salto ocurre aquí mismo, dentro del toque. */
     if (wcUri) return mostrarWC(w, wcUri, true);
 

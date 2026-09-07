@@ -43,6 +43,7 @@ node herramientas/probar_vista.mjs     # importe vacio, logos y volver a la secc
 node herramientas/probar_seed.mjs      # que no quede ni un «whitelist» en ningun idioma
 node herramientas/probar_salto.mjs     # que el documento no cambie de alto al recorrerlo
 node herramientas/probar_rejilla.mjs   # que la lista de carteras salga pareja y centrada
+node herramientas/probar_volver.mjs    # el camino de vuelta a la cartera al firmar
 ```
 
 `probar_wc.mjs` simula también el registro de carteras de WalletConnect y el SDK,
