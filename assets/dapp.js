@@ -1316,34 +1316,91 @@
 
   var ocupado = false;
   var carteraElegida = null;      /* la del registro que se eligió, si fue esa vía */
-  var enlaceVolver = null;
 
-  /* Con la cartera en otra app, «Confirm in your wallet…» no dice dónde. Esto
-     pone el camino de vuelta: un enlace de verdad, porque saltar a un esquema
-     propio desde JavaScript fuera de un gesto lo bloquea el navegador. */
-  function volverACartera() {
-    if (!MOVIL || !sesion.wc || !sesion.volver) return;
-    if (!document.getElementById('nrmVolverCss')) {
-      var e = document.createElement('style');
-      e.id = 'nrmVolverCss';
-      e.textContent = '.nrm-volver{display:block;margin:10px 0 0;padding:12px;border-radius:6px;' +
-        'border:1px solid var(--blue,#2F6BFF);color:var(--blue,#2F6BFF);background:none;' +
-        'font:inherit;font-size:14px;font-weight:500;text-align:center;text-decoration:none}';
-      document.head.appendChild(e);
-    }
-    if (!enlaceVolver) {
-      enlaceVolver = document.createElement('a');
-      enlaceVolver.className = 'nrm-volver';
-      cta.parentNode.insertBefore(enlaceVolver, cta.nextSibling);
-    }
-    var base = sesion.volver;
-    enlaceVolver.href = /^http/.test(base) ? base
-      : (base.charAt(base.length - 1) === '/' ? base : base + '/');
-    enlaceVolver.textContent = 'Open ' + (sesion.nombre || 'your wallet');
-    enlaceVolver.hidden = false;
+  /* Con la cartera en otra app, «Confirm in your wallet…» no dice dónde ni deja
+     claro que falta un paso. Un enlace pequeño debajo del botón tampoco: quien
+     no sepa que hay que pulsarlo da la compra por hecha y se va.
+
+     Así que sale la misma hoja que usa la conexión, tapando la página: es
+     imposible no verla, y dice qué falta y dónde se hace. */
+  var hojaF = null, pasoActual = '';
+
+  /* El botón ya dice en qué paso va —aprobar el USDT, confirmar la compra—, y
+     esa misma frase sirve aquí con el nombre de la cartera en lugar de «your
+     wallet», que es lo que hace falta cuando hay que ir a buscarla. */
+  function frasePaso(quien) {
+    var t = (pasoActual || 'Confirm').replace(/[.…\s]+$/, '');
+    t = t.replace(/your wallet/i, quien);
+    if (t.toLowerCase().indexOf(quien.toLowerCase()) < 0) t += ' in ' + quien;
+    return t + '. Your purchase is not finished until you do.';
   }
 
-  function ocultarVolver() { if (enlaceVolver) enlaceVolver.hidden = true; }
+  function cerrarFirma() {
+    if (!hojaF) return;
+    var h = hojaF; hojaF = null;
+    h.classList.remove('on');
+    setTimeout(function () { if (h.parentNode) h.remove(); }, 200);
+  }
+
+  function volverACartera() {
+    if (!sesion.wc) return;               /* la cartera está aquí mismo */
+    estilos();
+    cerrarFirma();
+
+    var destino = sesion.volver;
+    if (destino && !/^http/.test(destino) && destino.charAt(destino.length - 1) !== '/') {
+      destino += '/';
+    }
+    var quien = sesion.nombre || 'your wallet';
+
+    hojaF = document.createElement('div');
+    hojaF.className = 'nrm-fondo';
+    hojaF.setAttribute('role', 'dialog');
+    hojaF.setAttribute('aria-modal', 'true');
+
+    var caja = document.createElement('div');
+    caja.className = 'nrm-caja';
+
+    var cab = document.createElement('div');
+    cab.className = 'nrm-cab';
+    var hueco = document.createElement('button');
+    hueco.type = 'button'; hueco.className = 'nrm-ico'; hueco.hidden = true;
+    var tit = document.createElement('h3');
+    tit.textContent = quien;
+    var equis = document.createElement('button');
+    equis.type = 'button'; equis.className = 'nrm-ico';
+    equis.appendChild(icono('M4 4l8 8M12 4l-8 8'));
+    equis.setAttribute('aria-label', 'Close');
+    equis.addEventListener('click', cerrarFirma);
+    cab.appendChild(hueco); cab.appendChild(tit); cab.appendChild(equis);
+
+    var cuerpo = document.createElement('div');
+    cuerpo.className = 'nrm-qr';
+    var p = document.createElement('p');
+    p.textContent = destino ? frasePaso(quien)
+      : 'Open ' + quien + ' on your phone and confirm there. ' +
+        'Your purchase is not finished until you do.';
+    cuerpo.appendChild(p);
+
+    if (destino) {
+      /* Un enlace de verdad: saltar a un esquema propio desde JavaScript, fuera
+         de un gesto, lo bloquea el navegador sin decir nada. */
+      var a = document.createElement('a');
+      a.className = 'nrm-copiar nrm-grande';
+      a.href = destino;
+      a.rel = 'noopener';
+      a.textContent = 'Open ' + quien;
+      cuerpo.appendChild(a);
+    }
+
+    caja.appendChild(cab); caja.appendChild(cuerpo);
+    hojaF.appendChild(caja);
+    hojaF.addEventListener('click', function (e) { if (e.target === hojaF) cerrarFirma(); });
+    document.body.appendChild(hojaF);
+    requestAnimationFrame(function () { if (hojaF) hojaF.classList.add('on'); });
+  }
+
+  function ocultarVolver() { cerrarFirma(); }
 
   function pintarCta() {
     if (ocupado) return;
@@ -1375,6 +1432,7 @@
   function trabajando(txt) {
     ocupado = true; cta.disabled = true;
     cta.classList.add('espera'); cta.textContent = txt;
+    pasoActual = txt;
   }
   function libre() {
     ocupado = false;
@@ -1685,6 +1743,8 @@
       '.nrm-copiar{padding:9px 18px;border:1px solid rgba(10,12,16,.14);border-radius:999px;',
       'background:none;color:inherit;font:inherit;font-size:13px;cursor:pointer;transition:background .15s}',
       '.nrm-copiar:hover{background:rgba(47,107,255,.08)}',
+      '.nrm-copiar.nrm-grande{padding:14px 26px;font-size:15px;font-weight:500;',
+      'border-color:var(--blue,#2F6BFF);color:var(--blue,#2F6BFF);text-decoration:none}',
       '.nrm-cargando{grid-column:1/-1;padding:34px;text-align:center;font-size:13px;opacity:.5}',
 
       '@media(prefers-color-scheme:dark){',

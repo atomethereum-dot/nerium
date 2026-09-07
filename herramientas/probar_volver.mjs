@@ -67,28 +67,32 @@ chk('salta a la app y espera', (await pg.locator('.nrm-qr').innerText()).include
 await pg.evaluate(()=>{ window.__aprobado = true; });   // el usuario aprueba
 await pg.waitForTimeout(1800);
 chk('conecta por WalletConnect', await pg.locator('.nrm-pos .pos-dir').textContent(), '0x1a30…2d15');
-chk('mientras no se firma nada, no hay enlace', await pg.locator('.nrm-volver').count(), 0);
+chk('mientras no se firma nada, no hay hoja', await pg.locator('.nrm-fondo').count(), 0);
 
 await pg.locator('#wUsd').fill('0,01');
 await pg.locator('#wUsd').blur(); await pg.waitForTimeout(400);
 chk('la coma se entiende', await pg.locator('#wEq').textContent(), '≈ $7.46 on BNB Chain');
+chk('antes de comprar, nada tapa el botón', await pg.evaluate(()=>{
+  const b=document.getElementById('wCta'), r=b.getBoundingClientRect();
+  return document.elementFromPoint(r.left+r.width/2, r.top+r.height/2) === b;
+}), true);
 /* click() y no tap(): el toque simulado de Playwright no siempre llega al
    botón en emulación móvil, y aquí lo que se prueba es lo que pasa después. */
 await pg.evaluate(()=>document.getElementById('wCta').click());
 await pg.waitForTimeout(1500);
 chk('el botón dice que confirmes', await pg.locator('#wCta').textContent(), 'Confirm in your wallet…');
-const a = pg.locator('.nrm-volver');
-chk('y aparece el enlace de vuelta', await a.isVisible(), true);
-chk('con el nombre de la cartera', await a.textContent(), 'Open MetaMask');
+chk('sale la hoja tapando la página', await pg.locator('.nrm-fondo').isVisible(), true);
+chk('titulada con la cartera', await pg.locator('.nrm-fondo .nrm-cab h3').textContent(), 'MetaMask');
+chk('y dice qué falta y dónde', await pg.locator('.nrm-fondo .nrm-qr p').textContent(),
+    'Confirm in MetaMask. Your purchase is not finished until you do.');
+const a = pg.locator('.nrm-fondo a.nrm-copiar');
+chk('con su botón grande', await a.textContent(), 'Open MetaMask');
 chk('es un enlace de verdad', await a.evaluate(el=>el.tagName), 'A');
 chk('al esquema que declaró la sesión', await a.getAttribute('href'), 'metamask://');
+chk('y se puede cerrar', await pg.locator('.nrm-fondo .nrm-cab button[aria-label="Close"]').isVisible(), true);
 chk('y se mandó la transacción', await pg.evaluate(()=>!!window.__mandada), true);
-chk('nada tapa el botón de comprar', await pg.evaluate(()=>{
-  const b=document.getElementById('wCta'), r=b.getBoundingClientRect();
-  return document.elementFromPoint(r.left+r.width/2, r.top+r.height/2) === b;
-}), true);
 chk('sin errores de página', errs.length, 0);
-await pg.locator('#presale .widget').screenshot({path:'/tmp/volver.png'});
+await pg.locator('.nrm-caja').last().screenshot({path:'/tmp/volver.png'});
 
 await nav.close(); srv.close();
 let mal=0; for(const r of Rs){ if(!r.ok)mal++;
