@@ -2,19 +2,21 @@
 """El cubo de Nereum, reconstruido como vector desde el render entregado.
 
 Medido sobre nereum_cube_logo_v4_polished.png (787x785):
-  · la cara gira 17,1 grados
+  · la cara gira 45 grados (antes 17,1: el render nuevo la pone de canto)
   · la banda blanca ocupa el 18 % inferior de la cara
   · el canto del cubo asoma a la derecha y abajo
   · la plata va de #DCE0EA arriba a #9B9FA9 abajo
 """
 import math
 
-GIRO = -17.1                     # grados; negativo = sentido antihorario en pantalla
+GIRO = -45.0                     # grados; negativo = sentido antihorario en pantalla
 BANDA = 0.185                    # fracción inferior de la cara que es blanca
 CANTO = 0.058                    # grosor del cubo, en fracción del lado
 
-def cara(lado, cx, cy, giro=GIRO):
+def cara(lado, cx, cy, giro=None):
     """Las cuatro esquinas de un cuadrado girado alrededor de (cx,cy)."""
+    if giro is None:
+        giro = GIRO          # se lee al llamar, no al definir
     r = math.radians(giro)
     h = lado / 2
     return [(cx + x*math.cos(r) - y*math.sin(r),

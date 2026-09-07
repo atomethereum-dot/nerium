@@ -54,18 +54,30 @@ LARGA_SUB = {
 }
 
 def convertir(d, lang):
-    """Devuelve un diccionario nuevo conservando el orden de las claves."""
-    cortas = dict(zip(ORDEN_CORTAS, CORTAS[lang]))
+    """Devuelve un diccionario nuevo conservando el orden de las claves.
+
+    Acepta el diccionario en cualquiera de los dos estados. Antes solo miraba
+    las claves viejas y daba por convertido lo que no reconocía: bastaba que
+    algo hubiera tocado una clave para que se saltara el idioma entero y
+    dejara las otras cinco sin renombrar, con lo que el traductor ya no las
+    encontraba y esas frases se quedaban en inglés."""
+    import collections
+    cortas = {}
+    for k_viejo, frase in zip(ORDEN_CORTAS, CORTAS[lang]):
+        cortas[k_viejo] = frase                  # sin convertir
+        cortas[ING[k_viejo]] = frase             # ya convertida
     viejo, nuevo = LARGA_SUB[lang]
-    salida = {}
+    salida = collections.OrderedDict()
     tocadas = 0
     for k, v in d.items():
         if k in cortas:
-            salida[ING[k]] = cortas[k]; tocadas += 1
-        elif k == LARGA_VIEJA:
-            if viejo not in v:
-                raise SystemExit('no encuentro %r en %s' % (viejo, lang))
-            salida[LARGA_NUEVA] = v.replace(viejo, nuevo); tocadas += 1
+            salida[ING.get(k, k)] = cortas[k]; tocadas += 1
+        elif k in (LARGA_VIEJA, LARGA_NUEVA):
+            if viejo in v:
+                v = v.replace(viejo, nuevo)
+            elif nuevo not in v:
+                raise SystemExit('no encuentro %r ni %r en %s' % (viejo, nuevo, lang))
+            salida[LARGA_NUEVA] = v; tocadas += 1
         else:
             salida[k] = v
     if tocadas != 6:
@@ -104,20 +116,23 @@ def aplicar(html):
     """Devuelve el html con el cambio hecho, tanto en el texto como en el
     bloque de traducciones. Es idempotente: pasarlo dos veces no rompe nada."""
     import json, collections
+
+    # Las traducciones van PRIMERO. Una de las reglas de HTML es texto suelto,
+    # sin etiquetas, y también casaba dentro del JSON del diccionario: al
+    # cambiarla ahí antes de tiempo, el bloque quedaba a medio convertir.
+    marca = '<script id="i18n"'
+    if marca in html:
+        i = html.index(marca)
+        ab = html.index('>', i) + 1
+        cierre = html.index('</script>', i)
+        d = json.loads(html[ab:cierre], object_pairs_hook=collections.OrderedDict)
+        hecho = collections.OrderedDict()
+        for lang, frases in d.items():
+            hecho[lang] = convertir(frases, lang) if lang in CORTAS else frases
+        html = (html[:ab]
+                + json.dumps(hecho, ensure_ascii=False, separators=(',', ':'))
+                + html[cierre:])
+
     for viejo, nuevo in HTML:
         html = html.replace(viejo, nuevo)
-
-    marca = '<script id="i18n"'
-    if marca not in html:
-        return html
-    i = html.index(marca)
-    ab = html.index('>', i) + 1
-    cierre = html.index('</script>', i)
-    d = json.loads(html[ab:cierre], object_pairs_hook=collections.OrderedDict)
-    hecho = collections.OrderedDict()
-    for lang, frases in d.items():
-        if lang not in CORTAS or LARGA_VIEJA not in frases:
-            hecho[lang] = frases          # ya convertido, o un idioma que no conozco
-        else:
-            hecho[lang] = convertir(frases, lang)
-    return html[:ab] + json.dumps(hecho, ensure_ascii=False, separators=(',', ':')) + html[cierre:]
+    return html

@@ -8,7 +8,7 @@ El bloque se genera con herramientas/logo/logo.py; aqui va ya escrito para no
 depender de nada al montar.
 """
 
-VIEJO_ANCLA = '<svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="nlogo"'
+VIEJO_ANCLA = '<svg width="0" height="0" style="position:absolute" aria-hidden="true">'
 FIN_ANCLA = '</symbol></svg>'
 
 NUEVO = """<svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -30,19 +30,19 @@ NUEVO = """<svg width="0" height="0" style="position:absolute" aria-hidden="true
   </linearGradient>
 </defs>
 <symbol id="nlogo" viewBox="0 0 672 672">
-  <g transform="translate(-98.74 -104.76) scale(1.2409)">
-    <path fill="#6E7482" d="M468.35 86.03 L497.06 124.43 L614.67 506.75 L232.35 624.37 L203.65 585.97 L585.97 468.35 Z"/>
-    <path fill="url(#nrmPlata)" d="M86.03 203.65 L468.35 86.03 L585.97 468.35 L203.65 585.97 Z"/>
-    <path fill="#FAFBFC" d="M181.89 515.24 L564.21 397.62 L585.97 468.35 L203.65 585.97 Z"/>
-    <path fill="url(#nrmBrillo)" opacity=".8" d="M200.73 168.36 L229.40 159.54 L247.62 572.44 L220.85 580.67 Z"/>
+  <g transform="translate(-43.23 -38.23) scale(1.0766)">
+    <path fill="#6E7482" d="M336.00 53.16 L368.48 76.36 L651.32 359.20 L368.48 642.04 L336.00 618.84 L618.84 336.00 Z"/>
+    <path fill="url(#nrmPlata)" d="M53.16 336.00 L336.00 53.16 L618.84 336.00 L336.00 618.84 Z"/>
+    <path fill="#FAFBFC" d="M283.67 566.52 L566.52 283.67 L618.84 336.00 L336.00 618.84 Z"/>
+    <path fill="url(#nrmBrillo)" opacity=".8" d="M138.01 251.15 L159.22 229.93 L368.53 586.32 L348.73 606.11 Z"/>
   </g>
 </symbol>
-<!-- El de la cabecera se dibuja a 17-26 px: ahi el reflejo es ruido. -->
+<!-- El de la cabecera se dibuja a 30 px: ahi el reflejo es ruido. -->
 <symbol id="nlogo-s" viewBox="0 0 672 672">
-  <g transform="translate(-98.74 -104.76) scale(1.2409)">
-    <path fill="#6E7482" d="M468.35 86.03 L497.06 124.43 L614.67 506.75 L232.35 624.37 L203.65 585.97 L585.97 468.35 Z"/>
-    <path fill="url(#nrmPlata)" d="M86.03 203.65 L468.35 86.03 L585.97 468.35 L203.65 585.97 Z"/>
-    <path fill="#FAFBFC" d="M181.89 515.24 L564.21 397.62 L585.97 468.35 L203.65 585.97 Z"/>
+  <g transform="translate(-43.23 -38.23) scale(1.0766)">
+    <path fill="#6E7482" d="M336.00 53.16 L368.48 76.36 L651.32 359.20 L368.48 642.04 L336.00 618.84 L618.84 336.00 Z"/>
+    <path fill="url(#nrmPlata)" d="M53.16 336.00 L336.00 53.16 L618.84 336.00 L336.00 618.84 Z"/>
+    <path fill="#FAFBFC" d="M283.67 566.52 L566.52 283.67 L618.84 336.00 L336.00 618.84 Z"/>
   </g>
 </symbol></svg>"""
 
