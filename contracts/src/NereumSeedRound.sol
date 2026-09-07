@@ -265,7 +265,6 @@ contract NereumSeedRound is Ownable2Step, ReentrancyGuard, Pausable {
     function feedCount() external view returns (uint256) { return feeds.length; }
 
     function startRound(uint64 start, uint64 end) external onlyOwner {
-        if (priceUsd == 0) revert PriceNotSet();
         if (finalized) revert RoundAlreadyFinalized();
         if (startTime != 0) revert RoundAlreadyScheduled();
         if (priceUsd == 0) revert PriceNotSet();
