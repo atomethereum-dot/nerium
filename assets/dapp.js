@@ -420,14 +420,21 @@
     return (carteraElegida && carteraElegida.nombre) || 'WalletConnect';
   }
 
-  /* El icono que la cartera declara en la sesión. Es el suyo de verdad, no el
-     del registro, así que gana a cualquier otro. */
+  /* El logo del registro va primero, aunque la cartera declare uno suyo en la
+     sesión. El del registro es un icono de aplicación, cuadrado y del mismo
+     tamaño para todas, y es el que ya se ve bien en la lista. El que cada
+     cartera sube por su cuenta viene como quiere —transparente, recortado,
+     pequeño—, y ahí es donde unas salían impecables y otras no.
+
+     El de la sesión solo se usa si no hay entrada en el registro: mejor un
+     icono raro que ninguno. */
   function logoDe(prov) {
+    if (carteraElegida && carteraElegida.logo) return carteraElegida.logo;
     try {
       var m = prov && prov.session && prov.session.peer && prov.session.peer.metadata;
       if (m && m.icons && m.icons.length && m.icons[0]) return m.icons[0];
     } catch (e) {}
-    return (carteraElegida && carteraElegida.logo) || '';
+    return '';
   }
 
   function volverA(prov) {

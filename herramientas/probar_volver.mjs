@@ -64,7 +64,9 @@ const pg=await ctx.newPage();
 const errs=[]; pg.on('pageerror',e=>errs.push('ERROR '+e));
 pg.on('console',m=>{ if(m.type()==='error') errs.push('CONSOLA '+m.text()); });
 await pg.route('**explorer-api.walletconnect.com/v3/wallets**', r=>r.fulfill({status:200,contentType:'application/json',body:JSON.stringify(REGISTRO)}));
-const PIX=Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z/C/HgAGgwJ/lK3Q6wAAAABJRU5ErkJggg==','base64');
+// Iconos cuadrados de 200px, como los que sirve el registro de verdad.
+const PIX=fs.readFileSync(path.join(path.dirname(new URL(import.meta.url).pathname),
+  'iconos', 'icono_'+C.nombre.split(' ')[0].toLowerCase()+'.png'));
 await pg.route('**explorer-api.walletconnect.com/v3/logo/**', r=>r.fulfill({status:200,contentType:'image/png',body:PIX}));
 await pg.route('**ejemplo.invalid/logo.png', r=>r.fulfill({status:200,contentType:'image/png',body:PIX}));
 await pg.route('**/assets/walletconnect.js', r=>r.fulfill({status:200,contentType:'text/javascript',body:SDK}));
@@ -116,6 +118,13 @@ chk(C.nombre+': se puede cerrar', await pg.locator('.nrm-fondo .nrm-cab button[a
 chk(C.nombre+': la hoja lleva su logo', await pg.locator('.nrm-fondo .nrm-qr .nrm-av.nrm-grandota').count(), 1);
 chk(C.nombre+': y es imagen, no inicial',
     await pg.locator('.nrm-fondo .nrm-qr .nrm-av').evaluate(el=>el.tagName), 'IMG');
+/* Las carteras suben a la sesión el icono que quieren, de cualquier tamaño y
+   con o sin transparencia. El del registro es el mismo formato para todas, y
+   es el que ya se ve bien en la lista. */
+chk(C.nombre+': el logo es el del registro, no el que sube la cartera',
+    (await pg.locator('.nrm-fondo .nrm-qr img.nrm-av').getAttribute('src')).indexOf('explorer-api') >= 0, true);
+chk(C.nombre+': y en tamaño grande',
+    (await pg.locator('.nrm-fondo .nrm-qr img.nrm-av').getAttribute('src')).indexOf('/logo/lg/') > 0, true);
 chk(C.nombre+': sin placa detrás del logo',
     await pg.locator('.nrm-fondo .nrm-qr .nrm-av').evaluate(el=>{
       const cs=getComputedStyle(el); return cs.backgroundColor+'|'+cs.boxShadow; }),
