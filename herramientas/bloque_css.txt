@@ -77,3 +77,9 @@ html[dir="rtl"] .subir{left:16px !important;right:auto !important}
 /* Vacías hoy. Sin esto se les supondría 100vh cada una, que es alto de sobra
    para desplazar toda la página de abajo. */
 #docs,#blog,#team{contain-intrinsic-size:auto 0}
+/* ── el logotipo de la cabecera ─────────────────────────────────────────────
+   El cubo llena ahora su recuadro y el texto va pegado a él: con gap 9 y un
+   símbolo con aire dentro, entre marca y palabra quedaba un hueco de casi el
+   doble de lo que parecía. */
+.hd .brand{gap:5px}
+.hd .brand svg{width:30px;height:30px}
