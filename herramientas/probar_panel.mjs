@@ -119,15 +119,15 @@ async function abrir(eth, bsc, cerrarPanel=false){
  const E=red(0n,0n,0n,{__nativo:'0x'+(2n*10n**17n).toString(16),  __usdt:1234560000n});   // 0,2 ETH · 1.234,56 USDT
  const B=red(0n,0n,0n,{__nativo:'0x'+(15n*10n**17n).toString(16), __usdt:50n*10n**18n}); // 1,5 BNB · 50 USDT
  const {ctx,pg}=await abrir(E,B);
- chk('el saldo sale bajo el importe', await pg.locator('.nrm-saldo').textContent(), 'Balance 0.2 ETH');
+ // Un solo saldo, el de la moneda elegida, y cambia con ella.
+ chk('ETH',            await pg.locator('.nrm-saldo').textContent(), 'Balance 0.2 ETH');
+ await pg.locator('#wPay button').nth(1).click(); await pg.waitForTimeout(400);
+ chk('BNB',            await pg.locator('.nrm-saldo').textContent(), 'Balance 1.5 BNB');
  await pg.locator('#wPay button').nth(2).click(); await pg.waitForTimeout(400);
- chk('y cambia con la moneda', await pg.locator('.nrm-saldo').textContent(), 'Balance 1234.56 USDT');
- const f=await pg.locator('.pos-saldos li').allTextContents();
- chk('los cuatro en el panel', f.length, 4);
- chk('ETH de Ethereum',   f[0], 'ETH · Ethereum0.2');
- chk('USDT de Ethereum',  f[1], 'USDT · Ethereum1234.56');
- chk('BNB de BNB Chain',  f[2], 'BNB · BNB Chain1.5');
- chk('USDT de BNB Chain', f[3], 'USDT · BNB Chain50');
+ chk('USDT de Ethereum',  await pg.locator('.nrm-saldo').textContent(), 'Balance 1234.56 USDT on Ethereum');
+ await pg.locator('#wPay button').nth(3).click(); await pg.waitForTimeout(400);
+ chk('USDT de BNB Chain', await pg.locator('.nrm-saldo').textContent(), 'Balance 50 USDT on BNB Chain');
+ chk('y el panel ya no repite los saldos', await pg.locator('.pos-saldos').count(), 0);
  await pg.locator('#presale .widget').screenshot({path:'/tmp/saldos.png'});
  await ctx.close();
 }

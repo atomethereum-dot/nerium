@@ -924,7 +924,10 @@
     if (!sesion.cuenta || v === null) { lineaSaldo.hidden = true; return; }
     var dec = m.usdt ? red().usdtDec : 18;
     lineaSaldo.hidden = false;
-    lineaSaldo.textContent = 'Balance ' + humano(v, dec, m.usdt ? 2 : 6) + ' ' + simbolo();
+    /* Con USDT hace falta decir en qué red: existe en las dos y el saldo no es
+       el mismo. Con ETH o BNB la moneda ya nombra su cadena. */
+    lineaSaldo.textContent = 'Balance ' + humano(v, dec, m.usdt ? 2 : 6) + ' ' + simbolo() +
+      (m.usdt ? ' on ' + red().nombre : '');
   }
 
   var caja = cta.closest('.widget');
@@ -1170,12 +1173,8 @@
       'border-top:1px solid rgba(10,12,16,.09)}',
       '.nrm-pos li{display:flex;justify-content:space-between;gap:12px;padding:2px 0;opacity:.72}',
       '.nrm-pos .pos-pie{margin:9px 0 0;font-size:12px;opacity:.55}',
-      '.nrm-pos .pos-tit{margin:12px 0 6px;padding-top:10px;font-size:10.5px;',
-      'letter-spacing:.08em;text-transform:uppercase;opacity:.45;',
-      'border-top:1px solid rgba(10,12,16,.09)}',
       '.nrm-saldo{margin:-4px 0 12px;font-size:12px;opacity:.6;',
       "font-family:var(--m,ui-monospace,monospace)}",
-      '@media(prefers-color-scheme:dark){.nrm-pos .pos-tit{border-color:rgba(255,255,255,.10)}}',
       '.nrm-pos .pos-rec{margin-top:10px;padding-top:10px;border-top:1px solid rgba(10,12,16,.09);',
       'display:flex;justify-content:space-between;gap:12px;color:var(--blue,#2F6BFF);font-weight:500}',
       '@media(prefers-color-scheme:dark){.nrm-pos{border-color:rgba(255,255,255,.14)}',
@@ -1190,32 +1189,6 @@
     var b = document.createElement('span'); b.textContent = v;
     li.appendChild(a); li.appendChild(b);
     return li;
-  }
-
-  /* Los cuatro saldos de la cartera. Van juntos y con su red al lado: «USDT» a
-     secas no dice nada cuando existe en las dos. */
-  function bloqueSaldos() {
-    var filas = [];
-    [[1, false], [1, true], [56, false], [56, true]].forEach(function (par) {
-      var c = CADENAS[par[0]], b = saldos[par[0]];
-      if (!b) return;
-      var v = par[1] ? b.usdt : b.nativo;
-      if (v === null || v === undefined) return;
-      var dec = par[1] ? c.usdtDec : 18;
-      filas.push([(par[1] ? 'USDT' : c.simbolo) + ' · ' + c.nombre,
-                  humano(v, dec, par[1] ? 2 : 6)]);
-    });
-    if (!filas.length) return null;
-    var caja = document.createElement('div');
-    var t = document.createElement('div');
-    t.className = 'pos-tit'; t.textContent = 'In your wallet';
-    caja.appendChild(t);
-    var ul = document.createElement('ul');
-    ul.className = 'pos-saldos';
-    ul.style.cssText = 'margin:0;padding:0;border:0';
-    filas.forEach(function (f) { ul.appendChild(fila(f[0], f[1])); });
-    caja.appendChild(ul);
-    return caja;
   }
 
   function pintarPanel() {
@@ -1254,8 +1227,6 @@
       v.textContent = 'No purchase from this wallet yet.';
       panel.appendChild(v);
       panel.appendChild(topeRestante());
-      var sb0 = bloqueSaldos();
-      if (sb0) panel.appendChild(sb0);
       return;
     }
 
@@ -1290,8 +1261,6 @@
     } else {
       panel.appendChild(topeRestante());
     }
-    var sb = bloqueSaldos();
-    if (sb) panel.appendChild(sb);
   }
 
   /* El tope de $10.000 lo lleva cada contrato por su cuenta, así que es por red
