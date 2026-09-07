@@ -281,7 +281,8 @@
     var d = e.detail;
     if (!d || !d.info || vistas[d.info.uuid]) return;
     vistas[d.info.uuid] = true;
-    carteras.push({ nombre: d.info.name, icono: d.info.icon, prov: d.provider });
+    carteras.push({ nombre: d.info.name, icono: d.info.icon, prov: d.provider,
+                    rdns: d.info.rdns || '' });
   });
   try { window.dispatchEvent(new Event('eip6963:requestProvider')); } catch (e) {}
 
@@ -311,32 +312,44 @@
      no hay nada que pedir y no se toca la extensión. */
   var enVuelo = null;
 
-  function pedirCuentas(prov) {
-    if (enVuelo && enVuelo.prov === prov) return enVuelo.p;
+  function pedirCuentas(prov, silencioso) {
+    if (!silencioso && enVuelo && enVuelo.prov === prov) return enVuelo.p;
     var p = prov.request({ method: 'eth_accounts' })
       .catch(function () { return []; })
       .then(function (cs) {
         if (cs && cs.length) return cs;
+        /* En silencio se vuelve con las manos vacías y ya está: esto corre al
+           cargar la página, y ahí abrirle una ventana a alguien que no ha
+           pulsado nada sería salirle al paso. */
+        if (silencioso) return [];
         return prov.request({ method: 'eth_requestAccounts' });
       });
+    if (silencioso) return p;
     enVuelo = { prov: prov, p: p };
     var soltar = function () { if (enVuelo && enVuelo.p === p) enVuelo = null; };
     p.then(soltar, soltar);
     return p;
   }
 
-  function enchufar(prov, nombre) {
-    return pedirCuentas(prov).then(function (cs) {
+  function enchufar(prov, nombre, silencioso) {
+    return pedirCuentas(prov, silencioso).then(function (cs) {
       if (!cs || !cs.length) throw new Error('sin cuenta');
       return prov.request({ method: 'eth_chainId' }).then(function (h) {
         sesion = { prov: prov, cuenta: cs[0], cid: parseInt(h, 16), nombre: nombre || '',
                    /* Por WalletConnect la firma ocurre en otra app: hay que
                       saber cómo volver a ella. */
                    wc: prov === wcProv, volver: volverA(prov), logo: logoDe(prov) };
+        recordar(prov, nombre);
         if (prov.on) {
           prov.on('accountsChanged', function (a) {
             sesion.cuenta = (a && a[0]) || null;
-            if (!sesion.cuenta) sesion.prov = null;
+            if (!sesion.cuenta) { sesion.prov = null; olvidar(); }
+            posicion = { 1: null, 56: null };
+            refrescar().then(function () { pintar(); });
+          });
+          prov.on('disconnect', function () {
+            sesion = { prov: null, cuenta: null, cid: null, nombre: '' };
+            olvidar();
             posicion = { 1: null, 56: null };
             refrescar().then(function () { pintar(); });
           });
@@ -347,6 +360,74 @@
         }
         return sesion;
       });
+    });
+  }
+
+  /* ────────────────── volver a la página ya conectado ────────────────────── */
+
+  /* En el móvil, tocar «Connect wallet» te lleva a la cartera y la pestaña se
+     queda en segundo plano. Android e iOS descartan pestañas de fondo sin
+     avisar, así que al volver el navegador la RECARGA: la página arranca de
+     cero. La sesión de WalletConnect sigue guardada, y la extensión sigue
+     teniendo el permiso dado, pero nadie preguntaba al arrancar, así que el
+     botón volvía a decir «Connect wallet» después de haber conectado.
+
+     Aquí se pregunta, y se pregunta en silencio: todo esto usa eth_accounts,
+     que devuelve lo ya concedido y no abre ninguna ventana. */
+  var MEMO = 'nrm:cartera';
+
+  function recordar(prov, nombre) {
+    try {
+      var q = { tipo: prov === wcProv ? 'wc' : 'inyectada', nombre: nombre || '' };
+      if (q.tipo === 'inyectada') {
+        var m = listaCarteras().filter(function (w) { return w.prov === prov; })[0];
+        q.id = (m && m.rdns) || '';
+      }
+      localStorage.setItem(MEMO, JSON.stringify(q));
+    } catch (e) {}
+  }
+
+  function olvidar() { try { localStorage.removeItem(MEMO); } catch (e) {} }
+
+  function memoria() {
+    try { return JSON.parse(localStorage.getItem(MEMO) || 'null'); } catch (e) { return null; }
+  }
+
+  /* Si hay sesión guardada de WalletConnect. Se mira ANTES de cargar el
+     paquete: son 2 MB, y no hay por qué traerlos a quien solo pasa por aquí. */
+  function haySesionWC() {
+    try {
+      for (var i = 0; i < localStorage.length; i++) {
+        var k = localStorage.key(i);
+        if (!k || k.indexOf('wc@') !== 0 || k.indexOf('session') < 0) continue;
+        var v = JSON.parse(localStorage.getItem(k) || 'null');
+        if (v && v.length) return true;
+      }
+    } catch (e) {}
+    return false;
+  }
+
+  function reanudar() {
+    var q = memoria();
+    if (!q) return Promise.resolve(false);
+
+    if (q.tipo === 'wc') {
+      if (!haySesionWC()) { olvidar(); return Promise.resolve(false); }
+      return iniciarWC().then(function (prov) {
+        if (!prov.session) { olvidar(); return false; }
+        return enchufar(prov, nombreWC(prov), true).then(function () { return true; });
+      }).catch(function () { return false; });
+    }
+
+    /* Las extensiones se anuncian en cuanto se les pregunta, pero no siempre en
+       el mismo tic: se les da un momento antes de darlas por ausentes. */
+    return new Promise(function (ok) { setTimeout(ok, 350); }).then(function () {
+      var l = listaCarteras();
+      var m = l.filter(function (w) { return q.id && w.rdns === q.id; })[0] ||
+              l.filter(function (w) { return w.nombre === q.nombre; })[0];
+      if (!m) return false;
+      return enchufar(m.prov, m.nombre, true).then(function () { return true; })
+        .catch(function () { return false; });
     });
   }
 
@@ -2234,6 +2315,12 @@
 
   ponerMonedas();
   pintar(false);
+
+  /* Antes de nada: ¿veníamos ya conectados? En el móvil esto es lo normal, no
+     la excepción, porque volver de la cartera recarga la pestaña. */
+  reanudar().then(function (si) {
+    if (si) return refrescar().then(function () { pintar(); });
+  });
 
   leerTodo().then(function () {
     /* El primer chip de la maqueta era "$1"; el contrato admite desde $0,20. */
