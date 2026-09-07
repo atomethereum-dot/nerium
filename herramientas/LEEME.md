@@ -28,6 +28,7 @@ por EIP-6963.
 node herramientas/probar_dapp.mjs      # 26 comprobaciones del flujo de compra
 node herramientas/probar_estados.mjs   # los cinco estados de la ronda
 node herramientas/probar_wc.mjs        # el modal de carteras, el QR y el movil
+node herramientas/probar_panel.mjs     # lo que ve el comprador de su posicion
 ```
 
 `probar_wc.mjs` simula también el registro de carteras de WalletConnect y el SDK,

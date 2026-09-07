@@ -79,6 +79,7 @@
     claimable:       '0x402914f5',
     allocation:      '0xb81b8630',
     remaining:       '0x3acd1572',   /* remainingAllowanceUsd(address) */
+    spentUsd:        '0x0da8b1c9',
     buyWithNative:   '0x31ad36ab',
     buyWithUsdt:     '0x7789e96e',
     claim:           '0x4e71d92d',
@@ -204,6 +205,41 @@
 
   function leerTodo() { return Promise.all([leerRed(1), leerRed(56)]); }
 
+  /* Lo que lleva comprado esta cartera, por red. Son cuatro lecturas más por
+     cadena, así que solo se piden con una cartera conectada. */
+  var posicion = { 1: null, 56: null };
+
+  /* Estado de la venta y posición del comprador se piden juntos: si se pintaran
+     con lecturas de momentos distintos, el panel podría enseñar una compra que
+     el resto de la vista todavía no cuenta. */
+  function refrescar() { return Promise.all([leerTodo(), leerPosicion()]); }
+
+  function leerPosicion() {
+    var quien = sesion.cuenta;
+    if (!quien) { posicion = { 1: null, 56: null }; return Promise.resolve(); }
+    return Promise.all([1, 56].map(function (cid) {
+      var c = CADENAS[cid];
+      var uno = function (sel) {
+        return llamar(cid, c.venta, sel + encA(quien)).catch(function () { return null; });
+      };
+      return Promise.all([uno(SEL.allocation), uno(SEL.spentUsd),
+                          uno(SEL.remaining), uno(SEL.claimable)])
+        .then(function (r) {
+          if (!r[0]) { posicion[cid] = null; return; }
+          posicion[cid] = {
+            tokens: decU(palabras(r[0])[0]),        /* 18 decimales */
+            gastado: decU(palabras(r[1])[0]),       /* 8 decimales  */
+            queda: r[2] ? decU(palabras(r[2])[0]) : 0n,
+            reclamable: r[3] ? decU(palabras(r[3])[0]) : 0n
+          };
+        });
+    })).then(function () {
+      /* Si la cuenta cambió mientras se leía, lo leído ya no es de nadie. */
+      if (sesion.cuenta !== quien) posicion = { 1: null, 56: null };
+    });
+  }
+
+
   /* ─────────────────────────────── carteras ──────────────────────────────── */
 
   /* EIP-6963: las carteras se anuncian solas. Es lo que sustituyó al viejo
@@ -241,9 +277,13 @@
           prov.on('accountsChanged', function (a) {
             sesion.cuenta = (a && a[0]) || null;
             if (!sesion.cuenta) sesion.prov = null;
-            pintar();
+            posicion = { 1: null, 56: null };
+            refrescar().then(function () { pintar(); });
           });
-          prov.on('chainChanged', function (h2) { sesion.cid = parseInt(h2, 16); pintar(); });
+          prov.on('chainChanged', function (h2) {
+            sesion.cid = parseInt(h2, 16);
+            refrescar().then(function () { pintar(); });
+          });
         }
         return sesion;
       });
@@ -510,6 +550,166 @@
     }
 
     pintarCta();
+    pintarPanel();
+  }
+
+  /* ─────────────────────── lo que lleva el comprador ─────────────────────── */
+
+  /* Durante la ronda la cartera no tiene ni un NRM: el contrato solo anota la
+     asignación, y los tokens se transfieren al reclamar. Por eso lo que se
+     enseña aquí es `allocation`, no el saldo del token, que sería 0 y haría
+     pensar a la gente que su compra no entró. */
+
+  var panel = null;
+
+  function nrm(bi) {
+    var ent = bi / 1000000000000000000n;
+    var dec = Number((bi % 1000000000000000000n) / 10000000000000000n) / 100;
+    var v = Number(ent) + dec;
+    return v.toLocaleString('en-US', { maximumFractionDigits: v < 1 ? 4 : (v < 1000 ? 2 : 0) });
+  }
+  /* Céntimos solo cuando la cifra es pequeña: "$2,500.00" es ruido, pero
+     "$1" en lugar de "$0.60" sería mentira. */
+  var usd8 = function (bi, d) {
+    var v = Number(bi) / 1e8;
+    return dinero(v, d === undefined ? (v < 100 ? 2 : 0) : d);
+  };
+
+  function estilosPanel() {
+    if (document.getElementById('nrmPos')) return;
+    var e = document.createElement('style');
+    e.id = 'nrmPos';
+    e.textContent = [
+      '.nrm-pos{margin-top:14px;padding:14px 15px 13px;border:1px solid rgba(10,12,16,.12);',
+      'border-radius:14px;font-size:13px;line-height:1.45}',
+      '.nrm-pos .pos-cab{display:flex;align-items:center;justify-content:space-between;',
+      'gap:10px;margin-bottom:10px;font-size:11px;opacity:.5}',
+      /* La dirección va en monoespaciada y tal cual: en mayúsculas el 0x se lee
+         como 0X y parece otra cosa. */
+      ".nrm-pos .pos-cab .pos-dir{font-family:var(--m,ui-monospace,monospace);letter-spacing:0}",
+      '.nrm-pos .pos-salir{border:0;background:none;color:inherit;font:inherit;font-size:10.5px;',
+      'letter-spacing:.08em;text-transform:uppercase;cursor:pointer;opacity:.75;padding:0}',
+      '.nrm-pos .pos-salir:hover{opacity:1;text-decoration:underline}',
+      '.nrm-pos .pos-gran{display:flex;align-items:baseline;justify-content:space-between;gap:12px}',
+      '.nrm-pos .pos-gran b{font-size:22px;font-weight:600;letter-spacing:-.02em}',
+      '.nrm-pos .pos-gran b em{font-style:normal;font-size:12px;font-weight:500;opacity:.5;margin-left:5px}',
+      '.nrm-pos .pos-gran span{opacity:.62}',
+      '.nrm-pos ul{list-style:none;margin:11px 0 0;padding:10px 0 0;',
+      'border-top:1px solid rgba(10,12,16,.09)}',
+      '.nrm-pos li{display:flex;justify-content:space-between;gap:12px;padding:2px 0;opacity:.72}',
+      '.nrm-pos .pos-pie{margin:9px 0 0;font-size:12px;opacity:.55}',
+      '.nrm-pos .pos-rec{margin-top:10px;padding-top:10px;border-top:1px solid rgba(10,12,16,.09);',
+      'display:flex;justify-content:space-between;gap:12px;color:var(--blue,#2F6BFF);font-weight:500}',
+      '@media(prefers-color-scheme:dark){.nrm-pos{border-color:rgba(255,255,255,.14)}',
+      '.nrm-pos ul,.nrm-pos .pos-rec{border-color:rgba(255,255,255,.10)}}'
+    ].join('');
+    document.head.appendChild(e);
+  }
+
+  function fila(k, v) {
+    var li = document.createElement('li');
+    var a = document.createElement('span'); a.textContent = k;
+    var b = document.createElement('span'); b.textContent = v;
+    li.appendChild(a); li.appendChild(b);
+    return li;
+  }
+
+  function pintarPanel() {
+    var p1 = posicion[1], p56 = posicion[56];
+    var hay = sesion.cuenta && (p1 || p56);
+    if (!hay) { if (panel) panel.hidden = true; return; }
+
+    var tokens = (p1 ? p1.tokens : 0n) + (p56 ? p56.tokens : 0n);
+    var gasto  = (p1 ? p1.gastado : 0n) + (p56 ? p56.gastado : 0n);
+    var recl   = (p1 ? p1.reclamable : 0n) + (p56 ? p56.reclamable : 0n);
+
+    estilosPanel();
+    if (!panel) {
+      panel = document.createElement('div');
+      panel.className = 'nrm-pos';
+      nota.parentNode.insertBefore(panel, nota.nextSibling);
+    }
+    panel.hidden = false;
+    panel.textContent = '';
+
+    var cab = document.createElement('div');
+    cab.className = 'pos-cab';
+    var quien = document.createElement('span');
+    quien.className = 'pos-dir';
+    quien.textContent = sesion.cuenta.slice(0, 6) + '…' + sesion.cuenta.slice(-4);
+    var salir = document.createElement('button');
+    salir.type = 'button'; salir.className = 'pos-salir'; salir.textContent = 'Disconnect';
+    salir.addEventListener('click', desconectar);
+    cab.appendChild(quien); cab.appendChild(salir);
+    panel.appendChild(cab);
+
+    if (tokens === 0n) {
+      var v = document.createElement('div');
+      v.className = 'pos-pie';
+      v.style.margin = '0';
+      v.textContent = 'No purchase from this wallet yet.';
+      panel.appendChild(v);
+      panel.appendChild(topeRestante());
+      return;
+    }
+
+    var gran = document.createElement('div');
+    gran.className = 'pos-gran';
+    var b = document.createElement('b');
+    b.textContent = nrm(tokens);
+    var em = document.createElement('em'); em.textContent = 'NRM';
+    b.appendChild(em);
+    var g = document.createElement('span');
+    g.textContent = usd8(gasto) + ' invested';
+    gran.appendChild(b); gran.appendChild(g);
+    panel.appendChild(gran);
+
+    /* El desglose solo aporta si compró en las dos: si no, repite la cifra
+       de arriba con otras palabras. */
+    if (p1 && p56 && p1.tokens > 0n && p56.tokens > 0n) {
+      var ul = document.createElement('ul');
+      ul.appendChild(fila('Ethereum',  nrm(p1.tokens)  + ' NRM · ' + usd8(p1.gastado)));
+      ul.appendChild(fila('BNB Chain', nrm(p56.tokens) + ' NRM · ' + usd8(p56.gastado)));
+      panel.appendChild(ul);
+    }
+
+    if (recl > 0n) {
+      var r = document.createElement('div');
+      r.className = 'pos-rec';
+      var ra = document.createElement('span'); ra.textContent = 'Ready to claim';
+      var rb = document.createElement('span'); rb.textContent = nrm(recl) + ' NRM';
+      r.appendChild(ra); r.appendChild(rb);
+      panel.appendChild(r);
+    } else {
+      panel.appendChild(topeRestante());
+    }
+  }
+
+  /* El tope de $10.000 lo lleva cada contrato por su cuenta, así que es por red
+     y no una bolsa común: decir "te quedan X" sin nombrar la red sería mentira
+     para quien compre en las dos. */
+  function topeRestante() {
+    var c = red(), p = posicion[c.id];
+    var d = document.createElement('p');
+    d.className = 'pos-pie';
+    if (!p) { d.textContent = ''; return d; }
+    var tope = maxUsd();
+    if (!tope || p.queda > 100000000000000n) {
+      d.textContent = 'No cap on this wallet.';
+    } else if (p.queda === 0n) {
+      d.textContent = 'Cap reached on ' + c.nombre + '.';
+    } else {
+      d.textContent = usd8(p.queda, 0) + ' of your ' + dinero(tope) + ' left on ' + c.nombre + '.';
+    }
+    return d;
+  }
+
+  function desconectar() {
+    try { if (sesion.prov && sesion.prov.disconnect) sesion.prov.disconnect(); } catch (e) {}
+    sesion = { prov: null, cuenta: null, cid: null, nombre: '' };
+    posicion = { 1: null, 56: null };
+    wcUri = null; wcPedida = false; wcProv = null;
+    pintar();
   }
 
   /* ─────────────────────────── el botón principal ─────────────────────────── */
@@ -558,7 +758,7 @@
     if (!sesion.cuenta) return abrirCarteras();
     if (sesion.cid !== c.id) {
       trabajando('Confirm in your wallet…');
-      return cambiarRed(c.id).then(function () { return leerTodo(); })
+      return cambiarRed(c.id).then(function () { return refrescar(); })
         .then(function () { libre(); pintar(); })
         .catch(function (err) { libre(); aviso(motivo(err), true); });
     }
@@ -667,7 +867,7 @@
         return;
       }
       aviso(texto || 'Done. Your NRM allocation is recorded on ' + c.nombre + '.');
-      leerTodo().then(function () { pintar(); });
+      refrescar().then(function () { pintar(); });
     }).catch(function () {
       libre();
       aviso('Sent. It is taking longer than usual to confirm — check your wallet.');
@@ -1033,7 +1233,7 @@
   /* ─────────────────────────── elegir una cartera ─────────────────────────── */
 
   function tras(p) {
-    return p.then(function () { return leerTodo(); })
+    return p.then(function () { return refrescar(); })
       .then(function () { cerrar(); libre(); pintar(); })
       .catch(function (e) { cerrar(); libre(); aviso(motivo(e), true); });
   }
@@ -1160,7 +1360,7 @@
     new IntersectionObserver(function (es) {
       es.forEach(function (e) {
         if (e.isIntersecting && !reloj) {
-          reloj = setInterval(function () { leerTodo().then(function () { pintar(false); }); }, 30000);
+          reloj = setInterval(function () { refrescar().then(function () { pintar(false); }); }, 30000);
         } else if (!e.isIntersecting && reloj) {
           clearInterval(reloj); reloj = null;
         }
