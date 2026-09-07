@@ -1585,10 +1585,18 @@
       '.nrm-buscar::placeholder{color:currentColor;opacity:.42}',
 
       '.nrm-rej{flex:1;overflow-y:auto;overscroll-behavior:contain;padding:0 10px 14px;',
-      'display:grid;grid-template-columns:repeat(4,1fr);gap:2px;-webkit-overflow-scrolling:touch}',
-      '@media(max-width:380px){.nrm-rej{grid-template-columns:repeat(3,1fr)}}',
+      /* minmax(0,1fr) y no 1fr: `1fr` deja que una columna crezca si su
+         contenido no cabe, y con nombres como «Crypto.com Onchain» las cuatro
+         salían de anchos distintos y la rejilla quedaba torcida. El min-width:0
+         del botón es la otra mitad: sin él su tamaño mínimo sigue siendo el del
+         texto entero y el recorte con puntos suspensivos nunca llega a actuar. */
+      'display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:2px;',
+      '-webkit-overflow-scrolling:touch}',
+      /* Cuatro columnas por debajo de 440px dejan el nombre en dos letras y un
+         punto: a partir de ahí, tres. */
+      '@media(max-width:439px){.nrm-rej{grid-template-columns:repeat(3,minmax(0,1fr))}}',
 
-      '.nrm-w{position:relative;display:flex;flex-direction:column;align-items:center;gap:7px;',
+      '.nrm-w{min-width:0;position:relative;display:flex;flex-direction:column;align-items:center;gap:7px;',
       'padding:12px 4px 11px;border:0;border-radius:14px;background:none;color:inherit;',
       'font:inherit;cursor:pointer;transition:background .15s}',
       '.nrm-w:hover{background:rgba(47,107,255,.08)}',
