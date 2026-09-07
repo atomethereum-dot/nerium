@@ -297,8 +297,36 @@
 
   var sesion = { prov: null, cuenta: null, cid: null, nombre: '' };
 
+  /* Una petición de conexión por proveedor, y ni una más.
+
+     La extensión guarda la suya abierta hasta que alguien la contesta —y la
+     conserva aunque se recargue la página—, así que a la segunda responde
+     «Request of type wallet_requestPermissions already pending». Eso es un
+     callejón sin salida: por fuera se ve como que la cartera no conecta, y
+     seguir pulsando no lo arregla, lo perpetúa.
+
+     Antes de pedir nada se preguntan las cuentas YA concedidas con
+     eth_accounts, que no abre ninguna ventana ni deja peticiones colgando. Si
+     el permiso ya estaba dado —lo normal en cuanto alguien conectó una vez—
+     no hay nada que pedir y no se toca la extensión. */
+  var enVuelo = null;
+
+  function pedirCuentas(prov) {
+    if (enVuelo && enVuelo.prov === prov) return enVuelo.p;
+    var p = prov.request({ method: 'eth_accounts' })
+      .catch(function () { return []; })
+      .then(function (cs) {
+        if (cs && cs.length) return cs;
+        return prov.request({ method: 'eth_requestAccounts' });
+      });
+    enVuelo = { prov: prov, p: p };
+    var soltar = function () { if (enVuelo && enVuelo.p === p) enVuelo = null; };
+    p.then(soltar, soltar);
+    return p;
+  }
+
   function enchufar(prov, nombre) {
-    return prov.request({ method: 'eth_requestAccounts' }).then(function (cs) {
+    return pedirCuentas(prov).then(function (cs) {
       if (!cs || !cs.length) throw new Error('sin cuenta');
       return prov.request({ method: 'eth_chainId' }).then(function (h) {
         sesion = { prov: prov, cuenta: cs[0], cid: parseInt(h, 16), nombre: nombre || '',
@@ -522,6 +550,13 @@
     }
     if (e && (e.code === 4001 || /user rejected|denied/i.test(e.message || ''))) {
       return 'Signature cancelled.';
+    }
+    /* -32002: la cartera ya tiene una petición abierta esperando respuesta. El
+       texto que manda la extensión —«already pending for origin…»— no dice qué
+       hacer, y lo que hay que hacer es abrirla y contestarla. */
+    if (e && (e.code === -32002 || /already pending/i.test(e.message || ''))) {
+      return 'Your wallet already has a connection request open. ' +
+             'Open the wallet, approve or dismiss it, and try again.';
     }
     return (e && e.message) ? e.message.slice(0, 140) : 'Transaction failed.';
   }
@@ -1619,12 +1654,21 @@
       return registro;
     };
     if (!PROYECTO_WC) return Promise.resolve(raso());
-    var corte = new AbortController();
-    setTimeout(function () { corte.abort(); }, 8000);
-    pidiendo = fetch('https://explorer-api.walletconnect.com/v3/wallets?projectId=' +
-        PROYECTO_WC + '&entries=100&page=1', { signal: corte.signal })
-      .then(function (r) { return r.json(); })
-      .then(function (j) {
+
+    var traer = function (url) {
+      var corte = new AbortController();
+      var reloj = setTimeout(function () { corte.abort(); }, 8000);
+      return fetch(url, { signal: corte.signal })
+        .then(function (r) { clearTimeout(reloj); return r.json(); });
+    };
+
+    /* El registro viejo (explorer-api) y el de ahora (api.web3modal.org)
+       devuelven lo mismo con otros nombres. Se piden en orden y vale el primero
+       que conteste: si uno se cae, la lista sigue completa en vez de quedarse
+       en los veinte nombres de respaldo, sin logos y sin enlaces a las apps. */
+    var deExplorer = function () {
+      return traer('https://explorer-api.walletconnect.com/v3/wallets?projectId=' +
+          PROYECTO_WC + '&entries=100&page=1').then(function (j) {
         var l = j && j.listings, out = [];
         for (var k in l) if (Object.prototype.hasOwnProperty.call(l, k)) {
           var x = l[k];
@@ -1639,7 +1683,32 @@
             movil: x.mobile || {}, escritorio: x.desktop || {}
           });
         }
-        if (!out.length) return raso();
+        return out;
+      });
+    };
+
+    var deWeb3Modal = function () {
+      return traer('https://api.web3modal.org/getWallets?projectId=' + PROYECTO_WC +
+          '&page=1&entries=100&st=nereum&sv=1').then(function (j) {
+        return (j && j.data || []).filter(function (x) { return x && x.name; })
+          .map(function (x) {
+            return {
+              nombre: x.name,
+              logo: x.image_id ? 'https://api.web3modal.org/getWalletImage/' +
+                    x.image_id + '?projectId=' + PROYECTO_WC + '&st=nereum&sv=1' : '',
+              /* Aquí los enlaces vienen sueltos, no en un objeto. */
+              movil: { native: x.mobile_link || '', universal: x.link_mode || '' },
+              escritorio: { native: x.desktop_link || '', universal: x.webapp_link || '' }
+            };
+          });
+      });
+    };
+
+    pidiendo = deExplorer()
+      .catch(function () { return []; })
+      .then(function (out) { return out.length ? out : deWeb3Modal(); })
+      .then(function (out) {
+        if (!out || !out.length) return raso();
         registro = out;
         return out;
       })
@@ -1776,6 +1845,9 @@
       '.nrm-copiar.nrm-grande{padding:14px 26px;font-size:15px;font-weight:500;',
       'text-decoration:none}',
       '.nrm-cargando{grid-column:1/-1;padding:34px;text-align:center;font-size:13px;opacity:.5}',
+      /* La misma nota, pero al final de una lista ya poblada: ahí 34px de aire
+         empujan las fichas fuera de la vista. */
+      '.nrm-cargando.nrm-mas{padding:14px 12px}',
 
       '@media(prefers-color-scheme:dark){',
       '.nrm-caja{background:#12151C;color:#EDF0F6}',
@@ -1876,6 +1948,15 @@
       return;
     }
     todas.forEach(function (w) { rejilla.appendChild(ficha(w, !!w.prov)); });
+    /* Mientras el registro viaja solo están las extensiones detectadas: una o
+       dos fichas. Sin avisar de que faltan, la lista parece la lista entera y
+       corta, cuando lo que pasa es que aún no ha llegado. */
+    if (!registro) {
+      var mas = document.createElement('div');
+      mas.className = 'nrm-cargando nrm-mas';
+      mas.textContent = 'Loading more wallets…';
+      rejilla.appendChild(mas);
+    }
   }
 
   function verLista() {
