@@ -86,8 +86,30 @@ desplegar, pero una dirección viva del par equivocado no.
 cp .env.ejemplo .env        # y rellénalo
 npm install
 npx hardhat run scripts/desplegar.js --network ethereum
-npx hardhat run scripts/desplegar.js --network bsc
+DIRECCION_ESPERADA=0x…  npx hardhat run scripts/desplegar.js --network bsc
 ```
+
+### La misma dirección en las dos redes
+
+La dirección de un contrato **no sale de su código**: sale de quién lo despliega
+y de su *nonce*, o sea de cuántas transacciones ha enviado esa cartera en esa
+cadena. Con la misma cartera y el mismo nonce en Ethereum y en BNB Chain, el
+contrato cae en **la misma dirección en las dos** — y da igual que el USDT y el
+oráculo de cada red sean distintos, porque los argumentos del constructor no
+entran en el cálculo.
+
+Por eso el script **exige nonce 0 y aborta si no lo es**. Los pasos:
+
+1. Crea una cartera **nueva**, que no haya enviado nada nunca.
+2. Mándale gas en las dos redes. Recibir no gasta nonce; solo gastan las
+   transacciones que ella envía.
+3. Despliega en Ethereum. El script imprime la dirección.
+4. Despliega en BNB Chain pasando esa dirección en `DIRECCION_ESPERADA`. El
+   script calcula la que va a salir **antes de gastar gas** y aborta si no
+   coincide.
+
+Si algo obliga a salir de cero, `NONCE_EXIGIDO=<n>` fija otro valor — pero tiene
+que ser el mismo en las dos redes.
 
 El script **verifica los oráculos antes de desplegar** y aborta sin gastar gas
 si alguno no cuadra. Comprueba, para cada uno:
@@ -121,7 +143,9 @@ actualiza la lista sobre la marcha.
 ## Orden de uso
 
 1. Desplegar con `precio = 20000000`, `mínimo = 20000000` y
-   `máximo = 1000000000000`. El dueño debe ser **un multisig**.
+   `máximo = 1000000000000`. **La propiedad se queda en la cartera que
+   despliega**; pasarla a un multisig es opcional y se hace cuando se decida,
+   con `transferOwnership` y `acceptOwnership` desde el multisig.
 2. `setHardCap(...)` si quieres además un tope total de tokens.
 3. `startRound(0, fin)`.
 5. La gente compra. `withdrawNative` / `withdrawUsdt` cuando haga falta.
@@ -196,8 +220,9 @@ npm install
 npm test
 ```
 
-49 casos: 26 del contrato, 16 del Seed Round —precio, mínimo y tope por
-cartera— y 7 de la verificación previa al despliegue.
+55 casos: 26 del contrato, 16 del Seed Round —precio, mínimo y tope por
+cartera—, 6 de la dirección y la propiedad, y 7 de la verificación previa al
+despliegue.
 
 El compilador viene fijado en `package.json` (`solc@0.8.24`) y `hardhat.config.js`
 lo toma de ahí en vez de descargarlo, así que la compilación sale igual en
@@ -216,6 +241,13 @@ llega justo a 10.000 $ y el dólar siguiente revierte, que **el tope es acumulad
 y suma ETH con USDT**, que bajarlo no anula lo ya comprado, que lo recaudado
 llega al contrato y sale a la cartera que se indique, y que en pausa no se
 compra.
+
+Los de la dirección fijan la propiedad de la que depende desplegar en dos redes:
+que una cartera nueva tiene nonce 0 aunque le manden gas, que el contrato cae
+exactamente en la dirección calculada de antemano, que **los argumentos del
+constructor no la cambian**, que con el nonce ya gastado deja de coincidir —por
+eso el script lo exige— y que la propiedad se queda en el deployer hasta que se
+pase a un multisig en dos pasos.
 
 Los de la verificación prueban **la misma función que ejecuta el despliegue**, no
 una copia: que acepta un oráculo correcto y que rechaza el par equivocado, un
