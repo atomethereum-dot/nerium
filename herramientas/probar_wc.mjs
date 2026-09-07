@@ -88,6 +88,12 @@ async function montar(extra={}, movil=false){
  await pg.locator('.nrm-w b', {hasText:'Trust Wallet'}).click();
  await pg.waitForTimeout(1500);
  chk('el título pasa a la cartera', await pg.locator('.nrm-cab h3').textContent(), 'Trust Wallet');
+ const flecha = pg.locator('.nrm-cab button[aria-label="Back"]');
+ chk('la flecha se ve', await flecha.isVisible(), true);
+ chk('y está dibujada, no escrita', await flecha.locator('svg path').count(), 1);
+ chk('con tamaño real', await flecha.evaluate(el => el.getBoundingClientRect().width > 20), true);
+ chk('la ✕ también es un dibujo',
+     await pg.locator('.nrm-cab button[aria-label="Close"] svg path').count(), 1);
  chk('aparece el QR', await pg.locator('.nrm-qr .marco svg').count(), 1);
  const mods=await pg.locator('.nrm-qr .marco svg path').evaluate(
    el => (el.getAttribute('d')||'').split('M').length - 1);
@@ -148,6 +154,35 @@ async function montar(extra={}, movil=false){
  chk('el SDK caído se explica', await pg.locator('#wNote').textContent(),
      'WalletConnect could not load. Check your connection.');
  chk('y el modal se cierra', await pg.locator('.nrm-fondo').count(), 0);
+ await ctx.close();
+}
+
+// ── 4 · una extensión que no contesta deja salida ───────────────────────────
+{
+ const ctx=await nav.newContext({viewport:{width:1400,height:1000}});
+ await ctx.addInitScript(()=>{ const of=window.fetch;
+  window.fetch=async(u,o)=>{ if(String(u).indexOf('explorer-api')>=0)
+     return new Response('{"listings":{}}',{status:200,headers:{'content-type':'application/json'}});
+   return of(u,o); };
+  const prov={on(){},removeListener(){},request(){return new Promise(()=>{})}};  // nunca resuelve
+  const info={uuid:'w9',name:'Cartera muda',rdns:'x.muda',icon:''};
+  window.addEventListener('eip6963:requestProvider',()=>window.dispatchEvent(
+    new CustomEvent('eip6963:announceProvider',{detail:Object.freeze({info,provider:prov})})));
+ });
+ const pg=await ctx.newPage();
+ await pg.goto('http://127.0.0.1:8934/index.html',{waitUntil:'load'});
+ await pg.locator('#presale').scrollIntoViewIfNeeded(); await pg.waitForTimeout(1600);
+ await pg.locator('#wCta').click(); await pg.waitForTimeout(700);
+ await pg.locator('.nrm-w b',{hasText:'Cartera muda'}).click();
+ await pg.waitForTimeout(900);
+ chk('espera con su aviso', (await pg.locator('.nrm-rej').textContent()).trim(),
+     'Confirm the connection in Cartera muda…');
+ chk('y con flecha para volver',
+     await pg.locator('.nrm-cab button[aria-label="Back"]').isVisible(), true);
+ await pg.locator('.nrm-cab button[aria-label="Back"]').click();
+ await pg.waitForTimeout(400);
+ chk('que devuelve la lista', (await pg.locator('.nrm-w').count())>0, true);
+ await pg.locator('.nrm-caja').screenshot({path:'/tmp/flecha.png'});
  await ctx.close();
 }
 

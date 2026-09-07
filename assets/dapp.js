@@ -1251,6 +1251,23 @@
     document.head.appendChild(e);
   }
 
+  function icono(d) {
+    var NS = 'http://www.w3.org/2000/svg';
+    var svg = document.createElementNS(NS, 'svg');
+    svg.setAttribute('viewBox', '0 0 16 16');
+    svg.setAttribute('width', '15'); svg.setAttribute('height', '15');
+    svg.setAttribute('fill', 'none');
+    svg.setAttribute('stroke', 'currentColor');
+    svg.setAttribute('stroke-width', '1.7');
+    svg.setAttribute('stroke-linecap', 'round');
+    svg.setAttribute('stroke-linejoin', 'round');
+    svg.setAttribute('aria-hidden', 'true');
+    var p = document.createElementNS(NS, 'path');
+    p.setAttribute('d', d);
+    svg.appendChild(p);
+    return svg;
+  }
+
   function cerrar() {
     if (!hoja) return;
     var h = hoja; hoja = null;
@@ -1401,14 +1418,19 @@
     var cab = document.createElement('div');
     cab.className = 'nrm-cab';
     atras = document.createElement('button');
-    atras.type = 'button'; atras.className = 'nrm-ico'; atras.innerHTML = '&#8592;';
+    atras.type = 'button'; atras.className = 'nrm-ico';
+    /* Dibujados, no escritos. `←` y `✕` son caracteres que muchas tipografías
+       no traen —Switzer entre ellas— y entonces no se pinta nada: un botón
+       invisible que el visitante no sabe que puede pulsar. */
+    atras.appendChild(icono('M10 3 5 8l5 5'));
     atras.setAttribute('aria-label', 'Back');
     atras.hidden = true;
     atras.addEventListener('click', verLista);
     titulo = document.createElement('h3');
     titulo.textContent = 'Connect a wallet';
     var equis = document.createElement('button');
-    equis.type = 'button'; equis.className = 'nrm-ico'; equis.innerHTML = '&#10005;';
+    equis.type = 'button'; equis.className = 'nrm-ico';
+    equis.appendChild(icono('M4 4l8 8M12 4l-8 8'));
     equis.setAttribute('aria-label', 'Close');
     equis.addEventListener('click', cerrar);
     cab.appendChild(atras); cab.appendChild(titulo); cab.appendChild(equis);
@@ -1493,6 +1515,15 @@
       .catch(function () { if (hoja) verQR(w, uri); });
   }
 
+  function esperandoA(nombre) {
+    if (!hoja) return;
+    titulo.textContent = nombre;
+    atras.hidden = false;
+    buscador.hidden = true;
+    rejilla.textContent = '';
+    rejilla.appendChild(nota_('Confirm the connection in ' + nombre + '…'));
+  }
+
   function nota_(txt) {
     var d = document.createElement('div');
     d.className = 'nrm-cargando';
@@ -1503,6 +1534,11 @@
   function elegir(w) {
     if (w.prov) {                      /* extensión o navegador de cartera */
       trabajando('Confirm in your wallet…');
+      /* Una extensión puede no responder nunca —tiene otra petición abierta,
+         está bloqueada— y hasta ahora eso dejaba la lista puesta sin nada que
+         pulsar salvo cerrar. Se pasa a la misma vista de espera que
+         WalletConnect, con su flecha para volver. */
+      esperandoA(w.nombre);
       return tras(enchufar(w.prov, w.nombre));
     }
     if (!PROYECTO_WC) {
