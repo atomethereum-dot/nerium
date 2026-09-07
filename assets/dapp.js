@@ -423,6 +423,89 @@
     return (e && e.message) ? e.message.slice(0, 140) : 'Transaction failed.';
   }
 
+  /* ─────────────── una sección vista no vuelve a cambiar de alto ─────────── */
+
+  /* Con content-visibility:auto el navegador deja de pintar lo que sale de
+     pantalla y le vuelve a SUPONER un alto. Si ese supuesto no coincide con el
+     real, el documento cambia de tamaño cada vez que una sección entra o sale
+     —al bajar y sobre todo al volver a subir— y el scroll pega un tirón.
+
+     Las cifras de la hoja de estilo cubren la primera pasada. Esto cubre el
+     resto: en cuanto una sección se pinta, se le fija su alto medido, así que a
+     partir de ahí ocupa lo mismo esté pintada o no. Se vuelve a medir cada vez
+     que reaparece, para que un cambio posterior —el panel del comprador, sin ir
+     más lejos— no deje el número viejo. */
+  (function () {
+    if (!('IntersectionObserver' in window)) return;
+    var secciones = [].slice.call(document.querySelectorAll('main > section'));
+    if (!secciones.length) return;
+
+    function fijar(s, forzado) {
+      var cs = getComputedStyle(s);
+      /* Una sección que nunca se salta no necesita alto supuesto. */
+      if (!forzado && cs.contentVisibility === 'visible') return;
+      var extra = parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom) +
+                  parseFloat(cs.borderTopWidth) + parseFloat(cs.borderBottomWidth);
+      var h = s.offsetHeight - (extra || 0);
+      /* contain-intrinsic-size gobierna la caja de contenido: el relleno y el
+         borde los suma el navegador aparte. */
+      if (h > 0) s.style.containIntrinsicSize = h.toFixed(1) + 'px';
+    }
+
+    /* Las cifras de la hoja de estilo están medidas a dos anchos, y el alto de
+       una sección depende del ancho exacto de la ventana: en cualquier otro se
+       quedan cortas. Esto las mide de verdad, en la ventana que hay.
+
+       Se pintan todas un instante, se anota su alto y se restauran. Va después
+       de que la página haya cargado: la primera pintada, que es la que el
+       visitante nota, ya ocurrió, así que este trabajo extra no retrasa nada de
+       lo que ve. */
+    function medirTodas() {
+      var y = window.scrollY || 0;
+      var previo = secciones.map(function (s) { return s.style.contentVisibility; });
+      var estilaza = secciones.map(function (s) { return getComputedStyle(s).contentVisibility; });
+      secciones.forEach(function (s) { s.style.contentVisibility = 'visible'; });
+      void document.body.offsetHeight;                 /* fuerza la maquetación */
+      secciones.forEach(function (s, i) {
+        if (estilaza[i] !== 'visible') fijar(s, true);
+      });
+      secciones.forEach(function (s, i) { s.style.contentVisibility = previo[i]; });
+      void document.body.offsetHeight;
+      /* Pintar y despintar cambia el alto del documento un instante, y el
+         navegador puede reajustar el scroll: se deja donde estaba. */
+      if ((window.scrollY || 0) !== y) window.scrollTo(0, y);
+    }
+
+    function cuandoHaya(fn) {
+      var lanzar = function () {
+        if (window.requestIdleCallback) requestIdleCallback(fn, { timeout: 2000 });
+        else setTimeout(fn, 400);
+      };
+      if (document.readyState === 'complete') lanzar();
+      else addEventListener('load', lanzar);
+    }
+    cuandoHaya(medirTodas);
+
+    var io = new IntersectionObserver(function (es) {
+      es.forEach(function (e) {
+        if (!e.isIntersecting) return;
+        /* Un fotograma después: al entrar, la sección acaba de pintarse. */
+        requestAnimationFrame(function () { fijar(e.target); });
+      });
+    }, { rootMargin: '150px 0px' });
+    secciones.forEach(function (s) { io.observe(s); });
+
+    /* Al girar el teléfono los altos son otros y lo fijado deja de valer. */
+    var reloj = null;
+    addEventListener('resize', function () {
+      clearTimeout(reloj);
+      reloj = setTimeout(function () {
+        secciones.forEach(function (s) { s.style.containIntrinsicSize = ''; });
+        medirTodas();
+      }, 250);
+    }, { passive: true });
+  })();
+
   /* ───────────────────── quedarse donde uno estaba ───────────────────────── */
 
   /* Al recargar, el navegador guarda una posición en píxeles y la repone. Pero

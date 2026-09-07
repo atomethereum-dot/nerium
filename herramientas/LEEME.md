@@ -41,6 +41,7 @@ node herramientas/probar_panel.mjs     # lo que ve el comprador de su posicion
 node herramientas/probar_barra.mjs     # la recaudacion: privada + cadena
 node herramientas/probar_vista.mjs     # importe vacio, logos y volver a la seccion
 node herramientas/probar_seed.mjs      # que no quede ni un «whitelist» en ningun idioma
+node herramientas/probar_salto.mjs     # que el documento no cambie de alto al recorrerlo
 ```
 
 `probar_wc.mjs` simula también el registro de carteras de WalletConnect y el SDK,
@@ -87,8 +88,13 @@ que hay que saber para poner un `contain-intrinsic-size` que no mienta—.
 y dice qué sección cambia de alto en cada momento y cuánto se mueve el
 documento: es lo que localiza un tirón del scroll.
 
+`prensa.mjs` sigue a una sola sección bajando y subiendo, que es como se aisló
+el caso de la de prensa.
+
 Si llega un diseño nuevo con secciones distintas, hay que volver a pasarlos y
-actualizar las cifras de `bloque_css.txt`.
+actualizar las cifras de `bloque_css.txt`. Ojo con los selectores: tres
+secciones comparten la clase `paper`, así que van con `section.` delante para
+que no se pisen entre ellas.
 
 Necesitan Playwright. Si el Chromium del sistema no coincide con la versión que
 espera, hay que pasarle `executablePath`.

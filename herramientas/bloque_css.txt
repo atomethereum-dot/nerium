@@ -44,25 +44,30 @@ html[dir="rtl"] .subir{left:16px !important;right:auto !important}
    el navegador recuerde su alto de verdad: esto solo gobierna la primera
    pasada, que es donde estaba el salto.
 
-   stack, security, .xf y .xl no están aquí: ya se pintan siempre. */
+   stack, security, .xf y .xl no están aquí: ya se pintan siempre.
+
+   Los selectores van con `section.` delante a propósito: tres secciones llevan
+   la clase `paper` —«press paper», «paper say» y «paper logos»— y con la misma
+   especificidad ganaba la última regla escrita, así que la de prensa se quedaba
+   con el alto de otra. */
 @media(max-width:899px){
   #network  {contain-intrinsic-size:auto 86px}
-  .press    {contain-intrinsic-size:auto 529px}
-  .chroma   {contain-intrinsic-size:auto 226px}
-  .paper    {contain-intrinsic-size:auto 175px}
-  .kin      {contain-intrinsic-size:auto 94px}
+  section.press {contain-intrinsic-size:auto 529px}
+  section.chroma{contain-intrinsic-size:auto 226px}
+  section.say   {contain-intrinsic-size:auto 175px}
+  section.kin   {contain-intrinsic-size:auto 94px}
   #solutions{contain-intrinsic-size:auto 280px}
-  #presale  {contain-intrinsic-size:auto 1478px}
+  #presale  {contain-intrinsic-size:auto 1452px}
   #token    {contain-intrinsic-size:auto 922px}
   #builds   {contain-intrinsic-size:auto 559px}
   #join     {contain-intrinsic-size:auto 470px}
 }
 @media(min-width:900px){
   #network  {contain-intrinsic-size:auto 103px}
-  .press    {contain-intrinsic-size:auto 723px}
-  .chroma   {contain-intrinsic-size:auto 520px}
-  .paper    {contain-intrinsic-size:auto 360px}
-  .kin      {contain-intrinsic-size:auto 248px}
+  section.press {contain-intrinsic-size:auto 723px}
+  section.chroma{contain-intrinsic-size:auto 520px}
+  section.say   {contain-intrinsic-size:auto 360px}
+  section.kin   {contain-intrinsic-size:auto 248px}
   #solutions{contain-intrinsic-size:auto 407px}
   #presale  {contain-intrinsic-size:auto 743px}
   #token    {contain-intrinsic-size:auto 1055px}

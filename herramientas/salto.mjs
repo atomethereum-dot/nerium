@@ -31,7 +31,10 @@ console.log('secciones:', secs.join(' '));
 const filas=[];
 const paso = 260;
 const total = await pg.evaluate(()=>document.documentElement.scrollHeight);
-for(let y=0; y<total; y+=paso){
+const recorrido=[];
+for(let y=0;y<total;y+=paso) recorrido.push(y);
+for(let y=total;y>=0;y-=paso) recorrido.push(y);   // y de vuelta hacia arriba
+for(const y of recorrido){
   await pg.evaluate(v=>window.scrollTo(0,v), y);
   await pg.waitForTimeout(90);
   const m = await pg.evaluate(()=>{
