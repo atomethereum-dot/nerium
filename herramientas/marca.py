@@ -15,34 +15,28 @@ NUEVO = """<svg width="0" height="0" style="position:absolute" aria-hidden="true
 <!-- El cubo lleva su plata fija: no toma el color del texto como la marca
      anterior. Los degradados van aqui fuera y no dentro de cada <symbol>,
      porque referenciar un id desde dentro del arbol que clona <use> no es
-     fiable en todos los navegadores; declarados en el documento, si. -->
+     fiable en todos los navegadores; declarados en el documento, si.
+     Van en userSpaceOnUse, en el espacio local del <g> del simbolo. -->
 <defs>
-  <linearGradient id="nrmPlata" x1="0" y1="0" x2=".28" y2="1">
-    <stop offset="0" stop-color="#E7EAF1"/>
-    <stop offset=".38" stop-color="#C6CBD7"/>
-    <stop offset=".74" stop-color="#A9AEBB"/>
-    <stop offset="1" stop-color="#9298A6"/>
-  </linearGradient>
-  <linearGradient id="nrmBrillo" x1="0" y1="0" x2="1" y2="0">
-    <stop offset="0" stop-color="#fff" stop-opacity="0"/>
-    <stop offset=".5" stop-color="#fff"/>
-    <stop offset="1" stop-color="#fff" stop-opacity="0"/>
-  </linearGradient>
+  <linearGradient id="nrmPlata" gradientUnits="userSpaceOnUse" x1="63.94" y1="390.33" x2="608.06" y2="281.67"><stop offset="0" stop-color="#C6CAD7"/><stop offset="1" stop-color="#9498A1"/></linearGradient>
+  <radialGradient id="nrmBrillo" gradientUnits="userSpaceOnUse" cx="0" cy="0" r="1" gradientTransform="translate(229.93 328.93) rotate(-9.60) scale(47.20 252.40)"><stop offset="0" stop-color="#fff" stop-opacity="0.92"/><stop offset=".36" stop-color="#fff" stop-opacity="0.43"/><stop offset=".70" stop-color="#fff" stop-opacity="0.10"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>
 </defs>
 <symbol id="nlogo" viewBox="0 0 672 672">
-  <g transform="translate(-43.23 -38.23) scale(1.0766)">
-    <path fill="#6E7482" d="M336.00 53.16 L368.48 76.36 L651.32 359.20 L368.48 642.04 L336.00 618.84 L618.84 336.00 Z"/>
+  <g transform="translate(-43.88 -34.34) scale(1.0889)">
+    <path fill="#57595E" d="M336.00 53.16 L361.74 61.36 L644.58 344.20 L361.74 627.05 L336.00 618.84 L618.84 336.00 Z"/>
     <path fill="url(#nrmPlata)" d="M53.16 336.00 L336.00 53.16 L618.84 336.00 L336.00 618.84 Z"/>
-    <path fill="#FAFBFC" d="M283.67 566.52 L566.52 283.67 L618.84 336.00 L336.00 618.84 Z"/>
-    <path fill="url(#nrmBrillo)" opacity=".8" d="M138.01 251.15 L159.22 229.93 L368.53 586.32 L348.73 606.11 Z"/>
+    <path fill="url(#nrmBrillo)" d="M53.16 336.00 L336.00 53.16 L618.84 336.00 L336.00 618.84 Z"/>
+    <path fill="#FCFCFC" d="M283.67 566.52 L566.52 283.67 L618.84 336.00 L336.00 618.84 Z"/>
   </g>
 </symbol>
-<!-- El de la cabecera se dibuja a 30 px: ahi el reflejo es ruido. -->
+<!-- El pequeno lleva el mismo reflejo: sin el, a 30 px en la cabecera el cubo
+     se veia plano, que es justo donde mas se mira. -->
 <symbol id="nlogo-s" viewBox="0 0 672 672">
-  <g transform="translate(-43.23 -38.23) scale(1.0766)">
-    <path fill="#6E7482" d="M336.00 53.16 L368.48 76.36 L651.32 359.20 L368.48 642.04 L336.00 618.84 L618.84 336.00 Z"/>
+  <g transform="translate(-43.88 -34.34) scale(1.0889)">
+    <path fill="#57595E" d="M336.00 53.16 L361.74 61.36 L644.58 344.20 L361.74 627.05 L336.00 618.84 L618.84 336.00 Z"/>
     <path fill="url(#nrmPlata)" d="M53.16 336.00 L336.00 53.16 L618.84 336.00 L336.00 618.84 Z"/>
-    <path fill="#FAFBFC" d="M283.67 566.52 L566.52 283.67 L618.84 336.00 L336.00 618.84 Z"/>
+    <path fill="url(#nrmBrillo)" d="M53.16 336.00 L336.00 53.16 L618.84 336.00 L336.00 618.84 Z"/>
+    <path fill="#FCFCFC" d="M283.67 566.52 L566.52 283.67 L618.84 336.00 L336.00 618.84 Z"/>
   </g>
 </symbol></svg>"""
 

@@ -10,7 +10,7 @@ def png(fuente, px):
 # Por debajo de 48 px el brillo y los matices del degradado se convierten en
 # ruido: ahí va la versión sencilla, que a ese tamaño se lee mejor.
 def icono(px, app=False):
-    sencillo = px <= 32
+    sencillo = px <= 16   # solo a 16 px sobra el reflejo: ahi ocupa un pixel
     if app:
         return png('app-simple.svg' if sencillo else 'app.svg', px)
     return png('simple.svg' if sencillo else 'favicon.svg', px)
