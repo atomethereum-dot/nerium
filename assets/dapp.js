@@ -434,6 +434,10 @@
   ['wPay', 'wUsd', 'wRange', 'wChips', 'wCta'].forEach(function (id) {
     relevar(document.getElementById(id));
   });
+  /* La maqueta también anima la barra de recaudación hasta una cifra fija.
+     Se le quitan las escuchas igual, porque ahora esa cifra tiene que subir
+     con las compras. */
+  relevar(document.querySelector('#presale .raise'));
   pay = document.getElementById('wPay');
 
   var usdIn  = document.getElementById('wUsd'),
@@ -459,8 +463,14 @@
     b.addEventListener('click', function () {
       botones.forEach(function (x) { x.classList.remove('on'); });
       b.classList.add('on');
+      var antes = pago === null ? null : usdDe(pago);
       elegido = i;
-      pintar();
+      pago = null;
+      if (antes !== null) {
+        var u = unidDeUsd(Number(antes) / 1e8);
+        if (u !== null) pago = u;
+      }
+      pintar(false);
     });
   });
 
@@ -484,18 +494,55 @@
   function aBarra(u) { return Math.log10(Math.max(minUsd(), u)); }
   function deBarra(t) { return Math.pow(10, t); }
 
-  /* Cuánto hay que enviar para que al contrato le lleguen exactamente estos
-     dólares. Se redondea hacia arriba porque el contrato divide y trunca: un
-     wei de menos dejaría una compra del mínimo justo por debajo del mínimo. */
-  function pagoNativo(usd8) {
-    var e = est();
+  /* ─────────────────── el importe va en la moneda de pago ─────────────────── */
+
+  /* Se paga en BNB, se escribe en BNB. Antes el campo pedía dólares y la web
+     los convertía: el número que el comprador tecleaba no era el que firmaba,
+     y al aparecer otro distinto en la cartera lo normal es desconfiar. Ahora
+     lo que se escribe es exactamente el `value` de la transacción, y los
+     dólares se muestran debajo, que es el sentido correcto de la conversión
+     porque el precio del oráculo se mueve y el importe firmado no. */
+
+  var unidad = document.querySelector('#presale .w-field em');
+
+  function decimales() { return medio().usdt ? red().usdtDec : 18; }
+  function cifras()    { return medio().usdt ? 2 : 6; }
+  function simbolo()   { return medio().usdt ? 'USDT' : red().simbolo; }
+
+  /* Texto decimal → enteros, sin pasar por coma flotante: 0,1 + 0,2 no da 0,3
+     y aquí cada unidad es dinero. */
+  function aUnidades(txt, dec) {
+    var t = String(txt).replace(/[^0-9.]/g, '').split('.');
+    var ent = t[0] || '0';
+    var fr = (t[1] || '').slice(0, dec);
+    while (fr.length < dec) fr += '0';
+    try { return BigInt(ent) * 10n ** BigInt(dec) + BigInt(fr || '0'); }
+    catch (e) { return 0n; }
+  }
+
+  /* Lo que el contrato va a contar como dólares por ese pago. Se calcula igual
+     que lo hace él: mismas divisiones, mismos truncamientos. */
+  function usdDe(unid) {
+    var m = medio(), e = est();
+    if (m.usdt) return unid * 100000000n / (10n ** BigInt(red().usdtDec));
     if (!e.ok || !e.precioNativo) return null;
-    return (usd8 * 1000000000000000000n + e.precioNativo - 1n) / e.precioNativo;
+    return unid * e.precioNativo / 1000000000000000000n;
   }
-  function pagoUsdt(usd8) {
-    var u = 10n ** BigInt(red().usdtDec);
-    return (usd8 * u + 99999999n) / 100000000n;
+
+  /* Y al revés, para los atajos de la barra y los botones de importe. Redondea
+     hacia arriba: el contrato trunca, y un céntimo de menos dejaría la compra
+     del mínimo justo por debajo del mínimo. */
+  function unidDeUsd(usdCent) {
+    var m = medio(), e = est();
+    var u8 = BigInt(Math.round(usdCent * 1e8));
+    if (m.usdt) {
+      var u = 10n ** BigInt(red().usdtDec);
+      return (u8 * u + 99999999n) / 100000000n;
+    }
+    if (!e.ok || !e.precioNativo) return null;
+    return (u8 * 1000000000000000000n + e.precioNativo - 1n) / e.precioNativo;
   }
+
   function tokensPor(usd8) {
     var e = est();
     var p = e.ok && e.precioUsd ? e.precioUsd : 20000000n;
@@ -505,14 +552,19 @@
   /* Todo en enteros. Pasar por coma flotante para enseñar "0,199525 ETH"
      cuando se envían 0,199524… es pequeño, pero es la cifra que el comprador
      compara con lo que le pide la cartera, y si no cuadra desconfía. */
-  function humano(wei, dec, cifras) {
+  function humano(wei, dec, cif) {
     var u = 10n ** BigInt(dec);
     var ent = (wei / u).toString();
-    var frac = (wei % u).toString().padStart(dec, '0').slice(0, cifras || 6).replace(/0+$/, '');
+    var frac = (wei % u).toString().padStart(dec, '0').slice(0, cif || 6).replace(/0+$/, '');
     return frac ? ent + '.' + frac : ent;
   }
 
-  var usdActual = 500;
+  /* Lo que se paga, en unidades de la moneda elegida. Es el único origen de
+     verdad: el resto de la vista se deriva de aquí. */
+  var pago = null;
+  var USD_INICIAL = 500;
+
+
 
   var caja = cta.closest('.widget');
   var rotulo = caja ? caja.querySelector('.w-top span') : null;
@@ -538,45 +590,165 @@
       modoCerrada(true, ec.reparto);
       pintarCta();
       pintarPanel();
+      pintarBarra();
       return;
     }
     modoCerrada(false);
+
+    var m = medio(), c = red(), e = est();
+    var dec = decimales(), cif = cifras(), sim = simbolo();
+    if (unidad) unidad.textContent = sim;
+
+    /* Con una moneda nativa no hay importe posible hasta que se sepa el precio:
+       ni convertir el arranque, ni validar lo que se teclee. */
+    if (pago === null) {
+      var arranque = unidDeUsd(USD_INICIAL);
+      if (arranque === null) {
+        usdIn.value = '';
+        eq.textContent = 'Reading the price on ' + c.nombre + '…';
+        nrmOut.value = '';
+        pintarCta();
+        pintarPanel();
+        pintarBarra();
+        return;
+      }
+      pago = arranque;
+    }
+
+    var usd = usdDe(pago);
+    if (usd === null) {
+      eq.textContent = 'Price unavailable on ' + c.nombre;
+      pintarCta();
+      pintarPanel();
+      pintarBarra();
+      return;
+    }
+
     var mn = minUsd(), mx = maxUsd(), pr = precio();
-    var usd = usdActual;
-    var malo = usd < mn || usd > mx;
-    var uso  = Math.min(mx, Math.max(mn, usd));
-    if (!desdeInput) usdIn.value = uso >= 1000 ? num(uso) : String(+uso.toFixed(2));
+    var d = Number(usd) / 1e8;
+    var malo = d < mn || d > mx;
+
+    if (!desdeInput) usdIn.value = humano(pago, dec, cif);
 
     campo.classList.toggle('bad', malo);
     nota.classList.toggle('bad', malo);
 
-    var lineaLimites = 'Min ' + dinero(mn, mn < 1 ? 2 : 0) + ' · max ' +
-                       dinero(mx) + ' per wallet';
-    nota.textContent = malo
-      ? (usd < mn ? 'Minimum purchase is ' + dinero(mn, mn < 1 ? 2 : 0)
-                  : 'Maximum is ' + dinero(mx) + ' per wallet')
-      : lineaLimites + ' · live oracle price';
-
-    var nrm = uso / pr;
-    nrmOut.value = num(nrm);
-    tasa.textContent = '1 NRM = ' + dinero(pr, 2);
-    val.textContent  = dinero(nrm * LISTADO);
-    gain.textContent = '+' + dinero(nrm * LISTADO - uso);
-    range.value = aBarra(uso).toFixed(3);
-
-    var e = est(), m = medio(), c = red();
-    if (m.usdt) {
-      eq.textContent = '≈ ' + uso.toFixed(2) + ' USDT on ' + c.nombre;
-    } else if (e.ok && e.precioNativo) {
-      var wei = pagoNativo(BigInt(Math.round(uso * 1e8)));
-      eq.textContent = '≈ ' + humano(wei, 18, 6) + ' ' + c.simbolo + ' on ' + c.nombre +
-                       (e.oraculoVivo ? '' : ' · cached price');
+    if (malo && d < mn) {
+      var minU = unidDeUsd(mn);
+      nota.textContent = 'Minimum purchase is ' + dinero(mn, mn < 1 ? 2 : 0) +
+        (minU === null ? '' : ' — about ' + humano(minU, dec, cif) + ' ' + sim);
+    } else if (malo) {
+      var maxU = unidDeUsd(mx);
+      nota.textContent = 'Maximum is ' + dinero(mx) + ' per wallet' +
+        (maxU === null ? '' : ' — about ' + humano(maxU, dec, cif) + ' ' + sim);
     } else {
-      eq.textContent = 'Price unavailable on ' + c.nombre;
+      nota.textContent = 'Min ' + dinero(mn, mn < 1 ? 2 : 0) + ' · max ' +
+        dinero(mx) + ' per wallet · live oracle price';
     }
+
+    eq.textContent = '≈ ' + dinero(d, d < 100 ? 2 : 0) + ' on ' + c.nombre +
+      (m.usdt || e.oraculoVivo ? '' : ' · cached price');
+
+    var tk = tokensPor(usd);
+    nrmOut.value = nrm(tk);
+    tasa.textContent = '1 NRM = ' + dinero(pr, 2);
+    val.textContent  = dinero(d / pr * LISTADO);
+    gain.textContent = '+' + dinero(d / pr * LISTADO - d);
+    range.value = aBarra(Math.min(mx, Math.max(mn, d))).toFixed(3);
 
     pintarCta();
     pintarPanel();
+    pintarBarra();
+  }
+
+  /* Al cambiar de moneda se conserva el valor en dólares, no el número: pasar
+     de 0,5 ETH a 0,5 BNB sería multiplicar por tres lo que se paga sin que
+     nadie haya tocado el importe. */
+  function ponerUsd(d) {
+    var u = unidDeUsd(d);
+    if (u !== null) pago = u;
+    pintar(false);
+  }
+
+  /* ──────────────────────── barra de recaudación ─────────────────────────── */
+
+  /* Lo levantado antes de que existiera el contrato. No vive en ninguna cadena
+     —es la ronda privada, cerrada fuera de aquí— así que va escrito, y encima
+     se suma lo que entra por Ethereum y BNB Chain. */
+  var PRIVADA_USD = 13616000;
+
+  var barra = document.getElementById('saleFill'),
+      globo = document.getElementById('saleTip'),
+      cifra = document.getElementById('saleRaised'),
+      cifraPie = cifra ? cifra.nextElementSibling : null;
+  var pintado = 0, animada = false, vuelta = 0;
+
+  function enCadenaUsd() {
+    var t = 0;
+    [1, 56].forEach(function (k) {
+      var e = estado[k];
+      if (e && e.ok && e.precioUsd) {
+        t += Number(e.vendidos * e.precioUsd / 1000000000000000000n) / 1e8;
+      }
+    });
+    return t;
+  }
+
+  function objetivoUsd() {
+    var t = 0, hay = false;
+    [1, 56].forEach(function (k) {
+      var e = estado[k];
+      if (e && e.ok && e.tope && e.precioUsd) {
+        hay = true;
+        t += Number(e.tope * e.precioUsd / 1000000000000000000n) / 1e8;
+      }
+    });
+    return hay ? PRIVADA_USD + t : OBJETIVO_USD;
+  }
+
+  function pintarBarra() {
+    if (!barra) return;
+    var total = PRIVADA_USD + enCadenaUsd();
+    var meta = objetivoUsd();
+    var pct = meta > 0 ? Math.min(100, total / meta * 100) : 0;
+
+    if (cifraPie) cifraPie.textContent = 'raised of ' + dinero(meta);
+    if (globo) {
+      globo.querySelector('em').textContent = pct.toFixed(1) + '%';
+      globo.style.left = pct + '%';
+      globo.classList.add('on');
+    }
+    barra.style.width = pct + '%';
+
+    /* La primera vez sube contando, como en el diseño. Después, cuando una
+       compra cambia la cifra, se escribe sin más: un contador saltando cada
+       treinta segundos sería ruido. */
+    var hayCadena = (estado[1] && estado[1].ok) || (estado[56] && estado[56].ok);
+    if (!animada) {
+      /* Sin datos de la cadena todavía no se sabe el total: animar ahora
+         significaría contar hasta una cifra que enseguida cambia, y el último
+         fotograma de esa cuenta pisaría la buena. */
+      if (!hayCadena) { cifra.textContent = dinero(Math.round(total)); return; }
+      animada = true;
+      pintado = total;
+      if (matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        cifra.textContent = dinero(Math.round(total));
+        return;
+      }
+      var mio = ++vuelta, t0 = performance.now(), hasta = total;
+      (function paso(t) {
+        if (mio !== vuelta) return;      /* llegó una cifra más nueva */
+        var q = Math.min(1, (t - t0) / 1800), e = 1 - Math.pow(1 - q, 4);
+        cifra.textContent = dinero(Math.round(hasta * e));
+        if (q < 1) requestAnimationFrame(paso);
+      })(t0);
+      return;
+    }
+    if (Math.round(total) !== Math.round(pintado)) {
+      pintado = total;
+      vuelta++;                          /* corta cualquier cuenta en curso */
+      cifra.textContent = dinero(Math.round(total));
+    }
   }
 
   /* ─────────────────────── lo que lleva el comprador ─────────────────────── */
@@ -769,7 +941,9 @@
     if (!e.viva)     { cta.textContent = 'Round not open yet'; cta.disabled = true; return; }
     if (!sesion.cuenta) { cta.textContent = 'Connect wallet'; return; }
     if (sesion.cid !== c.id) { cta.textContent = 'Switch to ' + c.nombre; return; }
-    cta.textContent = 'Buy ' + num(usdActual / precio()) + ' NRM';
+    var u = pago === null ? null : usdDe(pago);
+    cta.textContent = u === null ? 'Connect wallet'
+      : 'Buy ' + nrm(tokensPor(u)) + ' NRM';
   }
 
   function trabajando(txt) {
@@ -798,8 +972,19 @@
   });
 
   function comprar() {
-    var c = red(), m = medio(), e = est();
-    var usd8 = BigInt(Math.round(Math.min(maxUsd(), Math.max(minUsd(), usdActual)) * 1e8));
+    var c = red(), m = medio();
+    if (pago === null || pago === 0n) { aviso('Enter an amount first.', true); return; }
+
+    /* Se envía exactamente lo que hay en el campo. El contrato sacará de ahí
+       los dólares con la misma cuenta que hace la vista, así que lo que firma
+       el comprador y lo que le cuenta el contrato son el mismo número. */
+    var usd8 = usdDe(pago);
+    if (usd8 === null) { aviso('No price available right now.', true); return; }
+
+    var d = Number(usd8) / 1e8;
+    if (d < minUsd()) { aviso('Minimum purchase is ' + dinero(minUsd(), 2), true); return; }
+    if (d > maxUsd()) { aviso('Maximum is ' + dinero(maxUsd()) + ' per wallet', true); return; }
+
     var esperados = tokensPor(usd8);
     var minimo = esperados * BigInt(10000 - HOLGURA_BPS) / 10000n;
 
@@ -815,14 +1000,12 @@
           : 'Only ' + dinero(Number(queda) / 1e8, 2) + ' left for this wallet.', true);
         return null;
       }
-      return m.usdt ? comprarUsdt(usd8, minimo) : comprarNativo(usd8, minimo);
+      return m.usdt ? comprarUsdt(pago, usd8, minimo) : comprarNativo(pago, minimo);
     }).catch(function (err) { libre(); aviso(motivo(err), true); });
   }
 
-  function comprarNativo(usd8, minimo) {
+  function comprarNativo(wei, minimo) {
     var c = red();
-    var wei = pagoNativo(usd8);
-    if (wei === null) { libre(); aviso('No price available right now.', true); return; }
     trabajando('Confirm in your wallet…');
     return enviar({
       to: c.venta,
@@ -831,9 +1014,8 @@
     }).then(function (h) { return confirmar(h); });
   }
 
-  function comprarUsdt(usd8, minimo) {
+  function comprarUsdt(cantidad, usd8, minimo) {
     var c = red();
-    var cantidad = pagoUsdt(usd8);
     trabajando('Checking allowance…');
     return llamar(c.id, c.usdt, SEL.allowance + encA(sesion.cuenta) + encA(c.venta))
       .then(function (r) {
@@ -856,7 +1038,9 @@
           return llamar(c.id, c.venta, SEL.remaining + encA(sesion.cuenta));
         }).then(function (r2) {
           var queda = decU(palabras(r2)[0]);
-          var techo = pagoUsdt(queda > 0n && queda < 10n ** 30n ? queda : usd8);
+          var tope = queda > 0n && queda < 10n ** 30n ? queda : usd8;
+          var techo = unidDeUsd(Number(tope) / 1e8);
+          if (techo === null) techo = cantidad;
           if (techo < cantidad) techo = cantidad;
           return enviar({ to: c.usdt, data: SEL.approve + encA(c.venta) + encU(techo) });
         }).then(function (h) {
@@ -1353,11 +1537,11 @@
   /* ─────────────────────────────── arranque ──────────────────────────────── */
 
   chips.querySelectorAll('button').forEach(function (b) {
-    b.addEventListener('click', function () { usdActual = +b.dataset.v; pintar(false); });
+    b.addEventListener('click', function () { ponerUsd(+b.dataset.v); });
   });
-  range.addEventListener('input', function () { usdActual = deBarra(+range.value); pintar(false); });
-  usdIn.addEventListener('input', function () { usdActual = limpio(usdIn.value); pintar(true); });
-  usdIn.addEventListener('blur',  function () { usdActual = limpio(usdIn.value); pintar(false); });
+  range.addEventListener('input', function () { ponerUsd(deBarra(+range.value)); });
+  usdIn.addEventListener('input', function () { pago = aUnidades(usdIn.value, decimales()); pintar(true); });
+  usdIn.addEventListener('blur',  function () { pago = aUnidades(usdIn.value, decimales()); pintar(false); });
 
   pintar(false);
 

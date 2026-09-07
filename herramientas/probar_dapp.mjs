@@ -108,11 +108,14 @@ await pg.locator('#presale').scrollIntoViewIfNeeded();
 await pg.waitForTimeout(1500);
 
 chk('precio por NRM', await pg.locator('#wRate').textContent(), '1 NRM = $0.20');
-chk('NRM por $500',   await pg.locator('#wNrm').inputValue(), '2,500');
 
+// El campo va en la moneda de pago: arranca en el equivalente a $500.
 const weiEsp = (50000000000n*10n**18n + PRECIO_NATIVO - 1n) / PRECIO_NATIVO;
 const ethEsp = (weiEsp/10n**18n).toString() + '.' + (weiEsp%10n**18n).toString().padStart(18,'0').slice(0,6).replace(/0+$/,'');
-chk('equivalente en ETH', await pg.locator('#wEq').textContent(), `≈ ${ethEsp} ETH on Ethereum`);
+chk('el campo está en ETH', await pg.locator('#wUsd').inputValue(), ethEsp);
+chk('y la unidad lo dice',  await pg.locator('#presale .w-field em').first().textContent(), 'ETH');
+chk('los dólares van debajo', await pg.locator('#wEq').textContent(), '≈ $500 on Ethereum');
+chk('NRM por ese importe', await pg.locator('#wNrm').inputValue(), '2,500');
 chk('nota de límites',    await pg.locator('#wNote').textContent(),
     'Min $0.20 · max $10,000 per wallet · live oracle price');
 chk('pie de la barra',    (await pg.locator('#presale .raise-foot').textContent()).trim(),
@@ -120,7 +123,7 @@ chk('pie de la barra',    (await pg.locator('#presale .raise-foot').textContent(
 
 // ── 2 · la barra de la ronda privada NO se toca ──────────────────────────────
 await pg.waitForTimeout(2200);
-chk('recaudación privada intacta', await pg.locator('#saleRaised').textContent(), '$13,616,000');
+chk('la privada sigue siendo la base', await pg.locator('#saleRaised').textContent(), '$13,616,000');
 chk('porcentaje intacto', await pg.locator('#saleTip em').textContent(), '85.1%');
 
 // ── 3 · conectar cartera ─────────────────────────────────────────────────────
@@ -139,9 +142,10 @@ await pg.locator('#wCta').click();
 await pg.waitForTimeout(1200);
 const tx1 = (await pg.evaluate(() => window.__tx))[0] || {};
 chk('destino de la compra', (tx1.to||'').toLowerCase(), '0xacbf1add75139d0e926d57ec715fdab8bee04a89');
-chk('valor enviado (wei)',  BigInt(tx1.value||0).toString(), weiEsp.toString());
+chk('firma exactamente lo escrito', BigInt(tx1.value||0).toString(), weiEsp.toString());
 chk('selector buyWithNative', (tx1.data||'').slice(0,10), '0x31ad36ab');
-const minEsp = (2500n*10n**18n)*9900n/10000n;
+const usdReal = weiEsp * PRECIO_NATIVO / 10n**18n;
+const minEsp = (usdReal * 10n**18n / PRECIO_USD) * 9900n / 10000n;
 chk('minTokensOut (1% holgura)', BigInt('0x'+(tx1.data||'').slice(10)).toString(), minEsp.toString());
 
 // ── 5 · cambio de red al elegir BNB ──────────────────────────────────────────
@@ -157,6 +161,11 @@ chk('cadena tras el cambio', await pg.evaluate(()=>window.__prov._cid), '0x38');
 await pg.evaluate(()=>{ window.__prov._cid='0x1'; window.__prov._emitir('chainChanged','0x1'); });
 await pg.locator('#wPay button').nth(2).click();   // USDT ERC-20
 await pg.waitForTimeout(400);
+chk('la unidad cambia a USDT', await pg.locator('#presale .w-field em').first().textContent(), 'USDT');
+await pg.locator('#wUsd').fill('500');
+await pg.locator('#wUsd').blur();
+await pg.waitForTimeout(300);
+chk('en USDT los dólares son los mismos', await pg.locator('#wEq').textContent(), '≈ $500 on Ethereum');
 await pg.evaluate(()=>{ window.__tx.length=0; });
 await pg.locator('#wCta').click();
 await pg.waitForTimeout(2500);
@@ -174,14 +183,22 @@ if (txs.length === 2) {
 }
 
 // ── 7 · límites ──────────────────────────────────────────────────────────────
-await pg.locator('#wUsd').fill('0.05');
+await pg.locator('#wPay button').nth(0).click();   // vuelta a ETH
+await pg.waitForTimeout(300);
+await pg.locator('#wUsd').fill('0.00001');        // ~$0,025
 await pg.locator('#wUsd').blur();
 await pg.waitForTimeout(300);
-chk('por debajo del mínimo', await pg.locator('#wNote').textContent(), 'Minimum purchase is $0.20');
-await pg.locator('#wUsd').fill('25000');
+const minU = (20000000n*10n**18n + PRECIO_NATIVO - 1n) / PRECIO_NATIVO;
+const minS = (minU/10n**18n).toString()+'.'+(minU%10n**18n).toString().padStart(18,'0').slice(0,6).replace(/0+$/,'');
+chk('por debajo del mínimo, con su equivalente', await pg.locator('#wNote').textContent(),
+    'Minimum purchase is $0.20 — about ' + minS + ' ETH');
+await pg.locator('#wUsd').fill('10');             // ~$25.059
 await pg.locator('#wUsd').blur();
 await pg.waitForTimeout(300);
-chk('por encima del máximo', await pg.locator('#wNote').textContent(), 'Maximum is $10,000 per wallet');
+const maxU = (1000000000000n*10n**18n + PRECIO_NATIVO - 1n) / PRECIO_NATIVO;
+const maxS = (maxU/10n**18n).toString()+'.'+(maxU%10n**18n).toString().padStart(18,'0').slice(0,6).replace(/0+$/,'');
+chk('por encima del máximo, con su equivalente', await pg.locator('#wNote').textContent(),
+    'Maximum is $10,000 per wallet — about ' + maxS + ' ETH');
 
 console.log('\n──────── resultado ────────');
 let mal = 0;
