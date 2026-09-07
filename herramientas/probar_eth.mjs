@@ -39,6 +39,8 @@ const SDK=`window.NereumWC={EthereumProvider:{init:async function(o){
   window.__aprobar=()=>soltar();
   window.__tx=null; window.__txs=[];
   const prov={ _cid: window.__cid0 || '0x38',
+    get chainId(){ return window.__provChainId !== undefined
+      ? window.__provChainId : parseInt(prov._cid,16); },
     session:{ peer:{ metadata:{ name:'MetaMask', icons:['https://x/i.png'],
                                 redirect:{ native:'metamask://', universal:'https://metamask.app.link' } } } },
     on:(e,f)=>{(oy[e]=oy[e]||[]).push(f)}, removeListener(){},
@@ -151,7 +153,7 @@ chk('sale la hoja para firmar en MetaMask',
 // que aparecer, con retraso pero aparecer, o volvemos al bloqueo mudo.
 {
   const {ctx:ctx3, pg:pg3} = await abrir({cid0:'0x38', lenta:false});
-  await pg3.evaluate(()=>{ window.__aprobadas=[56]; });   // Ethereum sin aprobar
+  await pg3.evaluate(()=>{ window.__aprobadas=[56]; });   // Ethereum sin habilitar
   await pg3.evaluate(()=>document.getElementById('wCta').click()); await pg3.waitForTimeout(1000);
   await pg3.locator('.nrm-w',{hasText:'MetaMask'}).first().click(); await pg3.waitForTimeout(700);
   await pg3.evaluate(()=>window.__aprobar()); await pg3.waitForTimeout(1800);
@@ -162,6 +164,17 @@ chk('sale la hoja para firmar en MetaMask',
   await pg3.waitForTimeout(1600);
   chk('  pero si tarda, enseña cómo volver a la cartera',
       await pg3.locator('.nrm-fondo a[href^="metamask://"]').count(), 1);
+  // Lo que sale en la cartera dice «conectar este sitio web · solicitando
+  // Ethereum» y se confunde con una conexion nueva. La hoja tiene que decirlo.
+  const txt = await pg3.evaluate(()=>{const f=document.querySelector('.nrm-fondo p');
+    return f?f.textContent:'';});
+  chk('  y explica que es el permiso de red, no una conexión',
+      /enable Ethereum for this site/i.test(txt) && /not a new connection/i.test(txt), true);
+  // la cartera concede la red actualizando la sesion, sin contestar la peticion
+  await pg3.evaluate(()=>{ window.__provChainId = 1; });
+  await pg3.waitForTimeout(1800);
+  chk('  y si la concede sin contestar, la compra sigue igual',
+      await pg3.evaluate(()=>!!window.__tx), true);
   await ctx3.close();
 }
 

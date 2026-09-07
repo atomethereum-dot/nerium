@@ -480,7 +480,13 @@
         return window.NereumWC.EthereumProvider.init({
           projectId: PROYECTO_WC,
           chains: [1],
-          optionalChains: [56],
+          /* Ethereum va en las dos listas a propósito. MetaMask deja elegir qué
+             redes habilita al conectar y por defecto marca la que tenga
+             puesta: quien conectó estando en BNB acababa con una sesión sin
+             Ethereum, y entonces la primera compra en Ethereum obliga a
+             pedirla aparte. Ofrecerla por las dos vías la deja habilitada
+             desde el principio en más carteras. */
+          optionalChains: [1, 56],
           showQrModal: false,
           /* Sin rpcMap, las lecturas viajan por el relay hasta el móvil y
              vuelven: lentas y a merced de que la app esté despierta. Con él,
@@ -522,7 +528,17 @@
        en la red pedida, que por fuera se ve igual que si no funcionara nada. */
     var reloj = null;
     var yaEsta = new Promise(function (ok) {
-      reloj = setInterval(function () { if (sesion.cid === cid) ok(); }, 400);
+      reloj = setInterval(function () {
+        if (sesion.cid === cid) return ok();
+        /* Hay carteras que conceden la red actualizando la sesión y no
+           contestan nunca a la petición. El proveedor sí se entera: se le
+           pregunta a él en vez de esperar un chainChanged que no llega. */
+        try {
+          if (sesion.prov && Number(sesion.prov.chainId) === cid) {
+            sesion.cid = cid; ok();
+          }
+        } catch (e) {}
+      }, 400);
     });
     var soltar = function () { clearInterval(reloj); };
 
@@ -1489,6 +1505,14 @@
      wallet», que es lo que hace falta cuando hay que ir a buscarla. */
   function frasePaso(quien) {
     var t = (pasoActual || 'Confirm').replace(/[.…\s]+$/, '');
+    /* El permiso de red merece su propia frase: lo que sale en la cartera dice
+       «conectar este sitio web» y pide la red, así que sin avisar parece que
+       la conexión se ha perdido y hay que empezar de nuevo. */
+    var red_ = /^Enable (.+?) in your wallet$/.exec(t);
+    if (red_) {
+      return quien + ' will ask to enable ' + red_[1] + ' for this site. ' +
+             'That is not a new connection: approve it and the purchase comes right after.';
+    }
     t = t.replace(/your wallet/i, quien);
     if (t.toLowerCase().indexOf(quien.toLowerCase()) < 0) t += ' in ' + quien;
     return t + '. Your purchase is not finished until you do.';
@@ -1685,6 +1709,11 @@
      retraso: solo aparece si la petición ha salido de verdad. */
   function alinearRed(c) {
     if (sesion.cid === c.id) return Promise.resolve();
+    /* Si la cadena no está habilitada en la sesión, la cartera enseña su
+       pantalla de permisos —«conectar este sitio · solicitando Ethereum»—, que
+       se parece muchísimo a una petición de conexión nueva y no lo es. Se dice
+       antes de que salga, o el visitante la cancela creyendo que algo va mal. */
+    trabajando('Enable ' + c.nombre + ' in your wallet…');
     return cambiarRed(c.id, 1200);
   }
 
