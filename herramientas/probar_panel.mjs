@@ -17,9 +17,14 @@ const ronda={'0xaf68130e':'0x'+w(250595548942n),'0x8b3948bd':'0x'+w(20000000n),
 '0x78e97925':'0x'+w(1757000000),'0x4b8bcb58':'0x'+w(0),'0xdd62ed3e':'0x'+w(0)};
 ronda['0xaf68130e']='0x'+w(250595548942n)+w(1);
 
-function red(alloc,gasto,recl,extra={}){return {...ronda,
-  '0xb81b8630':'0x'+w(alloc), '0x0da8b1c9':'0x'+w(gasto),
-  '0x3acd1572':'0x'+w(1000000000000n-gasto), '0x402914f5':'0x'+w(recl), ...extra};}
+function red(alloc,gasto,recl,extra={}){
+  // __usdt y __nativo no viajan al navegador: se traducen aquí, que un BigInt
+  // no se puede serializar hacia dentro de la página.
+  const {__usdt=0n, __nativo='0x0', ...resto}=extra;
+  return {...ronda,
+    '0xb81b8630':'0x'+w(alloc), '0x0da8b1c9':'0x'+w(gasto),
+    '0x3acd1572':'0x'+w(1000000000000n-gasto), '0x402914f5':'0x'+w(recl),
+    '0x70a08231':'0x'+w(__usdt), __nativo, ...resto};}
 
 const nav=await chromium.launch({executablePath:'/opt/pw-browsers/chromium-1194/chrome-linux/chrome',args:['--no-sandbox']});
 const Rs=[]; const chk=(n,a,b)=>Rs.push({n,ok:String(a)===String(b),a,b});
@@ -33,6 +38,7 @@ async function abrir(eth, bsc, cerrarPanel=false){
       const j=JSON.parse(o.body); const tabla=/bsc|binance|defibit/.test(url)?bsc:eth;
       let res=null;
       if(j.method==='eth_call') res=tabla[j.params[0].data.slice(0,10)]??'0x'+'0'.repeat(64);
+      else if(j.method==='eth_getBalance') res=tabla.__nativo ?? '0x0';
       return new Response(JSON.stringify({jsonrpc:'2.0',id:j.id,result:res}),{status:200,headers:{'content-type':'application/json'}});};
     const prov={_cid:'0x1',_o:{},on(e,f){(prov._o[e]=prov._o[e]||[]).push(f)},removeListener(){},
       _emit(e,a){(prov._o[e]||[]).forEach(f=>f(a))},
@@ -40,6 +46,7 @@ async function abrir(eth, bsc, cerrarPanel=false){
         if(method==='eth_requestAccounts')return['0xf222259D0dE7428dC4e2e78E74cC72A85a7B6aa6'];
         if(method==='eth_chainId')return prov._cid;
         if(method==='eth_call'){ const tabla=eth; return tabla[params[0].data.slice(0,10)]??'0x'+'0'.repeat(64); }
+        if(method==='eth_getBalance') return eth.__nativo ?? '0x0';
         throw new Error(method);}};
     const info={uuid:'w1',name:'MetaMask',rdns:'io.metamask',icon:''};
     window.addEventListener('eip6963:requestProvider',()=>window.dispatchEvent(
@@ -73,7 +80,7 @@ async function abrir(eth, bsc, cerrarPanel=false){
  const {ctx,pg}=await abrir(red(10000n*E18, 200000000000n, 0n), red(2500n*E18, 50000000000n, 0n));
  chk('suma las dos redes', await pg.locator('.pos-gran b').textContent(), '12,500NRM');
  chk('y lo invertido', await pg.locator('.pos-gran span').textContent(), '$2,500 invested');
- const fs_=await pg.locator('.nrm-pos li').allTextContents();
+ const fs_=await pg.locator('.pos-redes li').allTextContents();
  chk('desglosa Ethereum', fs_[0], 'Ethereum10,000 NRM · $2,000');
  chk('desglosa BNB Chain', fs_[1], 'BNB Chain2,500 NRM · $500');
  chk('el tope es por red', await pg.locator('.nrm-pos .pos-pie').last().textContent(),
@@ -88,7 +95,7 @@ async function abrir(eth, bsc, cerrarPanel=false){
 // ── 3 · solo una red: sin desglose que repita ────────────────────────────────
 {
  const {ctx,pg}=await abrir(red(2500n*E18, 50000000000n, 0n), red(0n,0n,0n));
- chk('una sola red no desglosa', await pg.locator('.nrm-pos li').count(), 0);
+ chk('una sola red no desglosa', await pg.locator('.pos-redes li').count(), 0);
  chk('pero sí el total', await pg.locator('.pos-gran b').textContent(), '2,500NRM');
  await ctx.close();
 }
@@ -107,6 +114,24 @@ async function abrir(eth, bsc, cerrarPanel=false){
  await pg.locator('#presale .widget').screenshot({path:'/tmp/p_claim.png'});
  await ctx.close();
 }
+// ── 4b · los saldos de la cartera ────────────────────────────────────────────
+{
+ const E=red(0n,0n,0n,{__nativo:'0x'+(2n*10n**17n).toString(16),  __usdt:1234560000n});   // 0,2 ETH · 1.234,56 USDT
+ const B=red(0n,0n,0n,{__nativo:'0x'+(15n*10n**17n).toString(16), __usdt:50n*10n**18n}); // 1,5 BNB · 50 USDT
+ const {ctx,pg}=await abrir(E,B);
+ chk('el saldo sale bajo el importe', await pg.locator('.nrm-saldo').textContent(), 'Balance 0.2 ETH');
+ await pg.locator('#wPay button').nth(2).click(); await pg.waitForTimeout(400);
+ chk('y cambia con la moneda', await pg.locator('.nrm-saldo').textContent(), 'Balance 1234.56 USDT');
+ const f=await pg.locator('.pos-saldos li').allTextContents();
+ chk('los cuatro en el panel', f.length, 4);
+ chk('ETH de Ethereum',   f[0], 'ETH · Ethereum0.2');
+ chk('USDT de Ethereum',  f[1], 'USDT · Ethereum1234.56');
+ chk('BNB de BNB Chain',  f[2], 'BNB · BNB Chain1.5');
+ chk('USDT de BNB Chain', f[3], 'USDT · BNB Chain50');
+ await pg.locator('#presale .widget').screenshot({path:'/tmp/saldos.png'});
+ await ctx.close();
+}
+
 // ── 5 · desconectar ──────────────────────────────────────────────────────────
 {
  const {ctx,pg}=await abrir(red(2500n*E18,50000000000n,0n), red(0n,0n,0n));

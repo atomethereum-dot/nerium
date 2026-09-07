@@ -156,6 +156,14 @@
      propio nodo, no depende de que el visitante pueda alcanzar un RPC público
      —hay países donde no— y no gasta cuota de nadie. Los públicos quedan como
      respaldo y como única vía antes de conectar. */
+  function pedir(cid, metodo, params) {
+    if (sesion.prov && sesion.cid === cid) {
+      return sesion.prov.request({ method: metodo, params: params })
+        .catch(function () { return rpc(cid, metodo, params); });
+    }
+    return rpc(cid, metodo, params);
+  }
+
   function llamar(cid, to, data) {
     var params = [{ to: to, data: data }, 'latest'];
     if (sesion.prov && sesion.cid === cid) {
@@ -208,6 +216,7 @@
   /* Lo que lleva comprado esta cartera, por red. Son cuatro lecturas más por
      cadena, así que solo se piden con una cartera conectada. */
   var posicion = { 1: null, 56: null };
+  var saldos   = { 1: null, 56: null };
 
   /* Estado de la venta y posición del comprador se piden juntos: si se pintaran
      con lecturas de momentos distintos, el panel podría enseñar una compra que
@@ -216,12 +225,29 @@
 
   function leerPosicion() {
     var quien = sesion.cuenta;
-    if (!quien) { posicion = { 1: null, 56: null }; return Promise.resolve(); }
+    if (!quien) {
+      posicion = { 1: null, 56: null };
+      saldos = { 1: null, 56: null };
+      return Promise.resolve();
+    }
     return Promise.all([1, 56].map(function (cid) {
       var c = CADENAS[cid];
       var uno = function (sel) {
         return llamar(cid, c.venta, sel + encA(quien)).catch(function () { return null; });
       };
+      /* El saldo de la cartera: la moneda de la red y su USDT. Es lo primero
+         que alguien mira antes de decidir cuánto compra. */
+      var nativo = pedir(cid, 'eth_getBalance', [quien, 'latest'])
+        .then(function (h) { return h ? BigInt(h) : null; })
+        .catch(function () { return null; });
+      var enUsdt = llamar(cid, c.usdt, SEL.balanceOf + encA(quien))
+        .then(function (r) { return decU(palabras(r)[0]); })
+        .catch(function () { return null; });
+      Promise.all([nativo, enUsdt]).then(function (b) {
+        saldos[cid] = (b[0] === null && b[1] === null) ? null
+                    : { nativo: b[0], usdt: b[1] };
+      });
+
       return Promise.all([uno(SEL.allocation), uno(SEL.spentUsd),
                           uno(SEL.remaining), uno(SEL.claimable)])
         .then(function (r) {
@@ -235,7 +261,10 @@
         });
     })).then(function () {
       /* Si la cuenta cambió mientras se leía, lo leído ya no es de nadie. */
-      if (sesion.cuenta !== quien) posicion = { 1: null, 56: null };
+      if (sesion.cuenta !== quien) {
+        posicion = { 1: null, 56: null };
+        saldos = { 1: null, 56: null };
+      }
     });
   }
 
@@ -769,9 +798,15 @@
   function simbolo()   { return medio().usdt ? 'USDT' : red().simbolo; }
 
   /* Texto decimal → enteros, sin pasar por coma flotante: 0,1 + 0,2 no da 0,3
-     y aquí cada unidad es dinero. */
+     y aquí cada unidad es dinero.
+
+     La coma cuenta como separador decimal. En medio mundo es LA coma, y el
+     teclado numérico del teléfono ofrece la que toque según el idioma: quitarla
+     como un carácter cualquiera convertía «0,1» en «01», o sea 1 BNB en lugar
+     de 0,1. Diez veces más, y firmado sin que nada avisara. */
   function aUnidades(txt, dec) {
-    var t = String(txt).replace(/[^0-9.]/g, '').split('.');
+    var limpio = String(txt).replace(/,/g, '.').replace(/[^0-9.]/g, '');
+    var t = limpio.split('.');
     var ent = t[0] || '0';
     var fr = (t[1] || '').slice(0, dec);
     while (fr.length < dec) fr += '0';
@@ -826,6 +861,29 @@
 
 
 
+  /* El saldo de la moneda elegida, justo debajo del importe: es el número que
+     hace falta para decidir cuánto se compra. */
+  var lineaSaldo = document.createElement('div');
+  lineaSaldo.className = 'nrm-saldo';
+  lineaSaldo.hidden = true;
+  eq.parentNode.insertBefore(lineaSaldo, eq.nextSibling);
+
+  function saldoDe(m) {
+    var b = saldos[m.cid];
+    if (!b) return null;
+    var v = m.usdt ? b.usdt : b.nativo;
+    return (v === null || v === undefined) ? null : v;
+  }
+
+  function pintarSaldo() {
+    var m = medio();
+    var v = saldoDe(m);
+    if (!sesion.cuenta || v === null) { lineaSaldo.hidden = true; return; }
+    var dec = m.usdt ? red().usdtDec : 18;
+    lineaSaldo.hidden = false;
+    lineaSaldo.textContent = 'Balance ' + humano(v, dec, m.usdt ? 2 : 6) + ' ' + simbolo();
+  }
+
   var caja = cta.closest('.widget');
   var rotulo = caja ? caja.querySelector('.w-top span') : null;
   var rotuloOrig = rotulo ? rotulo.textContent : '';
@@ -851,6 +909,7 @@
       pintarCta();
       pintarPanel();
       pintarBarra();
+      pintarSaldo();
       return;
     }
     modoCerrada(false);
@@ -875,6 +934,7 @@
       pintarCta();
       pintarPanel();
       pintarBarra();
+      pintarSaldo();
       return;
     }
 
@@ -884,6 +944,7 @@
       pintarCta();
       pintarPanel();
       pintarBarra();
+      pintarSaldo();
       return;
     }
 
@@ -922,6 +983,7 @@
     pintarCta();
     pintarPanel();
     pintarBarra();
+    pintarSaldo();
   }
 
   /* Al cambiar de moneda se conserva el valor en dólares, no el número: pasar
@@ -1065,6 +1127,12 @@
       'border-top:1px solid rgba(10,12,16,.09)}',
       '.nrm-pos li{display:flex;justify-content:space-between;gap:12px;padding:2px 0;opacity:.72}',
       '.nrm-pos .pos-pie{margin:9px 0 0;font-size:12px;opacity:.55}',
+      '.nrm-pos .pos-tit{margin:12px 0 6px;padding-top:10px;font-size:10.5px;',
+      'letter-spacing:.08em;text-transform:uppercase;opacity:.45;',
+      'border-top:1px solid rgba(10,12,16,.09)}',
+      '.nrm-saldo{margin:-4px 0 12px;font-size:12px;opacity:.6;',
+      "font-family:var(--m,ui-monospace,monospace)}",
+      '@media(prefers-color-scheme:dark){.nrm-pos .pos-tit{border-color:rgba(255,255,255,.10)}}',
       '.nrm-pos .pos-rec{margin-top:10px;padding-top:10px;border-top:1px solid rgba(10,12,16,.09);',
       'display:flex;justify-content:space-between;gap:12px;color:var(--blue,#2F6BFF);font-weight:500}',
       '@media(prefers-color-scheme:dark){.nrm-pos{border-color:rgba(255,255,255,.14)}',
@@ -1079,6 +1147,32 @@
     var b = document.createElement('span'); b.textContent = v;
     li.appendChild(a); li.appendChild(b);
     return li;
+  }
+
+  /* Los cuatro saldos de la cartera. Van juntos y con su red al lado: «USDT» a
+     secas no dice nada cuando existe en las dos. */
+  function bloqueSaldos() {
+    var filas = [];
+    [[1, false], [1, true], [56, false], [56, true]].forEach(function (par) {
+      var c = CADENAS[par[0]], b = saldos[par[0]];
+      if (!b) return;
+      var v = par[1] ? b.usdt : b.nativo;
+      if (v === null || v === undefined) return;
+      var dec = par[1] ? c.usdtDec : 18;
+      filas.push([(par[1] ? 'USDT' : c.simbolo) + ' · ' + c.nombre,
+                  humano(v, dec, par[1] ? 2 : 6)]);
+    });
+    if (!filas.length) return null;
+    var caja = document.createElement('div');
+    var t = document.createElement('div');
+    t.className = 'pos-tit'; t.textContent = 'In your wallet';
+    caja.appendChild(t);
+    var ul = document.createElement('ul');
+    ul.className = 'pos-saldos';
+    ul.style.cssText = 'margin:0;padding:0;border:0';
+    filas.forEach(function (f) { ul.appendChild(fila(f[0], f[1])); });
+    caja.appendChild(ul);
+    return caja;
   }
 
   function pintarPanel() {
@@ -1117,6 +1211,8 @@
       v.textContent = 'No purchase from this wallet yet.';
       panel.appendChild(v);
       panel.appendChild(topeRestante());
+      var sb0 = bloqueSaldos();
+      if (sb0) panel.appendChild(sb0);
       return;
     }
 
@@ -1135,6 +1231,7 @@
        de arriba con otras palabras. */
     if (p1 && p56 && p1.tokens > 0n && p56.tokens > 0n) {
       var ul = document.createElement('ul');
+      ul.className = 'pos-redes';
       ul.appendChild(fila('Ethereum',  nrm(p1.tokens)  + ' NRM · ' + usd8(p1.gastado)));
       ul.appendChild(fila('BNB Chain', nrm(p56.tokens) + ' NRM · ' + usd8(p56.gastado)));
       panel.appendChild(ul);
@@ -1150,6 +1247,8 @@
     } else {
       panel.appendChild(topeRestante());
     }
+    var sb = bloqueSaldos();
+    if (sb) panel.appendChild(sb);
   }
 
   /* El tope de $10.000 lo lleva cada contrato por su cuenta, así que es por red
@@ -1175,6 +1274,7 @@
     try { if (sesion.prov && sesion.prov.disconnect) sesion.prov.disconnect(); } catch (e) {}
     sesion = { prov: null, cuenta: null, cid: null, nombre: '' };
     posicion = { 1: null, 56: null };
+    saldos = { 1: null, 56: null };
     wcUri = null; wcEstado = 'nada'; wcFallo = null; wcEspera = null; wcProv = null;
     pintar();
   }
