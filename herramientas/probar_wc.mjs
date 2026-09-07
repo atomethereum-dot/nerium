@@ -1,4 +1,4 @@
-import { chromium } from 'playwright';
+import { chromium, devices } from 'playwright';
 import http from 'node:http'; import fs from 'node:fs'; import path from 'node:path';
 const RAIZ='/home/user/nerium';
 const T={'.html':'text/html','.js':'text/javascript','.css':'text/css','.json':'application/json',
@@ -12,58 +12,147 @@ const R={'0xaf68130e':'0x'+w(250595548942n)+w(1),'0x8b3948bd':'0x'+w(20000000n),
 '0x4194fdd1':'0x'+w(1000000000000n),'0x63b20117':'0x'+w(0),'0x4b749535':'0x'+w(0),'0xb8f7a665':'0x'+w(1),
 '0xb4bd9e27':'0x'+w(0),'0x5c975abb':'0x'+w(0),'0x78e97925':'0x'+w(1757000000),'0x4b8bcb58':'0x'+w(0),
 '0x3acd1572':'0x'+w(1000000000000n),'0xdd62ed3e':'0x'+w(0)};
-const nav=await chromium.launch({executablePath:'/opt/pw-browsers/chromium-1194/chrome-linux/chrome',args:['--no-sandbox']});
-const R2=[]; const chk=(n,a,b)=>R2.push({n,ok:String(a)===String(b),a,b});
 
-// ── caso 1: sin carteras de navegador, WalletConnect debe ser la unica opcion ──
+// Un pixel PNG que hace de logo, para no depender de la red.
+const PIX='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z/C/HgAGgwJ/lK3Q6wAAAABJRU5ErkJggg==';
+const REGISTRO={listings:{
+  a:{name:'Trust Wallet',image_id:'t1',mobile:{native:'trust://',universal:'https://link.trustwallet.com'}},
+  b:{name:'Rainbow',     image_id:'t2',mobile:{native:'rainbow://',universal:'https://rnbwapp.com'}},
+  c:{name:'Zerion',      image_id:'t3',mobile:{native:'zerion://',universal:'https://wallet.zerion.io'}},
+  d:{name:'MetaMask',    image_id:'t4',mobile:{native:'metamask://',universal:'https://metamask.app.link'}}
+}};
+// Un EthereumProvider falso servido en lugar del CDN: mismo camino de codigo.
+const SDK=`window.EthereumProvider={init:async function(o){
+  window.__wcInit=o;
+  const oy={};
+  return { on:(e,f)=>{(oy[e]=oy[e]||[]).push(f)}, removeListener(){},
+    connect: async function(){ (oy['display_uri']||[]).forEach(f=>f('wc:7f9a2c@2?relay-protocol=irn&symKey=abc123def456'));
+      await new Promise(r=>setTimeout(r,60000)); },
+    request: async function({method}){ if(method==='eth_requestAccounts')return['0x2222222222222222222222222222222222222222'];
+      if(method==='eth_chainId')return '0x1'; throw new Error(method); } };
+}};`;
+
+const nav=await chromium.launch({executablePath:'/opt/pw-browsers/chromium-1194/chrome-linux/chrome',args:['--no-sandbox']});
+const Rs=[]; const chk=(n,a,b)=>Rs.push({n,ok:String(a)===String(b),a,b});
+
+async function montar(extra={}, movil=false){
+  const ctx=await nav.newContext(movil?{...devices['iPhone 13']}:{viewport:{width:1400,height:1000}});
+  await ctx.addInitScript(({R,conExt})=>{ const of=window.fetch;
+    window.fetch=async(u,o)=>{ if(!o||!o.body) return of(u,o);
+      const j=JSON.parse(o.body); let res=null;
+      if(j.method==='eth_call')res=R[j.params[0].data.slice(0,10)]??'0x'+'0'.repeat(64);
+      return new Response(JSON.stringify({jsonrpc:'2.0',id:j.id,result:res}),{status:200,headers:{'content-type':'application/json'}});};
+    window.__abierto=[];
+    if(conExt){
+      const prov={_cid:'0x1',on(){},removeListener(){},async request({method}){
+        if(method==='eth_requestAccounts')return['0x1111111111111111111111111111111111111111'];
+        if(method==='eth_chainId')return '0x1'; throw new Error(method);}};
+      const info={uuid:'w1',name:'Rabby Wallet',rdns:'io.rabby',icon:''};
+      window.addEventListener('eip6963:requestProvider',()=>window.dispatchEvent(
+        new CustomEvent('eip6963:announceProvider',{detail:Object.freeze({info,provider:prov})})));
+    }
+  },{R,conExt:extra.conExt!==false});
+  const pg=await ctx.newPage();
+  await pg.route('**explorer-api.walletconnect.com/v3/wallets**', r=>
+    extra.sinRegistro ? r.abort() : r.fulfill({status:200,contentType:'application/json',body:JSON.stringify(REGISTRO)}));
+  await pg.route('**explorer-api.walletconnect.com/v3/logo/**', r=>
+    r.fulfill({status:200,contentType:'image/png',body:Buffer.from(PIX.split(',')[1],'base64')}));
+  await pg.route('**cdn.jsdelivr.net/**', r=>
+    extra.sinSdk ? r.abort() : r.fulfill({status:200,contentType:'text/javascript',body:SDK}));
+  return {ctx,pg};
+}
+
+// ── 1 · escritorio: lista con logos, buscador y QR ──────────────────────────
 {
- const ctx=await nav.newContext({viewport:{width:1400,height:1000}});
- await ctx.addInitScript(({R})=>{ const of=window.fetch;
-  window.fetch=async(u,o)=>{if(!o||!o.body)return of(u,o);const j=JSON.parse(o.body);
-   let res=null; if(j.method==='eth_call')res=R[j.params[0].data.slice(0,10)]??'0x'+'0'.repeat(64);
-   return new Response(JSON.stringify({jsonrpc:'2.0',id:j.id,result:res}),{status:200,headers:{'content-type':'application/json'}});};
-  delete window.ethereum;      // ni extension ni navegador de cartera
- },{R});
- const pg=await ctx.newPage(); const errs=[]; pg.on('pageerror',e=>errs.push(String(e)));
- // el CDN esta bloqueado en este entorno igual que en el sandbox: se corta la peticion
- await pg.route('**cdn.jsdelivr.net/**', r=>r.abort());
+ const {ctx,pg}=await montar();
+ const errs=[]; pg.on('pageerror',e=>errs.push(String(e)));
  await pg.goto('http://127.0.0.1:8934/index.html',{waitUntil:'load'});
- await pg.locator('#presale').scrollIntoViewIfNeeded(); await pg.waitForTimeout(1800);
- await pg.locator('#wCta').click(); await pg.waitForTimeout(300);
- const ops=await pg.locator('.nrm-w').allTextContents();
- chk('WalletConnect aparece en el selector', ops.join('|'), 'WalletConnect');
+ await pg.locator('#presale').scrollIntoViewIfNeeded(); await pg.waitForTimeout(1600);
+ await pg.locator('#wCta').click(); await pg.waitForTimeout(900);
+
+ const nombres=await pg.locator('.nrm-w b').allTextContents();
+ chk('la extensión encabeza la lista', nombres[0], 'Rabby Wallet');
+ chk('y detrás va el registro', nombres.slice(1).join(','), 'Trust Wallet,Rainbow,Zerion,MetaMask');
+ chk('la instalada lleva su punto', await pg.locator('.nrm-w i').count(), 1);
+ chk('los logos son imágenes', await pg.locator('.nrm-w img.nrm-av').count(), 4);
+ chk('la extensión sin icono cae en monograma',
+     (await pg.locator('.nrm-w').first().locator('.nrm-av').textContent()).trim(), 'R');
+
+ await pg.locator('.nrm-buscar').fill('rain');
+ await pg.waitForTimeout(200);
+ chk('el buscador filtra', (await pg.locator('.nrm-w b').allTextContents()).join(','), 'Rainbow');
+ await pg.locator('.nrm-buscar').fill('zzz'); await pg.waitForTimeout(200);
+ chk('sin resultados avisa', await pg.locator('.nrm-vacia').textContent(), 'No wallet with that name.');
+ await pg.locator('.nrm-buscar').fill(''); await pg.waitForTimeout(200);
+
+ await pg.locator('.nrm-w b', {hasText:'Trust Wallet'}).click();
+ await pg.waitForTimeout(1500);
+ chk('el título pasa a la cartera', await pg.locator('.nrm-cab h3').textContent(), 'Trust Wallet');
+ chk('aparece el QR', await pg.locator('.nrm-qr .marco svg').count(), 1);
+ const mods=await pg.locator('.nrm-qr .marco svg path').evaluate(
+   el => (el.getAttribute('d')||'').split('M').length - 1);
+ chk('el QR lleva cientos de módulos', mods>300, true);
+ chk('y fondo blanco para que se lea',
+     await pg.locator('.nrm-qr .marco svg rect').getAttribute('fill'), 'white');
+ chk('hay botón de copiar', await pg.locator('.nrm-copiar').textContent(), 'Copy link');
+ chk('el SDK arranca sin su modal', await pg.evaluate(()=>window.__wcInit.showQrModal), false);
+ chk('y con rpcMap', await pg.evaluate(()=>Object.keys(window.__wcInit.rpcMap).join(',')), '1,56');
+ await pg.locator('.nrm-ico').first().click(); await pg.waitForTimeout(300);
+ chk('la flecha vuelve a la lista', await pg.locator('.nrm-cab h3').textContent(), 'Connect a wallet');
+ chk('y el QR desaparece de verdad', await pg.locator('.nrm-qr').isVisible(), false);
+ chk('con la lista otra vez llena', (await pg.locator('.nrm-w').count())>0, true);
+ chk('y el buscador de vuelta', await pg.locator('.nrm-buscar').isVisible(), true);
+ await pg.locator('.nrm-w b',{hasText:'Trust Wallet'}).click(); await pg.waitForTimeout(1200);
+ await pg.locator('.nrm-caja').screenshot({path:'/tmp/m_qr.png'});
+ await pg.locator('.nrm-ico').first().click(); await pg.waitForTimeout(400);
+ await pg.locator('.nrm-caja').screenshot({path:'/tmp/m_lista.png'});
+ chk('sin errores de página', errs.length, 0);
+ await ctx.close();
+}
+
+// ── 2 · móvil: enlace profundo a la app, sin QR ──────────────────────────────
+{
+ const {ctx,pg}=await montar({},true);
+ await pg.goto('http://127.0.0.1:8934/index.html',{waitUntil:'load'});
+ await pg.evaluate(()=>{ const o=Object.getOwnPropertyDescriptor(window.location,'href');
+   window.__nav=[]; });
+ // Se captura la navegacion en vez de dejar que el esquema desconocido falle.
+ pg.on('framenavigated',f=>{});
+ await pg.route('trust://**', r=>r.abort());
+ let saltos=[];
+ pg.on('request', r=>{ if(!r.url().startsWith('http')) saltos.push(r.url()); });
+ await pg.locator('#presale').scrollIntoViewIfNeeded(); await pg.waitForTimeout(1600);
+ await pg.locator('#wCta').click(); await pg.waitForTimeout(900);
+ chk('en móvil también sale la lista', (await pg.locator('.nrm-w').count())>0, true);
+ await pg.locator('.nrm-w b',{hasText:'Trust Wallet'}).click();
+ await pg.waitForTimeout(1500);
+ chk('en móvil no dibuja QR', await pg.locator('.nrm-qr .marco').count(), 0);
+ chk('ofrece reintentar', await pg.locator('.nrm-copiar').first().textContent(), 'Open Trust Wallet');
+ chk('y copiar el enlace', await pg.locator('.nrm-copiar').last().textContent(), 'Copy link');
+ await pg.locator('.nrm-caja').screenshot({path:'/tmp/m_movil.png'});
+ await ctx.close();
+}
+
+// ── 3 · sin registro y sin SDK: sigue habiendo lista y el error se lee ──────
+{
+ const {ctx,pg}=await montar({sinRegistro:true,sinSdk:true,conExt:false});
+ await pg.goto('http://127.0.0.1:8934/index.html',{waitUntil:'load'});
+ await pg.locator('#presale').scrollIntoViewIfNeeded(); await pg.waitForTimeout(1600);
+ await pg.locator('#wCta').click(); await pg.waitForTimeout(1200);
+ const n=await pg.locator('.nrm-w b').allTextContents();
+ chk('la lista de respaldo aparece', n.length>=20, true);
+ chk('encabezada por MetaMask', n[0], 'MetaMask');
+ chk('todas con monograma', await pg.locator('.nrm-w img.nrm-av').count(), 0);
  await pg.locator('.nrm-w').first().click();
  await pg.waitForTimeout(2500);
- chk('el CDN caido da mensaje legible', await pg.locator('#wNote').textContent(),
+ chk('el SDK caído se explica', await pg.locator('#wNote').textContent(),
      'WalletConnect could not load. Check your connection.');
- chk('el boton vuelve a estar usable', await pg.locator('#wCta').isDisabled(), false);
- chk('sin errores de pagina', errs.length, 0);
+ chk('y el modal se cierra', await pg.locator('.nrm-fondo').count(), 0);
  await ctx.close();
 }
-// ── caso 2: con cartera de navegador, salen las dos ──────────────────────────
-{
- const ctx=await nav.newContext({viewport:{width:1400,height:1000}});
- await ctx.addInitScript(({R})=>{ const of=window.fetch;
-  window.fetch=async(u,o)=>{if(!o||!o.body)return of(u,o);const j=JSON.parse(o.body);
-   let res=null; if(j.method==='eth_call')res=R[j.params[0].data.slice(0,10)]??'0x'+'0'.repeat(64);
-   return new Response(JSON.stringify({jsonrpc:'2.0',id:j.id,result:res}),{status:200,headers:{'content-type':'application/json'}});};
-  const prov={_cid:'0x1',on(){},removeListener(){},async request({method}){
-   if(method==='eth_requestAccounts')return['0x1111111111111111111111111111111111111111'];
-   if(method==='eth_chainId')return '0x1'; throw new Error(method);}};
-  const info={uuid:'w1',name:'Rabby',rdns:'io.rabby',icon:''};
-  window.addEventListener('eip6963:requestProvider',()=>window.dispatchEvent(
-    new CustomEvent('eip6963:announceProvider',{detail:Object.freeze({info,provider:prov})})));
- },{R});
- const pg=await ctx.newPage();
- await pg.goto('http://127.0.0.1:8934/index.html',{waitUntil:'load'});
- await pg.locator('#presale').scrollIntoViewIfNeeded(); await pg.waitForTimeout(1800);
- await pg.locator('#wCta').click(); await pg.waitForTimeout(300);
- chk('las dos vias juntas', (await pg.locator('.nrm-w').allTextContents()).join('|'), 'Rabby|WalletConnect');
- await pg.locator('.nrm-caja').screenshot({path:'/tmp/wc.png'});
- await ctx.close();
-}
+
 await nav.close(); srv.close();
-let mal=0; for(const r of R2){ if(!r.ok)mal++;
+let mal=0; for(const r of Rs){ if(!r.ok)mal++;
  console.log((r.ok?'  ok  ':'  MAL ')+r.n+(r.ok?'':`\n         esperado: ${r.b}\n         obtenido: ${r.a}`)); }
-console.log(mal?`\n${mal} fallo(s)`:'\ntodo correcto');
+console.log(mal?`\n${mal} fallo(s)`:`\n${Rs.length}/${Rs.length} correctas`);
 process.exit(mal?1:0);

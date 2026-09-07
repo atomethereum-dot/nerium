@@ -94,6 +94,9 @@ const errores = [];
 pg.on('pageerror', e => errores.push(String(e)));
 pg.on('console', m => { if (m.type()==='error') errores.push('console: '+m.text()); });
 
+// El registro de carteras es de red: se sirve aquí para que la prueba no dependa de ella.
+await pg.route('**explorer-api.walletconnect.com/**', r => r.fulfill({
+  status:200, contentType:'application/json', body:JSON.stringify({listings:{}}) }));
 await pg.goto('http://127.0.0.1:8931/index.html', { waitUntil:'load' });
 await pg.waitForTimeout(1200);
 
@@ -123,11 +126,12 @@ chk('porcentaje intacto', await pg.locator('#saleTip em').textContent(), '85.1%'
 // ── 3 · conectar cartera ─────────────────────────────────────────────────────
 chk('CTA sin conectar', await pg.locator('#wCta').textContent(), 'Connect wallet');
 await pg.locator('#wCta').click();
-await pg.waitForTimeout(250);
-chk('modal de carteras', await pg.locator('.nrm-caja h3').textContent(), 'Connect a wallet');
-chk('cartera detectada', await pg.locator('.nrm-w b').first().textContent(), 'Cartera de prueba');
+await pg.waitForTimeout(400);
+chk('el modal abre', await pg.locator('.nrm-cab h3').textContent(), 'Connect a wallet');
+chk('la instalada va primera', await pg.locator('.nrm-w b').first().textContent(), 'Cartera de prueba');
 await pg.locator('.nrm-w').first().click();
-await pg.waitForTimeout(600);
+await pg.waitForTimeout(900);
+chk('el modal se cierra al conectar', await pg.locator('.nrm-fondo').count(), 0);
 chk('CTA conectado', await pg.locator('#wCta').textContent(), 'Buy 2,500 NRM');
 
 // ── 4 · compra con ETH ───────────────────────────────────────────────────────

@@ -27,8 +27,13 @@ por EIP-6963.
 ```
 node herramientas/probar_dapp.mjs      # 26 comprobaciones del flujo de compra
 node herramientas/probar_estados.mjs   # los cinco estados de la ronda
-node herramientas/probar_wc.mjs        # WalletConnect y el CDN caido
+node herramientas/probar_wc.mjs        # el modal de carteras, el QR y el movil
 ```
+
+`probar_wc.mjs` simula también el registro de carteras de WalletConnect y el SDK,
+así que cubre el modal entero sin salir a la red: la lista con logos, el
+buscador, el QR de escritorio, el enlace a la app en móvil y qué se ve cuando
+el registro o el SDK no responden.
 
 `probar_dapp.mjs` comprueba lo que de verdad importa: que el `value` en wei, el
 `minTokensOut` y los datos del `approve` y del `buyWithUsdt` son exactamente los

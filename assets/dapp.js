@@ -250,50 +250,54 @@
     });
   }
 
-  function cargarScript(src) {
-    return new Promise(function (ok, mal) {
+  var scripts = {};
+  function cargarScript(src, nombre) {
+    if (scripts[src]) return scripts[src];
+    scripts[src] = new Promise(function (ok, mal) {
       var s = document.createElement('script');
-      var reloj = setTimeout(function () {
-        mal(new Error('WalletConnect could not load. Check your connection.'));
-      }, 20000);
+      var fallo = function () {
+        mal(new Error((nombre || 'A script') + ' could not load. Check your connection.'));
+      };
+      var reloj = setTimeout(fallo, 20000);
       s.src = src; s.async = true;
       s.onload = function () { clearTimeout(reloj); ok(); };
-      s.onerror = function () {
-        clearTimeout(reloj);
-        mal(new Error('WalletConnect could not load. Check your connection.'));
-      };
+      s.onerror = function () { clearTimeout(reloj); fallo(); };
       document.head.appendChild(s);
     });
+    return scripts[src];
   }
 
-  /* WalletConnect. Solo se carga si hay Project ID: sin él el relay rechaza la
-     sesión, y bajar 400 KB para enseñar un error no le sirve a nadie. */
-  function conectarWC() {
-    if (!PROYECTO_WC) return Promise.reject(new Error('WalletConnect sin Project ID'));
-    var base = window.EthereumProvider
-      ? Promise.resolve()
-      : cargarScript('https://cdn.jsdelivr.net/npm/@walletconnect/ethereum-provider@2.17.2/dist/index.umd.js');
-    return base.then(function () {
-      return window.EthereumProvider.init({
-        projectId: PROYECTO_WC,
-        chains: [1],
-        optionalChains: [56],
-        showQrModal: true,
-        /* Sin rpcMap, las lecturas viajan por el relay hasta la cartera del
-           móvil y vuelven: lentas y a merced de que la app esté despierta. Con
-           él, eth_call sale por estos nodos y solo se molesta a la cartera para
-           firmar, que es lo único que solo ella puede hacer. */
-        rpcMap: { 1: CADENAS[1].rpc[0], 56: CADENAS[56].rpc[0] },
-        metadata: {
-          name: 'Nereum',
-          description: 'Nereum Seed Round',
-          url: location.origin,
-          icons: [location.origin + '/icon-192.png']
-        }
-      });
-    }).then(function (prov) {
-      return prov.enable().then(function () { return enchufar(prov, 'WalletConnect'); });
-    });
+  /* El modal es nuestro, así que del SDK solo se usa el transporte: se pide el
+     proveedor sin su interfaz (showQrModal: false) y la URI de emparejamiento
+     llega por el evento display_uri, que es lo que se convierte en QR o en
+     enlace a la app. */
+  var wcProv = null;
+  function iniciarWC() {
+    if (!PROYECTO_WC) return Promise.reject(new Error('WalletConnect is not configured.'));
+    if (wcProv) return Promise.resolve(wcProv);
+    return cargarScript(
+        'https://cdn.jsdelivr.net/npm/@walletconnect/ethereum-provider@2.24.0/dist/index.umd.js',
+        'WalletConnect')
+      .then(function () {
+        return window.EthereumProvider.init({
+          projectId: PROYECTO_WC,
+          chains: [1],
+          optionalChains: [56],
+          showQrModal: false,
+          /* Sin rpcMap, las lecturas viajan por el relay hasta el móvil y
+             vuelven: lentas y a merced de que la app esté despierta. Con él,
+             eth_call sale por estos nodos y solo se molesta a la cartera para
+             firmar, que es lo único que solo ella puede hacer. */
+          rpcMap: { 1: CADENAS[1].rpc[0], 56: CADENAS[56].rpc[0] },
+          metadata: {
+            name: 'Nereum',
+            description: 'Nereum Seed Round',
+            url: location.origin,
+            icons: [location.origin + '/icon-192.png']
+          }
+        });
+      })
+      .then(function (prov) { wcProv = prov; return prov; });
   }
 
   function cambiarRed(cid) {
@@ -670,104 +674,448 @@
     });
   }
 
-  /* ────────────────────────── selector de cartera ─────────────────────────── */
+  /* ──────────────────────── carteras: lista y conexión ───────────────────── */
 
-  var hoja = null;
+  var MOVIL = /Android|iPhone|iPad|iPod|Mobile|Silk/i.test(navigator.userAgent || '');
 
-  function estilos() {
-    if (document.getElementById('nrmWalletCss')) return;
-    var s = document.createElement('style');
-    s.id = 'nrmWalletCss';
-    s.textContent = [
-      '.nrm-fondo{position:fixed;inset:0;z-index:9999;background:rgba(8,10,16,.62);',
-      'backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;padding:20px}',
-      '.nrm-caja{width:100%;max-width:380px;background:#fff;border-radius:18px;padding:22px;',
-      'box-shadow:0 30px 80px rgba(0,0,0,.35);font:400 15px/1.45 var(--f,system-ui,sans-serif);color:#0B1020}',
-      '.nrm-caja h3{margin:0 0 4px;font-size:17px;font-weight:600}',
-      '.nrm-caja p{margin:0 0 16px;font-size:13px;opacity:.62}',
-      '.nrm-w{display:flex;align-items:center;gap:12px;width:100%;padding:12px 14px;margin-bottom:8px;',
-      'border:1px solid rgba(10,16,32,.10);border-radius:12px;background:#fff;cursor:pointer;',
-      'font:inherit;text-align:left;transition:border-color .15s,background .15s}',
-      '.nrm-w:hover{border-color:#2A5BFF;background:rgba(42,91,255,.04)}',
-      '.nrm-w img{width:26px;height:26px;border-radius:7px;flex:0 0 auto}',
-      '.nrm-w b{font-weight:500}',
-      '.nrm-x{display:block;width:100%;margin-top:10px;padding:9px;border:0;background:none;',
-      'font:inherit;font-size:13px;opacity:.55;cursor:pointer}',
-      '.nrm-vacio{font-size:13px;line-height:1.5;opacity:.7;margin:0 0 12px}',
-      '.nrm-vacio a{color:#2A5BFF}',
-      '@media(prefers-color-scheme:dark){.nrm-caja{background:#12151D;color:#EDF0F6}',
-      '.nrm-w{background:#171B25;border-color:rgba(255,255,255,.10)}',
-      '.nrm-w:hover{background:rgba(42,91,255,.14)}}',
-      '.w-cta.espera{opacity:.72;cursor:progress}'
-    ].join('');
-    document.head.appendChild(s);
+  /* Los logos y los enlaces a cada app salen del registro de WalletConnect. Si
+     no se puede alcanzar —red del visitante, API caída— la lista sigue saliendo
+     con estos nombres y un monograma, y el enlace pasa a ser el `wc:` pelado,
+     que el propio sistema operativo enruta a la cartera que haya instalada. */
+  var RESPALDO = ['MetaMask', 'Trust Wallet', 'Coinbase Wallet', 'Rainbow', 'Zerion',
+    'Uniswap Wallet', 'OKX Wallet', 'Bitget Wallet', 'Binance Web3 Wallet', 'SafePal',
+    'TokenPocket', 'imToken', 'Ledger Live', 'Rabby Wallet', 'Argent', '1inch Wallet',
+    'Crypto.com Onchain', 'Phantom', 'Exodus', 'Blockchain.com'];
+
+  var registro = null, pidiendo = null;
+
+  function traerRegistro() {
+    if (registro) return Promise.resolve(registro);
+    if (pidiendo) return pidiendo;
+    var raso = function () {
+      registro = RESPALDO.map(function (n) { return { nombre: n }; });
+      return registro;
+    };
+    if (!PROYECTO_WC) return Promise.resolve(raso());
+    var corte = new AbortController();
+    setTimeout(function () { corte.abort(); }, 8000);
+    pidiendo = fetch('https://explorer-api.walletconnect.com/v3/wallets?projectId=' +
+        PROYECTO_WC + '&entries=100&page=1', { signal: corte.signal })
+      .then(function (r) { return r.json(); })
+      .then(function (j) {
+        var l = j && j.listings, out = [];
+        for (var k in l) if (Object.prototype.hasOwnProperty.call(l, k)) {
+          var x = l[k];
+          if (!x || !x.name) continue;
+          out.push({
+            nombre: x.name,
+            logo: x.image_id ? 'https://explorer-api.walletconnect.com/v3/logo/md/' +
+                  x.image_id + '?projectId=' + PROYECTO_WC : '',
+            movil: x.mobile || {}, escritorio: x.desktop || {}
+          });
+        }
+        if (!out.length) return raso();
+        registro = out;
+        return out;
+      })
+      .catch(raso);
+    return pidiendo;
   }
 
-  function cerrar() { if (hoja) { hoja.remove(); hoja = null; } }
+  /* Cuando no hay logo, una inicial sobre un color estable sacado del nombre.
+     Estable importa: la misma cartera tiene siempre el mismo color y la lista no
+     cambia de aspecto entre visitas. */
+  function tono(n) {
+    var h = 0;
+    for (var i = 0; i < n.length; i++) h = (h * 31 + n.charCodeAt(i)) % 360;
+    return 'hsl(' + h + ' 62% 46%)';
+  }
+
+  /* Enlaces tal como los arma WalletConnect. Un esquema propio abre la app
+     directamente; el universal es https y, si la app no está, cae en su web. */
+  function enlaceNativo(base, uri) {
+    if (/^http/.test(base)) return enlaceUniversal(base, uri);
+    var b = base;
+    if (b.indexOf('://') < 0) b = b.replace(/[/:]/g, '') + '://';
+    if (b.charAt(b.length - 1) !== '/') b += '/';
+    return b + 'wc?uri=' + encodeURIComponent(uri);
+  }
+  function enlaceUniversal(base, uri) {
+    var b = base;
+    if (b.charAt(b.length - 1) !== '/') b += '/';
+    return b + 'wc?uri=' + encodeURIComponent(uri);
+  }
+  function enlaceApp(w, uri) {
+    var m = w.movil || {};
+    if (m.native) return enlaceNativo(m.native, uri);
+    if (m.universal) return enlaceUniversal(m.universal, uri);
+    return uri;
+  }
+
+  /* ─────────────────────────────── el modal ──────────────────────────────── */
+
+  var hoja = null, buscador = null, rejilla = null, vistaQR = null, atras = null, titulo = null;
+
+  function estilos() {
+    if (document.getElementById('nrmCss')) return;
+    var e = document.createElement('style');
+    e.id = 'nrmCss';
+    e.textContent = [
+      '.w-cta.espera{opacity:.72;cursor:progress}',
+      /* Las vistas del modal traen display propio, que le gana al [hidden] del
+         navegador: sin esto el QR se queda encima de la lista al volver atrás. */
+      '.nrm-caja [hidden]{display:none!important}',
+      '.nrm-caja .nrm-ico[hidden]{display:flex!important;visibility:hidden}',
+      '.nrm-fondo{position:fixed;inset:0;z-index:9999;background:rgba(4,7,12,.72);',
+      '-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);display:flex;',
+      'align-items:center;justify-content:center;padding:16px;opacity:0;transition:opacity .18s}',
+      '.nrm-fondo.on{opacity:1}',
+      '@media(max-width:560px){.nrm-fondo{align-items:flex-end;padding:0}}',
+
+      '.nrm-caja{width:100%;max-width:420px;max-height:min(640px,92vh);display:flex;',
+      'flex-direction:column;background:var(--paper,#fff);color:var(--ink,#0A0C10);',
+      'border-radius:22px;box-shadow:0 36px 90px rgba(0,0,0,.42);overflow:hidden;',
+      "font-family:var(--f,'Inter Tight',system-ui,sans-serif);",
+      'transform:translateY(10px) scale(.985);transition:transform .22s var(--ease,ease)}',
+      '.nrm-fondo.on .nrm-caja{transform:none}',
+      '@media(max-width:560px){.nrm-caja{max-width:none;border-radius:22px 22px 0 0;',
+      'max-height:88vh;padding-bottom:env(safe-area-inset-bottom,0px)}',
+      '.nrm-fondo.on .nrm-caja{transform:none}',
+      '.nrm-fondo:not(.on) .nrm-caja{transform:translateY(24px)}}',
+
+      '.nrm-cab{display:flex;align-items:center;gap:8px;padding:16px 16px 10px}',
+      '.nrm-cab h3{flex:1;margin:0;font-size:16px;font-weight:600;letter-spacing:-.01em;text-align:center}',
+      '.nrm-ico{width:32px;height:32px;flex:0 0 auto;display:flex;align-items:center;',
+      'justify-content:center;border:0;border-radius:50%;background:rgba(10,12,16,.05);',
+      'color:inherit;cursor:pointer;font-size:15px;line-height:1;transition:background .15s}',
+      '.nrm-ico:hover{background:rgba(10,12,16,.1)}',
+
+      '.nrm-buscar{margin:0 16px 12px;padding:11px 14px;border:1px solid rgba(10,12,16,.12);',
+      'border-radius:12px;background:rgba(10,12,16,.03);color:inherit;font:inherit;font-size:14px;',
+      'outline:0;transition:border-color .15s}',
+      '.nrm-buscar:focus{border-color:var(--blue,#2F6BFF)}',
+      '.nrm-buscar::placeholder{color:currentColor;opacity:.42}',
+
+      '.nrm-rej{flex:1;overflow-y:auto;overscroll-behavior:contain;padding:0 10px 14px;',
+      'display:grid;grid-template-columns:repeat(4,1fr);gap:2px;-webkit-overflow-scrolling:touch}',
+      '@media(max-width:380px){.nrm-rej{grid-template-columns:repeat(3,1fr)}}',
+
+      '.nrm-w{position:relative;display:flex;flex-direction:column;align-items:center;gap:7px;',
+      'padding:12px 4px 11px;border:0;border-radius:14px;background:none;color:inherit;',
+      'font:inherit;cursor:pointer;transition:background .15s}',
+      '.nrm-w:hover{background:rgba(47,107,255,.08)}',
+      '.nrm-w b{font-size:11px;font-weight:500;line-height:1.25;text-align:center;',
+      'width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;opacity:.86}',
+      '.nrm-av{width:46px;height:46px;border-radius:13px;object-fit:cover;',
+      'background:rgba(10,12,16,.06);display:flex;align-items:center;justify-content:center;',
+      'color:#fff;font-size:18px;font-weight:600;box-shadow:0 1px 3px rgba(0,0,0,.12)}',
+      '.nrm-w i{position:absolute;top:9px;right:9px;width:8px;height:8px;border-radius:50%;',
+      'background:#22C55E;box-shadow:0 0 0 2px var(--paper,#fff)}',
+      '.nrm-vacia{grid-column:1/-1;padding:28px 12px;text-align:center;font-size:13px;opacity:.55}',
+
+      '.nrm-qr{flex:1;display:flex;flex-direction:column;align-items:center;',
+      'justify-content:center;gap:14px;padding:6px 24px 26px;text-align:center}',
+      '.nrm-qr .marco{width:min(268px,68vw);aspect-ratio:1;padding:14px;border-radius:18px;',
+      'background:#fff;box-shadow:0 2px 14px rgba(0,0,0,.10);display:flex}',
+      '.nrm-qr .marco svg{width:100%;height:100%;display:block}',
+      '.nrm-qr p{margin:0;font-size:13px;line-height:1.5;opacity:.62;max-width:280px}',
+      '.nrm-copiar{padding:9px 18px;border:1px solid rgba(10,12,16,.14);border-radius:999px;',
+      'background:none;color:inherit;font:inherit;font-size:13px;cursor:pointer;transition:background .15s}',
+      '.nrm-copiar:hover{background:rgba(47,107,255,.08)}',
+      '.nrm-cargando{grid-column:1/-1;padding:34px;text-align:center;font-size:13px;opacity:.5}',
+
+      '@media(prefers-color-scheme:dark){',
+      '.nrm-caja{background:#12151C;color:#EDF0F6}',
+      '.nrm-ico{background:rgba(255,255,255,.07)}.nrm-ico:hover{background:rgba(255,255,255,.13)}',
+      '.nrm-buscar{background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.12)}',
+      '.nrm-av{background:rgba(255,255,255,.08)}',
+      '.nrm-w i{box-shadow:0 0 0 2px #12151C}',
+      '.nrm-copiar{border-color:rgba(255,255,255,.16)}}'
+    ].join('');
+    document.head.appendChild(e);
+  }
+
+  function cerrar() {
+    if (!hoja) return;
+    var h = hoja; hoja = null;
+    h.classList.remove('on');
+    setTimeout(function () { if (h.parentNode) h.remove(); }, 200);
+  }
+
+  function avatar(w) {
+    if (w.logo) {
+      var img = document.createElement('img');
+      img.className = 'nrm-av'; img.alt = ''; img.loading = 'lazy'; img.src = w.logo;
+      img.addEventListener('error', function () {
+        var d = monograma(w); img.parentNode.replaceChild(d, img);
+      });
+      return img;
+    }
+    return monograma(w);
+  }
+  function monograma(w) {
+    var d = document.createElement('div');
+    d.className = 'nrm-av';
+    d.style.background = tono(w.nombre);
+    d.textContent = w.nombre.charAt(0).toUpperCase();
+    return d;
+  }
+
+  function ficha(w, instalada) {
+    var b = document.createElement('button');
+    b.type = 'button'; b.className = 'nrm-w';
+    b.appendChild(avatar(w));
+    var n = document.createElement('b');
+    n.textContent = w.nombre;
+    b.appendChild(n);
+    if (instalada) {
+      b.title = w.nombre + ' — installed';
+      b.appendChild(document.createElement('i'));
+    }
+    b.addEventListener('click', function () { elegir(w); });
+    return b;
+  }
+
+  function pintarLista(filtro) {
+    if (!rejilla) return;
+    var f = (filtro || '').trim().toLowerCase();
+    var mias = listaCarteras().map(function (w) {
+      return { nombre: w.nombre, logo: w.icono, prov: w.prov };
+    });
+    var nombres = {};
+    mias.forEach(function (w) { nombres[w.nombre.toLowerCase()] = true; });
+    var otras = (registro || []).filter(function (w) {
+      return !nombres[w.nombre.toLowerCase()];
+    });
+    var todas = mias.concat(otras).filter(function (w) {
+      return !f || w.nombre.toLowerCase().indexOf(f) >= 0;
+    });
+
+    rejilla.textContent = '';
+    if (!todas.length) {
+      var v = document.createElement('div');
+      v.className = registro ? 'nrm-vacia' : 'nrm-cargando';
+      v.textContent = registro ? 'No wallet with that name.' : 'Loading wallets…';
+      rejilla.appendChild(v);
+      return;
+    }
+    todas.forEach(function (w) { rejilla.appendChild(ficha(w, !!w.prov)); });
+  }
+
+  function verLista() {
+    vistaQR.hidden = true;
+    buscador.hidden = false;
+    rejilla.hidden = false;
+    atras.hidden = true;
+    titulo.textContent = 'Connect a wallet';
+    /* Elegir una cartera vacía la rejilla para poner el "Opening…", así que al
+       volver hay que repintarla: sin esto la flecha atrás lleva a una lista en
+       blanco y no hay forma de salir salvo cerrando. */
+    pintarLista(buscador.value);
+  }
+
+  function verQR(w, uri) {
+    titulo.textContent = w.nombre;
+    atras.hidden = false;
+    buscador.hidden = true;
+    rejilla.hidden = true;
+    vistaQR.hidden = false;
+    vistaQR.textContent = '';
+
+    var marco = document.createElement('div');
+    marco.className = 'marco';
+    try {
+      var q = window.qrcode(0, 'M');
+      q.addData(uri);
+      q.make();
+      marco.innerHTML = q.createSvgTag({ cellSize: 6, margin: 0, scalable: true });
+      var svg = marco.querySelector('svg');
+      if (svg) { svg.setAttribute('shape-rendering', 'crispEdges'); }
+    } catch (e) {
+      marco.textContent = '';
+    }
+    vistaQR.appendChild(marco);
+
+    var p = document.createElement('p');
+    p.textContent = 'Scan with ' + w.nombre + ', or copy the link and paste it in the app.';
+    vistaQR.appendChild(p);
+
+    vistaQR.appendChild(botonCopiar(uri));
+  }
+
+  function botonCopiar(uri) {
+    var c = document.createElement('button');
+    c.type = 'button'; c.className = 'nrm-copiar'; c.textContent = 'Copy link';
+    c.addEventListener('click', function () {
+      var hecho = function () {
+        c.textContent = 'Copied';
+        setTimeout(function () { c.textContent = 'Copy link'; }, 1600);
+      };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(uri).then(hecho, function () {});
+      } else {
+        /* Safari viejo y cualquier navegador servido sin https no tienen
+           clipboard: el textarea de toda la vida sigue funcionando. */
+        var t = document.createElement('textarea');
+        t.value = uri;
+        t.setAttribute('readonly', '');
+        t.style.cssText = 'position:fixed;top:-1000px';
+        document.body.appendChild(t);
+        t.select(); t.setSelectionRange(0, t.value.length);
+        try { document.execCommand('copy'); hecho(); } catch (e) {}
+        t.remove();
+      }
+    });
+    return c;
+  }
 
   function abrirCarteras() {
     estilos();
     cerrar();
-    var lista = listaCarteras();
+
     hoja = document.createElement('div');
     hoja.className = 'nrm-fondo';
     hoja.setAttribute('role', 'dialog');
     hoja.setAttribute('aria-modal', 'true');
+    hoja.setAttribute('aria-label', 'Connect a wallet');
 
     var caja = document.createElement('div');
     caja.className = 'nrm-caja';
-    caja.innerHTML = '<h3>Connect a wallet</h3><p>You stay in control. Nereum never sees your keys.</p>';
 
-    lista.forEach(function (w) {
-      var b = document.createElement('button');
-      b.type = 'button'; b.className = 'nrm-w';
-      b.innerHTML = (w.icono ? '<img alt="" src="' + w.icono + '">' : '') +
-                    '<b></b>';
-      b.querySelector('b').textContent = w.nombre;
-      b.addEventListener('click', function () {
-        cerrar();
-        trabajando('Confirm in your wallet…');
-        enchufar(w.prov, w.nombre)
-          .then(function () { return leerTodo(); })
-          .then(function () { libre(); pintar(); })
-          .catch(function (e) { libre(); aviso(motivo(e), true); });
-      });
-      caja.appendChild(b);
-    });
+    var cab = document.createElement('div');
+    cab.className = 'nrm-cab';
+    atras = document.createElement('button');
+    atras.type = 'button'; atras.className = 'nrm-ico'; atras.innerHTML = '&#8592;';
+    atras.setAttribute('aria-label', 'Back');
+    atras.hidden = true;
+    atras.addEventListener('click', verLista);
+    titulo = document.createElement('h3');
+    titulo.textContent = 'Connect a wallet';
+    var equis = document.createElement('button');
+    equis.type = 'button'; equis.className = 'nrm-ico'; equis.innerHTML = '&#10005;';
+    equis.setAttribute('aria-label', 'Close');
+    equis.addEventListener('click', cerrar);
+    cab.appendChild(atras); cab.appendChild(titulo); cab.appendChild(equis);
 
-    if (PROYECTO_WC) {
-      var b = document.createElement('button');
-      b.type = 'button'; b.className = 'nrm-w';
-      b.innerHTML = '<b>WalletConnect</b>';
-      b.addEventListener('click', function () {
-        cerrar();
-        trabajando('Opening WalletConnect…');
-        conectarWC()
-          .then(function () { return leerTodo(); })
-          .then(function () { libre(); pintar(); })
-          .catch(function (e) { libre(); aviso(motivo(e), true); });
-      });
-      caja.appendChild(b);
-    } else if (!lista.length) {
-      var p = document.createElement('p');
-      p.className = 'nrm-vacio';
-      p.innerHTML = 'No wallet detected in this browser. Open nereum.xyz inside your ' +
-                    'wallet app, or install <a href="https://metamask.io" target="_blank" ' +
-                    'rel="noopener">MetaMask</a>.';
-      caja.appendChild(p);
-    }
+    buscador = document.createElement('input');
+    buscador.className = 'nrm-buscar';
+    buscador.type = 'search';
+    buscador.placeholder = 'Search wallet';
+    buscador.setAttribute('aria-label', 'Search wallet');
+    buscador.addEventListener('input', function () { pintarLista(buscador.value); });
 
-    var x = document.createElement('button');
-    x.type = 'button'; x.className = 'nrm-x'; x.textContent = 'Cancel';
-    x.addEventListener('click', cerrar);
-    caja.appendChild(x);
+    rejilla = document.createElement('div');
+    rejilla.className = 'nrm-rej';
 
+    vistaQR = document.createElement('div');
+    vistaQR.className = 'nrm-qr';
+    vistaQR.hidden = true;
+
+    caja.appendChild(cab); caja.appendChild(buscador);
+    caja.appendChild(rejilla); caja.appendChild(vistaQR);
     hoja.appendChild(caja);
     hoja.addEventListener('click', function (e) { if (e.target === hoja) cerrar(); });
     document.addEventListener('keydown', function esc(e) {
-      if (e.key === 'Escape') { cerrar(); document.removeEventListener('keydown', esc); }
+      if (e.key !== 'Escape') return;
+      document.removeEventListener('keydown', esc);
+      cerrar();
     });
     document.body.appendChild(hoja);
+    requestAnimationFrame(function () { if (hoja) hoja.classList.add('on'); });
+
+    pintarLista('');
+    traerRegistro().then(function () { if (hoja) pintarLista(buscador.value); });
+    /* El QR tarda en hacer falta y son 55 KB: se trae mientras el visitante
+       mira la lista, para que al elegir ya esté. */
+    if (!MOVIL) cargarScript('assets/qr.js', 'QR').catch(function () {});
+  }
+
+  /* ─────────────────────────── elegir una cartera ─────────────────────────── */
+
+  function tras(p) {
+    return p.then(function () { return leerTodo(); })
+      .then(function () { cerrar(); libre(); pintar(); })
+      .catch(function (e) { cerrar(); libre(); aviso(motivo(e), true); });
+  }
+
+  /* La URI de emparejamiento no es de ninguna cartera en concreto: sirve para
+     cualquiera. Por eso se pide una sola vez y se reutiliza si el visitante
+     vuelve atrás y elige otra, en vez de abrir una conexión nueva por cada
+     nombre que toque. */
+  var wcUri = null, wcPedida = false;
+
+  function mostrarWC(w, uri) {
+    if (!hoja) return;
+    titulo.textContent = w.nombre;
+    atras.hidden = false;
+    buscador.hidden = true;
+    if (MOVIL) {
+      /* El salto a la app es silencioso cuando falla: si no está instalada, o
+         si el navegador bloquea el esquema, no hay error ninguno y la pantalla
+         se queda esperando. De ahí el botón para reintentar y el enlace para
+         pegar a mano. */
+      rejilla.hidden = true;
+      vistaQR.hidden = false;
+      vistaQR.textContent = '';
+      var p = document.createElement('p');
+      p.textContent = 'Confirm the connection in ' + w.nombre +
+        '. If it did not open, try again or copy the link into the app.';
+      vistaQR.appendChild(p);
+      var abrir = document.createElement('button');
+      abrir.type = 'button'; abrir.className = 'nrm-copiar';
+      abrir.textContent = 'Open ' + w.nombre;
+      abrir.addEventListener('click', function () {
+        window.location.href = enlaceApp(w, uri);
+      });
+      vistaQR.appendChild(abrir);
+      vistaQR.appendChild(botonCopiar(uri));
+      window.location.href = enlaceApp(w, uri);
+      return;
+    }
+    cargarScript('assets/qr.js', 'QR')
+      .then(function () { if (hoja) verQR(w, uri); })
+      .catch(function () { if (hoja) verQR(w, uri); });
+  }
+
+  function nota_(txt) {
+    var d = document.createElement('div');
+    d.className = 'nrm-cargando';
+    d.textContent = txt;
+    return d;
+  }
+
+  function elegir(w) {
+    if (w.prov) {                      /* extensión o navegador de cartera */
+      trabajando('Confirm in your wallet…');
+      return tras(enchufar(w.prov, w.nombre));
+    }
+    if (!PROYECTO_WC) {
+      cerrar();
+      aviso('Open nereum.xyz inside your wallet app to connect.', true);
+      return;
+    }
+
+    titulo.textContent = w.nombre;
+    atras.hidden = false;
+    buscador.hidden = true;
+    rejilla.textContent = '';
+    rejilla.appendChild(nota_('Opening ' + w.nombre + '…'));
+
+    if (wcUri) return mostrarWC(w, wcUri);
+    if (wcPedida) return;              /* ya se está pidiendo, llegará sola */
+
+    wcPedida = true;
+    var pedida = w;
+    tras(iniciarWC().then(function (prov) {
+      prov.on('display_uri', function (uri) {
+        wcUri = uri;
+        mostrarWC(pedida, uri);
+      });
+      return prov.connect().then(function () { return enchufar(prov, pedida.nombre); });
+    }).catch(function (e) {
+      wcPedida = false; wcUri = null; wcProv = null;
+      throw e;
+    }));
   }
 
   /* ─────────────────────────────── arranque ──────────────────────────────── */
