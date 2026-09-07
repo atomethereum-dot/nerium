@@ -55,8 +55,11 @@ async function montar(extra={}, movil=false){
   const pg=await ctx.newPage();
   await pg.route('**explorer-api.walletconnect.com/v3/wallets**', r=>
     extra.sinRegistro ? r.abort() : r.fulfill({status:200,contentType:'application/json',body:JSON.stringify(REGISTRO)}));
+  // Solo se sirve el mediano: el grande tiene que reintentar ahí, no rendirse.
   await pg.route('**explorer-api.walletconnect.com/v3/logo/**', r=>
-    r.fulfill({status:200,contentType:'image/png',body:Buffer.from(PIX.split(',')[1],'base64')}));
+    r.request().url().indexOf('/logo/lg/') > 0
+      ? r.fulfill({status:404, body:''})
+      : r.fulfill({status:200,contentType:'image/png',body:Buffer.from(PIX.split(',')[1],'base64')}));
   // El paquete se sirve desde el propio sitio: se sustituye por el simulado.
   await pg.route('**/assets/walletconnect.js', r=>
     extra.sinSdk ? r.abort() : r.fulfill({status:200,contentType:'text/javascript',body:SDK}));
@@ -88,6 +91,9 @@ async function montar(extra={}, movil=false){
  chk('y detrás va el registro', nombres.slice(1).join(','), 'Trust Wallet,Rainbow,Zerion,MetaMask');
  chk('la instalada lleva su punto', await pg.locator('.nrm-w i').count(), 1);
  chk('los logos son imágenes', await pg.locator('.nrm-w img.nrm-av').count(), 4);
+ // `lg` y no `md`: a 3× un icono de 46 puntos son 138 píxeles reales.
+ chk('si el grande no está, se cae al mediano y no al monograma',
+     (await pg.locator('.nrm-w img.nrm-av').first().getAttribute('src')).includes('/logo/md/'), true);
  chk('la extensión sin icono cae en monograma',
      (await pg.locator('.nrm-w').first().locator('.nrm-av').textContent()).trim(), 'R');
 

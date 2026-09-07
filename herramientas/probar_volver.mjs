@@ -116,6 +116,10 @@ chk(C.nombre+': se puede cerrar', await pg.locator('.nrm-fondo .nrm-cab button[a
 chk(C.nombre+': la hoja lleva su logo', await pg.locator('.nrm-fondo .nrm-qr .nrm-av.nrm-grandota').count(), 1);
 chk(C.nombre+': y es imagen, no inicial',
     await pg.locator('.nrm-fondo .nrm-qr .nrm-av').evaluate(el=>el.tagName), 'IMG');
+chk(C.nombre+': sin placa detrás del logo',
+    await pg.locator('.nrm-fondo .nrm-qr .nrm-av').evaluate(el=>{
+      const cs=getComputedStyle(el); return cs.backgroundColor+'|'+cs.boxShadow; }),
+    'rgba(0, 0, 0, 0)|none');
 chk(C.nombre+': se mandó la transacción', await pg.evaluate(()=>!!window.__mandada), true);
 chk(C.nombre+': sin errores de página', errs.length, 0);
 if (oscuro) await pg.locator('.nrm-caja').last().screenshot({path:'/tmp/hoja_firmar.png'});

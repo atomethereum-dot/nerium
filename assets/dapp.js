@@ -1596,7 +1596,10 @@
           if (!x || !x.name) continue;
           out.push({
             nombre: x.name,
-            logo: x.image_id ? 'https://explorer-api.walletconnect.com/v3/logo/md/' +
+            /* `lg` y no `md`: en una pantalla de 3× un icono de 64 puntos son
+               192 píxeles de verdad, y el mediano se queda corto y se ve
+               emborronado. */
+            logo: x.image_id ? 'https://explorer-api.walletconnect.com/v3/logo/lg/' +
                   x.image_id + '?projectId=' + PROYECTO_WC : '',
             movil: x.mobile || {}, escritorio: x.desktop || {}
           });
@@ -1711,6 +1714,10 @@
       'width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;opacity:.86}',
       '.nrm-av.nrm-grandota{width:64px;height:64px;border-radius:18px;font-size:26px;',
       'margin:0 auto 2px}',
+      /* La placa gris y la sombra son para el monograma, que sin ellas es una
+         letra suelta. Un logo de verdad trae su propia forma, y ponerle un
+         cuadro detrás le inventa un fondo que no tiene. */
+      'img.nrm-av.nrm-grandota{background:none;box-shadow:none;object-fit:contain}',
       '.nrm-av{width:46px;height:46px;border-radius:13px;object-fit:cover;',
       'background:rgba(10,12,16,.06);display:flex;align-items:center;justify-content:center;',
       'color:#fff;font-size:18px;font-weight:600;box-shadow:0 1px 3px rgba(0,0,0,.12)}',
@@ -1773,7 +1780,13 @@
       var img = document.createElement('img');
       img.className = 'nrm-av'; img.alt = ''; img.loading = 'lazy'; img.src = w.logo;
       img.addEventListener('error', function () {
-        var d = monograma(w); img.parentNode.replaceChild(d, img);
+        /* Si el tamaño grande no estuviera servido, se prueba el mediano antes
+           de rendirse: quedarse sin logo es peor que tenerlo un poco blando. */
+        if (img.src.indexOf('/logo/lg/') > 0) {
+          img.src = img.src.replace('/logo/lg/', '/logo/md/');
+          return;
+        }
+        if (img.parentNode) img.parentNode.replaceChild(monograma(w), img);
       });
       return img;
     }
