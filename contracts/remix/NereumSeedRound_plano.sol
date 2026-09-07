@@ -1,23 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.24;
 
-/* ─────────────────────────────────────────────────────────────────────────────
-   NEREUM SEED ROUND — archivo unico para Remix y para verificar en el explorador
-
-   Es el mismo contrato de contracts/src/NereumSeedRound.sol, con las
-   dependencias de OpenZeppelin incrustadas para que no haya que resolver
-   ningun import. No se ha tocado ni una linea de la logica.
-
-   AL COMPILAR EN REMIX, pon exactamente esto o el bytecode no coincidira con
-   el que se ha probado, y la verificacion en Etherscan/BscScan fallara:
-
-       Compilador     0.8.24
-       Optimizacion   activada, 200 runs
-       EVM version    paris
-
-   El contrato que hay que desplegar es NereumSeedRound, el ultimo del archivo.
-   ───────────────────────────────────────────────────────────────────────────── */
-
 // Sources flattened with hardhat v2.29.1 https://hardhat.org
 
 // File @openzeppelin/contracts/utils/Context.sol@v5.6.1
