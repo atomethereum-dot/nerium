@@ -17,6 +17,15 @@ medias: es preferible que pare a que la web se publique sin el suelo del HUD.
 `bloque_css.txt` y `bloque_traductor.txt` son dos de esas piezas, guardadas
 aparte porque son largas.
 
+`seedround.py` es otra: el cambio de «Whitelist» a «Seed Round», en inglés y en
+los doce idiomas. Está aparte porque hay que aplicarlo a cada archivo nuevo —el
+bloque de traducciones viaja dentro del index.html que se sube, así que un
+diseño nuevo vuelve a traer el texto viejo—. Es idempotente: pasarlo sobre algo
+ya convertido no hace nada.
+
+El whitepaper no tiene script de montaje: si llega uno nuevo, el cambio hay que
+rehacerlo a mano, y `probar_seed.mjs` avisa si se olvidó.
+
 ## `probar_dapp.mjs` y `probar_estados.mjs`
 
 Prueban `assets/dapp.js` contra una cadena y una cartera simuladas. No tocan las
@@ -30,7 +39,8 @@ node herramientas/probar_estados.mjs   # los cinco estados de la ronda
 node herramientas/probar_wc.mjs        # el modal de carteras, el QR y el movil
 node herramientas/probar_panel.mjs     # lo que ve el comprador de su posicion
 node herramientas/probar_barra.mjs     # la recaudacion: privada + cadena
-node herramientas/probar_vista.mjs     # importe vacio y volver a la seccion al recargar
+node herramientas/probar_vista.mjs     # importe vacio, logos y volver a la seccion
+node herramientas/probar_seed.mjs      # que no quede ni un «whitelist» en ningun idioma
 ```
 
 `probar_wc.mjs` simula también el registro de carteras de WalletConnect y el SDK,

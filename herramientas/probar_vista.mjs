@@ -31,6 +31,19 @@ await pg.waitForTimeout(1800);
 await pg.locator('#presale').scrollIntoViewIfNeeded();
 await pg.waitForTimeout(1800);
 await pg.locator('#presale .widget').screenshot({path:'/tmp/vacio.png'});
+await pg.locator('#wPay').screenshot({path:'/tmp/monedas.png'});
+chk('cada botón lleva su moneda', await pg.locator('#wPay .nrm-mon').count(), 4);
+chk('y solo los USDT llevan insignia', await pg.locator('#wPay .nrm-mon .red').count(), 2);
+chk('la insignia del tercero es Ethereum',
+    await pg.locator('#wPay button').nth(2).locator('.red circle').getAttribute('fill'), '#627EEA');
+chk('y la del cuarto es BNB',
+    await pg.locator('#wPay button').nth(3).locator('.red circle').getAttribute('fill'), '#F0B90B');
+chk('el primero es ETH',
+    await pg.locator('#wPay button').nth(0).locator('.nrm-mon > svg > circle').getAttribute('fill'), '#627EEA');
+chk('el segundo BNB',
+    await pg.locator('#wPay button').nth(1).locator('.nrm-mon > svg > circle').getAttribute('fill'), '#F0B90B');
+chk('y los dos USDT en verde',
+    await pg.locator('#wPay button').nth(2).locator('.nrm-mon > svg > circle').getAttribute('fill'), '#26A17B');
 chk('el campo arranca vacío', await pg.locator('#wUsd').inputValue(), '');
 chk('con marca de agua',      await pg.locator('#wUsd').getAttribute('placeholder'), '0.00');
 chk('sin NRM de salida',      await pg.locator('#wNrm').inputValue(), '');

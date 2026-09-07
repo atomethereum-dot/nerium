@@ -551,6 +551,87 @@
     });
   });
 
+  /* ─────────────────────── los logos de cada moneda ──────────────────────── */
+
+  /* Dibujados aquí y no traídos de un CDN: son cuatro figuras, pesan menos que
+     la petición que costaría pedirlas, y una página de venta que va a buscar
+     imágenes a un tercero le está contando a ese tercero quién la visita. */
+  var NS = 'http://www.w3.org/2000/svg';
+
+  var MARCAS = {
+    ETH: { fondo: '#627EEA', partes: [
+      ['M16 4v9.7l8.2 3.7z', .6], ['M16 4 7.8 17.4 16 13.7z', 1],
+      ['M16 23.2V28l8.2-11.4z', .6], ['M16 28v-4.8L7.8 16.6z', 1],
+      ['m16 21.6 8.2-4.8-8.2-3.7z', .4], ['m7.8 16.8 8.2 4.8v-8.5z', .8] ] },
+    BNB: { fondo: '#F0B90B', partes: [
+      ['M16 5.8 19.4 9.2 16 12.6 12.6 9.2z', 1],
+      ['M9.2 12.6 12.6 16 9.2 19.4 5.8 16z', 1],
+      ['M22.8 12.6 26.2 16 22.8 19.4 19.4 16z', 1],
+      ['M16 19.4 19.4 22.8 16 26.2 12.6 22.8z', 1],
+      ['M16 12.6 19.4 16 16 19.4 12.6 16z', 1] ] },
+    USDT: { fondo: '#26A17B', partes: [
+      ['M17.9 15.6v-2.3h5.3V9.8H8.8v3.5h5.3v2.3c-4.3.2-7.6 1-7.6 2.1s3.3 1.9 7.6 2.1v6.7h3.8v-6.7' +
+       'c4.3-.2 7.6-1 7.6-2.1s-3.3-1.9-7.6-2.1m0 3.6c-.1 0-.7.1-1.9.1-1 0-1.7 0-1.9-.1' +
+       'c-3.7-.2-6.5-.8-6.5-1.6s2.8-1.4 6.5-1.6v2.6c.2 0 1 .1 2 .1 1.2 0 1.8-.1 1.9-.1v-2.6' +
+       'c3.6.2 6.5.8 6.5 1.6s-2.9 1.4-6.6 1.6', 1] ] }
+  };
+
+  function moneda(clave, tam) {
+    var m = MARCAS[clave];
+    var svg = document.createElementNS(NS, 'svg');
+    svg.setAttribute('viewBox', '0 0 32 32');
+    svg.setAttribute('width', tam); svg.setAttribute('height', tam);
+    svg.setAttribute('aria-hidden', 'true');
+    var c = document.createElementNS(NS, 'circle');
+    c.setAttribute('cx', '16'); c.setAttribute('cy', '16'); c.setAttribute('r', '16');
+    c.setAttribute('fill', m.fondo);
+    svg.appendChild(c);
+    m.partes.forEach(function (par) {
+      var p = document.createElementNS(NS, 'path');
+      p.setAttribute('d', par[0]);
+      p.setAttribute('fill', '#fff');
+      if (par[1] !== 1) p.setAttribute('fill-opacity', String(par[1]));
+      svg.appendChild(p);
+    });
+    return svg;
+  }
+
+  function estilosMonedas() {
+    if (document.getElementById('nrmMon')) return;
+    var e = document.createElement('style');
+    e.id = 'nrmMon';
+    e.textContent = [
+      '.w-pay button{justify-items:center}',
+      '.nrm-mon{position:relative;display:block;width:24px;height:24px;margin-bottom:1px}',
+      '.nrm-mon > svg{display:block}',
+      /* La insignia de red va sobre la moneda, con un aro del color del botón
+         para que se despegue del verde de USDT. */
+      '.nrm-mon .red{position:absolute;right:-3px;bottom:-2px;border-radius:50%;',
+      'background:#fff;padding:1.5px;display:block;line-height:0;box-shadow:0 0 0 .5px rgba(11,13,18,.12)}',
+      '.w-pay button.on .nrm-mon .red{background:#F0F5FF}'
+    ].join('');
+    document.head.appendChild(e);
+  }
+
+  function ponerMonedas() {
+    estilosMonedas();
+    botones.forEach(function (b, i) {
+      if (b.querySelector('.nrm-mon')) return;
+      var m = BOTONES[i];
+      var c = CADENAS[m.cid];
+      var caja = document.createElement('span');
+      caja.className = 'nrm-mon';
+      caja.appendChild(moneda(m.usdt ? 'USDT' : c.simbolo, 24));
+      if (m.usdt) {
+        var badge = document.createElement('span');
+        badge.className = 'red';
+        badge.appendChild(moneda(c.simbolo, 11));
+        caja.appendChild(badge);
+      }
+      b.insertBefore(caja, b.firstChild);
+    });
+  }
+
   function medio() { return BOTONES[elegido] || BOTONES[0]; }
   function red()   { return CADENAS[medio().cid]; }
   function est()   { return estado[medio().cid] || { ok: false }; }
@@ -1669,6 +1750,7 @@
   usdIn.addEventListener('input', function () { pago = aUnidades(usdIn.value, decimales()); pintar(true); });
   usdIn.addEventListener('blur',  function () { pago = aUnidades(usdIn.value, decimales()); pintar(false); });
 
+  ponerMonedas();
   pintar(false);
 
   leerTodo().then(function () {

@@ -608,7 +608,7 @@ td b{color:var(--ink)}
     </div>
     <div class="gr">
       <h5>Token</h5>
-      <a href="#/whitelist">Join the whitelist</a>
+      <a href="#/seedround">Join the Seed Round</a>
       <a href="#/dexscreener">DexScreener</a>
     </div>
     <div class="gr">
@@ -1044,7 +1044,7 @@ const DIAG={
   roadmap:      figuraCard('h','escalera',  'Roadmap',
                   'Five phases. Each one live before the next begins', 'PROTOCOL',
                   {escala:250, cx:790, cy:120, ax:-0.36, ay:0.62}),
-  whitelist:    figuraCard('i','corte',     'Join the whitelist',
+  seedround:    figuraCard('i','corte',     'Join the Seed Round',
                   'Fixed supply, zero tax, ownership renounced', 'TOKEN',
                   {escala:380, cx:900, cy:-10, ax:-0.20, ay:0.94})
 };
@@ -1256,7 +1256,7 @@ audit:{tipo:'rejilla',
 kyc:{tipo:'radios', arg:4,
   en:'Four proofs around one centre: none of them works alone',
   es:'Cuatro pruebas alrededor de un centro: ninguna funciona sola'},
-whitelist:{tipo:'embudo',
+seedround:{tipo:'embudo',
   en:'Many participants, one allocation, one published cap per wallet',
   es:'Muchos participantes, una asignación y un tope publicado por cartera'},
 dexscreener:{tipo:'curva',
@@ -2073,13 +2073,13 @@ que es el sentido entero de la red, no se convierta en papeleo para quien tiene
 el activo.</p>
 `},
 
-whitelist:{grupo:'Token', titulo:'Únase a la whitelist', html:`
-<p>La whitelist es la asignación previa a la cotización: la ventana en la que NRM
+seedround:{grupo:'Token', titulo:'Únase a la Seed Round', html:`
+<p>La Seed Round es la asignación previa a la cotización: la ventana en la que NRM
 se vende antes de negociarse en el mercado abierto, a un precio fijo marcado por
 el proyecto.</p>
 
 <p>Se entra en <a class="enl" href="https://nereum.xyz"><strong>nereum.xyz</strong></a>,
-la única dirección donde la whitelist está abierta. El resto de canales están en
+la única dirección donde la Seed Round está abierta. El resto de canales están en
 <a class="enl" href="#/links">Enlaces oficiales</a>.</p>
 
 <h2 id="token">El token</h2>
@@ -2089,7 +2089,7 @@ la única dirección donde la whitelist está abierta. El resto de canales está
   <tr><td>Red</td><td><b>Ethereum</b> · ERC-20</td></tr>
   <tr><td>Suministro total</td><td class="num"><b>160.000.000</b> — fijo en el génesis, no puede crecer</td></tr>
   <tr><td>Impuesto de compra y venta</td><td><b>0%</b></td></tr>
-  <tr><td>Precio en whitelist</td><td class="num"><b>$0,20</b></td></tr>
+  <tr><td>Precio en la Seed Round</td><td class="num"><b>$0,20</b></td></tr>
   <tr><td>Precio de salida</td><td class="num"><b>$1,00</b> — Uniswap v3</td></tr>
   <tr><td>Contrato</td><td>Propiedad renunciada — ver esa página</td></tr>
 </table>
@@ -2254,7 +2254,7 @@ gente no tiene un sitio autorizado donde comprobar.</p>
   <tr><td><b>Explorador</b></td>
       <td><a class="enl" href="https://nereum.xyz/explorer">nereum.xyz/explorer</a> — donde se puede
       comprobar cada afirmación de este documento</td></tr>
-  <tr><td><b>Whitelist</b></td>
+  <tr><td><b>Seed Round</b></td>
       <td><a class="enl" href="https://nereum.xyz">nereum.xyz</a> — el único sitio donde la ronda está abierta</td></tr>
   <tr><td><b>X</b></td>
       <td><a class="enl" href="https://x.com/nereumlab">x.com/nereumlab</a> — la única cuenta desde la que publicamos</td></tr>
@@ -2333,11 +2333,11 @@ de propietario figura como la dirección cero, y puedes verificarlo en
 <h3>¿Dónde cotiza NRM y a qué precio?</h3>
 <p>A $1,00 en Uniswap v3. Como v3 concentra la liquidez en un rango elegido, el
 precio de apertura es un parámetro del fondo. Ver
-<a class="enl" href="#/whitelist">Whitelist</a>.</p>
+<a class="enl" href="#/seedround">Seed Round</a>.</p>
 
 <h2 id="participar">Sobre participar</h2>
 
-<h3>¿Cómo entro en la whitelist?</h3>
+<h3>¿Cómo entro en la Seed Round?</h3>
 <p>En <a class="enl" href="https://nereum.xyz">nereum.xyz</a>, y en ningún otro
 sitio. Escribe la dirección tú mismo en vez de seguir un enlace que te hayan
 mandado.</p>
@@ -2980,11 +2980,11 @@ address, and you can verify it on
 <h3>Where does NRM list, and at what price?</h3>
 <p>At $1.00 on Uniswap v3. Because v3 concentrates liquidity in a chosen range,
 the opening price is a parameter of the pool. See
-<a class="enl" href="#/whitelist">Whitelist</a>.</p>
+<a class="enl" href="#/seedround">Seed Round</a>.</p>
 
 <h2 id="participar">About taking part</h2>
 
-<h3>How do I join the whitelist?</h3>
+<h3>How do I join the Seed Round?</h3>
 <p>At <a class="enl" href="https://nereum.xyz">nereum.xyz</a>, and nowhere else.
 Type the address yourself rather than following a link you were sent.</p>
 
@@ -3199,13 +3199,13 @@ the internet.</p>
 
 `},
 
-  whitelist:{
-    grupo:'Token', titulo:'Join the whitelist',
+  seedround:{
+    grupo:'Token', titulo:'Join the Seed Round',
     html:`
-<p>The whitelist is the pre-listing allocation: the window in which NRM is sold
+<p>The Seed Round is the pre-listing allocation: the window in which NRM is sold
 before it trades on the open market, at a fixed price set by the project.</p>
 
-<p>The whitelist is open at
+<p>The Seed Round is open at
 <a class="enl" href="https://nereum.xyz"><strong>nereum.xyz</strong></a> and
 nowhere else. Every other channel is listed on
 <a class="enl" href="#/links">Official links</a>.</p>
@@ -3217,7 +3217,7 @@ nowhere else. Every other channel is listed on
   <tr><td>Network</td><td><b>Ethereum</b> · ERC-20</td></tr>
   <tr><td>Total supply</td><td class="num"><b>160,000,000</b> — fixed at genesis, cannot grow</td></tr>
   <tr><td>Buy / sell tax</td><td><b>0%</b></td></tr>
-  <tr><td>Whitelist price</td><td class="num"><b>$0.20</b></td></tr>
+  <tr><td>Seed Round price</td><td class="num"><b>$0.20</b></td></tr>
   <tr><td>Price at listing</td><td class="num"><b>$1.00</b> — Uniswap v3</td></tr>
   <tr><td>Contract</td><td>Ownership renounced — see that page</td></tr>
 </table>
@@ -3426,7 +3426,7 @@ people have nowhere authoritative to check.</p>
   <tr><td><b>Explorer</b></td>
       <td><a class="enl" href="https://nereum.xyz/explorer">nereum.xyz/explorer</a> — where every claim in
       this document can be checked</td></tr>
-  <tr><td><b>Whitelist</b></td>
+  <tr><td><b>Seed Round</b></td>
       <td><a class="enl" href="https://nereum.xyz">nereum.xyz</a> — the only place the round is open</td></tr>
   <tr><td><b>X</b></td>
       <td><a class="enl" href="https://x.com/nereumlab">x.com/nereumlab</a> — the only account we post from</td></tr>
@@ -3486,7 +3486,7 @@ overnight costs someone everything.</p>
 
 const ORDEN=['introduction','vision',
   'legal','audit','kyc',
-  'whitelist','dexscreener',
+  'seedround','dexscreener',
   'network','scan','tokenization',
   'dex','nusd','forge','vaults','feed','link','wallet',
   'team','press','links','faq'];
@@ -3558,8 +3558,14 @@ function pinta(id){
   document.title='Nereum — '+p.titulo;
 }
 
+/* La sección se llamaba `whitelist` y ahora es `seedround`. Los enlaces con el
+   nombre viejo ya están repartidos por ahí fuera, así que se traducen en vez de
+   caer en la introducción como si no existieran. */
+const VIEJAS={whitelist:'seedround'};
+
 function ruta(){
-  const h=location.hash.replace('#/','').split('#')[0];
+  let h=location.hash.replace('#/','').split('#')[0];
+  if(VIEJAS[h]) h=VIEJAS[h];
   pinta(T()[h]?h:'introduction');
 }
 addEventListener('hashchange',()=>{ if(location.hash.startsWith('#/')) ruta(); });
@@ -3649,7 +3655,7 @@ document.getElementById('langB').onclick=()=>{
   LANG = LANG==='es' ? 'en' : 'es';
   try{ localStorage.setItem('nereum-lang', LANG); }catch(e){}
   aplicaIdioma(); armaIndice();
-  pinta(location.hash.startsWith('#/')?location.hash.slice(2):'introduction');
+  pinta(location.hash.startsWith('#/')?(VIEJAS[location.hash.slice(2)]||location.hash.slice(2)):'introduction');
 };
 /* el documento SIEMPRE abre en inglés: antes recordaba el idioma elegido, y a
    quien lo hubiera puesto en español le salía así al volver */
