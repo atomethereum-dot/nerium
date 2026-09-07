@@ -15,11 +15,17 @@ const R={'0xaf68130e':'0x'+w(74605336765n)+w(1),'0x8b3948bd':'0x'+w(20000000n),'
 '0xb4bd9e27':'0x'+w(0),'0x5c975abb':'0x'+w(0),'0x78e97925':'0x'+w(1757000000),'0x4b8bcb58':'0x'+w(0),
 '0x3acd1572':'0x'+w(1000000000000n),'0xdd62ed3e':'0x'+w(0),'0xb81b8630':'0x'+w(0),'0x0da8b1c9':'0x'+w(0),
 '0x402914f5':'0x'+w(0),'0x70a08231':'0x'+w(0)};
-const REGISTRO={listings:{a:{name:'MetaMask',image_id:'m',mobile:{native:'metamask://',universal:'https://metamask.app.link'}}}};
-const SDK=`window.NereumWC={EthereumProvider:{init:async function(o){
+const CARTERAS=[
+  {nombre:'MetaMask',      esquema:'metamask://'},
+  {nombre:'Trust Wallet',  esquema:'trust://'},
+  {nombre:'Rainbow',       esquema:'rainbow://'},
+  /* Sin `redirect` en la sesión: tiene que caer en el enlace del registro. */
+  {nombre:'Zerion',        esquema:null, delRegistro:'zerion://'},
+];
+const sdkDe=(c)=>`window.NereumWC={EthereumProvider:{init:async function(o){
   const oy={};
   const prov={
-    session:{peer:{metadata:{name:'MetaMask',redirect:{native:'metamask://'}}}},
+    session:{peer:{metadata:{name:${JSON.stringify(c.nombre)}${c.esquema?`,redirect:{native:${JSON.stringify(c.esquema)}}`:''}}}},
     on:(e,f)=>{(oy[e]=oy[e]||[]).push(f)}, removeListener(){},
     // El connect de verdad no resuelve hasta que el usuario aprueba en su
     // cartera: si aquí resolviera al instante, la web se conectaría sola antes
@@ -36,6 +42,12 @@ const SDK=`window.NereumWC={EthereumProvider:{init:async function(o){
   window.__prov=prov; return prov;
 }}};`;
 const nav=await chromium.launch({executablePath:'/opt/pw-browsers/chromium-1194/chrome-linux/chrome',args:['--no-sandbox']});
+const Rs=[]; const chk=(n,a,b)=>Rs.push({n,ok:String(a)===String(b),a,b});
+
+for (const C of CARTERAS) {
+const REGISTRO={listings:{a:{name:C.nombre,image_id:'m',
+  mobile:{native:C.esquema||C.delRegistro, universal:'https://ejemplo.invalid'}}}};
+const SDK=sdkDe(C);
 const ctx=await nav.newContext({...devices['iPhone 13']});
 await ctx.addInitScript(({R})=>{const of=window.fetch;
  window.fetch=async(u,o)=>{const url=String(u);
@@ -46,33 +58,32 @@ await ctx.addInitScript(({R})=>{const of=window.fetch;
  delete window.ethereum;
 },{R});
 const pg=await ctx.newPage();
-const Rs=[]; const chk=(n,a,b)=>Rs.push({n,ok:String(a)===String(b),a,b});
 const errs=[]; pg.on('pageerror',e=>errs.push('ERROR '+e));
 pg.on('console',m=>{ if(m.type()==='error') errs.push('CONSOLA '+m.text()); });
 await pg.route('**explorer-api.walletconnect.com/v3/wallets**', r=>r.fulfill({status:200,contentType:'application/json',body:JSON.stringify(REGISTRO)}));
 await pg.route('**explorer-api.walletconnect.com/v3/logo/**', r=>r.fulfill({status:200,contentType:'image/png',body:Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z/C/HgAGgwJ/lK3Q6wAAAABJRU5ErkJggg==','base64')}));
 await pg.route('**/assets/walletconnect.js', r=>r.fulfill({status:200,contentType:'text/javascript',body:SDK}));
-await pg.route('metamask://**', r=>r.abort());
+
 
 await pg.goto('http://127.0.0.1:8952/index.html',{waitUntil:'load'});
 await pg.locator('#presale').scrollIntoViewIfNeeded(); await pg.waitForTimeout(1700);
 await pg.locator('#wPay button').nth(1).click();            // BNB
 await pg.waitForTimeout(300);
 await pg.locator('#wCta').click(); await pg.waitForTimeout(900);   // abre el selector
-chk('la lista trae la cartera del registro',
-    await pg.locator('.nrm-w b').first().textContent(), 'MetaMask');
-await pg.locator('.nrm-w b',{hasText:'MetaMask'}).click();
+chk(C.nombre+': aparece en la lista',
+    await pg.locator('.nrm-w b').first().textContent(), C.nombre);
+await pg.locator('.nrm-w b',{hasText:C.nombre}).click();
 await pg.waitForTimeout(600);
-chk('salta a la app y espera', (await pg.locator('.nrm-qr').innerText()).includes('Confirm the connection in MetaMask'), true);
+chk(C.nombre+': espera la conexión', (await pg.locator('.nrm-qr').innerText()).includes('Confirm the connection in '+C.nombre), true);
 await pg.evaluate(()=>{ window.__aprobado = true; });   // el usuario aprueba
 await pg.waitForTimeout(1800);
-chk('conecta por WalletConnect', await pg.locator('.nrm-pos .pos-dir').textContent(), '0x1a30…2d15');
-chk('mientras no se firma nada, no hay hoja', await pg.locator('.nrm-fondo').count(), 0);
+chk(C.nombre+': conecta por WalletConnect', await pg.locator('.nrm-pos .pos-dir').textContent(), '0x1a30…2d15');
+chk(C.nombre+': sin firmar, no hay hoja', await pg.locator('.nrm-fondo').count(), 0);
 
 await pg.locator('#wUsd').fill('0,01');
 await pg.locator('#wUsd').blur(); await pg.waitForTimeout(400);
-chk('la coma se entiende', await pg.locator('#wEq').textContent(), '≈ $7.46 on BNB Chain');
-chk('antes de comprar, nada tapa el botón', await pg.evaluate(()=>{
+chk(C.nombre+': la coma se entiende', await pg.locator('#wEq').textContent(), '≈ $7.46 on BNB Chain');
+chk(C.nombre+': antes de comprar nada tapa el botón', await pg.evaluate(()=>{
   const b=document.getElementById('wCta'), r=b.getBoundingClientRect();
   return document.elementFromPoint(r.left+r.width/2, r.top+r.height/2) === b;
 }), true);
@@ -80,19 +91,21 @@ chk('antes de comprar, nada tapa el botón', await pg.evaluate(()=>{
    botón en emulación móvil, y aquí lo que se prueba es lo que pasa después. */
 await pg.evaluate(()=>document.getElementById('wCta').click());
 await pg.waitForTimeout(1500);
-chk('el botón dice que confirmes', await pg.locator('#wCta').textContent(), 'Confirm in your wallet…');
-chk('sale la hoja tapando la página', await pg.locator('.nrm-fondo').isVisible(), true);
-chk('titulada con la cartera', await pg.locator('.nrm-fondo .nrm-cab h3').textContent(), 'MetaMask');
-chk('y dice qué falta y dónde', await pg.locator('.nrm-fondo .nrm-qr p').textContent(),
-    'Confirm in MetaMask. Your purchase is not finished until you do.');
+chk(C.nombre+': el botón dice que confirmes', await pg.locator('#wCta').textContent(), 'Confirm in your wallet…');
+chk(C.nombre+': sale la hoja', await pg.locator('.nrm-fondo').isVisible(), true);
+chk(C.nombre+': titulada con SU nombre', await pg.locator('.nrm-fondo .nrm-cab h3').textContent(), C.nombre);
+chk(C.nombre+': y lo nombra en el mensaje', await pg.locator('.nrm-fondo .nrm-qr p').textContent(),
+    'Confirm in '+C.nombre+'. Your purchase is not finished until you do.');
 const a = pg.locator('.nrm-fondo a.nrm-copiar');
-chk('con su botón grande', await a.textContent(), 'Open MetaMask');
-chk('es un enlace de verdad', await a.evaluate(el=>el.tagName), 'A');
-chk('al esquema que declaró la sesión', await a.getAttribute('href'), 'metamask://');
-chk('y se puede cerrar', await pg.locator('.nrm-fondo .nrm-cab button[aria-label="Close"]').isVisible(), true);
-chk('y se mandó la transacción', await pg.evaluate(()=>!!window.__mandada), true);
-chk('sin errores de página', errs.length, 0);
-await pg.locator('.nrm-caja').last().screenshot({path:'/tmp/volver.png'});
+chk(C.nombre+': y en el botón', await a.textContent(), 'Open '+C.nombre);
+chk(C.nombre+': es un enlace de verdad', await a.evaluate(el=>el.tagName), 'A');
+chk(C.nombre+': al esquema correcto', await a.getAttribute('href'), C.esquema || C.delRegistro);
+chk(C.nombre+': se puede cerrar', await pg.locator('.nrm-fondo .nrm-cab button[aria-label="Close"]').isVisible(), true);
+chk(C.nombre+': se mandó la transacción', await pg.evaluate(()=>!!window.__mandada), true);
+chk(C.nombre+': sin errores de página', errs.length, 0);
+if (C.nombre==='Trust Wallet') await pg.locator('.nrm-caja').last().screenshot({path:'/tmp/volver2.png'});
+await ctx.close();
+}
 
 await nav.close(); srv.close();
 let mal=0; for(const r of Rs){ if(!r.ok)mal++;
