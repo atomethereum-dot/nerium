@@ -19,7 +19,7 @@ interface AggregatorV3Interface {
 }
 
 /**
- * @title  Ronda de financiación de Nereum
+ * @title  Seed Round de Nereum
  * @notice Se paga en la moneda nativa de la cadena (ETH en Ethereum, BNB en BNB
  *         Chain) o en USDT. El mismo código sirve en las dos redes.
  *
@@ -40,7 +40,7 @@ interface AggregatorV3Interface {
  *         La compra anota lo que corresponde a cada dirección; el reparto se
  *         abre cuando la ronda ha terminado y el token está depositado.
  */
-contract NereumFundingRound is Ownable2Step, ReentrancyGuard, Pausable {
+contract NereumSeedRound is Ownable2Step, ReentrancyGuard, Pausable {
     using SafeERC20 for IERC20;
 
     /// @dev Todos los importes en dólares llevan 8 decimales, que es la escala
@@ -66,6 +66,18 @@ contract NereumFundingRound is Ownable2Step, ReentrancyGuard, Pausable {
 
     /// @notice Compra mínima en dólares, 8 decimales. 1 $ se escribe 100000000.
     uint256 public minBuyUsd;
+
+    /// @notice Tope POR CARTERA en dólares, 8 decimales. 10.000 $ se escribe
+    ///         1000000000000. Cero significa sin tope.
+    ///
+    ///         CONVIENE SABER QUÉ ES Y QUÉ NO ES: cuenta lo gastado por
+    ///         dirección, sumando pagos en moneda nativa y en USDT. Nadie pasa
+    ///         de aquí con una cartera, pero cualquiera puede abrir otra y
+    ///         volver a empezar. Sirve para que la venta reparta y para
+    ///         sostener lo que anuncia la web; NO es un control de identidad.
+    ///         Si hace falta de verdad limitar por persona, eso se hace con
+    ///         lista blanca, y eso es otra cosa.
+    uint256 public maxBuyUsd;
 
     /// @notice Un oráculo y sus decimales, que se leen una vez y se guardan para
     ///         no gastar una llamada extra en cada compra.
@@ -104,12 +116,17 @@ contract NereumFundingRound is Ownable2Step, ReentrancyGuard, Pausable {
     mapping(address => uint256) public allocation;
     mapping(address => uint256) public claimed;
 
+    /// @notice Lo gastado por cada dirección, en dólares con 8 decimales, para
+    ///         poder aplicar el tope por cartera.
+    mapping(address => uint256) public spentUsd;
+
     // ─────────────────────────────── eventos ──────────────────────────────────
 
     event RoundScheduled(uint64 startTime, uint64 endTime);
     event RoundEnded(uint64 endedAt);
     event PriceUsdUpdated(uint256 priceUsd);
     event MinBuyUsdUpdated(uint256 minBuyUsd);
+    event MaxBuyUsdUpdated(uint256 maxBuyUsd);
     event MaxPriceAgeUpdated(uint256 seconds_);
     event FeedsUpdated(uint256 count);
     /// @notice El oráculo preferido no respondió y se usó otro de la lista.
@@ -136,6 +153,7 @@ contract NereumFundingRound is Ownable2Step, ReentrancyGuard, Pausable {
     error BadWindow();
     error PriceNotSet();
     error BelowMinimum(uint256 usdValue, uint256 minimum);
+    error AboveMaximum(uint256 wouldSpend, uint256 maximum);
     error HardCapReached();
     error SlippageTooHigh(uint256 got, uint256 min);
     error NoPriceAvailable();
@@ -165,14 +183,30 @@ contract NereumFundingRound is Ownable2Step, ReentrancyGuard, Pausable {
         IERC20 usdt_,
         AggregatorV3Interface[] memory feeds_,
         uint8 saleTokenDecimals_,
-        address owner_
+        address owner_,
+        uint256 priceUsd_,
+        uint256 minBuyUsd_,
+        uint256 maxBuyUsd_
     ) Ownable(owner_) {
         if (address(usdt_) == address(0) || owner_ == address(0)) revert ZeroAddress();
+        if (priceUsd_ == 0) revert PriceNotSet();
+        if (maxBuyUsd_ != 0 && minBuyUsd_ > maxBuyUsd_) revert BadWindow();
+
         usdt = usdt_;
         saleTokenDecimals = saleTokenDecimals_;
         _unit = 10 ** saleTokenDecimals_;
         _usdtUnit = 10 ** IERC20Metadata(address(usdt_)).decimals();
         _setFeeds(feeds_);
+
+        /* La economía se fija al desplegar y no en llamadas sueltas despues:
+           asi no existe el momento en que el contrato esta desplegado pero a
+           medio configurar. Los setters siguen ahi para corregir en marcha. */
+        priceUsd = priceUsd_;
+        minBuyUsd = minBuyUsd_;
+        maxBuyUsd = maxBuyUsd_;
+        emit PriceUsdUpdated(priceUsd_);
+        emit MinBuyUsdUpdated(minBuyUsd_);
+        emit MaxBuyUsdUpdated(maxBuyUsd_);
     }
 
     // ──────────────────────────── administración ──────────────────────────────
@@ -186,8 +220,18 @@ contract NereumFundingRound is Ownable2Step, ReentrancyGuard, Pausable {
 
     /// @notice Compra mínima en dólares, 8 decimales. 1 $ = 100000000.
     function setMinBuyUsd(uint256 min) external onlyOwner {
+        if (maxBuyUsd != 0 && min > maxBuyUsd) revert BadWindow();
         minBuyUsd = min;
         emit MinBuyUsdUpdated(min);
+    }
+
+    /// @notice Tope por cartera en dólares, 8 decimales. 10.000 $ = 1000000000000.
+    ///         Cero quita el tope. Bajarlo no anula lo ya comprado: quien
+    ///         estuviera por encima simplemente no puede comprar más.
+    function setMaxBuyUsd(uint256 max) external onlyOwner {
+        if (max != 0 && max < minBuyUsd) revert BadWindow();
+        maxBuyUsd = max;
+        emit MaxBuyUsdUpdated(max);
     }
 
     /// @notice Antigüedad a partir de la cual se usa el precio de respaldo.
@@ -221,6 +265,7 @@ contract NereumFundingRound is Ownable2Step, ReentrancyGuard, Pausable {
     function feedCount() external view returns (uint256) { return feeds.length; }
 
     function startRound(uint64 start, uint64 end) external onlyOwner {
+        if (priceUsd == 0) revert PriceNotSet();
         if (finalized) revert RoundAlreadyFinalized();
         if (startTime != 0) revert RoundAlreadyScheduled();
         if (priceUsd == 0) revert PriceNotSet();
@@ -369,6 +414,11 @@ contract NereumFundingRound is Ownable2Step, ReentrancyGuard, Pausable {
     {
         if (usdValue < minBuyUsd) revert BelowMinimum(usdValue, minBuyUsd);
 
+        /* El tope cuenta lo gastado por la dirección a lo largo de toda la
+           ronda, sumando moneda nativa y USDT: no es un tope por transacción. */
+        uint256 spent = spentUsd[buyer] + usdValue;
+        if (maxBuyUsd != 0 && spent > maxBuyUsd) revert AboveMaximum(spent, maxBuyUsd);
+
         tokens = (usdValue * _unit) / priceUsd;
         if (tokens == 0) revert BelowMinimum(usdValue, minBuyUsd);
         if (tokens < minTokensOut) revert SlippageTooHigh(tokens, minTokensOut);
@@ -378,6 +428,7 @@ contract NereumFundingRound is Ownable2Step, ReentrancyGuard, Pausable {
 
         totalTokensSold = sold;
         allocation[buyer] += tokens;
+        spentUsd[buyer] = spent;
     }
 
     function _requireLive() private view {
@@ -507,6 +558,14 @@ contract NereumFundingRound is Ownable2Step, ReentrancyGuard, Pausable {
     function nativeForUsd(uint256 usdAmount) external view returns (uint256) {
         (uint256 nativeUsd, ) = nativeUsdPrice();
         return (usdAmount * 1e18) / nativeUsd;
+    }
+
+    /// @notice Cuánto le queda por gastar a una dirección antes de topar.
+    ///         Sin tope devuelve el máximo, que es como decir "sin límite".
+    function remainingAllowanceUsd(address buyer) external view returns (uint256) {
+        if (maxBuyUsd == 0) return type(uint256).max;
+        uint256 spent = spentUsd[buyer];
+        return spent >= maxBuyUsd ? 0 : maxBuyUsd - spent;
     }
 
     function remainingTokens() external view returns (uint256) {

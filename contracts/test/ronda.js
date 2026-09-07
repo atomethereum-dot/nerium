@@ -6,7 +6,7 @@ const E = ethers.parseEther;
 const U6 = (n) => ethers.parseUnits(String(n), 6);
 const USD = (n) => ethers.parseUnits(String(n), 8);   // dólares con 8 decimales
 
-describe("NereumFundingRound", function () {
+describe("NereumSeedRound", function () {
   let owner, ana, luis, tesoreria, usdt, feed, feed2, feed3, token, p;
   const PRECIO = USD("0.10");        // 0,10 $ por NRM, como dice la web
   const MINIMO = USD("1");           // 1 $ mínimo
@@ -19,10 +19,11 @@ describe("NereumFundingRound", function () {
     feed2 = await F.deploy(USD("2900"));      // segundo proveedor
     feed3 = await F.deploy(USD("2800"));      // tercero
     token = await (await ethers.getContractFactory("MockToken")).deploy();
-    p = await (await ethers.getContractFactory("NereumFundingRound")).deploy(
+    p = await (await ethers.getContractFactory("NereumSeedRound")).deploy(
       await usdt.getAddress(),
       [await feed.getAddress(), await feed2.getAddress(), await feed3.getAddress()],
-      18, owner.address);
+      18, owner.address,
+      PRECIO, MINIMO, 0);      // sin tope por cartera: eso se prueba en tope.js
     for (const u of [ana, luis]) {
       await usdt.transfer(u.address, U6("1000000"));
       await usdt.connect(u).approve(await p.getAddress(), ethers.MaxUint256);
@@ -84,9 +85,9 @@ describe("NereumFundingRound", function () {
     const roto = await (await ethers.getContractFactory("MockFeedRoto")).deploy();
     const F = await ethers.getContractFactory("MockFeed");
     const bueno = await F.deploy(USD("3000"));
-    const p2 = await (await ethers.getContractFactory("NereumFundingRound")).deploy(
+    const p2 = await (await ethers.getContractFactory("NereumSeedRound")).deploy(
       await usdt.getAddress(), [await roto.getAddress(), await bueno.getAddress()],
-      18, owner.address);
+      18, owner.address, PRECIO, MINIMO, 0);
     await p2.setPriceUsd(PRECIO);
     await p2.startRound(0, (await time.latest()) + 3600);
     await p2.connect(ana).buyWithNative(0, { value: E("1") });
@@ -133,8 +134,9 @@ describe("NereumFundingRound", function () {
   it("se adapta a un oráculo con otros decimales", async () => {
     const f18 = await (await ethers.getContractFactory("MockFeed")).deploy(E("3000"));
     await f18.setDecimals(18);
-    const p2 = await (await ethers.getContractFactory("NereumFundingRound"))
-      .deploy(await usdt.getAddress(), [await f18.getAddress()], 18, owner.address);
+    const p2 = await (await ethers.getContractFactory("NereumSeedRound"))
+      .deploy(await usdt.getAddress(), [await f18.getAddress()], 18, owner.address,
+              PRECIO, MINIMO, 0);
     await p2.setPriceUsd(PRECIO);
     await p2.startRound(0, (await time.latest()) + 3600);
     await p2.connect(ana).buyWithNative(0, { value: E("1") });

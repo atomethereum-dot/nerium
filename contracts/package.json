@@ -1,0 +1,20 @@
+{
+  "name": "nereum-contracts",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Nereum Seed Round: venta en ETH/BNB y USDT sobre Ethereum y BNB Chain.",
+  "scripts": {
+    "build": "hardhat compile",
+    "test": "hardhat test",
+    "abi": "node scripts/abi.js"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0",
+    "dotenv": "^16.4.5",
+    "hardhat": "^2.22.10",
+    "solc": "0.8.24"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "^5.0.2"
+  }
+}

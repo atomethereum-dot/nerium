@@ -1,10 +1,10 @@
-# Ronda de financiación de Nereum
+# Nereum Seed Round
 
 Cobra en la moneda nativa de la cadena o en USDT. El mismo código sirve en
 Ethereum (ETH + USDT) y en BNB Chain (BNB + USDT).
 
 **El precio se fija en dólares, uno solo.** El contrato consulta a los oráculos
-cuánto vale ETH o BNB en cada compra, así que 0,10 $ siguen siendo 0,10 $ aunque
+cuánto vale ETH o BNB en cada compra, así que 0,20 $ siguen siendo 0,20 $ aunque
 la moneda se mueva. Y como el precio vive en dólares, **el mismo número vale
 para las dos redes**: no hay que acordarse de que USDT tiene 6 decimales en
 Ethereum y 18 en BNB Chain.
@@ -15,8 +15,9 @@ Ethereum y 18 en BNB Chain.
 
 | Función | Qué hace |
 |---|---|
-| `setPriceUsd(precio)` | Precio de un token en dólares, 8 decimales. 0,10 $ = `10000000` |
-| `setMinBuyUsd(min)` | Compra mínima en dólares. 1 $ = `100000000` |
+| `setPriceUsd(precio)` | Precio de un token en dólares, 8 decimales. 0,20 $ = `20000000` |
+| `setMinBuyUsd(min)` | Compra mínima en dólares. 0,20 $ = `20000000` |
+| `setMaxBuyUsd(max)` | Tope por cartera. 10.000 $ = `1000000000000`. Cero = sin tope |
 | `startRound(inicio, fin)` | Abre la ventana. Cero = ahora. Solo una vez |
 | `endRound()` | Cierra antes de tiempo. Sin vuelta atrás |
 | `setHardCap(tokens)` | Tope total. Cero = sin tope |
@@ -43,13 +44,24 @@ Ethereum y 18 en BNB Chain.
 | `feedsStatus()` | Estado de cada oráculo: cuál está sano y a qué precio |
 | `feedCount()` | Cuántos oráculos hay configurados |
 | `isLive()` / `isOver()` | Estado |
+| `spentUsd(x)` | Lo gastado por esa cartera, en dólares con 8 decimales |
+| `remainingAllowanceUsd(x)` | Lo que le queda antes de topar. Para pintar la web |
 | `allocation(x)` / `claimable(x)` / `remainingTokens()` | Consulta |
 
 ## Despliegue
 
 ```
-constructor(IERC20 usdt, AggregatorV3Interface[] oraculos, uint8 decimalesDelToken, address dueño)
+constructor(
+  IERC20 usdt, AggregatorV3Interface[] oraculos, uint8 decimalesDelToken, address dueño,
+  uint256 precioUsd,   // 0,20 $  →  20000000
+  uint256 minimoUsd,   // 0,20 $  →  20000000
+  uint256 maximoUsd    // 10.000 $ →  1000000000000   (cero = sin tope)
+)
 ```
+
+**La economía entra al desplegar**, no en llamadas sueltas después: así no
+existe el momento en que el contrato está desplegado pero a medio configurar.
+Los setters siguen ahí para corregir en marcha.
 
 Los oráculos van **en orden de preferencia**. Pon al menos dos, y de proveedores
 distintos: dos oráculos del mismo proveedor caen juntos.
@@ -93,8 +105,8 @@ La tercera y la cuarta son las que importan: una dirección viva de BTC/USD en
 lugar de ETH/USD no se ve a ojo y haría vender los NRM al 3% de su precio. El
 script lo detecta antes de que exista el contrato.
 
-Tras desplegar deja el precio en 0,10 $ y el mínimo en 1 $, y te dice qué queda
-por hacer.
+Tras desplegar imprime el precio, el mínimo y el tope que quedaron escritos, y
+te dice qué queda por hacer.
 
 ### Añadir un segundo oráculo
 
@@ -108,10 +120,10 @@ actualiza la lista sobre la marcha.
 
 ## Orden de uso
 
-1. Desplegar. El dueño debe ser **un multisig**.
-2. `setPriceUsd(10000000)` — 0,10 $, el precio que anuncia la web.
-3. `setMinBuyUsd(100000000)` — 1 $, y `setHardCap(...)` si quieres tope.
-4. `startRound(0, fin)`.
+1. Desplegar con `precio = 20000000`, `mínimo = 20000000` y
+   `máximo = 1000000000000`. El dueño debe ser **un multisig**.
+2. `setHardCap(...)` si quieres además un tope total de tokens.
+3. `startRound(0, fin)`.
 5. La gente compra. `withdrawNative` / `withdrawUsdt` cuando haga falta.
 6. `endRound()` o esperar a la fecha.
 7. `setSaleToken(NRM)`, transferir al contrato al menos `totalTokensSold`,
@@ -158,10 +170,18 @@ alcanza el excedente sobre `totalTokensSold - totalTokensClaimed`.
 **USDT de Ethereum no devuelve `bool`.** Todo usa `SafeERC20`; un `IERC20`
 normal fallaría en Ethereum.
 
+**El tope por cartera es acumulado y suma las dos monedas.** `spentUsd` cuenta
+lo gastado por dirección a lo largo de toda la ronda: no se esquiva partiendo la
+compra en trozos ni pagando mitad en ETH y mitad en USDT.
+
+Ahora bien, conviene tener claro qué es y qué no es. **Nadie pasa de 10.000 $ con
+una cartera, pero cualquiera puede abrir otra y volver a empezar.** Sirve para
+que la venta reparta y para sostener lo que anuncia la web; no es un control de
+identidad. Si hace falta limitar por persona de verdad, eso se hace con lista
+blanca, y eso es otra cosa.
+
 ## Lo que NO tiene
 
-- **Sin tope por cartera.** La web anuncia «máximo 10.000 $ por cartera» y el
-  contrato no lo impone. Hay que añadirlo o quitarlo de la web.
 - **Sin reembolso ni mínimo de recaudación.** Si no se llega al objetivo, no hay
   forma de devolver.
 - **Sin vesting.** Al abrir el reparto se retira el 100% de golpe.
@@ -172,12 +192,16 @@ normal fallaría en Ethereum.
 ## Pruebas
 
 ```
-npm install --save-dev hardhat@2 "@nomicfoundation/hardhat-toolbox@hh2" \
-                       solc@0.8.24 @openzeppelin/contracts@5.0.2
-npx hardhat test
+npm install
+npm test
 ```
 
-33 casos, 26 del contrato y 7 de la verificación previa al despliegue.
+49 casos: 26 del contrato, 16 del Seed Round —precio, mínimo y tope por
+cartera— y 7 de la verificación previa al despliegue.
+
+El compilador viene fijado en `package.json` (`solc@0.8.24`) y `hardhat.config.js`
+lo toma de ahí en vez de descargarlo, así que la compilación sale igual en
+cualquier máquina y no depende de que el repositorio de binarios esté accesible.
 
 Los del contrato, entre otros: que el precio siga al dólar cuando ETH sube o baja, que
 **la venta siga con el primer oráculo rancio, con los dos primeros caídos, con
@@ -185,6 +209,13 @@ uno reventando entero, y con LOS TRES caídos a la vez**, que vuelva sola al
 preferido cuando se recupera, que `feedsStatus` señale cuál falla, que el
 reparto no se abra antes de terminar la ronda, la protección del comprador, y
 que el dueño no pueda tocar los tokens de los compradores.
+
+Los del Seed Round comprueban los números que anuncia la web: que a 0,20 $ el
+token 1 ETH de 3.000 $ da 15.000 NRM, que 0,19 $ se rechaza y 0,20 $ pasa, que se
+llega justo a 10.000 $ y el dólar siguiente revierte, que **el tope es acumulado
+y suma ETH con USDT**, que bajarlo no anula lo ya comprado, que lo recaudado
+llega al contrato y sale a la cartera que se indique, y que en pausa no se
+compra.
 
 Los de la verificación prueban **la misma función que ejecuta el despliegue**, no
 una copia: que acepta un oráculo correcto y que rechaza el par equivocado, un

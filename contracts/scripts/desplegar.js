@@ -1,5 +1,5 @@
 /**
- * Despliegue de la ronda de Nereum.
+ * Despliegue del Seed Round de Nereum.
  *
  *   npx hardhat run scripts/desplegar.js --network ethereum
  *   npx hardhat run scripts/desplegar.js --network bsc
@@ -42,9 +42,13 @@ const REDES = {
   },
 };
 
-/* ── parámetros de la venta ── */
-const PRECIO_USD   = 10_000_000n;         // 0,10 $ por NRM, con 8 decimales
-const MINIMO_USD   = 100_000_000n;        // 1 $
+/* ── parámetros de la venta ──
+   Los tres importes van en dólares con 8 decimales, que es la escala en la que
+   Chainlink publica ETH/USD y BNB/USD. Van al constructor: el contrato no
+   existe ni un bloque a medio configurar.                                    */
+const PRECIO_USD   = 20_000_000n;             // 0,20 $ por NRM
+const MINIMO_USD   = 20_000_000n;             // compra mínima 0,20 $ (un token)
+const MAXIMO_USD   = 1_000_000_000_000n;      // tope por cartera 10.000 $
 const DECIMALES_NRM = 18;
 
 const { verificar } = require("./verificador");
@@ -60,7 +64,7 @@ async function main() {
   const [cuenta] = await ethers.getSigners();
   const proveedor = ethers.provider;
 
-  console.log(`\n─── Ronda de financiación de Nereum · ${cfg.nombre} ───`);
+  console.log(`\n─── Nereum Seed Round · ${cfg.nombre} ───`);
   console.log(`Desplegando desde: ${cuenta.address}`);
   console.log(`Saldo: ${ethers.formatEther(await proveedor.getBalance(cuenta.address))}\n`);
 
@@ -109,18 +113,18 @@ async function main() {
 
   /* ── 3 · desplegar ── */
   console.log("Desplegando…");
-  const P = await ethers.getContractFactory("NereumFundingRound");
-  const p = await P.deploy(cfg.usdt, cfg.oraculos, DECIMALES_NRM, cuenta.address);
+  const P = await ethers.getContractFactory("NereumSeedRound");
+  const p = await P.deploy(cfg.usdt, cfg.oraculos, DECIMALES_NRM, cuenta.address,
+                           PRECIO_USD, MINIMO_USD, MAXIMO_USD);
   await p.waitForDeployment();
   const dir = await p.getAddress();
   console.log(`  contrato: ${dir}\n`);
 
-  /* ── 4 · configurar ── */
-  console.log("Configurando…");
-  await (await p.setPriceUsd(PRECIO_USD)).wait();
-  console.log(`  precio: ${Number(PRECIO_USD) / 1e8} $ por NRM`);
-  await (await p.setMinBuyUsd(MINIMO_USD)).wait();
-  console.log(`  mínimo: ${Number(MINIMO_USD) / 1e8} $`);
+  /* ── 4 · comprobar lo que quedó escrito ── */
+  console.log("Configuración (viene del constructor, no hace falta tocarla):");
+  console.log(`  precio: ${Number(await p.priceUsd()) / 1e8} $ por NRM`);
+  console.log(`  mínimo: ${Number(await p.minBuyUsd()) / 1e8} $`);
+  console.log(`  tope por cartera: ${Number(await p.maxBuyUsd()) / 1e8} $`);
 
   const [cotiz, vivo] = await p.nativeUsdPrice();
   console.log(`  cotización que ve el contrato: ${Number(cotiz) / 1e8} $ ` +
