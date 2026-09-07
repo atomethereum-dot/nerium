@@ -304,7 +304,7 @@
         sesion = { prov: prov, cuenta: cs[0], cid: parseInt(h, 16), nombre: nombre || '',
                    /* Por WalletConnect la firma ocurre en otra app: hay que
                       saber cómo volver a ella. */
-                   wc: prov === wcProv, volver: volverA(prov) };
+                   wc: prov === wcProv, volver: volverA(prov), logo: logoDe(prov) };
         if (prov.on) {
           prov.on('accountsChanged', function (a) {
             sesion.cuenta = (a && a[0]) || null;
@@ -418,6 +418,16 @@
       if (m && m.name) return m.name;
     } catch (e) {}
     return (carteraElegida && carteraElegida.nombre) || 'WalletConnect';
+  }
+
+  /* El icono que la cartera declara en la sesión. Es el suyo de verdad, no el
+     del registro, así que gana a cualquier otro. */
+  function logoDe(prov) {
+    try {
+      var m = prov && prov.session && prov.session.peer && prov.session.peer.metadata;
+      if (m && m.icons && m.icons.length && m.icons[0]) return m.icons[0];
+    } catch (e) {}
+    return (carteraElegida && carteraElegida.logo) || '';
   }
 
   function volverA(prov) {
@@ -1376,6 +1386,9 @@
 
     var cuerpo = document.createElement('div');
     cuerpo.className = 'nrm-qr';
+    var cara = avatar({ nombre: quien, logo: sesion.logo || '' });
+    cara.classList.add('nrm-grandota');
+    cuerpo.appendChild(cara);
     var p = document.createElement('p');
     p.textContent = destino ? frasePaso(quien)
       : 'Open ' + quien + ' on your phone and confirm there. ' +
@@ -1727,6 +1740,8 @@
       '.nrm-w:hover{background:rgba(47,107,255,.08)}',
       '.nrm-w b{font-size:11px;font-weight:500;line-height:1.25;text-align:center;',
       'width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;opacity:.86}',
+      '.nrm-av.nrm-grandota{width:64px;height:64px;border-radius:18px;font-size:26px;',
+      'margin:0 auto 2px}',
       '.nrm-av{width:46px;height:46px;border-radius:13px;object-fit:cover;',
       'background:rgba(10,12,16,.06);display:flex;align-items:center;justify-content:center;',
       'color:#fff;font-size:18px;font-weight:600;box-shadow:0 1px 3px rgba(0,0,0,.12)}',
@@ -1743,8 +1758,10 @@
       '.nrm-copiar{padding:9px 18px;border:1px solid rgba(10,12,16,.14);border-radius:999px;',
       'background:none;color:inherit;font:inherit;font-size:13px;cursor:pointer;transition:background .15s}',
       '.nrm-copiar:hover{background:rgba(47,107,255,.08)}',
+      /* Solo cambia de tamaño: el color es el mismo que el de conectar, para
+         que las dos hojas se lean como el mismo sitio. */
       '.nrm-copiar.nrm-grande{padding:14px 26px;font-size:15px;font-weight:500;',
-      'border-color:var(--blue,#2F6BFF);color:var(--blue,#2F6BFF);text-decoration:none}',
+      'text-decoration:none}',
       '.nrm-cargando{grid-column:1/-1;padding:34px;text-align:center;font-size:13px;opacity:.5}',
 
       '@media(prefers-color-scheme:dark){',
@@ -1861,6 +1878,10 @@
     rejilla.hidden = true;
     vistaQR.hidden = false;
     vistaQR.textContent = '';
+
+    var caraQ = avatar(w);
+    caraQ.classList.add('nrm-grandota');
+    vistaQR.appendChild(caraQ);
 
     var marco = document.createElement('div');
     marco.className = 'marco';
@@ -2031,6 +2052,9 @@
       rejilla.hidden = true;
       vistaQR.hidden = false;
       vistaQR.textContent = '';
+      var caraM = avatar(w);
+      caraM.classList.add('nrm-grandota');
+      vistaQR.appendChild(caraM);
       var p = document.createElement('p');
       p.textContent = 'Confirm the connection in ' + w.nombre +
         '. If it did not open, tap below or copy the link into the app.';

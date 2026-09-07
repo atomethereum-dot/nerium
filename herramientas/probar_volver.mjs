@@ -16,8 +16,9 @@ const R={'0xaf68130e':'0x'+w(74605336765n)+w(1),'0x8b3948bd':'0x'+w(20000000n),'
 '0x3acd1572':'0x'+w(1000000000000n),'0xdd62ed3e':'0x'+w(0),'0xb81b8630':'0x'+w(0),'0x0da8b1c9':'0x'+w(0),
 '0x402914f5':'0x'+w(0),'0x70a08231':'0x'+w(0)};
 const CARTERAS=[
-  {nombre:'MetaMask',      esquema:'metamask://'},
-  {nombre:'Trust Wallet',  esquema:'trust://'},
+  {nombre:'MetaMask',      esquema:'metamask://', icono:true},
+  {nombre:'Trust Wallet',  esquema:'trust://',    icono:true},
+  /* Sin icono en la sesión: tiene que caer en el del registro. */
   {nombre:'Rainbow',       esquema:'rainbow://'},
   /* Sin `redirect` en la sesión: tiene que caer en el enlace del registro. */
   {nombre:'Zerion',        esquema:null, delRegistro:'zerion://'},
@@ -25,7 +26,7 @@ const CARTERAS=[
 const sdkDe=(c)=>`window.NereumWC={EthereumProvider:{init:async function(o){
   const oy={};
   const prov={
-    session:{peer:{metadata:{name:${JSON.stringify(c.nombre)}${c.esquema?`,redirect:{native:${JSON.stringify(c.esquema)}}`:''}}}},
+    session:{peer:{metadata:{name:${JSON.stringify(c.nombre)},icons:${JSON.stringify(c.icono?['https://ejemplo.invalid/logo.png']:[])}${c.esquema?`,redirect:{native:${JSON.stringify(c.esquema)}}`:''}}}},
     on:(e,f)=>{(oy[e]=oy[e]||[]).push(f)}, removeListener(){},
     // El connect de verdad no resuelve hasta que el usuario aprueba en su
     // cartera: si aquí resolviera al instante, la web se conectaría sola antes
@@ -48,7 +49,9 @@ for (const C of CARTERAS) {
 const REGISTRO={listings:{a:{name:C.nombre,image_id:'m',
   mobile:{native:C.esquema||C.delRegistro, universal:'https://ejemplo.invalid'}}}};
 const SDK=sdkDe(C);
-const ctx=await nav.newContext({...devices['iPhone 13']});
+// La primera se corre en modo oscuro: las dos hojas tienen que salir iguales.
+const oscuro = C.nombre === 'MetaMask';
+const ctx=await nav.newContext({...devices['iPhone 13'], colorScheme: oscuro ? 'dark' : 'light'});
 await ctx.addInitScript(({R})=>{const of=window.fetch;
  window.fetch=async(u,o)=>{const url=String(u);
   if(!o||!o.body)return of(u,o);const j=JSON.parse(o.body);let res=null;
@@ -61,7 +64,9 @@ const pg=await ctx.newPage();
 const errs=[]; pg.on('pageerror',e=>errs.push('ERROR '+e));
 pg.on('console',m=>{ if(m.type()==='error') errs.push('CONSOLA '+m.text()); });
 await pg.route('**explorer-api.walletconnect.com/v3/wallets**', r=>r.fulfill({status:200,contentType:'application/json',body:JSON.stringify(REGISTRO)}));
-await pg.route('**explorer-api.walletconnect.com/v3/logo/**', r=>r.fulfill({status:200,contentType:'image/png',body:Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z/C/HgAGgwJ/lK3Q6wAAAABJRU5ErkJggg==','base64')}));
+const PIX=Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z/C/HgAGgwJ/lK3Q6wAAAABJRU5ErkJggg==','base64');
+await pg.route('**explorer-api.walletconnect.com/v3/logo/**', r=>r.fulfill({status:200,contentType:'image/png',body:PIX}));
+await pg.route('**ejemplo.invalid/logo.png', r=>r.fulfill({status:200,contentType:'image/png',body:PIX}));
 await pg.route('**/assets/walletconnect.js', r=>r.fulfill({status:200,contentType:'text/javascript',body:SDK}));
 
 
@@ -75,6 +80,13 @@ chk(C.nombre+': aparece en la lista',
 await pg.locator('.nrm-w b',{hasText:C.nombre}).click();
 await pg.waitForTimeout(600);
 chk(C.nombre+': espera la conexión', (await pg.locator('.nrm-qr').innerText()).includes('Confirm the connection in '+C.nombre), true);
+chk(C.nombre+': la conexión también lleva logo', await pg.locator('.nrm-qr .nrm-av.nrm-grandota').count(), 1);
+let botonConectar = null;
+if (oscuro) {
+  await pg.locator('.nrm-caja').screenshot({path:'/tmp/hoja_conectar.png'});
+  botonConectar = await pg.evaluate(()=>{ const b=document.querySelector('.nrm-qr a.nrm-copiar'),
+    cs=getComputedStyle(b); return cs.color+' | '+cs.borderTopColor; });
+}
 await pg.evaluate(()=>{ window.__aprobado = true; });   // el usuario aprueba
 await pg.waitForTimeout(1800);
 chk(C.nombre+': conecta por WalletConnect', await pg.locator('.nrm-pos .pos-dir').textContent(), '0x1a30…2d15');
@@ -101,9 +113,27 @@ chk(C.nombre+': y en el botón', await a.textContent(), 'Open '+C.nombre);
 chk(C.nombre+': es un enlace de verdad', await a.evaluate(el=>el.tagName), 'A');
 chk(C.nombre+': al esquema correcto', await a.getAttribute('href'), C.esquema || C.delRegistro);
 chk(C.nombre+': se puede cerrar', await pg.locator('.nrm-fondo .nrm-cab button[aria-label="Close"]').isVisible(), true);
+chk(C.nombre+': la hoja lleva su logo', await pg.locator('.nrm-fondo .nrm-qr .nrm-av.nrm-grandota').count(), 1);
+chk(C.nombre+': y es imagen, no inicial',
+    await pg.locator('.nrm-fondo .nrm-qr .nrm-av').evaluate(el=>el.tagName), 'IMG');
 chk(C.nombre+': se mandó la transacción', await pg.evaluate(()=>!!window.__mandada), true);
 chk(C.nombre+': sin errores de página', errs.length, 0);
+if (oscuro) await pg.locator('.nrm-caja').last().screenshot({path:'/tmp/hoja_firmar.png'});
 if (C.nombre==='Trust Wallet') await pg.locator('.nrm-caja').last().screenshot({path:'/tmp/volver2.png'});
+if (oscuro) {
+  const fondos = await pg.evaluate(()=>{
+    const c = document.querySelector('.nrm-fondo .nrm-caja');
+    return getComputedStyle(c).backgroundColor;
+  });
+  chk('la hoja de firma es oscura como la de conexión', fondos, 'rgb(18, 21, 28)');
+  /* El botón de confirmar tiene que verse igual que el de conectar: son el
+     mismo gesto en dos momentos, y dos colores distintos los separan sin
+     motivo. */
+  chk('y su botón, del mismo color que el de conectar',
+      await pg.evaluate(()=>{ const b=document.querySelector('.nrm-fondo a.nrm-copiar'),
+        cs=getComputedStyle(b); return cs.color+' | '+cs.borderTopColor; }),
+      botonConectar);
+}
 await ctx.close();
 }
 
