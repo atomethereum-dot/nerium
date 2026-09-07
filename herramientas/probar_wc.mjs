@@ -70,6 +70,18 @@ async function montar(extra={}, movil=false){
  await pg.locator('#presale').scrollIntoViewIfNeeded(); await pg.waitForTimeout(1600);
  await pg.locator('#wCta').click(); await pg.waitForTimeout(900);
 
+ // La página oculta el cursor nativo para pintar el suyo, que queda por debajo
+ // del modal: dentro hace falta recuperarlo o no se ve qué se está señalando.
+ chk('la página esconde el cursor', await pg.evaluate(()=>document.body.classList.contains('cur-on')), true);
+ chk('pero en el modal hay puntero',
+     await pg.locator('.nrm-caja').evaluate(el=>getComputedStyle(el).cursor), 'default');
+ chk('y mano sobre cada cartera',
+     await pg.locator('.nrm-w').first().evaluate(el=>getComputedStyle(el).cursor), 'pointer');
+ chk('y sobre la ✕',
+     await pg.locator('.nrm-cab button[aria-label="Close"]').evaluate(el=>getComputedStyle(el).cursor), 'pointer');
+ chk('y cursor de texto en el buscador',
+     await pg.locator('.nrm-buscar').evaluate(el=>getComputedStyle(el).cursor), 'text');
+
  const nombres=await pg.locator('.nrm-w b').allTextContents();
  chk('la extensión encabeza la lista', nombres[0], 'Rabby Wallet');
  chk('y detrás va el registro', nombres.slice(1).join(','), 'Trust Wallet,Rainbow,Zerion,MetaMask');

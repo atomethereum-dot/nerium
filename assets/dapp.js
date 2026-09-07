@@ -1182,6 +1182,14 @@
          navegador: sin esto el QR se queda encima de la lista al volver atrás. */
       '.nrm-caja [hidden]{display:none!important}',
       '.nrm-caja .nrm-ico[hidden]{display:flex!important;visibility:hidden}',
+      /* La página esconde el cursor del sistema y pinta el suyo en #cur, a
+         z-index 130. El modal va a 9999, así que ese cursor queda debajo y
+         encima no hay puntero de ninguna clase: no se ve qué se va a pulsar.
+         Dentro del modal se devuelve el del sistema, que además es lo que se
+         espera de un diálogo. */
+      '.nrm-fondo,.nrm-fondo *{cursor:default!important}',
+      '.nrm-fondo button,.nrm-fondo .nrm-w,.nrm-fondo a{cursor:pointer!important}',
+      '.nrm-fondo input{cursor:text!important}',
       '.nrm-fondo{position:fixed;inset:0;z-index:9999;background:rgba(4,7,12,.72);',
       '-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);display:flex;',
       'align-items:center;justify-content:center;padding:16px;opacity:0;transition:opacity .18s}',
