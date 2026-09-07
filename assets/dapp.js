@@ -413,6 +413,9 @@
 
     if (q.tipo === 'wc') {
       if (!haySesionWC()) { olvidar(); return Promise.resolve(false); }
+      /* El registro trae los esquemas de cada app, y volverA() los necesita
+         justo aquí: al reanudar no hay cartera elegida de la que sacarlos. */
+      traerRegistro();
       return iniciarWC().then(function (prov) {
         /* Que exista una sesión guardada no quiere decir que siga viva: si
            caducó, eth_accounts sigue devolviendo su cuenta de memoria y la
@@ -562,15 +565,31 @@
     return '';
   }
 
+  /* Siempre el esquema propio (metamask://) antes que el enlace universal
+     (https://metamask.app.link). El universal a secas abre la app por su
+     pantalla de inicio —la del navegador y el «conectar cartera»—, y desde ahí
+     la petición pendiente no se ve: parece que la cartera pide conectarse otra
+     vez cuando lo que tiene es una firma esperando. El esquema propio la trae
+     al frente donde estaba. */
   function volverA(prov) {
-    try {
-      var m = prov && prov.session && prov.session.peer && prov.session.peer.metadata;
-      var r = m && m.redirect;
-      if (r && (r.native || r.universal)) return r.native || r.universal;
-    } catch (e) {}
-    var w = carteraElegida;
-    if (w && w.movil) return w.movil.native || w.movil.universal || null;
-    return null;
+    var m = null;
+    try { m = prov && prov.session && prov.session.peer && prov.session.peer.metadata; }
+    catch (e) {}
+    var r = (m && m.redirect) || {};
+    /* Tras recargar la página no hay «cartera elegida» —eso vive en la sesión
+       del navegador, no en la de WalletConnect—, así que se busca en el
+       registro por el nombre que declara la propia sesión. */
+    var w = carteraElegida || porNombre(m && m.name);
+    var reg = (w && w.movil) || {};
+    return r.native || reg.native || r.universal || reg.universal || null;
+  }
+
+  function porNombre(n) {
+    if (!n) return null;
+    var b = String(n).toLowerCase();
+    return (registro || []).filter(function (x) {
+      return String(x.nombre).toLowerCase() === b;
+    })[0] || null;
   }
 
   /* Toda petición que el visitante tiene que aprobar EN SU CARTERA sale por
@@ -1475,7 +1494,20 @@
     return t + '. Your purchase is not finished until you do.';
   }
 
+  var relojesFirma = [];
+
+  /* Deja la página sin cartera y sin memoria de ella, para empezar de cero. */
+  function soltarSesion() {
+    try { if (sesion.wc && sesion.prov && sesion.prov.disconnect) sesion.prov.disconnect(); }
+    catch (e) {}
+    wcProv = null; wcUri = null; wcEstado = 'nada';
+    sesion = { prov: null, cuenta: null, cid: null, nombre: '' };
+    posicion = { 1: null, 56: null };
+    olvidar();
+  }
+
   function cerrarFirma() {
+    while (relojesFirma.length) relojesFirma.pop()();
     if (!hojaF) return;
     var h = hojaF; hojaF = null;
     h.classList.remove('on');
@@ -1487,7 +1519,9 @@
     estilos();
     cerrarFirma();
 
-    var destino = sesion.volver;
+    /* Se recalcula ahora y no se usa el de la conexión: el registro, que es de
+       donde salen los esquemas de cada app, puede haber llegado después. */
+    var destino = volverA(sesion.prov) || sesion.volver;
     if (destino && !/^http/.test(destino) && destino.charAt(destino.length - 1) !== '/') {
       destino += '/';
     }
@@ -1536,10 +1570,37 @@
       cuerpo.appendChild(a);
     }
 
+    /* Si la cartera abre por su pantalla de inicio en vez de por la petición
+       —pasa cuando el sistema la ha matado y arranca de cero—, desde fuera se
+       ve como que pide conectarse otra vez, y ahí no hay salida: la hoja dice
+       «confirma» y la app dice «conecta». Pasado un rato se ofrece rehacer la
+       conexión, que es lo que de verdad hace falta. */
+    var rescate = setTimeout(function () {
+      if (!hojaF) return;
+      var p2 = document.createElement('p');
+      p2.className = 'nrm-flojo';
+      p2.textContent = 'Is ' + quien + ' asking you to connect instead? ' +
+                       'Then the session is gone and has to be made again.';
+      cuerpo.appendChild(p2);
+      var re = document.createElement('button');
+      re.type = 'button';
+      re.className = 'nrm-copiar';
+      re.textContent = 'Reconnect';
+      re.addEventListener('click', function () {
+        cerrarFirma();
+        soltarSesion();
+        libre();
+        abrirCarteras();
+      });
+      cuerpo.appendChild(re);
+    }, 25000);
+    var pararRescate = function () { clearTimeout(rescate); };
+
     caja.appendChild(cab); caja.appendChild(cuerpo);
     hojaF.appendChild(caja);
     hojaF.addEventListener('click', function (e) { if (e.target === hojaF) cerrarFirma(); });
     document.body.appendChild(hojaF);
+    relojesFirma.push(pararRescate);
     requestAnimationFrame(function () { if (hojaF) hojaF.classList.add('on'); });
   }
 
@@ -1960,6 +2021,9 @@
       '.nrm-copiar{padding:9px 18px;border:1px solid rgba(10,12,16,.14);border-radius:999px;',
       'background:none;color:inherit;font:inherit;font-size:13px;cursor:pointer;transition:background .15s}',
       '.nrm-copiar:hover{background:rgba(47,107,255,.08)}',
+      /* La salida de emergencia va en voz baja: es para quien la necesite, no
+         una invitación a rehacer la conexión a la primera de cambio. */
+      '.nrm-flojo{margin-top:14px;font-size:12.5px;opacity:.6;line-height:1.45}',
       /* Solo cambia de tamaño: el color es el mismo que el de conectar, para
          que las dos hojas se lean como el mismo sitio. */
       '.nrm-copiar.nrm-grande{padding:14px 26px;font-size:15px;font-weight:500;',
