@@ -1679,6 +1679,46 @@ html[dir="rtl"] .subir{left:16px !important;right:auto !important}
    placeholders". Se esconde hasta que estén los datos reales.
    Para volver a mostrarla basta con borrar este bloque. */
 #team{display:none !important}
+/* ── el documento dejaba de medir lo mismo a mitad de pasada ────────────────
+   Las secciones llevan content-visibility:auto, y mientras no se han pintado
+   el navegador les supone 100vh. Casi ninguna mide eso: la de compra ocupa
+   1614px en un teléfono y se le suponían 844, así que al entrar en pantalla el
+   documento crecía de golpe y el scroll pegaba un salto.
+
+   Las cifras son la CAJA DE CONTENIDO —contain-intrinsic-size no cuenta el
+   relleno ni el borde, que el navegador suma aparte— medidas con cada sección
+   en pantalla, a 390 y a 1280. El `auto` de delante hace que, una vez pintada,
+   el navegador recuerde su alto de verdad: esto solo gobierna la primera
+   pasada, que es donde estaba el salto.
+
+   stack, security, .xf y .xl no están aquí: ya se pintan siempre. */
+@media(max-width:899px){
+  #network  {contain-intrinsic-size:auto 86px}
+  .press    {contain-intrinsic-size:auto 529px}
+  .chroma   {contain-intrinsic-size:auto 226px}
+  .paper    {contain-intrinsic-size:auto 175px}
+  .kin      {contain-intrinsic-size:auto 94px}
+  #solutions{contain-intrinsic-size:auto 280px}
+  #presale  {contain-intrinsic-size:auto 1478px}
+  #token    {contain-intrinsic-size:auto 922px}
+  #builds   {contain-intrinsic-size:auto 559px}
+  #join     {contain-intrinsic-size:auto 470px}
+}
+@media(min-width:900px){
+  #network  {contain-intrinsic-size:auto 103px}
+  .press    {contain-intrinsic-size:auto 723px}
+  .chroma   {contain-intrinsic-size:auto 520px}
+  .paper    {contain-intrinsic-size:auto 360px}
+  .kin      {contain-intrinsic-size:auto 248px}
+  #solutions{contain-intrinsic-size:auto 407px}
+  #presale  {contain-intrinsic-size:auto 743px}
+  #token    {contain-intrinsic-size:auto 1055px}
+  #builds   {contain-intrinsic-size:auto 818px}
+  #join     {contain-intrinsic-size:auto 580px}
+}
+/* Vacías hoy. Sin esto se les supondría 100vh cada una, que es alto de sobra
+   para desplazar toda la página de abajo. */
+#docs,#blog,#team{contain-intrinsic-size:auto 0}
 </style>
 </head>
 <body>

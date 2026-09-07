@@ -53,5 +53,17 @@ el registro o el SDK no responden.
 esperados. Un fallo ahí es dinero mal enviado, así que conviene ejecutarlo
 después de tocar cualquier cosa del cálculo.
 
+## `orden.mjs`, `medir.mjs` y `salto.mjs`
+
+No prueban nada: miden. `orden.mjs` recorre las secciones llevando cada una a
+pantalla y da su alto real, el de su caja de contenido y su relleno —que es lo
+que hay que saber para poner un `contain-intrinsic-size` que no mienta—.
+`medir.mjs` hace lo mismo a varios anchos. `salto.mjs` baja la página a saltos
+y dice qué sección cambia de alto en cada momento y cuánto se mueve el
+documento: es lo que localiza un tirón del scroll.
+
+Si llega un diseño nuevo con secciones distintas, hay que volver a pasarlos y
+actualizar las cifras de `bloque_css.txt`.
+
 Necesitan Playwright. Si el Chromium del sistema no coincide con la versión que
 espera, hay que pasarle `executablePath`.

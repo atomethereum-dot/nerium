@@ -1084,7 +1084,7 @@
     try { if (sesion.prov && sesion.prov.disconnect) sesion.prov.disconnect(); } catch (e) {}
     sesion = { prov: null, cuenta: null, cid: null, nombre: '' };
     posicion = { 1: null, 56: null };
-    wcUri = null; wcPedida = false; wcProv = null;
+    wcUri = null; wcEstado = 'nada'; wcFallo = null; wcEspera = null; wcProv = null;
     pintar();
   }
 
@@ -1644,6 +1644,9 @@
 
     pintarLista('');
     traerRegistro().then(function () { if (hoja) pintarLista(buscador.value); });
+    /* Se pide ya, para que al elegir una cartera el salto a su app caiga dentro
+       del mismo toque. Si falla, se calla hasta que alguien la elija. */
+    arrancarWC();
     /* El QR tarda en hacer falta y son 55 KB: se trae mientras el visitante
        mira la lista, para que al elegir ya esté. */
     if (!MOVIL) cargarScript('assets/qr.js', 'QR').catch(function () {});
@@ -1661,39 +1664,75 @@
      cualquiera. Por eso se pide una sola vez y se reutiliza si el visitante
      vuelve atrás y elige otra, en vez de abrir una conexión nueva por cada
      nombre que toque. */
-  var wcUri = null, wcPedida = false;
+  /* La URI de emparejamiento no es de ninguna cartera en concreto: sirve para
+     cualquiera. Se pide en cuanto se abre el selector, y no al elegir una.
 
-  function mostrarWC(w, uri) {
+     El motivo es Chrome en Android. Saltar a `trust://…` solo funciona dentro
+     del gesto del usuario; si la navegación ocurre en una respuesta asíncrona
+     —que es lo que pasaba: se pulsaba, se pedía la URI, y se saltaba cuando
+     llegaba— el navegador ya no la considera provocada por nadie y la bloquea
+     sin decir nada. Teniendo la URI de antes, el salto ocurre dentro del mismo
+     toque y el gesto sigue vivo. */
+  var wcUri = null, wcEstado = 'nada', wcFallo = null, wcEspera = null;
+
+  function arrancarWC() {
+    if (!PROYECTO_WC || wcEstado === 'pidiendo' || wcEstado === 'lista') return;
+    wcEstado = 'pidiendo';
+    iniciarWC().then(function (prov) {
+      prov.on('display_uri', function (uri) {
+        wcUri = uri; wcEstado = 'lista';
+        if (wcEspera) { var w = wcEspera; wcEspera = null; mostrarWC(w, uri, false); }
+      });
+      return prov.connect().then(function () { return enchufar(prov, 'WalletConnect'); });
+    }).then(function () { return refrescar(); })
+      .then(function () { cerrar(); libre(); pintar(); })
+      .catch(function (e) {
+        wcEstado = 'fallo'; wcFallo = e; wcUri = null; wcProv = null;
+        /* Si nadie está esperando, el fallo se calla: puede que el visitante
+           solo quisiera su extensión y no le sirve de nada un error de un
+           servicio que no ha pedido. */
+        if (wcEspera) { wcEspera = null; cerrar(); libre(); aviso(motivo(e), true); }
+      });
+  }
+
+  function mostrarWC(w, uri, gesto) {
     if (!hoja) return;
     titulo.textContent = w.nombre;
     atras.hidden = false;
     buscador.hidden = true;
     if (MOVIL) {
-      /* El salto a la app es silencioso cuando falla: si no está instalada, o
-         si el navegador bloquea el esquema, no hay error ninguno y la pantalla
-         se queda esperando. De ahí el botón para reintentar y el enlace para
-         pegar a mano. */
+      var destino = enlaceApp(w, uri);
       rejilla.hidden = true;
       vistaQR.hidden = false;
       vistaQR.textContent = '';
       var p = document.createElement('p');
       p.textContent = 'Confirm the connection in ' + w.nombre +
-        '. If it did not open, try again or copy the link into the app.';
+        '. If it did not open, tap below or copy the link into the app.';
       vistaQR.appendChild(p);
-      var abrir = document.createElement('button');
-      abrir.type = 'button'; abrir.className = 'nrm-copiar';
+      /* Un enlace de verdad y no un botón con JavaScript: pulsar un <a> es una
+         navegación provocada por el usuario, y eso los navegadores no lo
+         bloquean aunque el esquema sea propio de una app. */
+      var abrir = document.createElement('a');
+      abrir.className = 'nrm-copiar';
+      abrir.href = destino;
+      abrir.rel = 'noopener';
       abrir.textContent = 'Open ' + w.nombre;
-      abrir.addEventListener('click', function () {
-        window.location.href = enlaceApp(w, uri);
-      });
       vistaQR.appendChild(abrir);
       vistaQR.appendChild(botonCopiar(uri));
-      window.location.href = enlaceApp(w, uri);
+      /* Solo se salta solo si esto viene del toque: fuera de él no llegaría. */
+      if (gesto) window.location.href = destino;
       return;
     }
     cargarScript('assets/qr.js', 'QR')
       .then(function () { if (hoja) verQR(w, uri); })
       .catch(function () { if (hoja) verQR(w, uri); });
+  }
+
+  function nota_(txt) {
+    var d = document.createElement('div');
+    d.className = 'nrm-cargando';
+    d.textContent = txt;
+    return d;
   }
 
   function esperandoA(nombre) {
@@ -1705,20 +1744,9 @@
     rejilla.appendChild(nota_('Confirm the connection in ' + nombre + '…'));
   }
 
-  function nota_(txt) {
-    var d = document.createElement('div');
-    d.className = 'nrm-cargando';
-    d.textContent = txt;
-    return d;
-  }
-
   function elegir(w) {
     if (w.prov) {                      /* extensión o navegador de cartera */
       trabajando('Confirm in your wallet…');
-      /* Una extensión puede no responder nunca —tiene otra petición abierta,
-         está bloqueada— y hasta ahora eso dejaba la lista puesta sin nada que
-         pulsar salvo cerrar. Se pasa a la misma vista de espera que
-         WalletConnect, con su flecha para volver. */
       esperandoA(w.nombre);
       return tras(enchufar(w.prov, w.nombre));
     }
@@ -1727,28 +1755,21 @@
       aviso('Open nereum.xyz inside your wallet app to connect.', true);
       return;
     }
+    if (wcEstado === 'fallo') {
+      cerrar();
+      aviso(motivo(wcFallo), true);
+      return;
+    }
+    /* Con la URI ya pedida, el salto ocurre aquí mismo, dentro del toque. */
+    if (wcUri) return mostrarWC(w, wcUri, true);
 
     titulo.textContent = w.nombre;
     atras.hidden = false;
     buscador.hidden = true;
     rejilla.textContent = '';
     rejilla.appendChild(nota_('Opening ' + w.nombre + '…'));
-
-    if (wcUri) return mostrarWC(w, wcUri);
-    if (wcPedida) return;              /* ya se está pidiendo, llegará sola */
-
-    wcPedida = true;
-    var pedida = w;
-    tras(iniciarWC().then(function (prov) {
-      prov.on('display_uri', function (uri) {
-        wcUri = uri;
-        mostrarWC(pedida, uri);
-      });
-      return prov.connect().then(function () { return enchufar(prov, pedida.nombre); });
-    }).catch(function (e) {
-      wcPedida = false; wcUri = null; wcProv = null;
-      throw e;
-    }));
+    wcEspera = w;
+    arrancarWC();
   }
 
   /* ─────────────────────────────── arranque ──────────────────────────────── */
