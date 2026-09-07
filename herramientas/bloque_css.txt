@@ -83,3 +83,9 @@ html[dir="rtl"] .subir{left:16px !important;right:auto !important}
    doble de lo que parecía. */
 .hd .brand{gap:5px}
 .hd .brand svg{width:30px;height:30px}
+/* ── el boton de whitepaper, al extremo derecho ─────────────────────────────
+   Quien lo empujaba a la derecha era el nav del centro (margin-inline:auto).
+   Al ocultar esos enlaces en escritorio, la regla de 1000px que anula el
+   margen automatico de .hd-r dejaba el boton pegado al logo. Se lo devolvemos
+   siempre: la barra solo tiene marca y boton, uno en cada punta. */
+.hd .hd-r{margin-left:auto}

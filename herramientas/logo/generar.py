@@ -9,15 +9,22 @@ def png(fuente, px):
 
 # Por debajo de 48 px el brillo y los matices del degradado se convierten en
 # ruido: ahí va la versión sencilla, que a ese tamaño se lee mejor.
-def icono(px):
-    return png('simple.svg' if px <= 32 else 'favicon.svg', px)
+def icono(px, app=False):
+    sencillo = px <= 32
+    if app:
+        return png('app-simple.svg' if sencillo else 'app.svg', px)
+    return png('simple.svg' if sencillo else 'favicon.svg', px)
 
 SALIDA = '/home/user/nerium/'
-for nombre, px in [('favicon-32.png',32), ('icon-192.png',192), ('icon-512.png',512),
-                   ('apple-touch-icon.png',180), ('apple-touch-icon-167.png',167),
-                   ('apple-touch-icon-152.png',152), ('apple-touch-icon-120.png',120),
-                   ('mstile-150.png',150)]:
-    icono(px).save(SALIDA + nombre, 'PNG', optimize=True)
+# El de la pestaña llena su hueco. Los de app llevan algo de margen: iOS y
+# Android los dibujan sobre una baldosa redondeada y pegados al borde quedan
+# apretados.
+for nombre, px, app in [('favicon-32.png',32,False),
+                        ('icon-192.png',192,True), ('icon-512.png',512,True),
+                        ('apple-touch-icon.png',180,True), ('apple-touch-icon-167.png',167,True),
+                        ('apple-touch-icon-152.png',152,True), ('apple-touch-icon-120.png',120,True),
+                        ('mstile-150.png',150,True)]:
+    icono(px, app).save(SALIDA + nombre, 'PNG', optimize=True)
     print(' ', nombre)
 
 # ── el .ico, escrito a mano ────────────────────────────────────────────────

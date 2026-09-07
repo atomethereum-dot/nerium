@@ -28,9 +28,15 @@ def d(pts, cerrar=True):
 def entre(a, b, t):
     return (a[0] + (b[0]-a[0])*t, a[1] + (b[1]-a[1])*t)
 
-def svg(px=512, sencillo=False, plano=False):
+def svg(px=512, sencillo=False, plano=False, margen=0.04):
     """`sencillo` quita brillo y matices, para 16 y 32 px.
-       `plano` devuelve una silueta negra de una pieza, para Safari."""
+       `plano` devuelve una silueta negra de una pieza, para Safari.
+       `margen` es la fracción de lienzo que queda libre a cada lado.
+
+       El cubo se encaja para LLENAR el lienzo. Antes ocupaba dos tercios y el
+       resto era transparente: el navegador dibuja el favicon dentro de un hueco
+       fijo, así que ese aire salía como separación entre el icono y el título
+       de la pestaña, y el logo parecía más pequeño de lo que es."""
     lado = px * 0.66
     cx = cy = px / 2
     dx = lado * CANTO * math.cos(math.radians(GIRO + 45)) * 1.4
@@ -42,6 +48,19 @@ def svg(px=512, sencillo=False, plano=False):
     c_inf_der = (inf_der[0]+dx, inf_der[1]+dy)
     c_inf_izq = (inf_izq[0]+dx, inf_izq[1]+dy)
     canto = [sup_der, c_sup_der, c_inf_der, c_inf_izq, inf_izq, inf_der]
+
+    # encajar: escalar y centrar sobre el lienzo entero
+    todos = [sup_izq, sup_der, inf_der, inf_izq] + canto
+    xs = [p[0] for p in todos]; ys = [p[1] for p in todos]
+    ancho, alto = max(xs)-min(xs), max(ys)-min(ys)
+    m = px * margen
+    esc = (px - 2*m) / max(ancho, alto)
+    tx = m + (px - 2*m - ancho*esc)/2 - min(xs)*esc
+    ty = m + (px - 2*m - alto*esc)/2 - min(ys)*esc
+    def enc(p):
+        return (tx + p[0]*esc, ty + p[1]*esc)
+    sup_izq, sup_der, inf_der, inf_izq = map(enc, (sup_izq, sup_der, inf_der, inf_izq))
+    canto = [enc(p) for p in canto]
 
     if plano:
         return ('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 %d %d">\n'
@@ -85,7 +104,47 @@ def svg(px=512, sencillo=False, plano=False):
                d(canto), d([sup_izq, sup_der, inf_der, inf_izq]), d(banda), brillo))
 
 if __name__ == '__main__':
-    open('favicon.svg','w').write(svg(512))
-    open('simple.svg','w').write(svg(512, sencillo=True))
-    open('mask-icon.svg','w').write(svg(512, plano=True))
+    # La pestaña llena su hueco; los iconos de app respiran algo más, que se
+    # dibujan sobre una baldosa con esquinas redondeadas.
+    open('favicon.svg','w').write(svg(512, margen=0.04))
+    open('simple.svg','w').write(svg(512, sencillo=True, margen=0.04))
+    open('app.svg','w').write(svg(512, margen=0.09))
+    open('app-simple.svg','w').write(svg(512, sencillo=True, margen=0.09))
+    open('mask-icon.svg','w').write(svg(512, plano=True, margen=0.04))
     print('svg listos')
+
+
+# ── el mismo cubo, para los <symbol> que la web usa por dentro ──────────────
+def simbolo(caja=672, margen=14, brillo_si=False):
+    """Devuelve el interior de un <symbol viewBox="0 0 caja caja">, encajado
+       para ocupar el mismo hueco que la marca anterior."""
+    lado = 400.0
+    cx = cy = caja / 2.0
+    dx = lado * CANTO * math.cos(math.radians(GIRO + 45)) * 1.4
+    dy = lado * CANTO * math.sin(math.radians(GIRO + 45)) * 1.4 + lado * CANTO
+
+    sup_izq, sup_der, inf_der, inf_izq = cara(lado, cx, cy)
+    canto = [sup_der, (sup_der[0]+dx, sup_der[1]+dy), (inf_der[0]+dx, inf_der[1]+dy),
+             (inf_izq[0]+dx, inf_izq[1]+dy), inf_izq, inf_der]
+    todos = [sup_izq, sup_der, inf_der, inf_izq] + canto
+
+    # encajar: escalar y centrar para llenar la caja menos el margen
+    xs = [p[0] for p in todos]; ys = [p[1] for p in todos]
+    ancho, alto = max(xs)-min(xs), max(ys)-min(ys)
+    esc = (caja - 2*margen) / max(ancho, alto)
+    tx = margen + (caja - 2*margen - ancho*esc)/2 - min(xs)*esc
+    ty = margen + (caja - 2*margen - alto*esc)/2 - min(ys)*esc
+
+    corte_izq = entre(sup_izq, inf_izq, 1 - BANDA)
+    corte_der = entre(sup_der, inf_der, 1 - BANDA)
+    banda = [corte_izq, corte_der, inf_der, inf_izq]
+
+    trozos = ['<path fill="#6E7482" d="%s"/>' % d(canto),
+              '<path fill="url(#nrmPlata)" d="%s"/>' % d([sup_izq, sup_der, inf_der, inf_izq]),
+              '<path fill="#FAFBFC" d="%s"/>' % d(banda)]
+    if brillo_si:
+        a = entre(sup_izq, sup_der, 0.30); b = entre(sup_izq, sup_der, 0.375)
+        c = entre(inf_izq, inf_der, 0.115); e = entre(inf_izq, inf_der, 0.045)
+        trozos.append('<path fill="url(#nrmBrillo)" opacity=".8" d="%s"/>' % d([a, b, c, e]))
+    return ('  <g transform="translate(%.2f %.2f) scale(%.4f)">\n    %s\n  </g>'
+            % (tx, ty, esc, '\n    '.join(trozos)))

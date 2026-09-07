@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
 <!-- Safari, al anclar una pestana, ignora el color y pinta la silueta con
      el tono que elija el usuario: por eso va negra y de una pieza. -->
-<path d="M44.83 144.19 L367.81 44.83 L467.17 367.81 L144.19 467.17 Z"/>
-<path d="M367.81 44.83 L392.06 77.27 L491.42 400.25 L168.44 499.61 L144.19 467.17 L467.17 367.81 Z"/>
+<path d="M24.72 123.39 L359.25 20.48 L462.16 355.01 L127.64 457.92 Z"/>
+<path d="M359.25 20.48 L384.36 54.08 L487.28 388.61 L152.75 491.52 L127.64 457.92 L462.16 355.01 Z"/>
 </svg>
