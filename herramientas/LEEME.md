@@ -44,6 +44,7 @@ node herramientas/probar_seed.mjs      # que no quede ni un «whitelist» en nin
 node herramientas/probar_salto.mjs     # que el documento no cambie de alto al recorrerlo
 node herramientas/probar_rejilla.mjs   # que la lista de carteras salga pareja y centrada
 node herramientas/probar_volver.mjs    # el camino de vuelta a la cartera al firmar
+node herramientas/probar_iconos.mjs    # que ningun favicon declarado falte
 ```
 
 `probar_wc.mjs` simula también el registro de carteras de WalletConnect y el SDK,
@@ -80,6 +81,22 @@ WalletConnect. `probar_bundle.mjs` comprueba que el archivo compilado expone un
 proveedor con `init`, `on`, `connect` y `request`, y `probar_wc.mjs` lo carga
 sobre la web de verdad: esa es la comprobación que habría cazado el fallo del
 nombre del global.
+
+## `logo/` — de dónde salen los iconos
+
+`logo/origen.png` es el render que llegó del cubo. `logo/logo.py` lo reconstruye
+como vector: se midieron sobre el render el giro de la cara (17,1°), la altura
+de la banda blanca (18 % inferior), el grosor del canto y la rampa de la plata.
+`logo/generar.py` lo rasteriza a todos los tamaños y escribe el `.ico`.
+
+```
+cd herramientas/logo && python3 logo.py && python3 generar.py
+```
+
+Por debajo de 48 px se usa una variante sencilla, sin brillo ni matices del
+degradado: a ese tamaño esos detalles son ruido y el icono se lee peor con ellos
+que sin ellos. El `.ico` no se hace reduciendo el de 256: cada tamaño se dibuja
+desde el vector, que es la diferencia entre un favicon nítido y uno pastoso.
 
 ## `orden.mjs`, `medir.mjs` y `salto.mjs`
 
