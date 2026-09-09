@@ -1736,6 +1736,118 @@ html[dir="rtl"] .subir{left:16px !important;right:auto !important}
    margen automatico de .hd-r dejaba el boton pegado al logo. Se lo devolvemos
    siempre: la barra solo tiene marca y boton, uno en cada punta. */
 .hd .hd-r{margin-left:auto}
+
+/* ══ la portada: el globo ══════════════════════════════════════════════════
+   Sustituye al mosaico de rectángulos. El script vive en assets/globo.js y no
+   hace nada si no encuentra sus dos lienzos, así que el resto de páginas lo
+   ignoran.
+
+   Los dos velos negros que llevaba la sección —::before y ::after— existían
+   para oscurecer el centro y que se leyera el rótulo antiguo. Sobre el globo
+   lo apagan entero, así que aquí se retiran y el contraste lo pone .nrm-velo,
+   que solo tapa el lado del texto. */
+.hero{background:#03050A}
+.hero::before,.hero::after{content:none}
+#nrmCielo,#nrmTierra{position:absolute;inset:0;width:100%;height:100%;display:block}
+#nrmCielo{z-index:0}
+#nrmTierra{z-index:1;touch-action:none;cursor:grab}
+#nrmTierra.nrm-arr{cursor:grabbing}
+
+/* los rótulos de las plazas: filete y guía hasta el punto, sin caja opaca */
+.nrm-rot{position:absolute;inset:0;z-index:2;pointer-events:none}
+.nrm-plaza{position:absolute;display:flex;align-items:center;gap:7px;
+  transform:translate(0,-50%);font-family:var(--m);font-size:10px;font-weight:500;
+  letter-spacing:.15em;text-transform:uppercase;white-space:nowrap;color:#D7E4F8;
+  will-change:transform,opacity}
+.nrm-plaza i{display:block;width:16px;height:1px;background:rgba(111,224,255,.5);flex:none}
+.nrm-plaza span{padding:3px 8px;background:rgba(4,8,16,.62);
+  border:1px solid rgba(111,224,255,.22)}
+
+.nrm-velo{position:absolute;inset:0;z-index:3;pointer-events:none;
+  background:linear-gradient(100deg,rgba(3,5,10,.97) 0%,rgba(3,5,10,.95) 28%,
+             rgba(3,5,10,.72) 42%,rgba(3,5,10,.2) 55%,rgba(3,5,10,0) 65%)}
+
+/* la capa de texto: el .hero-in del sitio centra en cruz, y aquí manda otra
+   composición —texto a la izquierda, pruebas abajo— */
+/* z-index 4: el .hero-in del sitio va en el 2 y el velo en el 3, así que sin
+   esto el velo caía ENCIMA del texto y se lo comía. Y la retícula: el .hero-in
+   trae justify-content:center, que en grid centra la pista y la encoge a su
+   contenido; la columna se planta a todo el ancho y arranca en el margen. */
+.hero-in.nrm-capa{display:grid;grid-template-columns:minmax(0,1fr);
+  grid-template-rows:1fr auto;align-items:center;justify-content:start;z-index:4;
+  text-align:left;padding:calc(var(--bar) + 10px) clamp(20px,3.6vw,56px) 0}
+.nrm-texto{max-width:min(980px,100%)}
+.nrm-ceja{display:flex;align-items:center;gap:12px;font-family:var(--m);font-size:11px;
+  font-weight:500;letter-spacing:.26em;text-transform:uppercase;color:#6FE0FF;
+  margin-bottom:clamp(16px,2.4vh,24px)}
+.nrm-ceja b{display:block;width:34px;height:1px;background:#6FE0FF;opacity:.55}
+.hero h1{font-size:clamp(33px,5.2vw,76px);line-height:.94;letter-spacing:-.046em;
+  font-weight:600;text-transform:uppercase;
+  background:linear-gradient(#FFFFFF 0%,#E4EAF6 62%,#B9C3D6 100%);
+  -webkit-background-clip:text;background-clip:text;color:transparent}
+.nrm-lead{margin:clamp(18px,2.6vh,28px) 0 0;max-width:44ch;font-size:16.5px;
+  line-height:1.65;color:#8A95AA}
+.nrm-lead b{color:#EEF3FB;font-weight:500}
+/* el botón del sitio mide 38 de alto: si el texto parte en dos líneas, se sale */
+.hero .hb{white-space:nowrap}
+
+.hero .hero-act{justify-content:flex-start;margin-top:clamp(22px,3.2vh,34px)}
+/* el reparto de entrada del sitio, extendido al antetítulo y al párrafo */
+.nrm-ceja,.nrm-lead{opacity:0;transform:translateY(14px);
+  transition:opacity 1s ease .35s,transform 1.1s cubic-bezier(.16,.84,.26,1) .35s}
+.ready .nrm-ceja,.ready .nrm-lead{opacity:1;transform:none}
+
+/* las cuatro pruebas, en columnas medidas y no en cuatro frases sueltas */
+/* El HUD del sitio ocupa las dos esquinas de abajo —el botón de subir y el
+   idioma a la izquierda, «compatible with» y el contador a la derecha—, así
+   que esta tira tiene que dejarle sitio o se pisan. */
+.nrm-pie{display:flex;flex-wrap:wrap;align-items:stretch;
+  border-top:1px solid rgba(196,214,246,.13);
+  margin-bottom:clamp(40px,6vh,58px);padding-right:clamp(0px,15vw,220px)}
+.nrm-pie>div{display:flex;flex-direction:column;gap:5px;padding:15px 30px 18px 0;
+  margin-right:30px;border-right:1px solid rgba(196,214,246,.13)}
+.nrm-pie>div:last-child{border-right:0;margin-right:0;padding-right:0;margin-left:auto}
+.nrm-pie .k{font-family:var(--m);font-size:9.5px;letter-spacing:.2em;
+  text-transform:uppercase;color:#4A5464}
+.nrm-pie .v{font-family:var(--m);font-size:12.5px;letter-spacing:.06em;color:#EEF3FB}
+.nrm-pie .viva{color:#5FE3A0}
+.nrm-pie .viva::before{content:'\25CF';margin-right:7px;font-size:7px;vertical-align:2px;
+  animation:nrmLate 2.4s ease-in-out infinite}
+.nrm-pie .pista{color:#8A95AA}
+@keyframes nrmLate{0%,100%{opacity:1}50%{opacity:.22}}
+
+@media(max-width:900px){
+  /* El velo empezaba en negro justo encima del globo: en pantalla pequeña se
+     comía el neón de las rutas y las luces del fondo, que es lo que hay que
+     ver. Ahora la mitad de arriba del globo queda limpia y el velo entra donde
+     empieza el texto. */
+  .nrm-velo{background:linear-gradient(rgba(3,5,10,0) 0%,rgba(3,5,10,0) 36%,
+            rgba(3,5,10,.5) 44%,rgba(3,5,10,.9) 52%,rgba(3,5,10,.985) 62%,
+            rgba(3,5,10,1) 100%)}
+  .hero-in.nrm-capa{align-items:end}
+  .nrm-texto{padding-top:min(35svh,320px)}
+  .hero .hero-act{justify-content:flex-start}
+}
+@media(max-width:760px){
+  /* cinco fichas con rótulo eran tres filas y echaban el segundo botón fuera
+     de la pantalla: aquí van los valores seguidos, separados por puntos */
+  .nrm-pie{gap:0 10px;padding-block:10px 12px;padding-right:0;margin-bottom:68px}
+  /* la pista de arrastre cae justo sobre el botón de subir del HUD, y en un
+     teléfono el gesto se descubre solo */
+  .nrm-pie>div:last-child{display:none}
+  .hero .hb{font-size:12.5px;padding:0 15px}
+  .nrm-pie>div{flex-direction:row;align-items:baseline;gap:0;padding:2px 0;margin:0;
+    border-right:0;min-width:0}
+  .nrm-pie>div:last-child{margin-left:0}
+  .nrm-pie .k{display:none}
+  .nrm-pie .v{font-size:11.5px}
+  .nrm-pie>div:not(:last-child)::after{content:'\00B7';margin-inline:10px;color:#4A5464}
+  .nrm-lead{font-size:15.5px;line-height:1.58}
+  .hero .hero-act{margin-top:20px}
+}
+@media(prefers-reduced-motion:reduce){
+  .nrm-ceja,.nrm-lead{opacity:1;transform:none;transition:none}
+}
 </style>
 </head>
 <body>
@@ -1816,24 +1928,28 @@ html[dir="rtl"] .subir{left:16px !important;right:auto !important}
 
 <div class="hero-hold">
 <section class="hero" id="top" data-bg="#04070C" data-acc="#2F6BFF">
-  <canvas id="burst"></canvas>
-  <div class="glowfloor" aria-hidden="true"></div>
-  <div class="wipe" aria-hidden="true">
-    <div class="slats" id="slats"></div>
-    <div class="sh-edges" id="shEdges"></div>
-    <div class="sh-mesh"><i></i><i></i><i></i><i></i></div>
-    <div class="lockup" id="lockup">
-      <i class="lk-bar" aria-hidden="true"></i>
-      <span class="lk-word" id="lkWord" translate="no"></span>
+  <canvas id="nrmCielo" aria-hidden="true"></canvas>
+  <canvas id="nrmTierra" role="img" tabindex="0"
+          aria-label="Interactive globe. Drag it to spin the Earth."></canvas>
+  <div class="nrm-rot" id="nrmRot" aria-hidden="true"></div>
+  <div class="nrm-velo" aria-hidden="true"></div>
+  <div class="hero-in nrm-capa">
+    <div class="nrm-texto">
+      <span class="nrm-ceja"><b></b>One ledger</span>
+      <h1 class="nrm-h1">Every asset<br>in every<br>market</h1>
+      <p class="nrm-lead">Treasury bills, invoices and property titles &mdash; settled on
+        one chain and verifiable from anywhere, <b>in seconds instead of days</b>.</p>
+      <div class="hero-act">
+        <a class="hb blue" href="#presale">Join the Seed Round</a>
+        <a class="hb white" href="https://nereum.xyz/whitepaper" rel="noopener">Read the whitepaper</a>
+      </div>
     </div>
-    <div class="lk-tag" id="lkTag"><i></i><span>Real-world asset chain</span></div>
-    <div class="sh-grain"></div>
-  </div>
-  <div class="hero-in">
-    <h1>A chain for real assets</h1>
-    <div class="hero-act">
-      <a class="hb blue" href="#security">Registered &amp; audited</a>
-      <a class="hb white" href="#presale">Join the Seed Round</a>
+    <div class="nrm-pie">
+      <div><span class="k">Seed Round</span><span class="v viva">Open</span></div>
+      <div><span class="k">Price</span><span class="v">1 NRM = $0.20</span></div>
+      <div><span class="k">Networks</span><span class="v">Ethereum &middot; BNB Chain</span></div>
+      <div><span class="k">Contracts</span><span class="v">Verified</span></div>
+      <div><span class="k">&nbsp;</span><span class="v pista" id="nrmPista">Drag the globe &#8599;</span></div>
     </div>
   </div>
 </section>
@@ -2686,7 +2802,7 @@ const CALM=matchMedia('(prefers-reduced-motion: reduce)').matches;
     }});
   })();
   (function(){
-    const heads=[...document.querySelectorAll('h1, h2, .say p, .rows b, .duo h3, .start b, .card b')];
+    const heads=[...document.querySelectorAll('h1:not(.nrm-h1), h2, .say p, .rows b, .duo h3, .start b, .card b')];
     heads.forEach(h=>{
       if(h.querySelector('.ws'))return;
       /* el texto original, antes de partirlo: al partirlo en letras se pierden
@@ -2697,7 +2813,7 @@ const CALM=matchMedia('(prefers-reduced-motion: reduce)').matches;
           if(c.nodeType===3){
             const parts=c.textContent.split(/(\s+)/);
             const frag=document.createDocumentFragment();
-            const byChar=h.matches('.hero h1');
+            const byChar=h.matches('.hero h1:not(.nrm-h1)');
             parts.forEach(t=>{
               if(!t.trim()){frag.appendChild(document.createTextNode(t));return}
               const units=byChar?[...t]:[t];
@@ -2716,7 +2832,7 @@ const CALM=matchMedia('(prefers-reduced-motion: reduce)').matches;
         });
       };
       walk(h);
-      const step=h.matches('.hero h1')?.028:.042;
+      const step=h.matches('.hero h1:not(.nrm-h1)')?.028:.042;
       [...h.querySelectorAll('.ws>.wi')].forEach((i,k)=>i.style.setProperty('--wd',(k*step).toFixed(3)+'s'));
       h.classList.add('sp');
     });
@@ -2898,7 +3014,7 @@ const CALM=matchMedia('(prefers-reduced-motion: reduce)').matches;
   (function(){
     const targets=[...document.querySelectorAll('.stack .sub, .loop .sub, .duo p, .start p, .rows + *')]
       .filter(Boolean);
-    const list=[...document.querySelectorAll('.hero p, .stack .sub, .loop .sub')];
+    const list=[...document.querySelectorAll('.hero p:not(.nrm-lead), .stack .sub, .loop .sub')];
     list.forEach(el=>{
       if(el.querySelector('.lnwrap'))return;
       const txt=el.textContent.trim();
@@ -3985,7 +4101,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
   })();
 })();
 (function(){
-  const h1=document.querySelector('.hero h1'); if(!h1)return;
+  const h1=document.querySelector('.hero h1:not(.nrm-h1)'); if(!h1)return;
   const fine=matchMedia('(hover:hover) and (pointer:fine)').matches;
   const calm=matchMedia('(prefers-reduced-motion: reduce)').matches;
   if(!fine||calm)return;
@@ -5370,5 +5486,6 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
 })();
 </script>
 <script defer src="assets/dapp.js"></script>
+<script defer src="assets/globo.js"></script>
 </body>
 </html>
