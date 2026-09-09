@@ -14,7 +14,6 @@ todo lo que se hizo aqui y el archivo subido no trae:
   7. la etiqueta que carga assets/dapp.js, la capa que conecta los contratos
   8. el cambio de «Whitelist» a «Seed Round», texto y traducciones
   9. la marca nueva: el cubo, en lugar del semidisco
- 10. la portada con el globo, en lugar del mosaico de rectangulos
 """
 import sys, os
 
@@ -22,7 +21,6 @@ AQUI = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, AQUI)
 import seedround
 import marca
-import portada
 subido, publicado = sys.argv[1], '/home/user/nerium/index.html'
 z = open(subido, encoding='utf-8').read()
 p = open(publicado, encoding='utf-8').read()
@@ -121,16 +119,10 @@ rest = seedround.aplicar(rest)
 # traducciones: sin esto, cada diseno nuevo devolveria el semidisco.
 rest = marca.aplicar(rest)
 
-# ── 10 · la portada ──
-# El hero viaja dentro del archivo subido igual que la marca: sin esto, cada
-# diseno nuevo devolveria el mosaico de rectangulos.
-rest = portada.aplicar(rest)
-
 salida = pre + rest
 open(publicado, 'w', encoding='utf-8').write(salida)
 print("montado:", len(salida), "bytes ·", salida.count('var(--hud-b)'), "usos de --hud-b ·",
       "traductor:", 'si' if 'translated-(ltr' in salida else 'NO', "·",
       "dapp:", 'si' if 'assets/dapp.js' in salida else 'NO', "·",
       "whitelist restante:", salida.lower().count('whitelist'), "·",
-      "marca:", 'cubo' if 'nrmPlata' in salida else 'LA VIEJA', "·",
-      "portada:", 'globo' if 'id="nrmTierra"' in salida else 'EL MOSAICO')
+      "marca:", 'cubo' if 'nrmPlata' in salida else 'LA VIEJA')
