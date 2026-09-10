@@ -1736,6 +1736,39 @@ html[dir="rtl"] .subir{left:16px !important;right:auto !important}
    margen automatico de .hd-r dejaba el boton pegado al logo. Se lo devolvemos
    siempre: la barra solo tiene marca y boton, uno en cada punta. */
 .hd .hd-r{margin-left:auto}
+
+/* ══ la portada ═══════════════════════════════════════════════════════════
+   El titular no era Switzer. El partidor de letras envuelve cada carácter en
+   un <i>, que es cursiva por defecto, y Switzer no trae cursiva —el sitio
+   carga cuatro pesos y los cuatro son redondos—, así que el navegador la
+   inclinaba a la fuerza. El resultado: el titular de la portada era el único
+   texto oblicuo de toda la web, y encima con una inclinación sintética, que
+   es lo que más delata a una tipografía. */
+.hero h1 .ltr,.hero h1 i,.ltr{font-style:normal}
+
+/* Las cuatro pruebas, debajo de los botones. La portada se podía mirar diez
+   segundos sin saber el precio, en qué redes está ni si los contratos están
+   verificados: todo eso vivía a dos pantallas de scroll. */
+.hero-pr{list-style:none;display:flex;flex-wrap:wrap;justify-content:center;
+  align-items:center;gap:9px 26px;margin:clamp(26px,3.2vw,40px) 0 0;padding:0;
+  font-family:var(--m);font-size:11px;letter-spacing:.14em;text-transform:uppercase;
+  color:rgba(226,236,250,.42);
+  opacity:0;transform:translateY(14px);
+  transition:opacity 1s ease .72s,transform 1.1s cubic-bezier(.16,.84,.26,1) .72s}
+.ready .hero-pr{opacity:1;transform:none}
+.hero-pr li{display:flex;align-items:center;gap:8px;white-space:nowrap}
+.hero-pr li:first-child{color:#6FE3A8}
+.hero-pr i{width:5px;height:5px;border-radius:50%;background:currentColor;
+  box-shadow:0 0 10px currentColor;animation:heroLate 2.4s ease-in-out infinite}
+@keyframes heroLate{0%,100%{opacity:1}50%{opacity:.22}}
+@media(max-width:700px){
+  /* en el móvil, dos filas de dos: en una sola fila se parten los nombres */
+  .hero-pr{gap:7px 18px;font-size:10px;letter-spacing:.1em;
+    margin-top:clamp(20px,4vw,28px);max-width:330px;margin-inline:auto}
+}
+@media(prefers-reduced-motion:reduce){
+  .hero-pr{opacity:1;transform:none;transition:none}
+}
 </style>
 </head>
 <body>
@@ -1832,9 +1865,15 @@ html[dir="rtl"] .subir{left:16px !important;right:auto !important}
   <div class="hero-in">
     <h1>A chain for real assets</h1>
     <div class="hero-act">
-      <a class="hb blue" href="#security">Registered &amp; audited</a>
-      <a class="hb white" href="#presale">Join the Seed Round</a>
+      <a class="hb blue" href="#presale">Join the Seed Round</a>
+      <a class="hb white" href="#security">Registered &amp; audited</a>
     </div>
+    <ul class="hero-pr">
+      <li><i></i>Seed Round open</li>
+      <li>1 NRM = $0.20</li>
+      <li>Ethereum &middot; BNB Chain</li>
+      <li>Contracts verified</li>
+    </ul>
   </div>
 </section>
 </div>
@@ -3068,8 +3107,8 @@ function campoGL(){
     vec3 c=PAL[0];
     if(idx==1)c=PAL[1]; else if(idx==2)c=PAL[2]; else if(idx==3)c=PAL[3];
     else if(idx==4)c=PAL[4]; else if(idx==5)c=PAL[5];
-    if(vScan>0.42){ float m=(vScan-0.42)/0.58; c=mix(c,vec3(1.0),m*0.8); }
-    O=vec4(c*vAlfa,vAlfa);        // se suma sobre lo ya pintado
+    if(vScan>0.42){ float m=(vScan-0.42)/0.58; c=mix(c,PAL[3],m*0.62); }
+    O=vec4(c*vAlfa,vAlfa);        // se trama sobre lo ya pintado
   }`;
   const VS2=`#version 300 es
   layout(location=0) in vec2 esquina;
@@ -3120,7 +3159,7 @@ function campoGL(){
     gl.clearColor(0,0,0,1); gl.clear(gl.COLOR_BUFFER_BIT);
     gl.bindFramebuffer(gl.FRAMEBUFFER,null);
   }
-  const T=[[77,162,255],[42,91,255],[130,190,255],[255,255,255],[120,145,190],[30,60,150]];
+  const T=[[64,132,255],[47,107,255],[124,168,255],[220,226,238],[116,134,176],[26,52,132]];
   const rnd=(a,b)=>a+Math.random()*(b-a);
   const FINE=matchMedia('(hover:hover) and (pointer:fine)').matches;
   const M={x:-1e5,y:-1e5,tx:-1e5,ty:-1e5,k:0,want:0,vx:0,vy:0};
@@ -3227,7 +3266,7 @@ function campoGL(){
     gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);
     gl.useProgram(pFade); gl.bindVertexArray(vaoPlano);
     gl.drawArrays(gl.TRIANGLE_STRIP,0,4);
-    gl.blendFunc(gl.ONE,gl.ONE);
+    gl.blendFunc(gl.ONE,gl.ONE_MINUS_SRC_COLOR);
     gl.useProgram(pCubos); gl.bindVertexArray(vao);
     gl.uniform2f(loc(pCubos,'R'),cv.width,cv.height);
     gl.uniform1f(loc(pCubos,'T'),t);
@@ -3258,7 +3297,7 @@ function campoGL(){
 function campo2D(){
   const cv=document.getElementById('burst');if(!cv)return;
   const ctx=cv.getContext('2d',{alpha:false});
-  const T=[[77,162,255],[42,91,255],[130,190,255],[255,255,255],[120,145,190],[30,60,150]];
+  const T=[[64,132,255],[47,107,255],[124,168,255],[220,226,238],[116,134,176],[26,52,132]];
   let W=0,H=0,dpr=1,P=[],live=true,last=0,t=0,U=28,cols=1,rows=1,desliz=0,halo=null,haloH=0;
   const rnd=(a,b)=>a+Math.random()*(b-a);
   const FINE=matchMedia('(hover:hover) and (pointer:fine)').matches;
@@ -3301,7 +3340,7 @@ function campo2D(){
     }
     ctx.globalCompositeOperation='source-over';
     ctx.fillStyle='rgba(0,0,0,.22)';ctx.fillRect(0,0,W,H);
-    ctx.globalCompositeOperation='lighter';
+    ctx.globalCompositeOperation='screen';
     desliz += ((scrollY*0.62) - desliz) * Math.min(1,dt*6);
     const CICLO=7.2;                       /* segundos de ida y vuelta */
     const q=(t%CICLO)/CICLO;
@@ -3350,7 +3389,8 @@ function campo2D(){
       let c=T[p.ci];
       if(enScan>.42){
         const m=(enScan-.42)/.58;
-        c=[c[0]+(255-c[0])*m*.8, c[1]+(255-c[1])*m*.8, c[2]+(255-c[2])*m*.55];
+        const S=T[3];
+        c=[c[0]+(S[0]-c[0])*m*.62, c[1]+(S[1]-c[1])*m*.62, c[2]+(S[2]-c[2])*m*.62];
       }
       ctx.fillStyle='rgba('+(c[0]|0)+','+(c[1]|0)+','+(c[2]|0)+','+a.toFixed(3)+')';
       ctx.fillRect(Math.round(x)+1,Math.round(y)+1,Math.max(1,w-2),Math.max(1,h-2));
@@ -3391,7 +3431,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
 (function(){
   const cv=document.getElementById('chroma');if(!cv)return;
   const ctx=cv.getContext('2d',{alpha:false});
-  const HUES=[196,202,206,210,212,212,214,216,218,222,226,230,206,212,220,208];
+  const HUES=[212,214,216,218,220,222,222,224,226,228,230,232,218,222,226,220];
   let W=0,H=0,dpr=1,bars=[],live=true,last=0;
   const rnd=(a,b)=>a+Math.random()*(b-a);
   function paint(b){
@@ -3421,7 +3461,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
       w:hero?rnd(.005,.013):rnd(.0015,.0062),
       h:hero?rnd(.62,1):rnd(.18,.80),
       hue:HUES[(Math.random()*HUES.length)|0],
-      sat:rnd(95,100),
+      sat:rnd(78,92),
       lum:hero?rnd(56,66):rnd(46,60),
       a:hero?rnd(.6,.92):rnd(.24,.62),
       v:rnd(8,58)*(hero?.5:1),
