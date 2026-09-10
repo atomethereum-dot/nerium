@@ -1842,6 +1842,22 @@ html[dir="rtl"] .ann-in:hover .ann-go{transform:scaleX(-1) translateX(4px)}
 .hero-in{padding-top:calc(var(--bar) + var(--ann))}
 .sheet{top:calc(var(--ann) + var(--bar))}
 
+/* ── la barra, negra y con las esquinas rectas ──
+   Venia con pelicula azul encima, el canto azul y 9px de redondeo. Las cuatro
+   variables que la pintan viven en :root y no las usa nada mas, asi que se
+   cambian ahi y valen para los dos estados de la barra: la de arriba y la que
+   se ancla al bajar. */
+:root{
+  --pf:transparent;              /* fuera la pelicula azul */
+  --pbase:#000;                  /* negro */
+  --pb:rgba(255,255,255,.10);    /* el canto, una linea fina y neutra */
+  --pr:0px;                      /* esquinas rectas */
+}
+/* opaca del todo: no hay nada detras que desenfocar */
+.hd{backdrop-filter:none;box-shadow:0 14px 40px -26px rgba(0,0,0,.9)}
+.hd.anclada{box-shadow:0 14px 40px -26px rgba(0,0,0,.9) !important}
+.nav .chip{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.12)}
+
 /* ── el menú del centro vuelve ── */
 @media(min-width:1120px){
   .hd .nav{display:flex}
