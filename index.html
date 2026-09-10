@@ -1927,8 +1927,6 @@ html[dir="rtl"] .ann-in:hover .ann-go{transform:scaleX(-1) translateX(4px)}
   border-bottom:1px solid rgba(var(--sh),.30);
   background:
     radial-gradient(120% 92% at 22% 12%, var(--luz) 0%, rgba(255,255,255,0) 60%),
-    repeating-linear-gradient(90deg, var(--rej) 0 1px, transparent 1px 26px),
-    repeating-linear-gradient(180deg, var(--rej2) 0 1px, transparent 1px 26px),
     linear-gradient(162deg, var(--w1) 0%, var(--w2) 100%);
   display:grid;place-items:center}
 /* un velo abajo, para que la figura no choque a hueso con el texto */
@@ -1961,10 +1959,17 @@ html[dir="rtl"] .ann-in:hover .ann-go{transform:scaleX(-1) translateX(4px)}
 .cb-rule{width:1px;height:clamp(30px,3.6vw,46px);background:rgba(255,255,255,.34);flex:0 0 auto}
 /* El medio va en su propia baldosa blanca: sobre el color, su logotipo
    necesita el fondo con el que esta hecho. */
+/* El tamano NO es decorativo. En un ordenador corriente —un pixel de pantalla
+   por pixel de CSS— la baldosa de 80 dejaba el logotipo en 62 pixeles reales, y
+   el de Morningstar son ONCE letras de palo seco en ese ancho: cuatro pixeles
+   por letra, con trazos por debajo del pixel. Se deshacia. En el telefono no
+   pasaba porque alli hay tres pixeles de pantalla por cada uno de CSS y ese
+   mismo logotipo se dibujaba con 120. Subiendo la baldosa a 112, el ordenador
+   pasa de 62 a 94 pixeles reales y las letras vuelven a tener cuerpo. */
 .cb-tile{flex:0 0 auto;display:grid;place-items:center;
-  width:clamp(58px,6.6vw,80px);height:clamp(58px,6.6vw,80px);
-  background:#fff;border-radius:12px;padding:9px;
-  box-shadow:0 6px 18px -8px rgba(0,0,0,.45)}
+  width:clamp(72px,8vw,112px);height:clamp(72px,8vw,112px);
+  background:#fff;border-radius:14px;padding:clamp(7px,.72vw,9px);
+  box-shadow:0 8px 22px -10px rgba(0,0,0,.48)}
 .cb-logo{width:100%;height:auto;border-radius:6px;display:block}
 
 /* ── el texto: papel, pero teñido de su color, no blanco pelado ── */
@@ -1987,8 +1992,6 @@ html[dir="rtl"] .ann-in:hover .ann-go{transform:scaleX(-1) translateX(4px)}
     linear-gradient(56deg, rgba(10,16,36,0) 38%, rgba(60,130,255,.50) 46.5%,
       rgba(206,228,255,.96) 50%, rgba(60,130,255,.42) 53.5%, rgba(10,16,36,0) 62%),
     radial-gradient(54% 64% at 62% 42%, rgba(70,140,255,.34) 0%, rgba(70,140,255,0) 72%),
-    repeating-linear-gradient(90deg, var(--rej) 0 1px, transparent 1px 26px),
-    repeating-linear-gradient(180deg, var(--rej2) 0 1px, transparent 1px 26px),
     linear-gradient(162deg, var(--w1) 0%, var(--w2) 100%)}
 
 @media(max-width:700px){

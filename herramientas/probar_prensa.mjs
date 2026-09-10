@@ -22,7 +22,7 @@ const nav = await chromium.launch({ executablePath:'/opt/pw-browsers/chromium-11
 let ok = 0, mal = 0;
 const di = (b, t) => { if (b) { ok++; console.log('  ok  ' + t); } else { mal++; console.log('  MAL ' + t); } };
 
-const ctx = await nav.newContext({ viewport:{width:1440,height:950} });
+const ctx = await nav.newContext({ viewport:{width:1440,height:950}, deviceScaleFactor:1 });
 const pg = await ctx.newPage();
 const errs = []; pg.on('pageerror', e => errs.push(e.message));
 await pg.goto('http://127.0.0.1:8993/', { waitUntil:'load' });
@@ -85,6 +85,24 @@ for (const [ac, real] of Object.entries(CERCA)) {
   const d = usado ? Math.abs(tono(rgb(ac)) - tono(real)) : 999;
   di(usado && (d < 25 || d > 335), 'el acento ' + ac + ' es el tono del logotipo (' + d.toFixed(0) + 'deg)');
 }
+
+// ── ni cuadricula, ni logotipos deshechos ──
+const fig = await pg.evaluate(() => getComputedStyle(document.querySelector('.pcd-art')).backgroundImage);
+di(!/repeating-linear-gradient/.test(fig), 'la figura ya no lleva cuadricula');
+
+/* En un ordenador corriente hay UN pixel de pantalla por cada pixel de CSS,
+   asi que el logotipo se dibuja con los pixeles que mida su caja y ni uno mas.
+   Con la baldosa de 80 eran 62, y el de Morningstar son once letras de palo
+   seco en ese ancho: cuatro pixeles por letra. Se deshacia. En el telefono no
+   se veia porque alli hay dos o tres pixeles de pantalla por cada uno de CSS.
+   Por debajo de 88 vuelve el problema. */
+const real = await pg.evaluate(() => [...document.querySelectorAll('.cb-logo')].map(i =>
+  ({ alt: i.alt, px: Math.round(i.getBoundingClientRect().width * devicePixelRatio),
+     origen: i.naturalWidth })));
+di(real.every(l => l.px >= 88),
+   'en pantalla de 1x el logotipo se dibuja con ' + real.map(l => l.px).join('/') + ' px reales');
+di(real.every(l => l.origen >= l.px),
+   'y el archivo tiene al menos esa resolucion (' + real.map(l => l.origen).join('/') + ')');
 
 // el hueco entre la figura y el texto: la tarjeta tiene que tener un dentro
 const sep = await pg.evaluate(() => {
