@@ -64,6 +64,7 @@ def _estilo(c):
 CANVAS = '            <canvas class="pcd-glow"></canvas>\n'
 
 
+FIN = '/* ══ fin: prensa ══ */'
 MARCA = '/* ══ las tarjetas de prensa ══'
 
 CSS = """
@@ -166,6 +167,7 @@ CSS = """
   .pcd,.pcd-body::after{transition:none}
   .pcd:hover{transform:none}
 }
+/* ══ fin: prensa ══ */
 """
 
 def _color(m):
@@ -207,9 +209,18 @@ def aplicar(html):
     html = html.replace(CANVAS, '')
     if MARCA in html:
         i = html.index(MARCA)
-        j = html.index('\n</style>', i)
-        html = html[:i] + CSS.lstrip('\n') + html[j:]
+        # hasta el sello de cierre, NO hasta </style>: detras puede haber otro
+        # modulo con su bloque, y cortar hasta el final se lo llevaba por delante
+        if FIN in html[i:]:
+            j = html.index(FIN, i) + len(FIN)
+        else:
+            # bloque de antes de que existiera el sello: se corta en el
+            # siguiente bloque (todos empiezan por la doble raya) o al final
+            cierre = html.index('\n</style>', i)
+            sig = html.find('/* \u2550\u2550 ', i + len(MARCA))
+            j = cierre if sig < 0 or sig > cierre else sig
+        html = html[:i] + CSS.strip('\n') + html[j:]
     else:
         assert html.count('\n</style>') == 1
-        html = html.replace('\n</style>', '\n' + CSS + '</style>', 1)
+        html = html.replace('\n</style>', '\n' + CSS.strip('\n') + '\n</style>', 1)
     return html

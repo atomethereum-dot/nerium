@@ -19,6 +19,7 @@ todo lo que se hizo aqui y el archivo subido no trae:
  11. la cabecera: el aviso de la ronda arriba y el menu del centro con fichas
  12. el fondo de la portada: los tres planos, lo que se posa, el pautado
  13. las tarjetas de prensa, con el lenguaje del whitepaper
+ 14. el papel con luz y grano, la compatibilidad y las cuatro garantias
 """
 import sys, os
 
@@ -30,6 +31,7 @@ import portada
 import cabecera
 import fondo
 import prensa
+import pagina
 subido, publicado = sys.argv[1], '/home/user/nerium/index.html'
 z = open(subido, encoding='utf-8').read()
 p = open(publicado, encoding='utf-8').read()
@@ -144,6 +146,9 @@ rest = fondo.aplicar(rest)
 # ── 13 · las tarjetas de prensa ──
 rest = prensa.aplicar(rest)
 
+# ── 14 · el papel, la compatibilidad y las filas ──
+rest = pagina.aplicar(rest)
+
 salida = pre + rest
 open(publicado, 'w', encoding='utf-8').write(salida)
 print("montado:", len(salida), "bytes ·", salida.count('var(--hud-b)'), "usos de --hud-b ·",
@@ -154,4 +159,5 @@ print("montado:", len(salida), "bytes ·", salida.count('var(--hud-b)'), "usos d
       "portada:", 'arreglada' if portada.MARCA in salida else 'SIN TOCAR', "·",
       "cabecera:", 'aviso + menu' if '<div class="ann" id="ann">' in salida else 'SIN TOCAR', "·",
       "fondo:", 'tres planos' if fondo.MARCA in salida else 'EL VIEJO', "·",
-      "prensa:", 'tarjetas' if prensa.MARCA in salida else 'SIN TOCAR')
+      "prensa:", 'tarjetas' if prensa.MARCA in salida else 'SIN TOCAR', "·",
+      "pagina:", 'con luz' if pagina.MARCA in salida else 'SIN TOCAR')
