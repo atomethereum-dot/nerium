@@ -1,0 +1,102 @@
+
+/* ══ la cabecera ══════════════════════════════════════════════════════════
+   Arriba del todo, el aviso de la ronda; debajo, la píldora de siempre con
+   el menú del centro devuelto y una ficha por entrada. */
+
+:root{--ann:38px}
+@media(max-width:899px){:root{--ann:34px}}
+body.ann-off{--ann:0px}
+
+/* ── el aviso ── */
+.ann{position:absolute;left:0;right:0;top:0;z-index:72;height:var(--ann);
+  display:flex;align-items:center;justify-content:center;overflow:hidden;
+  background:linear-gradient(90deg,#2A62F5 0%,#2F6BFF 50%,#2A62F5 100%);
+  color:#fff;
+  transition:height .38s cubic-bezier(.16,.84,.26,1)}
+body.ann-off .ann{height:0}
+.ann::after{content:"";position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(100deg,transparent 40%,rgba(255,255,255,.12) 50%,transparent 60%);
+  transform:translateX(-100%);animation:annBrillo 7.5s ease-in-out 2s infinite}
+@keyframes annBrillo{0%{transform:translateX(-100%)}42%,100%{transform:translateX(100%)}}
+
+.ann-in{display:flex;align-items:center;gap:11px;height:100%;padding:0 46px;
+  font-size:13px;font-weight:500;letter-spacing:-.005em;color:#fff;white-space:nowrap}
+.ann-dot{width:6px;height:6px;border-radius:50%;background:#fff;flex:none;
+  box-shadow:0 0 0 0 rgba(255,255,255,.55);animation:annLate 2.4s ease-in-out infinite}
+@keyframes annLate{0%,100%{box-shadow:0 0 0 0 rgba(255,255,255,.5)}
+  62%{box-shadow:0 0 0 6px rgba(255,255,255,0)}}
+.ann-p{width:3px;height:3px;border-radius:50%;background:rgba(255,255,255,.5);flex:none}
+.ann-k{font-weight:600}
+.ann-n b{font-weight:600;font-variant-numeric:tabular-nums}
+.ann-s{color:rgba(255,255,255,.78)}
+.ann-go{display:inline-block;transition:transform .3s cubic-bezier(.16,.84,.26,1)}
+.ann-in:hover .ann-go{transform:translateX(4px)}
+
+/* La línea de abajo es la misma cifra, dibujada: se ve cuánto queda sin
+   leer el número. */
+.ann-track{position:absolute;left:0;right:0;bottom:0;height:2px;
+  background:rgba(255,255,255,.22)}
+.ann-fill{display:block;height:100%;background:#DCE8FF;
+  box-shadow:0 0 10px rgba(220,232,255,.85);
+  transition:width 1.1s cubic-bezier(.16,.84,.26,1)}
+
+.ann-x{position:absolute;inset-inline-end:8px;top:50%;transform:translateY(-50%);
+  width:26px;height:26px;border-radius:6px;display:grid;place-items:center;
+  color:rgba(255,255,255,.72);transition:background .2s,color .2s}
+.ann-x:hover{background:rgba(255,255,255,.16);color:#fff}
+.ann-x svg{width:12px;height:12px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round}
+
+/* en arabe la barra se lee al reves: la flecha apunta al otro lado y la X se
+   va al otro extremo (eso lo hace ya inset-inline-end) */
+html[dir="rtl"] .ann-go{transform:scaleX(-1)}
+html[dir="rtl"] .ann-in:hover .ann-go{transform:scaleX(-1) translateX(4px)}
+
+@media(max-width:899px){
+  .ann-in{gap:9px;padding:0 40px;font-size:12px}
+  .ann-s,.ann-p2{display:none}
+}
+@media(max-width:380px){
+  .ann-k,.ann-p1{display:none}
+}
+@media(prefers-reduced-motion:reduce){
+  .ann,.ann-fill,.ann-go{transition:none}
+  .ann::after,.ann-dot{animation:none}
+}
+
+/* ── la píldora baja lo que ocupa el aviso ── */
+.hd,.hd.anclada{top:calc(var(--ann) + 14px) !important}
+@media(max-width:899px){
+  .hd,.hd.anclada{top:calc(var(--ann) + 10px) !important}
+}
+.hero-in{padding-top:calc(var(--bar) + var(--ann))}
+.sheet{top:calc(var(--ann) + var(--bar))}
+
+/* ── el menú del centro vuelve ── */
+@media(min-width:1120px){
+  .hd .nav{display:flex}
+  .hd .burger{display:none}
+}
+@media(min-width:1000px) and (max-width:1119px){
+  .hd .burger{display:block}
+}
+.nav{gap:2px}
+.nav>a{gap:8px;padding:7px 10px}
+.nav .chip{flex:none;display:inline-grid;place-items:center;width:20px;height:20px;
+  border-radius:5px;background:rgba(255,255,255,.075);
+  border:1px solid rgba(255,255,255,.10);color:rgba(226,236,255,.66);
+  transition:background .22s,border-color .22s,color .22s}
+.nav>a:hover .chip,.nav>a.on .chip{background:var(--blue);border-color:var(--blue);color:#fff}
+.nav .chip svg{width:11px;height:11px;fill:none;stroke:currentColor;stroke-width:1.6;
+  stroke-linecap:round;stroke-linejoin:round}
+
+/* ── y el mismo patrón en el menú del teléfono ── */
+.sheet a{display:flex;align-items:center;gap:12px}
+.sheet .chip{flex:none;display:inline-grid;place-items:center;width:26px;height:26px;
+  border-radius:7px;background:rgba(255,255,255,.07);
+  border:1px solid rgba(255,255,255,.11);color:rgba(226,236,255,.66);
+  margin-left:auto}
+.sheet .chip svg{width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:1.6;
+  stroke-linecap:round;stroke-linejoin:round}
+.sheet .sheet-cta{justify-content:center;margin-top:20px;border-bottom:0;
+  height:48px;border-radius:8px;background:var(--blue);color:#fff;
+  font-size:15px;font-weight:500}

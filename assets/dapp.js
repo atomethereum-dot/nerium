@@ -1287,6 +1287,10 @@
     }
     barra.style.width = pct + '%';
 
+    /* El aviso de arriba dice la misma cifra que esta barra, y la dice desde
+       aqui: escrita aparte se quedaria clavada el dia que la ronda avance. */
+    if (typeof window.__aviso === 'function') window.__aviso(pct);
+
     /* La primera vez sube contando, como en el diseño. Después, cuando una
        compra cambia la cifra, se escribe sin más: un contador saltando cada
        treinta segundos sería ruido. */
