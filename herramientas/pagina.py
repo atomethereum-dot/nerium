@@ -15,10 +15,77 @@ que hace que una pagina parezca una plantilla sin terminar.
 
 `montar_home.py` lo aplica en el paso 14.
 """
+import random
 import re
 
 FIN = '/* ══ fin: pagina ══ */'
 MARCA = '/* ══ el papel, la compatibilidad y las filas ══'
+
+# ── el tapiz de las secciones claras ─────────────────────────────────────────
+# El primer intento fue demasiado fino: dos focos al 6 % y grano al 3,6 %. Se
+# notaba, pero no se veia, y lo que hacia falta era un fondo de verdad.
+#
+# Este es el MISMO campo de bloques de la portada, pero quieto y palido: la
+# pagina entera pasa a hablar un solo idioma en vez de tener una portada con
+# personalidad y detras seis folios en blanco. Y esta compuesto igual que
+# aquel: los bloques se apartan del centro, que es donde va el texto, asi que
+# el hueco de leer es parte del dibujo y no una casualidad.
+#
+# Va como archivo (img/tapiz.svg) y no metido en el CSS: son 18 kB que asi se
+# guardan en cache y no engordan cada carga del index.html.
+W, H = 1600, 1000
+U = 40                                  # la celda, como en la portada
+AZUL = [(47,107,255), (121,171,255), (27,58,140), (150,178,232)]
+
+def tapiz(semilla=7):
+    r = random.Random(semilla)
+    piezas = []
+    cols, filas = W // U, H // U
+    for _ in range(190):
+        # se apartan del centro: ahi va el texto
+        while True:
+            cx = r.randrange(cols)
+            cy = r.randrange(filas)
+            dx = abs(cx / cols - .5) * 2
+            dy = abs(cy / filas - .5) * 2
+            d = (dx * dx * 1.15 + dy * dy) ** .5
+            if r.random() < min(1.0, d * 1.35):
+                break
+        an = r.choice([1, 1, 2, 2, 3, 4]) * U
+        al = U
+        c = AZUL[r.randrange(len(AZUL))]
+        a = round(r.uniform(.022, .072) * (0.42 + d * 0.72), 3)
+        piezas.append('<rect x="%d" y="%d" width="%d" height="%d" rx="3" fill="rgb(%d,%d,%d)" opacity="%s"/>'
+                      % (cx * U, cy * U, an, al, c[0], c[1], c[2], a))
+    blooms = (
+      '<circle cx="150" cy="70" r="620" fill="url(#b1)"/>'
+      '<circle cx="1480" cy="960" r="560" fill="url(#b2)"/>'
+      '<circle cx="820" cy="520" r="480" fill="url(#b3)"/>')
+    def rg(nid, col, op):
+        return ('<radialGradient id="' + nid + '">'
+                '<stop offset="0" stop-color="' + col + '" stop-opacity="' + op + '"/>'
+                '<stop offset="1" stop-color="' + col + '" stop-opacity="0"/></radialGradient>')
+    defs = ('<defs>' + rg('b1', 'rgb(47,107,255)', '.13')
+                     + rg('b2', 'rgb(91,140,255)', '.11')
+                     + rg('b3', 'rgb(255,255,255)', '.10') + '</defs>')
+    return ('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 %d %d" '
+            'preserveAspectRatio="xMidYMid slice">%s%s%s</svg>'
+            % (W, H, defs, blooms, ''.join(piezas)))
+
+
+def escribir_tapiz(raiz):
+    """Deja img/tapiz.svg al dia. Con semilla fija: el mismo dibujo siempre."""
+    import os
+    ruta = os.path.join(raiz, 'img', 'tapiz.svg')
+    dibujo = tapiz()
+    try:
+        if open(ruta, encoding='utf-8').read() == dibujo:
+            return ruta
+    except OSError:
+        pass
+    open(ruta, 'w', encoding='utf-8').write(dibujo)
+    return ruta
+
 
 # ── el grano ─────────────────────────────────────────────────────────────────
 # Un blanco liso de verdad no existe en nada impreso. Este es ruido fractal de
@@ -33,25 +100,34 @@ GRANO = ("url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' "
 CSS = """
 /* ══ el papel, la compatibilidad y las filas ═════════════════════════════ */
 
-/* ── 1 · el papel deja de ser blanco liso ──
+/* ── 1 · el papel: un fondo de verdad ──
    Seis secciones de #FFFFFF plano seguidas es lo que hace que una pagina
-   parezca una plantilla a medio terminar. Ahora el papel tiene luz —dos focos
-   muy flojos del azul de la casa, uno arriba a la izquierda y otro abajo a la
-   derecha— y grano. El grano es ruido fractal que dibuja el propio navegador,
-   no una imagen que descargar, y va al 3,6 %: no se ve, se nota. */
+   parezca una plantilla a medio terminar. Y no bastaba con insinuarlo: el
+   primer intento fueron dos focos al 6 % y grano, y se notaba pero no se veia.
+   Ahora lleva tapiz: el MISMO campo de bloques de la portada, quieto y palido,
+   asi que la pagina entera habla un solo idioma en vez de tener una portada
+   con caracter y detras seis folios en blanco. Esta compuesto igual que aquel
+   —los bloques se apartan del centro—, de modo que el hueco por donde se lee
+   es parte del dibujo. Encima va el grano, que es lo que quita el ultimo resto
+   de blanco de plantilla. */
 :root{--grano:%(GRANO)s}
 .paper,.paper2,.secure,.sale,.tkp,.join,.press{
-  background-image:
-    radial-gradient(88% 62% at 10% -6%, rgba(47,107,255,.062) 0%, rgba(47,107,255,0) 60%),
-    radial-gradient(72% 54% at 104% 106%, rgba(47,107,255,.048) 0%, rgba(47,107,255,0) 58%),
-    var(--grano);
-  background-repeat:no-repeat,no-repeat,repeat}
-.paper2{
-  background-image:
-    radial-gradient(88% 62% at 10% -6%, rgba(47,107,255,.085) 0%, rgba(47,107,255,0) 62%),
-    radial-gradient(72% 54% at 104% 106%, rgba(47,107,255,.060) 0%, rgba(47,107,255,0) 58%),
-    var(--grano);
-  background-repeat:no-repeat,no-repeat,repeat}
+  background-image:var(--grano),url(img/tapiz.svg);
+  background-repeat:repeat,no-repeat;
+  background-size:auto,cover;
+  background-position:0 0,center}
+/* Todas lo miran por el centro, y no cada una por una esquina: el tapiz esta
+   dibujado para dejar el medio libre, que es por donde se lee, y recortarlo
+   por un lado metia los bloques justo detras del titular. */
+@media(max-width:760px){
+  /* En vertical, «cover» agranda tanto el dibujo que los bloques dejan de
+     serlo y se vuelven manchas. Se le fija el ancho y se repite hacia abajo:
+     los bloques recuperan su tamano y la costura, a este contraste, no se ve. */
+  .paper,.paper2,.secure,.sale,.tkp,.join,.press{
+    background-size:auto,860px auto;
+    background-repeat:repeat,repeat-y;
+    background-position:0 0,center top}
+}
 
 /* ── 2 · «Compatible with»: la seccion mas vacia de la pagina ──
    Era una pantalla entera de blanco con siete nombres en gris pasando de
@@ -111,7 +187,9 @@ CSS = """
    datos que no tenemos. Va en z-index 0 —encima del fondo de la tarjeta y
    debajo del contenido—: en -1, con el ::before que ya tenia la tarjeta, se
    quedaba detras del propio fondo y no se veia. */
-.jbtn{overflow:hidden}
+/* Con el papel ya texturado, una tarjeta transparente deja verse el tapiz por
+   dentro y deja de parecer una tarjeta: se le pone fondo propio. */
+.jbtn{overflow:hidden;background:rgba(255,255,255,.90)}
 .jbtn::after{content:"";position:absolute;z-index:0;right:-12%;bottom:-38%;
   width:60%;aspect-ratio:1;border-radius:50%;pointer-events:none;
   background:radial-gradient(circle at 50% 50%,

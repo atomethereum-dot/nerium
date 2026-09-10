@@ -147,6 +147,7 @@ rest = fondo.aplicar(rest)
 rest = prensa.aplicar(rest)
 
 # ── 14 · el papel, la compatibilidad y las filas ──
+pagina.escribir_tapiz('/home/user/nerium')   # img/tapiz.svg, al dia
 rest = pagina.aplicar(rest)
 
 salida = pre + rest

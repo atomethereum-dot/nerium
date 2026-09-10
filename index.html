@@ -2006,25 +2006,34 @@ html[dir="rtl"] .ann-in:hover .ann-go{transform:scaleX(-1) translateX(4px)}
 /* ══ fin: prensa ══ */
 /* ══ el papel, la compatibilidad y las filas ═════════════════════════════ */
 
-/* ── 1 · el papel deja de ser blanco liso ──
+/* ── 1 · el papel: un fondo de verdad ──
    Seis secciones de #FFFFFF plano seguidas es lo que hace que una pagina
-   parezca una plantilla a medio terminar. Ahora el papel tiene luz —dos focos
-   muy flojos del azul de la casa, uno arriba a la izquierda y otro abajo a la
-   derecha— y grano. El grano es ruido fractal que dibuja el propio navegador,
-   no una imagen que descargar, y va al 3,6 %: no se ve, se nota. */
+   parezca una plantilla a medio terminar. Y no bastaba con insinuarlo: el
+   primer intento fueron dos focos al 6 % y grano, y se notaba pero no se veia.
+   Ahora lleva tapiz: el MISMO campo de bloques de la portada, quieto y palido,
+   asi que la pagina entera habla un solo idioma en vez de tener una portada
+   con caracter y detras seis folios en blanco. Esta compuesto igual que aquel
+   —los bloques se apartan del centro—, de modo que el hueco por donde se lee
+   es parte del dibujo. Encima va el grano, que es lo que quita el ultimo resto
+   de blanco de plantilla. */
 :root{--grano:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.92' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='.036'/%3E%3C/svg%3E")}
 .paper,.paper2,.secure,.sale,.tkp,.join,.press{
-  background-image:
-    radial-gradient(88% 62% at 10% -6%, rgba(47,107,255,.062) 0%, rgba(47,107,255,0) 60%),
-    radial-gradient(72% 54% at 104% 106%, rgba(47,107,255,.048) 0%, rgba(47,107,255,0) 58%),
-    var(--grano);
-  background-repeat:no-repeat,no-repeat,repeat}
-.paper2{
-  background-image:
-    radial-gradient(88% 62% at 10% -6%, rgba(47,107,255,.085) 0%, rgba(47,107,255,0) 62%),
-    radial-gradient(72% 54% at 104% 106%, rgba(47,107,255,.060) 0%, rgba(47,107,255,0) 58%),
-    var(--grano);
-  background-repeat:no-repeat,no-repeat,repeat}
+  background-image:var(--grano),url(img/tapiz.svg);
+  background-repeat:repeat,no-repeat;
+  background-size:auto,cover;
+  background-position:0 0,center}
+/* Todas lo miran por el centro, y no cada una por una esquina: el tapiz esta
+   dibujado para dejar el medio libre, que es por donde se lee, y recortarlo
+   por un lado metia los bloques justo detras del titular. */
+@media(max-width:760px){
+  /* En vertical, «cover» agranda tanto el dibujo que los bloques dejan de
+     serlo y se vuelven manchas. Se le fija el ancho y se repite hacia abajo:
+     los bloques recuperan su tamano y la costura, a este contraste, no se ve. */
+  .paper,.paper2,.secure,.sale,.tkp,.join,.press{
+    background-size:auto,860px auto;
+    background-repeat:repeat,repeat-y;
+    background-position:0 0,center top}
+}
 
 /* ── 2 · «Compatible with»: la seccion mas vacia de la pagina ──
    Era una pantalla entera de blanco con siete nombres en gris pasando de
@@ -2084,7 +2093,9 @@ html[dir="rtl"] .ann-in:hover .ann-go{transform:scaleX(-1) translateX(4px)}
    datos que no tenemos. Va en z-index 0 —encima del fondo de la tarjeta y
    debajo del contenido—: en -1, con el ::before que ya tenia la tarjeta, se
    quedaba detras del propio fondo y no se veia. */
-.jbtn{overflow:hidden}
+/* Con el papel ya texturado, una tarjeta transparente deja verse el tapiz por
+   dentro y deja de parecer una tarjeta: se le pone fondo propio. */
+.jbtn{overflow:hidden;background:rgba(255,255,255,.90)}
 .jbtn::after{content:"";position:absolute;z-index:0;right:-12%;bottom:-38%;
   width:60%;aspect-ratio:1;border-radius:50%;pointer-events:none;
   background:radial-gradient(circle at 50% 50%,

@@ -37,8 +37,26 @@ di(papel.every(p => p.img !== 'none'),
    'ninguna es ya un color plano: todas llevan luz encima');
 di(papel.every(p => /feTurbulence/.test(p.img)),
    'y todas llevan el grano, que es lo que quita el blanco de plantilla');
-di(papel.every(p => /rgba\(47, ?107, ?255/.test(p.img)),
-   'la luz es del azul de la casa, no un gris cualquiera');
+di(papel.every(p => /tapiz\.svg/.test(p.img)),
+   'y el tapiz de bloques, que es el fondo de verdad');
+const svg = fs.readFileSync(path.join(RAIZ, 'img', 'tapiz.svg'), 'utf8');
+di(/rgb\(47,107,255\)/.test(svg), 'dibujado con el azul de la casa, no un gris cualquiera');
+di((svg.match(/<rect /g) || []).length > 120,
+   'y con bloques de verdad: ' + (svg.match(/<rect /g) || []).length);
+/* El centro tiene que quedar libre: es por donde se lee. Y el hueco es un
+   OVALO, no una banda vertical —los bloques se apartan del medio en los dos
+   ejes—, asi que se mide la caja central contra el resto, por unidad de area,
+   que es la unica comparacion honesta cuando las dos zonas no miden igual. */
+const W = 1600, H = 1000;
+const cajas = [...svg.matchAll(/<rect x="(\d+)" y="(\d+)" width="(\d+)" height="(\d+)"[^>]*opacity="([\d.]+)"/g)]
+  .map(m => ({ x: +m[1], y: +m[2], w: +m[3], h: +m[4], a: +m[5] }));
+const dentro = c => { const cx = c.x + c.w / 2, cy = c.y + c.h / 2;
+  return cx >= W * .32 && cx < W * .68 && cy >= H * .28 && cy < H * .72; };
+const tinta = f => cajas.filter(f).reduce((s, c) => s + c.w * c.h * c.a, 0);
+const areaC = (W * .36) * (H * .44), areaR = W * H - areaC;
+const dC = tinta(dentro) / areaC, dR = tinta(c => !dentro(c)) / areaR;
+di(dC < dR * 0.5, 'y el medio despejado para el texto: ' +
+   (dC / dR).toFixed(2) + ' de tinta en el centro por cada 1 de fuera');
 
 // ── «Compatible with» ──
 const comp = await pg.evaluate(() => {
