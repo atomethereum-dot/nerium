@@ -17,6 +17,7 @@ todo lo que se hizo aqui y el archivo subido no trae:
  10. los arreglos de la portada: la cursiva falsa del titular, la paleta del
      mosaico, el orden de los botones y las cuatro pruebas
  11. la cabecera: el aviso de la ronda arriba y el menu del centro con fichas
+ 12. el fondo de la portada: los tres planos, lo que se posa, el pautado
 """
 import sys, os
 
@@ -26,6 +27,7 @@ import seedround
 import marca
 import portada
 import cabecera
+import fondo
 subido, publicado = sys.argv[1], '/home/user/nerium/index.html'
 z = open(subido, encoding='utf-8').read()
 p = open(publicado, encoding='utf-8').read()
@@ -133,6 +135,10 @@ rest = portada.aplicar(rest)
 # su CSS tiene que caer por detras del bloque grande para poder pisarlo.
 rest = cabecera.aplicar(rest)
 
+# ── 12 · el fondo de la portada ──
+# Sustituye entero el campo de bloques que trae el archivo del diseno.
+rest = fondo.aplicar(rest)
+
 salida = pre + rest
 open(publicado, 'w', encoding='utf-8').write(salida)
 print("montado:", len(salida), "bytes ·", salida.count('var(--hud-b)'), "usos de --hud-b ·",
@@ -141,4 +147,5 @@ print("montado:", len(salida), "bytes ·", salida.count('var(--hud-b)'), "usos d
       "whitelist restante:", salida.lower().count('whitelist'), "·",
       "marca:", 'cubo' if 'nrmPlata' in salida else 'LA VIEJA', "·",
       "portada:", 'arreglada' if portada.MARCA in salida else 'SIN TOCAR', "·",
-      "cabecera:", 'aviso + menu' if '<div class="ann" id="ann">' in salida else 'SIN TOCAR')
+      "cabecera:", 'aviso + menu' if '<div class="ann" id="ann">' in salida else 'SIN TOCAR', "·",
+      "fondo:", 'tres planos' if fondo.MARCA in salida else 'EL VIEJO')

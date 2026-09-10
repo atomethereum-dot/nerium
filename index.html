@@ -3225,102 +3225,179 @@ const CALM=matchMedia('(prefers-reduced-motion: reduce)').matches;
     if(q!==claro){claro=q;document.body.classList.toggle('light',q)}
   })();
 })();
+/* ══ el fondo de la portada ═══════════════════════════════════════════════
+   Antes: bloques al azar cayendo en columnas, todos al mismo tamano, mas una
+   barra que barria de arriba abajo. Plano y sin composicion: la misma densidad
+   en todas partes, tambien detras del titular.
+
+   Ahora hay tres planos de profundidad —celda, velocidad, alfa y paralaje
+   distintos en cada uno—, y casi la mitad de los bloques no cruzan: caen
+   frenando hasta una fila, dan un destello al posarse y se quedan de brasa
+   apagandose. Es una cadena de liquidacion: las cosas se asientan.
+
+   Ninguna de esas filas esta en la banda del medio, y en horizontal los
+   bloques se apartan del centro: el hueco del titular es parte del diseno,
+   no una casualidad. Detras va un papel pautado que tambien se apaga en el
+   centro, y una luz que pasea sola y levanta lo que pilla cerca.
+
+   Los dos caminos —WebGL y lienzo— pintan lo mismo. El azul de marca se suma
+   en «trama» (a+b-a*b), que no puede pasarse de 255: sumando sin mas, dos
+   azules encima daban cian.
+   Lo mantiene herramientas/fondo.py. */
 function campoGL(){
   const cv=document.getElementById('burst'); if(!cv)return false;
-  const gl=cv.getContext('webgl2',{alpha:false,antialias:false,
-    powerPreference:'high-performance'});
+  const gl=cv.getContext('webgl2',{alpha:false,antialias:false,powerPreference:'high-performance'});
   if(!gl)return false;
   const VS=`#version 300 es
-  layout(location=0) in vec2 esquina;      // el cuadrado unidad
-  layout(location=1) in vec4 A;            // gx, ancho, tono, fase
-  layout(location=2) in vec4 B;            // velocidad, vida, alfa, profundidad
-  layout(location=3) in vec2 C;            // caída, banco (0 arriba, 1 abajo)
-  uniform vec2 R; uniform float T,U,desliz,scanY,grueso;
-  uniform vec4 M;                          // ratón: x, y, fuerza, alcance
-  uniform vec2 Mv;                         // velocidad del ratón
-  out float vAlfa; out float vTono; out float vScan;
+  layout(location=0) in vec2 esquina;
+  layout(location=1) in vec4 A;   // columna, ancho, tono, fase
+  layout(location=2) in vec4 B;   // velocidad, vida, alfa, plano
+  layout(location=3) in vec4 C;   // recorrido, banco, cuando se posa, se posa
+  uniform vec2 R; uniform float T,U,desliz;
+  uniform vec4 M; uniform vec2 Mv; uniform vec3 LUZ;
+  out float vAlfa; out float vTono; out float vDest; out float vLuz;
+  out float vY; out float vEstira; out float vCabezaAbajo;
   void main(){
-    float k=fract(A.w + T*B.x*0.30*B.w/B.y);
-    float env=min(1.0,k*7.0)*pow(1.0-k,1.5);
-    float a=B.z*env;
-    float rec = C.y>0.5 ? (1.14 - k*C.x) : (-0.14 + k*C.x);
-    float x = A.x*U;
-    float y = floor(rec*R.y/U+0.5)*U + floor(desliz*B.w*(C.y>0.5?-1.0:1.0)/U+0.5)*U;
-    float w = A.y*U;
+    int p = int(B.w+0.5);
+    float esc = p==0 ? 0.55 : (p==1 ? 1.0 : 1.38);
+    float vel = p==0 ? 0.42 : (p==1 ? 1.0 : 1.62);
+    float par = p==0 ? 0.32 : (p==1 ? 0.76 : 1.20);
+    float u = U*esc;
+
+    float k = fract(A.w + T*B.x*vel*0.26/B.y);
+    float origen = C.y>0.5 ? 1.16 : -0.16;
+    float signo  = C.y>0.5 ? -1.0 : 1.0;
+    bool posa = C.w>0.5;
+    float kp = C.z;
+
+    float rec, a, dest=0.0, avance;
+    float entra = min(1.0, k*9.0);
+    if(posa){
+      float q = min(k,kp)/kp;
+      avance = q;
+      rec = origen + signo*C.x*(1.0 - pow(1.0-q,2.4));   // llega frenando
+      if(k<=kp){ a = B.z*entra; }
+      else{
+        float t2 = (k-kp)/max(1e-3,1.0-kp);
+        dest = pow(1.0 - min(1.0,t2/0.09), 3.0);          // el destello de posarse
+        a = B.z*(0.16 + 0.50*pow(1.0-t2,1.9));
+        a *= 1.0 + dest*2.8;
+        avance = 1.0;
+      }
+    }else{
+      avance = k;
+      rec = origen + signo*C.x*k;
+      a = B.z*entra*pow(1.0-k,1.4);
+    }
+
+    float x = A.x*u + floor(T*(p==0?2.2:(p==1?5.0:8.5))/u)*u;
+    float y = floor(rec*R.y/u+0.5)*u + floor(desliz*par/u+0.5)*u*signo;
+    float w = A.y*u;
+    float h = u;
+
+    // la estela: mientras cae se estira hacia atras, y se apaga en la cola
+    float estira = 0.0;
+    if(p>=1 && avance<1.0){
+      estira = vel*0.85*(1.0-avance)*(1.0-avance);
+      h = u*(1.0+estira);
+      if(signo>0.0) y -= (h-u);
+    }
+
     if(M.z>0.01){
-      vec2 dd=vec2(x+w*0.5, y+U*0.5)-M.xy;
+      vec2 dd=vec2(x+w*0.5, y+h*0.5)-M.xy;
       float d=length(dd);
       if(d<M.w){
         float q=1.0-d/M.w;
         float f=q*q*(3.0-2.0*q)*M.z;
         vec2 e=dd/max(d,1.0);
         float tope=M.w*0.42;
-        float emp=min(f*U*11.0,tope);
-        float gir=min(f*U*4.2,tope*0.42);
-        vec2 o=e*emp + vec2(-e.y,e.x)*gir + Mv*(f*0.026);
-        x+=floor(o.x/U+0.5)*U;
-        y+=floor(o.y/U+0.5)*U;
+        vec2 o=e*min(f*u*11.0,tope) + vec2(-e.y,e.x)*min(f*u*4.2,tope*0.42) + Mv*(f*0.026);
+        x+=floor(o.x/u+0.5)*u;
+        y+=floor(o.y/u+0.5)*u;
         a=min(1.0,a*(1.0+f*3.4));
       }
     }
-    float dS=abs(y+U*0.5-scanY);
-    float ins=0.0;
-    if(dS<grueso){ ins=1.0-dS/grueso; ins*=ins; a=min(1.0,a+ins*0.85); }
-    vec2 pos=vec2(x,y)+esquina*vec2(max(w-2.0,1.0),max(U-2.0,1.0))+vec2(1.0,1.0);
+
+    // la luz que pasea: no es el raton, va sola
+    float lit = 1.0 - smoothstep(LUZ.z*0.10, LUZ.z, length(vec2(x+w*0.5,y+h*0.5)-LUZ.xy));
+    a *= 1.0 + lit*0.50;
+
+    vec2 pos=vec2(x,y)+esquina*vec2(max(w-2.0,1.0),max(h-2.0,1.0))+vec2(1.0,1.0);
     gl_Position=vec4((pos/R)*2.0-1.0,0.0,1.0);
     gl_Position.y=-gl_Position.y;
-    vAlfa=a; vTono=A.z; vScan=ins;
+    vAlfa=min(a,1.0); vTono=A.z; vDest=dest; vLuz=lit;
+    vY=esquina.y; vEstira=estira/(1.0+estira); vCabezaAbajo = signo>0.0 ? 1.0 : 0.0;
   }`;
   const FS=`#version 300 es
   precision highp float;
-  in float vAlfa; in float vTono; in float vScan;
+  in float vAlfa; in float vTono; in float vDest; in float vLuz;
+  in float vY; in float vEstira; in float vCabezaAbajo;
   uniform vec3 PAL[6];
   out vec4 O;
   void main(){
-    if(vAlfa<0.012) discard;
+    float a=vAlfa;
+    if(vEstira>0.002){
+      float t = vCabezaAbajo>0.5 ? vY : 1.0-vY;      // 1 en la cabeza
+      a *= mix(1.0, 0.10+0.90*t*t, vEstira);
+    }
+    if(a<0.012) discard;
     int idx=int(vTono+0.5);
     vec3 c=PAL[0];
     if(idx==1)c=PAL[1]; else if(idx==2)c=PAL[2]; else if(idx==3)c=PAL[3];
     else if(idx==4)c=PAL[4]; else if(idx==5)c=PAL[5];
-    if(vScan>0.42){ float m=(vScan-0.42)/0.58; c=mix(c,PAL[3],m*0.62); }
-    O=vec4(c*vAlfa,vAlfa);        // se trama sobre lo ya pintado
+    c=mix(c,PAL[3],vLuz*0.30);
+    c=mix(c,vec3(0.90,0.94,1.0),vDest*0.80);
+    O=vec4(c*a,a);
   }`;
   const VS2=`#version 300 es
   layout(location=0) in vec2 esquina;
   void main(){ gl_Position=vec4(esquina*2.0-1.0,0.0,1.0); }`;
   const FS_FADE=`#version 300 es
-  precision highp float; out vec4 O;
-  void main(){ O=vec4(0.0,0.0,0.0,0.22); }`;
+  precision highp float; uniform float f; out vec4 O;
+  void main(){ O=vec4(0.0,0.0,0.0,f); }`;
+  /* La copia trae ademas el papel pautado y la luz que pasea. Van aqui, y no
+     en el acumulador, por dos motivos: es una pasada a pantalla completa que
+     ya se hacia —asi no cuesta un dibujado mas— y el pautado sale limpio, sin
+     que se lo coma el borrado de cada cuadro. */
   const FS_COPIA=`#version 300 es
   precision highp float;
-  uniform sampler2D tex; uniform vec2 R;
-  out vec4 O;
-  void main(){ O=vec4(texture(tex,gl_FragCoord.xy/R).rgb,1.0); }`;
-  const FS_HALO=`#version 300 es
-  precision highp float;
-  uniform vec2 R; uniform float scanY,grueso;
+  uniform sampler2D tex; uniform vec2 R; uniform float U, desliz; uniform vec3 LUZ;
   out vec4 O;
   void main(){
-    float d=abs(gl_FragCoord.y-(R.y-scanY));
-    float g=grueso*0.6;
-    float a=max(0.0,1.0-d/g);
-    a=a*a*0.16;
-    float linea=smoothstep(1.5,0.0,d)*0.22;
-    vec3 c=mix(vec3(0.184,0.420,1.0),vec3(0.659,0.769,1.0),0.5);
-    O=vec4(c*(a+linea),a+linea);
+    vec2 q=vec2(gl_FragCoord.x, R.y-gl_FragCoord.y);
+    float lx=step(mod(q.x, U*2.0), 1.0);
+    float ly=step(mod(q.y + desliz*0.35, U*3.0), 1.0);
+    float rej=(lx*0.034 + ly*0.022)*smoothstep(0.15,0.50,length((q/R-0.5)*vec2(1.30,1.0)));
+    float lz=1.0-smoothstep(0.0,LUZ.z*1.25,length(q-LUZ.xy));
+    lz=lz*lz*0.055;
+    vec3 c=texture(tex,gl_FragCoord.xy/R).rgb
+         + vec3(0.34,0.50,0.86)*rej + vec3(0.184,0.420,1.0)*lz;
+    O=vec4(c,1.0);
   }`;
-  function compila(t,src){const o=gl.createShader(t);gl.shaderSource(o,src);gl.compileShader(o);
+  /* Pautado y luz en la MISMA pasada: son dos capas a pantalla completa y
+     hacerlas por separado costaba un dibujado entero por cuadro. */
+  const FS_FONDO=`#version 300 es
+  precision highp float;
+  uniform vec2 R; uniform float U, desliz; uniform vec3 LUZ;
+  out vec4 O;
+  void main(){
+    vec2 q=vec2(gl_FragCoord.x, R.y-gl_FragCoord.y);
+    float lx=step(mod(q.x, U*2.0), 1.0);
+    float ly=step(mod(q.y + desliz*0.35, U*3.0), 1.0);
+    float rej=(lx*0.034 + ly*0.022)*smoothstep(0.15,0.50,length((q/R-0.5)*vec2(1.30,1.0)));
+    float lz=1.0-smoothstep(0.0,LUZ.z*1.25,length(q-LUZ.xy));
+    lz=lz*lz*0.055;
+    vec3 c=vec3(0.34,0.50,0.86)*rej + vec3(0.184,0.420,1.0)*lz;
+    float a=rej+lz;
+    O=vec4(c,a);
+  }`;
+  function compila(t,s){const o=gl.createShader(t);gl.shaderSource(o,s);gl.compileShader(o);
     if(!gl.getShaderParameter(o,gl.COMPILE_STATUS)){console.warn(gl.getShaderInfoLog(o));return null}return o}
-  function programa(vs,fs){
-    const v=compila(gl.VERTEX_SHADER,vs), f=compila(gl.FRAGMENT_SHADER,fs);
-    if(!v||!f)return null;
-    const p=gl.createProgram();gl.attachShader(p,v);gl.attachShader(p,f);gl.linkProgram(p);
-    if(!gl.getProgramParameter(p,gl.LINK_STATUS)){console.warn(gl.getProgramInfoLog(p));return null}
-    return p;
-  }
-  const pCubos=programa(VS,FS), pFade=programa(VS2,FS_FADE),
-        pHalo=programa(VS2,FS_HALO), pCopia=programa(VS2,FS_COPIA);
-  if(!pCubos||!pFade||!pHalo||!pCopia)return false;
+  function programa(v,f){const a=compila(gl.VERTEX_SHADER,v),b=compila(gl.FRAGMENT_SHADER,f);
+    if(!a||!b)return null;const p=gl.createProgram();gl.attachShader(p,a);gl.attachShader(p,b);gl.linkProgram(p);
+    if(!gl.getProgramParameter(p,gl.LINK_STATUS)){console.warn(gl.getProgramInfoLog(p));return null}return p}
+  const pCubos=programa(VS,FS), pFade=programa(VS2,FS_FADE), pCopia=programa(VS2,FS_COPIA);
+  if(!pCubos||!pFade||!pCopia)return false;
   let fbo=gl.createFramebuffer(), tex=gl.createTexture();
   function lienzoInterno(w,h){
     gl.bindTexture(gl.TEXTURE_2D,tex);
@@ -3334,8 +3411,10 @@ function campoGL(){
     gl.clearColor(0,0,0,1); gl.clear(gl.COLOR_BUFFER_BIT);
     gl.bindFramebuffer(gl.FRAMEBUFFER,null);
   }
-  const T=[[64,132,255],[47,107,255],[124,168,255],[220,226,238],[116,134,176],[26,52,132]];
+  const T=[[64,132,255],[47,107,255],[124,168,255],[206,220,248],[104,128,182],[26,52,132]];
+  const TONOS=[[5,5,5,5,4],[1,1,1,0,4],[0,0,1,2,2]];
   const rnd=(a,b)=>a+Math.random()*(b-a);
+  const FILAS=[0.045,0.105,0.170,0.240,0.310,0.700,0.770,0.840,0.905,0.960];
   const FINE=matchMedia('(hover:hover) and (pointer:fine)').matches;
   const M={x:-1e5,y:-1e5,tx:-1e5,ty:-1e5,k:0,want:0,vx:0,vy:0};
   const vao=gl.createVertexArray(); gl.bindVertexArray(vao);
@@ -3343,17 +3422,15 @@ function campoGL(){
   gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([0,0, 1,0, 0,1, 1,1]),gl.STATIC_DRAW);
   gl.enableVertexAttribArray(0); gl.vertexAttribPointer(0,2,gl.FLOAT,false,0,0);
   const bufA=gl.createBuffer(), bufB=gl.createBuffer(), bufC=gl.createBuffer();
-  for(const [b,loc,n] of [[bufA,1,4],[bufB,2,4],[bufC,3,2]]){
+  for(const [b,l,n] of [[bufA,1,4],[bufB,2,4],[bufC,3,4]]){
     gl.bindBuffer(gl.ARRAY_BUFFER,b);
-    gl.enableVertexAttribArray(loc);
-    gl.vertexAttribPointer(loc,n,gl.FLOAT,false,0,0);
-    gl.vertexAttribDivisor(loc,1);
+    gl.enableVertexAttribArray(l); gl.vertexAttribPointer(l,n,gl.FLOAT,false,0,0);
+    gl.vertexAttribDivisor(l,1);
   }
   const vaoPlano=gl.createVertexArray(); gl.bindVertexArray(vaoPlano);
   gl.bindBuffer(gl.ARRAY_BUFFER,quad);
   gl.enableVertexAttribArray(0); gl.vertexAttribPointer(0,2,gl.FLOAT,false,0,0);
-  let W=0,H=0,U=28,cols=1,N=0,dpr=1,desliz=0,live=true,t=0,last=0;
-  const uni={};
+  let W=0,H=0,U=28,N=0,dpr=1,desliz=0,live=true,t=0,last=0;
   function loc(p,n){return gl.getUniformLocation(p,n)}
   function size(){
     dpr=Math.min(devicePixelRatio||1,1.5);
@@ -3361,21 +3438,35 @@ function campoGL(){
     cv.width=Math.round(W*dpr);cv.height=Math.round(H*dpr);
     gl.viewport(0,0,cv.width,cv.height);
     U=Math.max(15,Math.round(Math.min(cv.width,cv.height)/26));
-    cols=Math.ceil(cv.width/U);
-    N=cv.width<1200?120:cv.width<2000?200:270;
-    const A=new Float32Array(N*4), B=new Float32Array(N*4), C=new Float32Array(N*2);
+    N=cv.width<1200?190:cv.width<2000?320:420;
+    const A=new Float32Array(N*4), B=new Float32Array(N*4), C=new Float32Array(N*4);
     for(let i=0;i<N;i++){
-      const abajo=Math.random()<0.42;
-      A[i*4]  =(Math.random()*cols)|0;
-      A[i*4+1]=Math.round(rnd(1,3));
-      A[i*4+2]=(Math.random()*T.length)|0;
+      const r=Math.random();
+      const plano = r<0.44 ? 0 : (r<0.80 ? 1 : 2);
+      const esc=[0.55,1,1.38][plano];
+      const cols=Math.ceil(cv.width/(U*esc));
+      const posa=Math.random()<0.46;
+      /* Las que se posan aterrizan en una de estas filas, y no hay ninguna en
+         la banda del medio: ahi va el titular. Salen del canto mas cercano a
+         su fila, asi que el campo converge arriba y abajo y deja el centro. */
+      const destino = posa ? FILAS[(Math.random()*FILAS.length)|0]+rnd(-.022,.022) : 0;
+      const abajo = posa ? destino>0.5 : Math.random()<0.38;
+      const paleta=TONOS[plano];
+      /* y en horizontal se apartan del centro por el mismo motivo */
+      let ux=Math.random();
+      ux = 0.5 + Math.sign(ux-0.5)*Math.pow(Math.abs(ux-0.5)*2,0.62)*0.5;
+      A[i*4]  =Math.min(cols-1,(ux*cols)|0);
+      A[i*4+1]=plano===0?Math.round(rnd(1,4)):Math.round(rnd(1,3));
+      A[i*4+2]=paleta[(Math.random()*paleta.length)|0];
       A[i*4+3]=Math.random();
-      B[i*4]  =rnd(.4,1.1);
-      B[i*4+1]=rnd(.7,1.6);
-      B[i*4+2]=rnd(.30,.85);
-      B[i*4+3]=rnd(.45,1);
-      C[i*2]  =Math.pow(Math.random(),1.9)*(abajo?.62:.78)+.10;
-      C[i*2+1]=abajo?1:0;
+      B[i*4]  =rnd(.5,1.15);
+      B[i*4+1]=posa?rnd(1.6,3.4):rnd(.8,1.7);
+      B[i*4+2]=[rnd(.07,.17),rnd(.15,.33),rnd(.26,.54)][plano];
+      B[i*4+3]=plano;
+      C[i*4]  =posa?Math.abs(destino-(abajo?1.16:-0.16)):(Math.pow(Math.random(),1.7)*(abajo?.70:.86)+.14);
+      C[i*4+1]=abajo?1:0;
+      C[i*4+2]=rnd(.22,.46);
+      C[i*4+3]=posa?1:0;
     }
     gl.bindBuffer(gl.ARRAY_BUFFER,bufA);gl.bufferData(gl.ARRAY_BUFFER,A,gl.STATIC_DRAW);
     gl.bindBuffer(gl.ARRAY_BUFFER,bufB);gl.bufferData(gl.ARRAY_BUFFER,B,gl.STATIC_DRAW);
@@ -3398,6 +3489,8 @@ function campoGL(){
   }
   new IntersectionObserver(e=>{live=e[0].isIntersecting},{threshold:.02}).observe(cv);
   let cuadros=0, t0Med=0, vigilando=true, muerto=false;
+  /* Si la tarjeta no da 40 cuadros, se suelta WebGL y sigue el camino de
+     lienzo, que pinta lo mismo con menos coste. */
   function rendirse(){
     muerto=true;
     try{gl.getExtension('WEBGL_lose_context')?.loseContext()}catch(e){}
@@ -3417,8 +3510,7 @@ function campoGL(){
       cuadros++;
       if(ts-t0Med>1000){
         vigilando=false;
-        const fps=cuadros*1000/(ts-t0Med);
-        if(fps<40){rendirse();return}
+        if(cuadros*1000/(ts-t0Med)<40){rendirse();return}
       }
     }
     const dt=Math.min(.05,(ts-last)/1000||.016); last=ts; t+=dt;
@@ -3426,43 +3518,36 @@ function campoGL(){
     if(M.tx>-1e4){
       const px=M.x,py=M.y;
       if(M.x<-1e4){M.x=M.tx;M.y=M.ty}
-      M.x+=(M.tx-M.x)*Math.min(1,dt*14);
-      M.y+=(M.ty-M.y)*Math.min(1,dt*14);
-      M.vx=(M.x-px)/Math.max(dt,.001);M.vy=(M.y-py)/Math.max(dt,.001);
+      M.x+=(M.tx-M.x)*Math.min(1,dt*14); M.y+=(M.ty-M.y)*Math.min(1,dt*14);
+      M.vx=(M.x-px)/Math.max(dt,.001); M.vy=(M.y-py)/Math.max(dt,.001);
     }
     desliz += ((scrollY*0.62*dpr) - desliz) * Math.min(1,dt*6);
-    const CICLO=7.2, q=(t%CICLO)/CICLO;
-    const vai=q<.5?q*2:(1-q)*2;
-    const suave=vai*vai*(3-2*vai);
-    const scanY=(-0.12+suave*1.24)*cv.height;
-    const grueso=Math.max(46*dpr, cv.height*0.085);
+    const lx=cv.width*(0.5+0.34*Math.sin(t*0.113)+0.10*Math.sin(t*0.291));
+    const ly=cv.height*(0.5+0.30*Math.cos(t*0.087)+0.09*Math.cos(t*0.233));
+    const lr=Math.min(cv.width,cv.height)*0.52;
     gl.bindFramebuffer(gl.FRAMEBUFFER,fbo);
     gl.enable(gl.BLEND);
     gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);
-    gl.useProgram(pFade); gl.bindVertexArray(vaoPlano);
-    gl.drawArrays(gl.TRIANGLE_STRIP,0,4);
+    gl.useProgram(pFade); gl.uniform1f(loc(pFade,'f'),0.32);
+    gl.bindVertexArray(vaoPlano); gl.drawArrays(gl.TRIANGLE_STRIP,0,4);
     gl.blendFunc(gl.ONE,gl.ONE_MINUS_SRC_COLOR);
     gl.useProgram(pCubos); gl.bindVertexArray(vao);
     gl.uniform2f(loc(pCubos,'R'),cv.width,cv.height);
     gl.uniform1f(loc(pCubos,'T'),t);
     gl.uniform1f(loc(pCubos,'U'),U);
     gl.uniform1f(loc(pCubos,'desliz'),desliz);
-    gl.uniform1f(loc(pCubos,'scanY'),scanY);
-    gl.uniform1f(loc(pCubos,'grueso'),grueso);
     gl.uniform4f(loc(pCubos,'M'),M.x,M.y,M.k,Math.min(cv.width,cv.height)*0.44);
     gl.uniform2f(loc(pCubos,'Mv'),M.vx,M.vy);
+    gl.uniform3f(loc(pCubos,'LUZ'),lx,ly,lr);
     gl.drawArraysInstanced(gl.TRIANGLE_STRIP,0,4,N);
-    gl.useProgram(pHalo); gl.bindVertexArray(vaoPlano);
-    gl.uniform2f(loc(pHalo,'R'),cv.width,cv.height);
-    gl.uniform1f(loc(pHalo,'scanY'),scanY);
-    gl.uniform1f(loc(pHalo,'grueso'),grueso);
-    gl.drawArrays(gl.TRIANGLE_STRIP,0,4);
     gl.bindFramebuffer(gl.FRAMEBUFFER,null);
     gl.disable(gl.BLEND);
     gl.useProgram(pCopia); gl.bindVertexArray(vaoPlano);
     gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D,tex);
     gl.uniform1i(loc(pCopia,'tex'),0);
     gl.uniform2f(loc(pCopia,'R'),cv.width,cv.height);
+    gl.uniform1f(loc(pCopia,'U'),U); gl.uniform1f(loc(pCopia,'desliz'),desliz);
+    gl.uniform3f(loc(pCopia,'LUZ'),lx,ly,lr);
     gl.drawArrays(gl.TRIANGLE_STRIP,0,4);
   }
   requestAnimationFrame(ts=>{last=ts;frame(ts)});
@@ -3472,22 +3557,34 @@ function campoGL(){
 function campo2D(){
   const cv=document.getElementById('burst');if(!cv)return;
   const ctx=cv.getContext('2d',{alpha:false});
-  const T=[[64,132,255],[47,107,255],[124,168,255],[220,226,238],[116,134,176],[26,52,132]];
-  let W=0,H=0,dpr=1,P=[],live=true,last=0,t=0,U=28,cols=1,rows=1,desliz=0,halo=null,haloH=0;
+  const T=[[64,132,255],[47,107,255],[124,168,255],[206,220,248],[104,128,182],[26,52,132]];
+  const TONOS=[[5,5,5,5,4],[1,1,1,0,4],[0,0,1,2,2]];
+  const ESC=[0.55,1,1.38], VEL=[0.42,1,1.62], PAR=[0.32,0.76,1.20], DER=[2.2,5.0,8.5];
+  const FILAS=[0.045,0.105,0.170,0.240,0.310,0.700,0.770,0.840,0.905,0.960];
   const rnd=(a,b)=>a+Math.random()*(b-a);
   const FINE=matchMedia('(hover:hover) and (pointer:fine)').matches;
   const M={x:-1e5,y:-1e5,tx:-1e5,ty:-1e5,k:0,want:0,vx:0,vy:0};
-  function reset(p,seed){
-    p.ci=(Math.random()*T.length)|0;
-    p.k=seed?Math.random():0;
-    p.sp=rnd(.4,1.1);
-    p.gx=(Math.random()*cols)|0;          /* columna fija: cae en vertical */
-    p.w=Math.round(rnd(1,3));
-    p.al=rnd(.30,.85);
-    p.life=rnd(.7,1.6);
-    p.z=rnd(.45,1);
-    p.abajo = Math.random() < .42;
-    p.caida = Math.pow(Math.random(),1.9)*(p.abajo?.62:.78)+.10;
+  let W=0,H=0,dpr=1,P=[],live=true,last=0,t=0,U=28,desliz=0,cols_=[],filas_=[];
+  function reset(p,semilla){
+    const r=Math.random();
+    p.pl = r<0.44?0:(r<0.80?1:2);
+    p.posa = Math.random()<0.46;
+    p.destino = p.posa ? FILAS[(Math.random()*FILAS.length)|0]+rnd(-.022,.022) : 0;
+    p.abajo = p.posa ? p.destino>0.5 : Math.random()<0.38;
+    const cols=Math.ceil(W/(U*ESC[p.pl]));
+    let ux=Math.random();
+    ux = 0.5 + Math.sign(ux-0.5)*Math.pow(Math.abs(ux-0.5)*2,0.62)*0.5;
+    p.gx = Math.min(cols-1,(ux*cols)|0);
+    p.w  = p.pl===0?Math.round(rnd(1,4)):Math.round(rnd(1,3));
+    const pal=TONOS[p.pl];
+    p.c  = T[pal[(Math.random()*pal.length)|0]];
+    p.k  = semilla?Math.random():0;
+    p.sp = rnd(.5,1.15);
+    p.vida = p.posa?rnd(1.6,3.4):rnd(.8,1.7);
+    p.al = [rnd(.07,.17),rnd(.15,.33),rnd(.26,.54)][p.pl];
+    p.kp = rnd(.22,.46);
+    p.rec = p.posa ? Math.abs(p.destino-(p.abajo?1.16:-0.16))
+                   : (Math.pow(Math.random(),1.7)*(p.abajo?.70:.86)+.14);
   }
   function size(){
     dpr=Math.min(devicePixelRatio||1,1.5);
@@ -3495,97 +3592,124 @@ function campo2D(){
     cv.width=W*dpr;cv.height=H*dpr;ctx.setTransform(dpr,0,0,dpr,0,0);
     ctx.fillStyle='#000';ctx.fillRect(0,0,W,H);
     U=Math.max(15,Math.round(Math.min(W,H)/26));
-    cols=Math.ceil(W/U);rows=Math.ceil(H/U);
-    const want=W<760?120:W<1300?200:270;
-    while(P.length<want)P.push({});
-    P.length=want;
+    const quiere=W<760?130:W<1300?195:245;
+    while(P.length<quiere)P.push({});
+    P.length=quiere;
     P.forEach(p=>{if(p.k===undefined)reset(p,true)});
+    sellos();
   }
   size();
+  /* El papel pautado: rayas de 1 px, no un sello a pantalla completa. En un
+     equipo sin GPU —que es justo el que acaba en este camino— componer el
+     millon y pico de pixeles de un sello cuesta mas que dibujar las cuarenta
+     rayas que de verdad se ven. Y por eso mismo aqui no va el halo de la luz:
+     es un 5 % de brillo sobre pantalla entera. Lo que si va, porque es lo que
+     se nota, es que la luz levante cada bloque que pilla cerca. */
+  function sellos(){
+    cols_=[]; filas_=[];
+    for(let x=0;x<W;x+=U*2){
+      const q=Math.abs(x/W-0.5)*1.30;
+      const a=0.034*Math.min(1,Math.max(0,(q-0.15)/0.35));
+      if(a>0.002) cols_.push([x,'rgba(87,128,219,'+a.toFixed(3)+')']);
+    }
+    for(let i=0;i<Math.ceil(H/(U*3))+2;i++){
+      const y=i*U*3, q=Math.abs(y/H-0.5);
+      const a=0.022*Math.min(1,Math.max(0,(q-0.15)/0.35));
+      filas_.push([y, a>0.002?'rgba(87,128,219,'+a.toFixed(3)+')':null]);
+    }
+  }
+  function rejilla(){
+    ctx.globalCompositeOperation='source-over';
+    for(const [x,c] of cols_){ ctx.fillStyle=c; ctx.fillRect(x,0,1,H) }
+    const off=(desliz*0.35)%(U*3);
+    for(const [y,c] of filas_){ if(!c)continue; ctx.fillStyle=c; ctx.fillRect(0,y-off,W,1) }
+  }
   function frame(ts){
-    if(!live){last=ts;requestAnimationFrame(frame);return}
+    requestAnimationFrame(frame);
+    if(!live){last=ts;return}
     const dt=Math.min(.05,(ts-last)/1000||.016);last=ts;t+=dt;
     M.k+=(M.want-M.k)*Math.min(1,dt*5.2);
     if(M.tx>-1e4){
       const px=M.x,py=M.y;
       if(M.x<-1e4){M.x=M.tx;M.y=M.ty}
-      M.x+=(M.tx-M.x)*Math.min(1,dt*14);
-      M.y+=(M.ty-M.y)*Math.min(1,dt*14);
+      M.x+=(M.tx-M.x)*Math.min(1,dt*14);M.y+=(M.ty-M.y)*Math.min(1,dt*14);
       M.vx=(M.x-px)/Math.max(dt,.001);M.vy=(M.y-py)/Math.max(dt,.001);
     }
-    ctx.globalCompositeOperation='source-over';
-    ctx.fillStyle='rgba(0,0,0,.22)';ctx.fillRect(0,0,W,H);
-    ctx.globalCompositeOperation='screen';
     desliz += ((scrollY*0.62) - desliz) * Math.min(1,dt*6);
-    const CICLO=7.2;                       /* segundos de ida y vuelta */
-    const q=(t%CICLO)/CICLO;
-    const vaiven=q<.5 ? q*2 : (1-q)*2;     /* 0→1→0, sin saltos */
-    const suave=vaiven*vaiven*(3-2*vaiven);
-    const scanY=(-0.12+suave*1.24)*H;      /* entra y sale por los cantos */
-    const GRUESO=Math.max(46,H*0.085);
-    const R=Math.min(W,H)*.44;   /* alcance del cursor: un círculo claro */
+    ctx.globalCompositeOperation='source-over';
+    ctx.fillStyle='rgba(0,0,0,.32)';ctx.fillRect(0,0,W,H);
+    rejilla();
+    const lx=W*(0.5+0.34*Math.sin(t*0.113)+0.10*Math.sin(t*0.291));
+    const ly=H*(0.5+0.30*Math.cos(t*0.087)+0.09*Math.cos(t*0.233));
+    const lr=Math.min(W,H)*0.52;
+    const R=Math.min(W,H)*.44;
+    ctx.globalCompositeOperation='screen';
     for(const p of P){
-      p.k+=dt*p.sp*.30*p.z/p.life;
+      p.k+=dt*p.sp*VEL[p.pl]*0.26/p.vida;
       if(p.k>1){reset(p,false);continue}
-      let x=p.gx*U;
-      const rec = p.abajo ? (1.14 - p.k*p.caida) : (-.14 + p.k*p.caida);
-      let y=Math.round(rec*H/U)*U + Math.round(desliz*p.z*(p.abajo?-1:1)/U)*U;
-      const w=p.w*U, h=U;
-      const env=Math.min(1,p.k*7) * Math.pow(1-p.k,1.5);
-      let a=p.al*env;
-      const dScan=Math.abs(y+U*.5-scanY);
-      let enScan=0;
-      if(dScan<GRUESO){
-        enScan=1-dScan/GRUESO;
-        enScan*=enScan;                    /* el borde cae rápido */
-        a=Math.min(1,a+enScan*.85);
+      const u=U*ESC[p.pl];
+      const origen=p.abajo?1.16:-0.16, signo=p.abajo?-1:1;
+      let rec,a,dest=0,avance;
+      const entra=Math.min(1,p.k*9);
+      if(p.posa){
+        const q=Math.min(p.k,p.kp)/p.kp; avance=q;
+        rec=origen+signo*p.rec*(1-Math.pow(1-q,2.4));
+        if(p.k<=p.kp){ a=p.al*entra; }
+        else{
+          const t2=(p.k-p.kp)/Math.max(1e-3,1-p.kp);
+          dest=Math.pow(1-Math.min(1,t2/0.09),3);
+          a=p.al*(0.16+0.50*Math.pow(1-t2,1.9))*(1+dest*2.8);
+          avance=1;
+        }
+      }else{
+        avance=p.k;
+        rec=origen+signo*p.rec*p.k;
+        a=p.al*entra*Math.pow(1-p.k,1.4);
+      }
+      let x=p.gx*u + Math.floor(t*DER[p.pl]/u)*u;
+      let y=Math.round(rec*H/u)*u + Math.round(desliz*PAR[p.pl]/u)*u*signo;
+      const w=p.w*u;
+      let h=u, estira=0;
+      if(p.pl===2 && avance<1){
+        estira=VEL[p.pl]*0.85*(1-avance)*(1-avance);
+        h=u*(1+estira);
+        if(signo>0) y-=(h-u);
       }
       if(M.k>.01){
         const dx=x+w/2-M.x, dy=y+h/2-M.y;
         if(dx>-R&&dx<R&&dy>-R&&dy<R){
-        const d=Math.hypot(dx,dy);
-        if(d<R){
-          const q=1-d/R;
-          const f=q*q*(3-2*q)*M.k;
-          const inv=1/(d||1);
-          const ex=dx*inv, ey=dy*inv;
-          const tope=R*.42;
-          const empuje=Math.min(f*U*11, tope);
-          const giro  =Math.min(f*U*4.2, tope*.42);
-          const arras =f*.026;
-          const ox = ex*empuje - ey*giro + M.vx*arras;
-          const oy = ey*empuje + ex*giro + M.vy*arras;
-          x+=Math.round(ox/U)*U;
-          y+=Math.round(oy/U)*U;
-          a=Math.min(1,a*(1+f*3.4));
-        }}
+          const d=Math.hypot(dx,dy);
+          if(d<R){
+            const q=1-d/R, f=q*q*(3-2*q)*M.k, inv=1/(d||1);
+            const ex=dx*inv, ey=dy*inv, tope=R*.42;
+            x+=Math.round((ex*Math.min(f*u*11,tope)-ey*Math.min(f*u*4.2,tope*.42)+M.vx*f*.026)/u)*u;
+            y+=Math.round((ey*Math.min(f*u*11,tope)+ex*Math.min(f*u*4.2,tope*.42)+M.vy*f*.026)/u)*u;
+            a=Math.min(1,a*(1+f*3.4));
+          }
+        }
       }
+      const lit=1-Math.min(1,Math.max(0,(Math.hypot(x+w/2-lx,y+h/2-ly)-lr*0.10)/(lr*0.90)));
+      a=Math.min(1,a*(1+lit*0.62));
       if(a<.012)continue;
-      let c=T[p.ci];
-      if(enScan>.42){
-        const m=(enScan-.42)/.58;
-        const S=T[3];
-        c=[c[0]+(S[0]-c[0])*m*.62, c[1]+(S[1]-c[1])*m*.62, c[2]+(S[2]-c[2])*m*.62];
+      let c=p.c;
+      if(lit>.01) c=[c[0]+(T[3][0]-c[0])*lit*.30, c[1]+(T[3][1]-c[1])*lit*.30, c[2]+(T[3][2]-c[2])*lit*.30];
+      if(dest>.01) c=[c[0]+(230-c[0])*dest*.80, c[1]+(240-c[1])*dest*.80, c[2]+(255-c[2])*dest*.80];
+      const col=(c[0]|0)+','+(c[1]|0)+','+(c[2]|0);
+      if(estira>0.002){
+        /* la estela: un rectangulo mas flojo detras de la cabeza */
+        const hc=u, ht=h-u;
+        const yt=signo>0?y:y+u;
+        ctx.fillStyle='rgba('+col+','+(a*0.26).toFixed(3)+')';
+        ctx.fillRect(Math.round(x)+1,Math.round(yt)+1,Math.max(1,w-2),Math.max(1,ht-2));
+        const yc=signo>0?y+ht:y;
+        ctx.fillStyle='rgba('+col+','+a.toFixed(3)+')';
+        ctx.fillRect(Math.round(x)+1,Math.round(yc)+1,Math.max(1,w-2),Math.max(1,hc-2));
+      }else{
+        ctx.fillStyle='rgba('+col+','+a.toFixed(3)+')';
+        ctx.fillRect(Math.round(x)+1,Math.round(y)+1,Math.max(1,w-2),Math.max(1,h-2));
       }
-      ctx.fillStyle='rgba('+(c[0]|0)+','+(c[1]|0)+','+(c[2]|0)+','+a.toFixed(3)+')';
-      ctx.fillRect(Math.round(x)+1,Math.round(y)+1,Math.max(1,w-2),Math.max(1,h-2));
     }
-    if(!halo||haloH!==GRUESO){
-      halo=ctx.createLinearGradient(0,0,0,GRUESO*1.2);
-      halo.addColorStop(0,'rgba(47,107,255,0)');
-      halo.addColorStop(.5,'rgba(121,171,255,.16)');
-      halo.addColorStop(1,'rgba(47,107,255,0)');
-      haloH=GRUESO;
-    }
-    ctx.save();
-    ctx.translate(0,scanY-GRUESO*.6);
-    ctx.fillStyle=halo;
-    ctx.fillRect(0,0,W,GRUESO*1.2);
-    ctx.restore();
-    ctx.fillStyle='rgba(168,196,255,.22)';
-    ctx.fillRect(0,Math.round(scanY),W,1);
     ctx.globalCompositeOperation='source-over';
-    requestAnimationFrame(frame);
   }
   addEventListener('resize',size,{passive:true});
   if(FINE&&!CALM){
