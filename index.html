@@ -1730,6 +1730,17 @@ html[dir="rtl"] .subir{left:16px !important;right:auto !important}
    doble de lo que parecía. */
 .hd .brand{gap:5px}
 .hd .brand svg{width:30px;height:30px}
+/* Y la palabra se apoya en la punta de abajo del rombo, no en su centro.
+   Va por LÍNEA DE BASE y no por el borde de la caja: la caja del texto llega
+   hasta donde caen las letras con rabo, así que alineando cajas la palabra
+   habría quedado flotando por encima de la punta. En un flex, un elemento
+   reemplazado como el <svg> no tiene línea de base propia y se usa el borde
+   inferior de su caja; el dibujo llega al 96,5 % de su recuadro (medido con
+   getBBox), así que la palabra cae 1 px por debajo de la punta exacta. Un
+   píxel, y hacia abajo, que es el lado bueno: cerrarlo pedía envolver la
+   palabra en un <span> —margen negativo no mueve esa línea de base en
+   Chromium, comprobado— y no compensa meter marcado por eso. */
+.hd .brand{align-items:baseline}
 /* ── el boton de whitepaper, al extremo derecho ─────────────────────────────
    Quien lo empujaba a la derecha era el nav del centro (margin-inline:auto).
    Al ocultar esos enlaces en escritorio, la regla de 1000px que anula el
