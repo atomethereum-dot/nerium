@@ -69,23 +69,52 @@ ANCLA_AVISO = '<header class="hd" id="hd">'
 # que se abre para ensenar cuatro enlaces al mismo sitio miente. Es un icono
 # que dice a que se va. Docs y Blog se quedan fuera a proposito: sus secciones
 # estan en display:none, y un enlace a algo oculto no lleva a ninguna parte.
+# ── secciones sin ancla ──────────────────────────────────────────────────────
+# Dos de las secciones de la pagina no tenian id: no se podia enlazar a ellas.
+# El nombre que les da el marcador de abajo sale del mapa NOMBRE, y ese mapa
+# busca por id, asi que a la de la tesis hay que darle tambien su entrada o el
+# marcador pasaria a decir «thesis» a secas.
+ANCLAS = [
+ ('<section class="press paper" data-bg="#FFFFFF" data-acc="#1D6AFF">',
+  '<section class="press paper" id="press" data-bg="#FFFFFF" data-acc="#1D6AFF">'),
+ ('<section class="paper say" data-bg="#FFFFFF" data-acc="#2E60FF">',
+  '<section class="paper say" id="thesis" data-bg="#FFFFFF" data-acc="#2E60FF">'),
+ ("    security:'Security', presale:'Seed Round', token:'Tokenomics',",
+  "    security:'Security', presale:'Seed Round', token:'Tokenomics',\n"
+  "    thesis:'The thesis', builds:'What is running',"),
+]
+
 ICONOS = {
-    'stack':     '<path d="M12 4 4 8l8 4 8-4-8-4Z"/><path d="M4 14l8 4 8-4"/>',
-    'builds':    '<path d="M9.2 8 5 12l4.2 4"/><path d="M14.8 8 19 12l-4.2 4"/>',
+    'network':   '<path d="M12 3.4 19 7.4v8.2l-7 4-7-4V7.4l7-4Z"/>',
+    'press':     '<path d="M4.6 6.4h14.8v8.8h-8.1L7.4 18.6v-3.4H4.6Z"/>',
+    'thesis':    '<path d="M7 4.6h6.4L17 8.2v11.2H7Z"/><path d="M13 4.6v3.8h4"/>',
     'solutions': '<path d="M4.5 4.5h5.5v5.5H4.5zM14 4.5h5.5v5.5H14z'
                  'M4.5 14h5.5v5.5H4.5zM14 14h5.5v5.5H14z"/>',
-    'network':   '<path d="M12 3.4 19 7.4v8.2l-7 4-7-4V7.4l7-4Z"/>',
+    'stack':     '<path d="M12 4 4 8l8 4 8-4-8-4Z"/><path d="M4 14l8 4 8-4"/>',
     'security':  '<path d="M12 3.5 5.2 6.4v4.8c0 4 2.8 6.8 6.8 7.6 4-.8 6.8-3.6 6.8-7.6V6.4L12 3.5Z"/>',
+    'presale':   '<path d="M4.6 18.4h14.8"/><path d="M8 18.4v-4.2M12 18.4v-8.6M16 18.4v-6.2"/>',
     'token':     '<circle cx="12" cy="12" r="7.6"/><circle cx="12" cy="12" r="3"/>',
+    'builds':    '<path d="M9.2 8 5 12l4.2 4"/><path d="M14.8 8 19 12l-4.2 4"/>',
+    'join':      '<circle cx="12" cy="12" r="2.2"/>'
+                 '<path d="M7.6 7.6a6.2 6.2 0 0 0 0 8.8"/><path d="M16.4 7.6a6.2 6.2 0 0 1 0 8.8"/>',
 }
 
+# Todas las secciones de la pagina, en el orden en que se bajan: asi lo que se
+# subraya al desplazar avanza de izquierda a derecha, sin saltos. Faltan tres
+# —Docs, Blog y el equipo— porque estan en display:none, y un enlace a algo
+# oculto no lleva a ninguna parte. Quedan fuera tambien las de paso (chroma,
+# kin, xfade, xlight), que no tienen contenido propio: son transiciones.
 ENTRADAS = [
-    ('stack',     'Stack'),
-    ('builds',    'Build'),
-    ('solutions', 'Solutions'),
     ('network',   'Network'),
+    ('press',     'Press'),
+    ('thesis',    'Thesis'),
+    ('solutions', 'Solutions'),
+    ('stack',     'Stack'),
     ('security',  'Security'),
+    ('presale',   'Seed Round'),
     ('token',     'Token'),
+    ('builds',    'Build'),
+    ('join',      'In the open'),
 ]
 
 
@@ -123,18 +152,18 @@ HOJA_VIEJA = """<div class="sheet" id="sheet">
 # diccionario; «Build» y el «complete» del aviso, no. Sin esto la cabecera se
 # quedaria en ingles en los doce idiomas.
 TRAD = {
-    'es': {'Build': 'Construir',   'complete': 'completado'},
-    'zh': {'Build': '构建',         'complete': '已完成'},
-    'ko': {'Build': '빌드',         'complete': '완료'},
-    'ja': {'Build': '開発',         'complete': '完了'},
-    'pt': {'Build': 'Construir',   'complete': 'concluído'},
-    'fr': {'Build': 'Développer',  'complete': 'complété'},
-    'de': {'Build': 'Entwickeln',  'complete': 'abgeschlossen'},
-    'tr': {'Build': 'Geliştir',    'complete': 'tamamlandı'},
-    'vi': {'Build': 'Xây dựng',    'complete': 'hoàn thành'},
-    'ru': {'Build': 'Разработка',  'complete': 'завершено'},
-    'id': {'Build': 'Bangun',      'complete': 'selesai'},
-    'ar': {'Build': 'التطوير',      'complete': 'مكتمل'},
+    'es': {'Build': 'Construir',   'complete': 'completado', 'Press': 'Prensa', 'Thesis': 'Tesis'},
+    'zh': {'Build': '构建',         'complete': '已完成', 'Press': '媒体', 'Thesis': '主张'},
+    'ko': {'Build': '빌드',         'complete': '완료', 'Press': '미디어', 'Thesis': '논지'},
+    'ja': {'Build': '開発',         'complete': '完了', 'Press': 'メディア', 'Thesis': '考え方'},
+    'pt': {'Build': 'Construir',   'complete': 'concluído', 'Press': 'Imprensa', 'Thesis': 'Tese'},
+    'fr': {'Build': 'Développer',  'complete': 'complété', 'Press': 'Presse', 'Thesis': 'Thèse'},
+    'de': {'Build': 'Entwickeln',  'complete': 'abgeschlossen', 'Press': 'Presse', 'Thesis': 'These'},
+    'tr': {'Build': 'Geliştir',    'complete': 'tamamlandı', 'Press': 'Basın', 'Thesis': 'Tez'},
+    'vi': {'Build': 'Xây dựng',    'complete': 'hoàn thành', 'Press': 'Báo chí', 'Thesis': 'Luận điểm'},
+    'ru': {'Build': 'Разработка',  'complete': 'завершено', 'Press': 'Пресса', 'Thesis': 'Тезис'},
+    'id': {'Build': 'Bangun',      'complete': 'selesai', 'Press': 'Pers', 'Thesis': 'Tesis'},
+    'ar': {'Build': 'التطوير',      'complete': 'مكتمل', 'Press': 'الصحافة', 'Thesis': 'الأطروحة'},
 }
 
 
@@ -188,6 +217,9 @@ def _traducir(html):
 
 def aplicar(html):
     """Idempotente."""
+    for viejo, nuevo in ANCLAS:
+        if viejo in html:
+            html = html.replace(viejo, nuevo, 1)
     if ESPIA_VIEJO in html:
         html = html.replace(ESPIA_VIEJO, ESPIA, 1)
     if NAV_VIEJO in html:

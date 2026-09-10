@@ -77,17 +77,23 @@ const menu = await pg.evaluate(() => [...document.querySelectorAll('.nav>a')].ma
            ficha: !!a.querySelector('.chip svg path, .chip svg circle'),
            destino: !!d, visible: d ? getComputedStyle(d).display !== 'none' : false };
 }));
-di(menu.length === 6, 'seis entradas en el centro, como el modelo (' + menu.length + ')');
+di(menu.length === 10, 'las diez secciones de la pagina en el centro (' + menu.length + ')');
 di(menu.every(m => m.ficha), 'cada una con su ficha');
 di(menu.every(m => m.destino), 'todas apuntan a una seccion que existe');
 di(menu.every(m => m.visible), 'y ninguna a una seccion oculta');
+const orden = await pg.evaluate(() => [...document.querySelectorAll('.nav>a')].map(a => {
+  const e = document.querySelector(a.getAttribute('href'));
+  let y = 0, n = e; while (n) { y += n.offsetTop; n = n.offsetParent } return y;
+}));
+di(orden.every((y, i) => i === 0 || y > orden[i-1]),
+   'y van en el orden en que se bajan, sin saltos');
 di(await pg.evaluate(() => getComputedStyle(document.querySelector('.nav')).display) === 'flex',
    'el menu se ve en escritorio');
 
 // ── el subrayado ──
 di((await pg.evaluate(() => document.querySelectorAll('.nav>a.on').length)) === 0,
    'en la portada no hay nada subrayado');
-for (const id of ['stack','solutions','network','security','token','builds']) {
+for (const id of ['network','press','thesis','solutions','stack','security','presale','token','builds','join']) {
   await pg.evaluate(i => { const e = document.getElementById(i); let y=0,n=e;
     while(n){y+=n.offsetTop;n=n.offsetParent} scrollTo(0, y + e.offsetHeight/2 - innerHeight/2); }, id);
   await pg.waitForTimeout(800);
@@ -98,7 +104,7 @@ for (const id of ['stack','solutions','network','security','token','builds']) {
 // ── los doce idiomas ──
 const dic = await pg.evaluate(() => JSON.parse(document.getElementById('i18n').textContent));
 di(Object.keys(dic).length === 12, 'siguen los doce idiomas');
-for (const k of ['Build','complete','Stack','Solutions','Network','Security','Token']) {
+for (const k of ['Build','complete','Press','Thesis','Stack','Solutions','Network','Security','Token','Seed Round','In the open']) {
   di(Object.values(dic).every(d => d[k]), `«${k}» traducido en los doce`);
 }
 const es = await (async () => {
@@ -130,7 +136,7 @@ const hoja = await mo.evaluate(() => {
            n: s.querySelectorAll('a').length, fichas: s.querySelectorAll('.chip').length,
            cta: !!s.querySelector('.sheet-cta') };
 });
-di(hoja.n === 7 && hoja.fichas === 6, 'el menu del telefono trae las mismas seis y la llamada');
+di(hoja.n === 11 && hoja.fichas === 10, 'el menu del telefono trae las mismas diez y la llamada');
 di(hoja.cta, 'con el boton de entrar en la ronda al final');
 di(hoja.top >= 80, 'y arranca por debajo del aviso y de la barra');
 await ctx2.close();

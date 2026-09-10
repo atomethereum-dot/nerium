@@ -88,21 +88,23 @@ html[dir="rtl"] .ann-in:hover .ann-go{transform:scaleX(-1) translateX(4px)}
 .nav .chip{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.12)}
 
 /* ── el menú del centro vuelve ── */
-@media(min-width:1120px){
+/* Diez entradas ocupan lo suyo: por debajo de 1280 no caben sin apretarlas,
+   y una barra apretada se lee peor que un boton de menu. */
+@media(min-width:1280px){
   .hd .nav{display:flex}
   .hd .burger{display:none}
 }
-@media(min-width:1000px) and (max-width:1119px){
+@media(min-width:1000px) and (max-width:1279px){
   .hd .burger{display:block}
 }
-.nav{gap:2px}
-.nav>a{gap:8px;padding:7px 10px}
-.nav .chip{flex:none;display:inline-grid;place-items:center;width:20px;height:20px;
+.nav{gap:0}
+.nav>a{gap:7px;padding:7px 9px;font-size:13.5px;white-space:nowrap}
+.nav .chip{flex:none;display:inline-grid;place-items:center;width:19px;height:19px;
   border-radius:5px;background:rgba(255,255,255,.075);
   border:1px solid rgba(255,255,255,.10);color:rgba(226,236,255,.66);
   transition:background .22s,border-color .22s,color .22s}
 .nav>a:hover .chip,.nav>a.on .chip{background:var(--blue);border-color:var(--blue);color:#fff}
-.nav .chip svg{width:11px;height:11px;fill:none;stroke:currentColor;stroke-width:1.6;
+.nav .chip svg{width:10.5px;height:10.5px;fill:none;stroke:currentColor;stroke-width:1.6;
   stroke-linecap:round;stroke-linejoin:round}
 
 /* ── y el mismo patrón en el menú del teléfono ── */
