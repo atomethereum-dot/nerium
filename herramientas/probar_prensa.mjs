@@ -54,6 +54,38 @@ di(t.every(c => c.esqMacizas === 0),
 di(t.every(c => c.img === c.tile), 'cada logotipo del medio, en su baldosa (' +
    t.map(c => c.img + '/' + c.tile).join(' ') + ')');
 
+// ── el color de cada medio ──
+const col = await pg.evaluate(() => [...document.querySelectorAll('.pcd')].map(c => {
+  const s = getComputedStyle(c);
+  const v = n => s.getPropertyValue(n).trim();
+  return { ac: v('--ac'), w1: v('--w1'), w2: v('--w2'),
+           tag: getComputedStyle(c.querySelector('.pcd-tag')).color,
+           palabra: c.querySelector('.cb') ? getComputedStyle(c.querySelector('.cb')).color : null };
+}));
+const rgb = h => [1,3,5].map(i => parseInt(h.slice(i, i+2), 16));
+const lum = h => { const [r,g,b] = rgb(h); return (0.2126*r + 0.7152*g + 0.0722*b) / 255; };
+const sat = h => { const c = rgb(h), M = Math.max(...c), m = Math.min(...c); return M ? (M-m)/M : 0; };
+di(col.length === 4 && new Set(col.map(c => c.ac)).size === 4,
+   'cada tarjeta lleva su propio acento: ' + col.map(c => c.ac).join(' '));
+di(col.every(c => lum(c.w1) < 0.42),
+   'y la figura no es blanca, es color: luminancia ' + col.map(c => lum(c.w1).toFixed(2)).join(' '));
+di(col.every(c => sat(c.w1) > 0.30 || lum(c.w1) < 0.10),
+   'con color de verdad, no gris: saturacion ' + col.map(c => sat(c.w1).toFixed(2)).join(' '));
+di(col.every(c => lum(c.w2) <= lum(c.w1) + 0.02), 'y el degradado va de claro a oscuro');
+di(col.filter(c => c.palabra).every(c => c.palabra === 'rgb(255, 255, 255)'),
+   'sobre ese color, la palabra Nereum va en blanco');
+// el acento tiene que parecerse al logotipo del medio, no ser uno cualquiera
+const CERCA = { '#0A11CE': [8,14,190], '#1FA800': [51,255,0], '#DC0206': [244,1,3] };
+const tono = c => { const [r,g,b] = c, M = Math.max(...c), m = Math.min(...c), D = M-m;
+  if (!D) return -1;
+  const h = M === r ? ((g-b)/D % 6) : M === g ? ((b-r)/D + 2) : ((r-g)/D + 4);
+  return (h*60 + 360) % 360; };
+for (const [ac, real] of Object.entries(CERCA)) {
+  const usado = col.find(c => c.ac.toUpperCase() === ac);
+  const d = usado ? Math.abs(tono(rgb(ac)) - tono(real)) : 999;
+  di(usado && (d < 25 || d > 335), 'el acento ' + ac + ' es el tono del logotipo (' + d.toFixed(0) + 'deg)');
+}
+
 // el hueco entre la figura y el texto: la tarjeta tiene que tener un dentro
 const sep = await pg.evaluate(() => {
   const c = document.querySelector('.pcd');
@@ -62,6 +94,13 @@ const sep = await pg.evaluate(() => {
 });
 di(parseFloat(sep.linea) >= 1, 'una linea separa la figura del texto');
 di(sep.aire >= 14, 'y el texto respira dentro de la tarjeta (' + sep.aire + 'px)');
+const haz = await pg.evaluate(() => {
+  const a = document.querySelector('.pcd-art.dark');
+  return { canvas: !!a.querySelector('canvas'),
+           fondo: getComputedStyle(a).backgroundImage };
+});
+di(!haz.canvas, 'la del anuncio ya no pinta su haz en un lienzo');
+di(/linear-gradient\(56deg/.test(haz.fondo), 'lo lleva en el fondo, que no se puede quedar en blanco');
 di(errs.length === 0, 'sin errores de pagina' + (errs.length ? ': ' + errs[0] : ''));
 await ctx.close();
 

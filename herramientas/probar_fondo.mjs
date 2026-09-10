@@ -65,7 +65,14 @@ const a = await lee();
 di(a.vivos > 2000, 'el campo esta pintado (' + a.vivos + ' pixeles con luz)');
 di(a.medio < a.arriba * 0.5, `el medio esta vacio para el titular (arriba ${a.arriba.toFixed(1)}, medio ${a.medio.toFixed(1)})`);
 di(a.medio < a.abajo * 0.5, `y tambien respecto a abajo (abajo ${a.abajo.toFixed(1)})`);
-di(a.cian === 0, 'no hay un solo pixel cian (' + a.cian + ')');
+/* El fallo que esto vigila era una ZONA cian, no un pixel: 1140 de 253074,
+   un 0,45 %. Pedir cero exactos hacia que la bateria fallara una vez de cada
+   seis por un unico pixel en el filo del umbral de tono, y una prueba que
+   grita sin motivo se acaba ignorando. El listón se pone donde separa las dos
+   cosas: veinte veces por debajo de aquello. */
+const cianPct = a.vivos ? a.cian / a.vivos * 100 : 0;
+di(cianPct < 0.02, 'no hay zona cian: ' + a.cian + ' de ' + a.vivos +
+   ' pixeles (' + cianPct.toFixed(4) + ' %)');
 di(a.gris === 0, 'ni un gris neutro: todo lleva azul dentro (' + a.gris + ')');
 
 // que siga vivo: dos instantes distintos no pueden dar la misma imagen
