@@ -3,7 +3,9 @@
 
 Todo lo de aqui esta medido sobre nereum_cube_logo_v4_polished.png (787x785),
 no estimado a ojo. La cara se ajusto como cuadrado girado: lado 517,9 px,
-centro (393,0 · 390,8), giro -16,96 grados. Sobre esa cara, y en sus propios
+centro (393,0 · 390,8), giro -16,96 grados. GIRO decide como se apoya el cubo
+—0 de pie, -45 de canto— y todo lo demas va medido en los ejes de la CARA, no
+en los de la pantalla, asi que gira con ella sin deformarse. Sobre esa cara, y en sus propios
 ejes, se midio lo demas:
 
   · el degradado de la plata es un PLANO, ajustado por minimos cuadrados sobre
@@ -29,7 +31,7 @@ flotando sobre blanco, no de la marca (en la web la pone el CSS).
 """
 import math
 
-GIRO = -45.0                     # grados; negativo = sentido antihorario en pantalla
+GIRO = 0.0                       # cuadrado de pie; -45 lo pone de canto, en rombo
 BANDA = 0.185                    # fracción inferior de la cara que es blanca
 CANTO_U, CANTO_V = 0.031, 0.060  # cuánto asoma el canto, en ejes de la cara
 

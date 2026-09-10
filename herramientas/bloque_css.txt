@@ -83,20 +83,20 @@ html[dir="rtl"] .subir{left:16px !important;right:auto !important}
    doble de lo que parecía. */
 .hd .brand{--n:30px;gap:5px;align-items:center}
 .hd .brand svg{width:var(--n);height:var(--n)}
-/* La palabra se apoya en la punta de abajo del rombo, clavada.
+/* La palabra se apoya en el canto de abajo del cubo, clavada.
    No vale align-items:baseline en el .brand: eso alinea, sí, pero de paso
    mete debajo el hueco de las letras con rabo, la caja de la marca crece y,
    al centrarse en la barra, el conjunto sube y la palabra queda colgando.
-   Se hace al revés: el rombo se queda centrado en la barra —donde estaba— y
+   Se hace al revés: el cubo se queda centrado en la barra —donde estaba— y
    la palabra se baja ella sola, sin tocar la maquetación.
 
    El número no es a ojo. Con line-height:1 y centrada, la línea de base cae
-   0,3824 em por debajo del centro del rombo (métrica de la Switzer), y la
-   punta cae 0,465 × el lado del rombo (el dibujo ocupa del 3,5 % al 96,5 %
-   de su recuadro, medido con getBBox). La diferencia es lo que hay que
-   bajar, y escrito así sigue saliendo bien si cambia el cuerpo o el tamaño
-   del logotipo. */
-.hd .brand .bw{line-height:1;transform:translateY(calc(var(--n) * 0.465 - 0.3824em))}
+   0,3824 em por debajo del centro del cubo (métrica de la Switzer), y el
+   canto de abajo cae 0,4792 × el lado del cubo: el dibujo ocupa del 2,08 %
+   al 97,92 % de su recuadro, medido con getBBox. La diferencia es lo que hay
+   que bajar, y escrito así sigue saliendo bien si cambia el cuerpo o el
+   tamaño del logotipo. */
+.hd .brand .bw{line-height:1;transform:translateY(calc(var(--n) * 0.4792 - 0.3824em))}
 /* ── el boton de whitepaper, al extremo derecho ─────────────────────────────
    Quien lo empujaba a la derecha era el nav del centro (margin-inline:auto).
    Al ocultar esos enlaces en escritorio, la regla de 1000px que anula el

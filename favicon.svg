@@ -1,7 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-<defs><linearGradient id="plata" gradientUnits="userSpaceOnUse" x1="29.07" y1="296.01" x2="462.43" y2="209.46"><stop offset="0" stop-color="#C6CAD7"/><stop offset="1" stop-color="#9498A1"/></linearGradient><radialGradient id="brillo" gradientUnits="userSpaceOnUse" cx="0" cy="0" r="1" gradientTransform="translate(161.27 247.10) rotate(-9.60) scale(37.59 201.02)"><stop offset="0" stop-color="#fff" stop-opacity="0.92"/><stop offset=".36" stop-color="#fff" stop-opacity="0.43"/><stop offset=".70" stop-color="#fff" stop-opacity="0.10"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient></defs>
-<path fill="#57595E" d="M245.75 27.46 L266.25 34.00 L491.52 259.27 L266.25 484.54 L245.75 478.00 L471.02 252.73 Z"/>
-<path fill="url(#plata)" d="M20.48 252.73 L245.75 27.46 L471.02 252.73 L245.75 478.00 Z"/>
-<path fill="url(#brillo)" d="M20.48 252.73 L245.75 27.46 L471.02 252.73 L245.75 478.00 Z"/>
-<path fill="#FCFCFC" d="M204.08 436.33 L429.35 211.06 L471.02 252.73 L245.75 478.00 Z"/>
+<defs><linearGradient id="plata" gradientUnits="userSpaceOnUse" x1="-7.29" y1="71.63" x2="505.51" y2="413.71"><stop offset="0" stop-color="#C6CAD7"/><stop offset="1" stop-color="#9498A1"/></linearGradient><radialGradient id="brillo" gradientUnits="userSpaceOnUse" cx="0" cy="0" r="1" gradientTransform="translate(171.35 153.79) rotate(35.40) scale(52.44 280.40)"><stop offset="0" stop-color="#fff" stop-opacity="0.92"/><stop offset=".36" stop-color="#fff" stop-opacity="0.43"/><stop offset=".70" stop-color="#fff" stop-opacity="0.10"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient></defs>
+<path fill="#57595E" d="M471.30 20.48 L485.08 47.14 L485.08 491.52 L40.70 491.52 L26.92 464.86 L471.30 464.86 Z"/>
+<path fill="url(#plata)" d="M26.92 20.48 L471.30 20.48 L471.30 464.86 L26.92 464.86 Z"/>
+<path fill="url(#brillo)" d="M26.92 20.48 L471.30 20.48 L471.30 464.86 L26.92 464.86 Z"/>
+<path fill="#FCFCFC" d="M26.92 382.65 L471.30 382.65 L471.30 464.86 L26.92 464.86 Z"/>
 </svg>

@@ -1730,20 +1730,20 @@ html[dir="rtl"] .subir{left:16px !important;right:auto !important}
    doble de lo que parecía. */
 .hd .brand{--n:30px;gap:5px;align-items:center}
 .hd .brand svg{width:var(--n);height:var(--n)}
-/* La palabra se apoya en la punta de abajo del rombo, clavada.
+/* La palabra se apoya en el canto de abajo del cubo, clavada.
    No vale align-items:baseline en el .brand: eso alinea, sí, pero de paso
    mete debajo el hueco de las letras con rabo, la caja de la marca crece y,
    al centrarse en la barra, el conjunto sube y la palabra queda colgando.
-   Se hace al revés: el rombo se queda centrado en la barra —donde estaba— y
+   Se hace al revés: el cubo se queda centrado en la barra —donde estaba— y
    la palabra se baja ella sola, sin tocar la maquetación.
 
    El número no es a ojo. Con line-height:1 y centrada, la línea de base cae
-   0,3824 em por debajo del centro del rombo (métrica de la Switzer), y la
-   punta cae 0,465 × el lado del rombo (el dibujo ocupa del 3,5 % al 96,5 %
-   de su recuadro, medido con getBBox). La diferencia es lo que hay que
-   bajar, y escrito así sigue saliendo bien si cambia el cuerpo o el tamaño
-   del logotipo. */
-.hd .brand .bw{line-height:1;transform:translateY(calc(var(--n) * 0.465 - 0.3824em))}
+   0,3824 em por debajo del centro del cubo (métrica de la Switzer), y el
+   canto de abajo cae 0,4792 × el lado del cubo: el dibujo ocupa del 2,08 %
+   al 97,92 % de su recuadro, medido con getBBox. La diferencia es lo que hay
+   que bajar, y escrito así sigue saliendo bien si cambia el cuerpo o el
+   tamaño del logotipo. */
+.hd .brand .bw{line-height:1;transform:translateY(calc(var(--n) * 0.4792 - 0.3824em))}
 /* ── el boton de whitepaper, al extremo derecho ─────────────────────────────
    Quien lo empujaba a la derecha era el nav del centro (margin-inline:auto).
    Al ocultar esos enlaces en escritorio, la regla de 1000px que anula el
@@ -1912,27 +1912,29 @@ html[dir="rtl"] .ann-in:hover .ann-go{transform:scaleX(-1) translateX(4px)}
      anterior. Los degradados van aqui fuera y no dentro de cada <symbol>,
      porque referenciar un id desde dentro del arbol que clona <use> no es
      fiable en todos los navegadores; declarados en el documento, si.
-     Van en userSpaceOnUse, en el espacio local del <g> del simbolo. -->
+     Van en userSpaceOnUse, en el espacio local del <g> del simbolo.
+     Se generan con herramientas/logo/logo.py; el cubo va de pie (GIRO 0),
+     no de canto. -->
 <defs>
-  <linearGradient id="nrmPlata" gradientUnits="userSpaceOnUse" x1="63.94" y1="390.33" x2="608.06" y2="281.67"><stop offset="0" stop-color="#C6CAD7"/><stop offset="1" stop-color="#9498A1"/></linearGradient>
-  <radialGradient id="nrmBrillo" gradientUnits="userSpaceOnUse" cx="0" cy="0" r="1" gradientTransform="translate(229.93 328.93) rotate(-9.60) scale(47.20 252.40)"><stop offset="0" stop-color="#fff" stop-opacity="0.92"/><stop offset=".36" stop-color="#fff" stop-opacity="0.43"/><stop offset=".70" stop-color="#fff" stop-opacity="0.10"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>
+  <linearGradient id="nrmPlata" gradientUnits="userSpaceOnUse" x1="105.20" y1="182.04" x2="566.80" y2="489.96"><stop offset="0" stop-color="#C6CAD7"/><stop offset="1" stop-color="#9498A1"/></linearGradient>
+  <radialGradient id="nrmBrillo" gradientUnits="userSpaceOnUse" cx="0" cy="0" r="1" gradientTransform="translate(266.00 256.00) rotate(35.40) scale(47.20 252.40)"><stop offset="0" stop-color="#fff" stop-opacity="0.92"/><stop offset=".36" stop-color="#fff" stop-opacity="0.43"/><stop offset=".70" stop-color="#fff" stop-opacity="0.10"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>
 </defs>
 <symbol id="nlogo" viewBox="0 0 672 672">
-  <g transform="translate(-43.88 -34.34) scale(1.0889)">
-    <path fill="#57595E" d="M336.00 53.16 L361.74 61.36 L644.58 344.20 L361.74 627.05 L336.00 618.84 L618.84 336.00 Z"/>
-    <path fill="url(#nrmPlata)" d="M53.16 336.00 L336.00 53.16 L618.84 336.00 L336.00 618.84 Z"/>
-    <path fill="url(#nrmBrillo)" d="M53.16 336.00 L336.00 53.16 L618.84 336.00 L336.00 618.84 Z"/>
-    <path fill="#FCFCFC" d="M283.67 566.52 L566.52 283.67 L618.84 336.00 L336.00 618.84 Z"/>
+  <g transform="translate(-183.76 -192.57) scale(1.5189)">
+    <path fill="#57595E" d="M536.00 136.00 L548.40 160.00 L548.40 560.00 L148.40 560.00 L136.00 536.00 L536.00 536.00 Z"/>
+    <path fill="url(#nrmPlata)" d="M136.00 136.00 L536.00 136.00 L536.00 536.00 L136.00 536.00 Z"/>
+    <path fill="url(#nrmBrillo)" d="M136.00 136.00 L536.00 136.00 L536.00 536.00 L136.00 536.00 Z"/>
+    <path fill="#FCFCFC" d="M136.00 462.00 L536.00 462.00 L536.00 536.00 L136.00 536.00 Z"/>
   </g>
 </symbol>
 <!-- El pequeno lleva el mismo reflejo: sin el, a 30 px en la cabecera el cubo
      se veia plano, que es justo donde mas se mira. -->
 <symbol id="nlogo-s" viewBox="0 0 672 672">
-  <g transform="translate(-43.88 -34.34) scale(1.0889)">
-    <path fill="#57595E" d="M336.00 53.16 L361.74 61.36 L644.58 344.20 L361.74 627.05 L336.00 618.84 L618.84 336.00 Z"/>
-    <path fill="url(#nrmPlata)" d="M53.16 336.00 L336.00 53.16 L618.84 336.00 L336.00 618.84 Z"/>
-    <path fill="url(#nrmBrillo)" d="M53.16 336.00 L336.00 53.16 L618.84 336.00 L336.00 618.84 Z"/>
-    <path fill="#FCFCFC" d="M283.67 566.52 L566.52 283.67 L618.84 336.00 L336.00 618.84 Z"/>
+  <g transform="translate(-183.76 -192.57) scale(1.5189)">
+    <path fill="#57595E" d="M536.00 136.00 L548.40 160.00 L548.40 560.00 L148.40 560.00 L136.00 536.00 L536.00 536.00 Z"/>
+    <path fill="url(#nrmPlata)" d="M136.00 136.00 L536.00 136.00 L536.00 536.00 L136.00 536.00 Z"/>
+    <path fill="url(#nrmBrillo)" d="M136.00 136.00 L536.00 136.00 L536.00 536.00 L136.00 536.00 Z"/>
+    <path fill="#FCFCFC" d="M136.00 462.00 L536.00 462.00 L536.00 536.00 L136.00 536.00 Z"/>
   </g>
 </symbol></svg>
 <div id="wash" aria-hidden="true"></div>

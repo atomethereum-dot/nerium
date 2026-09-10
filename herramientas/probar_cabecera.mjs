@@ -77,14 +77,30 @@ const marca = await pg.evaluate(() => {
   k.style.cssText = 'display:inline-block;width:0;height:0;overflow:hidden';
   sp.appendChild(k); const base = R(k).bottom; k.remove();
   const rs = R(svg), hd = R(document.querySelector('.hd'));
-  return { desfase: base - (rs.top + rs.height * 0.965),
-           centroBarra: hd.top + hd.height / 2, centroRombo: rs.top + rs.height / 2 };
+  // el canto de abajo del dibujo, medido de verdad y no a ojo: si algun dia
+  // el cubo cambia de forma, esta comprobacion cambia con el
+  const sym = document.getElementById('nlogo-s');
+  const vb = sym.getAttribute('viewBox').split(/\s+/).map(Number);
+  const t = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  t.setAttribute('viewBox', vb.join(' '));
+  t.style.cssText = 'position:absolute;left:-9999px;width:' + vb[2] + 'px;height:' + vb[3] + 'px';
+  [...sym.childNodes].forEach(x => t.appendChild(x.cloneNode(true)));
+  document.body.appendChild(t);
+  const g = t.querySelector('g'), bb = g.getBBox(), m = g.getCTM();
+  const ys = [[bb.x, bb.y], [bb.x + bb.width, bb.y], [bb.x, bb.y + bb.height],
+              [bb.x + bb.width, bb.y + bb.height]].map(([x, y]) => m.b * x + m.d * y + m.f);
+  t.remove();
+  const abajo = Math.max(...ys) / vb[3];
+  return { abajo, desfase: base - (rs.top + rs.height * abajo),
+           centroBarra: hd.top + hd.height / 2, centroCubo: rs.top + rs.height / 2 };
 });
 di(marca !== null, 'la palabra de la marca va en su propia caja');
 di(marca && Math.abs(marca.desfase) < 0.6,
-   'y su linea de base cae en la punta del rombo (' + (marca ? marca.desfase.toFixed(2) : '?') + ' px)');
-di(marca && Math.abs(marca.centroBarra - marca.centroRombo) < 0.6,
-   'sin desplazar el rombo: sigue centrado en la barra');
+   'y su linea de base cae en el canto de abajo del cubo, al ' +
+   (marca ? (marca.abajo*100).toFixed(1) : '?') + ' % de su recuadro (' +
+   (marca ? marca.desfase.toFixed(2) : '?') + ' px)');
+di(marca && Math.abs(marca.centroBarra - marca.centroCubo) < 0.6,
+   'sin desplazar el cubo: sigue centrado en la barra');
 
 // ── el menu ──
 await pg.evaluate(() => { try{ localStorage.removeItem('nrm:aviso') }catch(e){} });
