@@ -20,6 +20,7 @@ todo lo que se hizo aqui y el archivo subido no trae:
  12. el fondo de la portada: los tres planos, lo que se posa, el pautado
  13. las tarjetas de prensa, con el lenguaje del whitepaper
  14. el papel con luz y grano, la compatibilidad y las cuatro garantias
+ 15. el detalle: como aparece cada cosa, y que no se quede nada sin salir
 """
 import sys, os
 
@@ -32,6 +33,7 @@ import cabecera
 import fondo
 import prensa
 import pagina
+import detalle
 subido, publicado = sys.argv[1], '/home/user/nerium/index.html'
 z = open(subido, encoding='utf-8').read()
 p = open(publicado, encoding='utf-8').read()
@@ -150,6 +152,9 @@ rest = prensa.aplicar(rest)
 pagina.escribir_tapiz('/home/user/nerium')   # img/tapiz.svg, al dia
 rest = pagina.aplicar(rest)
 
+# ── 15 · el detalle ──
+rest = detalle.aplicar(rest)
+
 salida = pre + rest
 open(publicado, 'w', encoding='utf-8').write(salida)
 print("montado:", len(salida), "bytes ·", salida.count('var(--hud-b)'), "usos de --hud-b ·",
@@ -161,4 +166,5 @@ print("montado:", len(salida), "bytes ·", salida.count('var(--hud-b)'), "usos d
       "cabecera:", 'aviso + menu' if '<div class="ann" id="ann">' in salida else 'SIN TOCAR', "·",
       "fondo:", 'tres planos' if fondo.MARCA in salida else 'EL VIEJO', "·",
       "prensa:", 'tarjetas' if prensa.MARCA in salida else 'SIN TOCAR', "·",
-      "pagina:", 'con luz' if pagina.MARCA in salida else 'SIN TOCAR')
+      "pagina:", 'con luz' if pagina.MARCA in salida else 'SIN TOCAR', "·",
+      "detalle:", 'mascaras' if detalle.MARCA in salida else 'SIN TOCAR')
