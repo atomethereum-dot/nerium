@@ -82,6 +82,12 @@ ANCLAS = [
  ("    security:'Security', presale:'Seed Round', token:'Tokenomics',",
   "    security:'Security', presale:'Seed Round', token:'Tokenomics',\n"
   "    thesis:'The thesis', builds:'What is running',"),
+
+ # La palabra de la marca, en su propia caja: suelta, como nodo de texto, no
+ # hay forma de colocarla, y hace falta para apoyarla en la punta del rombo.
+ ('<svg aria-hidden="true"><use href="#nlogo-s"/></svg>\n    Nereum</a>',
+  '<svg aria-hidden="true"><use href="#nlogo-s"/></svg>\n'
+  '    <span class="bw">Nereum</span></a>'),
 ]
 
 ICONOS = {

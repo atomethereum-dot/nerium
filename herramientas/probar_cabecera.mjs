@@ -67,6 +67,25 @@ di(await pg.evaluate(() => document.querySelector('.ann').getBoundingClientRect(
 di(await pg.evaluate(() => document.getElementById('annPct').textContent) === '88%',
    'y trae la cifra nueva');
 
+// ── la marca: la palabra clavada en la punta del rombo ──
+const marca = await pg.evaluate(() => {
+  const br = document.querySelector('.hd .brand');
+  const svg = br.querySelector('svg'), sp = br.querySelector('.bw');
+  if (!sp) return null;
+  const R = e => e.getBoundingClientRect();
+  const k = document.createElement('span');
+  k.style.cssText = 'display:inline-block;width:0;height:0;overflow:hidden';
+  sp.appendChild(k); const base = R(k).bottom; k.remove();
+  const rs = R(svg), hd = R(document.querySelector('.hd'));
+  return { desfase: base - (rs.top + rs.height * 0.965),
+           centroBarra: hd.top + hd.height / 2, centroRombo: rs.top + rs.height / 2 };
+});
+di(marca !== null, 'la palabra de la marca va en su propia caja');
+di(marca && Math.abs(marca.desfase) < 0.6,
+   'y su linea de base cae en la punta del rombo (' + (marca ? marca.desfase.toFixed(2) : '?') + ' px)');
+di(marca && Math.abs(marca.centroBarra - marca.centroRombo) < 0.6,
+   'sin desplazar el rombo: sigue centrado en la barra');
+
 // ── el menu ──
 await pg.evaluate(() => { try{ localStorage.removeItem('nrm:aviso') }catch(e){} });
 await pg.reload({ waitUntil:'load' }); await pg.waitForTimeout(2400);

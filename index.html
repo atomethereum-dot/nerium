@@ -1728,19 +1728,22 @@ html[dir="rtl"] .subir{left:16px !important;right:auto !important}
    El cubo llena ahora su recuadro y el texto va pegado a él: con gap 9 y un
    símbolo con aire dentro, entre marca y palabra quedaba un hueco de casi el
    doble de lo que parecía. */
-.hd .brand{gap:5px}
-.hd .brand svg{width:30px;height:30px}
-/* Y la palabra se apoya en la punta de abajo del rombo, no en su centro.
-   Va por LÍNEA DE BASE y no por el borde de la caja: la caja del texto llega
-   hasta donde caen las letras con rabo, así que alineando cajas la palabra
-   habría quedado flotando por encima de la punta. En un flex, un elemento
-   reemplazado como el <svg> no tiene línea de base propia y se usa el borde
-   inferior de su caja; el dibujo llega al 96,5 % de su recuadro (medido con
-   getBBox), así que la palabra cae 1 px por debajo de la punta exacta. Un
-   píxel, y hacia abajo, que es el lado bueno: cerrarlo pedía envolver la
-   palabra en un <span> —margen negativo no mueve esa línea de base en
-   Chromium, comprobado— y no compensa meter marcado por eso. */
-.hd .brand{align-items:baseline}
+.hd .brand{--n:30px;gap:5px;align-items:center}
+.hd .brand svg{width:var(--n);height:var(--n)}
+/* La palabra se apoya en la punta de abajo del rombo, clavada.
+   No vale align-items:baseline en el .brand: eso alinea, sí, pero de paso
+   mete debajo el hueco de las letras con rabo, la caja de la marca crece y,
+   al centrarse en la barra, el conjunto sube y la palabra queda colgando.
+   Se hace al revés: el rombo se queda centrado en la barra —donde estaba— y
+   la palabra se baja ella sola, sin tocar la maquetación.
+
+   El número no es a ojo. Con line-height:1 y centrada, la línea de base cae
+   0,3824 em por debajo del centro del rombo (métrica de la Switzer), y la
+   punta cae 0,465 × el lado del rombo (el dibujo ocupa del 3,5 % al 96,5 %
+   de su recuadro, medido con getBBox). La diferencia es lo que hay que
+   bajar, y escrito así sigue saliendo bien si cambia el cuerpo o el tamaño
+   del logotipo. */
+.hd .brand .bw{line-height:1;transform:translateY(calc(var(--n) * 0.465 - 0.3824em))}
 /* ── el boton de whitepaper, al extremo derecho ─────────────────────────────
    Quien lo empujaba a la derecha era el nav del centro (margin-inline:auto).
    Al ocultar esos enlaces en escritorio, la regla de 1000px que anula el
@@ -1997,7 +2000,7 @@ html[dir="rtl"] .ann-in:hover .ann-go{transform:scaleX(-1) translateX(4px)}
 <header class="hd" id="hd">
   <a class="brand" href="#top">
     <svg aria-hidden="true"><use href="#nlogo-s"/></svg>
-    Nereum</a>
+    <span class="bw">Nereum</span></a>
   <nav class="nav">
     <a href="#network">Network<i class="chip" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3.4 19 7.4v8.2l-7 4-7-4V7.4l7-4Z"/></svg></i></a>
     <a href="#press">Press<i class="chip" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4.6 6.4h14.8v8.8h-8.1L7.4 18.6v-3.4H4.6Z"/></svg></i></a>
@@ -5261,6 +5264,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
     paper:'The thesis', solutions:'What it guarantees', stack:'The stack',
     security:'Security', presale:'Seed Round', token:'Tokenomics',
     thesis:'The thesis', builds:'What is running',
+    thesis:'The thesis', builds:'What is running',
     join:'In the open'
   };
   const FUERA=new Set(['chroma','kin','xfade','xlight','hpin','docs','blog']);
@@ -5297,6 +5301,24 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
   },{rootMargin:'-50% 0px -50% 0px',threshold:0});
   secs.forEach(o=>io.observe(o.el));
   pon(0);
+  /* Se repasa a mano cuando la pagina ya esta asentada, y en cada cambio de
+     tamano: mirar quien cruza la mitad ahora no depende de haberlo visto
+     cruzar. */
+  function repasa(){
+    const m=innerHeight/2;
+    for(let i=0;i<secs.length;i++){
+      const r=secs[i].el.getBoundingClientRect();
+      if(r.top<=m&&r.bottom>m){ if(i!==actual){actual=-1;pon(i)} return }
+    }
+    /* La portada no esta en esta lista —vive dentro de .hero-hold, no es hija
+       directa de <main>—, asi que estando en ella no cruza nadie la mitad: lo
+       correcto es que no haya nada subrayado, no que se quede lo anterior. */
+    links.forEach(l=>l.classList.remove('on'));
+    actual=-1;
+  }
+  addEventListener('load',()=>setTimeout(repasa,80));
+  addEventListener('resize',repasa,{passive:true});
+  setTimeout(repasa,1000);
   /* Se repasa a mano cuando la pagina ya esta asentada, y en cada cambio de
      tamano: mirar quien cruza la mitad ahora no depende de haberlo visto
      cruzar. */
