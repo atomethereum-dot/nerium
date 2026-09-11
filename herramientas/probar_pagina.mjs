@@ -92,6 +92,32 @@ for (const k of filas.map(f => f.linea)) {
 const sub = await pg.evaluate(() => document.querySelector('.lane-sub').textContent.trim());
 di(Object.values(dic).every(d => d[sub]), 'y la frase de «Compatible with» tambien');
 
+// ── la escala tipografica ──
+const tipo = await pg.evaluate(() => {
+  const g = s => { const e = document.querySelector(s); if (!e) return null;
+    const c = getComputedStyle(e), r = e.getBoundingClientRect();
+    const sec = e.closest('section');
+    return { px: Math.round(parseFloat(c.fontSize)),
+             lineas: Math.round(r.height / parseFloat(c.lineHeight)),
+             ancho: Math.round(r.width),
+             seccion: sec ? Math.round(sec.getBoundingClientRect().width) : 0 }; };
+  return { h1: g('.hero h1'), sec: g('.sec-h'), press: g('.press-h'),
+           sale: g('.sale-h'), join: g('.join-h') };
+});
+const titulares = ['sec','press','sale','join'].map(k => tipo[k]).filter(Boolean);
+di(tipo.h1 && tipo.h1.px >= 90,
+   'con 1440 de ancho el titular de portada pide sitio: ' + (tipo.h1 || {}).px + 'px');
+di(tipo.h1 && tipo.h1.lineas === 1, 'y cabe en un renglon');
+di(titulares.every(t => t.px >= 70),
+   'los titulares de seccion tambien: ' + titulares.map(t => t.px).join('/') + 'px');
+/* El de «Security» estaba encerrado en una columna de 484 px teniendo 1360 de
+   seccion, porque la caja llevaba la medida de LEER —56ch— y ahogaba al
+   titular. La medida va en cada pieza, no en la caja. */
+di(titulares.every(t => t.ancho > t.seccion * 0.45),
+   'y ninguno encerrado en media columna: ' +
+   titulares.map(t => Math.round(t.ancho / t.seccion * 100) + '%').join(' '));
+di(titulares.every(t => t.lineas <= 3), 'ninguno se parte en mas de tres renglones');
+
 di(errs.length === 0, 'sin errores de pagina' + (errs.length ? ': ' + errs[0] : ''));
 await ctx.close();
 

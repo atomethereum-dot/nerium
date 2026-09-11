@@ -21,6 +21,7 @@ todo lo que se hizo aqui y el archivo subido no trae:
  13. las tarjetas de prensa, con el lenguaje del whitepaper
  14. el papel con luz y grano, la compatibilidad y las cuatro garantias
  15. el detalle: como aparece cada cosa, y que no se quede nada sin salir
+ 16. la escala tipografica: el titular manda
 """
 import sys, os
 
@@ -34,6 +35,7 @@ import fondo
 import prensa
 import pagina
 import detalle
+import escala
 subido, publicado = sys.argv[1], '/home/user/nerium/index.html'
 z = open(subido, encoding='utf-8').read()
 p = open(publicado, encoding='utf-8').read()
@@ -155,6 +157,10 @@ rest = pagina.aplicar(rest)
 # ── 15 · el detalle ──
 rest = detalle.aplicar(rest)
 
+# ── 16 · la escala ──
+# Va la ultima: pisa cuerpos que vienen de todo lo anterior.
+rest = escala.aplicar(rest)
+
 salida = pre + rest
 open(publicado, 'w', encoding='utf-8').write(salida)
 print("montado:", len(salida), "bytes ·", salida.count('var(--hud-b)'), "usos de --hud-b ·",
@@ -167,4 +173,5 @@ print("montado:", len(salida), "bytes ·", salida.count('var(--hud-b)'), "usos d
       "fondo:", 'tres planos' if fondo.MARCA in salida else 'EL VIEJO', "·",
       "prensa:", 'tarjetas' if prensa.MARCA in salida else 'SIN TOCAR', "·",
       "pagina:", 'con luz' if pagina.MARCA in salida else 'SIN TOCAR', "·",
-      "detalle:", 'mascaras' if detalle.MARCA in salida else 'SIN TOCAR')
+      "detalle:", 'mascaras' if detalle.MARCA in salida else 'SIN TOCAR', "·",
+      "escala:", 'subida' if escala.MARCA in salida else 'SIN TOCAR')
