@@ -24,6 +24,7 @@ todo lo que se hizo aqui y el archivo subido no trae:
  16. la escala tipografica: el titular manda
  17. la mitad clara, decidida: suelo, relieve, ritmo y contraste
  18. el sistema: un solo epigrafe para las diez secciones, y el aviso
+ 19. la portada liquida: el rail de todo-o-nada y los botones
 """
 import sys, os
 
@@ -40,6 +41,7 @@ import detalle
 import escala
 import papel
 import sistema
+import liquida
 subido, publicado = sys.argv[1], '/home/user/nerium/index.html'
 z = open(subido, encoding='utf-8').read()
 p = open(publicado, encoding='utf-8').read()
@@ -176,6 +178,9 @@ rest = papel.aplicar(rest)
 # el aviso de la ronda ensena por fin lo que anuncia.
 rest = sistema.aplicar(rest)
 
+# ── 19 · la portada ──
+rest = liquida.aplicar(rest)
+
 salida = pre + rest
 open(publicado, 'w', encoding='utf-8').write(salida)
 print("montado:", len(salida), "bytes ·", salida.count('var(--hud-b)'), "usos de --hud-b ·",
@@ -191,4 +196,5 @@ print("montado:", len(salida), "bytes ·", salida.count('var(--hud-b)'), "usos d
       "detalle:", 'mascaras' if detalle.MARCA in salida else 'SIN TOCAR', "·",
       "escala:", 'subida' if escala.MARCA in salida else 'SIN TOCAR', "·",
       "papel:", 'decidido' if papel.MARCA in salida else 'SIN TOCAR', "·",
-      "sistema:", str(salida.count('class="sk-n"')) + '/10 epigrafes')
+      "sistema:", str(salida.count('class="sk-n"')) + '/10 epigrafes', "·",
+      "portada:", 'liquida' if liquida.MARCA in salida else 'SIN TOCAR')
