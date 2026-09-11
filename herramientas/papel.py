@@ -56,7 +56,7 @@ def placas(semilla=31):
     r = random.Random(semilla)
     piezas = []
     cols, filas = W // U, H // U
-    for _ in range(200):
+    for _ in range(120):
         for _ in range(40):
             cx, cy = r.randrange(cols), r.randrange(filas)
             hx, hy = cx / (cols - 1), cy / (filas - 1)
@@ -67,13 +67,13 @@ def placas(semilla=31):
             continue
         an = r.choice([2, 3, 3, 4, 4, 5, 6]) * U     # placas largas: arquitectura
         c = FRIO[r.randrange(len(FRIO))]
-        a = round((.07 + .27 * d) * r.uniform(.6, 1.0), 3)
+        a = round((.035 + .13 * d) * r.uniform(.6, 1.0), 3)
         x, y = cx * U, cy * U
         piezas.append('<rect x="%d" y="%d" width="%d" height="%d" fill="rgb(%d,%d,%d)" '
                       'opacity="%s"/>' % (x, y, an, U, c[0], c[1], c[2], a))
         # el filete de arriba: la luz viene de arriba, siempre la misma
         piezas.append('<rect x="%d" y="%d" width="%d" height="1" fill="#FFFFFF" '
-                      'opacity="%s"/>' % (x, y, an, round(min(.85, a * 2.6), 3)))
+                      'opacity="%s"/>' % (x, y, an, round(min(.55, a * 2.2), 3)))
 
     def rg(nid, col, op):
         return ('<radialGradient id="' + nid + '">'
@@ -112,7 +112,7 @@ def placas_alto(semilla=47):
     r = random.Random(semilla)
     piezas = []
     cols, filas = W // U, H // U
-    for _ in range(150):
+    for _ in range(95):
         for _ in range(40):
             cx, cy = r.randrange(cols), r.randrange(filas)
             hy = cy / (filas - 1)
@@ -122,12 +122,12 @@ def placas_alto(semilla=47):
             continue
         an = r.choice([1, 2, 2, 3, 3, 4, 5]) * U
         c = FRIO[r.randrange(len(FRIO))]
-        a = round((.06 + .26 * hy) * r.uniform(.6, 1.0), 3)
+        a = round((.03 + .12 * hy) * r.uniform(.6, 1.0), 3)
         x, y = cx * U, cy * U
         piezas.append('<rect x="%d" y="%d" width="%d" height="%d" fill="rgb(%d,%d,%d)" '
                       'opacity="%s"/>' % (x, y, an, U, c[0], c[1], c[2], a))
         piezas.append('<rect x="%d" y="%d" width="%d" height="1" fill="#FFFFFF" '
-                      'opacity="%s"/>' % (x, y, an, round(min(.85, a * 2.6), 3)))
+                      'opacity="%s"/>' % (x, y, an, round(min(.55, a * 2.2), 3)))
 
     def rg(nid, col, op):
         return ('<radialGradient id="' + nid + '">'
@@ -183,12 +183,9 @@ CSS = """
   /* Una sola direccion de luz para toda la mitad clara: de arriba. El filete
      blanco en el canto superior y la sombra tirando a azul debajo son la misma
      decision. Es lo que da relieve sin un solo borde gris. */
-  --p-relieve:inset 0 1px 0 rgba(255,255,255,.92),
-              0 1px 2px rgba(20,42,92,.05),
-              0 18px 40px -26px rgba(20,42,92,.44);
-  --p-relieve2:inset 0 1px 0 rgba(255,255,255,.95),
-               0 2px 4px rgba(20,42,92,.07),
-               0 34px 70px -34px rgba(20,42,92,.52);
+  /* Tres sombras por tarjeta era acumular. Una, y se acabo. */
+  --p-relieve:0 14px 34px -24px rgba(20,42,92,.40);
+  --p-relieve2:0 26px 58px -30px rgba(20,42,92,.46);
 }
 
 /* ── 1 · el suelo ──
@@ -309,12 +306,13 @@ main>section@@{box-shadow:inset 0 1px 0 rgba(255,255,255,.92)}
    titular partido, no un rotulo: meterlo en la tinta de rotulo dejaba grises
    todos los titulares de la pagina para que el medidor callara. Salio en una
    captura. Arreglar una medida estropeando el diseno es hacerlo al reves. */
-/* Los ordinales de las tarjetas iban a 1,56:1, o sea invisibles. Un numero
-   que no se ve no es una marca de agua: es tinta desperdiciada. Van a la misma
-   tinta de rotulo que el resto —un gris intermedio propio se quedaba corto
-   sobre el papel, que no es blanco— y a 10 px siguen sin pesar mas que el
-   titulo. */
-@@ :is(.sec-n,.rn){color:#5B657A}
+/* Los ordinales del canto de las tarjetas: fuera. Estaban a 1,56:1 —o sea,
+   invisibles— y mi primera reaccion fue subirlos a que se leyeran. Con eso
+   sumaban tres marcas mas por pantalla para decir lo que ya dice el orden de
+   las tarjetas: nada. Un numero que no se ve sobra; uno que se ve y no aporta,
+   tambien. El de las filas SI se queda: ahi la lista esta numerada de verdad. */
+@@ .sec-n{display:none}
+@@ .rn{color:#5B657A}
 /* El rotulo del medio de la rosca y su cifra: 2,20 y 2,65 sobre el papel. */
 @@ .tkp-core b{color:#1A2233}
 /* El epigrafe de cada tarjeta de prensa iba en el acento del medio, que en

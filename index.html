@@ -2204,12 +2204,9 @@ html[dir="rtl"] .ann-in:hover .ann-go{transform:scaleX(-1) translateX(4px)}
   /* Una sola direccion de luz para toda la mitad clara: de arriba. El filete
      blanco en el canto superior y la sombra tirando a azul debajo son la misma
      decision. Es lo que da relieve sin un solo borde gris. */
-  --p-relieve:inset 0 1px 0 rgba(255,255,255,.92),
-              0 1px 2px rgba(20,42,92,.05),
-              0 18px 40px -26px rgba(20,42,92,.44);
-  --p-relieve2:inset 0 1px 0 rgba(255,255,255,.95),
-               0 2px 4px rgba(20,42,92,.07),
-               0 34px 70px -34px rgba(20,42,92,.52);
+  /* Tres sombras por tarjeta era acumular. Una, y se acabo. */
+  --p-relieve:0 14px 34px -24px rgba(20,42,92,.40);
+  --p-relieve2:0 26px 58px -30px rgba(20,42,92,.46);
 }
 
 /* ── 1 · el suelo ──
@@ -2330,12 +2327,13 @@ main>section:is(.paper,.paper2,.secure,.sale,.tkp,.join,.press){box-shadow:inset
    titular partido, no un rotulo: meterlo en la tinta de rotulo dejaba grises
    todos los titulares de la pagina para que el medidor callara. Salio en una
    captura. Arreglar una medida estropeando el diseno es hacerlo al reves. */
-/* Los ordinales de las tarjetas iban a 1,56:1, o sea invisibles. Un numero
-   que no se ve no es una marca de agua: es tinta desperdiciada. Van a la misma
-   tinta de rotulo que el resto —un gris intermedio propio se quedaba corto
-   sobre el papel, que no es blanco— y a 10 px siguen sin pesar mas que el
-   titulo. */
-:is(.paper,.paper2,.secure,.sale,.tkp,.join,.press) :is(.sec-n,.rn){color:#5B657A}
+/* Los ordinales del canto de las tarjetas: fuera. Estaban a 1,56:1 —o sea,
+   invisibles— y mi primera reaccion fue subirlos a que se leyeran. Con eso
+   sumaban tres marcas mas por pantalla para decir lo que ya dice el orden de
+   las tarjetas: nada. Un numero que no se ve sobra; uno que se ve y no aporta,
+   tambien. El de las filas SI se queda: ahi la lista esta numerada de verdad. */
+:is(.paper,.paper2,.secure,.sale,.tkp,.join,.press) .sec-n{display:none}
+:is(.paper,.paper2,.secure,.sale,.tkp,.join,.press) .rn{color:#5B657A}
 /* El rotulo del medio de la rosca y su cifra: 2,20 y 2,65 sobre el papel. */
 :is(.paper,.paper2,.secure,.sale,.tkp,.join,.press) .tkp-core b{color:#1A2233}
 /* El epigrafe de cada tarjeta de prensa iba en el acento del medio, que en
@@ -2596,10 +2594,11 @@ footer :is(.fcopy,.f-legal){color:#5B657A}
   background:linear-gradient(to bottom,
     transparent,var(--via-c,rgba(160,200,255,.55)) 34%,transparent)}
 /* La estacion: el cubo de la marca, cerrado. Cuadrado, como el logotipo. */
+/* El cubo era de 11 px con un halo de 18: un foco en medio de la costura.
+   A 7, sin halo, sigue diciendo «aqui empalma» y deja de gritarlo. */
 .via::after{content:"";position:absolute;left:50%;top:clamp(34px,3.2vw,60px);
-  width:11px;height:11px;transform:translateX(-50%);
-  background:var(--via-c,#79ABFF);
-  box-shadow:0 0 18px var(--via-g,rgba(121,171,255,.85))}
+  width:7px;height:7px;transform:translateX(-50%);
+  background:var(--via-c,#79ABFF)}
 /* En papel el azul de marca; en lo oscuro, el claro. Es la misma regla que
    siguen los numeros de los epigrafes. */
 :is(.paper,.paper2,.secure,.sale,.tkp,.join,.press) .via{
@@ -2642,9 +2641,14 @@ footer :is(.fcopy,.f-legal){color:#5B657A}
 :is(#press,#thesis,#solutions,#security,#token,#builds,#join) .sk{
   display:flex;width:100%;justify-content:center;
   padding-top:clamp(16px,2vw,30px)}
-:is(#press,#thesis,#solutions,#security,#token,#builds,#join) .sk::before{
-  content:"";width:clamp(26px,3.4vw,54px);height:1px;flex:0 0 auto;order:-1;
-  background:linear-gradient(90deg,transparent,currentColor);opacity:.45}
+/* Y el filete del epigrafe, fuera los DOS.
+   Centrado hacia falta uno a cada lado para que no pareciera un error, y con
+   eso el rotulo pasaba a ser cinco marcas: numero, filete, punto, nombre,
+   filete. Contadas en pantalla salian 34 piezas de menos de 26 px. Un numero
+   y un nombre bastan para decir donde estas; lo demas era ruido con forma de
+   sistema. */
+:is(#press,#thesis,#solutions,#security,#token,#builds,#join) .sk::after{
+  display:none}
 /* Y los titulares y sus entradillas, centrados con ellos. */
 :is(.press-h,.sec-h,.tkp-h,.builds-h,.join-h,.sec-sub,.join-note,.say p){
   margin-inline:auto;text-align:center}
@@ -2661,12 +2665,66 @@ footer :is(.fcopy,.f-legal){color:#5B657A}
 @media(max-width:760px){
   .via{height:clamp(78px,13vh,120px);
     top:calc(-1 * clamp(24px,3.4vw,44px))}
-  .via::after{top:clamp(22px,3.2vw,40px);width:9px;height:9px}
+  .via::after{top:clamp(22px,3.2vw,40px);width:6px;height:6px}
   :is(#press,#thesis,#solutions,#security,#token,#builds,#join) .sk{
     padding-top:clamp(10px,3vw,20px)}
 }
 
 /* ══ fin: via ══ */
+/* ══ calma ═════════════════════════════════════════════════════════════════
+   La ronda que resta. Treinta y cuatro piezas de menos de 26 px en una sola
+   pantalla, y tres cosas distintas diciendo en que seccion estas. */
+
+/* ── el rail de la derecha, dormido ──
+   El menu de arriba ya subraya la seccion y el rotulo de abajo la nombra.
+   Trece rayas mas es decirlo por tercera vez. En reposo solo se ve la de la
+   seccion actual; al acercar el raton aparecen las trece, que para eso estan.
+   La zona sensible se ensancha con padding, no con un ancho mayor: asi no se
+   come el margen de la pagina. */
+.srail{padding:10px 6px;transition:opacity .3s var(--ease)}
+.srail button:not(.on) i{opacity:0;transition:opacity .3s var(--ease),
+  width .3s var(--ease)}
+.srail:hover button:not(.on) i,
+.srail:focus-within button:not(.on) i{opacity:.45}
+/* Y el dedo no tiene raton: en tactil se queda solo la marca de la seccion,
+   que es informacion, y se navega con el menu. */
+@media(hover:none){
+  .srail button:not(.on) i{opacity:0}
+  .srail s{display:none}
+}
+
+/* ── el pautado de las filas ──
+   Las cuatro garantias iban separadas por una linea de puntos. A ese tamano
+   una linea punteada es una fila de marcas, no un separador: son treinta y
+   tantos puntos por costura. Un filete. */
+:is(.paper,.paper2,.secure,.sale,.tkp,.join,.press) .rows li{
+  border-image:none}
+:is(.paper,.paper2,.secure,.sale,.tkp,.join,.press) .rows li+li{
+  border-top:1px solid rgba(30,58,116,.12)}
+
+/* ── las cuatro esquinas del telefono ──
+   En una pantalla de 390 px habia CUATRO cosas flotando encima del contenido a
+   la vez: la flecha de bajar abajo a la izquierda, el idioma debajo, la flecha
+   de subir abajo a la derecha y el rotulo de la seccion encima de esa. Y el
+   rotulo decia «SECURITY» teniendo «06 SECURITY» a la vista en el mismo
+   pantallazo.
+
+   · la flecha de bajar es una pista de la portada: cumple su papel ahi y
+     estorba el resto del recorrido, donde ademas convive con la de subir
+     apuntando al reves;
+   · el rotulo de la seccion se va: con el epigrafe centrado en cada estacion,
+     el nombre ya esta en pantalla y sobra decirlo por segunda vez.
+
+   En escritorio se quedan las dos: hay sitio de sobra y ahi no estorban. */
+@media(max-width:760px){
+  /* No hay ninguna clase que diga «estas arriba», pero el boton de subir se
+     enciende solo al bajar: se cuelga de el. */
+  body:has(.subir.on) .scrollbtn{opacity:0;pointer-events:none;
+    transition:opacity .3s var(--ease)}
+  .hud-band{display:none}
+}
+
+/* ══ fin: calma ══ */
 </style>
 </head>
 <body>

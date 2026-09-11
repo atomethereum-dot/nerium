@@ -26,6 +26,7 @@ todo lo que se hizo aqui y el archivo subido no trae:
  18. el sistema: un solo epigrafe para las diez secciones, y el aviso
  19. la portada liquida: el rail de todo-o-nada y los botones
  20. la via: una linea cose la pagina y las bandas dejan de cortarse
+ 21. calma: la ronda que resta, porque se veia cargada
 """
 import sys, os
 
@@ -44,6 +45,7 @@ import papel
 import sistema
 import liquida
 import via
+import calma
 subido, publicado = sys.argv[1], '/home/user/nerium/index.html'
 z = open(subido, encoding='utf-8').read()
 p = open(publicado, encoding='utf-8').read()
@@ -185,6 +187,9 @@ rest = liquida.aplicar(rest)
 
 # ── 20 · la via ──
 rest = via.aplicar(rest)
+
+# ── 21 · calma ──
+rest = calma.aplicar(rest)
 
 salida = pre + rest
 open(publicado, 'w', encoding='utf-8').write(salida)

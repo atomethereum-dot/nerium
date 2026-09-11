@@ -57,10 +57,11 @@ CSS = """
   background:linear-gradient(to bottom,
     transparent,var(--via-c,rgba(160,200,255,.55)) 34%,transparent)}
 /* La estacion: el cubo de la marca, cerrado. Cuadrado, como el logotipo. */
+/* El cubo era de 11 px con un halo de 18: un foco en medio de la costura.
+   A 7, sin halo, sigue diciendo «aqui empalma» y deja de gritarlo. */
 .via::after{content:"";position:absolute;left:50%;top:clamp(34px,3.2vw,60px);
-  width:11px;height:11px;transform:translateX(-50%);
-  background:var(--via-c,#79ABFF);
-  box-shadow:0 0 18px var(--via-g,rgba(121,171,255,.85))}
+  width:7px;height:7px;transform:translateX(-50%);
+  background:var(--via-c,#79ABFF)}
 /* En papel el azul de marca; en lo oscuro, el claro. Es la misma regla que
    siguen los numeros de los epigrafes. */
 :is(.paper,.paper2,.secure,.sale,.tkp,.join,.press) .via{
@@ -103,9 +104,14 @@ CSS = """
 :is(#press,#thesis,#solutions,#security,#token,#builds,#join) .sk{
   display:flex;width:100%;justify-content:center;
   padding-top:clamp(16px,2vw,30px)}
-:is(#press,#thesis,#solutions,#security,#token,#builds,#join) .sk::before{
-  content:"";width:clamp(26px,3.4vw,54px);height:1px;flex:0 0 auto;order:-1;
-  background:linear-gradient(90deg,transparent,currentColor);opacity:.45}
+/* Y el filete del epigrafe, fuera los DOS.
+   Centrado hacia falta uno a cada lado para que no pareciera un error, y con
+   eso el rotulo pasaba a ser cinco marcas: numero, filete, punto, nombre,
+   filete. Contadas en pantalla salian 34 piezas de menos de 26 px. Un numero
+   y un nombre bastan para decir donde estas; lo demas era ruido con forma de
+   sistema. */
+:is(#press,#thesis,#solutions,#security,#token,#builds,#join) .sk::after{
+  display:none}
 /* Y los titulares y sus entradillas, centrados con ellos. */
 :is(.press-h,.sec-h,.tkp-h,.builds-h,.join-h,.sec-sub,.join-note,.say p){
   margin-inline:auto;text-align:center}
@@ -122,7 +128,7 @@ CSS = """
 @media(max-width:760px){
   .via{height:clamp(78px,13vh,120px);
     top:calc(-1 * clamp(24px,3.4vw,44px))}
-  .via::after{top:clamp(22px,3.2vw,40px);width:9px;height:9px}
+  .via::after{top:clamp(22px,3.2vw,40px);width:6px;height:6px}
   :is(#press,#thesis,#solutions,#security,#token,#builds,#join) .sk{
     padding-top:clamp(10px,3vw,20px)}
 }
