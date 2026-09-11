@@ -92,16 +92,70 @@ def placas(semilla=31):
             % (W, H, defs, ''.join(piezas), luces))
 
 
+def placas_alto(semilla=47):
+    """El mismo campo, compuesto para una pantalla VERTICAL.
+
+       Esto es lo que me faltaba y no es un ajuste: es que la composicion
+       depende de la FORMA del hueco. El dibujo de arriba va en diagonal
+       —limpio arriba a la izquierda, denso abajo a la derecha— porque esta
+       pensado para 1440 de ancho. Metido en un telefono con «cover», el
+       navegador lo agranda casi ocho veces y recorta el medio: los bloques
+       dejan de ser bloques y se quedan en dos manchas azules gigantes. Una
+       pantalla entera de nada.
+
+       Aqui la caja es del ancho del telefono y se repite hacia abajo, asi que
+       las placas conservan su tamano de verdad. Y el hueco limpio ya no es
+       una esquina: es la FRANJA DE ARRIBA, porque en vertical el titular
+       ocupa todo el ancho y no deja rincon libre a la derecha."""
+    W, H, U = 420, 1200, 30
+    FRIO = [(176, 196, 226), (150, 176, 216), (198, 213, 236), (128, 158, 206)]
+    r = random.Random(semilla)
+    piezas = []
+    cols, filas = W // U, H // U
+    for _ in range(150):
+        for _ in range(40):
+            cx, cy = r.randrange(cols), r.randrange(filas)
+            hy = cy / (filas - 1)
+            if r.random() < hy ** 1.6:
+                break
+        else:
+            continue
+        an = r.choice([1, 2, 2, 3, 3, 4, 5]) * U
+        c = FRIO[r.randrange(len(FRIO))]
+        a = round((.06 + .26 * hy) * r.uniform(.6, 1.0), 3)
+        x, y = cx * U, cy * U
+        piezas.append('<rect x="%d" y="%d" width="%d" height="%d" fill="rgb(%d,%d,%d)" '
+                      'opacity="%s"/>' % (x, y, an, U, c[0], c[1], c[2], a))
+        piezas.append('<rect x="%d" y="%d" width="%d" height="1" fill="#FFFFFF" '
+                      'opacity="%s"/>' % (x, y, an, round(min(.85, a * 2.6), 3)))
+
+    def rg(nid, col, op):
+        return ('<radialGradient id="' + nid + '">'
+                '<stop offset="0" stop-color="' + col + '" stop-opacity="' + op + '"/>'
+                '<stop offset="1" stop-color="' + col + '" stop-opacity="0"/></radialGradient>')
+    defs = ('<defs>' + rg('m1', 'rgb(255,255,255)', '.94')
+                     + rg('m2', 'rgb(47,107,255)', '.07') + '</defs>')
+    # El foco blanco remata la franja de arriba, que es la de leer. Se corta a
+    # la altura de la costura para que al repetirse no deje un halo a mitad.
+    luces = ('<ellipse cx="210" cy="120" rx="430" ry="300" fill="url(#m1)"/>'
+             '<circle cx="400" cy="1140" r="300" fill="url(#m2)"/>')
+    return ('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 %d %d">%s%s%s</svg>'
+            % (W, H, defs, ''.join(piezas), luces))
+
+
 def escribir(raiz):
-    ruta = os.path.join(raiz, 'img', 'papel.svg')
-    dibujo = placas()
-    try:
-        if open(ruta, encoding='utf-8').read() == dibujo:
-            return ruta
-    except OSError:
-        pass
-    open(ruta, 'w', encoding='utf-8').write(dibujo)
-    return ruta
+    escritas = []
+    for nombre, dibujo in (('papel.svg', placas()), ('papel-alto.svg', placas_alto())):
+        ruta = os.path.join(raiz, 'img', nombre)
+        try:
+            if open(ruta, encoding='utf-8').read() == dibujo:
+                escritas.append(ruta)
+                continue
+        except OSError:
+            pass
+        open(ruta, 'w', encoding='utf-8').write(dibujo)
+        escritas.append(ruta)
+    return escritas
 
 
 # ── el bloque ────────────────────────────────────────────────────────────────
@@ -148,6 +202,26 @@ CSS = """
 @@{background-image:var(--grano),url(img/papel.svg);
    background-repeat:repeat,no-repeat;background-size:auto,cover;
    background-position:0 0,center}
+/* En el TELEFONO nada de lo de arriba vale, y esto es el fallo que me costo
+   tres rondas de «lo veo igual»: yo miraba capturas de 1440 y el sitio se ve
+   en un movil. Con «cover» sobre una seccion de 390x1900 el navegador agranda
+   el dibujo casi ocho veces y recorta el centro; las placas dejan de ser
+   placas y se quedan en dos manchas azules del tamano de la pantalla. Todo el
+   trabajo de fondo, invisible, y en algun tramo peor que invisible.
+
+   El modulo anterior YA tenia resuelto esto y yo lo pise sin darme cuenta: su
+   regla vivia dentro de una media query y la mia, que va despues en la hoja,
+   le gana igual —las media queries no suman especificidad—.
+
+   Aqui va el dibujo VERTICAL, del ancho de la pantalla y repitiendose hacia
+   abajo, asi que las placas conservan su tamano de verdad. */
+@media(max-width:760px){
+  @@{background-image:var(--grano),url(img/papel-alto.svg);
+     background-size:auto,100% auto;
+     background-repeat:repeat,repeat-y;
+     background-position:0 0,left top}
+}
+
 /* El canto de arriba de cada lamina clara: el mismo filete blanco que llevan
    las placas y las tarjetas, aplicado a la seccion entera. */
 main>section@@{box-shadow:inset 0 1px 0 rgba(255,255,255,.92)}
@@ -197,6 +271,13 @@ main>section@@{box-shadow:inset 0 1px 0 rgba(255,255,255,.92)}
 @@.tkp{background-image:
    linear-gradient(rgba(247,250,253,.72),rgba(247,250,253,.72)),
    var(--grano),url(img/papel.svg)}
+@media(max-width:760px){
+  @@.tkp{background-image:
+     linear-gradient(rgba(247,250,253,.72),rgba(247,250,253,.72)),
+     var(--grano),url(img/papel-alto.svg);
+     background-size:auto,auto,100% auto;
+     background-repeat:repeat,repeat,repeat-y}
+}
 
 @@.logos{padding:clamp(30px,3.2vw,46px) 0 clamp(34px,3.6vw,52px)}
 /* El titular de la banda vuelve a ser un titular. Cuando le puse encima el

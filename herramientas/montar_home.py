@@ -168,7 +168,7 @@ rest = escala.aplicar(rest)
 # ── 17 · la mitad clara ──
 # Detras de la escala: rehace las siete secciones claras, y para ganarle en
 # especificidad a lo original tiene que entrar despues.
-papel.escribir('/home/user/nerium')          # img/papel.svg, al dia
+papel.escribir('/home/user/nerium')          # img/papel.svg y papel-alto.svg
 rest = papel.aplicar(rest)
 
 # ── 18 · el sistema ──

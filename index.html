@@ -2223,6 +2223,26 @@ html[dir="rtl"] .ann-in:hover .ann-go{transform:scaleX(-1) translateX(4px)}
 :is(.paper,.paper2,.secure,.sale,.tkp,.join,.press){background-image:var(--grano),url(img/papel.svg);
    background-repeat:repeat,no-repeat;background-size:auto,cover;
    background-position:0 0,center}
+/* En el TELEFONO nada de lo de arriba vale, y esto es el fallo que me costo
+   tres rondas de «lo veo igual»: yo miraba capturas de 1440 y el sitio se ve
+   en un movil. Con «cover» sobre una seccion de 390x1900 el navegador agranda
+   el dibujo casi ocho veces y recorta el centro; las placas dejan de ser
+   placas y se quedan en dos manchas azules del tamano de la pantalla. Todo el
+   trabajo de fondo, invisible, y en algun tramo peor que invisible.
+
+   El modulo anterior YA tenia resuelto esto y yo lo pise sin darme cuenta: su
+   regla vivia dentro de una media query y la mia, que va despues en la hoja,
+   le gana igual —las media queries no suman especificidad—.
+
+   Aqui va el dibujo VERTICAL, del ancho de la pantalla y repitiendose hacia
+   abajo, asi que las placas conservan su tamano de verdad. */
+@media(max-width:760px){
+  :is(.paper,.paper2,.secure,.sale,.tkp,.join,.press){background-image:var(--grano),url(img/papel-alto.svg);
+     background-size:auto,100% auto;
+     background-repeat:repeat,repeat-y;
+     background-position:0 0,left top}
+}
+
 /* El canto de arriba de cada lamina clara: el mismo filete blanco que llevan
    las placas y las tarjetas, aplicado a la seccion entera. */
 main>section:is(.paper,.paper2,.secure,.sale,.tkp,.join,.press){box-shadow:inset 0 1px 0 rgba(255,255,255,.92)}
@@ -2272,6 +2292,13 @@ main>section:is(.paper,.paper2,.secure,.sale,.tkp,.join,.press){box-shadow:inset
 :is(.paper,.paper2,.secure,.sale,.tkp,.join,.press).tkp{background-image:
    linear-gradient(rgba(247,250,253,.72),rgba(247,250,253,.72)),
    var(--grano),url(img/papel.svg)}
+@media(max-width:760px){
+  :is(.paper,.paper2,.secure,.sale,.tkp,.join,.press).tkp{background-image:
+     linear-gradient(rgba(247,250,253,.72),rgba(247,250,253,.72)),
+     var(--grano),url(img/papel-alto.svg);
+     background-size:auto,auto,100% auto;
+     background-repeat:repeat,repeat,repeat-y}
+}
 
 :is(.paper,.paper2,.secure,.sale,.tkp,.join,.press).logos{padding:clamp(30px,3.2vw,46px) 0 clamp(34px,3.6vw,52px)}
 /* El titular de la banda vuelve a ser un titular. Cuando le puse encima el
