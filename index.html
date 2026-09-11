@@ -2274,8 +2274,12 @@ main>section:is(.paper,.paper2,.secure,.sale,.tkp,.join,.press){box-shadow:inset
    var(--grano),url(img/papel.svg)}
 
 :is(.paper,.paper2,.secure,.sale,.tkp,.join,.press).logos{padding:clamp(30px,3.2vw,46px) 0 clamp(34px,3.6vw,52px)}
-:is(.paper,.paper2,.secure,.sale,.tkp,.join,.press).logos h2{font-size:clamp(10px,1vw,11.5px);font-family:var(--m);
-   letter-spacing:.2em;text-transform:uppercase;color:#5B657A}
+/* El titular de la banda vuelve a ser un titular. Cuando le puse encima el
+   epigrafe numerado del paso 18, los dos eran mono en versales del mismo
+   cuerpo y la banda tartamudeaba: «01 NETWORK» y debajo «COMPATIBLE WITH».
+   Un epigrafe y un titular tienen que distinguirse en algo. */
+:is(.paper,.paper2,.secure,.sale,.tkp,.join,.press).logos h2{font-size:clamp(15px,1.6vw,19px);font-family:var(--f);
+   letter-spacing:-.02em;text-transform:none;font-weight:400;color:#1A2233}
 :is(.paper,.paper2,.secure,.sale,.tkp,.join,.press).logos .lane-sub{display:none}
 :is(.paper,.paper2,.secure,.sale,.tkp,.join,.press).logos .lane{margin-top:clamp(16px,1.8vw,24px)}
 
@@ -2331,6 +2335,84 @@ footer :is(.fcopy,.f-legal){color:#5B657A}
 .hb.blue,.get{background:#4C82FF;color:#00070F}
 
 /* ══ fin: papel ══ */
+/* ══ el sistema: orden e identidad ═══════════════════════════════════════
+   Habia cuatro maneras distintas de presentar una seccion y tres secciones
+   que no se presentaban. Ahora hay UNA, y ademas dice algo: el epigrafe de
+   cada seccion es su entrada del menu, con su numero. La espina dorsal de la
+   pagina y el menu de arriba cuentan lo mismo. */
+
+/* ── el epigrafe, uno para las diez ── */
+.sk{display:inline-flex;align-items:center;gap:13px;
+  font-family:var(--m);font-size:11px;letter-spacing:.2em;text-transform:uppercase;
+  line-height:1}
+.sk-n{font-style:normal;font-weight:500;letter-spacing:.06em;
+  font-variant-numeric:tabular-nums;font-size:11.5px;flex:0 0 auto;
+  /* El azul de marca esta en mitad de la escala: sobre el negro de «Build»
+     daba 4,29 y sobre el papel va sobrado. Cada mitad lleva el suyo. */
+  color:#79ABFF}
+/* El filete detras del rotulo: es lo que convierte diez rotulos sueltos en
+   una serie. Corto, para que no se lea como un separador de seccion. */
+.sk::after{content:"";width:clamp(26px,3.4vw,54px);height:1px;flex:0 0 auto;
+  background:linear-gradient(90deg,currentColor,transparent);opacity:.45}
+:is(.paper,.paper2,.secure,.sale,.tkp,.join,.press) .sk-n{color:#1B49E0}
+/* En seguridad y en la ronda el epigrafe ya traia su punto de «en directo»,
+   que significa algo y se queda: el numero entra delante, no en su sitio.
+   Ojo con esto, que ya me lo comi una vez: esas dos reglas visten a CUALQUIER
+   «i» de dentro como el punto —6 px, redondo y verde—, y el numero tambien es
+   un «i». Salia machacado en un circulito. Hay que desvestirlo. */
+:is(.sec-live,.sale-live).sk{gap:10px}
+:is(.sec-live,.sale-live).sk .sk-n{
+  width:auto;height:auto;border-radius:0;background:none;animation:none;
+  box-shadow:none;margin-inline-end:4px}
+/* Y los tres nuevos van con el mismo aire que los que ya estaban. */
+.say .sk,.rows-head .sk,.join-head .sk{margin-bottom:clamp(18px,2vw,28px)}
+.logos .sk{margin-bottom:clamp(12px,1.4vw,18px)}
+/* La banda va centrada, y un filete que sale solo por la derecha de algo
+   centrado se lee como un error de maquetacion, no como una serie. */
+.logos .sk::after{display:none}
+
+/* ── el aviso de la ronda ──
+   Era una tira plana: cuatro datos sueltos en fila y el avance en un pelo de
+   2 px pegado al canto de abajo, que es justo donde no se mira. Si lo que
+   anuncia es que la ronda va por el 85 %, el 85 % tiene que SER el elemento,
+   no una nota al pie. */
+.ann{background:
+  linear-gradient(90deg,#16379E 0%,#2F6BFF 42%,#2F6BFF 62%,#16379E 100%)}
+.ann-in{gap:clamp(10px,1.5vw,18px);padding:0 52px 0 22px}
+.ann-k{display:inline-flex;align-items:center;gap:8px;font-weight:600;flex:0 0 auto}
+.ann-dot{box-shadow:0 0 0 3px rgba(255,255,255,.22)}
+/* La barra, dentro y a la vista. Ancho fijo para que el numero de al lado no
+   baile cuando la ronda avanza. */
+.ann-bar{position:relative;width:clamp(64px,11vw,148px);height:5px;flex:0 0 auto;
+  border-radius:3px;overflow:hidden;background:rgba(3,10,40,.55);
+  box-shadow:inset 0 1px 2px rgba(3,10,40,.6)}
+.ann-fill{display:block;height:100%;border-radius:3px;
+  background:linear-gradient(90deg,#BFD6FF,#FFFFFF);
+  box-shadow:0 0 10px rgba(255,255,255,.55);
+  transition:width 1.1s cubic-bezier(.16,.84,.26,1)}
+.ann-n{flex:0 0 auto}
+.ann-n b{font-weight:600;font-variant-numeric:tabular-nums}
+.ann-p{width:3px;height:3px;border-radius:50%;background:rgba(255,255,255,.45);flex:none}
+.ann-s{color:rgba(255,255,255,.82);flex:0 0 auto}
+/* La llamada era una flecha suelta. Ahora es un boton, que es lo que es. */
+.ann-cta{display:inline-flex;align-items:center;gap:7px;flex:0 0 auto;
+  margin-inline-start:clamp(4px,1vw,14px);
+  height:24px;padding:0 12px;border-radius:999px;
+  background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);
+  font-weight:500;letter-spacing:.01em;white-space:nowrap;
+  transition:background .22s,border-color .22s}
+.ann-in:hover .ann-cta{background:#fff;border-color:#fff;color:#16379E}
+.ann-go{font-style:normal;transition:transform .3s cubic-bezier(.16,.84,.26,1)}
+.ann-in:hover .ann-go{transform:translateX(3px)}
+/* Al estrechar se va lo prescindible por orden: primero el precio, luego el
+   texto del boton —se queda la flecha—, y al final la palabra «complete». La
+   barra y el porcentaje no se van nunca: son el aviso. */
+@media(max-width:1180px){.ann-s,.ann-p{display:none}}
+@media(max-width:860px){.ann-cta{padding:0 9px;gap:0;font-size:0}
+  .ann-cta .ann-go{font-size:13px}}
+@media(max-width:560px){.ann-n span{display:none}.ann-in{padding-inline-start:14px}}
+
+/* ══ fin: sistema ══ */
 </style>
 </head>
 <body>
@@ -2387,15 +2469,13 @@ footer :is(.fcopy,.f-legal){color:#5B657A}
 
 <div class="ann" id="ann">
   <a class="ann-in" href="#presale">
-    <i class="ann-dot" aria-hidden="true"></i>
-    <span class="ann-k">Seed Round</span>
-    <i class="ann-p ann-p1" aria-hidden="true"></i>
+    <span class="ann-k"><i class="ann-dot" aria-hidden="true"></i>Seed Round</span>
+    <span class="ann-bar" aria-hidden="true"><i class="ann-fill" id="annFill" style="width:85%"></i></span>
     <span class="ann-n"><b id="annPct">85%</b> <span>complete</span></span>
-    <i class="ann-p ann-p2" aria-hidden="true"></i>
+    <i class="ann-p" aria-hidden="true"></i>
     <span class="ann-s">1 NRM = $0.20</span>
-    <span class="ann-go" aria-hidden="true">&#8594;</span>
+    <span class="ann-cta">Join the Seed Round<i class="ann-go" aria-hidden="true">&#8594;</i></span>
   </a>
-  <i class="ann-track" aria-hidden="true"><i class="ann-fill" id="annFill" style="width:85%"></i></i>
   <button class="ann-x" id="annX" type="button" aria-label="Hide this notice">
     <svg viewBox="0 0 14 14" aria-hidden="true"><path d="M3 3l8 8M11 3l-8 8"/></svg>
   </button>
@@ -2500,6 +2580,7 @@ footer :is(.fcopy,.f-legal){color:#5B657A}
 
 <section class="paper logos" id="network" data-bg="#FFFFFF" data-acc="#1D6AFF">
   <div class="wrap">
+    <div class="k sk rv"><i class="sk-n">01</i>Network</div>
     <h2 class="rv lane-k">Compatible with</h2>
     <p class="lane-sub rv">The chains it settles on and the wallets it already works with. Nothing to install, nothing to migrate.</p>
     <div class="lane rv"><div class="lane-in" id="lane1">
@@ -2515,7 +2596,7 @@ footer :is(.fcopy,.f-legal){color:#5B657A}
 
 <section class="press paper" id="press" data-bg="#FFFFFF" data-acc="#1D6AFF">
   <div class="wrap press-head">
-    <div class="k rv">In the press</div>
+    <div class="k sk rv"><i class="sk-n">02</i>In the press</div>
     <h2 class="press-h">What they are writing about the chain.</h2>
   </div>
   <div class="wrap press-hold"><div class="press-nav">
@@ -2589,6 +2670,7 @@ footer :is(.fcopy,.f-legal){color:#5B657A}
 
 <section class="paper say" id="thesis" data-bg="#FFFFFF" data-acc="#2E60FF">
   <div class="wrap">
+    <div class="k sk rv"><i class="sk-n">03</i>The thesis</div>
     <p class="rv">When value moves, the rules have to move with it. <em>On Nereum the rules travel with the asset and hold at machine speed &mdash; for desks and contracts alike.</em></p>
   </div>
 </section>
@@ -2609,6 +2691,7 @@ footer :is(.fcopy,.f-legal){color:#5B657A}
 
 <section class="paper2 pad" id="solutions" data-bg="#F1F2F4" data-acc="#3B57FF">
   <div class="wrap">
+    <div class="k sk rv"><i class="sk-n">04</i>Guarantees</div>
     <ul class="rows">
       <li class="rv"><i class="rn">01</i><b>All-or-nothing settlement</b><span class="rd">Every leg settles, or none does.</span><span class="ic"><svg viewBox="0 0 20 20"><path d="M4 10.5 8 14.5 16 5.5"/></svg></span></li>
       <li class="rv"><i class="rn">02</i><b>Controlled visibility</b><span class="rd">A public register; the policy travels with the asset.</span><span class="ic"><svg viewBox="0 0 20 20"><path d="M1.6 10S4.8 4.5 10 4.5 18.4 10 18.4 10 15.2 15.5 10 15.5 1.6 10 1.6 10Z"/><circle cx="10" cy="10" r="2.4"/></svg></span></li>
@@ -2623,7 +2706,7 @@ footer :is(.fcopy,.f-legal){color:#5B657A}
   <div class="stk-stage">
     <canvas class="stk-cv" id="stkCv"></canvas>
     <div class="stk-copy">
-      <div class="k">The stack</div>
+      <div class="k sk"><i class="sk-n">05</i>The stack</div>
       <div class="stk-t">
         <b data-i="0">One chain, four layers.</b>
         <b data-i="1">Watch them come together.</b>
@@ -2645,7 +2728,7 @@ footer :is(.fcopy,.f-legal){color:#5B657A}
  <div class="sec-stage">
   <div class="wrap">
     <div class="sec-head">
-      <div class="rv"><span class="sec-live"><i></i>Security</span></div>
+      <div class="rv"><span class="sec-live sk"><i class="sk-n">06</i><i></i>Security</span></div>
       <h2 class="sec-h">Three things you can check before you send a dollar.</h2>
       <p class="sec-sub">A new chain asks for trust up front. These are the three places where ours is verifiable by someone who is not us.</p>
     </div>
@@ -2704,7 +2787,7 @@ footer :is(.fcopy,.f-legal){color:#5B657A}
   <div class="sale-field" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
   <div class="wrap">
     <div class="sale-top rv">
-      <span class="sale-live"><i></i>Seed Round open</span>
+      <span class="sale-live sk"><i class="sk-n">07</i><i></i>Seed Round open</span>
       <span class="sale-net mono">Ethereum &#183; BNB Chain</span>
     </div>
 
@@ -2788,7 +2871,7 @@ footer :is(.fcopy,.f-legal){color:#5B657A}
 
 <section class="tkp" id="token" data-bg="#F5F5F7" data-acc="#2A5BFF">
   <div class="wrap tkp-head">
-    <div class="k rv">Tokenomics</div>
+    <div class="k sk rv"><i class="sk-n">08</i>Token</div>
     <h2 class="tkp-h">One hundred and sixty million NRM, fixed at genesis.</h2>
   </div>
   <figure class="tkp-fig" id="tkpFig">
@@ -2873,7 +2956,7 @@ footer :is(.fcopy,.f-legal){color:#5B657A}
 
 <section class="builds" id="builds" data-bg="#0A0E18" data-acc="#79ABFF">
   <div class="wrap builds-head">
-    <div class="k rv">What we are building</div>
+    <div class="k sk rv"><i class="sk-n">09</i>What we are building</div>
     <h2 class="builds-h">Two pieces, both already running.</h2>
   </div>
 
@@ -3066,7 +3149,8 @@ footer :is(.fcopy,.f-legal){color:#5B657A}
 <section class="join" id="join" data-bg="#FBFCFD" data-acc="#2A5BFF">
   <div class="wrap">
     <div class="join-head rv">
-      <h2 class="join-h">Everything we ship is announced in the open.</h2>
+      <div class="k sk rv"><i class="sk-n">10</i>In the open</div>
+    <h2 class="join-h">Everything we ship is announced in the open.</h2>
       <p class="join-note">No private groups, no paid signals. The same information reaches everyone at the same time.</p>
     </div>
     <div class="join-grid rv">

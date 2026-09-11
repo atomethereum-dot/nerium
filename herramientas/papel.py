@@ -199,8 +199,12 @@ main>section@@{box-shadow:inset 0 1px 0 rgba(255,255,255,.92)}
    var(--grano),url(img/papel.svg)}
 
 @@.logos{padding:clamp(30px,3.2vw,46px) 0 clamp(34px,3.6vw,52px)}
-@@.logos h2{font-size:clamp(10px,1vw,11.5px);font-family:var(--m);
-   letter-spacing:.2em;text-transform:uppercase;color:#5B657A}
+/* El titular de la banda vuelve a ser un titular. Cuando le puse encima el
+   epigrafe numerado del paso 18, los dos eran mono en versales del mismo
+   cuerpo y la banda tartamudeaba: «01 NETWORK» y debajo «COMPATIBLE WITH».
+   Un epigrafe y un titular tienen que distinguirse en algo. */
+@@.logos h2{font-size:clamp(15px,1.6vw,19px);font-family:var(--f);
+   letter-spacing:-.02em;text-transform:none;font-weight:400;color:#1A2233}
 @@.logos .lane-sub{display:none}
 @@.logos .lane{margin-top:clamp(16px,1.8vw,24px)}
 
