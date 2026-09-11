@@ -2533,13 +2533,12 @@ footer :is(.fcopy,.f-legal){color:#5B657A}
 }
 
 /* ── 3 · los botones ──
-   Median 38 px de alto y 13,5 de letra debajo de un titular de 100. Parecian
-   una nota al pie de su propia portada. La llamada principal de una pagina
-   que esta VENDIENDO tiene que pesar lo que pesa. */
+   Los subi de 38 a 52 px porque me parecian una nota al pie debajo de un
+   titular de 100. Vuelven a su tamano: era una opinion mia y no la del que
+   mira la pagina. Lo que SI se queda arreglado es que no partan en dos
+   renglones, que eso no era opinion, era un defecto. */
 .hero-act{gap:clamp(10px,1.2vw,14px)}
-.hero-act .hb{height:clamp(46px,3.4vw,52px);padding:0 clamp(20px,2vw,28px);
-  font-size:clamp(14px,1.05vw,15.5px);border-radius:5px}
-.hero-act .hb.blue{box-shadow:0 16px 34px -18px rgba(47,107,255,.75)}
+.hero-act .hb.blue{box-shadow:0 14px 30px -18px rgba(47,107,255,.6)}
 
 /* ── 4 · el telefono ──
    Aqui es donde de verdad se veia barata, y no lo habia mirado nunca: los dos
@@ -2547,23 +2546,38 @@ footer :is(.fcopy,.f-legal){color:#5B657A}
    amontonaba sin separadores. Los botones pasan a ocupar el ancho, uno encima
    del otro, y cada uno cabe en su renglon. */
 @media(max-width:700px){
-  .hero-act{flex-direction:column;align-items:stretch;width:min(100%,340px);
-    margin-inline:auto;gap:10px}
-  .hero-act .hb{justify-content:center;height:52px;font-size:15px;
-    white-space:nowrap}
-  .lq{display:block;width:100%;padding-inline:0}
-  .lq .hero-pr{display:grid;grid-template-columns:1fr 1fr;gap:12px 10px;
-    justify-items:center;font-size:9.5px;letter-spacing:.1em}
+  /* Uno encima del otro y del MISMO ancho: puestos en fila no caben y parten
+     en dos renglones, y puestos a lo ancho de su texto quedan uno mas largo
+     que otro, que se ve descuadrado. Del tamano de siempre. */
+  .hero-act{flex-direction:column;align-items:center;gap:10px}
+  .hero-act .hb{justify-content:center;width:min(100%,264px);white-space:nowrap}
+
+  /* La tira, en UNA columna centrada.
+     La puse en rejilla de dos columnas y quedaba torcida, y medido se ve por
+     que: los cuatro textos miden cosas muy distintas —«1 NRM = $0.20» y
+     «ETHEREUM · BNB CHAIN» no se parecen en nada—, asi que en dos columnas
+     cada pata caia en un sitio, con centros en 100 y 270 y la pantalla en 195.
+     Con cuatro largos que no se parecen, dos columnas no cuadran nunca. Una
+     sola columna centrada no puede torcerse. */
+  .lq{display:block;width:100%;padding-inline:0;padding-bottom:13px}
+  /* Y el «max-width» hay que soltarlo. La tira traia de antes
+     «max-width:330px; margin-inline:auto», que se centraba sola; mi regla de
+     arriba puso «margin:0» para quitarle el margen superior y de paso se
+     llevo por delante el «auto». Resultado: 330 px de texto pegados a la
+     izquierda dentro de un rail de 390, y el desvio creciendo con la
+     pantalla —0 a 360 px, 10 a 390, 30 a 430—. Eso era lo torcido, y es mio.
+     Sin tope, el texto y el rail miden lo mismo y no pueden discrepar. */
+  .lq .hero-pr{display:flex;flex-direction:column;align-items:center;
+    max-width:none;gap:9px;font-size:10px;letter-spacing:.12em}
   .lq .hero-pr li{justify-content:center}
-  /* Con dos columnas, las patas de la izquierda entran por la izquierda y las
-     de la derecha por la derecha: el gesto sigue leyendose en vertical. */
-  .lq .hero-pr li:nth-child(3){--lq-x:-14px}
-  .lq .hero-pr li:nth-child(4){--lq-x:14px}
-  /* Las marcas del rail se caen con dos filas: la de arriba quedaria colgando
-     a media altura, contra nada. En vertical el cierre lo cuenta el rail y el
-     barrido, que es suficiente. */
+  /* En columna las patas entran alternando arriba/abajo en vez de por los
+     lados: en vertical un desplazamiento lateral no se lee como «llegar». */
+  .lq .hero-pr li{--lq-x:0}
+  .lq .hero-pr li:nth-child(odd){--lq-x:-16px}
+  .lq .hero-pr li:nth-child(even){--lq-x:16px}
+  /* Las marcas de cada pata se caen: en columna quedarian colgando contra
+     nada. El cierre lo cuentan el rail, sus topes y el barrido. */
   .lq .hero-pr li::after{display:none}
-  .lq{padding-bottom:13px}
 }
 
 /* ══ fin: liquida ══ */

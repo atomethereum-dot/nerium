@@ -81,10 +81,49 @@ di(bot.length === 2, 'el telefono trae los dos botones de la portada');
 di(bot.every(b => b.renglones === 1),
    'y ninguno parte en dos renglones: ' +
    bot.map(b => '«' + b.txt + '» ' + b.renglones).join(', '));
-di(bot.every(b => b.alto >= 46 && b.cuerpo >= 14),
-   'y tienen tamano de llamada, no de nota al pie: ' + bot.map(b => b.alto + 'px/' + b.cuerpo).join(' '));
+/* Aqui habia una comprobacion de que los botones midieran 46 px o mas. La
+   quito, y no por comodidad: era una OPINION mia metida en una bateria. Los
+   subi de 38 a 52 porque me parecian pequenos y el que mira la pagina dijo
+   que los dejara como estaban. Una bateria esta para que no se rompa lo que
+   funciona, no para congelar mi gusto. Lo que si se queda es que no partan en
+   dos renglones, que eso es un defecto y no una preferencia. */
 di(Math.abs(bot[0].ancho - bot[1].ancho) <= 1,
    'los dos miden lo mismo: uno encima del otro y del mismo ancho');
+/* ── que nada quede torcido ──
+   Esto existe porque se me colo: mi regla puso «margin:0» en la tira para
+   quitarle el margen de arriba y se llevo por delante el «margin-inline:auto»
+   que traia de antes, dejando 330 px de texto pegados a la izquierda dentro
+   de un rail de 390. Y el desvio CRECIA con la pantalla —0 a 360, 10 a 390,
+   30 a 430—, asi que a un ancho podia pasar desapercibido. Por eso se mide a
+   varios anchos y no a uno. */
+for (const w of [320, 360, 390, 430]) {
+  await pg2.setViewportSize({ width:w, height:820 });
+  await pg2.waitForTimeout(500);
+  const d = await pg2.evaluate(() => {
+    /* Primero se lleva el gesto a su final. Sin esto se mide a mitad del
+       recorrido —las patas van desplazadas A PROPOSITO mientras llegan— y
+       salta un desvio de 2 px que no es una torcedura, es la animacion
+       haciendo su trabajo. Aqui se comprueba la MAQUETACION, no el gesto:
+       el gesto ya tiene sus cinco comprobaciones mas arriba. */
+    [...document.querySelectorAll('.lq, .lq *')].forEach(e =>
+      e.getAnimations().forEach(a => {
+        /* Solo las del gesto. El punto verde de «Seed Round open» lleva su
+           propio latido INFINITO, y a una animacion infinita no se le puede
+           pedir que acabe: «finish» lanza. */
+        if (a.animationName && a.animationName.startsWith('lq')) a.finish();
+      }));
+    const W = innerWidth, fuera = [];
+    const mira = (sel, n) => document.querySelectorAll(sel).forEach((e, i) => {
+      const r = e.getBoundingClientRect();
+      const desvio = Math.round(r.left + r.width / 2 - W / 2);
+      if (Math.abs(desvio) > 1) fuera.push(n + (i ? i + 1 : '') + ' ' + desvio);
+    });
+    mira('.hero h1', 'titular'); mira('.hero-act', 'botones');
+    mira('.lq', 'rail'); mira('.lq .hero-pr', 'tira'); mira('.lq .hero-pr li', 'pata');
+    return fuera;
+  });
+  di(d.length === 0, 'a ' + w + ' px todo cae centrado' + (d.length ? ': ' + d.join(', ') : ''));
+}
 await ctx2.close();
 
 await nav.close(); srv.close();
