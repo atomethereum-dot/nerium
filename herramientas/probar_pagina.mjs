@@ -37,26 +37,42 @@ di(papel.every(p => p.img !== 'none'),
    'ninguna es ya un color plano: todas llevan luz encima');
 di(papel.every(p => /feTurbulence/.test(p.img)),
    'y todas llevan el grano, que es lo que quita el blanco de plantilla');
-di(papel.every(p => /tapiz\.svg/.test(p.img)),
-   'y el tapiz de bloques, que es el fondo de verdad');
-const svg = fs.readFileSync(path.join(RAIZ, 'img', 'tapiz.svg'), 'utf8');
-di(/rgb\(47,107,255\)/.test(svg), 'dibujado con el azul de la casa, no un gris cualquiera');
+/* El paso 17 cambia el tapiz por las placas: es el mismo motivo con otra
+   composicion, asi que se comprueba el que la pagina esta usando DE VERDAD.
+   Fijar aqui «tapiz.svg» seria medir un archivo que ya nadie pinta. */
+const placas = /papel\.svg/.test(papel[0].img);
+const tap = placas ? 'papel.svg' : 'tapiz.svg';
+di(papel.every(p => p.img.includes(tap)),
+   'y el campo de bloques, que es el fondo de verdad (' + tap + ')');
+const svg = fs.readFileSync(path.join(RAIZ, 'img', tap), 'utf8');
+/* En color, no en gris. Se miran los rellenos de las PLACAS, no todo el
+   archivo: las luces llevan un blanco puro que es gris por definicion y no
+   dice nada de si el dibujo tiene color. */
+const tonos = [...svg.matchAll(/<rect[^>]*fill="rgb\((\d+),(\d+),(\d+)\)"/g)]
+  .map(m => [+m[1], +m[2], +m[3]]);
+di(tonos.length > 0 && tonos.every(c => Math.max(...c) - Math.min(...c) > 12),
+   'dibujado en color, no en un gris cualquiera (' + tonos.length + ' placas)');
 di((svg.match(/<rect /g) || []).length > 120,
    'y con bloques de verdad: ' + (svg.match(/<rect /g) || []).length);
-/* El centro tiene que quedar libre: es por donde se lee. Y el hueco es un
-   OVALO, no una banda vertical —los bloques se apartan del medio en los dos
-   ejes—, asi que se mide la caja central contra el resto, por unidad de area,
-   que es la unica comparacion honesta cuando las dos zonas no miden igual. */
+
+/* El hueco limpio se mide donde el contenido esta DE VERDAD, y eso cambio con
+   la composicion. El tapiz viejo apartaba los bloques del centro, pensando en
+   texto centrado; las placas los apartan de ARRIBA A LA IZQUIERDA, que es el
+   rincon del titular en las siete secciones. Se mide por unidad de area, que
+   es la unica comparacion honesta cuando las dos zonas no miden igual. */
 const W = 1600, H = 1000;
 const cajas = [...svg.matchAll(/<rect x="(\d+)" y="(\d+)" width="(\d+)" height="(\d+)"[^>]*opacity="([\d.]+)"/g)]
-  .map(m => ({ x: +m[1], y: +m[2], w: +m[3], h: +m[4], a: +m[5] }));
-const dentro = c => { const cx = c.x + c.w / 2, cy = c.y + c.h / 2;
-  return cx >= W * .32 && cx < W * .68 && cy >= H * .28 && cy < H * .72; };
+  .map(m => ({ x: +m[1], y: +m[2], w: +m[3], h: +m[4], a: +m[5] }))
+  .filter(c => c.h > 1);                       // los filetes de 1 px no son bloque
+const dentro = placas
+  ? c => c.x + c.w / 2 < W * .42 && c.y + c.h / 2 < H * .40
+  : c => { const cx = c.x + c.w / 2, cy = c.y + c.h / 2;
+           return cx >= W * .32 && cx < W * .68 && cy >= H * .28 && cy < H * .72; };
+const areaC = placas ? (W * .42) * (H * .40) : (W * .36) * (H * .44);
 const tinta = f => cajas.filter(f).reduce((s, c) => s + c.w * c.h * c.a, 0);
-const areaC = (W * .36) * (H * .44), areaR = W * H - areaC;
-const dC = tinta(dentro) / areaC, dR = tinta(c => !dentro(c)) / areaR;
-di(dC < dR * 0.5, 'y el medio despejado para el texto: ' +
-   (dC / dR).toFixed(2) + ' de tinta en el centro por cada 1 de fuera');
+const dC = tinta(dentro) / areaC, dR = tinta(c => !dentro(c)) / (W * H - areaC);
+di(dC < dR * 0.5, 'y el rincon del titular despejado: ' +
+   (dC / dR).toFixed(2) + ' de tinta dentro por cada 1 fuera');
 
 // ── «Compatible with» ──
 const comp = await pg.evaluate(() => {
