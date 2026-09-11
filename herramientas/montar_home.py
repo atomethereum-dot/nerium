@@ -22,6 +22,7 @@ todo lo que se hizo aqui y el archivo subido no trae:
  14. el papel con luz y grano, la compatibilidad y las cuatro garantias
  15. el detalle: como aparece cada cosa, y que no se quede nada sin salir
  16. la escala tipografica: el titular manda
+ 17. la pagina entera en oscuro: las siete secciones de papel se rehacen
 """
 import sys, os
 
@@ -36,6 +37,7 @@ import prensa
 import pagina
 import detalle
 import escala
+import oscuro
 subido, publicado = sys.argv[1], '/home/user/nerium/index.html'
 z = open(subido, encoding='utf-8').read()
 p = open(publicado, encoding='utf-8').read()
@@ -161,6 +163,12 @@ rest = detalle.aplicar(rest)
 # Va la ultima: pisa cuerpos que vienen de todo lo anterior.
 rest = escala.aplicar(rest)
 
+# ── 17 · la pagina en oscuro ──
+# Detras de la escala: rehace las siete secciones claras, y para ganarle en
+# especificidad a lo original tiene que entrar despues.
+oscuro.escribir_tapiz('/home/user/nerium')   # img/tapiz-oscuro.svg, al dia
+rest = oscuro.aplicar(rest)
+
 salida = pre + rest
 open(publicado, 'w', encoding='utf-8').write(salida)
 print("montado:", len(salida), "bytes ·", salida.count('var(--hud-b)'), "usos de --hud-b ·",
@@ -174,4 +182,5 @@ print("montado:", len(salida), "bytes ·", salida.count('var(--hud-b)'), "usos d
       "prensa:", 'tarjetas' if prensa.MARCA in salida else 'SIN TOCAR', "·",
       "pagina:", 'con luz' if pagina.MARCA in salida else 'SIN TOCAR', "·",
       "detalle:", 'mascaras' if detalle.MARCA in salida else 'SIN TOCAR', "·",
-      "escala:", 'subida' if escala.MARCA in salida else 'SIN TOCAR')
+      "escala:", 'subida' if escala.MARCA in salida else 'SIN TOCAR', "·",
+      "oscuro:", 'toda' if oscuro.MARCA in salida else 'SIN TOCAR')

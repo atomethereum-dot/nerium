@@ -37,9 +37,15 @@ di(papel.every(p => p.img !== 'none'),
    'ninguna es ya un color plano: todas llevan luz encima');
 di(papel.every(p => /feTurbulence/.test(p.img)),
    'y todas llevan el grano, que es lo que quita el blanco de plantilla');
-di(papel.every(p => /tapiz\.svg/.test(p.img)),
-   'y el tapiz de bloques, que es el fondo de verdad');
-const svg = fs.readFileSync(path.join(RAIZ, 'img', 'tapiz.svg'), 'utf8');
+/* El paso 17 cambia el tapiz por el oscuro: son el MISMO dibujo con los
+   tonos al reves, asi que se comprueba el que la pagina esta usando de verdad
+   y todo lo de abajo —el azul, los bloques, el hueco del centro— vale igual
+   para los dos. Fijar aqui «tapiz.svg» seria medir un archivo que ya nadie
+   pinta. */
+const tap = /tapiz-oscuro\.svg/.test(papel[0].img) ? 'tapiz-oscuro.svg' : 'tapiz.svg';
+di(papel.every(p => p.img.includes(tap)),
+   'y el tapiz de bloques, que es el fondo de verdad (' + tap + ')');
+const svg = fs.readFileSync(path.join(RAIZ, 'img', tap), 'utf8');
 di(/rgb\(47,107,255\)/.test(svg), 'dibujado con el azul de la casa, no un gris cualquiera');
 di((svg.match(/<rect /g) || []).length > 120,
    'y con bloques de verdad: ' + (svg.match(/<rect /g) || []).length);
