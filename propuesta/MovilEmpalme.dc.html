@@ -1,0 +1,71 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@200;300;400;500&family=DM+Mono:wght@300;400;500&display=swap">
+  <style>
+    body{margin:0;font-family:'Inter Tight','Switzer',system-ui,sans-serif}
+    a{color:#1B49E0}a:hover{color:#0A2564}
+    .m{font-family:'DM Mono',ui-monospace,monospace}
+  </style>
+</helmet>
+
+<div style="width:390px;height:844px;position:relative;overflow:hidden;background:#06080D;color:#E9EEF7">
+
+  <!-- banda animada, atravesada por la vía -->
+  <div style="position:absolute;left:0;right:0;top:0;height:300px;overflow:hidden;background:#050609">
+    <div style="position:absolute;inset:0;background:radial-gradient(420px 200px at 50% 112%,rgba(47,107,255,.24),transparent 72%)"></div>
+    <div style="position:absolute;left:0;right:0;top:72px;display:flex;gap:34px;align-items:center;justify-content:center;font-size:46px;font-weight:200;letter-spacing:-.04em;color:transparent;-webkit-text-stroke:1px rgba(233,238,247,.26);white-space:nowrap">
+      <span>Issuance</span><span style="color:rgba(233,238,247,.92);-webkit-text-stroke:0">Custody</span>
+    </div>
+    <div style="position:absolute;left:0;right:0;top:146px;display:flex;gap:34px;align-items:center;justify-content:center;font-size:46px;font-weight:200;letter-spacing:-.04em;color:transparent;-webkit-text-stroke:1px rgba(233,238,247,.18);white-space:nowrap">
+      <span>Atomic</span><span>Governed</span>
+    </div>
+    <div style="position:absolute;left:0;right:0;bottom:0;height:92px;background:línear-gradient(to bottom,transparent,#06080D 88%);clip-path:polygon(0 0,100% 0,52% 100%,48% 100%)"></div>
+  </div>
+
+  <div style="position:absolute;left:50%;top:0;bottom:0;width:1px;transform:translateX(-.5px);background:línear-gradient(to bottom,rgba(160,200,255,.10),rgba(160,200,255,.45) 230px,rgba(27,73,224,.40) 420px,rgba(27,73,224,.12))"></div>
+
+  <div style="position:absolute;left:50%;top:300px;transform:translate(-50%,-6px);width:12px;height:12px;background:#79ABFF;box-shadow:0 0 18px rgba(121,171,255,.85)"></div>
+
+  <div style="position:absolute;left:0;right:0;top:300px;bottom:0;background:#EDF1F8;color:#0A0D14;border-top:1px solid rgba(160,200,255,.22)">
+    <div style="position:absolute;inset:0;background:
+      radial-gradient(320px 180px at 50% 0%,rgba(255,255,255,.96),transparent 74%),
+      línear-gradient(to bottom,rgba(199,214,238,.5),transparent 220px)"></div>
+
+    <div style="position:relative;padding:36px 20px 0;display:flex;flex-direction:column;align-items:center;gap:12px">
+      <div class="m" style="display:flex;align-items:center;gap:12px;font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;color:#5B657A">
+        <span style="color:#1B49E0;font-weight:500">04</span><span>Guarantees</span>
+      </div>
+      <div style="font-size:34px;font-weight:300;letter-spacing:-.04em;line-height:1.04;text-align:center;color:#0A0D14">
+        Every leg settles, or none does.
+      </div>
+    </div>
+
+    <div style="position:relative;margin-top:30px;display:flex;flex-direction:column;gap:1px;background:rgba(30,58,116,.14);border-block:1px solid rgba(30,58,116,.14)">
+      <div style="background:#EDF1F8;padding:16px 20px;display:flex;gap:14px;align-items:baseline">
+        <span class="m" style="font-size:10.5px;color:#1B49E0">01</span>
+        <div><div style="font-size:17px;letter-spacing:-.02em">All-or-nothing settlement</div>
+        <div class="m" style="margin-top:6px;font-size:10px;letter-spacing:.1em;color:#5B657A">Every leg settles, or none does</div></div>
+      </div>
+      <div style="background:#EDF1F8;padding:16px 20px;display:flex;gap:14px;align-items:baseline">
+        <span class="m" style="font-size:10.5px;color:#1B49E0">02</span>
+        <div><div style="font-size:17px;letter-spacing:-.02em">Controlled visibility</div>
+        <div class="m" style="margin-top:6px;font-size:10px;letter-spacing:.1em;color:#5B657A">The policy travels with the asset</div></div>
+      </div>
+      <div style="background:#EDF1F8;padding:16px 20px;display:flex;gap:14px;align-items:baseline">
+        <span class="m" style="font-size:10.5px;color:#1B49E0">03</span>
+        <div><div style="font-size:17px;letter-spacing:-.02em">Always-on security</div>
+        <div class="m" style="margin-top:6px;font-size:10px;letter-spacing:.1em;color:#5B657A">Checked before anything is written</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+</body>
+</html>

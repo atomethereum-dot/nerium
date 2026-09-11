@@ -1,0 +1,98 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@200;300;400;500&family=DM+Mono:wght@300;400;500&display=swap">
+  <style>
+    body{margin:0;font-family:'Inter Tight','Switzer',system-ui,sans-serif;}
+    a{color:#79ABFF}a:hover{color:#BBD4FF}
+    .m{font-family:'DM Mono',ui-monospace,monospace}
+  </style>
+</helmet>
+
+<div style="width:1440px;height:900px;position:relative;overflow:hidden;background:#06080D;color:#E9EEF7">
+
+  <!-- ░░ banda animada (hoy: .kin) — ahora atravesada por la vía ░░ -->
+  <div style="position:absolute;left:0;right:0;top:0;height:392px;overflow:hidden;background:#050609">
+    <div style="position:absolute;inset:0;background:radial-gradient(900px 300px at 50% 110%,rgba(47,107,255,.20),transparent 70%)"></div>
+    <!-- palabras en contorno, como hoy, pero ancladas y NO guillotinadas -->
+    <div style="position:absolute;left:0;right:0;top:96px;display:flex;gap:64px;align-items:center;justify-content:center;font-size:82px;font-weight:200;letter-spacing:-.04em;color:transparent;-webkit-text-stroke:1px rgba(233,238,247,.26);white-space:nowrap">
+      <span>Issuance</span><span style="color:rgba(233,238,247,.92);-webkit-text-stroke:0">Custody</span><span>Real assets</span>
+    </div>
+    <div style="position:absolute;left:0;right:0;top:206px;display:flex;gap:64px;align-items:center;justify-content:center;font-size:82px;font-weight:200;letter-spacing:-.04em;color:transparent;-webkit-text-stroke:1px rgba(233,238,247,.18);white-space:nowrap">
+      <span>Atomic</span><span>Governed</span><span>Irreversible</span>
+    </div>
+    <!-- el embudo: la banda se ESTRECHA hacia la vía en vez de cortarse -->
+    <div style="position:absolute;left:0;right:0;bottom:0;height:118px;background:línear-gradient(to bottom,transparent,#06080D 88%);clip-path:polygon(0 0,100% 0,50.6% 100%,49.4% 100%)"></div>
+  </div>
+
+  <!-- ░░ LA VÍA: línea central continua ░░ -->
+  <div style="position:absolute;left:50%;top:0;bottom:0;width:1px;transform:translateX(-.5px);background:línear-gradient(to bottom,rgba(160,200,255,.10) 0,rgba(160,200,255,.42) 300px,rgba(27,73,224,.42) 560px,rgba(27,73,224,.14) 100%)"></div>
+
+  <!-- ░░ LA ESTACION: donde la banda entrega a la sección ░░ -->
+  <div style="position:absolute;left:50%;top:392px;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:0">
+    <!-- el cubo de la marca, cerrado -->
+    <div style="width:13px;height:13px;background:#79ABFF;box-shadow:0 0 18px rgba(121,171,255,.85);margin-top:-6px"></div>
+  </div>
+
+  <!-- ░░ sección siguiente: entra POR la vía ░░ -->
+  <div style="position:absolute;left:0;right:0;top:392px;bottom:0;background:#EDF1F8;color:#0A0D14;border-top:1px solid rgba(160,200,255,.22)">
+    <div style="position:absolute;inset:0;background:
+      radial-gradient(720px 280px at 50% 0%,rgba(255,255,255,.95),transparent 72%),
+      línear-gradient(to bottom,rgba(199,214,238,.55),transparent 300px)"></div>
+
+    <!-- rotulo de estación, centrado sobre la vía -->
+    <div style="position:relative;padding-top:44px;display:flex;flex-direction:column;align-items:center;gap:14px">
+      <div class="m" style="display:flex;align-items:center;gap:13px;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:#5B657A">
+        <span style="color:#1B49E0;font-weight:500">04</span>
+        <span>Guarantees</span>
+      </div>
+      <div style="font-size:60px;font-weight:300;letter-spacing:-.048em;line-height:1.02;text-align:center;max-width:20ch;color:#0A0D14">
+        Every leg settles, or none does.
+      </div>
+    </div>
+
+    <!-- las filas, colgando simetricas de la vía -->
+    <div style="position:relative;margin-top:44px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1px;background:rgba(30,58,116,.14);border-block:1px solid rgba(30,58,116,.14)">
+      <div style="background:#EDF1F8;padding:22px 40px 22px 0;display:flex;justify-content:flex-end;gap:16px;align-items:baseline">
+        <div style="text-align:right">
+          <div style="font-size:20px;font-weight:400;letter-spacing:-.02em">All-or-nothing settlement</div>
+          <div class="m" style="margin-top:7px;font-size:11px;letter-spacing:.1em;color:#5B657A">Every leg settles, or none does</div>
+        </div>
+        <span class="m" style="font-size:11px;color:#1B49E0">01</span>
+      </div>
+      <div style="background:#EDF1F8;padding:22px 0 22px 40px;display:flex;gap:16px;align-items:baseline">
+        <span class="m" style="font-size:11px;color:#1B49E0">02</span>
+        <div>
+          <div style="font-size:20px;font-weight:400;letter-spacing:-.02em">Controlled visibility</div>
+          <div class="m" style="margin-top:7px;font-size:11px;letter-spacing:.1em;color:#5B657A">The policy travels with the asset</div>
+        </div>
+      </div>
+      <div style="background:#EDF1F8;padding:22px 40px 22px 0;display:flex;justify-content:flex-end;gap:16px;align-items:baseline">
+        <div style="text-align:right">
+          <div style="font-size:20px;font-weight:400;letter-spacing:-.02em">Always-on security</div>
+          <div class="m" style="margin-top:7px;font-size:11px;letter-spacing:.1em;color:#5B657A">Checked before anything is written</div>
+        </div>
+        <span class="m" style="font-size:11px;color:#1B49E0">03</span>
+      </div>
+      <div style="background:#EDF1F8;padding:22px 0 22px 40px;display:flex;gap:16px;align-items:baseline">
+        <span class="m" style="font-size:11px;color:#1B49E0">04</span>
+        <div>
+          <div style="font-size:20px;font-weight:400;letter-spacing:-.02em">Performance under load</div>
+          <div class="m" style="margin-top:7px;font-size:11px;letter-spacing:.1em;color:#5B657A">Seconds, not days, and no manual checks</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- nota de lectura -->
+  <div class="m" style="position:absolute;left:40px;bottom:26px;font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:rgba(233,238,247,.34)">El empalme &middot; la banda entrega a la sección por la vía</div>
+</div>
+</x-dc>
+</body>
+</html>

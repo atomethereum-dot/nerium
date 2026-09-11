@@ -25,6 +25,7 @@ todo lo que se hizo aqui y el archivo subido no trae:
  17. la mitad clara, decidida: suelo, relieve, ritmo y contraste
  18. el sistema: un solo epigrafe para las diez secciones, y el aviso
  19. la portada liquida: el rail de todo-o-nada y los botones
+ 20. la via: una linea cose la pagina y las bandas dejan de cortarse
 """
 import sys, os
 
@@ -42,6 +43,7 @@ import escala
 import papel
 import sistema
 import liquida
+import via
 subido, publicado = sys.argv[1], '/home/user/nerium/index.html'
 z = open(subido, encoding='utf-8').read()
 p = open(publicado, encoding='utf-8').read()
@@ -181,6 +183,9 @@ rest = sistema.aplicar(rest)
 # ── 19 · la portada ──
 rest = liquida.aplicar(rest)
 
+# ── 20 · la via ──
+rest = via.aplicar(rest)
+
 salida = pre + rest
 open(publicado, 'w', encoding='utf-8').write(salida)
 print("montado:", len(salida), "bytes ·", salida.count('var(--hud-b)'), "usos de --hud-b ·",
@@ -197,4 +202,6 @@ print("montado:", len(salida), "bytes ·", salida.count('var(--hud-b)'), "usos d
       "escala:", 'subida' if escala.MARCA in salida else 'SIN TOCAR', "·",
       "papel:", 'decidido' if papel.MARCA in salida else 'SIN TOCAR', "·",
       "sistema:", str(salida.count('class="sk-n"')) + '/10 epigrafes', "·",
-      "portada:", 'liquida' if liquida.MARCA in salida else 'SIN TOCAR')
+      "portada:", 'liquida' if liquida.MARCA in salida else 'SIN TOCAR', "·",
+      "via:", str(salida.count('class="via"')) + ' estaciones, ' +
+              str(salida.count('class="emb"')) + ' empalmes')

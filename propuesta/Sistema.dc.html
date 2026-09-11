@@ -1,0 +1,84 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@200;300;400;500&family=DM+Mono:wght@300;400;500&display=swap">
+  <style>
+    body{margin:0;font-family:'Inter Tight','Switzer',system-ui,sans-serif}
+    a{color:#1B49E0}a:hover{color:#0A2564}
+    .m{font-family:'DM Mono',ui-monospace,monospace}
+  </style>
+</helmet>
+
+<div style="width:1440px;height:980px;position:relative;overflow:hidden;background:#06080D;color:#E9EEF7">
+  <div style="position:absolute;inset:0;background:radial-gradient(900px 500px at 18% -8%,rgba(47,107,255,.14),transparent 64%)"></div>
+
+  <div style="position:relative;padding:46px 56px 0">
+    <div class="m" style="display:flex;align-items:center;gap:13px;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:rgba(233,238,247,.56)">
+      <span style="color:#79ABFF;font-weight:500">00</span><span>La vía</span>
+      <i style="width:54px;height:1px;background:línear-gradient(90deg,currentColor,transparent);opacity:.45"></i>
+    </div>
+    <div style="margin-top:16px;font-size:46px;font-weight:300;letter-spacing:-.045em;line-height:1.04;max-width:24ch">
+      Una sola línea recorre las diez secciones.
+    </div>
+    <div style="margin-top:14px;font-size:16px;line-height:1.55;color:rgba(233,238,247,.68);max-width:62ch">
+      Hoy hay diez secciones y cuatro bandas animadas entre ellas, y cada costura es un corte seco: la banda se guillotina y la sección siguiente la tapa. La vía las cose. Cada banda deja de ser un relleno y pasa a ser un <b style="font-weight:500;color:#E9EEF7">empalme</b>: la línea entra, la banda ocurre alrededor, y la línea sale dentro de la estación siguiente.
+    </div>
+  </div>
+
+  <!-- comparación -->
+  <div style="position:relative;margin-top:44px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:56px;padding:0 56px">
+
+    <!-- HOY -->
+    <div>
+      <div class="m" style="font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;color:rgba(233,238,247,.42);margin-bottom:16px">Hoy &middot; corte seco</div>
+      <div style="position:relative;height:430px;border:1px solid rgba(255,255,255,.10);overflow:hidden">
+        <div style="position:absolute;left:0;right:0;top:0;height:190px;background:#050609;display:flex;align-items:center;justify-content:center;gap:26px;font-size:38px;font-weight:200;letter-spacing:-.04em;color:transparent;-webkit-text-stroke:1px rgba(233,238,247,.22);white-space:nowrap;overflow:hidden">
+          <span>Custody</span><span>Governed</span><span>Atomic</span>
+        </div>
+        <div style="position:absolute;left:0;right:0;top:190px;height:3px;background:repeating-línear-gradient(90deg,#C2433C 0 9px,transparent 9px 18px)"></div>
+        <div style="position:absolute;left:0;right:0;top:193px;bottom:0;background:#EDF1F8;border-radius:18px 18px 0 0;color:#0A0D14;padding:30px 26px">
+          <div class="m" style="font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;color:#5B657A">04 &nbsp;Guarantees</div>
+          <div style="margin-top:12px;font-size:28px;font-weight:300;letter-spacing:-.04em">Every leg settles, or none does.</div>
+        </div>
+      </div>
+      <div class="m" style="margin-top:14px;font-size:11px;line-height:1.7;letter-spacing:.02em;color:rgba(233,238,247,.5)">
+        Las palabras se cortan a media letra. La sección siguiente aterriza encima sin relación con lo de arriba. Nada indica que sean la misma página.
+      </div>
+    </div>
+
+    <!-- PROPUESTA -->
+    <div>
+      <div class="m" style="font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;color:#79ABFF;margin-bottom:16px">Propuesta &middot; empalme</div>
+      <div style="position:relative;height:430px;border:1px solid rgba(160,200,255,.28);overflow:hidden">
+        <div style="position:absolute;left:0;right:0;top:0;height:190px;background:#050609;display:flex;align-items:center;justify-content:center;gap:26px;font-size:38px;font-weight:200;letter-spacing:-.04em;color:transparent;-webkit-text-stroke:1px rgba(233,238,247,.22);white-space:nowrap;overflow:hidden">
+          <span>Custody</span><span style="color:rgba(233,238,247,.9);-webkit-text-stroke:0">Governed</span><span>Atomic</span>
+        </div>
+        <div style="position:absolute;left:0;right:0;top:120px;height:86px;background:línear-gradient(to bottom,transparent,#06080D 86%);clip-path:polygon(0 0,100% 0,51.4% 100%,48.6% 100%)"></div>
+        <div style="position:absolute;left:50%;top:0;bottom:0;width:1px;transform:translateX(-.5px);background:línear-gradient(to bottom,rgba(160,200,255,.12),rgba(160,200,255,.5) 46%,rgba(27,73,224,.45))"></div>
+        <div style="position:absolute;left:50%;top:206px;transform:translate(-50%,-6px);width:12px;height:12px;background:#79ABFF;box-shadow:0 0 18px rgba(121,171,255,.85);z-index:2"></div>
+        <div style="position:absolute;left:0;right:0;top:206px;bottom:0;background:#EDF1F8;color:#0A0D14;padding:34px 26px 0;text-align:center;border-top:1px solid rgba(160,200,255,.22)">
+          <div class="m" style="font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;color:#5B657A"><span style="color:#1B49E0;font-weight:500">04</span> &nbsp;Guarantees</div>
+          <div style="margin-top:12px;font-size:28px;font-weight:300;letter-spacing:-.04em">Every leg settles, or none does.</div>
+        </div>
+      </div>
+      <div class="m" style="margin-top:14px;font-size:11px;line-height:1.7;letter-spacing:.02em;color:rgba(233,238,247,.62)">
+        La banda se estrecha hacia la línea y la entrega en la estación. El número y el nombre son los del menú. Lo de arriba y lo de abajo son la misma página.
+      </div>
+    </div>
+  </div>
+
+  <div class="m" style="position:absolute;left:56px;bottom:28px;display:flex;gap:30px;font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:rgba(233,238,247,.34)">
+    <span>4 empalmes &middot; chroma, kin, xfade, xlight</span>
+    <span>10 estaciones &middot; las del menú</span>
+    <span>1 línea &middot; de la portada al pie</span>
+  </div>
+</div>
+</x-dc>
+</body>
+</html>

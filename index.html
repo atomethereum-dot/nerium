@@ -2581,6 +2581,92 @@ footer :is(.fcopy,.f-legal){color:#5B657A}
 }
 
 /* ══ fin: liquida ══ */
+/* ══ la via ═══════════════════════════════════════════════════════════════
+   Una sola linea cose la pagina. Entra en cada seccion por arriba, la banda
+   animada se estrecha hacia ella en vez de cortarse, y la entrega en una
+   estacion. Lo de arriba y lo de abajo pasan a ser la misma pagina. */
+
+/* ── la linea ──
+   Va por encima de la costura —z-index 4, que la costura es 1— y sale de
+   ARRIBA del todo de la seccion, que con el solape negativo cae dentro de la
+   anterior: por eso se lee continua y no como diez rayitas sueltas. */
+.via{position:absolute;left:50%;top:calc(-1 * clamp(36px,3.4vw,64px));
+  width:1px;transform:translateX(-.5px);
+  height:clamp(120px,15vh,210px);z-index:4;pointer-events:none;
+  background:linear-gradient(to bottom,
+    transparent,var(--via-c,rgba(160,200,255,.55)) 34%,transparent)}
+/* La estacion: el cubo de la marca, cerrado. Cuadrado, como el logotipo. */
+.via::after{content:"";position:absolute;left:50%;top:clamp(34px,3.2vw,60px);
+  width:11px;height:11px;transform:translateX(-50%);
+  background:var(--via-c,#79ABFF);
+  box-shadow:0 0 18px var(--via-g,rgba(121,171,255,.85))}
+/* En papel el azul de marca; en lo oscuro, el claro. Es la misma regla que
+   siguen los numeros de los epigrafes. */
+:is(.paper,.paper2,.secure,.sale,.tkp,.join,.press) .via{
+  --via-c:rgba(27,73,224,.55);--via-g:rgba(27,73,224,.5)}
+:is(.paper,.paper2,.secure,.sale,.tkp,.join,.press) .via::after{
+  background:#1B49E0}
+/* La primera no lleva cubo: no viene de ninguna banda, viene de la portada,
+   que ya cierra con su propio rail. */
+.logos .via::after{display:none}
+
+/* ── el empalme ──
+   El embudo se pinta del color de ABAJO: es la seccion siguiente subiendo a
+   recoger, no la banda desangrandose. Y llega justo hasta el centro, que es
+   por donde pasa la via. */
+.emb{position:absolute;left:0;right:0;bottom:0;z-index:3;pointer-events:none;
+  height:clamp(78px,9.5vw,132px);
+  background:linear-gradient(to bottom,transparent,var(--emb,#06080D) 88%);
+  clip-path:polygon(0 0,100% 0,50.7% 100%,49.3% 100%)}
+/* Las dos bandas de escenario fijo son mas altas que la pantalla: el embudo
+   se ancla al final de la seccion, que es donde el escenario acaba parado. */
+.xf .emb,.xl .emb{height:clamp(90px,11vw,150px)}
+@media(max-width:760px){.emb{height:clamp(56px,16vw,86px)}}
+
+/* ── la estacion, centrada sobre la via ──
+   Los epigrafes iban pegados a la izquierda. Centrados sobre la linea, las
+   diez entradas caen en el mismo sitio y la pagina gana la simetria que le
+   faltaba. El filete del epigrafe sale a los DOS lados, que si sale a uno
+   solo se lee como un error de maquetacion. */
+/* Los titulares si: cada cabecera es su propia caja y ahi centrar no arrastra
+   contenido ajeno. */
+:is(.press-head,.sec-head,.tkp-head,.builds-head,.join-head,.say .wrap){
+  text-align:center}
+:is(.press-head,.sec-head,.tkp-head,.builds-head,.join-head)>*{
+  margin-inline:auto}
+/* «.sk» es inline-flex: centrar su CONTENIDO no lo mueve a el, y centrarlo
+   desde el padre —lo primero que probe— se lleva por delante TODO lo que hay
+   dentro de ese padre: las cuatro filas de garantias se quedaron con sus
+   descripciones centradas a media columna. Se hace block y se centra el solo,
+   sin tocar a nadie. */
+:is(#press,#thesis,#solutions,#security,#token,#builds,#join) .sk{
+  display:flex;width:100%;justify-content:center;
+  padding-top:clamp(16px,2vw,30px)}
+:is(#press,#thesis,#solutions,#security,#token,#builds,#join) .sk::before{
+  content:"";width:clamp(26px,3.4vw,54px);height:1px;flex:0 0 auto;order:-1;
+  background:linear-gradient(90deg,transparent,currentColor);opacity:.45}
+/* Y los titulares y sus entradillas, centrados con ellos. */
+:is(.press-h,.sec-h,.tkp-h,.builds-h,.join-h,.sec-sub,.join-note,.say p){
+  margin-inline:auto;text-align:center}
+:is(.sec-sub,.join-note){max-width:52ch}
+
+/* La ronda se queda como esta: su titular convive con el widget a la derecha
+   y centrarlo lo dejaria hablando solo. Ahi la via entra igual y la estacion
+   se centra; el resto, no. */
+#presale .sale-top{justify-content:center;gap:clamp(14px,2vw,28px)}
+
+/* ── el telefono ──
+   En vertical la linea es mas corta: la pantalla mide un tercio y una via de
+   210 px se come media seccion. */
+@media(max-width:760px){
+  .via{height:clamp(78px,13vh,120px);
+    top:calc(-1 * clamp(24px,3.4vw,44px))}
+  .via::after{top:clamp(22px,3.2vw,40px);width:9px;height:9px}
+  :is(#press,#thesis,#solutions,#security,#token,#builds,#join) .sk{
+    padding-top:clamp(10px,3vw,20px)}
+}
+
+/* ══ fin: via ══ */
 </style>
 </head>
 <body>
@@ -2748,7 +2834,7 @@ footer :is(.fcopy,.f-legal){color:#5B657A}
 </div>
 
 
-<section class="paper logos" id="network" data-bg="#FFFFFF" data-acc="#1D6AFF">
+<section class="paper logos" id="network" data-bg="#FFFFFF" data-acc="#1D6AFF"><i class="via" aria-hidden="true"></i>
   <div class="wrap">
     <div class="k sk rv"><i class="sk-n">01</i>Network</div>
     <h2 class="rv lane-k">Compatible with</h2>
@@ -2764,7 +2850,7 @@ footer :is(.fcopy,.f-legal){color:#5B657A}
 
 
 
-<section class="press paper" id="press" data-bg="#FFFFFF" data-acc="#1D6AFF">
+<section class="press paper" id="press" data-bg="#FFFFFF" data-acc="#1D6AFF"><i class="via" aria-hidden="true"></i>
   <div class="wrap press-head">
     <div class="k sk rv"><i class="sk-n">02</i>In the press</div>
     <h2 class="press-h">What they are writing about the chain.</h2>
@@ -2835,10 +2921,10 @@ footer :is(.fcopy,.f-legal){color:#5B657A}
 </section>
 
 
-<section class="chroma" data-bg="#000000" data-acc="#3E86FF"><canvas id="chroma"></canvas></section>
+<section class="chroma" data-bg="#000000" data-acc="#3E86FF"><i class="emb" aria-hidden="true" style="--emb:#000000"></i><canvas id="chroma"></canvas></section>
 
 
-<section class="paper say" id="thesis" data-bg="#FFFFFF" data-acc="#2E60FF">
+<section class="paper say" id="thesis" data-bg="#FFFFFF" data-acc="#2E60FF"><i class="via" aria-hidden="true"></i>
   <div class="wrap">
     <div class="k sk rv"><i class="sk-n">03</i>The thesis</div>
     <p class="rv">When value moves, the rules have to move with it. <em>On Nereum the rules travel with the asset and hold at machine speed &mdash; for desks and contracts alike.</em></p>
@@ -2847,7 +2933,7 @@ footer :is(.fcopy,.f-legal){color:#5B657A}
 
 
 
-<section class="kin" data-bg="#050609" data-acc="#2F6BFF" aria-hidden="true">
+<section class="kin" data-bg="#050609" data-acc="#2F6BFF" aria-hidden="true"><i class="emb" aria-hidden="true" style="--emb:#050609"></i>
   <div class="kin-row" data-dir="1"><div class="kin-in">
     <span>Issuance</span><span class="o">Custody</span><span>Real assets</span><span class="o">Redemption</span>
     <span>Issuance</span><span class="o">Custody</span><span>Real assets</span><span class="o">Redemption</span>
@@ -2859,7 +2945,7 @@ footer :is(.fcopy,.f-legal){color:#5B657A}
 </section>
 
 
-<section class="paper2 pad" id="solutions" data-bg="#F1F2F4" data-acc="#3B57FF">
+<section class="paper2 pad" id="solutions" data-bg="#F1F2F4" data-acc="#3B57FF"><i class="via" aria-hidden="true"></i>
   <div class="wrap">
     <div class="k sk rv"><i class="sk-n">04</i>Guarantees</div>
     <ul class="rows">
@@ -2872,7 +2958,7 @@ footer :is(.fcopy,.f-legal){color:#5B657A}
 </section>
 
 
-<section class="stack stk-hold" id="stack" data-bg="#000000" data-acc="#5B7BFF">
+<section class="stack stk-hold" id="stack" data-bg="#000000" data-acc="#5B7BFF"><i class="via" aria-hidden="true"></i>
   <div class="stk-stage">
     <canvas class="stk-cv" id="stkCv"></canvas>
     <div class="stk-copy">
@@ -2894,7 +2980,7 @@ footer :is(.fcopy,.f-legal){color:#5B657A}
 </section>
 
 
-<section class="secure" id="security" data-bg="#FFFFFF" data-acc="#2A5BFF">
+<section class="secure" id="security" data-bg="#FFFFFF" data-acc="#2A5BFF"><i class="via" aria-hidden="true"></i>
  <div class="sec-stage">
   <div class="wrap">
     <div class="sec-head">
@@ -2953,7 +3039,7 @@ footer :is(.fcopy,.f-legal){color:#5B657A}
 
 
 
-<section class="sale" id="presale" data-bg="#FBFCFD" data-acc="#2A5BFF">
+<section class="sale" id="presale" data-bg="#FBFCFD" data-acc="#2A5BFF"><i class="via" aria-hidden="true"></i>
   <div class="sale-field" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
   <div class="wrap">
     <div class="sale-top rv">
@@ -3039,7 +3125,7 @@ footer :is(.fcopy,.f-legal){color:#5B657A}
 </section>
 
 
-<section class="tkp" id="token" data-bg="#F5F5F7" data-acc="#2A5BFF">
+<section class="tkp" id="token" data-bg="#F5F5F7" data-acc="#2A5BFF"><i class="via" aria-hidden="true"></i>
   <div class="wrap tkp-head">
     <div class="k sk rv"><i class="sk-n">08</i>Token</div>
     <h2 class="tkp-h">One hundred and sixty million NRM, fixed at genesis.</h2>
@@ -3107,7 +3193,7 @@ footer :is(.fcopy,.f-legal){color:#5B657A}
 
 
 
-<section class="xf" id="xfade" data-bg="#000000" data-acc="#2F6BFF">
+<section class="xf" id="xfade" data-bg="#000000" data-acc="#2F6BFF"><i class="emb" aria-hidden="true" style="--emb:#F5F5F7"></i>
   <div class="xf-stage" id="xfStage">
     <canvas class="xf-cv" id="xfCv"></canvas>
     <div class="xf-txt" id="xfEsq" aria-hidden="true">
@@ -3124,7 +3210,7 @@ footer :is(.fcopy,.f-legal){color:#5B657A}
 </section>
 
 
-<section class="builds" id="builds" data-bg="#0A0E18" data-acc="#79ABFF">
+<section class="builds" id="builds" data-bg="#0A0E18" data-acc="#79ABFF"><i class="via" aria-hidden="true"></i>
   <div class="wrap builds-head">
     <div class="k sk rv"><i class="sk-n">09</i>What we are building</div>
     <h2 class="builds-h">Two pieces, both already running.</h2>
@@ -3253,7 +3339,7 @@ footer :is(.fcopy,.f-legal){color:#5B657A}
 </section>
 
 
-<section class="xl" id="xlight" data-bg="#05070C" data-acc="#2F6BFF">
+<section class="xl" id="xlight" data-bg="#05070C" data-acc="#2F6BFF"><i class="emb" aria-hidden="true" style="--emb:#0A0E18"></i>
   <div class="xl-stage" id="xlStage">
     <canvas class="xl-cv" id="xlCv"></canvas>
     <div class="xl-word">Nereum Labs</div>
@@ -3316,7 +3402,7 @@ footer :is(.fcopy,.f-legal){color:#5B657A}
   </div>
 </section>
 
-<section class="join" id="join" data-bg="#FBFCFD" data-acc="#2A5BFF">
+<section class="join" id="join" data-bg="#FBFCFD" data-acc="#2A5BFF"><i class="via" aria-hidden="true"></i>
   <div class="wrap">
     <div class="join-head rv">
       <div class="k sk rv"><i class="sk-n">10</i>In the open</div>

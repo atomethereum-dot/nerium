@@ -84,8 +84,18 @@ const seccion = await pg.evaluate(()=>{
   let y=0,n=s; while(n){y+=n.offsetTop;n=n.offsetParent;}
   return {top:y, alto:s.offsetHeight, y:window.scrollY};
 });
-chk('tras recargar sigue en la compra',
-    seccion.y >= seccion.top - 20 && seccion.y <= seccion.top + seccion.alto, true);
+/* Esto medía «el borde de arriba cae dentro de 20 px del borde de la
+   sección», que es identidad de PÍXEL, no lo que la frase dice. Y el scroll se
+   restaura por píxel guardado: cualquier cambio de maquetación por encima lo
+   desplaza. Con la vía, el epígrafe centrado sumó unos 40 px por sección y el
+   píxel restaurado cayó 22 px por encima del borde — con la compra ocupando el
+   95 % de la pantalla. Eso es «sigue en la compra» por cualquier lectura
+   razonable, y la comprobación decía que no.
+   Se mide lo que importa: cuánto de lo que ves ES la sección de compra. */
+const visible = Math.max(0, Math.min(seccion.y + 900, seccion.top + seccion.alto)
+                          - Math.max(seccion.y, seccion.top));
+chk('tras recargar sigue en la compra (' + Math.round(visible / 9) + '% de la pantalla)',
+    visible >= 450, true);
 chk('y muy cerca de donde estaba', Math.abs(despues - antes) < 200, true);
 
 // ── una visita nueva empieza arriba ─────────────────────────────────────────

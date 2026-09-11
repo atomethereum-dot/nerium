@@ -1,0 +1,14 @@
+{
+  "artboards": [
+    { "file": "Sistema.dc.html", "x": 0,    "y": 0,    "w": 1440, "h": 980, "title": "La vía — el sistema" },
+    { "file": "Main.dc.html",    "x": 1560, "y": 0,    "w": 1440, "h": 900, "title": "El empalme (escritorio)" },
+    { "file": "Portada.dc.html", "x": 0,    "y": 1120, "w": 1440, "h": 900, "title": "Portada (escritorio)" },
+    { "file": "Movil.dc.html",   "x": 1560, "y": 1120, "w": 390,  "h": 844, "title": "Portada (móvil)" },
+    { "file": "MovilEmpalme.dc.html", "x": 2040, "y": 1120, "w": 390, "h": 844, "title": "El empalme (móvil)" }
+  ],
+  "annotations": [
+    { "id": "brief", "x": 0, "y": -150, "w": 620,
+      "text": "Propuesta para nereum.xyz — «La vía»\n\nUna línea central continua cose las diez secciones. Las bandas animadas dejan de ser relleno entre secciones y pasan a ser empalmes: la línea entra, la banda ocurre alrededor y la línea sale dentro de la estación siguiente.\n\nMismos textos, mismos colores de marca, misma tipografía. Nada que traducir todavia." }
+  ],
+  "launch": { "view": "canvas" }
+}
