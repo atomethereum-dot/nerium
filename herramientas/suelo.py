@@ -51,9 +51,17 @@ CSS = """
     radial-gradient(58% 70% at 96% -14%,rgba(158,194,255,.30),transparent 66%),
     radial-gradient(64% 72% at 18% 112%,rgba(196,214,246,.26),transparent 70%),
     var(--grano),url(img/papel.svg);
-  background-repeat:no-repeat,no-repeat,no-repeat,repeat,no-repeat;
-  background-size:auto,auto,auto,auto,cover;
-  background-position:0 0,0 0,0 0,0 0,center}
+  background-repeat:no-repeat,no-repeat,no-repeat,repeat,repeat;
+  /* Las placas, a TAMANO FIJO. Con «cover» el navegador estira el dibujo hasta
+     tapar la seccion, y las secciones miden cosas muy distintas: medido, la
+     misma placa salia a 36 px en la tesis, 39 en seguridad, 40 en la preventa,
+     47 en build y 56 en token. O sea que el fondo cambiaba de escala un 55 %
+     de una seccion a otra. Eso es lo que se ve como «un fondo que no va con
+     los demas», y no se arregla retocando un color: se arregla no dejando que
+     la altura de la seccion decida el tamano del dibujo. Ancho fijo y se
+     repite; la placa mide lo mismo en las diez. */
+  background-size:auto,auto,auto,auto,1600px auto;
+  background-position:0 0,0 0,0 0,0 0,center top}
 @media(max-width:760px){
   :is(.paper,.paper2,.secure,.sale,.tkp,.join,.press,.builds,.hpin,.loop){
     background-image:
@@ -67,9 +75,28 @@ CSS = """
 }
 /* La preventa traia sus auroras como elementos animados. Se quedan: son las
    mismas, moviendose despacio, y es la seccion de la que salio el suelo. */
-.tkp{background-blend-mode:normal}
-/* El velo extra de la rosca ya no hace falta: el suelo es igual de claro en
-   todas partes y la rosca no compite con nada. */
+
+/* Y la rosca llevaba ademas un velo blanco propio de una ronda anterior, que
+   le tapaba las auroras y la dejaba con cinco capas cuando las demas tienen
+   doce. Fuera: el suelo es el mismo o no lo es. */
+.tkp.tkp{background-image:
+  radial-gradient(62% 74% at 6% -10%,rgba(150,190,255,.34),transparent 68%),
+  radial-gradient(58% 70% at 96% -14%,rgba(158,194,255,.30),transparent 66%),
+  radial-gradient(64% 72% at 18% 112%,rgba(196,214,246,.26),transparent 70%),
+  var(--grano),url(img/papel.svg);
+  background-repeat:no-repeat,no-repeat,no-repeat,repeat,repeat;
+  background-size:auto,auto,auto,auto,1600px auto;
+  background-position:0 0,0 0,0 0,0 0,center top}
+@media(max-width:760px){
+  .tkp.tkp{background-image:
+    radial-gradient(78% 48% at 6% -6%,rgba(150,190,255,.32),transparent 68%),
+    radial-gradient(74% 44% at 96% -8%,rgba(158,194,255,.28),transparent 66%),
+    radial-gradient(80% 46% at 18% 106%,rgba(196,214,246,.24),transparent 70%),
+    var(--grano),url(img/papel-alto.svg);
+    background-repeat:no-repeat,no-repeat,no-repeat,repeat,repeat-y;
+    background-size:auto,auto,auto,auto,100% auto;
+    background-position:0 0,0 0,0 0,0 0,left top}
+}
 
 /* ── las tres que eran oscuras ──
    Suelo claro y tinta nueva. Las laminas de arte se quedan oscuras: eso es
