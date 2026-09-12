@@ -148,17 +148,27 @@ for (const w of [320, 360, 390, 430, 560, 768, 1024, 1440]) {
 }
 await pg2.setViewportSize({ width:390, height:844 });
 
-/* Y el verde del avance: es el dato que la barra viene a dar, asi que tiene
-   que ser lo mas encendido de ahi dentro. Se comprueba que sea lima de verdad
-   —verde dominante y muy saturado— y no un blanco mas entre textos blancos. */
-const lima = await pg2.evaluate(() => {
-  const f = getComputedStyle(document.querySelector('.ann-fill')).backgroundImage;
-  const tonos = [...f.matchAll(/rgb\((\d+), (\d+), (\d+)\)/g)].map(m => m.slice(1).map(Number));
-  return tonos.map(([r, g, b]) => ({ r, g, b, verde: g > 180 && g > r + 20 && g > b + 120 }));
+/* El verde del aviso.
+   Aqui comprobaba que el AVANCE fuera lima. Lo puse yo entero en lima, me
+   dijeron que el verde fuera un detalle y no el elemento mas grande, y el
+   avance volvio a su claro: la comprobacion sobrevivio a la decision que
+   defendia. Se cambia por la que de verdad importa —otra vez lo mismo: no
+   congelar mi gusto, sino sujetar lo acordado—.
+
+   Lo acordado es: el punto de «en directo» es lo unico verde, y es el verde
+   que la pagina YA usa en «Seed Round open» y en las tarjetas de build. Un
+   verde nuevo para un solo punto es lo que lo volveria un color suelto. */
+const verde = await pg2.evaluate(() => {
+  const g = e => e ? getComputedStyle(e).backgroundColor : null;
+  return { punto: g(document.querySelector('.ann-dot')),
+           vivo:  g(document.querySelector('.sale-live i')),
+           build: g(document.querySelector('.bcd-dot')),
+           avance: getComputedStyle(document.querySelector('.ann-fill')).backgroundImage };
 });
-di(lima.length > 0 && lima.every(t => t.verde),
-   'y lo recorrido va en lima, no en blanco: ' +
-   lima.map(t => 'rgb(' + t.r + ',' + t.g + ',' + t.b + ')').join(' '));
+di(verde.punto === verde.build,
+   'el punto del aviso lleva el verde de la casa, no uno nuevo: ' + verde.punto);
+di(!/rgb\((?:1\d\d|2\d\d), 25[0-5], (?:[0-9]|[1-9]\d)\)/.test(verde.avance),
+   'y el avance NO va en verde: el verde es un detalle, no la barra entera');
 
 await ctx2.close();
 

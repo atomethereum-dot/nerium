@@ -28,6 +28,7 @@ todo lo que se hizo aqui y el archivo subido no trae:
  20. la via: una linea cose la pagina y las bandas dejan de cortarse
  21. calma: la ronda que resta, porque se veia cargada
  22. un solo suelo: el de la preventa, en todas las secciones
+ 23. los logotipos de verdad en la fila de compatibilidad
 """
 import sys, os
 
@@ -48,6 +49,7 @@ import liquida
 import via
 import calma
 import suelo
+import logos
 subido, publicado = sys.argv[1], '/home/user/nerium/index.html'
 z = open(subido, encoding='utf-8').read()
 p = open(publicado, encoding='utf-8').read()
@@ -195,6 +197,9 @@ rest = calma.aplicar(rest)
 
 # ── 22 · un solo suelo ──
 rest = suelo.aplicar(rest)
+
+# ── 23 · los logotipos ──
+rest = logos.aplicar(rest)
 
 salida = pre + rest
 open(publicado, 'w', encoding='utf-8').write(salida)
