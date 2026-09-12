@@ -13,13 +13,18 @@ dibujados de memoria:
   · el zorro de MetaMask, del propio repositorio de MetaMask;
   · el escudo de Trust Wallet, del propio repositorio de Trust Wallet.
 
-Y dos se quedan con su punto, que es lo honesto:
+Y dos llevan icono de la casa, no logotipo, porque no hay logotipo que poner:
 
-  · DexScreener no publica marca en ningun repositorio que se pueda alcanzar
-    desde aqui, y dibujarla de memoria es justo lo que este modulo evita: un
-    logotipo mal hecho es peor que ninguno;
-  · «Venture Capital» no es una marca, es una categoria. No tiene logotipo que
-    poner.
+  · de DexScreener no se puede traer la marca oficial desde aqui: su sitio lo
+    corta la politica del proxy, la busqueda de repositorios de GitHub esta
+    cerrada a los del proyecto y ninguna ruta adivinada existe. Dibujarla de
+    memoria es justo lo que esto evita;
+  · «Venture Capital» no es una marca, es una categoria.
+
+  Llevan un icono dibujado aqui con la paleta de Nereum —velas de cotizacion y
+  linea de crecimiento— que no se parece a la marca de nadie a proposito. Un
+  cuadradito de color al lado de cuatro logotipos de verdad se lee como un
+  logotipo que falta; un icono hecho a conciencia se lee como lo que es.
 
 `montar_home.py` lo aplica en el paso 23.
 """
@@ -39,8 +44,22 @@ MARCAS = {
     'Binance Wallet':     'bnb.svg',
     'MetaMask':           'metamask.svg',
     'Trust Wallet':       'trust.png',
-    'DexScreener':        None,
-    'Venture Capital':    None,
+    # Estos dos NO son logotipos de nadie, y por eso no van en el mismo saco:
+    #
+    # · de DexScreener no se puede traer la marca oficial desde aqui —su sitio
+    #   lo corta la politica del proxy, la busqueda de repositorios de GitHub
+    #   esta cerrada a los del proyecto, y ninguna ruta adivinada existe—, y
+    #   dibujarla de memoria es justo lo que este modulo evita;
+    # · «Venture Capital» no es una marca, es una categoria: no hay logotipo
+    #   que traer ni ahora ni nunca.
+    #
+    # Asi que llevan ICONO propio, dibujado aqui y con la paleta de Nereum:
+    # unas velas de cotizacion y una linea de crecimiento. No se parecen a la
+    # marca de nadie a proposito. Un cuadradito de color al lado de cuatro
+    # logotipos de verdad se lee como un logotipo que falta; un icono hecho a
+    # conciencia se lee como lo que es.
+    'DexScreener':        'dexscreener.svg',
+    'Venture Capital':    'venture.svg',
 }
 
 CSS = """
@@ -49,9 +68,9 @@ CSS = """
    Con ellos, un punto es solo un punto. */
 .lane-in span img{width:20px;height:20px;flex:0 0 auto;object-fit:contain;
   border-radius:50%;display:block}
-/* Los que traen su propio disco de color —Ethereum, Binance— ya vienen
-   redondos; el zorro y el escudo van sobre transparente, asi que no se
-   recortan: se dejan a su aire y solo se les iguala el tamano. */
+/* Los que traen su propio disco de color —Ethereum, Binance, y los dos iconos
+   de la casa— ya vienen redondos; el zorro y el escudo van sobre transparente,
+   asi que no se recortan: se dejan a su aire y solo se les iguala el tamano. */
 .lane-in span img[src$="metamask.svg"],
 .lane-in span img[src$="trust.png"]{border-radius:0}
 /* Y donde hay logotipo, fuera el punto: decian lo mismo dos veces. */
