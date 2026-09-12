@@ -124,6 +124,42 @@ for (const w of [320, 360, 390, 430]) {
   });
   di(d.length === 0, 'a ' + w + ' px todo cae centrado' + (d.length ? ': ' + d.join(', ') : ''));
 }
+/* ── el aviso de la ronda, centrado ──
+   Tres veces he torcido algo por lo mismo: descontar el hueco de un boton por
+   UN SOLO lado. Aqui fueron 15 px en escritorio y 19 en el movil, y encima con
+   dos reglas distintas haciendolo —una general y otra dentro de una media
+   query—, asi que arreglar una dejaba la otra. Se mide a ocho anchos. */
+for (const w of [320, 360, 390, 430, 560, 768, 1024, 1440]) {
+  await pg2.setViewportSize({ width:w, height:760 });
+  await pg2.waitForTimeout(420);
+  const d = await pg2.evaluate(() => {
+    const W = innerWidth;
+    const vis = [...document.querySelectorAll('.ann-in > *')]
+      .filter(e => e.getBoundingClientRect().width > 0);
+    if (!vis.length) return null;
+    const l = Math.min(...vis.map(e => e.getBoundingClientRect().left));
+    const r = Math.max(...vis.map(e => e.getBoundingClientRect().right));
+    const x = document.querySelector('.ann-x').getBoundingClientRect();
+    return { desvio: Math.round((l + r) / 2 - W / 2), choca: r > x.left - 2 };
+  });
+  di(d && Math.abs(d.desvio) <= 1 && !d.choca,
+     'el aviso cae centrado a ' + w + ' px' +
+     (d ? (d.desvio ? ' (desvio ' + d.desvio + ')' : '') + (d.choca ? ' — choca con la X' : '') : ' — no hay aviso'));
+}
+await pg2.setViewportSize({ width:390, height:844 });
+
+/* Y el verde del avance: es el dato que la barra viene a dar, asi que tiene
+   que ser lo mas encendido de ahi dentro. Se comprueba que sea lima de verdad
+   —verde dominante y muy saturado— y no un blanco mas entre textos blancos. */
+const lima = await pg2.evaluate(() => {
+  const f = getComputedStyle(document.querySelector('.ann-fill')).backgroundImage;
+  const tonos = [...f.matchAll(/rgb\((\d+), (\d+), (\d+)\)/g)].map(m => m.slice(1).map(Number));
+  return tonos.map(([r, g, b]) => ({ r, g, b, verde: g > 180 && g > r + 20 && g > b + 120 }));
+});
+di(lima.length > 0 && lima.every(t => t.verde),
+   'y lo recorrido va en lima, no en blanco: ' +
+   lima.map(t => 'rgb(' + t.r + ',' + t.g + ',' + t.b + ')').join(' '));
+
 await ctx2.close();
 
 await nav.close(); srv.close();

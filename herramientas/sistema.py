@@ -145,20 +145,43 @@ CSS = """
    2 px pegado al canto de abajo, que es justo donde no se mira. Si lo que
    anuncia es que la ronda va por el 85 %, el 85 % tiene que SER el elemento,
    no una nota al pie. */
+:root{--lima:#C6FF3D}
 .ann{background:
   linear-gradient(90deg,#16379E 0%,#2F6BFF 42%,#2F6BFF 62%,#16379E 100%)}
-.ann-in{gap:clamp(10px,1.5vw,18px);padding:0 52px 0 22px}
+/* El relleno, SIMETRICO. Lo puse a 52 por la derecha y 22 por la izquierda
+   para dejarle sitio al boton de cerrar, y esos 30 px de diferencia corren el
+   bloque entero 15 px a la izquierda —19 en el movil, donde era 52/14—. Eso es
+   lo que se ve torcido: no esta inclinado, esta descentrado, y la culpa es de
+   descontar un hueco por un solo lado. Igual por los dos y vuelve al centro;
+   el boton de cerrar sigue teniendo su sitio porque va por encima. */
+.ann-in{gap:clamp(10px,1.5vw,18px);padding-inline:clamp(38px,4vw,56px)}
 .ann-k{display:inline-flex;align-items:center;gap:8px;font-weight:600;flex:0 0 auto}
-.ann-dot{box-shadow:0 0 0 3px rgba(255,255,255,.22)}
+/* El punto de «en directo», en lima. Sobre el azul de marca el blanco no dice
+   nada: es el mismo color del texto. El lima si, y ademas es el unico sitio de
+   la barra donde aparece, asi que se lee como senal y no como adorno. */
+.ann-dot{background:var(--lima,#C6FF3D);
+  box-shadow:0 0 0 3px rgba(198,255,61,.22),0 0 12px rgba(198,255,61,.75);
+  animation:annVivo 2.4s ease-in-out infinite}
+@keyframes annVivo{0%,100%{box-shadow:0 0 0 3px rgba(198,255,61,.22),
+    0 0 12px rgba(198,255,61,.75)}
+  50%{box-shadow:0 0 0 5px rgba(198,255,61,.10),0 0 18px rgba(198,255,61,.95)}}
+@media(prefers-reduced-motion:reduce){.ann-dot{animation:none}}
 /* La barra, dentro y a la vista. Ancho fijo para que el numero de al lado no
    baile cuando la ronda avanza. */
 .ann-bar{position:relative;width:clamp(64px,11vw,148px);height:5px;flex:0 0 auto;
   border-radius:3px;overflow:hidden;background:rgba(3,10,40,.55);
   box-shadow:inset 0 1px 2px rgba(3,10,40,.6)}
-.ann-fill{display:block;height:100%;border-radius:3px;
-  background:linear-gradient(90deg,#BFD6FF,#FFFFFF);
-  box-shadow:0 0 10px rgba(255,255,255,.55);
+/* Y lo recorrido, en lima. Es el dato que la barra viene a dar: el 85 % tiene
+   que ser lo mas encendido que hay ahi dentro, no un blanco mas entre textos
+   blancos. Lleva ademas un remate vivo en la punta —el borde de lo ganado—,
+   que es donde va la mirada. */
+.ann-fill{position:relative;display:block;height:100%;border-radius:3px;
+  background:linear-gradient(90deg,#8FE000,var(--lima,#C6FF3D));
+  box-shadow:0 0 10px rgba(198,255,61,.75),0 0 22px rgba(198,255,61,.35);
   transition:width 1.1s cubic-bezier(.16,.84,.26,1)}
+.ann-fill::after{content:"";position:absolute;right:0;top:-1px;bottom:-1px;
+  width:2px;border-radius:2px;background:#EAFFB0;
+  box-shadow:0 0 8px rgba(234,255,176,.95)}
 .ann-n{flex:0 0 auto}
 .ann-n b{font-weight:600;font-variant-numeric:tabular-nums}
 .ann-p{width:3px;height:3px;border-radius:50%;background:rgba(255,255,255,.45);flex:none}
@@ -170,7 +193,9 @@ CSS = """
   background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);
   font-weight:500;letter-spacing:.01em;white-space:nowrap;
   transition:background .22s,border-color .22s}
-.ann-in:hover .ann-cta{background:#fff;border-color:#fff;color:#16379E}
+.ann-in:hover .ann-cta{background:var(--lima,#C6FF3D);
+  border-color:var(--lima,#C6FF3D);color:#0F2000;
+  box-shadow:0 0 20px rgba(198,255,61,.5)}
 .ann-go{font-style:normal;transition:transform .3s cubic-bezier(.16,.84,.26,1)}
 .ann-in:hover .ann-go{transform:translateX(3px)}
 /* Al estrechar se va lo prescindible por orden: primero el precio, luego el
@@ -179,7 +204,11 @@ CSS = """
 @media(max-width:1180px){.ann-s,.ann-p{display:none}}
 @media(max-width:860px){.ann-cta{padding:0 9px;gap:0;font-size:0}
   .ann-cta .ann-go{font-size:13px}}
-@media(max-width:560px){.ann-n span{display:none}.ann-in{padding-inline-start:14px}}
+/* Aqui habia un «padding-inline-start:14px» de una ronda anterior, que volvia
+   a descentrar el bloque 12 px por el mismo motivo: descontar hueco por un
+   solo lado. El relleno se toca por los DOS o no se toca. */
+@media(max-width:560px){.ann-n span{display:none}
+  .ann-in{padding-inline:clamp(30px,7vw,38px)}}
 """ + '\n' + FIN
 
 
