@@ -26,11 +26,11 @@ FIN = '/* ══ fin: suelo ══ */'
 
 # Las tres que eran oscuras pierden su data-bg de noche: de el salen el color
 # de la regla del HUD y el del cursor.
-FONDOS = [
-    ('<section class="builds" id="builds" data-bg="#0A0E18"', '#F5F8FC'),
-    ('<section class="hpin" id="docs" data-bg="#0A0E18"', '#F5F8FC'),
-    ('<section class="dark pad loop" id="blog" data-bg="#060C1A"', '#F5F8FC'),
-]
+# Las tres profundas —lo que construimos, la documentacion y el diario— se
+# quedan en negro. Las pase a claro siguiendo «que el fondo sea siempre igual»,
+# y la respuesta fue que volvieran al oscuro que tenian. Asi que el suelo unico
+# es el de las SIETE de papel; estas tres son otro acto de la pagina.
+FONDOS = []
 
 CSS = """
 /* ══ un solo suelo ═════════════════════════════════════════════════════════
@@ -44,7 +44,7 @@ CSS = """
    preventa se viera mejor que el resto—, las placas y el grano. En ese orden:
    el grano va arriba del todo porque es lo que quita el ultimo resto de
    blanco de plantilla. */
-:is(.paper,.paper2,.secure,.sale,.tkp,.join,.press,.builds,.hpin,.loop){
+:is(.paper,.paper2,.secure,.sale,.tkp,.join,.press){
   background-color:var(--suelo);
   background-image:
     radial-gradient(62% 74% at 6% -10%,rgba(150,190,255,.34),transparent 68%),
@@ -63,7 +63,7 @@ CSS = """
   background-size:auto,auto,auto,auto,1600px auto;
   background-position:0 0,0 0,0 0,0 0,center top}
 @media(max-width:760px){
-  :is(.paper,.paper2,.secure,.sale,.tkp,.join,.press,.builds,.hpin,.loop){
+  :is(.paper,.paper2,.secure,.sale,.tkp,.join,.press){
     background-image:
       radial-gradient(78% 48% at 6% -6%,rgba(150,190,255,.32),transparent 68%),
       radial-gradient(74% 44% at 96% -8%,rgba(158,194,255,.28),transparent 66%),
@@ -98,47 +98,19 @@ CSS = """
     background-position:0 0,0 0,0 0,0 0,left top}
 }
 
-/* ── las tres que eran oscuras ──
-   Suelo claro y tinta nueva. Las laminas de arte se quedan oscuras: eso es
-   dibujo, como las placas de color de las tarjetas de prensa. */
-:is(.builds,.hpin,.loop){color:#0A0D14}
-:is(.builds,.hpin,.loop) :is(h2,h3,b,strong){color:#0A0D14}
-.builds-h,.hp-t,.loop h2{color:#0A0D14}
-.loop .sub{color:#3C4557}
-.loop .card b{color:#0A0D14}
-.hp-ghost{color:rgba(10,13,20,.05)}
-/* El resplandor azul que llevaban por detras sobraba en claro: era para
-   levantar el negro. */
-.builds::before{display:none}
+/* Las tres profundas se quedan en negro y con su tinta de siempre: no se
+   tocan. Lo unico que se les deja es la estacion de la via en su color claro,
+   que ahi el azul de marca no llega. */
+:is(.builds,.hpin,.loop) .sk-n{color:#79ABFF}
+:is(.builds,.hpin,.loop) .via{--via-c:rgba(160,200,255,.5)}
+:is(.builds,.hpin,.loop) .via::after{background:#79ABFF}
 
-/* El epigrafe de estas tres iba con «--mute», que es el gris de los fondos
-   OSCUROS: sobre papel se queda en blanco sobre blanco. Y no lo caza la
-   bateria de contraste —esos rotulos estan en su lista de «sin medir», porque
-   ahi el fondo lo pinta un degradado y no una regla—, asi que esto se ve
-   mirando o no se ve. */
-:is(.builds,.hpin,.loop) .k{color:#5B657A}
-:is(.builds,.hpin,.loop) .sk-n{color:#1B49E0}
-:is(.builds,.hpin,.loop) .via{--via-c:rgba(27,73,224,.5)}
-:is(.builds,.hpin,.loop) .via::after{background:#1B49E0}
-
-/* Las dos tarjetas de build: la lamina de arte sigue oscura, el pie pasa a
-   papel con el mismo relieve que el resto de tarjetas claras. «.bcd» no traia
-   fondo —sobre negro no le hacia falta— y sin el, el pie de la tarjeta se
-   confundia con el suelo. */
-.bcd{background:#fff;border:1px solid var(--p-linea);
-  box-shadow:var(--p-relieve);overflow:hidden}
-.bcd>*:last-child{padding:clamp(16px,1.6vw,22px) clamp(16px,1.6vw,22px)
-  clamp(18px,1.8vw,24px)}
-.bcd:hover{box-shadow:var(--p-relieve2)}
-.bcd-t{color:#0A0D14}
-.bcd-d{color:#3C4557}
-.bcd-tag{color:#5B657A}
-.bcd-go{color:#1B49E0}
-
-/* El diario: las tarjetas llevan su propio lienzo pintado y se quedan como
-   estan; lo que cambia es lo que hay alrededor. */
-.loop h2 i{background:#1B49E0}
-.loop .sub s{background:#1B49E0}
+/* Token era la unica de las siete claras SIN tinta propia: heredaba el blanco
+   de la pagina sobre un suelo claro. Hoy no se nota porque todos sus textos
+   llevan color propio, pero cualquier texto que se anada ahi nace invisible.
+   La bateria no lo cazaria —solo mide lo que existe—, asi que se cierra la
+   puerta en vez de esperar a pisarla. */
+.tkp{color:var(--ink)}
 
 /* Los rotulos de columna del pie iban a 3:1. Los escopados de papel no
    llegan ahi —el pie no es una de las siete— y el efecto de texto revuelto
