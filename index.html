@@ -2941,6 +2941,51 @@ footer .fgrid h4,footer .tec-real{color:#5B657A}
 }
 
 /* ══ fin: garantias ══ */
+/* ══ la costura ═══════════════════════════════════════════════════════════
+   Entre cada banda animada y la seccion que le sigue. Antes era un triangulo
+   recortado con «clip-path» y pintado de un color fijo; dos de los cuatro
+   colores estaban invertidos y las dos diagonales del recorte se veian. Ahora
+   no hay ni un borde recto y el color es el que la escena tiene de verdad
+   ahi, muestreado en pantalla. */
+
+/* ── el color de cada suelo ──
+   Medido con el embudo apagado, que si no se mide a si mismo. En componentes
+   sueltas y no en «#RRGGBB» porque los degradados tienen que bajar la alfa
+   sin tocar el tono: un color claro que se desvanece hacia «transparent»
+   interpola hacia rgba(0,0,0,0) y pasa por un halo gris. */
+.chroma .emb{--embc:0 0 0}   /* #000000 · campo de rayas sobre negro */
+.kin .emb{--embc:8 10 12}   /* #080A0C · cinta oscura */
+.xf .emb{--embc:10 16 27}   /* #0A101B · acaba OSCURA, no clara */
+.xl .emb{--embc:224 228 230}   /* #E0E4E6 · acaba CLARA, no oscura */
+
+/* ── las dos capas ──
+   Suelo: la escena se hunde en su propio color, de lado a lado.
+   Convergencia: una elipse anclada abajo en el centro, mas alta por el medio
+   que por los lados. La misma idea que el triangulo —todo baja hacia la via—
+   pero con caida suave, sin una sola recta que lo diga. */
+.emb{
+  clip-path:none;
+  background:
+    radial-gradient(132% 106% at 50% 100%,
+      rgb(var(--embc,10 16 27) / 1)    0%,
+      rgb(var(--embc,10 16 27) / .74) 24%,
+      rgb(var(--embc,10 16 27) / .30) 50%,
+      rgb(var(--embc,10 16 27) / 0)   74%),
+    linear-gradient(to bottom,
+      rgb(var(--embc,10 16 27) / 0)    0%,
+      rgb(var(--embc,10 16 27) / .30) 56%,
+      rgb(var(--embc,10 16 27) / .84) 88%,
+      rgb(var(--embc,10 16 27) / 1)  100%)}
+
+/* Un poco mas alto que el triangulo: la caida es suave y necesita recorrido
+   para no acabar siendo una raya. Las cuatro iguales —el paso 20 daba dos
+   alturas distintas— porque ahora la forma no depende de la escena. */
+.chroma .emb,.kin .emb,.xf .emb,.xl .emb{height:clamp(104px,12vw,180px)}
+@media(max-width:760px){
+  .chroma .emb,.kin .emb,.xf .emb,.xl .emb{height:clamp(64px,18vw,104px)}
+}
+
+/* ══ fin: costura ══ */
 </style>
 </head>
 <body>

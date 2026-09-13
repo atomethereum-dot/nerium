@@ -50,6 +50,7 @@ node herramientas/probar_volver.mjs    # el camino de vuelta a la cartera al fir
 node herramientas/probar_iconos.mjs    # que ningun favicon declarado falte
 node herramientas/probar_titulos.mjs   # todos los titulos a la izquierda menos la portada
 node herramientas/probar_garantias.mjs # aire bajo el epigrafe y las filas en su linea
+node herramientas/probar_costura.mjs   # el embudo del color de la escena, sin recorte
 ```
 
 `probar_wc.mjs` simula también el registro de carteras de WalletConnect y el SDK,

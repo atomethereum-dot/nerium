@@ -31,6 +31,7 @@ todo lo que se hizo aqui y el archivo subido no trae:
  23. los logotipos de verdad en la fila de compatibilidad
  24. los titulos a la izquierda, todos menos el de la portada
  25. las garantias: aire arriba y los dos textos en la misma linea
+ 26. la costura: la banda se apaga en su color, sin triangulo
 """
 import sys, os
 
@@ -54,6 +55,7 @@ import suelo
 import logos
 import izquierda
 import garantias
+import costura
 subido, publicado = sys.argv[1], '/home/user/nerium/index.html'
 z = open(subido, encoding='utf-8').read()
 p = open(publicado, encoding='utf-8').read()
@@ -212,6 +214,9 @@ rest = izquierda.aplicar(rest)
 # ── 25 · las garantias ──
 rest = garantias.aplicar(rest)
 
+# ── 26 · la costura ──
+rest = costura.aplicar(rest)
+
 salida = pre + rest
 open(publicado, 'w', encoding='utf-8').write(salida)
 print("montado:", len(salida), "bytes ·", salida.count('var(--hud-b)'), "usos de --hud-b ·",
@@ -232,4 +237,5 @@ print("montado:", len(salida), "bytes ·", salida.count('var(--hud-b)'), "usos d
       "via:", str(salida.count('class="via"')) + ' estaciones, ' +
               str(salida.count('class="emb"')) + ' empalmes', "·",
       "titulos:", 'a la izquierda' if izquierda.MARCA in salida else 'CENTRADOS', "·",
-      "garantias:", 'cuadradas' if garantias.MARCA in salida else 'SIN TOCAR')
+      "garantias:", 'cuadradas' if garantias.MARCA in salida else 'SIN TOCAR', "·",
+      "costura:", 'sin triangulo' if costura.MARCA in salida else 'EL TRIANGULO')

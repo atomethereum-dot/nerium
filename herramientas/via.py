@@ -166,7 +166,9 @@ def aplicar(html):
         if i < 0:
             continue
         j = html.index('>', i) + 1
-        if html[j:j + 12] == '<i class="emb':
+        # 13, no 12: «<i class="emb» mide trece. Con 12 la comparacion
+        # nunca era cierta y este guardia no guardaba nada.
+        if html[j:j + 13] == '<i class="emb':
             continue
         if '<i class="emb" aria-hidden="true" style="--emb:%s"></i>' % suelo in html:
             continue
