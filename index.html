@@ -2912,6 +2912,35 @@ footer .fgrid h4,footer .tec-real{color:#5B657A}
 .loop .sub{justify-content:flex-start}
 
 /* ══ fin: titulos a la izquierda ══ */
+/* ══ las garantias ════════════════════════════════════════════════════════
+   Aire entre el epigrafe y la lista, y los dos textos de cada fila en la
+   misma linea. */
+
+/* ── 1 · el epigrafe ──
+   Iba a CERO del borde de la lista, y ese borde es una linea de puntos: el
+   rotulo no quedaba cerca de la raya, quedaba encima. La regla que le daba
+   aire existia desde hace tiempo pero apuntaba a «.rows-head», que no esta
+   en el marcado. Se enchufa por identificador, que es lo que hay. */
+#solutions .sk{margin-bottom:clamp(18px,2vw,28px)}
+
+/* ── 2 · las dos columnas de cada fila ──
+   Un titulo de 32 px y una descripcion de 16.5 px alineados por arriba no
+   quedan alineados: la caja de linea del grande es mas alta y su letra
+   empieza mas abajo. Medido, la descripcion iba 18 px POR ENCIMA del titulo.
+   «baseline» los pone en el mismo renglon sea cual sea el tamano, que es lo
+   que el ojo llama «alineado».
+
+   Solo en estas dos piezas: el numero de orden y el icono siguen arriba. */
+.rows b,.rows .rd{align-self:baseline}
+
+/* En el telefono la descripcion baja a su propio renglon del flex, y entre
+   renglones distintos no hay linea base que compartir. Se deja como estaba
+   para no arrastrarla con un margen que alli no pinta nada. */
+@media(max-width:820px){
+  .rows b,.rows .rd{align-self:flex-start}
+}
+
+/* ══ fin: garantias ══ */
 </style>
 </head>
 <body>
