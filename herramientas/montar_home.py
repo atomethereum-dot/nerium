@@ -33,6 +33,7 @@ todo lo que se hizo aqui y el archivo subido no trae:
  25. las garantias: aire arriba y los dos textos en la misma linea
  26. la costura: la banda se apaga en su color, sin triangulo
  27. el punto de la tira sale del centrado y la columna cuadra
+ 28. las tarjetas de seguridad se llenan en vez de dejar hueco
 """
 import sys, os
 
@@ -58,6 +59,7 @@ import izquierda
 import garantias
 import costura
 import punto
+import tarjeta
 subido, publicado = sys.argv[1], '/home/user/nerium/index.html'
 z = open(subido, encoding='utf-8').read()
 p = open(publicado, encoding='utf-8').read()
@@ -222,6 +224,9 @@ rest = costura.aplicar(rest)
 # ── 27 · el punto de la tira ──
 rest = punto.aplicar(rest)
 
+# ── 28 · las tarjetas de seguridad ──
+rest = tarjeta.aplicar(rest)
+
 salida = pre + rest
 open(publicado, 'w', encoding='utf-8').write(salida)
 print("montado:", len(salida), "bytes ·", salida.count('var(--hud-b)'), "usos de --hud-b ·",
@@ -244,4 +249,5 @@ print("montado:", len(salida), "bytes ·", salida.count('var(--hud-b)'), "usos d
       "titulos:", 'a la izquierda' if izquierda.MARCA in salida else 'CENTRADOS', "·",
       "garantias:", 'cuadradas' if garantias.MARCA in salida else 'SIN TOCAR', "·",
       "costura:", 'sin triangulo' if costura.MARCA in salida else 'EL TRIANGULO', "·",
-      "tira:", 'un solo eje' if punto.MARCA in salida else 'EL PRIMERO TORCIDO')
+      "tira:", 'un solo eje' if punto.MARCA in salida else 'EL PRIMERO TORCIDO', "·",
+      "tarjetas:", 'llenas' if tarjeta.MARCA in salida else 'CON HUECO')

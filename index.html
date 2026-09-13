@@ -3008,6 +3008,46 @@ footer .fgrid h4,footer .tec-real{color:#5B657A}
 }
 
 /* ══ fin: punto de la tira ══ */
+/* ══ la tarjeta que se llena ═══════════════════════════════════════════════
+   El area de tarjetas se reparte lo que sobra de pantalla y cada tarjeta va
+   «inset:0», asi que se estira hasta el area entera. El contenido no, y el
+   enlace del pie lleva «margin-top:auto»: se iba al canto de abajo y dejaba
+   todo el sobrante en un hueco entre el ultimo dato y el. Medido:
+
+       390 x 844   area 486   hueco   22 px
+       430 x 932   area 566   hueco  124 px
+
+   Cuanto mas alto el telefono, mayor el agujero: es el area la que crece, no
+   lo que hay dentro.
+
+   Probe lo otro primero —que la tarjeta midiera su contenido y se centrara—
+   y el agujero no desaparece: se sale de la tarjeta y se reparte alrededor.
+   A 440x956 quedaban 94 px de aire encima y 185 debajo. El hueco seguia ahi,
+   solo que fuera de la caja.
+
+   Asi que el sobrante se reparte DENTRO, entre las filas de datos, que es
+   contenido de verdad llenando la tarjeta. No es el hueco disimulado: las
+   cuatro filas crecen lo mismo y lo que cambia es el ritmo vertical de una
+   tabla, que es justo lo que un telefono mas alto puede permitirse. */
+@media(max-width:899px){
+  /* La lista de datos se queda con lo que sobra... */
+  .secure .sec-grid .sec-card .sec-fields{
+    flex:1 1 auto;display:flex;flex-direction:column}
+  /* ...y las cuatro filas se lo reparten a partes iguales.
+     La fila pasa de «flex» a «grid» por una razon concreta: al crecer, con
+     «flex» el texto se queda pegado arriba y el filete de abajo se aleja
+     solo. En «grid», «align-content:center» centra la fila dentro de lo que
+     ha crecido y «align-items:baseline» sigue cuadrando el rotulo pequeño
+     con el dato grande, que es lo que hay que conservar. */
+  .secure .sec-grid .sec-card .sec-fields>div{
+    flex:1 1 auto;
+    display:grid;grid-auto-flow:column;justify-content:space-between;
+    align-content:center;align-items:baseline}
+  /* El enlace ya no necesita empujarse solo: la lista lo ha dejado abajo. */
+  .secure .sec-grid .sec-card .sec-go{margin-top:0}
+}
+
+/* ══ fin: tarjeta ══ */
 </style>
 </head>
 <body>
