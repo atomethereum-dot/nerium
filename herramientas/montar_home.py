@@ -34,6 +34,7 @@ todo lo que se hizo aqui y el archivo subido no trae:
  26. la costura: la banda se apaga en su color, sin triangulo
  27. el punto de la tira sale del centrado y la columna cuadra
  28. las tarjetas de seguridad se llenan en vez de dejar hueco
+ 29. la ruta: las tres fases de adopcion, con su rail al scroll
 """
 import sys, os
 
@@ -60,6 +61,7 @@ import garantias
 import costura
 import punto
 import tarjeta
+import ruta
 subido, publicado = sys.argv[1], '/home/user/nerium/index.html'
 z = open(subido, encoding='utf-8').read()
 p = open(publicado, encoding='utf-8').read()
@@ -227,6 +229,9 @@ rest = punto.aplicar(rest)
 # ── 28 · las tarjetas de seguridad ──
 rest = tarjeta.aplicar(rest)
 
+# ── 29 · la ruta ──
+rest = ruta.aplicar(rest)
+
 salida = pre + rest
 open(publicado, 'w', encoding='utf-8').write(salida)
 print("montado:", len(salida), "bytes ·", salida.count('var(--hud-b)'), "usos de --hud-b ·",
@@ -250,4 +255,5 @@ print("montado:", len(salida), "bytes ·", salida.count('var(--hud-b)'), "usos d
       "garantias:", 'cuadradas' if garantias.MARCA in salida else 'SIN TOCAR', "·",
       "costura:", 'sin triangulo' if costura.MARCA in salida else 'EL TRIANGULO', "·",
       "tira:", 'un solo eje' if punto.MARCA in salida else 'EL PRIMERO TORCIDO', "·",
-      "tarjetas:", 'llenas' if tarjeta.MARCA in salida else 'CON HUECO')
+      "tarjetas:", 'llenas' if tarjeta.MARCA in salida else 'CON HUECO', "·",
+      "ruta:", str(salida.count('class="ruta-f"')) + ' fases' if ruta.MARCA in salida else 'SIN RUTA')

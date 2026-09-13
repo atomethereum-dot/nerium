@@ -52,6 +52,7 @@ node herramientas/probar_titulos.mjs   # todos los titulos a la izquierda menos 
 node herramientas/probar_garantias.mjs # aire bajo el epigrafe y las filas en su linea
 node herramientas/probar_costura.mjs   # el embudo del color de la escena, sin recorte
 node herramientas/probar_tarjeta.mjs   # las tarjetas de seguridad, sin hueco abajo
+node herramientas/probar_ruta.mjs      # la ruta: el rail de la referencia y su avance
 ```
 
 `probar_wc.mjs` simula también el registro de carteras de WalletConnect y el SDK,
