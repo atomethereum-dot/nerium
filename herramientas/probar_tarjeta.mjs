@@ -91,6 +91,66 @@ for (const [W, H] of [[440,956],[430,932],[414,896],[390,844],[375,667]]) {
   await ctx.close();
 }
 
+// ── que quepa ENTERA en cualquier pantalla, y sin esconder texto ────────────
+// Esto es lo que pedia el encargo: «que se vea bien en todas las pantallas y
+// completo como es». Dos cosas distintas y las dos se miden:
+//
+//   · que no se salga — el enlace del pie tiene que quedar dentro del area
+//     util de la tarjeta, en los dieciseis tamaños;
+//   · que no falte — ni la entradilla de la seccion ni la descripcion de la
+//     tarjeta pueden estar en «display:none». Habia dos bloques que las
+//     quitaban en pantallas cortas «porque no cabia»; cabia, lo que no cabia
+//     era con 112 px de carril vacio debajo.
+//
+// «Keep scrolling» es la unica excepcion, y solo por debajo de 620 px de
+// alto: es una ayuda de navegacion, no informacion del proyecto.
+{
+  const TAM = [[320,568],[360,640],[375,667],[390,664],[412,732],[360,780],[375,812],
+               [390,844],[414,896],[393,852],[430,932],[440,956],[480,1000],[600,900]];
+  for (const [W, H] of TAM) {
+    const ctx = await nav.newContext({ viewport:{ width:W, height:H }, isMobile:true, hasTouch:true });
+    const pg = await ctx.newPage();
+    await pg.goto('http://127.0.0.1:9159/', { waitUntil:'load' });
+    await mirar(pg);
+    const r = await pg.evaluate(() => {
+      const D = [];
+      document.querySelectorAll('.sec-card').forEach(c => {
+        const rc = c.getBoundingClientRect(), cs = getComputedStyle(c);
+        const go = c.querySelector('.sec-go').getBoundingClientRect();
+        D.push({ t:c.querySelector('.sec-t').textContent.trim().slice(0, 18),
+                 sale:Math.round(go.bottom - (rc.bottom - parseFloat(cs.paddingBottom))) });
+      });
+      const oculto = [];
+      for (const [n, s] of [['entradilla','.secure .sec-sub'], ['descripcion','.secure .sec-p']]) {
+        const e = document.querySelector(s);
+        if (e && getComputedStyle(e).display === 'none') oculto.push(n);
+      }
+      // y que ningun mando fijo del canto pise la tarjeta
+      const c = document.querySelector('.sec-card.on') || document.querySelector('.sec-card');
+      const rc = c.getBoundingClientRect();
+      const choques = [];
+      for (const [n, s] of [['el boton de subir','.subir'], ['el idioma','.lang'], ['el de bajar','.scrollbtn']]) {
+        const e = document.querySelector(s); if (!e) continue;
+        const cs = getComputedStyle(e);
+        if (cs.display === 'none' || cs.visibility === 'hidden' || parseFloat(cs.opacity) < 0.05) continue;
+        const b = e.getBoundingClientRect(); if (!b.width) continue;
+        if (!(b.right <= rc.left || rc.right <= b.left || b.bottom <= rc.top || rc.bottom <= b.top)) choques.push(n);
+      }
+      return { D, oculto, choques };
+    });
+    const fuera = r.D.filter(x => x.sale > 0);
+    di(fuera.length === 0,
+       W + 'x' + H + ' · las tres caben enteras' +
+       (fuera.length ? ' — se salen: ' + fuera.map(x => '«' + x.t + '» ' + x.sale + ' px').join(', ') : ''));
+    di(r.oculto.length === 0,
+       W + 'x' + H + ' · y sin esconder texto' + (r.oculto.length ? ' — falta: ' + r.oculto.join(', ') : ''));
+    di(r.choques.length === 0,
+       W + 'x' + H + ' · ningun mando del canto pisa la tarjeta' +
+       (r.choques.length ? ' — ' + r.choques.join(', ') : ''));
+    await ctx.close();
+  }
+}
+
 // ── el escritorio no se toca ─────────────────────────────────────────────────
 {
   const ctx = await nav.newContext({ viewport:{ width:1440, height:900 } });

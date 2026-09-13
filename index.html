@@ -3045,6 +3045,73 @@ footer .fgrid h4,footer .tec-real{color:#5B657A}
     align-content:center;align-items:baseline}
   /* El enlace ya no necesita empujarse solo: la lista lo ha dejado abajo. */
   .secure .sec-grid .sec-card .sec-go{margin-top:0}
+
+  /* ── el carril de abajo ──
+     Con el hueco de dentro resuelto quedaba el de FUERA: la seccion reservaba
+     112 px en el canto inferior y ahi no hay nada. Los 112 salian de dejar
+     libre el boton de subir, que se colocaba a 62 px del fondo y mide 42, o
+     sea que su borde de arriba caia a 104.
+
+     Pero ese boton va a la DERECHA y lo unico que hay debajo —el idioma— va a
+     la izquierda: en su columna no tiene nada que esquivar. Baja al canto, y
+     el carril pasa de 112 a 64. La tarjeta se queda esos 48 px y la franja de
+     abajo deja de estar vacia: lo que queda es justo el alto de los mandos. */
+  .subir{bottom:var(--hud-b)}
+  .secure .sec-stage{padding-bottom:calc(var(--hud-b) + 50px) !important}
+}
+
+/* ── y lo que se escondia por no caber, vuelve ──
+   Habia dos bloques que quitaban texto en pantallas cortas: la entradilla de
+   la seccion por debajo de 720 px de alto, y ademas la descripcion de la
+   tarjeta y el aviso de seguir bajando por debajo de 620. El comentario lo
+   decia sin rodeos: «en pantallas muy cortas no cabe todo, se recorta lo
+   prescindible». Cabia de sobra; lo que no cabia era con 112 px de carril
+   vacio debajo. Con 64 sobran esos 48, y no hay que quitarle texto a nadie. */
+@media(max-width:899px) and (max-height:720px){
+  .sec-sub{display:block}
+}
+@media(max-width:899px) and (max-height:620px){
+  /* Vuelven la entradilla de la seccion y la descripcion de la tarjeta, que
+     son TEXTO: lo que cuentan no lo cuenta nadie mas.
+     «Keep scrolling» no vuelve, y es a proposito: es una ayuda de navegacion,
+     no informacion sobre el proyecto. En una pantalla de 568 px esos 21 px
+     son justo los que le faltan a la tarjeta, y entre perder un aviso de que
+     se puede seguir bajando —que el dedo ya sabe— y perder un parrafo, se
+     pierde el aviso. */
+  .secure .sec-sub,.secure .sec-p{display:block}
+}
+
+/* ── y para que quepa sin quitar nada, el ritmo se ata al alto ──
+   En una pantalla de 568 px la cabecera se comia 195 —un tercio— y el
+   contenido de la tarjeta pedia 367 para un area de 258. Lo que sobra no es
+   texto: son margenes pensados para una pantalla de 900. Aqui todos los
+   huecos verticales pasan a medirse en «vh», asi que encogen con la pantalla
+   en vez de encogerla ellos. El texto no se toca en ningun tamaño; el
+   titular baja de cuerpo, que es lo que un movil corto pide de todas formas. */
+@media(max-width:899px) and (max-height:740px){
+  .secure .sec-h{font-size:clamp(21px,4.6vh,32px);line-height:1.08;
+    margin-block:clamp(6px,1.5vh,14px) clamp(6px,1.5vh,16px)}
+  .secure .sec-head{margin-bottom:clamp(6px,1.2vh,14px)}
+  .secure .sec-head .sk{margin-bottom:clamp(5px,1.1vh,12px)}
+  .secure .sec-sub{margin-top:clamp(6px,1.3vh,14px);
+    font-size:clamp(11.5px,2vh,14px);line-height:1.42}
+  .secure .sec-cue{margin-bottom:clamp(5px,1.1vh,12px)}
+  .secure .sec-dots{margin-bottom:clamp(5px,1.1vh,14px)}
+  .secure .sec-stage{padding-top:clamp(4px,1.2vh,22px) !important}
+
+  .secure .sec-grid .sec-card{
+    padding:clamp(10px,1.9vh,16px) clamp(13px,4vw,16px) clamp(9px,1.7vh,14px)}
+  .secure .sec-card .sec-ic{width:28px;height:28px}
+  .secure .sec-card .sec-t{margin-top:clamp(9px,2vh,20px)}
+  .secure .sec-card .sec-k{margin-top:clamp(4px,.8vh,6px)}
+  .secure .sec-card .sec-p{margin-top:clamp(7px,1.5vh,14px)}
+  .secure .sec-card .sec-fields{margin-top:clamp(8px,1.7vh,18px)}
+  .secure .sec-card .sec-go{padding-top:clamp(8px,1.7vh,14px)}
+  /* El cuerpo del texto tambien se ata al alto, pero con suelo: por debajo
+     de 11,5 px deja de leerse, y entonces lo que sobra no es el texto. */
+  .secure .sec-card .sec-p{font-size:clamp(11.5px,2.05vh,13.5px);line-height:1.44}
+  .secure .sec-card .sec-fields>div{padding-block:clamp(3px,.75vh,9px)}
+  .secure .sec-card .sec-fields dd{font-size:clamp(12px,2.15vh,13.5px)}
 }
 
 /* ══ fin: tarjeta ══ */
