@@ -29,6 +29,7 @@ todo lo que se hizo aqui y el archivo subido no trae:
  21. calma: la ronda que resta, porque se veia cargada
  22. un solo suelo: el de la preventa, en todas las secciones
  23. los logotipos de verdad en la fila de compatibilidad
+ 24. los titulos a la izquierda, todos menos el de la portada
 """
 import sys, os
 
@@ -50,6 +51,7 @@ import via
 import calma
 import suelo
 import logos
+import izquierda
 subido, publicado = sys.argv[1], '/home/user/nerium/index.html'
 z = open(subido, encoding='utf-8').read()
 p = open(publicado, encoding='utf-8').read()
@@ -201,6 +203,10 @@ rest = suelo.aplicar(rest)
 # ── 23 · los logotipos ──
 rest = logos.aplicar(rest)
 
+# ── 24 · los titulos a la izquierda ──
+# El ultimo del todo: pisa por orden, no por peso. Si se adelanta, no pisa.
+rest = izquierda.aplicar(rest)
+
 salida = pre + rest
 open(publicado, 'w', encoding='utf-8').write(salida)
 print("montado:", len(salida), "bytes ·", salida.count('var(--hud-b)'), "usos de --hud-b ·",
@@ -219,4 +225,5 @@ print("montado:", len(salida), "bytes ·", salida.count('var(--hud-b)'), "usos d
       "sistema:", str(salida.count('class="sk-n"')) + '/10 epigrafes', "·",
       "portada:", 'liquida' if liquida.MARCA in salida else 'SIN TOCAR', "·",
       "via:", str(salida.count('class="via"')) + ' estaciones, ' +
-              str(salida.count('class="emb"')) + ' empalmes')
+              str(salida.count('class="emb"')) + ' empalmes', "·",
+      "titulos:", 'a la izquierda' if izquierda.MARCA in salida else 'CENTRADOS')

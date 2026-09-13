@@ -2862,6 +2862,56 @@ footer .fgrid h4,footer .tec-real{color:#5B657A}
 @media(max-width:760px){.lane-in span img{width:18px;height:18px}}
 
 /* ══ fin: logos ══ */
+/* ══ los titulos a la izquierda ═══════════════════════════════════════════
+   Todos menos el de la portada. Un titular centrado obliga al ojo a buscar
+   donde empieza cada renglon; alineados hay un solo borde para el epigrafe,
+   el titular, la entradilla y las tarjetas, y no se vuelve a buscar.
+
+   Cada regla repite la especificidad de la que anula y va DESPUES: este
+   modulo es el ultimo paso del montaje justamente para eso.
+
+   «start», no «left». El sitio se traduce al arabe y el cuerpo se pone en
+   «direction:rtl»: con «left» los titulos arabes se quedarian a la izquierda,
+   que en arabe es el final del renglon. «start» es el principio del renglon
+   sea cual sea el idioma, y es lo que ya usan los titulos de las tarjetas. */
+
+/* ── 1 · la caja de la cabecera ──
+   «.sec-head» es la unica que existe en el marcado; las otras cuatro se
+   nombran porque el paso 20 las nombraba y asi la vuelta es exacta. */
+:is(.press-head,.sec-head,.tkp-head,.builds-head,.join-head,.say .wrap){
+  text-align:start}
+:is(.press-head,.sec-head,.tkp-head,.builds-head,.join-head)>*{
+  margin-inline:0}
+
+/* ── 2 · el titular y su entradilla ──
+   El «margin-inline:0» importa tanto como el «text-align»: las entradillas
+   llevan «max-width:52ch», y una caja estrecha centrada con el texto ya
+   alineado a la izquierda se queda flotando en medio del hueco. */
+:is(.press-h,.sec-h,.tkp-h,.builds-h,.join-h,.sec-sub,.join-note,.say p){
+  margin-inline:0;text-align:start}
+
+/* ── 3 · el epigrafe numerado ──
+   «.sk» es un flex al 100 % del ancho: no se mueve con «text-align», se
+   mueve con «justify-content». Es el mismo sitio donde el paso 20 lo centro. */
+#network .sk,#press .sk,#thesis .sk,#solutions .sk,#security .sk,#presale .sk,#token .sk,#builds .sk,#join .sk{justify-content:flex-start}
+/* La ronda tiene su propia fila —el epigrafe y las dos cadenas— y se centraba
+   con «justify-content» desde el identificador: hace falta el mismo peso. */
+#presale .sale-top{justify-content:flex-start}
+
+/* ── 4 · la fila de compatibles ──
+   Aqui el centrado no venia del paso 20 sino de la hoja original, que centra
+   la seccion entera. El carrusel no se entera: sus fichas son casillas de un
+   flex, y «text-align» no las coloca. */
+.logos{text-align:start}
+.logos h2,.logos .lane-sub{margin-inline:0;text-align:start}
+
+/* ── 5 · «Stay in the loop» ──
+   Su entradilla es un flex con un cuadradito delante, asi que ademas del
+   texto hay que mover la fila. */
+.loop h2,.loop .sub{text-align:start}
+.loop .sub{justify-content:flex-start}
+
+/* ══ fin: titulos a la izquierda ══ */
 </style>
 </head>
 <body>
