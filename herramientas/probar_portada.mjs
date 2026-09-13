@@ -172,6 +172,53 @@ di(!/rgb\((?:1\d\d|2\d\d), 25[0-5], (?:[0-9]|[1-9]\d)\)/.test(verde.avance),
 
 await ctx2.close();
 
+/* ── el eje de la tira en columna ──
+   En el movil los cuatro renglones de la tira se centran, pero el primero
+   lleva un punto DENTRO, y lo que se centra es el renglon entero. Resultado:
+   su texto quedaba +6,50 px a la derecha del eje —(punto 5 + hueco 8) / 2—
+   mientras los otros tres caian a ±0,01. Un renglon contra tres, en una
+   pantalla de 390, es una linea torcida.
+
+   Se mide el texto con un «Range» sobre el nodo de texto y no la caja del
+   «li»: la caja incluye el punto, asi que compararla con el eje diria que
+   todo esta bien justo cuando no lo esta. Y se espera a que la animacion de
+   llegada TERMINE —«--lq-x» mete ±16 px mientras entra—, que midiendo en
+   vuelo salen esos 16 px y parecen el fallo. */
+{
+  const anchos = [320, 360, 390, 430];
+  for (const W of anchos) {
+    const c = await nav.newContext({ viewport:{ width:W, height:840 }, isMobile:true, hasTouch:true });
+    const p3 = await c.newPage();
+    await p3.goto('http://127.0.0.1:9166/', { waitUntil:'load' });
+    await p3.waitForTimeout(2600);
+    await p3.evaluate(() => { document.querySelectorAll('.lq .hero-pr li').forEach(e =>
+      e.getAnimations().forEach(a => { try { a.finish(); } catch (_) {} })); });
+    await p3.waitForTimeout(1200);
+    const r = await p3.evaluate(() => {
+      const ul = document.querySelector('.hero-pr'); const ru = ul.getBoundingClientRect();
+      if (getComputedStyle(ul).flexDirection !== 'column') return { col:false };
+      const eje = (ru.left + ru.right) / 2;
+      const fuera = [];
+      ul.querySelectorAll('li').forEach((li, i) => {
+        const t = [...li.childNodes].find(n => n.nodeType === 3 && n.textContent.trim());
+        if (!t) return;
+        const rg = document.createRange(); rg.selectNodeContents(t);
+        const b = rg.getBoundingClientRect();
+        const d = (b.left + b.right) / 2 - eje;
+        if (Math.abs(d) > 1) fuera.push((i + 1) + '. «' + t.textContent.trim().slice(0, 18) + '» ' + d.toFixed(2) + ' px');
+      });
+      const pt = ul.querySelector('li:first-child i').getBoundingClientRect();
+      return { col:true, fuera, izq:pt.left, scroll:document.documentElement.scrollWidth > innerWidth };
+    });
+    if (!r.col) { di(false, W + 'px · la tira tendria que ir en columna'); await c.close(); continue; }
+    di(r.fuera.length === 0,
+       W + 'px · los cuatro renglones comparten eje' + (r.fuera.length ? ' — fuera: ' + r.fuera.join(', ') : ''));
+    di(r.izq >= 0 && !r.scroll,
+       W + 'px · y el punto, colgado al margen, no se sale de la pantalla (x=' + r.izq.toFixed(0) + ')');
+    await c.close();
+  }
+}
+
 await nav.close(); srv.close();
 console.log(mal ? `\n${ok} bien, ${mal} MAL` : `\n${ok}/${ok} correctas`);
 process.exit(mal ? 1 : 0);

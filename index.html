@@ -2986,6 +2986,28 @@ footer .fgrid h4,footer .tec-real{color:#5B657A}
 }
 
 /* ══ fin: costura ══ */
+/* ══ el punto de la tira ═══════════════════════════════════════════════════
+   En columna, el primer renglon lleva un punto dentro y se centra el renglon
+   entero, asi que su TEXTO queda +6,5 px a la derecha del eje que comparten
+   los otros tres —(punto 5 + hueco 8) / 2—. Medido a 430, 390 y 360: +6,50 en
+   el primero, ±0,01 en los demas.
+
+   El punto sale del centrado y se cuelga en el margen. El renglon mide lo que
+   mide su texto, se centra con los otros tres, y el punto queda como una
+   marca al margen en vez de como algo que empuja la linea.
+
+   La vertical NO se toca: el punto esta a 0,12 px del centro optico de las
+   mayusculas, que no lo distingue ninguna pantalla. */
+@media(max-width:700px){
+  .lq .hero-pr li:first-child{position:relative}
+  /* «right:100 %» lo deja pegado al borde izquierdo del renglon y el margen
+     le devuelve el hueco que tenia cuando era una pieza mas. */
+  .lq .hero-pr li:first-child>i{
+    position:absolute;right:100%;margin-right:8px;
+    top:50%;transform:translateY(-50%)}
+}
+
+/* ══ fin: punto de la tira ══ */
 </style>
 </head>
 <body>

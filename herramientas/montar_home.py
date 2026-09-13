@@ -32,6 +32,7 @@ todo lo que se hizo aqui y el archivo subido no trae:
  24. los titulos a la izquierda, todos menos el de la portada
  25. las garantias: aire arriba y los dos textos en la misma linea
  26. la costura: la banda se apaga en su color, sin triangulo
+ 27. el punto de la tira sale del centrado y la columna cuadra
 """
 import sys, os
 
@@ -56,6 +57,7 @@ import logos
 import izquierda
 import garantias
 import costura
+import punto
 subido, publicado = sys.argv[1], '/home/user/nerium/index.html'
 z = open(subido, encoding='utf-8').read()
 p = open(publicado, encoding='utf-8').read()
@@ -217,6 +219,9 @@ rest = garantias.aplicar(rest)
 # ── 26 · la costura ──
 rest = costura.aplicar(rest)
 
+# ── 27 · el punto de la tira ──
+rest = punto.aplicar(rest)
+
 salida = pre + rest
 open(publicado, 'w', encoding='utf-8').write(salida)
 print("montado:", len(salida), "bytes ·", salida.count('var(--hud-b)'), "usos de --hud-b ·",
@@ -238,4 +243,5 @@ print("montado:", len(salida), "bytes ·", salida.count('var(--hud-b)'), "usos d
               str(salida.count('class="emb"')) + ' empalmes', "·",
       "titulos:", 'a la izquierda' if izquierda.MARCA in salida else 'CENTRADOS', "·",
       "garantias:", 'cuadradas' if garantias.MARCA in salida else 'SIN TOCAR', "·",
-      "costura:", 'sin triangulo' if costura.MARCA in salida else 'EL TRIANGULO')
+      "costura:", 'sin triangulo' if costura.MARCA in salida else 'EL TRIANGULO', "·",
+      "tira:", 'un solo eje' if punto.MARCA in salida else 'EL PRIMERO TORCIDO')
