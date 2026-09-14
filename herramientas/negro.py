@@ -13,8 +13,10 @@ por otro lado:
   · el «background» del CSS, que es lo que pinta la caja;
   · el «data-bg» del marcado, que es de donde la pagina saca el color de la
     banda que va por detras de todo al hacer scroll;
-  · y en el escenario del final, el color con el que su LIENZO se limpia cada
-    cuadro, que no esta en el CSS sino dentro del guion.
+  · y lo que cada LIENZO pinta por su cuenta, que no esta en el CSS sino
+    dentro del guion: el color con el que el escenario del final se limpia
+    cada cuadro, y el lavado azul de pantalla completa que el campo de cubos
+    se echaba encima en modo «lighter».
 
 Lo que NO se toca, y es el encargo entero: las animaciones. Los cubos siguen
 volando, la cinta sigue corriendo, la hebra de la ruta sigue encendida y los
@@ -54,6 +56,17 @@ LIENZOS = [
      "sctx.fillStyle='#000000'; sctx.fillRect(0,0,W,H);"),
     ("sctx.fillStyle='rgba(4,6,11,.26)';",
      "sctx.fillStyle='rgba(0,0,0,.26)';"),
+    # El campo de cubos se lavaba entero con un radial azul en modo «lighter»
+    # —«rgba(47,107,255,.13)» de esquina a esquina—. Eso no es la escena: es un
+    # tinte encima de ella, y era lo que dejaba esa pantalla en azul marino con
+    # el suelo ya en negro. Los cubos no se tocan: llevan su propio color.
+    ("""    const g=ctx.createRadialGradient(cx,cy,0,cx,cy,Math.min(W,H)*0.7);
+    g.addColorStop(0,'rgba(47,107,255,'+(0.13*fuerza).toFixed(3)+')');
+    g.addColorStop(1,'rgba(47,107,255,0)');
+    ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+""",
+     """    /* sin lavado de fondo: el suelo de esta seccion es negro */
+"""),
 ]
 
 _SEL = ','.join(s for s, _ in SECCIONES)

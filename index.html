@@ -6152,10 +6152,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
     const foco=Math.min(W,H)*0.92;
     const vel=(0.9+fuerza*3.4)*dt;
     ctx.globalCompositeOperation='lighter';
-    const g=ctx.createRadialGradient(cx,cy,0,cx,cy,Math.min(W,H)*0.7);
-    g.addColorStop(0,'rgba(47,107,255,'+(0.13*fuerza).toFixed(3)+')');
-    g.addColorStop(1,'rgba(47,107,255,0)');
-    ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+    /* sin lavado de fondo: el suelo de esta seccion es negro */
     for(const c of vuelo){
       const zAntes=c.z;
       c.z-=vel;
