@@ -109,12 +109,18 @@ _ADN_W, _ADN_H = 96, 3400
 _U = _ADN_W            # una unidad de periodo = un ancho de hebra
 _HEBRAS = [
     # centro, amplitud, periodo (en anchos), fase, grosor, opacidad
-    (46, 13, 3.2, 0.0, 1.00, .78),
-    (50, 17, 4.6, 1.9, 0.82, .62),
-    (47,  9, 2.5, 3.4, 0.73, .46),
-    (51, 20, 5.8, 0.7, 0.73, .52),
-    (48, 11, 3.9, 5.1, 0.64, .34),
+    (47,  8, 3.2, 0.0, 1.00, .78),
+    (49, 11, 4.6, 1.9, 0.88, .62),
+    (48,  6, 2.5, 3.4, 0.80, .46),
+    (49, 13, 5.8, 0.7, 0.80, .52),
+    (48,  7, 3.9, 5.1, 0.74, .34),
 ]
+# El peso mas bajo sube de .64 a .74. Al estrechar la hebra todo encoge con
+# ella, y a 320 px la quinta se quedaba en 0,29 px de trazo: por debajo de un
+# tercio de pixel el navegador ya no dibuja una linea, dibuja una niebla.
+# Las amplitudes bajaron de 9-20 a 6-13. Con las de antes la trenza se abria
+# cuarenta unidades de noventa y seis —casi la mitad del lienzo— y a tamaño
+# real eso es una mata ancha, no una hebra. Ceñida se lee como un cable.
 # El quinto numero es un PESO RELATIVO, no un grosor. El grosor de verdad lo
 # pone el CSS en proporcion al ancho de la hebra, con
 # «vector-effect:non-scaling-stroke» para que la escala del lienzo no lo toque.
@@ -203,6 +209,44 @@ def _adn():
             '</i>' % (defs, lienzo(usos('ruta-h0')), lienzo(usos('ruta-h1')), chispas))
 
 
+# ── la marca de fondo ────────────────────────────────────────────────────────
+# El logo, grande, girando despacio detras del roadmap. Es el MISMO archivo que
+# el favicon —la misma geometria y los mismos degradados—, no un dibujo nuevo
+# que se le parezca: si algun dia cambia el logo, cambia aqui.
+#
+# Tres cajas, no una: los «transform» no se suman entre animaciones distintas,
+# asi que una pasea, otra gira y el SVG solo se estira. En una sola caja la
+# segunda animacion pisaria a la primera.
+def _marca():
+    return (
+        '<i class="ruta-marca" aria-hidden="true">'
+        '<i class="ruta-marca-v"><i class="ruta-marca-g">'
+        '<svg viewBox="0 0 512 512">'
+        '<defs>'
+        '<linearGradient id="nr-plata" gradientUnits="userSpaceOnUse"'
+        ' x1="-7.29" y1="71.63" x2="505.51" y2="413.71">'
+        '<stop offset="0" stop-color="#C6CAD7"/>'
+        '<stop offset="1" stop-color="#9498A1"/></linearGradient>'
+        '<radialGradient id="nr-brillo" gradientUnits="userSpaceOnUse"'
+        ' cx="0" cy="0" r="1"'
+        ' gradientTransform="translate(171.35 153.79) rotate(35.40)'
+        ' scale(52.44 280.40)">'
+        '<stop offset="0" stop-color="#fff" stop-opacity=".92"/>'
+        '<stop offset=".36" stop-color="#fff" stop-opacity=".43"/>'
+        '<stop offset=".70" stop-color="#fff" stop-opacity=".10"/>'
+        '<stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>'
+        '</defs>'
+        '<path fill="#57595E" d="M471.30 20.48 L485.08 47.14 L485.08 491.52'
+        ' L40.70 491.52 L26.92 464.86 L471.30 464.86 Z"/>'
+        '<path fill="url(#nr-plata)" d="M26.92 20.48 L471.30 20.48'
+        ' L471.30 464.86 L26.92 464.86 Z"/>'
+        '<path fill="url(#nr-brillo)" d="M26.92 20.48 L471.30 20.48'
+        ' L471.30 464.86 L26.92 464.86 Z"/>'
+        '<path fill="#FCFCFC" d="M26.92 382.65 L471.30 382.65'
+        ' L471.30 464.86 L26.92 464.86 Z"/>'
+        '</svg></i></i></i>')
+
+
 def _marcado():
     fases = []
     for i, (titulo, estado, objetivo) in enumerate(FASES):
@@ -217,6 +261,7 @@ def _marcado():
     return (
         '\n\n<section class="ruta" id="ruta" data-bg="#000000" data-acc="#79ABFF">\n'
         '  %s\n'
+        '  %s\n'
         '  <div class="wrap ruta-wrap">\n'
         '    <div class="k sk rv ruta-top">'
         '<i class="sk-n">%s</i>%s</div>\n'
@@ -227,7 +272,7 @@ def _marcado():
         '    </ol>\n'
         '  </div>\n'
         '</section>\n\n'
-    ) % (_adn(), NUMERO, ROTULO, TITULO, ENTRADILLA, '\n'.join(fases))
+    ) % (_marca(), _adn(), NUMERO, ROTULO, TITULO, ENTRADILLA, '\n'.join(fases))
 
 
 CSS = """
@@ -254,7 +299,7 @@ CSS = """
   --borde:clamp(26px,3.4vw,56px);
   --carril:clamp(56px,8.5vw,140px);
   --eje:calc(var(--carril) * .5);
-  --adn:clamp(30px,4.4vw,74px)}
+  --adn:clamp(24px,3.2vw,52px)}
 /* El mismo resplandor de «.builds», en el mismo sitio: cada seccion lo tiene
    en su propia esquina, asi que repetirlo es lo que las hace parecer una. */
 .ruta::before{content:'';position:absolute;inset:0;pointer-events:none;
@@ -279,6 +324,66 @@ CSS = """
    empezaba enseguida: las dos juntas se leian amontonadas. Se le da aire por
    abajo, que es de donde viene el apreton. */
 .builds{padding-bottom:clamp(76px,8.4vw,128px)}
+/* ── la marca de fondo ──
+   El logo, grande, girando despacio por detras de todo.
+
+   CUANTA LUZ PUEDE DAR. No es gusto, es una cuenta. El parrafo de una fase
+   todavia no alcanzada va en rgba(226,236,250,.6): sobre un fondo de
+   luminancia L su contraste es (0,2713 + 0,05)/(L + 0,05), y para no bajar de
+   4,5:1 —lo que pide un cuerpo de 14 px— L no puede pasar de 0,0214. Lo mas
+   claro que llega a poner la marca, medido en pantalla, es un gris de 32 sobre
+   255: 0,0145, que deja el parrafo en casi 5:1.
+
+   Se mide de verdad en «probar_ruta», leyendo el pixel de la pantalla, no
+   confiando en esta cuenta.
+
+   Las tres cajas: una pasea, otra gira, el SVG se estira. Los «transform» no
+   se suman entre animaciones, asi que en una sola caja la segunda pisaria a
+   la primera. Solo se anima «transform», que es lo que la tarjeta grafica
+   compone sola sin volver a pintar nada. */
+.ruta-marca{position:absolute;inset:0;z-index:0;overflow:hidden;
+  pointer-events:none;perspective:1500px;perspective-origin:50% 42%;
+  opacity:.22;
+  /* DOS MASCARAS, y se cruzan:
+       · la redonda apaga los cantos, que un logo cortado a escuadra por el
+         borde de la seccion se lee como un error y no como un fondo;
+       · la horizontal lo baja donde vive el TEXTO —la mitad izquierda— y lo
+         deja entero donde no hay nada que leer.
+     Asi el logo se ve de verdad sin comerse las letras: donde importa llega
+     al 22% de una cosa y donde no, al 7%. Un solo numero para toda la caja
+     obligaba a elegir entre que no se viera o que estorbase. */
+  -webkit-mask-image:radial-gradient(120% 96% at 50% 48%,#000 34%,transparent 92%),
+                     linear-gradient(to right,rgba(0,0,0,.32) 0 46%,#000 82%);
+          mask-image:radial-gradient(120% 96% at 50% 48%,#000 34%,transparent 92%),
+                     linear-gradient(to right,rgba(0,0,0,.32) 0 46%,#000 82%);
+  -webkit-mask-composite:source-in;
+          mask-composite:intersect}
+.ruta-marca-v,.ruta-marca-g{position:absolute;inset:0;display:block;
+  transform-style:preserve-3d;will-change:transform}
+.ruta-marca-v{animation:marcaPasea 71s ease-in-out infinite}
+.ruta-marca-g{animation:marcaGira 53s ease-in-out infinite}
+.ruta-marca svg{position:absolute;left:50%;top:50%;
+  width:min(108vw,1180px);height:min(108vw,1180px);
+  margin:calc(min(108vw,1180px) / -2) 0 0 calc(min(108vw,1180px) / -2);
+  display:block}
+/* El giro: el logo va de canto —como la referencia, en rombo— y cabecea en
+   los tres ejes. El «rotateZ» no vuelve a 45 por el camino corto si lo dejo
+   suelto, asi que los fotogramas lo llevan a mano. */
+@keyframes marcaGira{
+    0%{transform:rotateX(-14deg) rotateY(16deg) rotateZ(45deg)}
+   25%{transform:rotateX(10deg)  rotateY(-9deg) rotateZ(52deg)}
+   50%{transform:rotateX(15deg)  rotateY(14deg) rotateZ(40deg)}
+   75%{transform:rotateX(-8deg)  rotateY(-16deg) rotateZ(49deg)}
+  100%{transform:rotateX(-14deg) rotateY(16deg) rotateZ(45deg)}}
+/* El paseo: recorre la seccion sin llegar a salirse del todo. */
+@keyframes marcaPasea{
+    0%{transform:translate3d(-9%,-5%,0) scale(1)}
+   30%{transform:translate3d(8%,4%,0)   scale(1.06)}
+   60%{transform:translate3d(-5%,7%,0)  scale(.97)}
+  100%{transform:translate3d(-9%,-5%,0) scale(1)}}
+@media(prefers-reduced-motion:reduce){
+  .ruta-marca-v,.ruta-marca-g{animation:none}}
+
 .ruta-wrap{position:relative}
 .ruta-top,.ruta-h,.ruta-sub,.ruta-f{padding-left:var(--carril)}
 .ruta-wrap>.ruta-top,.ruta-wrap>.ruta-h,.ruta-wrap>.ruta-lista{position:relative;z-index:1}
@@ -448,21 +553,35 @@ CSS = """
 .ruta-f.on .ruta-est{color:#79ABFF}
 .ruta-t{margin:clamp(8px,1.2vw,16px) 0 0;font-weight:400;
   font-size:clamp(24px,3.6vw,46px);letter-spacing:-.035em;line-height:1.04;
-  color:rgba(255,255,255,.5);transition:color .55s var(--ease,ease)}
+  /* .56 y no .5: con el logo detras el fondo deja de ser negro puro, y a .5
+     el titulo apagado se quedaba justo en el filo. Sigue siendo mas apagado
+     que el encendido, que es lo que tiene que decir. */
+  color:rgba(255,255,255,.56);transition:color .55s var(--ease,ease)}
 .ruta-f.on .ruta-t{color:#fff}
 .ruta-p{margin:clamp(10px,1.4vw,18px) 0 0;max-width:56ch;
   font-size:clamp(14px,1.35vw,17px);line-height:1.55;
-  color:rgba(226,236,250,.5);transition:color .55s var(--ease,ease)}
+  /* .58 y no .5. A .5 sobre negro PURO este parrafo ya daba 4,59:1 contra un
+     minimo de 4,5: iba al filo antes de que hubiera nada detras. Con el logo
+     de fondo hay que darle margen, y de paso deja de depender de que el negro
+     sea exactamente negro. */
+  color:rgba(226,236,250,.6);transition:color .55s var(--ease,ease)}
 .ruta-f.on .ruta-p{color:rgba(226,236,250,.76)}
 
 
 @media(max-width:760px){
+  /* En el telefono el texto ocupa todo el ancho, asi que no hay mitad libre
+     donde subir la marca: se baja entera. */
+  .ruta-marca{opacity:.13;
+    -webkit-mask-image:radial-gradient(130% 92% at 50% 48%,#000 30%,transparent 94%);
+            mask-image:radial-gradient(130% 92% at 50% 48%,#000 30%,transparent 94%);
+    -webkit-mask-composite:source-over;
+            mask-composite:add}
   /* En el telefono solo cambia el ANCHO de la hebra. El trazo, el resplandor
      y las chispas ya bajan solos con «--k», que es proporcional a ese ancho;
      antes se corregian aparte aqui y acababan discutiendo con la regla de
      arriba. A menos de 34 px no cabe una trenza de cinco: por fino que se
      dibuje, las cinco caen dentro de diez pixeles y se leen como una barra. */
-  .ruta{--carril:clamp(58px,17vw,78px);--adn:clamp(34px,10.5vw,44px)}
+  .ruta{--carril:clamp(58px,17vw,78px);--adn:clamp(28px,7.6vw,34px)}
   .ruta-adn{opacity:.76}
   .ruta-h{max-width:none}
   .ruta-p{max-width:none}

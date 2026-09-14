@@ -295,6 +295,175 @@ for (let y = 0; y < alto; y += 450) { await pg.evaluate(v => scrollTo(0, v), y);
   }
 }
 
+// ── 3d · la marca de fondo no se come el texto ─────────────────────────────
+// El logo va detras del texto, y esto NO lo vigila «probar_contraste»: aquella
+// bateria calcula el fondo subiendo por los padres, y un decorado colocado en
+// absoluto no es padre de nada. Por eso se lee el PIXEL de la pantalla.
+//
+// Se mide con el texto escondido —lo que hay DETRAS— y con la animacion
+// congelada en varios momentos del ciclo, que dura casi un minuto y el peor
+// fotograma no tiene por que ser el primero.
+//
+// El limite no es un gusto: el parrafo de una fase no alcanzada va en
+// rgba(226,236,250,.58), que compuesto sobre negro da luminancia 0,2517. Para
+// no bajar de 4,5:1 el fondo no puede pasar de (0,3017/4,5) - 0,05 = 0,0170.
+{
+  const c = await nav.newContext({ viewport:{ width:1440, height:900 } });
+  const p4 = await c.newPage();
+  await p4.goto('http://127.0.0.1:9163/', { waitUntil:'load' });
+  await p4.waitForTimeout(700);
+  /* El scroll se CONVERGE, no se pide y ya. «scrollIntoView» en esta pagina no
+     cae dos veces en el mismo sitio: hay secciones ancladas que cambian el
+     alto del documento mientras te mueves, asi que cada tirada dejaba la ruta
+     unos pixeles mas arriba o mas abajo, entraban renglones distintos en la
+     franja medible y el resultado bailaba. Repitiendo hasta clavarlo, la
+     medida sale igual siempre. */
+  for (let i = 0; i < 12; i++) {
+    const d = await p4.evaluate(() => {
+      const r = document.getElementById('ruta').getBoundingClientRect();
+      return (r.top + r.height / 2) - innerHeight / 2;
+    });
+    if (Math.abs(d) < 2) break;
+    await p4.evaluate(v => scrollBy(0, v), d);
+    await p4.waitForTimeout(90);
+  }
+  await p4.waitForTimeout(700);
+  await p4.addStyleTag({ content:
+    '.ruta-marca-v,.ruta-marca-g{animation-play-state:paused !important}' +
+    /* «opacity:0» y no «visibility:hidden»: el sistema de revelado de la
+       pagina le pone «visibility:visible» a los hijos al entrar, asi que el
+       texto reaparecia y lo que se media era el azul del rotulo —rgb
+       122,172,254— y no el fondo. La opacidad de un padre no la puede
+       deshacer ningun hijo. */
+    '.ruta-wrap{opacity:0 !important}' });
+  /* LA ZONA SON LOS RENGLONES, uno por uno. Tres intentos hasta acertar, y los
+     dos primeros daban lecturas de 0,4 y 0,7 que parecian decir que el logo
+     cegaba la seccion:
+
+       · desde la caja de «.ruta-h» —que empieza antes de su sangria— entraba
+         el carril, y con el la hebra encendida, clara a proposito;
+       · acotando en horizontal pero cogiendo los 900 px de alto entraban los
+         filetes y el canto azul de la seccion, que no estan detras de ninguna
+         letra; y como el scroll no cae dos veces en el mismo sitio —esta
+         pagina tiene secciones ancladas— unas tiradas los pillaban y otras
+         no. Una medida que solo a veces miente es peor que no tenerla.
+
+     Asi que se miden los rectangulos del TEXTO, con «Range» y uno a uno: lo
+     que no esta debajo de una letra no cuenta. */
+  const zonas = await p4.evaluate(() => {
+    const sec = document.getElementById('ruta').getBoundingClientRect();
+    /* Y ademas: solo la franja CENTRAL de la pantalla, dejando 110 px arriba y
+       abajo. Ahi es donde vive el cromo fijo —la barra de arriba, el boton de
+       subir, el rotulo de seccion—, que va por encima de todo y es claro: un
+       renglon que quedaba debajo de la barra se medía contra ella, un gris de
+       94, y no contra el fondo de la seccion. Fallaba una tirada de cada tres
+       o cuatro segun donde cayera el scroll.
+
+       Se intento enumerar los elementos fijos y descartar lo que pisaran, y no
+       vale: esta pagina lleva un lienzo fijo a pantalla completa que va DEBAJO
+       y no tapa nada, y el filtro se quedaba sin un solo renglon que medir,
+       que es otra manera de no comprobar nada. Una franja fija es tosca pero
+       no miente. */
+    const MARGEN = 110;
+    const fuera = [];
+    const mete = (e, quien) => { if (!e) return;
+      const g = document.createRange(); g.selectNodeContents(e);
+      for (const b of g.getClientRects()) {
+        /* Los renglones que no caben ENTEROS en pantalla se descartan, no se
+           recortan. Recortandolos, un renglon que asoma por arriba se
+           convertia en una franja pegada a y=0 que en realidad cae sobre la
+           seccion anterior: una tirada de cada tres media el fondo de otro
+           sitio y daba un gris de 95 que aqui no existe. */
+        /* Entero en pantalla Y entero dentro de la seccion. Lo segundo hacia
+           falta: esta pagina apila secciones ancladas que se solapan mientras
+           una entra, asi que un renglon que asoma por el canto de la ruta se
+           mide contra el fondo de la de al lado. Era lo que daba un gris de 96
+           en una tirada de cada tres, un gris que en esta seccion no existe. */
+        if (b.top < 0 || b.bottom > innerHeight || b.left < 0 || b.right > innerWidth) continue;
+        if (b.top < sec.top || b.bottom > sec.bottom) continue;
+        if (b.top < MARGEN || b.bottom > innerHeight - MARGEN) continue;
+        const x = Math.floor(b.left), y = Math.floor(b.top);
+        const w = Math.ceil(b.right) - x, h = Math.ceil(b.bottom) - y;
+        if (w > 4 && h > 4) fuera.push({ x, y, width:w, height:h, q:quien });
+      }
+    };
+    mete(document.querySelector('.ruta-h'), 'h');
+    mete(document.querySelector('.ruta-sub'), 'sub');
+    document.querySelectorAll('.ruta-t,.ruta-p').forEach((e, i) =>
+      mete(e, e.className.replace('ruta-', '') + i));
+    return fuera;
+  });
+  di(zonas.length >= 3, 'hay texto de la ruta en pantalla para medir lo que tiene detras (' +
+     zonas.length + ' renglones)');
+
+  /* Antes de medir, que el texto este DE VERDAD apagado. Una tirada dio 0,41
+     de fondo y el pixel culpable era el azul de un rotulo: la captura salio
+     antes de que la regla hiciera efecto. Una medida que a veces miente es
+     peor que no tenerla, asi que aqui se comprueba y se vuelve a comprobar al
+     final, por si algo lo reenciende a mitad. */
+  const apagado = async () => p4.evaluate(() =>
+    getComputedStyle(document.querySelector('.ruta-wrap')).opacity);
+  await p4.waitForFunction(() =>
+    getComputedStyle(document.querySelector('.ruta-wrap')).opacity === '0', null, { timeout:4000 });
+
+  let peor = 0, cuando = 0, donde = null;
+  for (const d of [0, 9, 18, 27, 36, 45, 54, 63]) {
+    await p4.evaluate(v => { document.querySelectorAll('.ruta-marca-v,.ruta-marca-g')
+      .forEach(e => { e.style.animationDelay = (-v) + 's'; }); }, d);
+    // dos cuadros, para que el cambio este pintado y no a medio pintar
+    await p4.evaluate(() => new Promise(r =>
+      requestAnimationFrame(() => requestAnimationFrame(r))));
+    await p4.waitForTimeout(120);
+    for (const zona of zonas) {
+    const png = await p4.screenshot({ clip:zona });
+    const L = await p4.evaluate(async b64 => {
+      const img = new Image();
+      await new Promise(r => { img.onload = r; img.src = 'data:image/png;base64,' + b64; });
+      const cv = document.createElement('canvas');
+      cv.width = img.width; cv.height = img.height;
+      const g = cv.getContext('2d'); g.drawImage(img, 0, 0);
+      const px = g.getImageData(0, 0, cv.width, cv.height).data;
+      const lin = v => { v /= 255; return v <= .04045 ? v / 12.92 : Math.pow((v + .055) / 1.055, 2.4); };
+      let max = 0, mx = 0, my = 0, rgb = '';
+      for (let i = 0; i < px.length; i += 4) {
+        const L = .2126 * lin(px[i]) + .7152 * lin(px[i+1]) + .0722 * lin(px[i+2]);
+        if (L > max) { max = L; const n = i / 4;
+          mx = n % cv.width; my = (n / cv.width) | 0;
+          rgb = px[i] + ',' + px[i+1] + ',' + px[i+2]; }
+      }
+      return { max, mx, my, rgb, w:cv.width, h:cv.height };
+    }, png.toString('base64'));
+    if (L.max > peor) { peor = L.max; cuando = d; donde = Object.assign({}, L, { z:zona }); }
+    }
+  }
+  /* El contraste que le queda al parrafo mas apagado contra ESE pixel.
+     El color del parrafo se LEE de la pagina, no se escribe aqui: llevandolo
+     a mano, el dia que alguien lo cambie la bateria seguiria dando por bueno
+     un numero que ya no existe.
+
+     La primera version ponia «(0.3017 + 0.05) / (peor + 0.05)» y el 0,3017 ya
+     llevaba el 0,05 sumado: daba 5,23:1 donde de verdad habia 4,48 y dejaba
+     pasar un fondo que no cumplia. */
+  const opWrap = await apagado();
+  const Ltexto = await p4.evaluate(() => {
+    const c = getComputedStyle(document.querySelector('.ruta-f:last-of-type .ruta-p')).color;
+    const m = c.match(/[\d.]+/g).map(Number);
+    const a = m.length > 3 ? m[3] : 1;
+    const lin = v => { v /= 255; return v <= .04045 ? v / 12.92 : Math.pow((v + .055) / 1.055, 2.4); };
+    // compuesto sobre negro, que es el suelo de la seccion
+    const s = m.slice(0, 3).map(v => v * a);
+    return .2126 * lin(s[0]) + .7152 * lin(s[1]) + .0722 * lin(s[2]);
+  });
+  const cr = (Ltexto + 0.05) / (peor + 0.05);
+  di(cr >= 4.5, 'al parrafo mas apagado le quedan ' + cr.toFixed(2) +
+     ':1 contra el fondo mas claro que le pone la marca (minimo 4,5; texto ' +
+     Ltexto.toFixed(4) + ', fondo ' + peor.toFixed(4) + ', peor momento a los ' + cuando + ' s' +
+     (donde ? ', rgb ' + donde.rgb + ' en ' + donde.mx + ',' + donde.my + ' en el renglon ' + donde.z.q + ' (' + donde.z.x + ',' + donde.z.y + ' ' + donde.z.width + 'x' + donde.z.height + ')' : '') + ', wrap op ' + opWrap + ')');
+  di(cr >= 4.8, 'y con holgura, no al filo: ' + cr.toFixed(2) + ':1 (se pide 4,8 para no vivir en el limite)');
+  di(opWrap === '0', 'y la medida es del FONDO: el texto seguia apagado al terminar (opacidad ' + opWrap + ')');
+  await c.close();
+}
+
 // ── 4 · el punto baja con el scroll ────────────────────────────────────────
 // Dos cosas distintas, y hay que medirlas por separado:
 //
