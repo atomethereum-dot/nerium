@@ -171,7 +171,7 @@ for (let y = 0; y < alto; y += 450) { await pg.evaluate(v => scrollTo(0, v), y);
       const borde = sel => { const e = document.querySelector(sel); if (!e) return null;
         const g = document.createRange(); g.selectNodeContents(e);
         const b = g.getBoundingClientRect(); return b.width ? b.left : null; };
-      const bordes = ['.ruta-k', '.ruta-h', '.ruta-cab', '.ruta-t', '.ruta-p']
+      const bordes = ['.ruta-top', '.ruta-h', '.ruta-cab', '.ruta-t', '.ruta-p']
         .map(borde).filter(x => x !== null);
       /* TODO LO DE AQUI SE DESESCALA ANTES DE MEDIR.
          La seccion lleva un «scale» de 0,95-1 que va con el scroll, y
@@ -210,6 +210,62 @@ for (let y = 0; y < alto; y += 450) { await pg.evaluate(v => scrollTo(0, v), y);
     di(desvio <= 2, W + 'px · el rail va por DENTRO de la hebra: ' + desvio.toFixed(1) + ' px entre los dos ejes (maximo 2)');
     di(r.disp <= 1.5, W + 'px · y todo el texto de la seccion en una sola columna (dispersion ' + r.disp.toFixed(1) + ' px)');
     di(!r.scroll, W + 'px · sin scroll horizontal');
+    await c.close();
+  }
+}
+
+// ── 3c · la trenza es una trenza, no una barra ─────────────────────────────
+// Dos fallos distintos la convirtieron en una barra blanca maciza, y ninguno
+// se veia leyendo el CSS:
+//
+//   · la caja que envuelve las chispas es TAMBIEN un <i> dentro de
+//     «.ruta-adn», asi que la regla «.ruta-adn i» —fondo #E4EFFF, para las
+//     chispas— la pintaba a ella entera: un rectangulo macizo de la altura de
+//     la seccion encima del dibujo;
+//
+//   · y las medidas proporcionales se escribieron como «calc(var(--adn)/56…)».
+//     Una propiedad personalizada llega SIN resolver, asi que ahi dentro
+//     «--adn» es la cadena «clamp(30px,4.4vw,74px)»: la cuenta sale px por px
+//     —px al cuadrado— y la declaracion entera se cae. Apagaba el resplandor
+//     en unas pantallas y mandaba el tamaño de las chispas a «auto» en otras.
+//
+// Asi que se comprueba lo que se ve: que dentro de la hebra no haya nada
+// pintado que sea ancho —solo las chispas, y son diminutas— y que ni el trazo
+// ni el resplandor se hayan caido.
+{
+  for (const [W, H] of [[1440,900],[1280,900],[390,844],[320,700]]) {
+    const c = await nav.newContext({ viewport:{ width:W, height:H }, isMobile:W < 900, hasTouch:W < 900 });
+    const p3 = await c.newPage();
+    await p3.goto('http://127.0.0.1:9163/', { waitUntil:'load' });
+    await p3.waitForTimeout(700);
+    await p3.evaluate(() => document.getElementById('ruta').scrollIntoView({ block:'center' }));
+    await p3.waitForTimeout(900);
+    const r = await p3.evaluate(() => {
+      const ad = document.querySelector('.ruta-adn');
+      const ancho = ad.getBoundingClientRect().width;
+      // lo que pinta un fondo dentro de la hebra, y cuanto ocupa
+      const manchas = [...ad.querySelectorAll('*')].filter(e => {
+        const cs = getComputedStyle(e);
+        return cs.backgroundColor !== 'rgba(0, 0, 0, 0)' || cs.backgroundImage !== 'none';
+      }).map(e => ({ q:e.tagName.toLowerCase() + '.' + (e.getAttribute('class') || ''),
+                     w:+e.getBoundingClientRect().width.toFixed(1) }));
+      const ps = [...ad.querySelectorAll('path')].map(e => {
+        const cs = getComputedStyle(e);
+        return { sw:parseFloat(cs.strokeWidth), fill:cs.fill, luz:cs.filter };
+      });
+      return { ancho:+ancho.toFixed(1), manchas, ps,
+               k:getComputedStyle(ad).getPropertyValue('--k').trim() };
+    });
+    const gorda = r.manchas.filter(m => m.w > 6);
+    di(gorda.length === 0, W + 'px · nada macizo dentro de la hebra: ' +
+       (gorda.length ? gorda.map(m => m.q + ' de ' + m.w + ' px' ).join(', ') + ' sobre una caja de ' + r.ancho
+                     : r.manchas.length + ' piezas pintadas, ninguna pasa de 6 px'));
+    di(r.ps.every(x => x.fill === 'none'), W + 'px · las hebras son trazo, no relleno');
+    const sw = r.ps.map(x => x.sw);
+    di(sw.every(v => v >= .3 && v <= 3), W + 'px · el trazo sale en pixeles razonables: ' +
+       sw.map(v => v.toFixed(2)).join(', '));
+    di(r.ps.every(x => x.luz !== 'none'), W + 'px · y el resplandor no se ha caido por una cuenta invalida');
+    di(/^[0-9.]+$/.test(r.k), W + 'px · «--k» llega resuelto y sin unidades: "' + r.k + '"');
     await c.close();
   }
 }

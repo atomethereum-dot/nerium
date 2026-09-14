@@ -58,7 +58,14 @@ FASES = [
      'the same way interbank payment rails are not one today.'),
 ]
 
-ROTULO = 'Nereum &middot; adoption roadmap'
+# El rotulo de arriba decia «Roadmap» en azul y el titular, tres centimetros
+# mas abajo, decia «Roadmap» otra vez. Y a la derecha ponia «Nereum · adoption
+# roadmap», que es la tercera. Ahora la seccion usa el rotulo del RESTO de la
+# web —numero y frase, «09 What we are building», «11 In the open»—, que es lo
+# que hace que se lean como capitulos de lo mismo y no como carteles sueltos.
+# La marca de la derecha se va: ninguna otra seccion tiene una.
+NUMERO = '10'
+ROTULO = 'How this gets adopted'
 TITULO = 'Roadmap'
 ENTRADILLA = 'Three phases, and what each one has to prove.'
 
@@ -72,31 +79,68 @@ ENTRADILLA = 'Three phases, and what each one has to prove.'
 # Las curvas se generan aqui, no se pegan a mano: cinco senos de frecuencia y
 # fase distintas sobre un lienzo estrecho y muy alto, con la amplitud apretada
 # arriba y abajo lo justo para que no se corten en seco.
-_ADN_W, _ADN_H = 96, 1000
+_ADN_W, _ADN_H = 96, 3400
 # Cada hebra con su centro y su fase. Las tuve todas naciendo del mismo punto
 # y salia un HUSO: las cinco se juntaban arriba y abajo y se abombaban en
 # medio. En la referencia corren parejas y se cruzan por el camino, cada una
 # entrando y saliendo del cuadro por su lado.
+#
+# EL PERIODO VA EN ANCHOS DE HEBRA, no en vueltas por seccion.
+#
+# Antes iba en vueltas —de 0,7 a 3,1 en toda la altura, la mas lenta sin
+# llegar a dar UNA curva en 1.200 px—, y eso no es una trenza, son cinco
+# arañazos casi verticales. Pero el fallo de fondo era otro: el lienzo se
+# estira sin respetar proporciones —«preserveAspectRatio:none»— y la seccion
+# no mide igual de alta en cada pantalla, asi que el mismo dibujo salia a
+# proporcion 21 en escritorio y 35 en movil. Apretando las vueltas mejoraba,
+# pero el telefono seguia con la trenza vez y media mas estirada que el
+# ordenador, y eso no se arregla eligiendo mejor un numero.
+#
+# Asi que el lienzo deja de deformarse: el JS le pone al «viewBox» la altura
+# que le toca por su propia proporcion, y una unidad de dibujo mide lo mismo
+# a lo ancho que a lo alto en CUALQUIER pantalla. Diciendo el periodo en
+# anchos de hebra —3,2 anchos— la trenza sale identica en las dos; en la
+# pantalla mas alta simplemente se ve un tramo mas largo de la misma hebra,
+# que es lo que hace una hebra de verdad.
+#
+# El dibujo se genera largo —3.400 unidades, de sobra para la proporcion mas
+# alta que se da— y el «viewBox» recorta. Como el periodo es constante,
+# recortar por abajo no se nota.
+_U = _ADN_W            # una unidad de periodo = un ancho de hebra
 _HEBRAS = [
-    # centro, amplitud, frecuencia, fase, grosor, opacidad
-    (44, 10, 2.1, 0.0, 1.0, .85),
-    (50, 14, 1.4, 1.9, 0.8, .70),
-    (46, 18, 1.0, 3.4, 0.7, .52),
-    (54,  8, 3.1, 0.7, 0.7, .60),
-    (48, 16, 0.7, 5.1, 0.6, .40),
+    # centro, amplitud, periodo (en anchos), fase, grosor, opacidad
+    (46, 13, 3.2, 0.0, 1.00, .78),
+    (50, 17, 4.6, 1.9, 0.82, .62),
+    (47,  9, 2.5, 3.4, 0.73, .46),
+    (51, 20, 5.8, 0.7, 0.73, .52),
+    (48, 11, 3.9, 5.1, 0.64, .34),
 ]
+# El quinto numero es un PESO RELATIVO, no un grosor. El grosor de verdad lo
+# pone el CSS en proporcion al ancho de la hebra, con
+# «vector-effect:non-scaling-stroke» para que la escala del lienzo no lo toque.
+#
+# Han hecho falta los dos arreglos. En unidades de lienzo, con el «viewBox» a
+# medida, en movil una unidad son 0,25 px y un trazo de 0,9 se quedaba en 0,2:
+# invisible. Clavandolo en pixeles pasaba lo contrario: 1,1 px de trazo y 1,6
+# de resplandor sobre una hebra de 24 px de ancho pesan cuatro veces mas que
+# sobre una de 56, y las cinco se fundian en una barra gris. Proporcional a
+# «--adn» las dos pantallas enseñan el MISMO dibujo, que es de lo que iba
+# todo esto.
 
 
-def _camino(cx, amp, frec, fase, pasos=44):
+def _x(cx, amp, per, fase, y):
+    return cx + amp * math.sin(math.tau * y / (per * _U) + fase)
+
+
+def _camino(cx, amp, per, fase, pasos=460):
     pts = []
     for k in range(pasos + 1):
-        t = k / pasos
+        y = round(k / pasos * _ADN_H, 1)
         # Sin estrechamiento: la hebra corre entera de arriba abajo. Lo que se
         # difumina en las puntas es la PINTURA, con una mascara, no la
         # geometria: apretando la geometria las cinco convergian y el conjunto
         # se leia como un huso en vez de como una trenza.
-        pts.append((round(cx + amp * math.sin(frec * math.tau * t + fase), 1),
-                    round(t * _ADN_H, 1)))
+        pts.append((round(_x(cx, amp, per, fase, y), 1), y))
     d = 'M%s %s' % pts[0]
     for i in range(1, len(pts)):
         (x0, y0), (x1, y1) = pts[i - 1], pts[i]
@@ -105,17 +149,21 @@ def _camino(cx, amp, frec, fase, pasos=44):
     return d
 
 
-def _chispas(n=34):
+def _chispas(n=64):
     # Van SOBRE las hebras, no al azar: es lo que hace que se lea como una
     # hebra de luz y no como polvo. Semilla fija para que el dibujo no cambie
     # entre montajes.
+    #
+    # Se reparten por las 3.400 unidades enteras y el JS las coloca segun lo
+    # que el «viewBox» acabe enseñando, asi que se ven unas veinte en cualquier
+    # pantalla. La «y» va en unidades de dibujo, no en tanto por ciento: el
+    # tanto por ciento dependia de una altura que ahora cambia con el ancho.
     r = random.Random(20260913)
     out = []
     for _ in range(n):
-        cx, amp, frec, fase, _g, _o = r.choice(_HEBRAS)
-        t = r.uniform(.04, .96)
-        x = cx + amp * math.sin(frec * math.tau * t + fase)
-        out.append((round(x / _ADN_W * 100, 2), round(t * 100, 2),
+        cx, amp, per, fase, _g, _o = r.choice(_HEBRAS)
+        y = r.uniform(0, _ADN_H)
+        out.append((round(_x(cx, amp, per, fase, y) / _ADN_W * 100, 2), round(y, 1),
                     r.choice([1.4, 1.8, 2.2, 2.8, 3.4]),
                     round(r.uniform(.35, .95), 2), round(r.uniform(0, 7), 1)))
     return out
@@ -123,15 +171,19 @@ def _chispas(n=34):
 
 def _adn():
     caminos = ''.join(
-        '<path d="%s" stroke-width="%s" style="--o:%s;--d:%ss"/>'
-        % (_camino(cx, amp, frec, fase), gr, op, round(i * 1.7, 1))
-        for i, (cx, amp, frec, fase, gr, op) in enumerate(_HEBRAS))
+        '<path d="%s" vector-effect="non-scaling-stroke"'
+        ' style="--w:%s;--o:%s;--d:%ss"/>'
+        % (_camino(cx, amp, per, fase), gr, op, round(i * 1.7, 1))
+        for i, (cx, amp, per, fase, gr, op) in enumerate(_HEBRAS))
     chispas = ''.join(
-        '<i style="left:%s%%;top:%s%%;--s:%spx;--o:%s;--d:%ss"></i>' % c
-        for c in _chispas())
+        '<i data-y="%s" style="left:%s%%;--s:%spx;--o:%s;--d:%ss"></i>'
+        % (c[1], c[0], c[2], c[3], c[4]) for c in _chispas())
+    # Las chispas van en su propia caja para que les llegue la MISMA mascara
+    # que al trazo. Sueltas no se apagaban con el —tienen su propia opacidad—
+    # y quedaban puntos brillando solos contra el canto de la seccion.
     return ('<i class="ruta-adn" aria-hidden="true">'
             '<svg viewBox="0 0 %d %d" preserveAspectRatio="none">%s</svg>'
-            '%s</i>' % (_ADN_W, _ADN_H, caminos, chispas))
+            '<i class="ruta-chispas">%s</i></i>' % (_ADN_W, _ADN_H, caminos, chispas))
 
 
 def _marcado():
@@ -149,10 +201,8 @@ def _marcado():
         '\n\n<section class="ruta" id="ruta" data-bg="#000000" data-acc="#79ABFF">\n'
         '  %s\n'
         '  <div class="wrap ruta-wrap">\n'
-        '    <div class="ruta-top">\n'
-        '      <span class="ruta-k">Roadmap</span>\n'
-        '      <span class="ruta-marca">%s</span>\n'
-        '    </div>\n'
+        '    <div class="k sk rv ruta-top">'
+        '<i class="sk-n">%s</i>%s</div>\n'
         '    <h2 class="ruta-h">%s</h2>\n'
         '    <p class="ruta-sub">%s</p>\n'
         '    <ol class="ruta-lista" id="rutaLista">\n'
@@ -163,7 +213,7 @@ def _marcado():
         '    </ol>\n'
         '  </div>\n'
         '</section>\n\n'
-    ) % (_adn(), ROTULO, TITULO, ENTRADILLA, '\n'.join(fases))
+    ) % (_adn(), NUMERO, ROTULO, TITULO, ENTRADILLA, '\n'.join(fases))
 
 
 CSS = """
@@ -187,10 +237,10 @@ CSS = """
   /* Cuanto se despega del canto el rail. NO puede bajar de la mitad de
      «--adn»: la hebra va centrada sobre el, asi que por debajo de eso se
      corta contra el borde de la pantalla. A 1280 la mitad son 36 px. */
-  --borde:clamp(24px,3.4vw,56px);
+  --borde:clamp(26px,3.4vw,56px);
   --carril:clamp(56px,8.5vw,140px);
   --eje:calc(var(--carril) * .5);
-  --adn:clamp(34px,5.6vw,96px)}
+  --adn:clamp(30px,4.4vw,74px)}
 /* El mismo resplandor de «.builds», en el mismo sitio: cada seccion lo tiene
    en su propia esquina, asi que repetirlo es lo que las hace parecer una. */
 .ruta::before{content:'';position:absolute;inset:0;pointer-events:none;
@@ -224,24 +274,56 @@ CSS = """
 /* El campo azul: mas ancho que las hebras, pero CONTENIDO. La primera vez lo
    puse a 390 px y con el doble de fuerza, y lavaba de azul media seccion: el
    resplandor tiene que acompañar a la hebra, no sustituirla. */
+/* Se desborda 4% por arriba y por abajo, y la seccion recorta: eran treinta
+   pixeles de resplandor con el canto cortado a escuadra, que es parte de lo
+   que se veia «cortado» en movil. Se apaga con la misma mascara que el
+   trazo, asi ninguna pieza termina en seco. */
 .ruta-adn::before{content:"";position:absolute;inset:-4% -55% -4% -115%;
+  -webkit-mask-image:linear-gradient(to bottom,transparent,#000 12%,#000 88%,transparent);
+          mask-image:linear-gradient(to bottom,transparent,#000 12%,#000 88%,transparent);
   background:
-    radial-gradient(40% 38% at 66% 30%,rgba(56,120,255,.22),transparent 72%),
-    radial-gradient(32% 30% at 60% 78%,rgba(70,140,255,.15),transparent 76%),
-    linear-gradient(to right,transparent,rgba(40,96,230,.13) 62%,transparent)}
+    radial-gradient(40% 38% at 66% 30%,rgba(56,120,255,.19),transparent 72%),
+    radial-gradient(32% 30% at 60% 78%,rgba(70,140,255,.13),transparent 76%),
+    linear-gradient(to right,transparent,rgba(40,96,230,.11) 62%,transparent)}
 /* Las puntas se apagan con mascara, que es lo que toca: apretando la
    geometria las cinco hebras convergian en un punto. */
 .ruta-adn svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible;
   -webkit-mask-image:linear-gradient(to bottom,transparent,#000 7%,#000 93%,transparent);
           mask-image:linear-gradient(to bottom,transparent,#000 7%,#000 93%,transparent)}
+/* Todo en proporcion al ancho de la hebra, a traves de «--k»: cuantas veces
+   cabe en ella el ancho al que se dibujo, 56 px. Lo escribe el JS ya resuelto
+   y SIN unidades.
+
+   Aqui NO se puede escribir «calc(var(--adn) / 56 ...)», y es la tercera vez
+   que lo aprendo en esta seccion: una propiedad personalizada llega sin
+   resolver, asi que ahi dentro «--adn» es la cadena «clamp(30px,4.4vw,74px)»
+   y la cuenta sale px por px —px al cuadrado—, que es invalido. La primera
+   vez dejo el rail clavado en un respaldo; la segunda apago este mismo
+   resplandor sin avisar; la tercera mando el tamaño de las 64 chispas a
+   «auto» y las pinto encima de todo: la trenza desaparecia bajo una barra
+   blanca y parecia un problema de diseño. Multiplicar por un numero suelto
+   no tiene ese modo de fallo. */
+.ruta-adn{--k:1}
 .ruta-adn path{fill:none;stroke:#BBD9FF;stroke-linecap:round;
-  opacity:var(--o);filter:drop-shadow(0 0 2px rgba(130,185,255,.9))}
+  stroke-width:calc(var(--k) * var(--w) * 1px);
+  opacity:var(--o);
+  filter:drop-shadow(0 0 calc(var(--k) * 1.6px) rgba(130,185,255,.72))}
 /* Las chispas: redondas de verdad. Van fuera del SVG porque el lienzo se
    estira en vertical —«preserveAspectRatio:none»— y ahi un circulo saldria
    ovalado. */
-.ruta-adn i{position:absolute;width:var(--s);height:var(--s);margin:calc(var(--s) / -2);
+/* La misma mascara que el trazo, para que las chispas se apaguen con el. */
+.ruta-chispas{position:absolute;inset:0;display:block;pointer-events:none;
+  -webkit-mask-image:linear-gradient(to bottom,transparent,#000 7%,#000 93%,transparent);
+          mask-image:linear-gradient(to bottom,transparent,#000 7%,#000 93%,transparent)}
+/* «.ruta-chispas i», NO «.ruta-adn i». La caja que envuelve a las chispas es
+   tambien un <i> dentro de «.ruta-adn», asi que «.ruta-adn i» la pintaba a
+   ella: un rectangulo de 41 px relleno de #E4EFFF solido, de arriba abajo,
+   tapando la trenza entera. La barra blanca que se veia era esto. */
+.ruta-chispas i{position:absolute;
+  --sp:calc(var(--s) * var(--k));
+  width:var(--sp);height:var(--sp);margin:calc(var(--sp) / -2);
   border-radius:50%;background:#E4EFFF;opacity:var(--o);
-  box-shadow:0 0 calc(var(--s) * 1.7) rgba(160,205,255,.95)}
+  box-shadow:0 0 calc(var(--sp) * 1.4) rgba(160,205,255,.8)}
 
 /* La luz respira. Cada hebra con su retraso, que si laten a la vez es un
    semaforo y no una hebra. */
@@ -249,24 +331,18 @@ CSS = """
 @keyframes adnChispa{0%,100%{opacity:calc(var(--o) * .35);transform:scale(.72)}
   50%{opacity:var(--o);transform:none}}
 .ruta-adn path{animation:adnHebra 11s ease-in-out var(--d) infinite}
-.ruta-adn i{animation:adnChispa 5.5s ease-in-out var(--d) infinite}
+.ruta-chispas i{animation:adnChispa 5.5s ease-in-out var(--d) infinite}
 
 @media(prefers-reduced-motion:reduce){
-  .ruta-adn path,.ruta-adn i{animation:none}
+  .ruta-adn path,.ruta-chispas i{animation:none}
 }
 
 /* ── el rotulo de arriba ──
    Como en la referencia: el nombre a un lado y la seccion al otro, en la
    misma linea. No lleva numero de estacion: esto no entra en el menu. */
-.ruta-top{display:flex;justify-content:space-between;align-items:baseline;
-  gap:clamp(12px,3vw,40px);
-  font-family:var(--m);font-size:clamp(9.5px,1vw,11px);letter-spacing:.24em;
-  text-transform:uppercase}
-/* El .68 de estos tres rotulos no es gusto: a .5 y .46 se quedaban en 3,3:1 y
-   2,99:1 sobre este negro, por debajo del 4,5:1 que pide un cuerpo de 11 px.
-   Lo cazo «probar_contraste.mjs», que mide el pixel y no el CSS. */
-.ruta-k{color:#79ABFF}
-.ruta-marca{color:rgba(160,190,240,.68);text-align:end}
+/* Solo la sangria: lo demas —tipo, tamaño, el numerito— lo pone «.k.sk», el
+   mismo rotulo que llevan las otras nueve secciones. */
+.ruta-top{margin:0}
 .ruta-h{margin:clamp(18px,2.4vw,30px) 0 0;
   font-weight:400;font-size:clamp(26px,4.4vw,56px);letter-spacing:-.04em;
   line-height:1.04;color:#fff;max-width:18ch;text-wrap:balance}
@@ -358,18 +434,14 @@ CSS = """
 
 
 @media(max-width:760px){
-  /* En el telefono la hebra pesaba demasiado: ocupaba el mismo sitio relativo
-     que en una pantalla de 1440 y ahi es media pantalla. Baja de ancho, de
-     trazo y de luz. */
-  .ruta{--carril:clamp(58px,17vw,78px);--adn:clamp(28px,8vw,36px)}
-  .ruta-adn{opacity:.72}
-  .ruta-adn path{filter:drop-shadow(0 0 1.3px rgba(130,185,255,.75))}
-  /* Las chispas encogen por tamaño, no por «transform»: el transform ya lo
-     usa su propio latido y una cosa pisaria a la otra. */
-  .ruta-adn i{width:calc(var(--s) * .72);height:calc(var(--s) * .72);
-    margin:calc(var(--s) * -.36);box-shadow:0 0 calc(var(--s) * 1.4) rgba(160,205,255,.9)}
+  /* En el telefono solo cambia el ANCHO de la hebra. El trazo, el resplandor
+     y las chispas ya bajan solos con «--k», que es proporcional a ese ancho;
+     antes se corregian aparte aqui y acababan discutiendo con la regla de
+     arriba. A menos de 34 px no cabe una trenza de cinco: por fino que se
+     dibuje, las cinco caen dentro de diez pixeles y se leen como una barra. */
+  .ruta{--carril:clamp(58px,17vw,78px);--adn:clamp(34px,10.5vw,44px)}
+  .ruta-adn{opacity:.76}
   .ruta-h{max-width:none}
-  .ruta-marca{display:none}   /* a 360 px no cabe en la misma linea */
   .ruta-p{max-width:none}
 }
 /* Sin movimiento el rail sigue puesto —el dibujo es el mismo— y lo unico que
@@ -401,7 +473,39 @@ JS = """<script>
      Midiendo el centro de la hebra los dos van al mismo eje por construccion
      y ya no pueden volver a divorciarse. La lista esta centrada con el resto
      del texto, asi que «--x» es la distancia desde ella hasta ese eje. */
+  /* EL LIENZO NO SE DEFORMA.
+     El SVG va con «preserveAspectRatio:none», asi que estira el dibujo a la
+     caja: como la seccion no mide igual de alta en cada pantalla, la misma
+     trenza salia a proporcion 21 en escritorio y 35 en movil —vez y media
+     mas estirada en el telefono—. Dandole al «viewBox» la altura que le toca
+     por su propia proporcion, una unidad mide lo mismo a lo ancho que a lo
+     alto y la trenza sale identica en todas; la pantalla mas alta solo
+     enseña un tramo mas largo de la misma hebra.
+
+     Las chispas se colocan aqui por lo mismo: su sitio es una «y» en unidades
+     de dibujo, y a que tanto por ciento de la caja cae depende de cuanto
+     acabe enseñando el «viewBox». */
   var hebra = seccion && seccion.querySelector('.ruta-adn');
+  var lienzo = hebra && hebra.querySelector('svg');
+  var chispas = hebra ? [].slice.call(hebra.querySelectorAll('.ruta-chispas i')) : [];
+  var ALTO_MAX = 3400, altoVB = 0;
+  function lienzoAlPunto(){
+    if(!lienzo) return;
+    var h = hebra.getBoundingClientRect();
+    if(!h.width || !h.height) return;
+    var alto = Math.min(ALTO_MAX, Math.round(96 * h.height / h.width));
+    if(alto === altoVB) return;
+    altoVB = alto;
+    lienzo.setAttribute('viewBox', '0 0 96 ' + alto);
+    /* El mismo sitio para las dos cosas: aqui ya esta medida la caja. 56 es el
+       ancho al que se dibujo la trenza; «--k» dice cuantas veces cabe. */
+    hebra.style.setProperty('--k', (h.width / 56).toFixed(3));
+    for(var i = 0; i < chispas.length; i++){
+      var y = +chispas[i].getAttribute('data-y');
+      chispas[i].style.top = (y / alto * 100).toFixed(2) + '%';
+    }
+  }
+
   function eje(cl){
     var x = 14;
     if(hebra){ var h = hebra.getBoundingClientRect(); if(h.width) x = h.left + h.width / 2; }
@@ -414,6 +518,7 @@ JS = """<script>
      movil pasa siempre. */
   var ys = [];
   function medir(){
+    lienzoAlPunto();
     var cl = lista.getBoundingClientRect();
     lista.style.setProperty('--x', eje(cl) + 'px');
     ys = fases.map(function(f){
@@ -443,6 +548,7 @@ JS = """<script>
 
   function paso(){
     pendiente = false;
+    lienzoAlPunto();
     lista.style.setProperty('--x', eje(lista.getBoundingClientRect()) + 'px');
     var h = innerHeight || document.documentElement.clientHeight;
     var y = h * LINEA;

@@ -99,7 +99,7 @@ INSERTA = [
      '<div class="k sk rv"><i class="sk-n">04</i>Guarantees</div>'),
     ('<section class="join" id="join"',
      '<h2 class="join-h">',
-     '<div class="k sk rv"><i class="sk-n">10</i>In the open</div>'),
+     '<div class="k sk rv"><i class="sk-n">11</i>In the open</div>'),
 ]
 
 
