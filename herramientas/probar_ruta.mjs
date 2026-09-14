@@ -145,7 +145,10 @@ for (let y = 0; y < alto; y += 450) { await pg.evaluate(v => scrollTo(0, v), y);
       cab0:cabs[0] * 100, fPunto:fPunto * 100,
       ejePunto:(rp.left + rp.right) / 2, xCamino,
       galon:{ op:+cf.opacity, vis:cf.visibility, alto:+rf.height.toFixed(1) },
-      titular:+(function(){ const e = document.querySelector('.ruta-h');
+      /* Contra el texto de la primera FASE, no contra el titular: el titular
+         se alinea con el resto de la web y pasa por encima de la hebra a
+         proposito, asi que compararlo con el no mide nada. */
+      titular:+(function(){ const e = document.querySelector('.ruta-t');
         const g = document.createRange(); g.selectNodeContents(e);
         return g.getBoundingClientRect().left; })().toFixed(1) };
   });
@@ -166,8 +169,41 @@ for (let y = 0; y < alto; y += 450) { await pg.evaluate(v => scrollTo(0, v), y);
      'y termina EN el punto, no antes ni despues: ' + (100 - r.v1).toFixed(2) + '% vs ' + r.fPunto.toFixed(2) + '%');
   di(r.galon.op === 1 && r.galon.vis === 'visible' && r.galon.alto > 8,
      'el galon del final se VE (opacidad ' + r.galon.op + ', ' + r.galon.alto + ' px)');
-  di(r.ejePunto < r.titular, 'y todo ello en su carril, a la izquierda del texto: ' +
+  di(r.ejePunto < r.titular, 'y todo ello en su carril, a la izquierda del texto de las fases: ' +
      r.ejePunto.toFixed(1) + ' vs ' + r.titular);
+}
+
+// ── 3a · la cabecera, en el mismo borde que las demas secciones ────────────
+// El rotulo y el titular llevaban la sangria del carril y arrancaban hasta
+// 140 px a la derecha de los de «09 What we are building» o «02 In the press».
+// Con todas las secciones alineadas en un borde, esta se salia de la columna.
+//
+// Y el borde se mide con «Range» sobre el texto, no con la caja: la caja
+// empieza antes de la sangria y daria por bueno justo lo que se quiere cazar.
+{
+  for (const W of [1512, 1440, 1280, 1024, 430, 390]) {
+    const c = await nav.newContext({ viewport:{ width:W, height:900 }, isMobile:W < 900, hasTouch:W < 900 });
+    const p5 = await c.newPage();
+    await p5.goto('http://127.0.0.1:9163/', { waitUntil:'load' });
+    await p5.waitForTimeout(700);
+    const alto = await p5.evaluate(() => document.documentElement.scrollHeight);
+    for (let y = 0; y < alto; y += 450) { await p5.evaluate(v => scrollTo(0, v), y); await p5.waitForTimeout(45); }
+    const r = await p5.evaluate(() => {
+      const izq = sel => { const e = document.querySelector(sel); if (!e) return null;
+        const g = document.createRange(); g.selectNodeContents(e);
+        const b = g.getBoundingClientRect(); return b.width ? b.left : null; };
+      return { builds:izq('.builds-h'), press:izq('.press-h'), token:izq('.tkp-h'),
+               rot:izq('.ruta-top'), tit:izq('.ruta-h') };
+    });
+    const casa = [r.builds, r.press, r.token].filter(v => v !== null);
+    const ref = casa.length ? Math.min(...casa) : null;
+    di(ref !== null && Math.abs(r.tit - ref) <= 1,
+       W + 'px · el titular de la ruta nace en el mismo borde que los demas: ' +
+       r.tit.toFixed(1) + ' vs ' + (ref === null ? '?' : ref.toFixed(1)));
+    di(ref !== null && Math.abs(r.rot - ref) <= 1,
+       W + 'px · y su rotulo tambien: ' + r.rot.toFixed(1) + ' vs ' + (ref === null ? '?' : ref.toFixed(1)));
+    await c.close();
+  }
 }
 
 // ── 3b · el carril y el texto, separados de verdad ──────────────────────────
@@ -202,7 +238,12 @@ for (let y = 0; y < alto; y += 450) { await pg.evaluate(v => scrollTo(0, v), y);
       const borde = sel => { const e = document.querySelector(sel); if (!e) return null;
         const g = document.createRange(); g.selectNodeContents(e);
         const b = g.getBoundingClientRect(); return b.width ? b.left : null; };
-      const bordes = ['.ruta-top', '.ruta-h', '.ruta-cab', '.ruta-t', '.ruta-p']
+      /* Solo el texto de las FASES. La cabecera —rotulo y titular— ya no entra:
+         desde que se alinea con el resto de las secciones nace en el mismo
+         borde que la hebra y pasa por encima de ella a proposito. Lo que no
+         puede tocarla es el texto de las fases, que es pequeño y apagado, y
+         eso es lo que se mide aqui. */
+      const bordes = ['.ruta-cab', '.ruta-t', '.ruta-p']
         .map(borde).filter(x => x !== null);
       /* TODO LO DE AQUI SE DESESCALA ANTES DE MEDIR.
          La seccion lleva un «scale» de 0,95-1 que va con el scroll, y
@@ -244,7 +285,7 @@ for (let y = 0; y < alto; y += 450) { await pg.evaluate(v => scrollTo(0, v), y);
     di(r.ejePunto > r.hebraIzq && r.ejePunto < r.hebraDer,
        W + 'px · el punto va DENTRO de la hebra: ' + r.ejePunto.toFixed(1) +
        ' entre ' + r.hebraIzq.toFixed(1) + ' y ' + r.hebraDer.toFixed(1));
-    di(r.disp <= 1.5, W + 'px · y todo el texto de la seccion en una sola columna (dispersion ' + r.disp.toFixed(1) + ' px)');
+    di(r.disp <= 1.5, W + 'px · y las tres fases en una sola columna (dispersion ' + r.disp.toFixed(1) + ' px)');
     di(!r.scroll, W + 'px · sin scroll horizontal');
     await c.close();
   }

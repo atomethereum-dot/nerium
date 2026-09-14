@@ -314,12 +314,23 @@ def _marca():
     detras = ('<svg viewBox="0 0 512 512">%s%s</svg>'
               % (_bisel('#8E93A0', '#2C2F35', '#1B1D22', '#6B6F7A'),
                  _cara('-b', .22)))
+    # Y LOS CUATRO LADOS. Sin ellos la pieza esta HUECA: son dos planchas
+    # separadas en Z y por el canto se ve a traves, que es exactamente el hueco
+    # que se veia por los lados. El bisel de las caras es plano —vive en el
+    # plano de cada cara— y no rellena el volumen; esto si.
+    #
+    # Cada lado lleva su propio tono: los de arriba y la izquierda reciben la
+    # luz, los de abajo y la derecha quedan en sombra, igual que el bisel.
+    lados = ''.join(
+        '<i class="ruta-marca-l %s"></i>' % c
+        for c in ('l-ar', 'l-ab', 'l-iz', 'l-de'))
     return (
         '<i class="ruta-marca" aria-hidden="true">'
         '<i class="ruta-marca-v"><i class="ruta-marca-x"><i class="ruta-marca-g">'
+        '%s'
         '<i class="ruta-marca-b">%s</i>'
         '<i class="ruta-marca-f">%s<i class="ruta-marca-luz"></i></i>'
-        '</i></i></i></i>' % (detras, delante))
+        '</i></i></i></i>' % (lados, detras, delante))
 
 
 
@@ -482,10 +493,33 @@ CSS = """
 /* El canto ya no es una pila de capas: son cuatro trapecios dentro del propio
    SVG. Aqui solo queda separar las dos caras en Z, que es lo que le da cuerpo
    al girar. */
-.ruta-marca-f{transform:translateZ(0)}
+/* La caja, centrada: la cara de delante media pieza hacia fuera y la de atras
+   media hacia dentro. Asi los cuatro lados caen donde tienen que caer. */
+.ruta-marca-f{transform:translateZ(calc(var(--gr) / 2))}
+
+/* LOS CUATRO LADOS. Lo que rellena el volumen. Cada uno es una tira de
+   «--gr» de fondo girada a su sitio; juntos cierran la pieza y se acaba el
+   hueco que se veia por los cantos.
+
+   Tambien llevan «backface-visibility»: de los cuatro, a cualquier angulo solo
+   hay dos mirando a camara, asi que pintar los otros dos es trabajo tirado. */
+.ruta-marca-l{position:absolute;left:50%;top:50%;display:block;
+  backface-visibility:hidden;-webkit-backface-visibility:hidden}
+.l-ar,.l-ab{width:var(--lado);height:var(--gr);
+  margin:calc(var(--gr) / -2) 0 0 calc(var(--lado) / -2)}
+.l-iz,.l-de{width:var(--gr);height:var(--lado);
+  margin:calc(var(--lado) / -2) 0 0 calc(var(--gr) / -2)}
+.l-ar{transform:rotateX(90deg) translateZ(calc(var(--lado) / 2));
+  background:linear-gradient(to bottom,#C8CCD8,#6A6E79 62%,#3A3D45)}
+.l-ab{transform:rotateX(-90deg) translateZ(calc(var(--lado) / 2));
+  background:linear-gradient(to top,#2B2E35,#4A4D55 58%,#22242A)}
+.l-iz{transform:rotateY(-90deg) translateZ(calc(var(--lado) / 2));
+  background:linear-gradient(to right,#B6BAC6,#63666F 66%,#34373E)}
+.l-de{transform:rotateY(90deg) translateZ(calc(var(--lado) / 2));
+  background:linear-gradient(to left,#34373E,#4E515A 54%,#24272D)}
 /* La trasera, al fondo del canto y espejada. Sin ella, pasada la media vuelta
    lo que miraba a camara era la ultima lamina: un rectangulo gris sin forma. */
-.ruta-marca-b{transform:translateZ(calc(var(--gr) * -1)) scaleX(-1)}
+.ruta-marca-b{transform:translateZ(calc(var(--gr) / -2)) rotateY(180deg)}
 .ruta-marca svg{position:absolute;inset:0;width:100%;height:100%;display:block}
 /* El reflejo que recorre la cara. Va aparte del SVG y con su propio tiempo:
    pegado al dibujo giraria con el y un reflejo que gira con la pieza no es un
@@ -535,7 +569,21 @@ CSS = """
   .ruta-marca-v,.ruta-marca-g,.ruta-marca-x{animation:none}}
 
 .ruta-wrap{position:relative}
-.ruta-top,.ruta-h,.ruta-f{padding-left:var(--carril)}
+/* LA CABECERA, AL MISMO BORDE QUE LAS DEMAS SECCIONES.
+   El rotulo y el titular llevaban la sangria del carril, asi que arrancaban
+   entre 56 y 140 px mas a la derecha que los de «09 What we are building» o
+   «02 In the press». Con todas las secciones alineadas en un solo borde, esta
+   se salia de la columna y se veia.
+
+   Pasan por encima de la hebra —no por detras— y eso es a proposito: un
+   titular de 76 px en blanco sobre una hebra tenue se lee sin problema, y es
+   lo que permite alinearlo sin mover la hebra de donde tiene que estar.
+
+   La LISTA de fases si conserva el carril: ahi el texto es de 14 a 17 px y
+   apagado, y sobre la hebra no se leeria. Son dos niveles a proposito —la
+   cabecera a lo ancho de la seccion, las fases en su propia columna—, no un
+   descuadre. */
+.ruta-f{padding-left:var(--carril)}
 .ruta-wrap>.ruta-top,.ruta-wrap>.ruta-h,.ruta-wrap>.ruta-lista{position:relative;z-index:1}
 .ruta-adn{position:absolute;top:0;bottom:0;z-index:0;pointer-events:none;
   width:var(--adn);left:var(--borde);margin-left:calc(var(--adn) / -2);
@@ -548,8 +596,8 @@ CSS = """
    que se veia «cortado» en movil. Se apaga con la misma mascara que el
    trazo, asi ninguna pieza termina en seco. */
 .ruta-adn::before{content:"";position:absolute;inset:-4% -55% -4% -115%;
-  -webkit-mask-image:linear-gradient(to bottom,transparent,#000 12%,#000 88%,transparent);
-          mask-image:linear-gradient(to bottom,transparent,#000 12%,#000 88%,transparent);
+  -webkit-mask-image:linear-gradient(to bottom,transparent var(--m0),#000 var(--m1),#000 88%,transparent);
+          mask-image:linear-gradient(to bottom,transparent var(--m0),#000 var(--m1),#000 88%,transparent);
   background:
     radial-gradient(40% 38% at 66% 30%,rgba(56,120,255,.19),transparent 72%),
     radial-gradient(32% 30% at 60% 78%,rgba(70,140,255,.13),transparent 76%),
@@ -557,8 +605,8 @@ CSS = """
 /* Las puntas se apagan con mascara, que es lo que toca: apretando la
    geometria las cinco hebras convergian en un punto. */
 .ruta-adn svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible;
-  -webkit-mask-image:linear-gradient(to bottom,transparent,#000 7%,#000 93%,transparent);
-          mask-image:linear-gradient(to bottom,transparent,#000 7%,#000 93%,transparent)}
+  -webkit-mask-image:linear-gradient(to bottom,transparent var(--m0),#000 var(--m1),#000 93%,transparent);
+          mask-image:linear-gradient(to bottom,transparent var(--m0),#000 var(--m1),#000 93%,transparent)}
 /* Todo en proporcion al ancho de la hebra, a traves de «--k»: cuantas veces
    cabe en ella el ancho al que se dibujo, 56 px. Lo escribe el JS ya resuelto
    y SIN unidades.
@@ -572,7 +620,17 @@ CSS = """
    «auto» y las pinto encima de todo: la trenza desaparecia bajo una barra
    blanca y parecia un problema de diseño. Multiplicar por un numero suelto
    no tiene ese modo de fallo. */
-.ruta-adn{--k:1}
+/* LA HEBRA EMPIEZA DONDE EMPIEZAN LAS FASES.
+   Antes subia hasta arriba del todo, y al alinear la cabecera con el resto de
+   las secciones el titular quedaba encima de ella. Medido: el rotulo, de 11 px,
+   caia a 1,54:1 contra un fondo que la hebra ponia en 0,134 de luminancia, y
+   el titular blanco cruzaba una hebra casi blanca. Alinear no puede costar que
+   no se lea.
+
+   Y tiene sentido por si solo: la hebra ES el recorrido de las fases, asi que
+   su sitio es el de la lista y no el de la cabecera. El JS le pasa en «--m0»
+   donde cae la primera fase; el 24% es el respaldo hasta que mide. */
+.ruta-adn{--k:1;--m0:24%;--m1:30%}
 .ruta-adn use{fill:none;stroke-linecap:round;
   stroke-width:calc(var(--k) * var(--w) * 1px)}
 .ruta-h0{stroke:#BBD9FF;opacity:var(--o);
@@ -597,8 +655,8 @@ CSS = """
    ovalado. */
 /* La misma mascara que el trazo, para que las chispas se apaguen con el. */
 .ruta-chispas{position:absolute;inset:0;display:block;pointer-events:none;
-  -webkit-mask-image:linear-gradient(to bottom,transparent,#000 7%,#000 93%,transparent);
-          mask-image:linear-gradient(to bottom,transparent,#000 7%,#000 93%,transparent)}
+  -webkit-mask-image:linear-gradient(to bottom,transparent var(--m0),#000 var(--m1),#000 93%,transparent);
+          mask-image:linear-gradient(to bottom,transparent var(--m0),#000 var(--m1),#000 93%,transparent)}
 /* «.ruta-chispas i», NO «.ruta-adn i». La caja que envuelve a las chispas es
    tambien un <i> dentro de «.ruta-adn», asi que «.ruta-adn i» la pintaba a
    ella: un rectangulo de 41 px relleno de #E4EFFF solido, de arriba abajo,
@@ -853,6 +911,10 @@ JS = """<script>
       /* El corte de arriba es fijo —donde empieza la fase 1— y el de abajo es
          el punto: la luz y el punto son el MISMO borde, asi que viajan juntos
          con la misma curva y el mismo tiempo. */
+      /* Donde empieza la hebra: un poco antes de la primera fase, para que
+         entre desvaneciendose y no de un corte. */
+      hebra.style.setProperty('--m0', Math.max(0, ys[0] * 100 - 9).toFixed(2) + '%');
+      hebra.style.setProperty('--m1', Math.max(2, ys[0] * 100 - 1).toFixed(2) + '%');
       hebra.style.setProperty('--v0', Math.max(0, ys[0] * 100).toFixed(2) + '%');
       hebra.style.setProperty('--v1', Math.max(0, (1 - y) * 100).toFixed(2) + '%');
       punto.style.setProperty('--py', (y * 100).toFixed(2) + '%');
