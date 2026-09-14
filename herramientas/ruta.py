@@ -224,12 +224,6 @@ def _adn():
 # Tres cajas, no una: los «transform» no se suman entre animaciones distintas,
 # asi que una pasea, otra gira y el SVG solo se estira. En una sola caja la
 # segunda animacion pisaria a la primera.
-# Cuantas laminas tiene el canto. Con pocas se ve el escalonado al girar; con
-# muchas no se gana nada y son nodos de mas. Dieciocho aguanta los 22 grados de
-# cabeceo sin que se noten los peldaños.
-_CAPAS = 30
-
-
 # ── el titular entra en el grupo de la casa ──────────────────────────────────
 # En vez de repetir aqui el interletraje y el interlineado, se añade «.ruta-h»
 # a las reglas que ya los definen para todas las demas secciones. Asi hay UNA
@@ -243,70 +237,90 @@ GRUPO = [
 ]
 
 
-def _marca():
-    # EL CANTO, DE VERDAD. Antes era una lamina plana girada en el espacio: se
-    # movia en 3D pero no TENIA fondo, porque el unico grosor era el bisel
-    # pintado del propio logo, que esta dibujado para mirarse de frente y al
-    # girar se queda quieto y delata que es plano.
-    #
-    # Ahora el cuerpo son dieciocho copias de la cara, cada una un poco mas
-    # atras en Z y un poco mas oscura. Al girar, esas copias se ven de canto y
-    # forman un lateral macizo con su degradado: el logo pasa de ser un papel a
-    # ser una pieza. El bisel pintado se retira, que ya no hace falta y
-    # duplicado se veria doble.
-    # LAS LAMINAS VAN OPACAS. Antes cada una llevaba su propia opacidad y el
-    # canto se veia POR DENTRO: treinta hojas translucidas apiladas no son un
-    # solido, son un solido de mentira, y eso es lo que se leia barato. Un
-    # canto de verdad no deja ver lo que hay detras de el.
-    #
-    # Lo que cambia hacia dentro es el COLOR, no la transparencia: de un gris
-    # claro junto a la cara a casi negro al fondo, con una curva que cae rapido
-    # al principio. Asi hay arista —claro de golpe, oscuro enseguida— y no una
-    # rampa lavada.
-    def _gris(k):
-        t = k / (_CAPAS - 1)
-        v = 0.80 * (1 - t) ** 1.8 + 0.055
-        return '#%02X%02X%02X' % (int(v * 208), int(v * 214), int(v * 228))
+# ── la marca de fondo ────────────────────────────────────────────────────────
+# EL BISEL SE DIBUJA, NO SE APILA.
+#
+# La primera version hacia el canto apilando copias de la cara cada vez un poco
+# mas grandes. Funcionaba como dibujo y era insostenible como pagina: medido,
+# 591 ms por fotograma con la marca puesta y 28 ms sin ella. Menos de dos
+# imagenes por segundo. Setenta y dos laminas opacas de 1120 px son noventa
+# millones de pixeles repintados por cuadro, y encima colgaban de un elemento
+# con mascara y opacidad, que obliga a componer el subarbol entero aparte.
+#
+# No era un problema de afinar el numero de laminas: salia a unos 8 ms POR
+# LAMINA, asi que ni con seis se llegaba a tiempo. Tambien explicaba que
+# empezaran a fallar las comprobaciones del rail — con cuadros de medio segundo
+# una transicion de 0,8 s no termina cuando se la mide.
+#
+# Asi que el canto pasa a ser geometria: cuatro trapecios entre el contorno
+# exterior y la cara, cada uno con su tono segun de donde venga la luz. Un solo
+# elemento, un solo repintado, y el bisel sale liso por construccion: no hay
+# peldaños que esconder porque no hay escalones.
+_O0, _O1 = 6.0, 506.0          # contorno exterior de la pieza
+_B = 34.0                      # ancho del bisel
+_I0, _I1 = _O0 + _B, _O1 - _B  # la cara, dentro del bisel
+_BANDA = .8005                 # donde empieza la franja blanca, en tanto por uno
 
-    canto = ''.join('<i style="--n:%d;--c:%s"></i>' % (k, _gris(k))
-                    for k in range(1, _CAPAS))
-    # La cara: el dibujo del logo, con su degradado y su franja.
-    cara = (
-        '<svg viewBox="0 0 512 512">'
+
+def _bisel(arriba, derecha, abajo, izquierda):
+    """Los cuatro trapecios del canto, con la luz viniendo de arriba a la
+    izquierda: la cara de arriba es la que mas recibe y la de abajo la que
+    menos. Sin esa diferencia el bisel es un marco y no un canto."""
+    car = lambda pts: ' '.join('%s %s' % q for q in pts)
+    caras = [
+        (arriba,    [(_O0, _O0), (_O1, _O0), (_I1, _I0), (_I0, _I0)]),
+        (derecha,   [(_O1, _O0), (_O1, _O1), (_I1, _I1), (_I1, _I0)]),
+        (abajo,     [(_O1, _O1), (_O0, _O1), (_I0, _I1), (_I1, _I1)]),
+        (izquierda, [(_O0, _O1), (_O0, _O0), (_I0, _I0), (_I0, _I1)]),
+    ]
+    return ''.join('<path fill="%s" d="M%s Z"/>' % (c, car(p)) for c, p in caras)
+
+
+def _cara(sufijo, luz):
+    """La cara de la pieza: el degradado de plata, el reflejo y la franja."""
+    by = _I0 + (_I1 - _I0) * _BANDA
+    return (
         '<defs>'
-        '<linearGradient id="nr-plata" gradientUnits="userSpaceOnUse"'
-        ' x1="-7.29" y1="71.63" x2="505.51" y2="413.71">'
+        '<linearGradient id="nr-plata%s" gradientUnits="userSpaceOnUse"'
+        ' x1="%s" y1="%s" x2="%s" y2="%s">'
         '<stop offset="0" stop-color="#EDF0F7"/>'
         '<stop offset=".52" stop-color="#A9AEBB"/>'
         '<stop offset="1" stop-color="#4E525C"/></linearGradient>'
-        '<radialGradient id="nr-brillo" gradientUnits="userSpaceOnUse"'
-        ' cx="0" cy="0" r="1"'
-        ' gradientTransform="translate(171.35 153.79) rotate(35.40)'
-        ' scale(52.44 280.40)">'
-        '<stop offset="0" stop-color="#fff" stop-opacity=".92"/>'
-        '<stop offset=".36" stop-color="#fff" stop-opacity=".43"/>'
-        '<stop offset=".70" stop-color="#fff" stop-opacity=".10"/>'
-        '<stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>'
+        '<linearGradient id="nr-brillo%s" gradientUnits="userSpaceOnUse"'
+        ' x1="%s" y1="%s" x2="%s" y2="%s">'
+        '<stop offset="0" stop-color="#fff" stop-opacity="0"/>'
+        '<stop offset=".42" stop-color="#fff" stop-opacity="%s"/>'
+        '<stop offset=".55" stop-color="#fff" stop-opacity="%s"/>'
+        '<stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>'
         '</defs>'
-        '<path fill="url(#nr-plata)" d="M26.92 20.48 L471.30 20.48'
-        ' L471.30 464.86 L26.92 464.86 Z"/>'
-        '<path fill="url(#nr-brillo)" d="M26.92 20.48 L471.30 20.48'
-        ' L471.30 464.86 L26.92 464.86 Z"/>'
-        '<path fill="#FCFCFC" d="M26.92 382.65 L471.30 382.65'
-        ' L471.30 464.86 L26.92 464.86 Z"/>'
-        '</svg>')
-    # La TRASERA es el mismo dibujo, no una lamina lisa. Antes, al pasar de la
-    # media vuelta, lo que quedaba mirando a camara era la ultima lamina del
-    # canto: un rectangulo gris sin forma. Una pieza real tiene dos caras, y el
-    # reverso de una plancha grabada es la misma plancha vista del otro lado.
-    # Se refleja con «scaleX(-1)», que es lo que hace el reverso de verdad.
+        '<rect x="%s" y="%s" width="%s" height="%s" fill="url(#nr-plata%s)"/>'
+        '<rect x="%s" y="%s" width="%s" height="%s" fill="url(#nr-brillo%s)"/>'
+        '<rect x="%s" y="%s" width="%s" height="%s" fill="#FCFCFC"/>'
+        % (sufijo, _I0, _I0, _I1, _I1,
+           sufijo, _I0, _I0, _I1, _I1, luz, round(luz * .28, 3),
+           _I0, _I0, _I1 - _I0, _I1 - _I0, sufijo,
+           _I0, _I0, _I1 - _I0, _I1 - _I0, sufijo,
+           _I0, by, _I1 - _I0, _I1 - by))
+
+
+def _marca():
+    # Dos piezas y nada mas: la cara de delante y la de atras. La de atras es el
+    # mismo dibujo con el bisel invertido —la luz le llega por el otro lado— y
+    # espejado, que es lo que se ve del reverso de una plancha. Sin ella, pasada
+    # la media vuelta lo que miraba a camara era un rectangulo liso.
+    delante = ('<svg viewBox="0 0 512 512">%s%s</svg>'
+               % (_bisel('#E4E8F1', '#5D616B', '#34373E', '#C2C7D3'),
+                  _cara('', .5)))
+    detras = ('<svg viewBox="0 0 512 512">%s%s</svg>'
+              % (_bisel('#8E93A0', '#2C2F35', '#1B1D22', '#6B6F7A'),
+                 _cara('-b', .22)))
     return (
         '<i class="ruta-marca" aria-hidden="true">'
         '<i class="ruta-marca-v"><i class="ruta-marca-x"><i class="ruta-marca-g">'
-        '<i class="ruta-marca-c">%s</i>'
         '<i class="ruta-marca-b">%s</i>'
         '<i class="ruta-marca-f">%s<i class="ruta-marca-luz"></i></i>'
-        '</i></i></i></i>' % (canto, cara, cara))
+        '</i></i></i></i>' % (detras, delante))
+
 
 
 def _marcado():
@@ -347,7 +361,7 @@ CSS = """
    antes, volver a aplicarlo deshacia el paso 30 y la ruta salia marina otra
    vez. Lo cazo su bateria comparando el suelo con el de proyectos. */
 .ruta{position:relative;overflow:hidden;background:#000;
-  padding:clamp(78px,9vw,136px) 0 clamp(72px,8.6vw,132px);
+  padding:clamp(122px,13.6vw,216px) 0 clamp(72px,8.6vw,132px);
   /* El CARRIL: la franja de la izquierda donde viven el rail y la hebra. Todo
      el texto de la seccion empieza a su derecha.
 
@@ -381,10 +395,17 @@ CSS = """
    media, cortada a cuchillo contra el canto, con el rail corriendo por su
    flanco en vez de por dentro. «--borde» manda sobre lo pegado que va todo,
    pero tiene un suelo: la mitad de la hebra. */
-/* La seccion de arriba entregaba con su pie a 48 px del canto y la ruta
-   empezaba enseguida: las dos juntas se leian amontonadas. Se le da aire por
-   abajo, que es de donde viene el apreton. */
-.builds{padding-bottom:clamp(76px,8.4vw,128px)}
+/* EL AIRE ENTRE LAS DOS SECCIONES.
+   Medido de tinta a tinta —el ultimo renglon de una al primero de la otra— el
+   hueco era de 223 px. No es poco comparado con los pares de dentro de un
+   mismo capitulo (214 entre tesis y kin, 233 entre preventa y token), pero
+   estas dos son capitulos distintos, y los saltos de capitulo de esta pagina
+   van entre 690 y 820. Por eso se leian pegadas aunque el numero pareciera
+   normal: el listón que le corresponde no era ese.
+
+   Sube a unos 400 px de tinta a tinta, repartido entre el pie de una y la
+   cabeza de la otra para que ninguna cargue sola con el hueco. */
+.builds{padding-bottom:clamp(118px,13vw,208px)}
 /* ── la marca de fondo ──
    El logo, grande, girando despacio por detras de todo.
 
@@ -437,50 +458,50 @@ CSS = """
 /* ── la pieza ──
    «--lado» es el tamaño del logo y «--gr» el grosor del canto: un 4,5% del
    lado, que es la proporcion de una pieza solida y no la de una chapa. */
-/* Mas grande y MUCHO mas gruesa: el grosor pasa del 5,5% al 15% del lado. A
+/* Mas grande y MUCHO mas gruesa: el grosor pasa del 5,5% al 22% del lado. A
    0,22 de opacidad un canto fino se funde con la cara y la pieza se lee
    plana; lo que hace el 3D no es que gire, es que se vea el lateral. */
-.ruta-marca{--lado:min(96vw,1120px);--gr:calc(var(--lado) * .15)}
+.ruta-marca{--lado:min(90vw,1020px);--gr:calc(var(--lado) * .22)}
 .ruta-marca-x{position:absolute;inset:0;display:block;
   transform-style:preserve-3d;animation:marcaCabecea 29s ease-in-out infinite}
-.ruta-marca-c,.ruta-marca-f,.ruta-marca-b{position:absolute;left:50%;top:50%;
+.ruta-marca-f,.ruta-marca-b{position:absolute;left:50%;top:50%;
   width:var(--lado);height:var(--lado);
   margin:calc(var(--lado) / -2) 0 0 calc(var(--lado) / -2);
-  transform-style:preserve-3d}
+  transform-style:preserve-3d;
+  /* Cada cara se deja de pintar cuando da la espalda. En un solido la de
+     atras la tapa la de delante de todas formas, asi que pintarlas las dos
+     siempre es trabajo tirado: son 1.120 px de lado y cada superficie grande
+     costaba unos trece milisegundos por cuadro. Con esto solo se pinta la que
+     de verdad se ve. */
+  backface-visibility:hidden;-webkit-backface-visibility:hidden}
 /* EL CANTO. Dieciocho laminas hacia atras en Z, cada una mas oscura. Vistas
    de frente no se ven —quedan justo detras de la cara—, pero en cuanto la
    pieza cabecea aparecen de lado y forman un lateral macizo con su sombreado.
    Es lo que separa una pieza de un papel: un papel girado sigue sin tener
    canto, y por mucho que se mueva se lee plano. */
-/* EL CHAFLAN. El cuerpo es un 8% mas grande que la cara, asi que asoma por
-   los cuatro lados. Es lo que hace que la pieza se lea con volumen en
-   CUALQUIER angulo y no solo cuando el lateral mira a camara: sin el, en los
-   giros en que el canto queda de espaldas la pieza volvia a leerse como un
-   recorte plano de papel. Una pieza real siempre enseña su arista. */
-.ruta-marca-c{transform-style:preserve-3d;transform:scale(1.08)}
-.ruta-marca-c i{position:absolute;inset:0;display:block;
-  transform:translateZ(calc(var(--gr) / 29 * var(--n) * -1));
-  /* OPACAS. Con opacidad por lamina el canto se veia por dentro: treinta hojas
-     translucidas apiladas no son un solido, y eso es lo que se leia barato. Lo
-     que oscurece hacia el fondo es el color, que lo calcula el generador. */
-  background:var(--c)}
+/* El canto ya no es una pila de capas: son cuatro trapecios dentro del propio
+   SVG. Aqui solo queda separar las dos caras en Z, que es lo que le da cuerpo
+   al girar. */
 .ruta-marca-f{transform:translateZ(0)}
 /* La trasera, al fondo del canto y espejada. Sin ella, pasada la media vuelta
    lo que miraba a camara era la ultima lamina: un rectangulo gris sin forma. */
 .ruta-marca-b{transform:translateZ(calc(var(--gr) * -1)) scaleX(-1)}
-.ruta-marca-b svg{filter:brightness(.62)}
 .ruta-marca svg{position:absolute;inset:0;width:100%;height:100%;display:block}
 /* El reflejo que recorre la cara. Va aparte del SVG y con su propio tiempo:
    pegado al dibujo giraria con el y un reflejo que gira con la pieza no es un
    reflejo, es una mancha pintada encima. */
-.ruta-marca-luz{position:absolute;inset:0;display:block;pointer-events:none;
-  background:linear-gradient(104deg,transparent 34%,rgba(255,255,255,.5) 47%,
-    rgba(255,255,255,.06) 56%,transparent 66%);
+/* El reflejo es una BANDA, no un lienzo entero: antes cubria toda la cara y
+   pintaba 1.120 px de lado para enseñar una franja de trescientos. Ahora mide
+   lo que se ve y recorre la cara moviendose. */
+.ruta-marca-luz{position:absolute;top:-10%;bottom:-10%;left:0;width:34%;
+  display:block;pointer-events:none;
+  background:linear-gradient(104deg,transparent 6%,rgba(255,255,255,.5) 44%,
+    rgba(255,255,255,.06) 62%,transparent 94%);
   animation:marcaLuz 17s ease-in-out infinite}
 @keyframes marcaLuz{
-    0%{transform:translateX(-42%)}
-   50%{transform:translateX(42%)}
-  100%{transform:translateX(-42%)}}
+    0%{transform:translateX(-20%)}
+   50%{transform:translateX(214%)}
+  100%{transform:translateX(-20%)}}
 /* El giro: el logo va de canto —como la referencia, en rombo— y cabecea en
    los tres ejes. El «rotateZ» no vuelve a 45 por el camino corto si lo dejo
    suelto, asi que los fotogramas lo llevan a mano. */
