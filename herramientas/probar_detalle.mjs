@@ -44,7 +44,10 @@ di(!t.tapado || /1\d\d%|108/.test(t.tapado) || /inset/.test(t.tapado),
 await pg.evaluate(() => document.getElementById('security').scrollIntoView());
 await pg.waitForTimeout(1700);
 const abre = await pg.evaluate(() => {
-  const h = document.querySelector('.sec-h');
+  /* El de SEGURIDAD, no el primero que haya: desde que Garantias tiene su
+     titular, «.sec-h» a secas devuelve el de la seccion anterior, que a esta
+     altura de la pagina sigue —con razon— tapado. */
+  const h = document.querySelector('#security .sec-h');
   return { vis: h.classList.contains('vis'), clip: getComputedStyle(h).clipPath };
 });
 di(abre.vis, 'al llegar a la seccion, el titular se descubre');

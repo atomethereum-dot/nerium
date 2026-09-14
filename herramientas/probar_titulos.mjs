@@ -32,10 +32,11 @@ const nav = await chromium.launch({ executablePath:'/opt/pw-browsers/chromium-11
 let ok = 0, mal = 0;
 const di = (b, t) => { if (b) { ok++; console.log('  ok  ' + t) } else { mal++; console.log('  MAL ' + t) } };
 
-// Las diez estaciones que llevan cabecera propia. «#stack» y «#xfade» no
-// estan: su texto es el pie de una escena animada centrada, no la cabecera de
-// una seccion, y se queda centrado a proposito.
-const SECCIONES = ['network','press','thesis','solutions','security','presale','token','builds','join'];
+// Las estaciones que llevan cabecera propia. «#stack» ya esta: era la unica
+// que quedaba centrada de las once y se paso al margen, asi que ahora se le
+// pide lo mismo que a las demas. «#xfade» sigue fuera: eso no es la cabecera
+// de una seccion, es una palabra a pantalla completa entre dos escenas.
+const SECCIONES = ['network','press','thesis','solutions','stack','security','presale','token','builds','join'];
 
 // Un recorrido entero para que salte todo lo que aparece al entrar en cuadro;
 // medir antes da cajas de ancho cero y una bateria que aprueba sin mirar.
@@ -90,8 +91,12 @@ for (const [W, H] of [[1440,900],[1280,900],[768,1024],[390,844]]) {
       const sec = document.getElementById(i); if (!sec) return null;
       const caja = sec.querySelector('.wrap') || sec;
       const iz = e => { if (!e) return null; const b = e.getBoundingClientRect(); return b.width ? b.left : null; };
-      return { base:iz(caja), ep:iz(sec.querySelector('.sk')), ti:iz(sec.querySelector('h2')),
-               su:iz(sec.querySelector('.sec-sub,.join-note,.lane-sub,.sale-sub,.sub')) };
+      // La pila no escribe su titular en un «h2» ni su entradilla en un «p»:
+      // son tres «b» y tres «s» que se van relevando, y solo el que lleva
+      // «.on» esta a la vista. Los demas miden cero y «iz» ya los descarta.
+      return { base:iz(caja), ep:iz(sec.querySelector('.sk')),
+               ti:iz(sec.querySelector('h2, .stk-t b.on')),
+               su:iz(sec.querySelector('.sec-sub,.join-note,.lane-sub,.sale-sub,.sub,.stk-sub s.on')) };
     }, s);
     if (!f || f.base === null) { di(false, W + 'px · ' + s + ': no se pudo medir la caja'); continue; }
     const partes = [['epigrafe',f.ep],['titular',f.ti],['entradilla',f.su]].filter(p => p[1] !== null);
