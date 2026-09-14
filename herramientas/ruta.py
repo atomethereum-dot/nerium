@@ -184,7 +184,10 @@ CSS = """
      Antes no existia: el titular y el rail compartian eje, asi que media hebra
      caia justo debajo de las primeras letras. En la referencia el texto esta
      lejos de la barra, y esa distancia es lo que hace que la hebra se lea. */
-  --borde:clamp(11px,1.4vw,22px);
+  /* Cuanto se despega del canto el rail. NO puede bajar de la mitad de
+     «--adn»: la hebra va centrada sobre el, asi que por debajo de eso se
+     corta contra el borde de la pantalla. A 1280 la mitad son 36 px. */
+  --borde:clamp(24px,3.4vw,56px);
   --carril:clamp(56px,8.5vw,140px);
   --eje:calc(var(--carril) * .5);
   --adn:clamp(34px,5.6vw,96px)}
@@ -200,9 +203,14 @@ CSS = """
    veinte pixeles a cada lado, no media pantalla— y van encendidas, no palidas.
 
    El elemento cuelga de la SECCION, no del contenedor de texto, porque la
-   seccion es la que llega al canto de la pantalla. Se centra sobre «--borde»,
-   que es lo pegado al canto que va el rail, y lo que le sobra por la izquierda
-   se sale de pantalla: en la referencia la nebulosa tambien se sale. */
+   seccion es la que llega al canto de la pantalla, y se centra sobre «--borde»
+   para quedar encima del rail.
+
+   Un intento anterior dejo «--borde» en 11-22 px y la hebra, que mide hasta
+   96, se salia 18 px por la izquierda: en pantalla no se veia una hebra sino
+   media, cortada a cuchillo contra el canto, con el rail corriendo por su
+   flanco en vez de por dentro. «--borde» manda sobre lo pegado que va todo,
+   pero tiene un suelo: la mitad de la hebra. */
 /* La seccion de arriba entregaba con su pie a 48 px del canto y la ruta
    empezaba enseguida: las dos juntas se leian amontonadas. Se le da aire por
    abajo, que es de donde viene el apreton. */
@@ -380,6 +388,26 @@ JS = """<script>
   var fases = [].slice.call(lista.querySelectorAll('.ruta-f'));
   if(!fases.length) return;
 
+  /* DONDE VA EL RAIL.
+     Se mide sobre la HEBRA ya pintada, no leyendo «--borde».
+
+     Leyendolo no funciona: «getComputedStyle().getPropertyValue()» devuelve
+     una propiedad personalizada tal cual se escribio, sin resolver, asi que
+     con un «clamp()» dentro lo que sale es la cadena «clamp(24px,3.4vw,56px)»
+     y «parseFloat» de eso es NaN. El rail llevaba desde entonces clavado en
+     el 14 del respaldo, y mover «--borde» no le hacia nada —la hebra si se
+     movia, y por eso se separaron—.
+
+     Midiendo el centro de la hebra los dos van al mismo eje por construccion
+     y ya no pueden volver a divorciarse. La lista esta centrada con el resto
+     del texto, asi que «--x» es la distancia desde ella hasta ese eje. */
+  var hebra = seccion && seccion.querySelector('.ruta-adn');
+  function eje(cl){
+    var x = 14;
+    if(hebra){ var h = hebra.getBoundingClientRect(); if(h.width) x = h.left + h.width / 2; }
+    return (x - cl.left).toFixed(1);
+  }
+
   /* ── donde va cada cosa ──
      El renglon del contador de cada fase: ahi se para el punto. Medido, no a
      ojo: a ojo se descuadra en cuanto un titular pasa a dos renglones, que en
@@ -387,10 +415,7 @@ JS = """<script>
   var ys = [];
   function medir(){
     var cl = lista.getBoundingClientRect();
-    /* El rail, casi al canto. La lista esta centrada con el resto del texto,
-       asi que su «--x» es la distancia —negativa— desde ella hasta el borde. */
-    var borde = parseFloat(getComputedStyle(seccion).getPropertyValue('--borde')) || 14;
-    lista.style.setProperty('--x', (borde - cl.left).toFixed(1) + 'px');
+    lista.style.setProperty('--x', eje(cl) + 'px');
     ys = fases.map(function(f){
       var c = f.querySelector('.ruta-cab').getBoundingClientRect();
       return (c.top - cl.top) + c.height / 2;
@@ -418,14 +443,7 @@ JS = """<script>
 
   function paso(){
     pendiente = false;
-    /* El sitio del rail se recalcula aqui y no solo al medir: la lista esta
-       centrada, asi que su borde izquierdo se mueve con el ancho del
-       contenedor, y eso cambia en sitios donde un «resize» no salta —al
-       asentarse la maquetacion, al aparecer la barra de scroll—. Medido una
-       sola vez, a 1280 y a 820 px el punto salia diez pixeles desviado. */
-    var cl0 = lista.getBoundingClientRect();
-    var bd = parseFloat(getComputedStyle(seccion).getPropertyValue('--borde')) || 14;
-    lista.style.setProperty('--x', (bd - cl0.left).toFixed(1) + 'px');
+    lista.style.setProperty('--x', eje(lista.getBoundingClientRect()) + 'px');
     var h = innerHeight || document.documentElement.clientHeight;
     var y = h * LINEA;
     /* Aqui habia un atajo —«si la lista queda fuera de pantalla, no calcules»—

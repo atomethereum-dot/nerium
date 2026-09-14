@@ -173,11 +173,41 @@ for (let y = 0; y < alto; y += 450) { await pg.evaluate(v => scrollTo(0, v), y);
         const b = g.getBoundingClientRect(); return b.width ? b.left : null; };
       const bordes = ['.ruta-k', '.ruta-h', '.ruta-cab', '.ruta-t', '.ruta-p']
         .map(borde).filter(x => x !== null);
-      return { derecha, texto:Math.min(...bordes), disp:Math.max(...bordes) - Math.min(...bordes),
+      /* TODO LO DE AQUI SE DESESCALA ANTES DE MEDIR.
+         La seccion lleva un «scale» de 0,95-1 que va con el scroll, y
+         «scrollIntoView» la deja en un punto distinto en cada ancho: a 1280
+         se mide a 0,978 y a 1440 a 0,955. Encogida tira de sus cantos hacia
+         el centro, asi que un recorte de 20 px se lee como si sobraran 13.
+         Asi se colo: la medida era estable —misma cifra a 800 ms y a 3,3 s—
+         pero indulgente. El centro de la seccion no se mueve con el «scale»,
+         asi que desde el se deshace: x → cx + (x - cx) / k. */
+      const sc = document.getElementById('ruta').getBoundingClientRect();
+      const k = (getComputedStyle(document.getElementById('ruta')).transform
+        .match(/matrix\(([\d.]+)/) || [0, 1])[1] * 1 || 1;
+      const cx = sc.left + sc.width / 2;
+      const real = x => cx + (x - cx) / k;
+
+      // El canto IZQUIERDO de la hebra, y el eje del rail. Faltaban las dos:
+      // sin la primera se colo una version con «--borde» a 11-22 px que
+      // cortaba 18 px de hebra contra el borde de la pantalla, y sin la
+      // segunda se colo que el rail leia «--borde» con «parseFloat» de un
+      // «clamp()» —NaN— y se quedaba clavado en el respaldo, asi que la
+      // hebra se movia y el rail no.
+      const izq = Math.min(sv.left - trazo, ...[...document.querySelectorAll('.ruta-adn i')]
+        .map(e => e.getBoundingClientRect().left - brillo(e)));
+      const pt = document.querySelector('.ruta-punto').getBoundingClientRect();
+      const ad = document.querySelector('.ruta-adn').getBoundingClientRect();
+      return { derecha, izq:real(izq), escala:k,
+               ejePunto:real(pt.left + pt.width / 2), ejeHebra:real(ad.left + ad.width / 2),
+               texto:Math.min(...bordes), disp:Math.max(...bordes) - Math.min(...bordes),
                scroll:document.documentElement.scrollWidth > innerWidth };
     });
     const hueco = r.texto - r.derecha;
     di(hueco >= 10, W + 'px · la hebra despega del texto: ' + hueco.toFixed(1) + ' px de hueco (minimo 10)');
+    di(r.izq >= 0, W + 'px · y entra ENTERA: su canto izquierdo cae en ' + r.izq.toFixed(1)
+       + ' px, en reposo (medido a escala ' + r.escala.toFixed(3) + ')');
+    const desvio = Math.abs(r.ejePunto - r.ejeHebra);
+    di(desvio <= 2, W + 'px · el rail va por DENTRO de la hebra: ' + desvio.toFixed(1) + ' px entre los dos ejes (maximo 2)');
     di(r.disp <= 1.5, W + 'px · y todo el texto de la seccion en una sola columna (dispersion ' + r.disp.toFixed(1) + ' px)');
     di(!r.scroll, W + 'px · sin scroll horizontal');
     await c.close();
