@@ -59,7 +59,8 @@ FASES = [
 ]
 
 ROTULO = 'Nereum &middot; adoption roadmap'
-TITULO = 'Three phases, and what each one has to prove.'
+TITULO = 'Roadmap'
+ENTRADILLA = 'Three phases, and what each one has to prove.'
 
 
 
@@ -146,13 +147,14 @@ def _marcado():
             '      </li>' % (i, i + 1, len(FASES), estado, titulo, objetivo))
     return (
         '\n\n<section class="ruta" id="ruta" data-bg="#000000" data-acc="#79ABFF">\n'
+        '  %s\n'
         '  <div class="wrap ruta-wrap">\n'
-        '    %s\n'
         '    <div class="ruta-top">\n'
         '      <span class="ruta-k">Roadmap</span>\n'
         '      <span class="ruta-marca">%s</span>\n'
         '    </div>\n'
         '    <h2 class="ruta-h">%s</h2>\n'
+        '    <p class="ruta-sub">%s</p>\n'
         '    <ol class="ruta-lista" id="rutaLista">\n'
         '      <i class="ruta-rail" aria-hidden="true">'
         '<i class="ruta-punto"></i><i class="ruta-linea"></i>'
@@ -161,7 +163,7 @@ def _marcado():
         '    </ol>\n'
         '  </div>\n'
         '</section>\n\n'
-    ) % (_adn(), ROTULO, TITULO, '\n'.join(fases))
+    ) % (_adn(), ROTULO, TITULO, ENTRADILLA, '\n'.join(fases))
 
 
 CSS = """
@@ -182,6 +184,7 @@ CSS = """
      Antes no existia: el titular y el rail compartian eje, asi que media hebra
      caia justo debajo de las primeras letras. En la referencia el texto esta
      lejos de la barra, y esa distancia es lo que hace que la hebra se lea. */
+  --borde:clamp(11px,1.4vw,22px);
   --carril:clamp(56px,8.5vw,140px);
   --eje:calc(var(--carril) * .5);
   --adn:clamp(34px,5.6vw,96px)}
@@ -196,19 +199,19 @@ CSS = """
    doble: en la referencia las hebras van PEGADAS a la barra —se abren unos
    veinte pixeles a cada lado, no media pantalla— y van encendidas, no palidas.
 
-   Por eso el elemento vive DENTRO del wrap y no en la seccion: asi su «left:0»
-   es el mismo borde del que cuelga el rail, y centrandolo sobre el se queda
-   justo encima. Colgandolo de la seccion caia treinta y cinco pixeles a la
-   derecha del rail, que es lo que se veia. */
+   El elemento cuelga de la SECCION, no del contenedor de texto, porque la
+   seccion es la que llega al canto de la pantalla. Se centra sobre «--borde»,
+   que es lo pegado al canto que va el rail, y lo que le sobra por la izquierda
+   se sale de pantalla: en la referencia la nebulosa tambien se sale. */
 /* La seccion de arriba entregaba con su pie a 48 px del canto y la ruta
    empezaba enseguida: las dos juntas se leian amontonadas. Se le da aire por
    abajo, que es de donde viene el apreton. */
 .builds{padding-bottom:clamp(76px,8.4vw,128px)}
 .ruta-wrap{position:relative}
-.ruta-top,.ruta-h,.ruta-f{padding-left:var(--carril)}
+.ruta-top,.ruta-h,.ruta-sub,.ruta-f{padding-left:var(--carril)}
 .ruta-wrap>.ruta-top,.ruta-wrap>.ruta-h,.ruta-wrap>.ruta-lista{position:relative;z-index:1}
 .ruta-adn{position:absolute;top:0;bottom:0;z-index:0;pointer-events:none;
-  width:var(--adn);left:var(--eje);margin-left:calc(var(--adn) / -2);
+  width:var(--adn);left:var(--borde);margin-left:calc(var(--adn) / -2);
   overflow:visible}
 /* El campo azul: mas ancho que las hebras, pero CONTENIDO. La primera vez lo
    puse a 390 px y con el doble de fuerza, y lavaba de azul media seccion: el
@@ -256,9 +259,16 @@ CSS = """
    Lo cazo «probar_contraste.mjs», que mide el pixel y no el CSS. */
 .ruta-k{color:#79ABFF}
 .ruta-marca{color:rgba(160,190,240,.68);text-align:end}
-.ruta-h{margin:clamp(18px,2.4vw,30px) 0 clamp(48px,5.8vw,88px);
+.ruta-h{margin:clamp(18px,2.4vw,30px) 0 0;
   font-weight:400;font-size:clamp(26px,4.4vw,56px);letter-spacing:-.04em;
-  line-height:1.06;color:#fff;max-width:18ch;text-wrap:balance}
+  line-height:1.04;color:#fff;max-width:18ch;text-wrap:balance}
+/* La frase que antes hacia de titular baja a entradilla: el titulo de la
+   seccion es «Roadmap», que es lo que se busca de un vistazo, y la frase
+   explica. Antes iba al reves y habia que leerla entera para saber que era
+   esto. */
+.ruta-sub{margin:clamp(12px,1.6vw,20px) 0 clamp(48px,5.8vw,88px);
+  max-width:46ch;font-size:clamp(15px,1.5vw,19px);line-height:1.5;
+  color:rgba(226,236,250,.66)}
 
 /* ── el rail ──
    Este es el de la referencia, pieza por pieza: un punto LLENO arriba, un
@@ -274,7 +284,7 @@ CSS = """
    el renglon del contador de cada fase. A ojo se descuadra en cuanto un
    titular pasa a dos renglones, que en movil pasa siempre. */
 .ruta-lista{list-style:none;margin:0;padding:0;position:relative;
-  --x:var(--eje);--a:0px;--b:0px;--y:0px}
+  --x:0px;--a:0px;--b:0px;--y:0px}
 .ruta-rail{position:absolute;left:var(--x);top:var(--a);height:var(--b);
   width:2px;margin-left:-1px;pointer-events:none}
 /* El punto: lleno, sin aro y SIN HALO, como en la referencia. Le puse uno
@@ -314,7 +324,13 @@ CSS = """
 .ruta-f + .ruta-f::before{content:"";position:absolute;top:0;
   left:var(--carril);right:0;height:1px;pointer-events:none;
   background:linear-gradient(to right,
-    rgba(160,200,255,.24),rgba(160,200,255,.07) 58%,transparent 92%)}
+    rgba(160,200,255,.42) 0 14%,rgba(160,200,255,.16) 52%,transparent 94%)}
+/* Y un tope en el arranque: un tramo corto en azul de marca, mas grueso que
+   el filete. El filete solo se quedaba en un susurro; el tope le da un
+   principio claro y hace que se lea como una division y no como una sombra. */
+.ruta-f + .ruta-f::after{content:"";position:absolute;top:-1px;
+  left:var(--carril);width:clamp(26px,3.4vw,46px);height:3px;
+  pointer-events:none;background:#3E86FF}
 
 .ruta-cab{display:flex;align-items:baseline;gap:clamp(10px,1.6vw,18px);
   font-family:var(--m);font-size:clamp(9.5px,1vw,11px);letter-spacing:.2em;
@@ -360,6 +376,7 @@ JS = """<script>
 (function(){
   var lista = document.getElementById('rutaLista');
   if(!lista) return;
+  var seccion = document.getElementById('ruta');
   var fases = [].slice.call(lista.querySelectorAll('.ruta-f'));
   if(!fases.length) return;
 
@@ -370,6 +387,10 @@ JS = """<script>
   var ys = [];
   function medir(){
     var cl = lista.getBoundingClientRect();
+    /* El rail, casi al canto. La lista esta centrada con el resto del texto,
+       asi que su «--x» es la distancia —negativa— desde ella hasta el borde. */
+    var borde = parseFloat(getComputedStyle(seccion).getPropertyValue('--borde')) || 14;
+    lista.style.setProperty('--x', (borde - cl.left).toFixed(1) + 'px');
     ys = fases.map(function(f){
       var c = f.querySelector('.ruta-cab').getBoundingClientRect();
       return (c.top - cl.top) + c.height / 2;
@@ -397,6 +418,14 @@ JS = """<script>
 
   function paso(){
     pendiente = false;
+    /* El sitio del rail se recalcula aqui y no solo al medir: la lista esta
+       centrada, asi que su borde izquierdo se mueve con el ancho del
+       contenedor, y eso cambia en sitios donde un «resize» no salta —al
+       asentarse la maquetacion, al aparecer la barra de scroll—. Medido una
+       sola vez, a 1280 y a 820 px el punto salia diez pixeles desviado. */
+    var cl0 = lista.getBoundingClientRect();
+    var bd = parseFloat(getComputedStyle(seccion).getPropertyValue('--borde')) || 14;
+    lista.style.setProperty('--x', (bd - cl0.left).toFixed(1) + 'px');
     var h = innerHeight || document.documentElement.clientHeight;
     var y = h * LINEA;
     /* Aqui habia un atajo —«si la lista queda fuera de pantalla, no calcules»—
