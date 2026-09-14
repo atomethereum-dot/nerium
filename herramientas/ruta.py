@@ -170,20 +170,37 @@ def _chispas(n=64):
 
 
 def _adn():
-    caminos = ''.join(
-        '<path d="%s" vector-effect="non-scaling-stroke"'
-        ' style="--w:%s;--o:%s;--d:%ss"/>'
-        % (_camino(cx, amp, per, fase), gr, op, round(i * 1.7, 1))
-        for i, (cx, amp, per, fase, gr, op) in enumerate(_HEBRAS))
+    # Los caminos se declaran UNA vez en <defs> y se usan dos: la trenza
+    # apagada y, encima, la misma trenza encendida recortada al tramo que ya
+    # has recorrido. Con <use> el dibujo no se repite en el archivo, que son
+    # cinco caminos de casi mil curvas cada uno.
+    defs = ''.join(
+        '<path id="nr-adn-%d" d="%s"/>' % (i, _camino(cx, amp, per, fase))
+        for i, (cx, amp, per, fase, _g, _o) in enumerate(_HEBRAS))
+    usos = lambda clase: ''.join(
+        '<use class="%s" href="#nr-adn-%d" vector-effect="non-scaling-stroke"'
+        ' style="--w:%s;--o:%s;--d:%ss"/>' % (clase, i, gr, op, round(i * 1.7, 1))
+        for i, (_cx, _a, _p, _f, gr, op) in enumerate(_HEBRAS))
     chispas = ''.join(
         '<i data-y="%s" style="left:%s%%;--s:%spx;--o:%s;--d:%ss"></i>'
         % (c[1], c[0], c[2], c[3], c[4]) for c in _chispas())
+    lienzo = lambda dentro: ('<svg viewBox="0 0 %d %d" preserveAspectRatio="none">%s</svg>'
+                             % (_ADN_W, _ADN_H, dentro))
     # Las chispas van en su propia caja para que les llegue la MISMA mascara
     # que al trazo. Sueltas no se apagaban con el —tienen su propia opacidad—
     # y quedaban puntos brillando solos contra el canto de la seccion.
+    #
+    # El punto y el galon viven AQUI DENTRO, no en la lista: son parte de la
+    # hebra, no una barra puesta encima de ella.
     return ('<i class="ruta-adn" aria-hidden="true">'
-            '<svg viewBox="0 0 %d %d" preserveAspectRatio="none">%s</svg>'
-            '<i class="ruta-chispas">%s</i></i>' % (_ADN_W, _ADN_H, caminos, chispas))
+            '<svg width="0" height="0" style="position:absolute">'
+            '<defs>%s</defs></svg>'
+            '%s<i class="ruta-viva">%s</i>'
+            '<i class="ruta-chispas">%s</i>'
+            '<i class="ruta-punto"></i>'
+            '<i class="ruta-flecha"><svg viewBox="0 0 24 24">'
+            '<path d="M6 9.5 12 16l6-6.5"/></svg></i>'
+            '</i>' % (defs, lienzo(usos('ruta-h0')), lienzo(usos('ruta-h1')), chispas))
 
 
 def _marcado():
@@ -206,10 +223,7 @@ def _marcado():
         '    <h2 class="ruta-h">%s</h2>\n'
         '    <p class="ruta-sub">%s</p>\n'
         '    <ol class="ruta-lista" id="rutaLista">\n'
-        '      <i class="ruta-rail" aria-hidden="true">'
-        '<i class="ruta-punto"></i><i class="ruta-linea"></i>'
-        '<i class="ruta-flecha"><svg viewBox="0 0 24 24">'
-        '<path d="M6 9.5 12 16l6-6.5"/></svg></i></i>\n%s\n'
+        '%s\n'
         '    </ol>\n'
         '  </div>\n'
         '</section>\n\n'
@@ -304,10 +318,25 @@ CSS = """
    blanca y parecia un problema de diseño. Multiplicar por un numero suelto
    no tiene ese modo de fallo. */
 .ruta-adn{--k:1}
-.ruta-adn path{fill:none;stroke:#BBD9FF;stroke-linecap:round;
-  stroke-width:calc(var(--k) * var(--w) * 1px);
-  opacity:var(--o);
+.ruta-adn use{fill:none;stroke-linecap:round;
+  stroke-width:calc(var(--k) * var(--w) * 1px)}
+.ruta-h0{stroke:#BBD9FF;opacity:var(--o);
   filter:drop-shadow(0 0 calc(var(--k) * 1.6px) rgba(130,185,255,.72))}
+
+/* ── el recorrido ──
+   No hay barra. La barra ES la hebra: la misma trenza, encendida, recortada
+   al tramo que ya llevas. Antes era una linea recta blanca por encima del
+   dibujo y se leian como dos cosas que no se conocian —una trenza curva y un
+   palo recto—, que es justo lo que no puede ser.
+
+   Se recorta con «clip-path:inset» y no con una mascara porque el corte se
+   anima: baja con el mismo tiempo y la misma curva que el punto, asi que la
+   luz y el punto viajan juntos. */
+.ruta-viva{position:absolute;inset:0;display:block;pointer-events:none;
+  clip-path:inset(var(--v0,100%) 0 var(--v1,0%) 0);
+  transition:clip-path .8s cubic-bezier(.16,.84,.26,1)}
+.ruta-h1{stroke:#EAF2FF;opacity:calc(var(--o) * .55 + .45);
+  filter:drop-shadow(0 0 calc(var(--k) * 3px) rgba(190,220,255,.85))}
 /* Las chispas: redondas de verdad. Van fuera del SVG porque el lienzo se
    estira en vertical —«preserveAspectRatio:none»— y ahi un circulo saldria
    ovalado. */
@@ -330,11 +359,11 @@ CSS = """
 @keyframes adnHebra{0%,100%{opacity:calc(var(--o) * .62)}50%{opacity:var(--o)}}
 @keyframes adnChispa{0%,100%{opacity:calc(var(--o) * .35);transform:scale(.72)}
   50%{opacity:var(--o);transform:none}}
-.ruta-adn path{animation:adnHebra 11s ease-in-out var(--d) infinite}
+.ruta-adn use{animation:adnHebra 11s ease-in-out var(--d) infinite}
 .ruta-chispas i{animation:adnChispa 5.5s ease-in-out var(--d) infinite}
 
 @media(prefers-reduced-motion:reduce){
-  .ruta-adn path,.ruta-chispas i{animation:none}
+  .ruta-adn use,.ruta-chispas i{animation:none}
 }
 
 /* ── el rotulo de arriba ──
@@ -367,29 +396,23 @@ CSS = """
    El sitio del punto y los extremos del rail no se ponen a ojo: el guion mide
    el renglon del contador de cada fase. A ojo se descuadra en cuanto un
    titular pasa a dos renglones, que en movil pasa siempre. */
-.ruta-lista{list-style:none;margin:0;padding:0;position:relative;
-  --x:0px;--a:0px;--b:0px;--y:0px}
-.ruta-rail{position:absolute;left:var(--x);top:var(--a);height:var(--b);
-  width:2px;margin-left:-1px;pointer-events:none}
+.ruta-lista{list-style:none;margin:0;padding:0;position:relative}
 /* El punto: lleno, sin aro y SIN HALO, como en la referencia. Le puse uno
    para que no se perdiera entre las hebras y la bateria me paro: el acuerdo
-   era que fuera identica, no que a mi me pareciera que se veia poco. Si hace
-   falta despegarlo del fondo, se despeja el fondo, no se disfraza el punto. */
-.ruta-punto{position:absolute;left:50%;top:var(--y);
+   era que fuera identica, no que a mi me pareciera que se veia poco.
+
+   Va SOBRE la hebra, en su «x» y en su «y»: el guion le pregunta al camino
+   donde pasa a esa altura, asi que el punto cabalga la curva en vez de
+   flotar en un eje recto al lado. Las dos coordenadas se animan igual. */
+.ruta-punto{position:absolute;left:var(--px,50%);top:var(--py,0);
   width:13px;height:13px;margin:-6.5px 0 0 -6.5px;border-radius:50%;
   background:#3E86FF;
-  transition:top .8s cubic-bezier(.16,.84,.26,1)}
-/* La linea: blanca, arranca un buen hueco por debajo del punto —en la
-   referencia ese hueco es casi dos veces y media el punto— y baja hasta el
-   galon. Va a .9 y no a .6: con la hebra encendida detras, a .6 dejaba de
-   mandar, y en la referencia la barra es lo mas claro de todo el margen. */
-.ruta-linea{position:absolute;left:0;right:0;
-  top:calc(var(--y) + 27px);bottom:15px;
-  background:rgba(255,255,255,.9);
-  box-shadow:0 0 6px rgba(255,255,255,.25);
-  transition:top .8s cubic-bezier(.16,.84,.26,1)}
-.ruta-flecha{position:absolute;left:50%;bottom:0;width:15px;height:15px;
-  margin-left:-7.5px;display:grid;place-items:center;color:rgba(255,255,255,.9)}
+  transition:top .8s cubic-bezier(.16,.84,.26,1),
+             left .8s cubic-bezier(.16,.84,.26,1)}
+/* El galon cierra la hebra, tambien sobre la curva. */
+.ruta-flecha{position:absolute;left:var(--fx,50%);top:var(--fy,100%);
+  width:15px;height:15px;margin:-2px 0 0 -7.5px;display:grid;place-items:center;
+  color:rgba(255,255,255,.9)}
 .ruta-flecha svg{width:15px;height:15px;fill:none;stroke:currentColor;
   stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round}
 
@@ -447,7 +470,7 @@ CSS = """
 /* Sin movimiento el rail sigue puesto —el dibujo es el mismo— y lo unico que
    se quita es el viaje del punto: salta en vez de deslizarse. */
 @media(prefers-reduced-motion:reduce){
-  .ruta-punto,.ruta-linea,.ruta-t,.ruta-p,.ruta-est{transition:none}
+  .ruta-punto,.ruta-viva,.ruta-t,.ruta-p,.ruta-est{transition:none}
 }
 """ + '\n' + FIN
 
@@ -460,19 +483,6 @@ JS = """<script>
   var fases = [].slice.call(lista.querySelectorAll('.ruta-f'));
   if(!fases.length) return;
 
-  /* DONDE VA EL RAIL.
-     Se mide sobre la HEBRA ya pintada, no leyendo «--borde».
-
-     Leyendolo no funciona: «getComputedStyle().getPropertyValue()» devuelve
-     una propiedad personalizada tal cual se escribio, sin resolver, asi que
-     con un «clamp()» dentro lo que sale es la cadena «clamp(24px,3.4vw,56px)»
-     y «parseFloat» de eso es NaN. El rail llevaba desde entonces clavado en
-     el 14 del respaldo, y mover «--borde» no le hacia nada —la hebra si se
-     movia, y por eso se separaron—.
-
-     Midiendo el centro de la hebra los dos van al mismo eje por construccion
-     y ya no pueden volver a divorciarse. La lista esta centrada con el resto
-     del texto, asi que «--x» es la distancia desde ella hasta ese eje. */
   /* EL LIENZO NO SE DEFORMA.
      El SVG va con «preserveAspectRatio:none», asi que estira el dibujo a la
      caja: como la seccion no mide igual de alta en cada pantalla, la misma
@@ -486,17 +496,22 @@ JS = """<script>
      de dibujo, y a que tanto por ciento de la caja cae depende de cuanto
      acabe enseñando el «viewBox». */
   var hebra = seccion && seccion.querySelector('.ruta-adn');
-  var lienzo = hebra && hebra.querySelector('svg');
+  var lienzos = hebra ? [].slice.call(hebra.querySelectorAll('svg:not([width])')) : [];
   var chispas = hebra ? [].slice.call(hebra.querySelectorAll('.ruta-chispas i')) : [];
-  var ALTO_MAX = 3400, altoVB = 0;
+  var espina = hebra && hebra.querySelector('#nr-adn-0');
+  var punto = hebra && hebra.querySelector('.ruta-punto');
+  var galon = hebra && hebra.querySelector('.ruta-flecha');
+  var ALTO_MAX = 3400, altoVB = 0, caja = null;
   function lienzoAlPunto(){
-    if(!lienzo) return;
+    if(!lienzos.length) return;
     var h = hebra.getBoundingClientRect();
     if(!h.width || !h.height) return;
+    caja = h;
     var alto = Math.min(ALTO_MAX, Math.round(96 * h.height / h.width));
     if(alto === altoVB) return;
     altoVB = alto;
-    lienzo.setAttribute('viewBox', '0 0 96 ' + alto);
+    for(var j = 0; j < lienzos.length; j++)
+      lienzos[j].setAttribute('viewBox', '0 0 96 ' + alto);
     /* El mismo sitio para las dos cosas: aqui ya esta medida la caja. 56 es el
        ancho al que se dibujo la trenza; «--k» dice cuantas veces cabe. */
     hebra.style.setProperty('--k', (h.width / 56).toFixed(3));
@@ -506,10 +521,24 @@ JS = """<script>
     }
   }
 
-  function eje(cl){
-    var x = 14;
-    if(hebra){ var h = hebra.getBoundingClientRect(); if(h.width) x = h.left + h.width / 2; }
-    return (x - cl.left).toFixed(1);
+  /* POR DONDE PASA LA HEBRA A ESA ALTURA.
+     El punto ya no se pone en un eje recto: se le pregunta al camino. La «y»
+     crece siempre a lo largo de el, asi que una busqueda binaria sobre
+     «getPointAtLength» da el sitio exacto en veinte pasos.
+
+     Esto es lo que hace que sean UNA cosa. Antes el recorrido era una linea
+     recta blanca por encima del dibujo, y se leian como dos: una trenza que
+     curva y un palo que no. Ahora el punto cabalga la curva y lo que baja
+     encendido es la propia hebra. */
+  function curvaX(f){
+    if(!espina) return null;
+    var u = f * altoVB;
+    var L = espina.getTotalLength(), lo = 0, hi = L, p = null;
+    for(var i = 0; i < 20; i++){
+      var m = (lo + hi) / 2; p = espina.getPointAtLength(m);
+      if(p.y < u) lo = m; else hi = m;
+    }
+    return p ? p.x / 96 * 100 : null;
   }
 
   /* ── donde va cada cosa ──
@@ -519,25 +548,47 @@ JS = """<script>
   var ys = [];
   function medir(){
     lienzoAlPunto();
-    var cl = lista.getBoundingClientRect();
-    lista.style.setProperty('--x', eje(cl) + 'px');
+    if(!caja) return;
+    /* Todo contra la caja de la HEBRA, que es donde viven ahora el punto y la
+       luz. Antes se media contra la lista, que va centrada con el texto y no
+       tiene nada que ver con el margen. */
+    /* En FRACCION de la caja, no en pixeles.
+       La seccion lleva un «scale» que va con el scroll, asi que su caja mide
+       distinto de un cuadro a otro. Guardando pixeles, «ys» quedaba de una
+       medida y «caja.height» de la siguiente, y la luz se pasaba del punto un
+       cuatro por ciento —cincuenta pixeles— sin que nada estuviera mal a
+       primera vista. En fraccion las dos cosas sobreviven al cambio de
+       escala, porque el scale afecta arriba y abajo por igual. */
     ys = fases.map(function(f){
       var c = f.querySelector('.ruta-cab').getBoundingClientRect();
-      return (c.top - cl.top) + c.height / 2;
+      return ((c.top - caja.top) + c.height / 2) / caja.height;
     });
-    /* El rail baja hasta pasado el texto de la ULTIMA fase, no hasta su
-       contador: parado en el contador, el ultimo tramo de linea salia de
-       treinta pixeles y en la referencia la linea es larga. */
+    /* La luz llega hasta pasado el texto de la ULTIMA fase, no hasta su
+       contador: parada ahi, el ultimo tramo salia de treinta pixeles y el
+       recorrido de la referencia es largo. */
     var fin = fases[fases.length - 1].querySelector('.ruta-p').getBoundingClientRect();
-    var abajo = (fin.bottom - cl.top) + 30;
-    lista.style.setProperty('--a', ys[0].toFixed(1) + 'px');
-    lista.style.setProperty('--b', (abajo - ys[0]).toFixed(1) + 'px');
+    fondo = Math.min(1, ((fin.bottom - caja.top) + 30) / caja.height);
+    if(galon){
+      var xf = curvaX(fondo);
+      if(xf !== null) galon.style.setProperty('--fx', xf.toFixed(2) + '%');
+      galon.style.setProperty('--fy', (fondo * 100).toFixed(2) + '%');
+    }
     pon(activa);
   }
-  var activa = 0;
+  var activa = 0, fondo = 0;
   function pon(i){
     activa = i;
-    lista.style.setProperty('--y', (ys.length ? ys[i] - ys[0] : 0).toFixed(1) + 'px');
+    if(ys.length && caja && punto){
+      var y = ys[i];
+      /* El corte de arriba es fijo —donde empieza la fase 1— y el de abajo es
+         el punto: la luz y el punto son el MISMO borde, asi que viajan juntos
+         con la misma curva y el mismo tiempo. */
+      hebra.style.setProperty('--v0', Math.max(0, ys[0] * 100).toFixed(2) + '%');
+      hebra.style.setProperty('--v1', Math.max(0, (1 - y) * 100).toFixed(2) + '%');
+      punto.style.setProperty('--py', (y * 100).toFixed(2) + '%');
+      var x = curvaX(y);
+      if(x !== null) punto.style.setProperty('--px', x.toFixed(2) + '%');
+    }
     for(var k = 0; k < fases.length; k++) fases[k].classList.toggle('on', k <= i);
   }
 
@@ -549,7 +600,6 @@ JS = """<script>
   function paso(){
     pendiente = false;
     lienzoAlPunto();
-    lista.style.setProperty('--x', eje(lista.getBoundingClientRect()) + 'px');
     var h = innerHeight || document.documentElement.clientHeight;
     var y = h * LINEA;
     /* Aqui habia un atajo —«si la lista queda fuera de pantalla, no calcules»—

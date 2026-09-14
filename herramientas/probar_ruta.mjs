@@ -88,55 +88,73 @@ for (let y = 0; y < alto; y += 450) { await pg.evaluate(v => scrollTo(0, v), y);
   di(r.menu === 10 && !r.enMenu, 'no entra en el menu, que sigue con ' + r.menu + ' entradas');
 }
 
-// ── 3 · el rail es el de la referencia, y medido ────────────────────────────
-// Un punto LLENO, un hueco, una linea BLANCA y un galon al final. Ni aros ni
-// tres puntos ni la linea azul: eso fue invencion mia y no era lo que se pidio.
+// ── 3 · el recorrido y la hebra son UNA cosa ───────────────────────────────
+// Antes el recorrido era una linea recta blanca por encima del dibujo, y se
+// leian como dos cosas que no se conocen: una trenza que curva y un palo que
+// no. Ahora la barra ES la hebra —la misma trenza, encendida hasta donde vas—
+// y el punto cabalga la curva.
+//
+// Lo que se comprueba es justo eso, y no que «exista un elemento»: que no
+// quede ninguna linea recta, que el punto caiga SOBRE el camino, y que el
+// borde de la luz y el punto sean el mismo sitio.
 {
   await pg.evaluate(() => document.getElementById('ruta').scrollIntoView({ block:'center' }));
-  await pg.waitForTimeout(900);
+  await pg.waitForTimeout(1100);
   const r = await pg.evaluate(() => {
-    const l = document.getElementById('rutaLista'), cs = getComputedStyle(l);
-    const cl = l.getBoundingClientRect();
+    const ad = document.querySelector('.ruta-adn'), cad = getComputedStyle(ad);
+    const caja = ad.getBoundingClientRect();
     const pu = document.querySelector('.ruta-punto'), cp = getComputedStyle(pu);
-    const li = document.querySelector('.ruta-linea'), cli = getComputedStyle(li);
     const fl = document.querySelector('.ruta-flecha'), cf = getComputedStyle(fl);
-    const rp = pu.getBoundingClientRect(), rl = li.getBoundingClientRect(), rf = fl.getBoundingClientRect();
+    const rp = pu.getBoundingClientRect(), rf = fl.getBoundingClientRect();
+    const viva = document.querySelector('.ruta-viva');
     const cabs = [...document.querySelectorAll('.ruta-cab')].map(c => {
-      const b = c.getBoundingClientRect(); return (b.top - cl.top) + b.height / 2; });
-    const fin = document.querySelector('.ruta-f:last-of-type .ruta-p').getBoundingClientRect();
-    const w = document.querySelector('#ruta .wrap').getBoundingClientRect();
-    const t = document.querySelector('.ruta-h').getBoundingClientRect();
+      const b = c.getBoundingClientRect(); return (b.top - caja.top) / caja.height; });
+    // donde pasa el camino a la altura del punto, preguntandoselo a el
+    const esp = document.querySelector('#nr-adn-0');
+    const vb = (document.querySelector('.ruta-viva svg').getAttribute('viewBox') || '').split(' ');
+    const alto = +vb[3] || 0;
+    const fPunto = (rp.top + rp.height / 2 - caja.top) / caja.height;
+    let xCamino = null;
+    if (esp && alto) {
+      const u = fPunto * alto, L = esp.getTotalLength();
+      let lo = 0, hi = L, q = null;
+      for (let i = 0; i < 22; i++) { const m = (lo + hi) / 2; q = esp.getPointAtLength(m);
+        if (q.y < u) lo = m; else hi = m; }
+      xCamino = caja.left + q.x / 96 * caja.width;
+    }
     return {
-      a:parseFloat(cs.getPropertyValue('--a')), b:parseFloat(cs.getPropertyValue('--b')),
-      cab0:cabs[0], finTexto:(fin.bottom - cl.top),
       puntos:document.querySelectorAll('.ruta-punto').length,
       aros:document.querySelectorAll('.ruta-nodo').length,
+      rectas:document.querySelectorAll('.ruta-linea, .ruta-rail').length,
       colorPunto:cp.backgroundColor, radio:cp.borderRadius, sombra:cp.boxShadow,
-      colorLinea:cli.backgroundColor,
-      hueco:+(rl.top - rp.bottom).toFixed(1), largo:+rl.height.toFixed(1),
-      galon:{ op:+cf.opacity, vis:cf.visibility, alto:+rf.height.toFixed(1),
-              bajo:+(rf.top - rl.bottom).toFixed(1) },
-      eje:+((rp.left + rp.right) / 2).toFixed(1),
-      titular:+(function(){ const e=document.querySelector('.ruta-h');
-        const g=document.createRange(); g.selectNodeContents(e);
-        return g.getBoundingClientRect().left; })().toFixed(1),
-      wrap:+w.left.toFixed(1) };
+      viva:!!viva, recorte:viva ? getComputedStyle(viva).clipPath : '',
+      v0:parseFloat(cad.getPropertyValue('--v0')), v1:parseFloat(cad.getPropertyValue('--v1')),
+      cab0:cabs[0] * 100, fPunto:fPunto * 100,
+      ejePunto:(rp.left + rp.right) / 2, xCamino,
+      galon:{ op:+cf.opacity, vis:cf.visibility, alto:+rf.height.toFixed(1) },
+      titular:+(function(){ const e = document.querySelector('.ruta-h');
+        const g = document.createRange(); g.selectNodeContents(e);
+        return g.getBoundingClientRect().left; })().toFixed(1) };
   });
   di(r.puntos === 1 && r.aros === 0,
      'un solo punto y ningun aro, como en la referencia (' + r.puntos + ' punto, ' + r.aros + ' aros)');
   di(/^rgb\(62, 134, 255\)/.test(r.colorPunto) && r.radio.startsWith('50%'),
      'el punto va LLENO y azul: ' + r.colorPunto);
   di(r.sombra === 'none', 'y sin halo, que la referencia no lo lleva (' + r.sombra + ')');
-  di(/rgba\(255, 255, 255/.test(r.colorLinea), 'la linea es BLANCA, no azul: ' + r.colorLinea);
-  di(r.hueco >= 18, 'hay hueco entre el punto y la linea: ' + r.hueco + ' px');
-  di(r.largo > 120, 'y la linea es larga, no un muñon: ' + r.largo + ' px');
+  di(r.rectas === 0, 'no queda ninguna barra recta encima del dibujo (' + r.rectas + ' piezas)');
+  di(r.viva && /inset/.test(r.recorte), 'la barra es la propia hebra encendida: ' + r.recorte);
+  // EL punto de todo esto: el punto cae SOBRE el camino, no a su lado
+  const desvio = r.xCamino === null ? 999 : Math.abs(r.ejePunto - r.xCamino);
+  di(desvio <= 2, 'y el punto cabalga la curva: ' + desvio.toFixed(2) +
+     ' px entre el punto y el camino a esa altura (maximo 2)');
+  di(Math.abs(r.v0 - r.cab0) <= 1.2,
+     'la luz arranca en el renglon del primer contador: ' + r.v0.toFixed(2) + '% vs ' + r.cab0.toFixed(2) + '%');
+  di(Math.abs((100 - r.v1) - r.fPunto) <= 1.2,
+     'y termina EN el punto, no antes ni despues: ' + (100 - r.v1).toFixed(2) + '% vs ' + r.fPunto.toFixed(2) + '%');
   di(r.galon.op === 1 && r.galon.vis === 'visible' && r.galon.alto > 8,
      'el galon del final se VE (opacidad ' + r.galon.op + ', ' + r.galon.alto + ' px)');
-  di(Math.abs(r.a - r.cab0) <= 1.5,
-     'el rail arranca en el renglon del primer contador, medido: ' + r.a.toFixed(1) + ' vs ' + r.cab0.toFixed(1));
-  di(r.a + r.b > r.finTexto,
-     'y baja pasado el texto de la ultima fase (' + (r.a + r.b).toFixed(1) + ' > ' + r.finTexto.toFixed(1) + ')');
-  di(r.eje < r.titular, 'el rail va en su carril, a la izquierda del texto: ' + r.eje + ' vs ' + r.titular);
+  di(r.ejePunto < r.titular, 'y todo ello en su carril, a la izquierda del texto: ' +
+     r.ejePunto.toFixed(1) + ' vs ' + r.titular);
 }
 
 // ── 3b · el carril y el texto, separados de verdad ──────────────────────────
@@ -161,7 +179,7 @@ for (let y = 0; y < alto; y += 450) { await pg.evaluate(v => scrollTo(0, v), y);
       const sv = document.querySelector('.ruta-adn svg').getBoundingClientRect();
       const brillo = e => parseFloat((getComputedStyle(e).boxShadow.match(/0px 0px ([\d.]+)px/) || [0, 0])[1]) || 0;
       const chispas = [...document.querySelectorAll('.ruta-adn i')].map(e => e.getBoundingClientRect().right + brillo(e));
-      const trazo = parseFloat((getComputedStyle(document.querySelector('.ruta-adn path')).filter
+      const trazo = parseFloat((getComputedStyle(document.querySelector('.ruta-adn use')).filter
         .match(/drop-shadow\(0px 0px ([\d.]+)px/) || [0, 0])[1]) || 0;
       const derecha = Math.max(sv.right + trazo, ...chispas);
       // El borde del TEXTO con un «Range» sobre su contenido. Sumar el
@@ -198,7 +216,8 @@ for (let y = 0; y < alto; y += 450) { await pg.evaluate(v => scrollTo(0, v), y);
       const pt = document.querySelector('.ruta-punto').getBoundingClientRect();
       const ad = document.querySelector('.ruta-adn').getBoundingClientRect();
       return { derecha, izq:real(izq), escala:k,
-               ejePunto:real(pt.left + pt.width / 2), ejeHebra:real(ad.left + ad.width / 2),
+               ejePunto:real(pt.left + pt.width / 2),
+               hebraIzq:real(ad.left), hebraDer:real(ad.right),
                texto:Math.min(...bordes), disp:Math.max(...bordes) - Math.min(...bordes),
                scroll:document.documentElement.scrollWidth > innerWidth };
     });
@@ -206,8 +225,12 @@ for (let y = 0; y < alto; y += 450) { await pg.evaluate(v => scrollTo(0, v), y);
     di(hueco >= 10, W + 'px · la hebra despega del texto: ' + hueco.toFixed(1) + ' px de hueco (minimo 10)');
     di(r.izq >= 0, W + 'px · y entra ENTERA: su canto izquierdo cae en ' + r.izq.toFixed(1)
        + ' px, en reposo (medido a escala ' + r.escala.toFixed(3) + ')');
-    const desvio = Math.abs(r.ejePunto - r.ejeHebra);
-    di(desvio <= 2, W + 'px · el rail va por DENTRO de la hebra: ' + desvio.toFixed(1) + ' px entre los dos ejes (maximo 2)');
+    /* Ya no se pide que el punto este en el EJE: cabalga la curva, asi que
+       se separa del centro a proposito. Que caiga sobre el camino lo mide el
+       bloque 3; aqui solo se exige que no se salga de la hebra. */
+    di(r.ejePunto > r.hebraIzq && r.ejePunto < r.hebraDer,
+       W + 'px · el punto va DENTRO de la hebra: ' + r.ejePunto.toFixed(1) +
+       ' entre ' + r.hebraIzq.toFixed(1) + ' y ' + r.hebraDer.toFixed(1));
     di(r.disp <= 1.5, W + 'px · y todo el texto de la seccion en una sola columna (dispersion ' + r.disp.toFixed(1) + ' px)');
     di(!r.scroll, W + 'px · sin scroll horizontal');
     await c.close();
@@ -245,11 +268,13 @@ for (let y = 0; y < alto; y += 450) { await pg.evaluate(v => scrollTo(0, v), y);
       const ancho = ad.getBoundingClientRect().width;
       // lo que pinta un fondo dentro de la hebra, y cuanto ocupa
       const manchas = [...ad.querySelectorAll('*')].filter(e => {
+        // el punto y el galon son el recorrido, no la trenza
+        if (e.closest('.ruta-punto, .ruta-flecha')) return false;
         const cs = getComputedStyle(e);
         return cs.backgroundColor !== 'rgba(0, 0, 0, 0)' || cs.backgroundImage !== 'none';
       }).map(e => ({ q:e.tagName.toLowerCase() + '.' + (e.getAttribute('class') || ''),
                      w:+e.getBoundingClientRect().width.toFixed(1) }));
-      const ps = [...ad.querySelectorAll('path')].map(e => {
+      const ps = [...ad.querySelectorAll('use')].map(e => {
         const cs = getComputedStyle(e);
         return { sw:parseFloat(cs.strokeWidth), fill:cs.fill, luz:cs.filter };
       });
