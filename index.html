@@ -3295,9 +3295,11 @@ footer .fgrid h4,footer .tec-real{color:#5B657A}
    y encima «builds» y la ruta llevaban un resplandor azul de 1100 px por la
    esquina. Suelo negro y fuera el resplandor de esquina.
 
-   Las animaciones no se tocan: los cubos, la cinta, la hebra y los
-   resplandores que pinta cada lienzo siguen igual. Lo unico que se va es el
-   suelo de debajo. */
+   El resto del azul no estaba aqui sino dentro del guion, en lo que cada
+   lienzo se pinta solo: el lavado del campo de cubos y, sobre todo, el relleno
+   de las losetas del corredor. Eso lo cambia «negro.py» en el marcado.
+
+   Las animaciones no se tocan. */
 .builds,.ruta,.hpin,.kin,.xf,.xl{background:#000}
 /* El resplandor de esquina era lo que mas tiznaba de azul: 1100 x 520 px de
    «rgba(47,107,255,.16)» entrando por arriba a la izquierda. */
@@ -6198,7 +6200,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
       const k=Math.min(1, eOut(clm((close-t0)/(1-t0)))*1.06);
       if(k<=0)continue;
       const h=H*k, down=i%2===0, y=down?0:H-h;
-      ctx.fillStyle='#04060B';
+      ctx.fillStyle='#000000';
       ctx.fillRect(x-.5,y,w+1,h);
       const fadeEdge=1-clm((k-.86)/.14);
       if(fadeEdge>.02){
@@ -6359,8 +6361,8 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
     }
     if(!suVelo||suVeloH!==H){
       suVelo=sctx.createLinearGradient(0,hor-H*.1,0,hor+H*.16);
-      suVelo.addColorStop(0,'rgba(4,6,11,.95)');
-      suVelo.addColorStop(1,'rgba(4,6,11,0)');
+      suVelo.addColorStop(0,'rgba(0,0,0,.95)');
+      suVelo.addColorStop(1,'rgba(0,0,0,0)');
       suVeloH=H;
     }
     sctx.fillStyle=suVelo;
@@ -6410,8 +6412,8 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
   }
   function draw(p){
     const flood=eOut(clm(p/.46));
-    const bg=Math.round(5+(PAPER[0]-5)*flood);
-    ctx.fillStyle='rgb('+bg+','+Math.round(7+(PAPER[1]-7)*flood)+','+Math.round(12+(PAPER[2]-12)*flood)+')';
+    const bg=Math.round(PAPER[0]*flood);
+    ctx.fillStyle='rgb('+bg+','+Math.round(PAPER[1]*flood)+','+Math.round(PAPER[2]*flood)+')';
     ctx.fillRect(0,0,W,H);
     const fx=W*.5, fy=H*1.02;
     for(const q of cells){
@@ -6424,7 +6426,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
       const fly=k*k*U*2.4*q.push;
       const cx=q.x+U/2 + (dx/dl)*fly + Math.cos(q.ang)*fly*.2;
       const cy=q.y+U/2 + (dy/dl)*fly;
-      ctx.fillStyle='#04060B';
+      ctx.fillStyle='#000000';
       ctx.fillRect(cx-w/2,cy-h/2,w+.8,h+.8);
       if(k>.02&&k<.72){
         const a=(1-k/.72)*.55;
