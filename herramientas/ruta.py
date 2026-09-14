@@ -217,10 +217,31 @@ def _adn():
 # Tres cajas, no una: los «transform» no se suman entre animaciones distintas,
 # asi que una pasea, otra gira y el SVG solo se estira. En una sola caja la
 # segunda animacion pisaria a la primera.
+# Cuantas laminas tiene el canto. Con pocas se ve el escalonado al girar; con
+# muchas no se gana nada y son nodos de mas. Dieciocho aguanta los 22 grados de
+# cabeceo sin que se noten los peldaños.
+_CAPAS = 18
+
+
 def _marca():
+    # EL CANTO, DE VERDAD. Antes era una lamina plana girada en el espacio: se
+    # movia en 3D pero no TENIA fondo, porque el unico grosor era el bisel
+    # pintado del propio logo, que esta dibujado para mirarse de frente y al
+    # girar se queda quieto y delata que es plano.
+    #
+    # Ahora el cuerpo son dieciocho copias de la cara, cada una un poco mas
+    # atras en Z y un poco mas oscura. Al girar, esas copias se ven de canto y
+    # forman un lateral macizo con su degradado: el logo pasa de ser un papel a
+    # ser una pieza. El bisel pintado se retira, que ya no hace falta y
+    # duplicado se veria doble.
+    canto = ''.join(
+        '<i style="--n:%d;--t:%s"></i>' % (k, round(1 - k / (_CAPAS - 1) * .72, 3))
+        for k in range(1, _CAPAS))
     return (
         '<i class="ruta-marca" aria-hidden="true">'
         '<i class="ruta-marca-v"><i class="ruta-marca-g">'
+        '<i class="ruta-marca-c">%s</i>'
+        '<i class="ruta-marca-f">'
         '<svg viewBox="0 0 512 512">'
         '<defs>'
         '<linearGradient id="nr-plata" gradientUnits="userSpaceOnUse"'
@@ -236,15 +257,15 @@ def _marca():
         '<stop offset=".70" stop-color="#fff" stop-opacity=".10"/>'
         '<stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>'
         '</defs>'
-        '<path fill="#57595E" d="M471.30 20.48 L485.08 47.14 L485.08 491.52'
-        ' L40.70 491.52 L26.92 464.86 L471.30 464.86 Z"/>'
         '<path fill="url(#nr-plata)" d="M26.92 20.48 L471.30 20.48'
         ' L471.30 464.86 L26.92 464.86 Z"/>'
         '<path fill="url(#nr-brillo)" d="M26.92 20.48 L471.30 20.48'
         ' L471.30 464.86 L26.92 464.86 Z"/>'
         '<path fill="#FCFCFC" d="M26.92 382.65 L471.30 382.65'
         ' L471.30 464.86 L26.92 464.86 Z"/>'
-        '</svg></i></i></i>')
+        '</svg>'
+        '<i class="ruta-marca-luz"></i>'
+        '</i></i></i></i>' % canto)
 
 
 def _marcado():
@@ -342,7 +363,12 @@ CSS = """
    la primera. Solo se anima «transform», que es lo que la tarjeta grafica
    compone sola sin volver a pintar nada. */
 .ruta-marca{position:absolute;inset:0;z-index:0;overflow:hidden;
-  pointer-events:none;perspective:1500px;perspective-origin:50% 42%;
+  /* La perspectiva corta —900 en vez de 1500— es lo que abre la pieza al girar
+     y enseña el canto; con 1500 el giro salia casi ortografico y el grosor no
+     se leia. Pero acorta y ademas AGRANDA: la primera prueba con 900 dejo la
+     pieza tan cerca que se comia el encuadre y se perdia la silueta. Se
+     compensa echandola hacia atras en Z y bajandole el lado. */
+  pointer-events:none;perspective:1050px;perspective-origin:50% 40%;
   opacity:.22;
   /* DOS MASCARAS, y se cruzan:
        · la redonda apaga los cantos, que un logo cortado a escuadra por el
@@ -361,20 +387,51 @@ CSS = """
 .ruta-marca-v,.ruta-marca-g{position:absolute;inset:0;display:block;
   transform-style:preserve-3d;will-change:transform}
 .ruta-marca-v{animation:marcaPasea 71s ease-in-out infinite}
-.ruta-marca-g{animation:marcaGira 53s ease-in-out infinite}
-.ruta-marca svg{position:absolute;left:50%;top:50%;
-  width:min(108vw,1180px);height:min(108vw,1180px);
-  margin:calc(min(108vw,1180px) / -2) 0 0 calc(min(108vw,1180px) / -2);
-  display:block}
+/* Echada hacia atras: asi la perspectiva corta le da profundidad sin
+   acercarla tanto como para salirse del encuadre. */
+.ruta-marca-g{animation:marcaGira 53s ease-in-out infinite;
+  transform:translateZ(-220px)}
+
+/* ── la pieza ──
+   «--lado» es el tamaño del logo y «--gr» el grosor del canto: un 4,5% del
+   lado, que es la proporcion de una pieza solida y no la de una chapa. */
+.ruta-marca{--lado:min(76vw,860px);--gr:calc(var(--lado) * .055)}
+.ruta-marca-c,.ruta-marca-f{position:absolute;left:50%;top:50%;
+  width:var(--lado);height:var(--lado);
+  margin:calc(var(--lado) / -2) 0 0 calc(var(--lado) / -2);
+  transform-style:preserve-3d}
+/* EL CANTO. Dieciocho laminas hacia atras en Z, cada una mas oscura. Vistas
+   de frente no se ven —quedan justo detras de la cara—, pero en cuanto la
+   pieza cabecea aparecen de lado y forman un lateral macizo con su sombreado.
+   Es lo que separa una pieza de un papel: un papel girado sigue sin tener
+   canto, y por mucho que se mueva se lee plano. */
+.ruta-marca-c{transform-style:preserve-3d}
+.ruta-marca-c i{position:absolute;inset:0;display:block;
+  transform:translateZ(calc(var(--gr) / 17 * var(--n) * -1));
+  background:linear-gradient(148deg,#9DA2AF,#5E626C 62%,#3F424A);
+  opacity:var(--t)}
+.ruta-marca-f{transform:translateZ(0)}
+.ruta-marca svg{position:absolute;inset:0;width:100%;height:100%;display:block}
+/* El reflejo que recorre la cara. Va aparte del SVG y con su propio tiempo:
+   pegado al dibujo giraria con el y un reflejo que gira con la pieza no es un
+   reflejo, es una mancha pintada encima. */
+.ruta-marca-luz{position:absolute;inset:0;display:block;pointer-events:none;
+  background:linear-gradient(104deg,transparent 34%,rgba(255,255,255,.5) 47%,
+    rgba(255,255,255,.06) 56%,transparent 66%);
+  animation:marcaLuz 17s ease-in-out infinite}
+@keyframes marcaLuz{
+    0%{transform:translateX(-42%)}
+   50%{transform:translateX(42%)}
+  100%{transform:translateX(-42%)}}
 /* El giro: el logo va de canto —como la referencia, en rombo— y cabecea en
    los tres ejes. El «rotateZ» no vuelve a 45 por el camino corto si lo dejo
    suelto, asi que los fotogramas lo llevan a mano. */
 @keyframes marcaGira{
-    0%{transform:rotateX(-14deg) rotateY(16deg) rotateZ(45deg)}
-   25%{transform:rotateX(10deg)  rotateY(-9deg) rotateZ(52deg)}
-   50%{transform:rotateX(15deg)  rotateY(14deg) rotateZ(40deg)}
-   75%{transform:rotateX(-8deg)  rotateY(-16deg) rotateZ(49deg)}
-  100%{transform:rotateX(-14deg) rotateY(16deg) rotateZ(45deg)}}
+    0%{transform:translateZ(-220px) rotateX(-21deg) rotateY(24deg)  rotateZ(45deg)}
+   25%{transform:translateZ(-220px) rotateX(16deg)  rotateY(-14deg) rotateZ(53deg)}
+   50%{transform:translateZ(-220px) rotateX(23deg)  rotateY(21deg)  rotateZ(38deg)}
+   75%{transform:translateZ(-220px) rotateX(-12deg) rotateY(-25deg) rotateZ(50deg)}
+  100%{transform:translateZ(-220px) rotateX(-21deg) rotateY(24deg)  rotateZ(45deg)}}
 /* El paseo: recorre la seccion sin llegar a salirse del todo. */
 @keyframes marcaPasea{
     0%{transform:translate3d(-9%,-5%,0) scale(1)}
@@ -468,7 +525,7 @@ CSS = """
 .ruta-chispas i{animation:adnChispa 5.5s ease-in-out var(--d) infinite}
 
 @media(prefers-reduced-motion:reduce){
-  .ruta-adn use,.ruta-chispas i{animation:none}
+  .ruta-adn use,.ruta-chispas i,.ruta-marca-luz{animation:none}
 }
 
 /* ── el rotulo de arriba ──

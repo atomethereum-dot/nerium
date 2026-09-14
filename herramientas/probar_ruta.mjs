@@ -387,13 +387,19 @@ for (let y = 0; y < alto; y += 450) { await pg.evaluate(v => scrollTo(0, v), y);
         if (w > 4 && h > 4) fuera.push({ x, y, width:w, height:h, q:quien });
       }
     };
-    mete(document.querySelector('.ruta-h'), 'h');
-    mete(document.querySelector('.ruta-sub'), 'sub');
-    document.querySelectorAll('.ruta-t,.ruta-p').forEach((e, i) =>
-      mete(e, e.className.replace('ruta-', '') + i));
+    /* SOLO LOS PARRAFOS DE LAS FASES. Son el texto mas pequeño y el mas
+       apagado de la seccion —14 a 17 px, y en una fase no alcanzada van al
+       .6—, o sea el que manda: lo que valga para ellos vale para el titular,
+       que es cinco veces mas grande y va en blanco.
+
+       Meter tambien el titular no añadia rigor y si ruido: el canto azul de
+       un pixel que separa las secciones le cruza el renglon, y un filete de
+       un pixel sobre un titular de 56 px no es un problema de lectura —ni es
+       cosa del logo, que es lo que aqui se juzga—. */
+    document.querySelectorAll('.ruta-p').forEach((e, i) => mete(e, 'p' + i));
     return fuera;
   });
-  di(zonas.length >= 3, 'hay texto de la ruta en pantalla para medir lo que tiene detras (' +
+  di(zonas.length >= 2, 'hay parrafos de la ruta en pantalla para medir lo que tienen detras (' +
      zonas.length + ' renglones)');
 
   /* Antes de medir, que el texto este DE VERDAD apagado. Una tirada dio 0,41
@@ -406,36 +412,59 @@ for (let y = 0; y < alto; y += 450) { await pg.evaluate(v => scrollTo(0, v), y);
   await p4.waitForFunction(() =>
     getComputedStyle(document.querySelector('.ruta-wrap')).opacity === '0', null, { timeout:4000 });
 
+  /* SE MIDE LA MARCA SOLA, sobre el negro de la seccion.
+     Se apaga todo lo demas —el texto, la hebra, los filetes y el canto de la
+     seccion— y queda el logo sobre el suelo, que es negro puro. Lo que se lee
+     entonces ES la luz que el logo pone detras de cada renglon, sin nada
+     prestado.
+
+     Dos intentos peores antes de esto:
+
+       · mirar el maximo absoluto del fondo encontraba siempre algo claro de
+         un pixel —el canto azul de la seccion cruza el renglon del titular— y
+         le echaba la culpa al logo de una linea que estaba ahi desde antes;
+       · y comparar pixel a pixel «con logo» contra «sin logo» tampoco vale:
+         entre las dos capturas la seccion se corre un pixel por su propio
+         «scale», y una linea de un pixel deja de coincidir consigo misma, con
+         lo que salia que el logo pintaba de azul un sitio donde solo se habia
+         movido el canto.
+
+     Sondear el punto con «elementsFromPoint» no aclaraba nada tampoco: las
+     capas decorativas llevan «pointer-events:none» y el sondeo pasa de largo. */
+  await p4.addStyleTag({ content:
+    '.ruta-adn{display:none !important}' +
+    '.ruta::before,.ruta::after{display:none !important}' +
+    '.ruta-f::before,.ruta-f::after{display:none !important}' });
+
+  const LEER = async b64 => p4.evaluate(async x => {
+    const img = new Image();
+    await new Promise(r => { img.onload = r; img.src = 'data:image/png;base64,' + x; });
+    const cv = document.createElement('canvas');
+    cv.width = img.width; cv.height = img.height;
+    const g = cv.getContext('2d'); g.drawImage(img, 0, 0);
+    const px = g.getImageData(0, 0, cv.width, cv.height).data;
+    const lin = v => { v /= 255; return v <= .04045 ? v / 12.92 : Math.pow((v + .055) / 1.055, 2.4); };
+    let max = 0, rgb = '';
+    for (let i = 0; i < px.length; i += 4) {
+      const L = .2126 * lin(px[i]) + .7152 * lin(px[i+1]) + .0722 * lin(px[i+2]);
+      if (L > max) { max = L; rgb = px[i] + ',' + px[i+1] + ',' + px[i+2]; }
+    }
+    return { max, rgb };
+  }, b64);
+
   let peor = 0, cuando = 0, donde = null;
   for (const d of [0, 9, 18, 27, 36, 45, 54, 63]) {
     await p4.evaluate(v => { document.querySelectorAll('.ruta-marca-v,.ruta-marca-g')
       .forEach(e => { e.style.animationDelay = (-v) + 's'; }); }, d);
-    // dos cuadros, para que el cambio este pintado y no a medio pintar
     await p4.evaluate(() => new Promise(r =>
       requestAnimationFrame(() => requestAnimationFrame(r))));
     await p4.waitForTimeout(120);
-    for (const zona of zonas) {
-    const png = await p4.screenshot({ clip:zona });
-    const L = await p4.evaluate(async b64 => {
-      const img = new Image();
-      await new Promise(r => { img.onload = r; img.src = 'data:image/png;base64,' + b64; });
-      const cv = document.createElement('canvas');
-      cv.width = img.width; cv.height = img.height;
-      const g = cv.getContext('2d'); g.drawImage(img, 0, 0);
-      const px = g.getImageData(0, 0, cv.width, cv.height).data;
-      const lin = v => { v /= 255; return v <= .04045 ? v / 12.92 : Math.pow((v + .055) / 1.055, 2.4); };
-      let max = 0, mx = 0, my = 0, rgb = '';
-      for (let i = 0; i < px.length; i += 4) {
-        const L = .2126 * lin(px[i]) + .7152 * lin(px[i+1]) + .0722 * lin(px[i+2]);
-        if (L > max) { max = L; const n = i / 4;
-          mx = n % cv.width; my = (n / cv.width) | 0;
-          rgb = px[i] + ',' + px[i+1] + ',' + px[i+2]; }
-      }
-      return { max, mx, my, rgb, w:cv.width, h:cv.height };
-    }, png.toString('base64'));
-    if (L.max > peor) { peor = L.max; cuando = d; donde = Object.assign({}, L, { z:zona }); }
+    for (const z of zonas) {
+      const L = await LEER((await p4.screenshot({ clip:z })).toString('base64'));
+      if (L.max > peor) { peor = L.max; cuando = d; donde = { rgb:L.rgb, z }; }
     }
   }
+
   /* El contraste que le queda al parrafo mas apagado contra ESE pixel.
      El color del parrafo se LEE de la pagina, no se escribe aqui: llevandolo
      a mano, el dia que alguien lo cambie la bateria seguiria dando por bueno
@@ -458,7 +487,7 @@ for (let y = 0; y < alto; y += 450) { await pg.evaluate(v => scrollTo(0, v), y);
   di(cr >= 4.5, 'al parrafo mas apagado le quedan ' + cr.toFixed(2) +
      ':1 contra el fondo mas claro que le pone la marca (minimo 4,5; texto ' +
      Ltexto.toFixed(4) + ', fondo ' + peor.toFixed(4) + ', peor momento a los ' + cuando + ' s' +
-     (donde ? ', rgb ' + donde.rgb + ' en ' + donde.mx + ',' + donde.my + ' en el renglon ' + donde.z.q + ' (' + donde.z.x + ',' + donde.z.y + ' ' + donde.z.width + 'x' + donde.z.height + ')' : '') + ', wrap op ' + opWrap + ')');
+     (donde ? ', rgb ' + donde.rgb + ' en el renglon ' + donde.z.q : '') + ', wrap op ' + opWrap + ')');
   di(cr >= 4.8, 'y con holgura, no al filo: ' + cr.toFixed(2) + ':1 (se pide 4,8 para no vivir en el limite)');
   di(opWrap === '0', 'y la medida es del FONDO: el texto seguia apagado al terminar (opacidad ' + opWrap + ')');
   await c.close();
