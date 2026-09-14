@@ -4497,13 +4497,22 @@ const CALM=matchMedia('(prefers-reduced-motion: reduce)').matches;
   }
   addEventListener('resize',measure,{passive:true});
   new ResizeObserver(measure).observe(el);
-  function frame(){
+  let antesT=0;
+  function frame(ahora){
     if(smooth){
       const prev=S.y;
-      S.y=lerp(S.y,S.t,.11);
+      /* El paso, por TIEMPO y no por cuadro. Antes era un 0,11 fijo por
+         cuadro: con cuadros de 34 ms —medido con ruedas de verdad— avanzaba la
+         mitad de lo que toca y la pagina se quedaba 219 px por detras de la
+         rueda. A 60 por segundo esta cuenta da el mismo 0,11 de siempre, asi
+         que el tacto es identico; lo que cambia es que ya no se retrasa
+         cuando un cuadro se alarga. */
+      const dt=Math.min(64,(ahora||0)-antesT||16.7); antesT=ahora||0;
+      const k=1-Math.pow(1-.11,dt/16.7);
+      S.y=lerp(S.y,S.t,k);
       if(Math.abs(S.t-S.y)<.4)S.y=S.t;
       S.v=S.y-prev;
-      if(Math.abs(S.v)>.05)scrollTo({top:S.y,behavior:'auto'});
+      if(Math.abs(S.v)>.05)scrollTo(0,S.y);
     }else{
       const prev=S.y;S.y=scrollY;S.v=S.y-prev;
     }
@@ -4730,12 +4739,41 @@ const CALM=matchMedia('(prefers-reduced-motion: reduce)').matches;
     }));
     if(!bands.length)return;
     let vivas=bands;
+    /* NI UNA VARIABLE HEREDABLE EN LA RAIZ POR CUADRO.
+       Escribir una propiedad personalizada sobre el <html> obliga a repasar el
+       estilo del documento entero —1.135 de 1.644 elementos, 2,6 ms— y esto
+       cambiaba en casi todos los cuadros al bajar: 12 ms por cuadro tirados.
+       El lavado se reparte a mano, y el azul mas abajo se espacia. */
+    const capa=document.getElementById('wash');
+    let pinta=null;
+    function reparte(){
+      /* Quien pinta el lavado se pregunta, no se supone: se limpia lo escrito,
+         se compara el color calculado de cada candidata con el del propio
+         #wash y solo entran las que coinciden. El <footer> lo declara pero lo
+         pierde contra una regla mas fuerte, y asi se queda fuera solo. */
+      const cand=[...document.querySelectorAll('.hero,section.dark,.stack,footer')];
+      for(const e of cand)e.style.backgroundColor='';
+      if(!capa){pinta=[];return}
+      capa.style.removeProperty('--wash');
+      const v=getComputedStyle(capa).backgroundColor;
+      pinta=cand.filter(e=>getComputedStyle(e).backgroundColor===v);
+      lastBg='';
+    }
+    function lavado(c){
+      if(!pinta)reparte();
+      /* El #wash esta vacio: escribirle la variable cuesta un elemento, y de
+         ahi la leen el vigilante del tono y el cursor. */
+      if(capa)capa.style.setProperty('--wash',c);
+      else document.documentElement.style.setProperty('--wash',c);
+      for(let i=0;i<pinta.length;i++)pinta[i].style.backgroundColor=c;
+    }
     const measure=()=>{
       bands.forEach(b=>{let y=0,n=b.n;while(n){y+=n.offsetTop;n=n.offsetParent}b.top=y});
       vivas=bands.filter(b=>b.n.offsetHeight>0||b.n.offsetParent);
+      pinta=null;
     };
     measure();
-    let cur=[0,0,0],ca=[0,0,0],first=true,lastBg='',lastAcc='';
+    let cur=[0,0,0],ca=[0,0,0],first=true,lastBg='',lastAcc='',puesto='',ap=[0,0,0];
     jobs.push({measure,run(){
       const anchor=S.y+S.vh*0.92;
       let i=0;
@@ -4747,8 +4785,16 @@ const CALM=matchMedia('(prefers-reduced-motion: reduce)').matches;
       if(first){cur=bg;ca=acc;first=false}
       cur=mix(cur,bg,.16); ca=mix(ca,acc,.16);
       const c1=css(cur), c2=css(ca);
-      if(c1!==lastBg){lastBg=c1;document.documentElement.style.setProperty('--wash',c1)}
-      if(c2!==lastAcc){lastAcc=c2;document.documentElement.style.setProperty('--blue',c2)}
+      if(c1!==lastBg){lastBg=c1;lavado(c1)}
+      /* El azul si vive en la raiz —lo piden «::selection» y «:focus-visible»,
+         que valen para cualquier elemento—, pero no se reescribe por cuadro:
+         mientras corre, cada seis puntos de 255; en cuanto se para, exacto. */
+      if(c2!==puesto&&(c2===lastAcc||
+         Math.max(Math.abs(ca[0]-ap[0]),Math.abs(ca[1]-ap[1]),Math.abs(ca[2]-ap[2]))>=6)){
+        puesto=c2; ap=[ca[0],ca[1],ca[2]];
+        document.documentElement.style.setProperty('--blue',c2);
+      }
+      lastAcc=c2;
     }});
   })();
   (function(){
@@ -4943,6 +4989,7 @@ const CALM=matchMedia('(prefers-reduced-motion: reduce)').matches;
 (function(){
   const raiz=document.documentElement;
   let claro=null;
+  const sitio=document.getElementById('wash');
   const lum=c=>{
     const m=(c||'').match(/[\d.]+/g); if(!m||m.length<3)return 0;
     const f=v=>{v/=255;return v<=.03928?v/12.92:Math.pow((v+.055)/1.055,2.4)};
@@ -4950,11 +4997,13 @@ const CALM=matchMedia('(prefers-reduced-motion: reduce)').matches;
   };
   (function mira(){
     requestAnimationFrame(mira);
-    /* «raiz.style» y NO «getComputedStyle»: lo segundo recalcula el estilo del
-       documento entero, y esto corre en cada cuadro mientras la pagina este
-       abierta. Era el 33 % del coste de desplazarse. El valor se escribe en
-       linea sobre el <html>, asi que leerlo de aqui es exacto y gratis. */
-    const q=lum(raiz.style.getPropertyValue('--wash'))>.35;
+    /* El estilo EN LINEA y NO «getComputedStyle»: lo segundo recalcula el
+       estilo del documento entero, y esto corre en cada cuadro mientras la
+       pagina este abierta. Era el 33 % del coste de desplazarse. El lavado se
+       escribe en linea sobre el #wash, asi que leerlo de ahi es exacto y
+       gratis; sin valor, la cadena vacia da luminancia 0, que es el oscuro
+       del CSS. */
+    const q=lum(sitio?sitio.style.getPropertyValue('--wash'):'')>.35;
     if(q!==claro){claro=q;document.body.classList.toggle('light',q)}
   })();
 })();
@@ -6754,8 +6803,12 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
   addEventListener('resize',size,{passive:true});
   if(window.ResizeObserver) new ResizeObserver(size).observe(cv);
   let medido=false;
+  const capaW=document.getElementById('wash');
   function ink(){
-    const w=getComputedStyle(document.documentElement).getPropertyValue('--wash').trim();
+    /* El estilo en linea del #wash, que es donde vive ahora el lavado, y no
+       «getComputedStyle», que recalculaba el documento entero en cada cuadro
+       del cursor. Sin valor se devuelve la tinta clara, igual que antes. */
+    const w=capaW?capaW.style.getPropertyValue('--wash').trim():'';
     const m=w.match(/[\d.]+/g);
     if(!m)return '233,238,247';
     return (.2126*+m[0]+.7152*+m[1]+.0722*+m[2])>140?'11,13,18':'233,238,247';
@@ -7071,6 +7124,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
   if(!filas.length)return;
   const SIM='ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789/\\<>[]{}#$%&*+=-';
   if(CALMA)return;
+  const lavadoEl=document.getElementById('wash');
   filas.forEach(el=>{
     const txt=el.textContent;
     el.textContent='';
@@ -7102,6 +7156,9 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
         real.append(document.createTextNode(fijo));
         const cur=document.createElement('span');
         cur.className='tec-cur';
+        /* El lavado vive en el #wash, no en la raiz; el cursor se crea en
+           cada letra, asi que el color se le pone aqui. */
+        if(lavadoEl)cur.style.color=lavadoEl.style.getPropertyValue('--wash');
         cur.textContent=SIM[(Math.floor(e/MS_SIMBOLO)+i*7)%SIM.length];
         real.append(cur);
       }

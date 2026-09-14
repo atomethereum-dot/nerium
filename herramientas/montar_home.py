@@ -269,5 +269,5 @@ print("montado:", len(salida), "bytes ·", salida.count('var(--hud-b)'), "usos d
       "tarjetas:", 'llenas' if tarjeta.MARCA in salida else 'CON HUECO', "·",
       "ruta:", str(salida.count('class="ruta-f"')) + ' fases' if ruta.MARCA in salida else 'SIN RUTA', "·",
       "negro:", 'suelo a cero' if negro.MARCA in salida else 'AZULADO', "·",
-      "fluidez:", 'sin lecturas por cuadro'
-                  if 'raiz.style.getPropertyValue' in salida else 'CON ATASCO')
+      "fluidez:", 'sin variables en la raiz por cuadro'
+                  if 'function lavado(c){' in salida else 'CON ATASCO')
