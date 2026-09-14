@@ -3117,10 +3117,15 @@ footer .fgrid h4,footer .tec-real{color:#5B657A}
 /* ══ fin: tarjeta ══ */
 /* ══ la ruta ══════════════════════════════════════════════════════════════
    Las tres fases de adopcion, debajo de «lo que estamos construyendo» y con
-   su mismo suelo: el mismo negro y el mismo resplandor, para que las dos se
-   lean como un solo campo y no como dos secciones pegadas. */
-.ruta{position:relative;overflow:hidden;background:#0A0E18;
-  padding:clamp(52px,6.5vw,96px) 0 clamp(64px,8vw,124px);
+   su mismo suelo, para que las dos se lean como un solo campo y no como dos
+   secciones pegadas.
+
+   El negro va escrito AQUI, no solo en el paso 30. Este modulo reescribe su
+   propia seccion cada vez que se aplica, asi que si se quedaba con el azul de
+   antes, volver a aplicarlo deshacia el paso 30 y la ruta salia marina otra
+   vez. Lo cazo su bateria comparando el suelo con el de proyectos. */
+.ruta{position:relative;overflow:hidden;background:#000;
+  padding:clamp(78px,9vw,136px) 0 clamp(72px,8.6vw,132px);
   /* El CARRIL: la franja de la izquierda donde viven el rail y la hebra. Todo
      el texto de la seccion empieza a su derecha.
 
@@ -3145,6 +3150,10 @@ footer .fgrid h4,footer .tec-real{color:#5B657A}
    es el mismo borde del que cuelga el rail, y centrandolo sobre el se queda
    justo encima. Colgandolo de la seccion caia treinta y cinco pixeles a la
    derecha del rail, que es lo que se veia. */
+/* La seccion de arriba entregaba con su pie a 48 px del canto y la ruta
+   empezaba enseguida: las dos juntas se leian amontonadas. Se le da aire por
+   abajo, que es de donde viene el apreton. */
+.builds{padding-bottom:clamp(76px,8.4vw,128px)}
 .ruta-wrap{position:relative}
 .ruta-top,.ruta-h,.ruta-f{padding-left:var(--carril)}
 .ruta-wrap>.ruta-top,.ruta-wrap>.ruta-h,.ruta-wrap>.ruta-lista{position:relative;z-index:1}
@@ -3197,7 +3206,7 @@ footer .fgrid h4,footer .tec-real{color:#5B657A}
    Lo cazo «probar_contraste.mjs», que mide el pixel y no el CSS. */
 .ruta-k{color:#79ABFF}
 .ruta-marca{color:rgba(160,190,240,.68);text-align:end}
-.ruta-h{margin:clamp(14px,2vw,26px) 0 clamp(30px,4.4vw,64px);
+.ruta-h{margin:clamp(18px,2.4vw,30px) 0 clamp(48px,5.8vw,88px);
   font-weight:400;font-size:clamp(26px,4.4vw,56px);letter-spacing:-.04em;
   line-height:1.06;color:#fff;max-width:18ch;text-wrap:balance}
 
@@ -3240,8 +3249,22 @@ footer .fgrid h4,footer .tec-real{color:#5B657A}
 .ruta-flecha svg{width:15px;height:15px;fill:none;stroke:currentColor;
   stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round}
 
-.ruta-f{position:relative;padding-block:0 clamp(34px,5vw,80px)}
-.ruta-f:last-of-type{padding-bottom:clamp(30px,4vw,58px)}
+.ruta-f{position:relative;padding-block:0 clamp(46px,5.6vw,96px)}
+.ruta-f:last-of-type{padding-bottom:0}
+/* ── el filete que separa una fase de la siguiente ──
+   Tres bloques de texto seguidos, con 33 px entre ellos en el telefono, se
+   leian como un muro. El filete los separa y de paso le da a la seccion un
+   ritmo que antes no tenia.
+
+   Arranca en la COLUMNA del texto, no en el borde: si cruzara el carril
+   partiria el rail en tres, y el rail es una linea continua a proposito. Y se
+   desvanece hacia la derecha, que una raya de lado a lado en un sitio donde no
+   hay nada a la derecha se lee como un subrayado suelto. */
+.ruta-f + .ruta-f{padding-top:clamp(46px,5.6vw,96px)}
+.ruta-f + .ruta-f::before{content:"";position:absolute;top:0;
+  left:var(--carril);right:0;height:1px;pointer-events:none;
+  background:linear-gradient(to right,
+    rgba(160,200,255,.24),rgba(160,200,255,.07) 58%,transparent 92%)}
 
 .ruta-cab{display:flex;align-items:baseline;gap:clamp(10px,1.6vw,18px);
   font-family:var(--m);font-size:clamp(9.5px,1vw,11px);letter-spacing:.2em;
