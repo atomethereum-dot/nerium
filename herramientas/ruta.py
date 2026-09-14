@@ -260,6 +260,22 @@ _O0, _O1 = 6.0, 506.0          # contorno exterior de la pieza
 _B = 34.0                      # ancho del bisel
 _I0, _I1 = _O0 + _B, _O1 - _B  # la cara, dentro del bisel
 _BANDA = .8005                 # donde empieza la franja blanca, en tanto por uno
+_VELO = .32                    # lo apagada que va la marca sobre el negro
+
+
+def _apaga(c, f=_VELO):
+    """Multiplica un color por el velo.
+
+    La marca llevaba «opacity» sobre la caja que la contiene, y eso obliga al
+    navegador a componer TODA la seccion fuera de pantalla en cada cuadro.
+    Medido: 17 ms por cuadro, mas que todas las demas piezas juntas.
+
+    Como el suelo de la seccion es negro PURO, un color al 32 % sobre negro y
+    ese mismo color multiplicado por 0,32 y pintado opaco dan exactamente el
+    mismo pixel. Asi que se hornea aqui y la caja deja de necesitar opacidad.
+    """
+    c = c.lstrip('#')
+    return '#%02X%02X%02X' % tuple(int(int(c[i:i + 2], 16) * f) for i in (0, 2, 4))
 
 
 def _bisel(arriba, derecha, abajo, izquierda):
@@ -283,9 +299,9 @@ def _cara(sufijo, luz):
         '<defs>'
         '<linearGradient id="nr-plata%s" gradientUnits="userSpaceOnUse"'
         ' x1="%s" y1="%s" x2="%s" y2="%s">'
-        '<stop offset="0" stop-color="#EDF0F7"/>'
-        '<stop offset=".52" stop-color="#A9AEBB"/>'
-        '<stop offset="1" stop-color="#4E525C"/></linearGradient>'
+        '<stop offset="0" stop-color="%s"/>'
+        '<stop offset=".52" stop-color="%s"/>'
+        '<stop offset="1" stop-color="%s"/></linearGradient>'
         '<linearGradient id="nr-brillo%s" gradientUnits="userSpaceOnUse"'
         ' x1="%s" y1="%s" x2="%s" y2="%s">'
         '<stop offset="0" stop-color="#fff" stop-opacity="0"/>'
@@ -295,12 +311,14 @@ def _cara(sufijo, luz):
         '</defs>'
         '<rect x="%s" y="%s" width="%s" height="%s" fill="url(#nr-plata%s)"/>'
         '<rect x="%s" y="%s" width="%s" height="%s" fill="url(#nr-brillo%s)"/>'
-        '<rect x="%s" y="%s" width="%s" height="%s" fill="#FCFCFC"/>'
+        '<rect x="%s" y="%s" width="%s" height="%s" fill="%s"/>'
         % (sufijo, _I0, _I0, _I1, _I1,
-           sufijo, _I0, _I0, _I1, _I1, luz, round(luz * .28, 3),
+           _apaga('#EDF0F7'), _apaga('#A9AEBB'), _apaga('#4E525C'),
+           sufijo, _I0, _I0, _I1, _I1,
+           round(luz * _VELO, 3), round(luz * .28 * _VELO, 3),
            _I0, _I0, _I1 - _I0, _I1 - _I0, sufijo,
            _I0, _I0, _I1 - _I0, _I1 - _I0, sufijo,
-           _I0, by, _I1 - _I0, _I1 - by))
+           _I0, by, _I1 - _I0, _I1 - by, _apaga('#FCFCFC')))
 
 
 def _marca():
@@ -309,10 +327,10 @@ def _marca():
     # espejado, que es lo que se ve del reverso de una plancha. Sin ella, pasada
     # la media vuelta lo que miraba a camara era un rectangulo liso.
     delante = ('<svg viewBox="0 0 512 512">%s%s</svg>'
-               % (_bisel('#E4E8F1', '#5D616B', '#34373E', '#C2C7D3'),
+               % (_bisel(*map(_apaga, ('#E4E8F1', '#5D616B', '#34373E', '#C2C7D3'))),
                   _cara('', .5)))
     detras = ('<svg viewBox="0 0 512 512">%s%s</svg>'
-              % (_bisel('#8E93A0', '#2C2F35', '#1B1D22', '#6B6F7A'),
+              % (_bisel(*map(_apaga, ('#8E93A0', '#2C2F35', '#1B1D22', '#6B6F7A'))),
                  _cara('-b', .22)))
     # Y LOS CUATRO LADOS. Sin ellos la pieza esta HUECA: son dos planchas
     # separadas en Z y por el canto se ve a traves, que es exactamente el hueco
@@ -441,23 +459,24 @@ CSS = """
      pieza tan cerca que se comia el encuadre y se perdia la silueta. Se
      compensa echandola hacia atras en Z y bajandole el lado. */
   pointer-events:none;perspective:1050px;perspective-origin:50% 40%;
-  opacity:.32;
-  /* DOS MASCARAS, y se cruzan:
-       · la redonda apaga los cantos, que un logo cortado a escuadra por el
-         borde de la seccion se lee como un error y no como un fondo. Va ancha
-         y se apaga tarde: apretada, recortaba la pieza en cuñas y lo que se
-         veia no era un solido girando sino poligonos sueltos;
-       · la horizontal lo baja donde vive el TEXTO —la mitad izquierda— y lo
-         deja entero donde no hay nada que leer.
-     Asi el logo se ve de verdad sin comerse las letras: donde importa llega
-     al 32% de una cosa y donde no, al 6%. Un solo numero para toda la caja
-     obligaba a elegir entre que no se viera o que estorbase. */
-  -webkit-mask-image:radial-gradient(145% 125% at 50% 50%,#000 58%,transparent 100%),
-                     linear-gradient(to right,rgba(0,0,0,.2) 0 46%,#000 82%);
-          mask-image:radial-gradient(145% 125% at 50% 50%,#000 58%,transparent 100%),
-                     linear-gradient(to right,rgba(0,0,0,.2) 0 46%,#000 82%);
-  -webkit-mask-composite:source-in;
-          mask-composite:intersect}
+  /* NI OPACIDAD NI MASCARA en esta caja.
+     Las dos obligan al navegador a componer la seccion entera fuera de
+     pantalla en cada cuadro, y la marca se mueve en todos. Medido: 17 ms por
+     cuadro, mas que todas las demas piezas de la marca juntas, y el mayor
+     coste que le quedaba a la pagina.
+
+     El velo se hornea en los colores —sobre negro puro, un color al 32 % y
+     ese color multiplicado por 0,32 dan el mismo pixel— y los dos degradados
+     que antes recortaban ahora se PINTAN ENCIMA en negro, que sobre un suelo
+     negro da exactamente lo mismo y cuesta lo que un rectangulo con
+     degradado. El velo va debajo del texto —la marca esta en z-index 0 y el
+     texto en 1—, asi que no toca ni una letra. */
+}
+/* El apagado de los cantos y el hueco sobre la columna de texto, pintados. */
+.ruta-marca::after{content:"";position:absolute;inset:0;display:block;
+  pointer-events:none;
+  background:radial-gradient(145% 125% at 50% 50%,transparent 58%,#000 100%),
+             linear-gradient(to right,rgba(0,0,0,.8) 0 46%,transparent 82%)}
 .ruta-marca-v,.ruta-marca-g{position:absolute;inset:0;display:block;
   transform-style:preserve-3d;will-change:transform}
 .ruta-marca-v{animation:marcaPasea 47s ease-in-out infinite}
@@ -510,13 +529,13 @@ CSS = """
 .l-iz,.l-de{width:var(--gr);height:var(--lado);
   margin:calc(var(--lado) / -2) 0 0 calc(var(--gr) / -2)}
 .l-ar{transform:rotateX(90deg) translateZ(calc(var(--lado) / 2));
-  background:linear-gradient(to bottom,#C8CCD8,#6A6E79 62%,#3A3D45)}
+  background:linear-gradient(to bottom,#404149,#222329 62%,#121316)}
 .l-ab{transform:rotateX(-90deg) translateZ(calc(var(--lado) / 2));
-  background:linear-gradient(to top,#2B2E35,#4A4D55 58%,#22242A)}
+  background:linear-gradient(to top,#0D0E10,#171820 58%,#0B0C0D)}
 .l-iz{transform:rotateY(-90deg) translateZ(calc(var(--lado) / 2));
-  background:linear-gradient(to right,#B6BAC6,#63666F 66%,#34373E)}
+  background:linear-gradient(to right,#3A3B3F,#1F2023 66%,#101114)}
 .l-de{transform:rotateY(90deg) translateZ(calc(var(--lado) / 2));
-  background:linear-gradient(to left,#34373E,#4E515A 54%,#24272D)}
+  background:linear-gradient(to left,#101114,#191A1C 54%,#0B0C0E)}
 /* La trasera, al fondo del canto y espejada. Sin ella, pasada la media vuelta
    lo que miraba a camara era la ultima lamina: un rectangulo gris sin forma. */
 .ruta-marca-b{transform:translateZ(calc(var(--gr) / -2)) rotateY(180deg)}
@@ -529,8 +548,8 @@ CSS = """
    lo que se ve y recorre la cara moviendose. */
 .ruta-marca-luz{position:absolute;top:-10%;bottom:-10%;left:0;width:34%;
   display:block;pointer-events:none;
-  background:linear-gradient(104deg,transparent 6%,rgba(255,255,255,.5) 44%,
-    rgba(255,255,255,.06) 62%,transparent 94%);
+  background:linear-gradient(104deg,transparent 6%,rgba(255,255,255,.16) 44%,
+    rgba(255,255,255,.02) 62%,transparent 94%);
   animation:marcaLuz 17s ease-in-out infinite}
 @keyframes marcaLuz{
     0%{transform:translateX(-20%)}
@@ -780,11 +799,11 @@ CSS = """
 @media(max-width:760px){
   /* En el telefono el texto ocupa todo el ancho, asi que no hay mitad libre
      donde subir la marca: se baja entera. */
-  .ruta-marca{opacity:.16;
-    -webkit-mask-image:radial-gradient(130% 92% at 50% 48%,#000 30%,transparent 94%);
-            mask-image:radial-gradient(130% 92% at 50% 48%,#000 30%,transparent 94%);
-    -webkit-mask-composite:source-over;
-            mask-composite:add}
+  /* En el telefono el texto ocupa todo el ancho, asi que no hay mitad libre
+     donde subir la marca: el velo es parejo y mas apagado. */
+  .ruta-marca::after{background:
+    radial-gradient(150% 120% at 50% 50%,transparent 50%,#000 100%),
+    linear-gradient(to right,rgba(0,0,0,.5) 0 100%)}
   /* En el telefono solo cambia el ANCHO de la hebra. El trazo, el resplandor
      y las chispas ya bajan solos con «--k», que es proporcional a ese ancho;
      antes se corregian aparte aqui y acababan discutiendo con la regla de
@@ -830,10 +849,23 @@ JS = """<script>
   var punto = hebra && hebra.querySelector('.ruta-punto');
   var galon = hebra && hebra.querySelector('.ruta-flecha');
   var ALTO_MAX = 3400, altoVB = 0, caja = null;
-  function lienzoAlPunto(){
+  /* SOLO CUANDO LA CAJA CAMBIA, no en cada cuadro.
+     Esto se llamaba desde «paso()», o sea sesenta veces por segundo, y cada
+     llamada empieza por un «getBoundingClientRect». Medido con el perfilador:
+     1.775 ms de 23.598 recorriendo la pagina, el 7,5 % del coste de
+     desplazarse, y es codigo mio. La caja de la hebra solo cambia cuando
+     cambia el tamaño de la seccion, y para eso esta «ResizeObserver»: avisa
+     el, en vez de preguntarle nosotros. */
+  var hayQueMedir = true;
+  if(hebra && window.ResizeObserver){
+    new ResizeObserver(function(){ hayQueMedir = true; }).observe(hebra);
+  }
+  function lienzoAlPunto(forzar){
     if(!lienzos.length) return;
+    if(!hayQueMedir && !forzar) return;
     var h = hebra.getBoundingClientRect();
     if(!h.width || !h.height) return;
+    hayQueMedir = false;
     caja = h;
     var alto = Math.min(ALTO_MAX, Math.round(96 * h.height / h.width));
     if(alto === altoVB) return;
@@ -873,9 +905,9 @@ JS = """<script>
      El renglon del contador de cada fase: ahi se para el punto. Medido, no a
      ojo: a ojo se descuadra en cuanto un titular pasa a dos renglones, que en
      movil pasa siempre. */
-  var ys = [];
+  var ys = [], docY = [];
   function medir(){
-    lienzoAlPunto();
+    lienzoAlPunto(true);
     if(!caja) return;
     /* Todo contra la caja de la HEBRA, que es donde viven ahora el punto y la
        luz. Antes se media contra la lista, que va centrada con el texto y no
@@ -887,8 +919,18 @@ JS = """<script>
        cuatro por ciento —cincuenta pixeles— sin que nada estuviera mal a
        primera vista. En fraccion las dos cosas sobreviven al cambio de
        escala, porque el scale afecta arriba y abajo por igual. */
+    /* Dos cosas de cada fase, medidas AQUI y no en cada cuadro:
+         · «ys», en fraccion de la caja de la hebra, para pintar;
+         · «docY», el sitio del renglon en el DOCUMENTO, para decidir por que
+           fase vas restando el scroll, que es aritmetica y no cuesta nada.
+       El segundo es lo que quita del cuadro tres «getBoundingClientRect» y
+       tres «querySelector»: medido con el perfilador, 1.926 ms de 20.689
+       recorriendo la pagina, casi un diez por ciento del coste de
+       desplazarse. */
+    docY = [];
     ys = fases.map(function(f){
       var c = f.querySelector('.ruta-cab').getBoundingClientRect();
+      docY.push(c.top + scrollY + c.height / 2);
       return ((c.top - caja.top) + c.height / 2) / caja.height;
     });
     /* La luz llega hasta pasado el texto de la ULTIMA fase, no hasta su
@@ -941,11 +983,17 @@ JS = """<script>
        los dos extremos solo —ninguna por encima de la linea da la primera,
        todas por encima dan la ultima—, asi que el atajo no ahorraba nada y
        rompia el unico caso que no se ve al bajar: el de volver. */
+    /* Con los sitios ya medidos, esto es una resta. Antes pedia el rectangulo
+       de las tres fases en CADA cuadro de scroll, y cada peticion obliga al
+       navegador a rehacer la maquetacion porque el sistema que escala las
+       secciones acaba de escribir sobre ellas en el mismo cuadro.
+
+       La cuenta ignora ese escalado, que corre los renglones unos pocos
+       pixeles. La linea de activacion esta al 62 % de la pantalla: unos
+       pixeles ahi no cambian por que fase vas. */
+    var limite = scrollY + y;
     var i = 0;
-    for(var k = 0; k < fases.length; k++){
-      var c = fases[k].querySelector('.ruta-cab').getBoundingClientRect();
-      if(c.top + c.height / 2 <= y) i = k;
-    }
+    for(var k = 0; k < docY.length; k++) if(docY[k] <= limite) i = k;
     if(i !== activa) pon(i);
   }
   function pedir(){ if(pendiente) return; pendiente = true; requestAnimationFrame(paso); }

@@ -64,6 +64,7 @@ import punto
 import tarjeta
 import ruta
 import negro
+import fluidez
 subido, publicado = sys.argv[1], '/home/user/nerium/index.html'
 z = open(subido, encoding='utf-8').read()
 p = open(publicado, encoding='utf-8').read()
@@ -237,6 +238,11 @@ rest = ruta.aplicar(rest)
 # ── 30 · el negro de verdad ──
 rest = negro.aplicar(rest)
 
+# ── 31 · que se pueda navegar ──
+# Va al final a proposito: toca codigo que ponen pasos anteriores, asi que
+# tiene que llegar cuando ya esta todo puesto.
+rest = fluidez.aplicar(rest)
+
 salida = pre + rest
 open(publicado, 'w', encoding='utf-8').write(salida)
 print("montado:", len(salida), "bytes ·", salida.count('var(--hud-b)'), "usos de --hud-b ·",
@@ -262,4 +268,6 @@ print("montado:", len(salida), "bytes ·", salida.count('var(--hud-b)'), "usos d
       "tira:", 'un solo eje' if punto.MARCA in salida else 'EL PRIMERO TORCIDO', "·",
       "tarjetas:", 'llenas' if tarjeta.MARCA in salida else 'CON HUECO', "·",
       "ruta:", str(salida.count('class="ruta-f"')) + ' fases' if ruta.MARCA in salida else 'SIN RUTA', "·",
-      "negro:", 'suelo a cero' if negro.MARCA in salida else 'AZULADO')
+      "negro:", 'suelo a cero' if negro.MARCA in salida else 'AZULADO', "·",
+      "fluidez:", 'sin lecturas por cuadro'
+                  if 'raiz.style.getPropertyValue' in salida else 'CON ATASCO')
