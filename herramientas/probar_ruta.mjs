@@ -116,7 +116,11 @@ for (let y = 0; y < alto; y += 450) { await pg.evaluate(v => scrollTo(0, v), y);
       hueco:+(rl.top - rp.bottom).toFixed(1), largo:+rl.height.toFixed(1),
       galon:{ op:+cf.opacity, vis:cf.visibility, alto:+rf.height.toFixed(1),
               bajo:+(rf.top - rl.bottom).toFixed(1) },
-      eje:+((rp.left + rp.right) / 2).toFixed(1), titular:+t.left.toFixed(1), wrap:+w.left.toFixed(1) };
+      eje:+((rp.left + rp.right) / 2).toFixed(1),
+      titular:+(function(){ const e=document.querySelector('.ruta-h');
+        const g=document.createRange(); g.selectNodeContents(e);
+        return g.getBoundingClientRect().left; })().toFixed(1),
+      wrap:+w.left.toFixed(1) };
   });
   di(r.puntos === 1 && r.aros === 0,
      'un solo punto y ningun aro, como en la referencia (' + r.puntos + ' punto, ' + r.aros + ' aros)');
@@ -132,8 +136,52 @@ for (let y = 0; y < alto; y += 450) { await pg.evaluate(v => scrollTo(0, v), y);
      'el rail arranca en el renglon del primer contador, medido: ' + r.a.toFixed(1) + ' vs ' + r.cab0.toFixed(1));
   di(r.a + r.b > r.finTexto,
      'y baja pasado el texto de la ultima fase (' + (r.a + r.b).toFixed(1) + ' > ' + r.finTexto.toFixed(1) + ')');
-  di(Math.abs(r.eje - r.titular) <= 2,
-     'y cae en el eje del titular, no en un carril propio: ' + r.eje + ' vs ' + r.titular);
+  di(r.eje < r.titular, 'el rail va en su carril, a la izquierda del texto: ' + r.eje + ' vs ' + r.titular);
+}
+
+// ── 3b · el carril y el texto, separados de verdad ──────────────────────────
+// El primer montaje ponia el rail en el mismo eje que el titular, asi que
+// media hebra caia debajo de las primeras letras. Ahora la seccion tiene su
+// propia columna y la hebra su carril, y esto lo mide a siete anchos.
+//
+// El borde de la hebra se mide CON EL RESPLANDOR: la sombra de las chispas y
+// el «drop-shadow» del trazo se salen de la caja, y era justo eso lo que se
+// comia el hueco cuando la medida a secas decia que habia sitio de sobra.
+{
+  for (const [W, H] of [[1512,900],[1440,900],[1280,900],[1024,800],[430,932],[390,844],[320,700]]) {
+    const c = await nav.newContext({ viewport:{ width:W, height:H }, isMobile:W < 900, hasTouch:W < 900 });
+    const p2 = await c.newPage();
+    await p2.goto('http://127.0.0.1:9163/', { waitUntil:'load' });
+    await p2.waitForTimeout(800);
+    const alto = await p2.evaluate(() => document.documentElement.scrollHeight);
+    for (let y = 0; y < alto; y += 450) { await p2.evaluate(v => scrollTo(0, v), y); await p2.waitForTimeout(45); }
+    await p2.evaluate(() => document.getElementById('ruta').scrollIntoView({ block:'center' }));
+    await p2.waitForTimeout(800);
+    const r = await p2.evaluate(() => {
+      const sv = document.querySelector('.ruta-adn svg').getBoundingClientRect();
+      const brillo = e => parseFloat((getComputedStyle(e).boxShadow.match(/0px 0px ([\d.]+)px/) || [0, 0])[1]) || 0;
+      const chispas = [...document.querySelectorAll('.ruta-adn i')].map(e => e.getBoundingClientRect().right + brillo(e));
+      const trazo = parseFloat((getComputedStyle(document.querySelector('.ruta-adn path')).filter
+        .match(/drop-shadow\(0px 0px ([\d.]+)px/) || [0, 0])[1]) || 0;
+      const derecha = Math.max(sv.right + trazo, ...chispas);
+      // El borde del TEXTO con un «Range» sobre su contenido. Sumar el
+      // «padding-left» que devuelve «getComputedStyle» NO vale: con barra de
+      // scroll, un «clamp» en «vw» se reporta contra un ancho y se maqueta
+      // contra otro, y salian 5 px de desajuste que en pantalla no existen.
+      const borde = sel => { const e = document.querySelector(sel); if (!e) return null;
+        const g = document.createRange(); g.selectNodeContents(e);
+        const b = g.getBoundingClientRect(); return b.width ? b.left : null; };
+      const bordes = ['.ruta-k', '.ruta-h', '.ruta-cab', '.ruta-t', '.ruta-p']
+        .map(borde).filter(x => x !== null);
+      return { derecha, texto:Math.min(...bordes), disp:Math.max(...bordes) - Math.min(...bordes),
+               scroll:document.documentElement.scrollWidth > innerWidth };
+    });
+    const hueco = r.texto - r.derecha;
+    di(hueco >= 10, W + 'px · la hebra despega del texto: ' + hueco.toFixed(1) + ' px de hueco (minimo 10)');
+    di(r.disp <= 1.5, W + 'px · y todo el texto de la seccion en una sola columna (dispersion ' + r.disp.toFixed(1) + ' px)');
+    di(!r.scroll, W + 'px · sin scroll horizontal');
+    await c.close();
+  }
 }
 
 // ── 4 · el punto baja con el scroll ────────────────────────────────────────

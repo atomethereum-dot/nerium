@@ -3120,7 +3120,16 @@ footer .fgrid h4,footer .tec-real{color:#5B657A}
    su mismo suelo: el mismo negro y el mismo resplandor, para que las dos se
    lean como un solo campo y no como dos secciones pegadas. */
 .ruta{position:relative;overflow:hidden;background:#0A0E18;
-  padding:clamp(52px,6.5vw,96px) 0 clamp(64px,8vw,124px)}
+  padding:clamp(52px,6.5vw,96px) 0 clamp(64px,8vw,124px);
+  /* El CARRIL: la franja de la izquierda donde viven el rail y la hebra. Todo
+     el texto de la seccion empieza a su derecha.
+
+     Antes no existia: el titular y el rail compartian eje, asi que media hebra
+     caia justo debajo de las primeras letras. En la referencia el texto esta
+     lejos de la barra, y esa distancia es lo que hace que la hebra se lea. */
+  --carril:clamp(56px,8.5vw,140px);
+  --eje:calc(var(--carril) * .5);
+  --adn:clamp(34px,5.6vw,96px)}
 /* El mismo resplandor de «.builds», en el mismo sitio: cada seccion lo tiene
    en su propia esquina, asi que repetirlo es lo que las hace parecer una. */
 .ruta::before{content:'';position:absolute;inset:0;pointer-events:none;
@@ -3137,10 +3146,11 @@ footer .fgrid h4,footer .tec-real{color:#5B657A}
    justo encima. Colgandolo de la seccion caia treinta y cinco pixeles a la
    derecha del rail, que es lo que se veia. */
 .ruta-wrap{position:relative}
+.ruta-top,.ruta-h,.ruta-f{padding-left:var(--carril)}
 .ruta-wrap>.ruta-top,.ruta-wrap>.ruta-h,.ruta-wrap>.ruta-lista{position:relative;z-index:1}
 .ruta-adn{position:absolute;top:0;bottom:0;z-index:0;pointer-events:none;
-  --an:clamp(56px,7vw,100px);
-  width:var(--an);left:0;margin-left:calc(var(--an) / -2);overflow:visible}
+  width:var(--adn);left:var(--eje);margin-left:calc(var(--adn) / -2);
+  overflow:visible}
 /* El campo azul: mas ancho que las hebras, pero CONTENIDO. La primera vez lo
    puse a 390 px y con el doble de fuerza, y lavaba de azul media seccion: el
    resplandor tiene que acompañar a la hebra, no sustituirla. */
@@ -3149,15 +3159,19 @@ footer .fgrid h4,footer .tec-real{color:#5B657A}
     radial-gradient(40% 38% at 66% 30%,rgba(56,120,255,.22),transparent 72%),
     radial-gradient(32% 30% at 60% 78%,rgba(70,140,255,.15),transparent 76%),
     linear-gradient(to right,transparent,rgba(40,96,230,.13) 62%,transparent)}
-.ruta-adn svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+/* Las puntas se apagan con mascara, que es lo que toca: apretando la
+   geometria las cinco hebras convergian en un punto. */
+.ruta-adn svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible;
+  -webkit-mask-image:linear-gradient(to bottom,transparent,#000 7%,#000 93%,transparent);
+          mask-image:linear-gradient(to bottom,transparent,#000 7%,#000 93%,transparent)}
 .ruta-adn path{fill:none;stroke:#BBD9FF;stroke-linecap:round;
-  opacity:var(--o);filter:drop-shadow(0 0 2.5px rgba(130,185,255,.9))}
+  opacity:var(--o);filter:drop-shadow(0 0 2px rgba(130,185,255,.9))}
 /* Las chispas: redondas de verdad. Van fuera del SVG porque el lienzo se
    estira en vertical —«preserveAspectRatio:none»— y ahi un circulo saldria
    ovalado. */
 .ruta-adn i{position:absolute;width:var(--s);height:var(--s);margin:calc(var(--s) / -2);
   border-radius:50%;background:#E4EFFF;opacity:var(--o);
-  box-shadow:0 0 calc(var(--s) * 2.2) rgba(160,205,255,.95)}
+  box-shadow:0 0 calc(var(--s) * 1.7) rgba(160,205,255,.95)}
 
 /* La luz respira. Cada hebra con su retraso, que si laten a la vez es un
    semaforo y no una hebra. */
@@ -3201,7 +3215,7 @@ footer .fgrid h4,footer .tec-real{color:#5B657A}
    el renglon del contador de cada fase. A ojo se descuadra en cuanto un
    titular pasa a dos renglones, que en movil pasa siempre. */
 .ruta-lista{list-style:none;margin:0;padding:0;position:relative;
-  --x:0px;--a:0px;--b:0px;--y:0px}
+  --x:var(--eje);--a:0px;--b:0px;--y:0px}
 .ruta-rail{position:absolute;left:var(--x);top:var(--a);height:var(--b);
   width:2px;margin-left:-1px;pointer-events:none}
 /* El punto: lleno, sin aro y SIN HALO, como en la referencia. Le puse uno
@@ -3226,8 +3240,7 @@ footer .fgrid h4,footer .tec-real{color:#5B657A}
 .ruta-flecha svg{width:15px;height:15px;fill:none;stroke:currentColor;
   stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round}
 
-.ruta-f{position:relative;padding-left:clamp(30px,4vw,64px);
-  padding-block:0 clamp(34px,5vw,80px)}
+.ruta-f{position:relative;padding-block:0 clamp(34px,5vw,80px)}
 .ruta-f:last-of-type{padding-bottom:clamp(30px,4vw,58px)}
 
 .ruta-cab{display:flex;align-items:baseline;gap:clamp(10px,1.6vw,18px);
@@ -3248,6 +3261,16 @@ footer .fgrid h4,footer .tec-real{color:#5B657A}
 
 
 @media(max-width:760px){
+  /* En el telefono la hebra pesaba demasiado: ocupaba el mismo sitio relativo
+     que en una pantalla de 1440 y ahi es media pantalla. Baja de ancho, de
+     trazo y de luz. */
+  .ruta{--carril:clamp(58px,17vw,78px);--adn:clamp(28px,8vw,36px)}
+  .ruta-adn{opacity:.72}
+  .ruta-adn path{filter:drop-shadow(0 0 1.3px rgba(130,185,255,.75))}
+  /* Las chispas encogen por tamaño, no por «transform»: el transform ya lo
+     usa su propio latido y una cosa pisaria a la otra. */
+  .ruta-adn i{width:calc(var(--s) * .72);height:calc(var(--s) * .72);
+    margin:calc(var(--s) * -.36);box-shadow:0 0 calc(var(--s) * 1.4) rgba(160,205,255,.9)}
   .ruta-h{max-width:none}
   .ruta-marca{display:none}   /* a 360 px no cabe en la misma linea */
   .ruta-p{max-width:none}
@@ -3259,6 +3282,28 @@ footer .fgrid h4,footer .tec-real{color:#5B657A}
 }
 
 /* ══ fin: ruta ══ */
+/* ══ el negro de verdad ════════════════════════════════════════════════════
+   Lo que parecia negro eran azules muy oscuros:
+
+     .builds    venia de #0A0E18
+     .ruta      venia de #0A0E18
+     .hpin      venia de #0A0E18
+     .kin       venia de #050609
+     .xf        venia de #000000
+     .xl        venia de #05070C
+
+   y encima «builds» y la ruta llevaban un resplandor azul de 1100 px por la
+   esquina. Suelo negro y fuera el resplandor de esquina.
+
+   Las animaciones no se tocan: los cubos, la cinta, la hebra y los
+   resplandores que pinta cada lienzo siguen igual. Lo unico que se va es el
+   suelo de debajo. */
+.builds,.ruta,.hpin,.kin,.xf,.xl{background:#000}
+/* El resplandor de esquina era lo que mas tiznaba de azul: 1100 x 520 px de
+   «rgba(47,107,255,.16)» entrando por arriba a la izquierda. */
+.builds::before,.ruta::before{display:none}
+
+/* ══ fin: negro ══ */
 </style>
 </head>
 <body>
@@ -3525,7 +3570,7 @@ footer .fgrid h4,footer .tec-real{color:#5B657A}
 
 
 
-<section class="kin" data-bg="#050609" data-acc="#2F6BFF" aria-hidden="true"><i class="emb" aria-hidden="true" style="--emb:#050609"></i>
+<section class="kin" data-bg="#000000" data-acc="#2F6BFF" aria-hidden="true"><i class="emb" aria-hidden="true" style="--emb:#050609"></i>
   <div class="kin-row" data-dir="1"><div class="kin-in">
     <span>Issuance</span><span class="o">Custody</span><span>Real assets</span><span class="o">Redemption</span>
     <span>Issuance</span><span class="o">Custody</span><span>Real assets</span><span class="o">Redemption</span>
@@ -3802,7 +3847,7 @@ footer .fgrid h4,footer .tec-real{color:#5B657A}
 </section>
 
 
-<section class="builds" id="builds" data-bg="#0A0E18" data-acc="#79ABFF"><i class="via" aria-hidden="true"></i>
+<section class="builds" id="builds" data-bg="#000000" data-acc="#79ABFF"><i class="via" aria-hidden="true"></i>
   <div class="wrap builds-head">
     <div class="k sk rv"><i class="sk-n">09</i>What we are building</div>
     <h2 class="builds-h">Two pieces, both already running.</h2>
@@ -3860,9 +3905,9 @@ footer .fgrid h4,footer .tec-real{color:#5B657A}
 
 
 
-<section class="ruta" id="ruta" data-bg="#0A0E18" data-acc="#79ABFF">
+<section class="ruta" id="ruta" data-bg="#000000" data-acc="#79ABFF">
   <div class="wrap ruta-wrap">
-    <i class="ruta-adn" aria-hidden="true"><svg viewBox="0 0 96 1000" preserveAspectRatio="none"><path d="M48.0 0.0 C48.0 11.3 48.4 11.3 48.4 22.7 C48.4 34.1 49.1 34.1 49.1 45.5 C49.1 56.9 49.9 56.9 49.9 68.2 C49.9 79.6 50.6 79.6 50.6 90.9 C50.6 102.2 51.2 102.2 51.2 113.6 C51.2 125.0 51.4 125.0 51.4 136.4 C51.4 147.8 51.3 147.8 51.3 159.1 C51.3 170.4 50.8 170.4 50.8 181.8 C50.8 193.2 49.9 193.2 49.9 204.5 C49.9 215.9 48.7 215.9 48.7 227.3 C48.7 238.7 47.2 238.7 47.2 250.0 C47.2 261.4 45.8 261.4 45.8 272.7 C45.8 284.1 44.4 284.1 44.4 295.5 C44.4 306.9 43.3 306.9 43.3 318.2 C43.3 329.5 42.6 329.5 42.6 340.9 C42.6 352.2 42.4 352.2 42.4 363.6 C42.4 375.0 42.7 375.0 42.7 386.4 C42.7 397.8 43.5 397.8 43.5 409.1 C43.5 420.5 44.7 420.5 44.7 431.8 C44.7 443.1 46.3 443.1 46.3 454.5 C46.3 465.9 48.1 465.9 48.1 477.3 C48.1 488.6 49.9 488.6 49.9 500.0 C49.9 511.4 51.5 511.4 51.5 522.7 C51.5 534.1 52.7 534.1 52.7 545.5 C52.7 556.9 53.5 556.9 53.5 568.2 C53.5 579.5 53.8 579.5 53.8 590.9 C53.8 602.2 53.6 602.2 53.6 613.6 C53.6 625.0 52.9 625.0 52.9 636.4 C52.9 647.8 51.7 647.8 51.7 659.1 C51.7 670.5 50.2 670.5 50.2 681.8 C50.2 693.1 48.7 693.1 48.7 704.5 C48.7 715.9 47.1 715.9 47.1 727.3 C47.1 738.6 45.8 738.6 45.8 750.0 C45.8 761.4 44.8 761.4 44.8 772.7 C44.8 784.1 44.1 784.1 44.1 795.5 C44.1 806.9 43.9 806.9 43.9 818.2 C43.9 829.5 44.2 829.5 44.2 840.9 C44.2 852.2 44.7 852.2 44.7 863.6 C44.7 875.0 45.6 875.0 45.6 886.4 C45.6 897.8 46.5 897.8 46.5 909.1 C46.5 920.5 47.4 920.5 47.4 931.8 C47.4 943.1 48.1 943.1 48.1 954.5 C48.1 965.9 48.4 965.9 48.4 977.3 C48.4 988.6 48.0 988.6 48.0 1000.0" stroke-width="1.0" style="--o:0.85;--d:0.0s"/><path d="M48.0 0.0 C48.0 11.3 49.9 11.3 49.9 22.7 C49.9 34.1 50.5 34.1 50.5 45.5 C50.5 56.9 50.6 56.9 50.6 68.2 C50.6 79.6 50.2 79.6 50.2 90.9 C50.2 102.2 49.4 102.2 49.4 113.6 C49.4 125.0 48.3 125.0 48.3 136.4 C48.3 147.8 46.9 147.8 46.9 159.1 C46.9 170.4 45.3 170.4 45.3 181.8 C45.3 193.2 43.7 193.2 43.7 204.5 C43.7 215.9 42.1 215.9 42.1 227.3 C42.1 238.7 40.7 238.7 40.7 250.0 C40.7 261.4 39.5 261.4 39.5 272.7 C39.5 284.1 38.6 284.1 38.6 295.5 C38.6 306.9 38.1 306.9 38.1 318.2 C38.1 329.5 38.0 329.5 38.0 340.9 C38.0 352.2 38.4 352.2 38.4 363.6 C38.4 375.0 39.2 375.0 39.2 386.4 C39.2 397.8 40.4 397.8 40.4 409.1 C40.4 420.5 42.0 420.5 42.0 431.8 C42.0 443.1 43.9 443.1 43.9 454.5 C43.9 465.9 46.0 465.9 46.0 477.3 C46.0 488.6 48.2 488.6 48.2 500.0 C48.2 511.4 50.3 511.4 50.3 522.7 C50.3 534.1 52.4 534.1 52.4 545.5 C52.4 556.9 54.3 556.9 54.3 568.2 C54.3 579.5 55.8 579.5 55.8 590.9 C55.8 602.2 57.0 602.2 57.0 613.6 C57.0 625.0 57.7 625.0 57.7 636.4 C57.7 647.8 58.0 647.8 58.0 659.1 C58.0 670.5 57.9 670.5 57.9 681.8 C57.9 693.1 57.3 693.1 57.3 704.5 C57.3 715.9 56.4 715.9 56.4 727.3 C56.4 738.6 55.1 738.6 55.1 750.0 C55.1 761.4 53.7 761.4 53.7 772.7 C53.7 784.1 52.1 784.1 52.1 795.5 C52.1 806.9 50.4 806.9 50.4 818.2 C50.4 829.5 48.9 829.5 48.9 840.9 C48.9 852.2 47.5 852.2 47.5 863.6 C47.5 875.0 46.4 875.0 46.4 886.4 C46.4 897.8 45.7 897.8 45.7 909.1 C45.7 920.5 45.3 920.5 45.3 931.8 C45.3 943.1 45.4 943.1 45.4 954.5 C45.4 965.9 46.0 965.9 46.0 977.3 C46.0 988.6 48.0 988.6 48.0 1000.0" stroke-width="0.8" style="--o:0.7;--d:1.7s"/><path d="M48.0 0.0 C48.0 11.3 46.7 11.3 46.7 22.7 C46.7 34.1 45.4 34.1 45.4 45.5 C45.4 56.9 44.0 56.9 44.0 68.2 C44.0 79.6 42.5 79.6 42.5 90.9 C42.5 102.2 41.0 102.2 41.0 113.6 C41.0 125.0 39.5 125.0 39.5 136.4 C39.5 147.8 38.2 147.8 38.2 159.1 C38.2 170.4 37.1 170.4 37.1 181.8 C37.1 193.2 36.2 193.2 36.2 204.5 C36.2 215.9 35.7 215.9 35.7 227.3 C35.7 238.7 35.4 238.7 35.4 250.0 C35.4 261.4 35.5 261.4 35.5 272.7 C35.5 284.1 36.0 284.1 36.0 295.5 C36.0 306.9 36.8 306.9 36.8 318.2 C36.8 329.5 38.0 329.5 38.0 340.9 C38.0 352.2 39.5 352.2 39.5 363.6 C39.5 375.0 41.2 375.0 41.2 386.4 C41.2 397.8 43.2 397.8 43.2 409.1 C43.2 420.5 45.3 420.5 45.3 431.8 C45.3 443.1 47.6 443.1 47.6 454.5 C47.6 465.9 49.8 465.9 49.8 477.3 C49.8 488.6 52.1 488.6 52.1 500.0 C52.1 511.4 54.2 511.4 54.2 522.7 C54.2 534.1 56.2 534.1 56.2 545.5 C56.2 556.9 58.0 556.9 58.0 568.2 C58.0 579.5 59.5 579.5 59.5 590.9 C59.5 602.2 60.7 602.2 60.7 613.6 C60.7 625.0 61.6 625.0 61.6 636.4 C61.6 647.8 62.1 647.8 62.1 659.1 C62.1 670.5 62.2 670.5 62.2 681.8 C62.2 693.1 62.0 693.1 62.0 704.5 C62.0 715.9 61.4 715.9 61.4 727.3 C61.4 738.6 60.6 738.6 60.6 750.0 C60.6 761.4 59.4 761.4 59.4 772.7 C59.4 784.1 58.1 784.1 58.1 795.5 C58.1 806.9 56.6 806.9 56.6 818.2 C56.6 829.5 54.9 829.5 54.9 840.9 C54.9 852.2 53.3 852.2 53.3 863.6 C53.3 875.0 51.7 875.0 51.7 886.4 C51.7 897.8 50.3 897.8 50.3 909.1 C50.3 920.5 49.1 920.5 49.1 931.8 C49.1 943.1 48.1 943.1 48.1 954.5 C48.1 965.9 47.6 965.9 47.6 977.3 C47.6 988.6 48.0 988.6 48.0 1000.0" stroke-width="0.7" style="--o:0.52;--d:3.4s"/><path d="M48.0 0.0 C48.0 11.3 49.7 11.3 49.7 22.7 C49.7 34.1 50.8 34.1 50.8 45.5 C50.8 56.9 51.2 56.9 51.2 68.2 C51.2 79.6 50.6 79.6 50.6 90.9 C50.6 102.2 49.1 102.2 49.1 113.6 C49.1 125.0 46.9 125.0 46.9 136.4 C46.9 147.8 44.5 147.8 44.5 159.1 C44.5 170.4 42.5 170.4 42.5 181.8 C42.5 193.2 41.4 193.2 41.4 204.5 C41.4 215.9 41.6 215.9 41.6 227.3 C41.6 238.7 43.2 238.7 43.2 250.0 C43.2 261.4 46.0 261.4 46.0 272.7 C46.0 284.1 49.3 284.1 49.3 295.5 C49.3 306.9 52.7 306.9 52.7 318.2 C52.7 329.5 55.2 329.5 55.2 340.9 C55.2 352.2 56.5 352.2 56.5 363.6 C56.5 375.0 56.1 375.0 56.1 386.4 C56.1 397.8 54.0 397.8 54.0 409.1 C54.0 420.5 50.7 420.5 50.7 431.8 C50.7 443.1 46.9 443.1 46.9 454.5 C46.9 465.9 43.1 465.9 43.1 477.3 C43.1 488.6 40.4 488.6 40.4 500.0 C40.4 511.4 39.1 511.4 39.1 522.7 C39.1 534.1 39.5 534.1 39.5 545.5 C39.5 556.9 41.6 556.9 41.6 568.2 C41.6 579.5 44.9 579.5 44.9 590.9 C44.9 602.2 48.7 602.2 48.7 613.6 C48.7 625.0 52.3 625.0 52.3 636.4 C52.3 647.8 54.9 647.8 54.9 659.1 C54.9 670.5 56.0 670.5 56.0 681.8 C56.0 693.1 55.6 693.1 55.6 704.5 C55.6 715.9 53.7 715.9 53.7 727.3 C53.7 738.6 50.8 738.6 50.8 750.0 C50.8 761.4 47.7 761.4 47.7 772.7 C47.7 784.1 44.9 784.1 44.9 795.5 C44.9 806.9 43.0 806.9 43.0 818.2 C43.0 829.5 42.3 829.5 42.3 840.9 C42.3 852.2 42.8 852.2 42.8 863.6 C42.8 875.0 44.3 875.0 44.3 886.4 C44.3 897.8 46.2 897.8 46.2 909.1 C46.2 920.5 48.0 920.5 48.0 931.8 C48.0 943.1 49.2 943.1 49.2 954.5 C49.2 965.9 49.4 965.9 49.4 977.3 C49.4 988.6 48.0 988.6 48.0 1000.0" stroke-width="0.7" style="--o:0.6;--d:5.1s"/><path d="M48.0 0.0 C48.0 11.3 44.4 11.3 44.4 22.7 C44.4 34.1 42.8 34.1 42.8 45.5 C42.8 56.9 41.9 56.9 41.9 68.2 C41.9 79.6 41.4 79.6 41.4 90.9 C41.4 102.2 41.3 102.2 41.3 113.6 C41.3 125.0 41.5 125.0 41.5 136.4 C41.5 147.8 42.0 147.8 42.0 159.1 C42.0 170.4 42.8 170.4 42.8 181.8 C42.8 193.2 43.9 193.2 43.9 204.5 C43.9 215.9 45.2 215.9 45.2 227.3 C45.2 238.7 46.6 238.7 46.6 250.0 C46.6 261.4 48.3 261.4 48.3 272.7 C48.3 284.1 50.0 284.1 50.0 295.5 C50.0 306.9 51.9 306.9 51.9 318.2 C51.9 329.5 53.8 329.5 53.8 340.9 C53.8 352.2 55.6 352.2 55.6 363.6 C55.6 375.0 57.5 375.0 57.5 386.4 C57.5 397.8 59.3 397.8 59.3 409.1 C59.3 420.5 60.9 420.5 60.9 431.8 C60.9 443.1 62.5 443.1 62.5 454.5 C62.5 465.9 63.8 465.9 63.8 477.3 C63.8 488.6 65.0 488.6 65.0 500.0 C65.0 511.4 65.9 511.4 65.9 522.7 C65.9 534.1 66.6 534.1 66.6 545.5 C66.6 556.9 67.1 556.9 67.1 568.2 C67.1 579.5 67.3 579.5 67.3 590.9 C67.3 602.2 67.2 602.2 67.2 613.6 C67.2 625.0 66.9 625.0 66.9 636.4 C66.9 647.8 66.3 647.8 66.3 659.1 C66.3 670.5 65.5 670.5 65.5 681.8 C65.5 693.1 64.5 693.1 64.5 704.5 C64.5 715.9 63.3 715.9 63.3 727.3 C63.3 738.6 61.9 738.6 61.9 750.0 C61.9 761.4 60.4 761.4 60.4 772.7 C60.4 784.1 58.8 784.1 58.8 795.5 C58.8 806.9 57.2 806.9 57.2 818.2 C57.2 829.5 55.5 829.5 55.5 840.9 C55.5 852.2 53.9 852.2 53.9 863.6 C53.9 875.0 52.4 875.0 52.4 886.4 C52.4 897.8 51.0 897.8 51.0 909.1 C51.0 920.5 49.8 920.5 49.8 931.8 C49.8 943.1 48.8 943.1 48.8 954.5 C48.8 965.9 48.1 965.9 48.1 977.3 C48.1 988.6 48.0 988.6 48.0 1000.0" stroke-width="0.6" style="--o:0.4;--d:6.8s"/></svg><i style="left:55.86%;top:61.23%;--s:1.8px;--o:0.89;--d:5.7s"></i><i style="left:42.88%;top:38.56%;--s:2.2px;--o:0.38;--d:2.8s"></i><i style="left:48.29%;top:88.81%;--s:1.8px;--o:0.76;--d:1.1s"></i><i style="left:51.44%;top:49.38%;--s:1.8px;--o:0.9;--d:3.4s"></i><i style="left:51.6%;top:69.22%;--s:1.4px;--o:0.75;--d:2.6s"></i><i style="left:46.4%;top:46.18%;--s:1.8px;--o:0.72;--d:3.6s"></i><i style="left:50.85%;top:70.26%;--s:2.2px;--o:0.62;--d:6.1s"></i><i style="left:57.86%;top:34.45%;--s:3.4px;--o:0.81;--d:1.3s"></i><i style="left:47.5%;top:44.47%;--s:2.8px;--o:0.43;--d:0.4s"></i><i style="left:47.99%;top:24.15%;--s:1.4px;--o:0.76;--d:0.0s"></i><i style="left:39.71%;top:31.55%;--s:1.8px;--o:0.66;--d:2.7s"></i><i style="left:57.2%;top:84.14%;--s:2.2px;--o:0.71;--d:3.7s"></i><i style="left:44.15%;top:5.49%;--s:1.8px;--o:0.41;--d:4.4s"></i><i style="left:45.8%;top:41.89%;--s:3.4px;--o:0.84;--d:4.3s"></i><i style="left:43.44%;top:14.69%;--s:1.8px;--o:0.73;--d:0.6s"></i><i style="left:49.97%;top:44.81%;--s:1.8px;--o:0.76;--d:0.2s"></i><i style="left:45.13%;top:7.83%;--s:1.4px;--o:0.41;--d:1.3s"></i><i style="left:50.45%;top:70.8%;--s:1.8px;--o:0.46;--d:0.7s"></i><i style="left:48.37%;top:45.6%;--s:3.4px;--o:0.92;--d:2.7s"></i><i style="left:53.69%;top:53.57%;--s:1.4px;--o:0.65;--d:5.0s"></i><i style="left:44.43%;top:57.59%;--s:2.2px;--o:0.93;--d:6.4s"></i><i style="left:50.66%;top:95.86%;--s:3.4px;--o:0.89;--d:6.7s"></i><i style="left:65.56%;top:73.29%;--s:2.8px;--o:0.42;--d:6.3s"></i><i style="left:53.61%;top:53.48%;--s:1.8px;--o:0.43;--d:3.4s"></i><i style="left:47.38%;top:91.7%;--s:3.4px;--o:0.62;--d:3.1s"></i><i style="left:51.46%;top:28.74%;--s:1.4px;--o:0.55;--d:6.7s"></i><i style="left:62.05%;top:41.3%;--s:1.8px;--o:0.79;--d:0.1s"></i><i style="left:44.21%;top:37.57%;--s:1.8px;--o:0.4;--d:6.8s"></i><i style="left:44.93%;top:18.9%;--s:2.2px;--o:0.36;--d:1.8s"></i><i style="left:50.39%;top:76.78%;--s:2.2px;--o:0.77;--d:2.1s"></i><i style="left:58.82%;top:37.37%;--s:2.8px;--o:0.57;--d:0.2s"></i><i style="left:42.14%;top:25.42%;--s:2.8px;--o:0.8;--d:1.1s"></i><i style="left:48.85%;top:25.36%;--s:3.4px;--o:0.89;--d:1.3s"></i><i style="left:70.08%;top:59.2%;--s:2.8px;--o:0.78;--d:5.6s"></i></i>
+    <i class="ruta-adn" aria-hidden="true"><svg viewBox="0 0 96 1000" preserveAspectRatio="none"><path d="M44.0 0.0 C44.0 11.3 47.0 11.3 47.0 22.7 C47.0 34.1 49.6 34.1 49.6 45.5 C49.6 56.9 51.8 56.9 51.8 68.2 C51.8 79.6 53.3 79.6 53.3 90.9 C53.3 102.2 54.0 102.2 54.0 113.6 C54.0 125.0 53.7 125.0 53.7 136.4 C53.7 147.8 52.6 147.8 52.6 159.1 C52.6 170.4 50.8 170.4 50.8 181.8 C50.8 193.2 48.3 193.2 48.3 204.5 C48.3 215.9 45.4 215.9 45.4 227.3 C45.4 238.7 42.4 238.7 42.4 250.0 C42.4 261.4 39.6 261.4 39.6 272.7 C39.6 284.1 37.1 284.1 37.1 295.5 C37.1 306.9 35.3 306.9 35.3 318.2 C35.3 329.5 34.2 329.5 34.2 340.9 C34.2 352.2 34.0 352.2 34.0 363.6 C34.0 375.0 34.7 375.0 34.7 386.4 C34.7 397.8 36.3 397.8 36.3 409.1 C36.3 420.5 38.5 420.5 38.5 431.8 C38.5 443.1 41.2 443.1 41.2 454.5 C41.2 465.9 44.1 465.9 44.1 477.3 C44.1 488.6 47.1 488.6 47.1 500.0 C47.1 511.4 49.8 511.4 49.8 522.7 C49.8 534.1 51.9 534.1 51.9 545.5 C51.9 556.9 53.4 556.9 53.4 568.2 C53.4 579.5 54.0 579.5 54.0 590.9 C54.0 602.2 53.7 602.2 53.7 613.6 C53.7 625.0 52.6 625.0 52.6 636.4 C52.6 647.8 50.7 647.8 50.7 659.1 C50.7 670.5 48.2 670.5 48.2 681.8 C48.2 693.1 45.3 693.1 45.3 704.5 C45.3 715.9 42.3 715.9 42.3 727.3 C42.3 738.6 39.5 738.6 39.5 750.0 C39.5 761.4 37.0 761.4 37.0 772.7 C37.0 784.1 35.2 784.1 35.2 795.5 C35.2 806.9 34.2 806.9 34.2 818.2 C34.2 829.5 34.0 829.5 34.0 840.9 C34.0 852.2 34.8 852.2 34.8 863.6 C34.8 875.0 36.3 875.0 36.3 886.4 C36.3 897.8 38.6 897.8 38.6 909.1 C38.6 920.5 41.3 920.5 41.3 931.8 C41.3 943.1 44.3 943.1 44.3 954.5 C44.3 965.9 47.2 965.9 47.2 977.3 C47.2 988.6 49.9 988.6 49.9 1000.0" stroke-width="1.0" style="--o:0.85;--d:0.0s"/><path d="M63.2 0.0 C63.2 11.3 62.1 11.3 62.1 22.7 C62.1 34.1 60.4 34.1 60.4 45.5 C60.4 56.9 58.4 56.9 58.4 68.2 C58.4 79.6 56.0 79.6 56.0 90.9 C56.0 102.2 53.4 102.2 53.4 113.6 C53.4 125.0 50.6 125.0 50.6 136.4 C50.6 147.8 47.8 147.8 47.8 159.1 C47.8 170.4 45.1 170.4 45.1 181.8 C45.1 193.2 42.6 193.2 42.6 204.5 C42.6 215.9 40.4 215.9 40.4 227.3 C40.4 238.7 38.6 238.7 38.6 250.0 C38.6 261.4 37.2 261.4 37.2 272.7 C37.2 284.1 36.3 284.1 36.3 295.5 C36.3 306.9 36.0 306.9 36.0 318.2 C36.0 329.5 36.2 329.5 36.2 340.9 C36.2 352.2 37.0 352.2 37.0 363.6 C37.0 375.0 38.3 375.0 38.3 386.4 C38.3 397.8 40.1 397.8 40.1 409.1 C40.1 420.5 42.3 420.5 42.3 431.8 C42.3 443.1 44.7 443.1 44.7 454.5 C44.7 465.9 47.4 465.9 47.4 477.3 C47.4 488.6 50.2 488.6 50.2 500.0 C50.2 511.4 53.0 511.4 53.0 522.7 C53.0 534.1 55.6 534.1 55.6 545.5 C55.6 556.9 58.1 556.9 58.1 568.2 C58.1 579.5 60.2 579.5 60.2 590.9 C60.2 602.2 61.9 602.2 61.9 613.6 C61.9 625.0 63.1 625.0 63.1 636.4 C63.1 647.8 63.8 647.8 63.8 659.1 C63.8 670.5 64.0 670.5 64.0 681.8 C64.0 693.1 63.6 693.1 63.6 704.5 C63.6 715.9 62.6 715.9 62.6 727.3 C62.6 738.6 61.2 738.6 61.2 750.0 C61.2 761.4 59.3 761.4 59.3 772.7 C59.3 784.1 57.0 784.1 57.0 795.5 C57.0 806.9 54.5 806.9 54.5 818.2 C54.5 829.5 51.8 829.5 51.8 840.9 C51.8 852.2 49.0 852.2 49.0 863.6 C49.0 875.0 46.2 875.0 46.2 886.4 C46.2 897.8 43.6 897.8 43.6 909.1 C43.6 920.5 41.3 920.5 41.3 931.8 C41.3 943.1 39.3 943.1 39.3 954.5 C39.3 965.9 37.7 965.9 37.7 977.3 C37.7 988.6 36.6 988.6 36.6 1000.0" stroke-width="0.8" style="--o:0.7;--d:1.7s"/><path d="M41.4 0.0 C41.4 11.3 39.0 11.3 39.0 22.7 C39.0 34.1 36.7 34.1 36.7 45.5 C36.7 56.9 34.6 56.9 34.6 68.2 C34.6 79.6 32.7 79.6 32.7 90.9 C32.7 102.2 31.1 102.2 31.1 113.6 C31.1 125.0 29.8 125.0 29.8 136.4 C29.8 147.8 28.9 147.8 28.9 159.1 C28.9 170.4 28.3 170.4 28.3 181.8 C28.3 193.2 28.0 193.2 28.0 204.5 C28.0 215.9 28.1 215.9 28.1 227.3 C28.1 238.7 28.6 238.7 28.6 250.0 C28.6 261.4 29.4 261.4 29.4 272.7 C29.4 284.1 30.6 284.1 30.6 295.5 C30.6 306.9 32.1 306.9 32.1 318.2 C32.1 329.5 33.8 329.5 33.8 340.9 C33.8 352.2 35.9 352.2 35.9 363.6 C35.9 375.0 38.1 375.0 38.1 386.4 C38.1 397.8 40.5 397.8 40.5 409.1 C40.5 420.5 43.0 420.5 43.0 431.8 C43.0 443.1 45.5 443.1 45.5 454.5 C45.5 465.9 48.1 465.9 48.1 477.3 C48.1 488.6 50.6 488.6 50.6 500.0 C50.6 511.4 53.0 511.4 53.0 522.7 C53.0 534.1 55.3 534.1 55.3 545.5 C55.3 556.9 57.4 556.9 57.4 568.2 C57.4 579.5 59.3 579.5 59.3 590.9 C59.3 602.2 60.9 602.2 60.9 613.6 C60.9 625.0 62.2 625.0 62.2 636.4 C62.2 647.8 63.1 647.8 63.1 659.1 C63.1 670.5 63.7 670.5 63.7 681.8 C63.7 693.1 64.0 693.1 64.0 704.5 C64.0 715.9 63.9 715.9 63.9 727.3 C63.9 738.6 63.4 738.6 63.4 750.0 C63.4 761.4 62.6 761.4 62.6 772.7 C62.6 784.1 61.4 784.1 61.4 795.5 C61.4 806.9 59.9 806.9 59.9 818.2 C59.9 829.5 58.2 829.5 58.2 840.9 C58.2 852.2 56.1 852.2 56.1 863.6 C56.1 875.0 53.9 875.0 53.9 886.4 C53.9 897.8 51.5 897.8 51.5 909.1 C51.5 920.5 49.0 920.5 49.0 931.8 C49.0 943.1 46.5 943.1 46.5 954.5 C46.5 965.9 43.9 965.9 43.9 977.3 C43.9 988.6 41.4 988.6 41.4 1000.0" stroke-width="0.7" style="--o:0.52;--d:3.4s"/><path d="M59.2 0.0 C59.2 11.3 61.3 11.3 61.3 22.7 C61.3 34.1 62.0 34.1 62.0 45.5 C62.0 56.9 61.2 56.9 61.2 68.2 C61.2 79.6 59.0 79.6 59.0 90.9 C59.0 102.2 55.8 102.2 55.8 113.6 C55.8 125.0 52.3 125.0 52.3 136.4 C52.3 147.8 49.1 147.8 49.1 159.1 C49.1 170.4 46.9 170.4 46.9 181.8 C46.9 193.2 46.0 193.2 46.0 204.5 C46.0 215.9 46.7 215.9 46.7 227.3 C46.7 238.7 48.8 238.7 48.8 250.0 C48.8 261.4 51.9 261.4 51.9 272.7 C51.9 284.1 55.4 284.1 55.4 295.5 C55.4 306.9 58.6 306.9 58.6 318.2 C58.6 329.5 61.0 329.5 61.0 340.9 C61.0 352.2 62.0 352.2 62.0 363.6 C62.0 375.0 61.5 375.0 61.5 386.4 C61.5 397.8 59.5 397.8 59.5 409.1 C59.5 420.5 56.5 420.5 56.5 431.8 C56.5 443.1 53.0 443.1 53.0 454.5 C53.0 465.9 49.7 465.9 49.7 477.3 C49.7 488.6 47.2 488.6 47.2 500.0 C47.2 511.4 46.1 511.4 46.1 522.7 C46.1 534.1 46.4 534.1 46.4 545.5 C46.4 556.9 48.3 556.9 48.3 568.2 C48.3 579.5 51.2 579.5 51.2 590.9 C51.2 602.2 54.7 602.2 54.7 613.6 C54.7 625.0 58.0 625.0 58.0 636.4 C58.0 647.8 60.6 647.8 60.6 659.1 C60.6 670.5 61.9 670.5 61.9 681.8 C61.9 693.1 61.7 693.1 61.7 704.5 C61.7 715.9 60.0 715.9 60.0 727.3 C60.0 738.6 57.1 738.6 57.1 750.0 C57.1 761.4 53.7 761.4 53.7 772.7 C53.7 784.1 50.3 784.1 50.3 795.5 C50.3 806.9 47.6 806.9 47.6 818.2 C47.6 829.5 46.2 829.5 46.2 840.9 C46.2 852.2 46.2 852.2 46.2 863.6 C46.2 875.0 47.8 875.0 47.8 886.4 C47.8 897.8 50.6 897.8 50.6 909.1 C50.6 920.5 54.0 920.5 54.0 931.8 C54.0 943.1 57.4 943.1 57.4 954.5 C57.4 965.9 60.2 965.9 60.2 977.3 C60.2 988.6 61.8 988.6 61.8 1000.0" stroke-width="0.7" style="--o:0.6;--d:5.1s"/><path d="M33.2 0.0 C33.2 11.3 33.9 11.3 33.9 22.7 C33.9 34.1 34.7 34.1 34.7 45.5 C34.7 56.9 35.6 56.9 35.6 68.2 C35.6 79.6 36.7 79.6 36.7 90.9 C36.7 102.2 37.9 102.2 37.9 113.6 C37.9 125.0 39.2 125.0 39.2 136.4 C39.2 147.8 40.6 147.8 40.6 159.1 C40.6 170.4 42.0 170.4 42.0 181.8 C42.0 193.2 43.5 193.2 43.5 204.5 C43.5 215.9 45.1 215.9 45.1 227.3 C45.1 238.7 46.7 238.7 46.7 250.0 C46.7 261.4 48.3 261.4 48.3 272.7 C48.3 284.1 49.9 284.1 49.9 295.5 C49.9 306.9 51.4 306.9 51.4 318.2 C51.4 329.5 53.0 329.5 53.0 340.9 C53.0 352.2 54.5 352.2 54.5 363.6 C54.5 375.0 55.9 375.0 55.9 386.4 C55.9 397.8 57.2 397.8 57.2 409.1 C57.2 420.5 58.5 420.5 58.5 431.8 C58.5 443.1 59.7 443.1 59.7 454.5 C59.7 465.9 60.7 465.9 60.7 477.3 C60.7 488.6 61.6 488.6 61.6 500.0 C61.6 511.4 62.4 511.4 62.4 522.7 C62.4 534.1 63.0 534.1 63.0 545.5 C63.0 556.9 63.5 556.9 63.5 568.2 C63.5 579.5 63.8 579.5 63.8 590.9 C63.8 602.2 64.0 602.2 64.0 613.6 C64.0 625.0 64.0 625.0 64.0 636.4 C64.0 647.8 63.8 647.8 63.8 659.1 C63.8 670.5 63.5 670.5 63.5 681.8 C63.5 693.1 63.1 693.1 63.1 704.5 C63.1 715.9 62.4 715.9 62.4 727.3 C62.4 738.6 61.7 738.6 61.7 750.0 C61.7 761.4 60.8 761.4 60.8 772.7 C60.8 784.1 59.8 784.1 59.8 795.5 C59.8 806.9 58.6 806.9 58.6 818.2 C58.6 829.5 57.4 829.5 57.4 840.9 C57.4 852.2 56.0 852.2 56.0 863.6 C56.0 875.0 54.6 875.0 54.6 886.4 C54.6 897.8 53.1 897.8 53.1 909.1 C53.1 920.5 51.6 920.5 51.6 931.8 C51.6 943.1 50.0 943.1 50.0 954.5 C50.0 965.9 48.4 965.9 48.4 977.3 C48.4 988.6 46.8 988.6 46.8 1000.0" stroke-width="0.6" style="--o:0.4;--d:6.8s"/></svg><i style="left:55.99%;top:61.23%;--s:1.8px;--o:0.89;--d:5.7s"></i><i style="left:39.58%;top:38.56%;--s:2.2px;--o:0.38;--d:2.8s"></i><i style="left:47.95%;top:88.81%;--s:1.8px;--o:0.76;--d:1.1s"></i><i style="left:48.24%;top:49.38%;--s:1.8px;--o:0.9;--d:3.4s"></i><i style="left:48.83%;top:69.22%;--s:1.4px;--o:0.75;--d:2.6s"></i><i style="left:47.48%;top:46.18%;--s:1.8px;--o:0.72;--d:3.6s"></i><i style="left:47.44%;top:70.26%;--s:2.2px;--o:0.62;--d:6.1s"></i><i style="left:63.78%;top:34.45%;--s:3.4px;--o:0.81;--d:1.3s"></i><i style="left:41.63%;top:44.47%;--s:2.8px;--o:0.43;--d:0.4s"></i><i style="left:47.99%;top:24.15%;--s:1.4px;--o:0.76;--d:0.0s"></i><i style="left:37.51%;top:31.55%;--s:1.8px;--o:0.66;--d:2.7s"></i><i style="left:60.53%;top:84.14%;--s:2.2px;--o:0.71;--d:3.7s"></i><i style="left:36.52%;top:5.49%;--s:1.8px;--o:0.41;--d:4.4s"></i><i style="left:38.69%;top:41.89%;--s:3.4px;--o:0.84;--d:4.3s"></i><i style="left:41.47%;top:14.69%;--s:1.8px;--o:0.73;--d:0.6s"></i><i style="left:56.23%;top:44.81%;--s:1.8px;--o:0.76;--d:0.2s"></i><i style="left:35.13%;top:7.83%;--s:1.4px;--o:0.41;--d:1.3s"></i><i style="left:46.69%;top:70.8%;--s:1.8px;--o:0.46;--d:0.7s"></i><i style="left:43.09%;top:45.6%;--s:3.4px;--o:0.92;--d:2.7s"></i><i style="left:56.79%;top:53.57%;--s:1.4px;--o:0.65;--d:5.0s"></i><i style="left:51.21%;top:57.59%;--s:2.2px;--o:0.93;--d:6.4s"></i><i style="left:51.81%;top:95.86%;--s:3.4px;--o:0.89;--d:6.7s"></i><i style="left:64.86%;top:73.29%;--s:2.8px;--o:0.42;--d:6.3s"></i><i style="left:56.69%;top:53.48%;--s:1.8px;--o:0.43;--d:3.4s"></i><i style="left:44.57%;top:91.7%;--s:3.4px;--o:0.62;--d:3.1s"></i><i style="left:51.35%;top:28.74%;--s:1.4px;--o:0.55;--d:6.7s"></i><i style="left:59.86%;top:41.3%;--s:1.8px;--o:0.79;--d:0.1s"></i><i style="left:35.73%;top:37.57%;--s:1.8px;--o:0.4;--d:6.8s"></i><i style="left:44.25%;top:18.9%;--s:2.2px;--o:0.36;--d:1.8s"></i><i style="left:56.7%;top:76.78%;--s:2.2px;--o:0.77;--d:2.1s"></i><i style="left:57.41%;top:37.37%;--s:2.8px;--o:0.57;--d:0.2s"></i><i style="left:39.86%;top:25.42%;--s:2.8px;--o:0.8;--d:1.1s"></i><i style="left:48.87%;top:25.36%;--s:3.4px;--o:0.89;--d:1.3s"></i><i style="left:66.48%;top:59.2%;--s:2.8px;--o:0.78;--d:5.6s"></i></i>
     <div class="ruta-top">
       <span class="ruta-k">Roadmap</span>
       <span class="ruta-marca">Nereum &middot; adoption roadmap</span>
@@ -3889,7 +3934,7 @@ footer .fgrid h4,footer .tec-real{color:#5B657A}
   </div>
 </section>
 
-<section class="hpin" id="docs" data-bg="#0A0E18" data-acc="#3B6BFF">
+<section class="hpin" id="docs" data-bg="#000000" data-acc="#3B6BFF">
   <div class="hpin-hold" id="hpinHold">
     <div class="hpin-stage">
       <div class="hpin-track" id="hpinTrack">
@@ -3960,7 +4005,7 @@ footer .fgrid h4,footer .tec-real{color:#5B657A}
 </section>
 
 
-<section class="xl" id="xlight" data-bg="#05070C" data-acc="#2F6BFF"><i class="emb" aria-hidden="true" style="--emb:#0A0E18"></i>
+<section class="xl" id="xlight" data-bg="#000000" data-acc="#2F6BFF"><i class="emb" aria-hidden="true" style="--emb:#0A0E18"></i>
   <div class="xl-stage" id="xlStage">
     <canvas class="xl-cv" id="xlCv"></canvas>
     <div class="xl-word">Nereum Labs</div>
@@ -6290,9 +6335,9 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
     if(scvW!==Math.round(W*d)||scvH!==Math.round(H*d)){
       scvW=scv.width=Math.round(W*d); scvH=scv.height=Math.round(H*d);
       sctx.setTransform(d,0,0,d,0,0);
-      sctx.fillStyle='#05070C'; sctx.fillRect(0,0,W,H);
+      sctx.fillStyle='#000000'; sctx.fillRect(0,0,W,H);
     }
-    sctx.fillStyle='rgba(4,6,11,.26)';
+    sctx.fillStyle='rgba(0,0,0,.26)';
     sctx.fillRect(0,0,W,H);
     const cx=W/2, hor=H*.30;
     const U=Math.max(16,Math.round(Math.min(W,H)/22));

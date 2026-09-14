@@ -70,18 +70,19 @@ TITULO = 'Three phases, and what each one has to prove.'
 #
 # Las curvas se generan aqui, no se pegan a mano: cinco senos de frecuencia y
 # fase distintas sobre un lienzo estrecho y muy alto, con la amplitud apretada
-# arriba y abajo para que cada hebra nazca y muera fina en vez de cortarse.
+# arriba y abajo lo justo para que no se corten en seco.
 _ADN_W, _ADN_H = 96, 1000
-# Todas nacen en el MISMO sitio —48, el centro del lienzo, que se coloca
-# encima del rail— y se abren poco: en la referencia las hebras van pegadas a
-# la barra, no repartidas por media pantalla. Amplitud maxima 20 de 96.
+# Cada hebra con su centro y su fase. Las tuve todas naciendo del mismo punto
+# y salia un HUSO: las cinco se juntaban arriba y abajo y se abombaban en
+# medio. En la referencia corren parejas y se cruzan por el camino, cada una
+# entrando y saliendo del cuadro por su lado.
 _HEBRAS = [
     # centro, amplitud, frecuencia, fase, grosor, opacidad
-    (48,  6, 2.1, 0.0, 1.0, .85),
-    (48, 11, 1.4, 1.9, 0.8, .70),
-    (48, 16, 1.0, 3.4, 0.7, .52),
-    (48,  9, 3.1, 0.7, 0.7, .60),
-    (48, 20, 0.7, 5.1, 0.6, .40),
+    (44, 10, 2.1, 0.0, 1.0, .85),
+    (50, 14, 1.4, 1.9, 0.8, .70),
+    (46, 18, 1.0, 3.4, 0.7, .52),
+    (54,  8, 3.1, 0.7, 0.7, .60),
+    (48, 16, 0.7, 5.1, 0.6, .40),
 ]
 
 
@@ -89,9 +90,11 @@ def _camino(cx, amp, frec, fase, pasos=44):
     pts = []
     for k in range(pasos + 1):
         t = k / pasos
-        # sin(pi*t)**.6: la hebra se estrecha hacia los dos extremos
-        s = math.sin(math.pi * t) ** .6
-        pts.append((round(cx + amp * s * math.sin(frec * math.tau * t + fase), 1),
+        # Sin estrechamiento: la hebra corre entera de arriba abajo. Lo que se
+        # difumina en las puntas es la PINTURA, con una mascara, no la
+        # geometria: apretando la geometria las cinco convergian y el conjunto
+        # se leia como un huso en vez de como una trenza.
+        pts.append((round(cx + amp * math.sin(frec * math.tau * t + fase), 1),
                     round(t * _ADN_H, 1)))
     d = 'M%s %s' % pts[0]
     for i in range(1, len(pts)):
@@ -110,8 +113,7 @@ def _chispas(n=34):
     for _ in range(n):
         cx, amp, frec, fase, _g, _o = r.choice(_HEBRAS)
         t = r.uniform(.04, .96)
-        s = math.sin(math.pi * t) ** .6
-        x = cx + amp * s * math.sin(frec * math.tau * t + fase)
+        x = cx + amp * math.sin(frec * math.tau * t + fase)
         out.append((round(x / _ADN_W * 100, 2), round(t * 100, 2),
                     r.choice([1.4, 1.8, 2.2, 2.8, 3.4]),
                     round(r.uniform(.35, .95), 2), round(r.uniform(0, 7), 1)))
@@ -168,7 +170,16 @@ CSS = """
    su mismo suelo: el mismo negro y el mismo resplandor, para que las dos se
    lean como un solo campo y no como dos secciones pegadas. */
 .ruta{position:relative;overflow:hidden;background:#0A0E18;
-  padding:clamp(52px,6.5vw,96px) 0 clamp(64px,8vw,124px)}
+  padding:clamp(52px,6.5vw,96px) 0 clamp(64px,8vw,124px);
+  /* El CARRIL: la franja de la izquierda donde viven el rail y la hebra. Todo
+     el texto de la seccion empieza a su derecha.
+
+     Antes no existia: el titular y el rail compartian eje, asi que media hebra
+     caia justo debajo de las primeras letras. En la referencia el texto esta
+     lejos de la barra, y esa distancia es lo que hace que la hebra se lea. */
+  --carril:clamp(56px,8.5vw,140px);
+  --eje:calc(var(--carril) * .5);
+  --adn:clamp(34px,5.6vw,96px)}
 /* El mismo resplandor de «.builds», en el mismo sitio: cada seccion lo tiene
    en su propia esquina, asi que repetirlo es lo que las hace parecer una. */
 .ruta::before{content:'';position:absolute;inset:0;pointer-events:none;
@@ -185,10 +196,11 @@ CSS = """
    justo encima. Colgandolo de la seccion caia treinta y cinco pixeles a la
    derecha del rail, que es lo que se veia. */
 .ruta-wrap{position:relative}
+.ruta-top,.ruta-h,.ruta-f{padding-left:var(--carril)}
 .ruta-wrap>.ruta-top,.ruta-wrap>.ruta-h,.ruta-wrap>.ruta-lista{position:relative;z-index:1}
 .ruta-adn{position:absolute;top:0;bottom:0;z-index:0;pointer-events:none;
-  --an:clamp(56px,7vw,100px);
-  width:var(--an);left:0;margin-left:calc(var(--an) / -2);overflow:visible}
+  width:var(--adn);left:var(--eje);margin-left:calc(var(--adn) / -2);
+  overflow:visible}
 /* El campo azul: mas ancho que las hebras, pero CONTENIDO. La primera vez lo
    puse a 390 px y con el doble de fuerza, y lavaba de azul media seccion: el
    resplandor tiene que acompañar a la hebra, no sustituirla. */
@@ -197,15 +209,19 @@ CSS = """
     radial-gradient(40% 38% at 66% 30%,rgba(56,120,255,.22),transparent 72%),
     radial-gradient(32% 30% at 60% 78%,rgba(70,140,255,.15),transparent 76%),
     linear-gradient(to right,transparent,rgba(40,96,230,.13) 62%,transparent)}
-.ruta-adn svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+/* Las puntas se apagan con mascara, que es lo que toca: apretando la
+   geometria las cinco hebras convergian en un punto. */
+.ruta-adn svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible;
+  -webkit-mask-image:linear-gradient(to bottom,transparent,#000 7%,#000 93%,transparent);
+          mask-image:linear-gradient(to bottom,transparent,#000 7%,#000 93%,transparent)}
 .ruta-adn path{fill:none;stroke:#BBD9FF;stroke-linecap:round;
-  opacity:var(--o);filter:drop-shadow(0 0 2.5px rgba(130,185,255,.9))}
+  opacity:var(--o);filter:drop-shadow(0 0 2px rgba(130,185,255,.9))}
 /* Las chispas: redondas de verdad. Van fuera del SVG porque el lienzo se
    estira en vertical —«preserveAspectRatio:none»— y ahi un circulo saldria
    ovalado. */
 .ruta-adn i{position:absolute;width:var(--s);height:var(--s);margin:calc(var(--s) / -2);
   border-radius:50%;background:#E4EFFF;opacity:var(--o);
-  box-shadow:0 0 calc(var(--s) * 2.2) rgba(160,205,255,.95)}
+  box-shadow:0 0 calc(var(--s) * 1.7) rgba(160,205,255,.95)}
 
 /* La luz respira. Cada hebra con su retraso, que si laten a la vez es un
    semaforo y no una hebra. */
@@ -249,7 +265,7 @@ CSS = """
    el renglon del contador de cada fase. A ojo se descuadra en cuanto un
    titular pasa a dos renglones, que en movil pasa siempre. */
 .ruta-lista{list-style:none;margin:0;padding:0;position:relative;
-  --x:0px;--a:0px;--b:0px;--y:0px}
+  --x:var(--eje);--a:0px;--b:0px;--y:0px}
 .ruta-rail{position:absolute;left:var(--x);top:var(--a);height:var(--b);
   width:2px;margin-left:-1px;pointer-events:none}
 /* El punto: lleno, sin aro y SIN HALO, como en la referencia. Le puse uno
@@ -274,8 +290,7 @@ CSS = """
 .ruta-flecha svg{width:15px;height:15px;fill:none;stroke:currentColor;
   stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round}
 
-.ruta-f{position:relative;padding-left:clamp(30px,4vw,64px);
-  padding-block:0 clamp(34px,5vw,80px)}
+.ruta-f{position:relative;padding-block:0 clamp(34px,5vw,80px)}
 .ruta-f:last-of-type{padding-bottom:clamp(30px,4vw,58px)}
 
 .ruta-cab{display:flex;align-items:baseline;gap:clamp(10px,1.6vw,18px);
@@ -296,6 +311,16 @@ CSS = """
 
 
 @media(max-width:760px){
+  /* En el telefono la hebra pesaba demasiado: ocupaba el mismo sitio relativo
+     que en una pantalla de 1440 y ahi es media pantalla. Baja de ancho, de
+     trazo y de luz. */
+  .ruta{--carril:clamp(58px,17vw,78px);--adn:clamp(28px,8vw,36px)}
+  .ruta-adn{opacity:.72}
+  .ruta-adn path{filter:drop-shadow(0 0 1.3px rgba(130,185,255,.75))}
+  /* Las chispas encogen por tamaño, no por «transform»: el transform ya lo
+     usa su propio latido y una cosa pisaria a la otra. */
+  .ruta-adn i{width:calc(var(--s) * .72);height:calc(var(--s) * .72);
+    margin:calc(var(--s) * -.36);box-shadow:0 0 calc(var(--s) * 1.4) rgba(160,205,255,.9)}
   .ruta-h{max-width:none}
   .ruta-marca{display:none}   /* a 360 px no cabe en la misma linea */
   .ruta-p{max-width:none}
