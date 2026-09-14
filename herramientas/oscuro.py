@@ -80,25 +80,38 @@ DOS_CSS_NUEVO = """.paper2{background:var(--paper2);color:var(--ink)}
 # bloque, el titular, el subtitulo y los tres pasos. Se pasa al mismo borde que
 # el resto de cabeceras —el del «.wrap» mas el carril— y se anulan los cuatro
 # centrados, incluidos los que vuelven a ponerlo en el estado «.on».
-TRES_MARCA_VIEJO = """    <div class="stk-copy">"""
-TRES_MARCA_NUEVO = """    <div class="stk-copy wrap">"""
-TRES_PASOS_VIEJO = """    <div class="stk-steps"><i><b></b></i><i><b></b></i><i><b></b></i></div>"""
-TRES_PASOS_NUEVO = """    <div class="stk-steps wrap"><i><b></b></i><i><b></b></i><i><b></b></i></div>"""
+TRES_MARCA_VIEJO = """    <div class="stk-copy">
+      <div class="k sk"><i class="sk-n">05</i>The stack</div>"""
+TRES_MARCA_NUEVO = """    <div class="stk-copy wrap">
+      <div class="stk-steps"><i><b></b></i><i><b></b></i><i><b></b></i></div>
+      <div class="k sk"><i class="sk-n">05</i>The stack</div>"""
+TRES_PASOS_VIEJO = """    <div class="stk-steps"><i><b></b></i><i><b></b></i><i><b></b></i></div>
+  </div>
+  <span class="hold" data-bg="#000000" data-acc="#5B7BFF"></span>"""
+TRES_PASOS_NUEVO = """  </div><!-- los tres pasos viven ahora dentro de .stk-copy -->
+  <span class="hold" data-bg="#000000" data-acc="#5B7BFF"></span>"""
 TRES_VIEJO = """.stk-steps i b{display:block;height:100%;width:0;background:var(--blue);border-radius:2px}"""
 TRES_NUEVO = """.stk-steps i b{display:block;height:100%;width:0;background:var(--blue);border-radius:2px}
 """ + MARCA + """════════════════════
    Era la unica seccion centrada de las once. El borde izquierdo de todas las
    cabeceras es el del «.wrap», asi que la manera honrada de alinearla es
    darle el «.wrap»: la caja se la calcula el mismo sitio que a las demas, y
-   los cambios de tamano la siguen solos. Van con ella el titular, el
-   subtitulo y los tres pasos, que colgaban de «left:50%». */
+   los cambios de tamano la siguen solos. Van con ella el titular y el
+   subtitulo, que colgaban de «left:50%».
+
+   Y los tres pasos se suben ENCIMA del epigrafe, dentro del bloque. Estaban
+   sueltos, pegados al suelo de la escena y centrados; al traerlos al margen
+   izquierdo se pusieron justo donde vive el selector de idioma y se pisaban.
+   Arriba no estorban a nadie, van con el texto al que pertenecen y se leen
+   como lo que son: por donde va la escena. */
 .stk-copy{text-align:start;padding-inline:0}
 .stk-t b,.stk-sub s{left:0;right:auto}
 .stk-t b{transform:translateY(14px)}
 .stk-t b.on{transform:none}
 .stk-sub s{transform:translateY(10px)}
 .stk-sub s.on{transform:none}
-.stk-steps{justify-content:flex-start}"""
+.stk-steps{position:static;transform:none;left:auto;bottom:auto;
+  justify-content:flex-start;margin-bottom:clamp(16px,2vw,24px)}"""
 
 # ── 4 · fuera las fichas del menu ────────────────────────────────────────────
 CUATRO_VIEJO = """.nav>a:hover .chip,.nav>a.on .chip{background:var(--blue);border-color:var(--blue);color:#fff}"""
