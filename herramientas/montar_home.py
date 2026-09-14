@@ -36,6 +36,8 @@ todo lo que se hizo aqui y el archivo subido no trae:
  28. las tarjetas de seguridad se llenan en vez de dejar hueco
  29. la ruta: las tres fases de adopcion, con su rail al scroll
  30. las secciones oscuras, en negro de verdad
+ 31. que la pagina se pueda navegar en escritorio
+ 32. las dos tarjetas de proyectos, con la captura de lo que son
 """
 import sys, os
 
@@ -65,6 +67,7 @@ import tarjeta
 import ruta
 import negro
 import fluidez
+import proyectos
 subido, publicado = sys.argv[1], '/home/user/nerium/index.html'
 z = open(subido, encoding='utf-8').read()
 p = open(publicado, encoding='utf-8').read()
@@ -238,6 +241,10 @@ rest = ruta.aplicar(rest)
 # ── 30 · el negro de verdad ──
 rest = negro.aplicar(rest)
 
+# ── 32 · los proyectos ensenan el producto ──
+# Va antes de fluidez porque fluidez toca codigo, no marcado.
+rest = proyectos.aplicar(rest)
+
 # ── 31 · que se pueda navegar ──
 # Va al final a proposito: toca codigo que ponen pasos anteriores, asi que
 # tiene que llegar cuando ya esta todo puesto.
@@ -270,4 +277,5 @@ print("montado:", len(salida), "bytes ·", salida.count('var(--hud-b)'), "usos d
       "ruta:", str(salida.count('class="ruta-f"')) + ' fases' if ruta.MARCA in salida else 'SIN RUTA', "·",
       "negro:", 'suelo a cero' if negro.MARCA in salida else 'AZULADO', "·",
       "fluidez:", 'sin variables en la raiz por cuadro'
-                  if 'function lavado(c){' in salida else 'CON ATASCO')
+                  if 'function lavado(c){' in salida else 'CON ATASCO', "·",
+      "proyectos:", str(salida.count('class="bcd-shot"')) + ' capturas')

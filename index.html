@@ -569,6 +569,16 @@ body.light .hud-band{color:rgba(10,12,16,.6)}
 .bcd-plate::after{content:'';position:absolute;inset:0;
   background:radial-gradient(60% 80% at 70% 12%,rgba(47,107,255,.20),transparent 66%)}
 .bcd-cv{position:absolute;inset:0;width:100%;height:100%;z-index:0}
+/* ══ proyectos ══ Lo aplica herramientas/proyectos.py ══════════════════
+   La caja de la ilustracion se abre a lo que mide la captura —1,9— en vez de
+   recortarle el 15 % por la derecha, que ahi estan el buscador y el boton.
+   Y se apaga el halo azul de la placa: encima de una captura clara tenia la
+   pantalla de un color que no es el suyo. */
+.bcd-art{aspect-ratio:1.9}
+.bcd-foto{padding:0;gap:0;background:#EEF2FB}
+.bcd-foto::after{display:none}
+.bcd-shot{position:absolute;inset:0;width:100%;height:100%;
+  object-fit:cover;object-position:left top;display:block}
 .bcd-mark{position:relative;z-index:2;display:flex;align-items:center;
   gap:.34em;font-size:clamp(19px,2.1vw,28px);font-weight:500;
   letter-spacing:-.04em;color:#fff}
@@ -4135,11 +4145,9 @@ footer .fgrid h4,footer .tec-real{color:#5B657A}
       <article class="bcd">
         <div class="bcd-art">
           <i class="cn tl"></i><i class="cn tr"></i><i class="cn bl"></i><i class="cn br"></i>
-          <div class="bcd-plate">
-            <canvas class="bcd-cv"></canvas>
-            <span class="bcd-mark"><svg aria-hidden="true"><use href="#nlogo"/></svg>Nereum</span>
-            <span class="bcd-rule"></span>
-            <span class="bcd-kind"><b>NereumEVM</b>Layer 1</span>
+          <div class="bcd-plate bcd-foto">
+            <img class="bcd-shot" src="img/explorer-overview.webp" width="1500" height="789"
+                 alt="The Nereum explorer: block height, tokenized assets and live block production" loading="lazy" decoding="async">
           </div>
         </div>
         <div class="bcd-tag"><i class="bcd-dot"></i>Testnet · 75% to mainnet</div>
@@ -4153,11 +4161,9 @@ footer .fgrid h4,footer .tec-real{color:#5B657A}
       <article class="bcd">
         <div class="bcd-art">
           <i class="cn tl"></i><i class="cn tr"></i><i class="cn bl"></i><i class="cn br"></i>
-          <div class="bcd-plate">
-            <canvas class="bcd-cv"></canvas>
-            <span class="bcd-mark"><svg aria-hidden="true"><use href="#nlogo"/></svg>Nereum</span>
-            <span class="bcd-rule"></span>
-            <span class="bcd-kind"><b>Forge</b>Issuance</span>
+          <div class="bcd-plate bcd-foto">
+            <img class="bcd-shot" src="img/explorer-tokenize.webp" width="1500" height="789"
+                 alt="Issuing an asset on Nereum: name, symbol, type, units and declared value" loading="lazy" decoding="async">
           </div>
         </div>
         <div class="bcd-tag"><i class="bcd-dot"></i>Testnet · 75% to mainnet</div>
