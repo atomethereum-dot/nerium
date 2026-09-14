@@ -58,16 +58,23 @@ FASES = [
      'the same way interbank payment rails are not one today.'),
 ]
 
-# El rotulo de arriba decia «Roadmap» en azul y el titular, tres centimetros
-# mas abajo, decia «Roadmap» otra vez. Y a la derecha ponia «Nereum · adoption
-# roadmap», que es la tercera. Ahora la seccion usa el rotulo del RESTO de la
-# web —numero y frase, «09 What we are building», «11 In the open»—, que es lo
-# que hace que se lean como capitulos de lo mismo y no como carteles sueltos.
-# La marca de la derecha se va: ninguna otra seccion tiene una.
+# El rotulo es el NOMBRE DEL CAPITULO, como en el resto de la web: «01
+# Network», «08 Token», «06 Security». Cuatro de once son un sustantivo pelado,
+# asi que «Roadmap» ahi no desentona: es exactamente el molde, y es donde el
+# lector busca saber en que seccion esta.
+#
+# El titular es la frase, que es lo que hacen todas las demas: «Two pieces,
+# both already running.», «One price now. One price at listing.», «Three things
+# you can check before you send a dollar.» Todas abren con un numero y cierran
+# en punto seco. La de esta seccion ya estaba escrita, pero vivia de entradilla
+# gris debajo de un titular de una sola palabra, que no es el patron de la casa
+# ni de lejos.
+#
+# Con eso la entradilla sobra: en las secciones que llevan este molde —02, 08,
+# 09— no hay tercera linea, se pasa del titular al contenido.
 NUMERO = '10'
-ROTULO = 'How this gets adopted'
-TITULO = 'Roadmap'
-ENTRADILLA = 'Three phases, and what each one has to prove.'
+ROTULO = 'Roadmap'
+TITULO = 'Three phases, and what each one has to prove.'
 
 
 
@@ -223,6 +230,19 @@ def _adn():
 _CAPAS = 30
 
 
+# ── el titular entra en el grupo de la casa ──────────────────────────────────
+# En vez de repetir aqui el interletraje y el interlineado, se añade «.ruta-h»
+# a las reglas que ya los definen para todas las demas secciones. Asi hay UNA
+# fuente de verdad: el dia que se afine el titular de la web, este va detras
+# solo, que es justo lo que no pasaba.
+GRUPO = [
+    ('.press-h,.builds-h,.tkp-h,.sale-h,.sec-h,.join-h,.tm-h{\n  letter-spacing:-.052em;line-height:.97}',
+     '.press-h,.builds-h,.tkp-h,.sale-h,.sec-h,.join-h,.tm-h,.ruta-h{\n  letter-spacing:-.052em;line-height:.97}'),
+    ('.press-h,.builds-h,.tkp-h,.sale-h,.sec-h,.join-h,.tm-h{\n    letter-spacing:-.042em;line-height:1.02}',
+     '.press-h,.builds-h,.tkp-h,.sale-h,.sec-h,.join-h,.tm-h,.ruta-h{\n    letter-spacing:-.042em;line-height:1.02}'),
+]
+
+
 def _marca():
     # EL CANTO, DE VERDAD. Antes era una lamina plana girada en el espacio: se
     # movia en 3D pero no TENIA fondo, porque el unico grosor era el bisel
@@ -234,19 +254,24 @@ def _marca():
     # forman un lateral macizo con su degradado: el logo pasa de ser un papel a
     # ser una pieza. El bisel pintado se retira, que ya no hace falta y
     # duplicado se veria doble.
-    # La opacidad NO baja en linea recta: cae rapido en las primeras laminas y
-    # se aplana al fondo. Eso es lo que hace una arista —claro de golpe junto a
-    # la cara, oscuro enseguida— en vez de una rampa gris que a poca opacidad
-    # se confunde con la propia cara y se lee plana.
-    canto = ''.join(
-        '<i style="--n:%d;--t:%s"></i>'
-        % (k, round(.06 + .94 * (1 - k / (_CAPAS - 1)) ** 2.2, 3))
-        for k in range(1, _CAPAS))
-    return (
-        '<i class="ruta-marca" aria-hidden="true">'
-        '<i class="ruta-marca-v"><i class="ruta-marca-x"><i class="ruta-marca-g">'
-        '<i class="ruta-marca-c">%s</i>'
-        '<i class="ruta-marca-f">'
+    # LAS LAMINAS VAN OPACAS. Antes cada una llevaba su propia opacidad y el
+    # canto se veia POR DENTRO: treinta hojas translucidas apiladas no son un
+    # solido, son un solido de mentira, y eso es lo que se leia barato. Un
+    # canto de verdad no deja ver lo que hay detras de el.
+    #
+    # Lo que cambia hacia dentro es el COLOR, no la transparencia: de un gris
+    # claro junto a la cara a casi negro al fondo, con una curva que cae rapido
+    # al principio. Asi hay arista —claro de golpe, oscuro enseguida— y no una
+    # rampa lavada.
+    def _gris(k):
+        t = k / (_CAPAS - 1)
+        v = 0.80 * (1 - t) ** 1.8 + 0.055
+        return '#%02X%02X%02X' % (int(v * 208), int(v * 214), int(v * 228))
+
+    canto = ''.join('<i style="--n:%d;--c:%s"></i>' % (k, _gris(k))
+                    for k in range(1, _CAPAS))
+    # La cara: el dibujo del logo, con su degradado y su franja.
+    cara = (
         '<svg viewBox="0 0 512 512">'
         '<defs>'
         '<linearGradient id="nr-plata" gradientUnits="userSpaceOnUse"'
@@ -269,9 +294,19 @@ def _marca():
         ' L471.30 464.86 L26.92 464.86 Z"/>'
         '<path fill="#FCFCFC" d="M26.92 382.65 L471.30 382.65'
         ' L471.30 464.86 L26.92 464.86 Z"/>'
-        '</svg>'
-        '<i class="ruta-marca-luz"></i>'
-        '</i></i></i></i></i>' % canto)
+        '</svg>')
+    # La TRASERA es el mismo dibujo, no una lamina lisa. Antes, al pasar de la
+    # media vuelta, lo que quedaba mirando a camara era la ultima lamina del
+    # canto: un rectangulo gris sin forma. Una pieza real tiene dos caras, y el
+    # reverso de una plancha grabada es la misma plancha vista del otro lado.
+    # Se refleja con «scaleX(-1)», que es lo que hace el reverso de verdad.
+    return (
+        '<i class="ruta-marca" aria-hidden="true">'
+        '<i class="ruta-marca-v"><i class="ruta-marca-x"><i class="ruta-marca-g">'
+        '<i class="ruta-marca-c">%s</i>'
+        '<i class="ruta-marca-b">%s</i>'
+        '<i class="ruta-marca-f">%s<i class="ruta-marca-luz"></i></i>'
+        '</i></i></i></i>' % (canto, cara, cara))
 
 
 def _marcado():
@@ -293,13 +328,12 @@ def _marcado():
         '    <div class="k sk rv ruta-top">'
         '<i class="sk-n">%s</i>%s</div>\n'
         '    <h2 class="ruta-h">%s</h2>\n'
-        '    <p class="ruta-sub">%s</p>\n'
         '    <ol class="ruta-lista" id="rutaLista">\n'
         '%s\n'
         '    </ol>\n'
         '  </div>\n'
         '</section>\n\n'
-    ) % (_marca(), _adn(), NUMERO, ROTULO, TITULO, ENTRADILLA, '\n'.join(fases))
+    ) % (_marca(), _adn(), NUMERO, ROTULO, TITULO, '\n'.join(fases))
 
 
 CSS = """
@@ -409,7 +443,7 @@ CSS = """
 .ruta-marca{--lado:min(96vw,1120px);--gr:calc(var(--lado) * .15)}
 .ruta-marca-x{position:absolute;inset:0;display:block;
   transform-style:preserve-3d;animation:marcaCabecea 29s ease-in-out infinite}
-.ruta-marca-c,.ruta-marca-f{position:absolute;left:50%;top:50%;
+.ruta-marca-c,.ruta-marca-f,.ruta-marca-b{position:absolute;left:50%;top:50%;
   width:var(--lado);height:var(--lado);
   margin:calc(var(--lado) / -2) 0 0 calc(var(--lado) / -2);
   transform-style:preserve-3d}
@@ -426,9 +460,15 @@ CSS = """
 .ruta-marca-c{transform-style:preserve-3d;transform:scale(1.08)}
 .ruta-marca-c i{position:absolute;inset:0;display:block;
   transform:translateZ(calc(var(--gr) / 29 * var(--n) * -1));
-  background:linear-gradient(148deg,#D7DBE6,#6E727C 48%,#262931);
-  opacity:var(--t)}
+  /* OPACAS. Con opacidad por lamina el canto se veia por dentro: treinta hojas
+     translucidas apiladas no son un solido, y eso es lo que se leia barato. Lo
+     que oscurece hacia el fondo es el color, que lo calcula el generador. */
+  background:var(--c)}
 .ruta-marca-f{transform:translateZ(0)}
+/* La trasera, al fondo del canto y espejada. Sin ella, pasada la media vuelta
+   lo que miraba a camara era la ultima lamina: un rectangulo gris sin forma. */
+.ruta-marca-b{transform:translateZ(calc(var(--gr) * -1)) scaleX(-1)}
+.ruta-marca-b svg{filter:brightness(.62)}
 .ruta-marca svg{position:absolute;inset:0;width:100%;height:100%;display:block}
 /* El reflejo que recorre la cara. Va aparte del SVG y con su propio tiempo:
    pegado al dibujo giraria con el y un reflejo que gira con la pieza no es un
@@ -474,7 +514,7 @@ CSS = """
   .ruta-marca-v,.ruta-marca-g,.ruta-marca-x{animation:none}}
 
 .ruta-wrap{position:relative}
-.ruta-top,.ruta-h,.ruta-sub,.ruta-f{padding-left:var(--carril)}
+.ruta-top,.ruta-h,.ruta-f{padding-left:var(--carril)}
 .ruta-wrap>.ruta-top,.ruta-wrap>.ruta-h,.ruta-wrap>.ruta-lista{position:relative;z-index:1}
 .ruta-adn{position:absolute;top:0;bottom:0;z-index:0;pointer-events:none;
   width:var(--adn);left:var(--borde);margin-left:calc(var(--adn) / -2);
@@ -566,16 +606,17 @@ CSS = """
 /* Solo la sangria: lo demas —tipo, tamaño, el numerito— lo pone «.k.sk», el
    mismo rotulo que llevan las otras nueve secciones. */
 .ruta-top{margin:0}
-.ruta-h{margin:clamp(18px,2.4vw,30px) 0 0;
-  font-weight:400;font-size:clamp(26px,4.4vw,56px);letter-spacing:-.04em;
-  line-height:1.04;color:#fff;max-width:18ch;text-wrap:balance}
-/* La frase que antes hacia de titular baja a entradilla: el titulo de la
-   seccion es «Roadmap», que es lo que se busca de un vistazo, y la frase
-   explica. Antes iba al reves y habia que leerla entera para saber que era
-   esto. */
-.ruta-sub{margin:clamp(12px,1.6vw,20px) 0 clamp(48px,5.8vw,88px);
-  max-width:46ch;font-size:clamp(15px,1.5vw,19px);line-height:1.5;
-  color:rgba(226,236,250,.66)}
+/* El titular, con el MISMO tratamiento que los de las demas secciones. Se
+   habia escrito por su cuenta —56 px y peso 400 frente a los 76 y 300 de la
+   casa, con menos interletraje negativo y mas interlineado—, y al lado del de
+   «what we are building» se notaba: mas pequeño y mas gordo, como si fuera de
+   otra pagina.
+
+   El tamaño sale de «--fs-h2», que es la variable que usan todos, y el
+   interletraje y el interlineado se los da la regla comun a la que esta
+   seccion se añade mas abajo. Aqui solo queda lo que es suyo: el margen. */
+.ruta-h{margin:clamp(18px,2.4vw,30px) 0 clamp(48px,5.8vw,88px);
+  font-weight:300;font-size:var(--fs-h2);color:#fff;max-width:22ch}
 
 /* ── el rail ──
    Este es el de la referencia, pieza por pieza: un punto LLENO arriba, un
@@ -862,6 +903,13 @@ def aplicar(html):
         assert html.count(ancla) == 1, 'no esta la seccion de documentacion'
         k = html.index(ancla)
         html = html[:k] + _marcado().lstrip('\n') + html[k:]
+
+    # ── el titular, al grupo de titulares de la casa ──
+    for viejo, nuevo in GRUPO:
+        if nuevo in html:
+            continue
+        assert html.count(viejo) == 1, 'no esta la regla comun de titulares: ' + viejo[:40]
+        html = html.replace(viejo, nuevo, 1)
 
     # ── el CSS ──
     if MARCA in html:
