@@ -71,14 +71,17 @@ TITULO = 'Three phases, and what each one has to prove.'
 # Las curvas se generan aqui, no se pegan a mano: cinco senos de frecuencia y
 # fase distintas sobre un lienzo estrecho y muy alto, con la amplitud apretada
 # arriba y abajo para que cada hebra nazca y muera fina en vez de cortarse.
-_ADN_W, _ADN_H = 120, 1000
+_ADN_W, _ADN_H = 96, 1000
+# Todas nacen en el MISMO sitio —48, el centro del lienzo, que se coloca
+# encima del rail— y se abren poco: en la referencia las hebras van pegadas a
+# la barra, no repartidas por media pantalla. Amplitud maxima 20 de 96.
 _HEBRAS = [
     # centro, amplitud, frecuencia, fase, grosor, opacidad
-    (58, 15, 2.1, 0.0, 0.9, .55),
-    (58, 22, 1.4, 1.9, 0.7, .40),
-    (52, 30, 1.0, 3.4, 0.6, .28),
-    (64, 11, 3.1, 0.7, 0.6, .34),
-    (46, 38, 0.7, 5.1, 0.5, .20),
+    (48,  6, 2.1, 0.0, 1.0, .85),
+    (48, 11, 1.4, 1.9, 0.8, .70),
+    (48, 16, 1.0, 3.4, 0.7, .52),
+    (48,  9, 3.1, 0.7, 0.7, .60),
+    (48, 20, 0.7, 5.1, 0.6, .40),
 ]
 
 
@@ -141,8 +144,8 @@ def _marcado():
             '      </li>' % (i, i + 1, len(FASES), estado, titulo, objetivo))
     return (
         '\n\n<section class="ruta" id="ruta" data-bg="#0A0E18" data-acc="#79ABFF">\n'
-        '  %s\n'
-        '  <div class="wrap">\n'
+        '  <div class="wrap ruta-wrap">\n'
+        '    %s\n'
         '    <div class="ruta-top">\n'
         '      <span class="ruta-k">Roadmap</span>\n'
         '      <span class="ruta-marca">%s</span>\n'
@@ -172,52 +175,46 @@ CSS = """
   background:radial-gradient(1100px 520px at 16% -12%,rgba(47,107,255,.16),transparent 62%)}
 .ruta>*{position:relative;z-index:1}
 
-/* ── la hebra de luz del margen ──
-   En la referencia la banda de la izquierda no es una linea sobre negro: es
-   una hebra luminosa trenzada consigo misma, tipo ADN, con chispas por ella.
-   La nuestra estaba plana.
+/* ── la hebra de luz, PEGADA a la barra ──
+   Primero la puse ancha y a la izquierda del rail, y estaba mal por partida
+   doble: en la referencia las hebras van PEGADAS a la barra —se abren unos
+   veinte pixeles a cada lado, no media pantalla— y van encendidas, no palidas.
 
-   Vive DEBAJO de todo —«z-index:0» contra el 1 del resto— y se apaga hacia la
-   derecha con una mascara, porque el texto empieza a unos cien pixeles y si el
-   resplandor le llega al fondo se cae el contraste. Eso no es opinion: lo mide
-   «probar_contraste.mjs» pixel a pixel. */
-.ruta-adn{position:absolute;left:0;top:0;bottom:0;z-index:0;pointer-events:none;
-  width:clamp(76px,11vw,158px);overflow:hidden;
-  -webkit-mask-image:linear-gradient(to right,#000 0 34%,rgba(0,0,0,.55) 66%,transparent 96%);
-          mask-image:linear-gradient(to right,#000 0 34%,rgba(0,0,0,.55) 66%,transparent 96%)}
-/* El campo azul del fondo: dos manchas, una alta y otra baja, desbordando por
-   la izquierda para que no se vea donde empiezan. */
-/* Tres capas: dos manchas —una alta y otra baja— y un lavado que aviva el
-   canto izquierdo, que en la referencia es la parte mas encendida de todas. */
-.ruta-adn::before{content:"";position:absolute;inset:-8% -20% -8% -70%;
+   Por eso el elemento vive DENTRO del wrap y no en la seccion: asi su «left:0»
+   es el mismo borde del que cuelga el rail, y centrandolo sobre el se queda
+   justo encima. Colgandolo de la seccion caia treinta y cinco pixeles a la
+   derecha del rail, que es lo que se veia. */
+.ruta-wrap{position:relative}
+.ruta-wrap>.ruta-top,.ruta-wrap>.ruta-h,.ruta-wrap>.ruta-lista{position:relative;z-index:1}
+.ruta-adn{position:absolute;top:0;bottom:0;z-index:0;pointer-events:none;
+  --an:clamp(56px,7vw,100px);
+  width:var(--an);left:0;margin-left:calc(var(--an) / -2);overflow:visible}
+/* El campo azul: mas ancho que las hebras, pero CONTENIDO. La primera vez lo
+   puse a 390 px y con el doble de fuerza, y lavaba de azul media seccion: el
+   resplandor tiene que acompañar a la hebra, no sustituirla. */
+.ruta-adn::before{content:"";position:absolute;inset:-4% -55% -4% -115%;
   background:
-    radial-gradient(58% 42% at 46% 32%,rgba(56,120,255,.46),transparent 70%),
-    radial-gradient(48% 34% at 34% 78%,rgba(70,140,255,.30),transparent 74%),
-    linear-gradient(to right,rgba(40,96,230,.30),transparent 58%)}
+    radial-gradient(40% 38% at 66% 30%,rgba(56,120,255,.22),transparent 72%),
+    radial-gradient(32% 30% at 60% 78%,rgba(70,140,255,.15),transparent 76%),
+    linear-gradient(to right,transparent,rgba(40,96,230,.13) 62%,transparent)}
 .ruta-adn svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
-.ruta-adn path{fill:none;stroke:#93C2FF;stroke-linecap:round;
-  opacity:var(--o);filter:drop-shadow(0 0 3.5px rgba(96,160,255,.75))}
+.ruta-adn path{fill:none;stroke:#BBD9FF;stroke-linecap:round;
+  opacity:var(--o);filter:drop-shadow(0 0 2.5px rgba(130,185,255,.9))}
 /* Las chispas: redondas de verdad. Van fuera del SVG porque el lienzo se
    estira en vertical —«preserveAspectRatio:none»— y ahi un circulo saldria
    ovalado. */
 .ruta-adn i{position:absolute;width:var(--s);height:var(--s);margin:calc(var(--s) / -2);
-  border-radius:50%;background:#CFE2FF;opacity:var(--o);
-  box-shadow:0 0 calc(var(--s) * 2.4) rgba(150,195,255,.85)}
+  border-radius:50%;background:#E4EFFF;opacity:var(--o);
+  box-shadow:0 0 calc(var(--s) * 2.2) rgba(160,205,255,.95)}
 
 /* La luz respira. Cada hebra con su retraso, que si laten a la vez es un
    semaforo y no una hebra. */
-@keyframes adnHebra{0%,100%{opacity:calc(var(--o) * .55)}50%{opacity:var(--o)}}
+@keyframes adnHebra{0%,100%{opacity:calc(var(--o) * .62)}50%{opacity:var(--o)}}
 @keyframes adnChispa{0%,100%{opacity:calc(var(--o) * .35);transform:scale(.72)}
   50%{opacity:var(--o);transform:none}}
 .ruta-adn path{animation:adnHebra 11s ease-in-out var(--d) infinite}
 .ruta-adn i{animation:adnChispa 5.5s ease-in-out var(--d) infinite}
 
-@media(max-width:760px){
-  /* En el telefono el margen es de dieciseis pixeles: la hebra queda debajo
-     del texto por fuerza, asi que baja de intensidad hasta donde el medidor
-     de contraste la deja pasar. */
-  .ruta-adn{width:clamp(64px,26vw,104px);opacity:.62}
-}
 @media(prefers-reduced-motion:reduce){
   .ruta-adn path,.ruta-adn i{animation:none}
 }
@@ -255,20 +252,25 @@ CSS = """
   --x:0px;--a:0px;--b:0px;--y:0px}
 .ruta-rail{position:absolute;left:var(--x);top:var(--a);height:var(--b);
   width:2px;margin-left:-1px;pointer-events:none}
-/* El punto: lleno, sin aro y sin halo. En la referencia no los lleva. */
+/* El punto: lleno, sin aro y SIN HALO, como en la referencia. Le puse uno
+   para que no se perdiera entre las hebras y la bateria me paro: el acuerdo
+   era que fuera identica, no que a mi me pareciera que se veia poco. Si hace
+   falta despegarlo del fondo, se despeja el fondo, no se disfraza el punto. */
 .ruta-punto{position:absolute;left:50%;top:var(--y);
   width:13px;height:13px;margin:-6.5px 0 0 -6.5px;border-radius:50%;
   background:#3E86FF;
   transition:top .8s cubic-bezier(.16,.84,.26,1)}
 /* La linea: blanca, arranca un buen hueco por debajo del punto —en la
    referencia ese hueco es casi dos veces y media el punto— y baja hasta el
-   galon. */
+   galon. Va a .9 y no a .6: con la hebra encendida detras, a .6 dejaba de
+   mandar, y en la referencia la barra es lo mas claro de todo el margen. */
 .ruta-linea{position:absolute;left:0;right:0;
   top:calc(var(--y) + 27px);bottom:15px;
-  background:rgba(255,255,255,.6);
+  background:rgba(255,255,255,.9);
+  box-shadow:0 0 6px rgba(255,255,255,.25);
   transition:top .8s cubic-bezier(.16,.84,.26,1)}
 .ruta-flecha{position:absolute;left:50%;bottom:0;width:15px;height:15px;
-  margin-left:-7.5px;display:grid;place-items:center;color:rgba(255,255,255,.6)}
+  margin-left:-7.5px;display:grid;place-items:center;color:rgba(255,255,255,.9)}
 .ruta-flecha svg{width:15px;height:15px;fill:none;stroke:currentColor;
   stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round}
 
