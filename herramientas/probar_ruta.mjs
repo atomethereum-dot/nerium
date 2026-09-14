@@ -98,8 +98,21 @@ for (let y = 0; y < alto; y += 450) { await pg.evaluate(v => scrollTo(0, v), y);
 // quede ninguna linea recta, que el punto caiga SOBRE el camino, y que el
 // borde de la luz y el punto sean el mismo sitio.
 {
-  await pg.evaluate(() => document.getElementById('ruta').scrollIntoView({ block:'center' }));
-  await pg.waitForTimeout(1100);
+  /* El scroll se CONVERGE, como en el bloque de la marca: «scrollIntoView» no
+     cae dos veces en el mismo sitio —hay secciones ancladas que cambian el
+     alto del documento— y el punto viaja 0,8 s hasta su sitio. Leyendolo a
+     medio viaje salian 3,6 px de desvio y un 70% donde hay un 55, y fallaba
+     una tirada de cada dos sin que nada estuviera mal. */
+  for (let i = 0; i < 12; i++) {
+    const d = await pg.evaluate(() => {
+      const r = document.getElementById('ruta').getBoundingClientRect();
+      return (r.top + r.height / 2) - innerHeight / 2;
+    });
+    if (Math.abs(d) < 2) break;
+    await pg.evaluate(v => scrollBy(0, v), d);
+    await pg.waitForTimeout(90);
+  }
+  await pg.waitForTimeout(1400);
   const r = await pg.evaluate(() => {
     const ad = document.querySelector('.ruta-adn'), cad = getComputedStyle(ad);
     const caja = ad.getBoundingClientRect();
@@ -510,7 +523,25 @@ for (let y = 0; y < alto; y += 450) { await pg.evaluate(v => scrollTo(0, v), y);
 {
   const estado = () => pg.evaluate(() =>
     [...document.querySelectorAll('.ruta-f')].map(e => e.classList.contains('on') ? 1 : 0).join(''));
-  const clavado = () => pg.evaluate(() => {
+  /* PARADO DE VERDAD: se le pregunta al navegador.
+     El punto viaja 0,8 s hasta su sitio con una curva que frena mucho al
+     final. Una espera fija fallaba de vez en cuando —una tirada dio 18,8 px,
+     que son los que le faltaban por recorrer—, y mirar si la cifra «ya casi no
+     cambia» tampoco vale: en la cola de esa curva avanza menos de medio pixel
+     por decima y todavia le quedan siete. La unica lectura honesta es esperar
+     a que las transiciones terminen, que es un dato que el navegador tiene. */
+  const clavado = async () => {
+    await pg.evaluate(async () => {
+      const e = [document.querySelector('.ruta-punto'), document.querySelector('.ruta-viva')].filter(Boolean);
+      const an = e.flatMap(x => x.getAnimations ? x.getAnimations() : []);
+      await Promise.race([
+        Promise.all(an.map(a => a.finished.catch(() => {}))),
+        new Promise(r => setTimeout(r, 2500)),
+      ]);
+    });
+    return leerClavado();
+  };
+  const leerClavado = () => pg.evaluate(() => {
     const l = document.getElementById('rutaLista'), cl = l.getBoundingClientRect();
     const rp = document.querySelector('.ruta-punto').getBoundingClientRect();
     const cabs = [...document.querySelectorAll('.ruta-cab')].map(c => {

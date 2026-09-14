@@ -220,7 +220,7 @@ def _adn():
 # Cuantas laminas tiene el canto. Con pocas se ve el escalonado al girar; con
 # muchas no se gana nada y son nodos de mas. Dieciocho aguanta los 22 grados de
 # cabeceo sin que se noten los peldaños.
-_CAPAS = 18
+_CAPAS = 30
 
 
 def _marca():
@@ -234,20 +234,26 @@ def _marca():
     # forman un lateral macizo con su degradado: el logo pasa de ser un papel a
     # ser una pieza. El bisel pintado se retira, que ya no hace falta y
     # duplicado se veria doble.
+    # La opacidad NO baja en linea recta: cae rapido en las primeras laminas y
+    # se aplana al fondo. Eso es lo que hace una arista —claro de golpe junto a
+    # la cara, oscuro enseguida— en vez de una rampa gris que a poca opacidad
+    # se confunde con la propia cara y se lee plana.
     canto = ''.join(
-        '<i style="--n:%d;--t:%s"></i>' % (k, round(1 - k / (_CAPAS - 1) * .72, 3))
+        '<i style="--n:%d;--t:%s"></i>'
+        % (k, round(.06 + .94 * (1 - k / (_CAPAS - 1)) ** 2.2, 3))
         for k in range(1, _CAPAS))
     return (
         '<i class="ruta-marca" aria-hidden="true">'
-        '<i class="ruta-marca-v"><i class="ruta-marca-g">'
+        '<i class="ruta-marca-v"><i class="ruta-marca-x"><i class="ruta-marca-g">'
         '<i class="ruta-marca-c">%s</i>'
         '<i class="ruta-marca-f">'
         '<svg viewBox="0 0 512 512">'
         '<defs>'
         '<linearGradient id="nr-plata" gradientUnits="userSpaceOnUse"'
         ' x1="-7.29" y1="71.63" x2="505.51" y2="413.71">'
-        '<stop offset="0" stop-color="#C6CAD7"/>'
-        '<stop offset="1" stop-color="#9498A1"/></linearGradient>'
+        '<stop offset="0" stop-color="#EDF0F7"/>'
+        '<stop offset=".52" stop-color="#A9AEBB"/>'
+        '<stop offset="1" stop-color="#4E525C"/></linearGradient>'
         '<radialGradient id="nr-brillo" gradientUnits="userSpaceOnUse"'
         ' cx="0" cy="0" r="1"'
         ' gradientTransform="translate(171.35 153.79) rotate(35.40)'
@@ -265,7 +271,7 @@ def _marca():
         ' L471.30 464.86 L26.92 464.86 Z"/>'
         '</svg>'
         '<i class="ruta-marca-luz"></i>'
-        '</i></i></i></i>' % canto)
+        '</i></i></i></i></i>' % canto)
 
 
 def _marcado():
@@ -369,33 +375,40 @@ CSS = """
      pieza tan cerca que se comia el encuadre y se perdia la silueta. Se
      compensa echandola hacia atras en Z y bajandole el lado. */
   pointer-events:none;perspective:1050px;perspective-origin:50% 40%;
-  opacity:.22;
+  opacity:.32;
   /* DOS MASCARAS, y se cruzan:
        · la redonda apaga los cantos, que un logo cortado a escuadra por el
-         borde de la seccion se lee como un error y no como un fondo;
+         borde de la seccion se lee como un error y no como un fondo. Va ancha
+         y se apaga tarde: apretada, recortaba la pieza en cuñas y lo que se
+         veia no era un solido girando sino poligonos sueltos;
        · la horizontal lo baja donde vive el TEXTO —la mitad izquierda— y lo
          deja entero donde no hay nada que leer.
      Asi el logo se ve de verdad sin comerse las letras: donde importa llega
-     al 22% de una cosa y donde no, al 7%. Un solo numero para toda la caja
+     al 32% de una cosa y donde no, al 6%. Un solo numero para toda la caja
      obligaba a elegir entre que no se viera o que estorbase. */
-  -webkit-mask-image:radial-gradient(120% 96% at 50% 48%,#000 34%,transparent 92%),
-                     linear-gradient(to right,rgba(0,0,0,.32) 0 46%,#000 82%);
-          mask-image:radial-gradient(120% 96% at 50% 48%,#000 34%,transparent 92%),
-                     linear-gradient(to right,rgba(0,0,0,.32) 0 46%,#000 82%);
+  -webkit-mask-image:radial-gradient(145% 125% at 50% 50%,#000 58%,transparent 100%),
+                     linear-gradient(to right,rgba(0,0,0,.2) 0 46%,#000 82%);
+          mask-image:radial-gradient(145% 125% at 50% 50%,#000 58%,transparent 100%),
+                     linear-gradient(to right,rgba(0,0,0,.2) 0 46%,#000 82%);
   -webkit-mask-composite:source-in;
           mask-composite:intersect}
 .ruta-marca-v,.ruta-marca-g{position:absolute;inset:0;display:block;
   transform-style:preserve-3d;will-change:transform}
-.ruta-marca-v{animation:marcaPasea 71s ease-in-out infinite}
+.ruta-marca-v{animation:marcaPasea 47s ease-in-out infinite}
 /* Echada hacia atras: asi la perspectiva corta le da profundidad sin
    acercarla tanto como para salirse del encuadre. */
-.ruta-marca-g{animation:marcaGira 53s ease-in-out infinite;
-  transform:translateZ(-220px)}
+.ruta-marca-g{animation:marcaGira 26s linear infinite;
+  transform:translateZ(-260px)}
 
 /* ── la pieza ──
    «--lado» es el tamaño del logo y «--gr» el grosor del canto: un 4,5% del
    lado, que es la proporcion de una pieza solida y no la de una chapa. */
-.ruta-marca{--lado:min(76vw,860px);--gr:calc(var(--lado) * .055)}
+/* Mas grande y MUCHO mas gruesa: el grosor pasa del 5,5% al 15% del lado. A
+   0,22 de opacidad un canto fino se funde con la cara y la pieza se lee
+   plana; lo que hace el 3D no es que gire, es que se vea el lateral. */
+.ruta-marca{--lado:min(96vw,1120px);--gr:calc(var(--lado) * .15)}
+.ruta-marca-x{position:absolute;inset:0;display:block;
+  transform-style:preserve-3d;animation:marcaCabecea 29s ease-in-out infinite}
 .ruta-marca-c,.ruta-marca-f{position:absolute;left:50%;top:50%;
   width:var(--lado);height:var(--lado);
   margin:calc(var(--lado) / -2) 0 0 calc(var(--lado) / -2);
@@ -405,10 +418,15 @@ CSS = """
    pieza cabecea aparecen de lado y forman un lateral macizo con su sombreado.
    Es lo que separa una pieza de un papel: un papel girado sigue sin tener
    canto, y por mucho que se mueva se lee plano. */
-.ruta-marca-c{transform-style:preserve-3d}
+/* EL CHAFLAN. El cuerpo es un 8% mas grande que la cara, asi que asoma por
+   los cuatro lados. Es lo que hace que la pieza se lea con volumen en
+   CUALQUIER angulo y no solo cuando el lateral mira a camara: sin el, en los
+   giros en que el canto queda de espaldas la pieza volvia a leerse como un
+   recorte plano de papel. Una pieza real siempre enseña su arista. */
+.ruta-marca-c{transform-style:preserve-3d;transform:scale(1.08)}
 .ruta-marca-c i{position:absolute;inset:0;display:block;
-  transform:translateZ(calc(var(--gr) / 17 * var(--n) * -1));
-  background:linear-gradient(148deg,#9DA2AF,#5E626C 62%,#3F424A);
+  transform:translateZ(calc(var(--gr) / 29 * var(--n) * -1));
+  background:linear-gradient(148deg,#D7DBE6,#6E727C 48%,#262931);
   opacity:var(--t)}
 .ruta-marca-f{transform:translateZ(0)}
 .ruta-marca svg{position:absolute;inset:0;width:100%;height:100%;display:block}
@@ -426,20 +444,34 @@ CSS = """
 /* El giro: el logo va de canto —como la referencia, en rombo— y cabecea en
    los tres ejes. El «rotateZ» no vuelve a 45 por el camino corto si lo dejo
    suelto, asi que los fotogramas lo llevan a mano. */
+/* LA VUELTA ENTERA SOBRE SU EJE, que es lo unico que dice «esto es un solido»
+   sin lugar a dudas: cada media vuelta la pieza pasa DE CANTO, la silueta se
+   estrecha hasta ser una barra y se ve el grosor de lado a lado. Ninguna
+   cantidad de balanceo hace eso.
+
+   Antes daba tumbos en tres ejes a la vez y era peor de lo que suena: a poca
+   opacidad y recortada por la mascara, un solido que voltea sin eje fijo no se
+   lee como un solido, se lee como poligonos sueltos moviendose. El eje
+   estable es lo que deja seguir la pieza con la vista.
+
+   El cabeceo en X se queda en un vaiven corto —lo justo para que no parezca un
+   letrero de tienda— y va en un tiempo distinto del giro, asi que la
+   combinacion tarda minutos en repetirse. */
 @keyframes marcaGira{
-    0%{transform:translateZ(-220px) rotateX(-21deg) rotateY(24deg)  rotateZ(45deg)}
-   25%{transform:translateZ(-220px) rotateX(16deg)  rotateY(-14deg) rotateZ(53deg)}
-   50%{transform:translateZ(-220px) rotateX(23deg)  rotateY(21deg)  rotateZ(38deg)}
-   75%{transform:translateZ(-220px) rotateX(-12deg) rotateY(-25deg) rotateZ(50deg)}
-  100%{transform:translateZ(-220px) rotateX(-21deg) rotateY(24deg)  rotateZ(45deg)}}
+    0%{transform:translateZ(-260px) rotateZ(38deg) rotateY(0deg)}
+  100%{transform:translateZ(-260px) rotateZ(38deg) rotateY(360deg)}}
+@keyframes marcaCabecea{
+    0%{transform:rotateX(-17deg)}
+   50%{transform:rotateX(15deg)}
+  100%{transform:rotateX(-17deg)}}
 /* El paseo: recorre la seccion sin llegar a salirse del todo. */
 @keyframes marcaPasea{
-    0%{transform:translate3d(-9%,-5%,0) scale(1)}
-   30%{transform:translate3d(8%,4%,0)   scale(1.06)}
-   60%{transform:translate3d(-5%,7%,0)  scale(.97)}
-  100%{transform:translate3d(-9%,-5%,0) scale(1)}}
+    0%{transform:translate3d(-9%,-6%,0) scale(1)}
+   33%{transform:translate3d(8%,5%,0)   scale(1.06)}
+   66%{transform:translate3d(6%,-7%,0)  scale(.96)}
+  100%{transform:translate3d(-9%,-6%,0) scale(1)}}
 @media(prefers-reduced-motion:reduce){
-  .ruta-marca-v,.ruta-marca-g{animation:none}}
+  .ruta-marca-v,.ruta-marca-g,.ruta-marca-x{animation:none}}
 
 .ruta-wrap{position:relative}
 .ruta-top,.ruta-h,.ruta-sub,.ruta-f{padding-left:var(--carril)}
@@ -628,7 +660,7 @@ CSS = """
 @media(max-width:760px){
   /* En el telefono el texto ocupa todo el ancho, asi que no hay mitad libre
      donde subir la marca: se baja entera. */
-  .ruta-marca{opacity:.13;
+  .ruta-marca{opacity:.16;
     -webkit-mask-image:radial-gradient(130% 92% at 50% 48%,#000 30%,transparent 94%);
             mask-image:radial-gradient(130% 92% at 50% 48%,#000 30%,transparent 94%);
     -webkit-mask-composite:source-over;
