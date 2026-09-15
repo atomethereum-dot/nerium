@@ -15,15 +15,19 @@ scroll como mando: no se reproduce sola, se OPERA. Tres tiempos.
   el enganche      (.42 → .62) los tres anillos caen en linea de golpe, la
                    cruz de mira converge y la cifra de la ronda se engancha.
                    Es el momento en que el aparato dice «listo».
-  la apertura      (.62 → 1) el diafragma abre, y por el hueco no hay dibujo:
-                   hay LUZ, que es el suelo de la ronda esperando detras. La
-                   camara se va en cuanto el hueco la come, y la pagina sale a
-                   la seccion de la ronda sin corte.
+  la apertura      (.56 → .96) el diafragma abre, y por el hueco no hay
+                   dibujo: esta LA RONDA. La camara se va en cuanto el hueco
+                   la come.
 
-Lo que hay detras del lienzo es, literalmente, el color de la banda que viene.
-El lienzo pinta la camara encima y le RECORTA el hueco con destination-out, de
-modo que la apertura no es un degradado imitando luz: es el propio fondo de la
-ronda apareciendo. Por eso el paso de una seccion a la otra no tiene costura.
+Y eso ultimo es literal. La puerta se SOLAPA con la seccion de la ronda -100vh
+de margen negativo- de modo que la ronda ya esta ahi debajo, viva, mientras el
+escenario sigue anclado encima. El lienzo pinta la camara y le recorta el hueco
+con destination-out, asi que por el diafragma aparece el contenido de verdad.
+
+Esto es lo que arregla el hueco en blanco de la primera version: alli el iris
+abria sobre un suelo vacio y quedaban casi mil pixeles de pantalla sin nada
+hasta que llegaba la seccion. Medido contando textos visibles: tres —los tres
+del HUD— desde el 80 % del recorrido hasta pasado el final.
 
 Tres decisiones que no son de gusto:
 
@@ -50,32 +54,41 @@ SELLO_JS = '/* ── el umbral: la puerta de la ronda ── */'
 
 CSS = """
 /* ══ umbral ════════════════════════════════════════════════════════════════
-   La camara oscura que se abre antes de la ronda. */
-.umb{position:relative;height:220vh;z-index:1;
-  margin-top:clamp(-36px,-3.4vw,-64px)}
+   La camara oscura que se abre sobre la ronda. */
+.umb{position:relative;height:210vh;z-index:3;
+  /* La puerta es decoracion (aria-hidden) y esta ANCLADA ENCIMA de la ronda
+     durante 100vh: si intercepta el puntero, durante ese tramo los botones de
+     la ronda no se pueden pulsar. Lo canto probar_vista intentando un clic. */
+  pointer-events:none;
+  margin-top:clamp(-36px,-3.4vw,-64px);
+  /* Y aqui esta lo que arregla el hueco en blanco: la puerta se SOLAPA con la
+     seccion de la ronda. Antes el iris abria sobre el suelo vacio y quedaban
+     casi mil pixeles de pantalla sin nada hasta que llegaba el contenido.
+     Ahora la ronda empieza 100vh antes, por debajo del escenario anclado, y
+     lo que aparece por el hueco del iris es la ronda de verdad. */
+  margin-bottom:-100vh}
 .umb-esc{position:sticky;top:0;height:100dvh;overflow:hidden;
-  /* El fondo ES el suelo de la ronda: lo que aparece por el hueco del
-     diafragma no imita la luz, es la banda que viene. */
-  background:var(--suelo)}
+  /* transparente: la cortina la pinta el lienzo, y debajo esta la ronda */
+  background:transparent}
 .umb-lz{position:absolute;inset:0;width:100%;height:100%;display:block}
 .umb-hud{position:absolute;inset:0;display:grid;place-items:center;
   pointer-events:none;text-align:center;
   font-family:var(--m);color:#E9EEF7}
 .umb-caja{display:flex;flex-direction:column;align-items:center;gap:clamp(12px,1.6vw,20px);
   opacity:0;transform:translateY(14px);will-change:opacity,transform}
-.umb-k{font-size:11px;letter-spacing:.26em;color:#79ABFF}
+.umb-k{font-size:11px;letter-spacing:.26em;color:#5FE9FF}
 .umb-n{display:flex;align-items:baseline;gap:.06em;
   font-family:var(--f);font-weight:200;letter-spacing:-.05em;
   font-size:clamp(76px,13vw,190px);line-height:.88;color:#fff;
   font-variant-numeric:tabular-nums}
-.umb-n i{font-style:normal;font-size:.42em;color:#79ABFF;font-weight:300}
-.umb-sub{font-size:11px;letter-spacing:.2em;color:rgba(233,238,247,.62)}
+.umb-n i{font-style:normal;font-size:.42em;color:#5FE9FF;font-weight:300}
+.umb-sub{font-size:11px;letter-spacing:.2em;color:rgba(233,238,247,.66)}
 @media(max-width:760px){
-  .umb{height:200vh}
+  .umb{height:190vh;margin-bottom:-90vh}
   .umb-k,.umb-sub{font-size:9.5px;letter-spacing:.18em}
 }
 @media(prefers-reduced-motion:reduce){
-  .umb{height:0;margin-top:0}
+  .umb{height:0;margin-top:0;margin-bottom:0}
   .umb-esc{display:none}
 }
 /* ══ fin: umbral ══ */
@@ -119,12 +132,20 @@ JS = """<script>
   }
   var suave=function(t){return t*t*(3-2*t)};
   var tramo=function(p,a,b){return suave(Math.min(1,Math.max(0,(p-a)/(b-a))))};
+  /* La paleta: el azul de la casa, cian y violeta. El color no es decoracion
+     aqui —es lo que separa el aparato frio de arriba del momento en que
+     engancha—: los anillos entran en azul apagado y en el enganche viran a
+     cian encendido. */
+  var AZUL=[47,107,255], CIAN=[95,233,255], VIOLETA=[150,90,255];
+  function mez(a,b,t){return [a[0]+(b[0]-a[0])*t, a[1]+(b[1]-a[1])*t, a[2]+(b[2]-a[2])*t]}
+  function tinta(c,al){return 'rgba('+(c[0]|0)+','+(c[1]|0)+','+(c[2]|0)+','+al.toFixed(3)+')'}
 
   var DIENTES=60;
-  function anillo(g,R,seg,hueco,ang,alfa,grueso){
+  function anillo(R,seg,hueco,ang,alfa,grueso,color,brillo){
     cx.save(); cx.translate(W/2,H/2); cx.rotate(ang);
-    cx.strokeStyle='rgba(150,185,255,'+alfa.toFixed(3)+')';
+    cx.strokeStyle=tinta(color,alfa);
     cx.lineWidth=grueso; cx.lineCap='butt';
+    if(brillo>0){ cx.shadowColor=tinta(color,0.9); cx.shadowBlur=brillo }
     var paso=Math.PI*2/seg;
     for(var i=0;i<seg;i++){
       cx.beginPath();
@@ -135,34 +156,42 @@ JS = """<script>
   }
   function dibuja(p){
     cx.clearRect(0,0,W,H);
-    /* la camara */
+    var R=Math.min(W,H)*0.29;
+    var enc=tramo(p,0.34,0.54);              /* el enganche */
+    var ab=tramo(p,0.56,0.96);               /* la apertura */
+
+    /* 1 · la camara, con su propio campo de color. Un negro plano era una
+       pantalla apagada; esto es una camara con algo encendido dentro. */
     cx.fillStyle='#04070C';
     cx.fillRect(0,0,W,H);
-    var R=Math.min(W,H)*0.29;
+    var halo=cx.createRadialGradient(W/2,H/2,0,W/2,H/2,Math.max(W,H)*0.62);
+    var fuerza=(0.10+0.42*enc)*(1-ab*0.55);
+    halo.addColorStop(0,   tinta(mez(AZUL,CIAN,enc), 0.30*fuerza*3));
+    halo.addColorStop(0.42,tinta(mez(AZUL,VIOLETA,enc*0.6), 0.16*fuerza*3));
+    halo.addColorStop(1,   'rgba(4,7,12,0)');
+    cx.fillStyle=halo; cx.fillRect(0,0,W,H);
 
-    /* 1 · el instrumento: tres anillos que llegan desalineados */
-    var vis=tramo(p,0.02,0.20)*(1-tramo(p,0.72,0.92));
+    /* 2 · el instrumento */
+    var vis=tramo(p,0.02,0.20)*(1-tramo(p,0.74,0.92));
     if(vis>0.002){
-      var enc=tramo(p,0.34,0.52);              /* el enganche */
-      var giro=(1-enc);
-      anillo(cx,R*1.34,DIENTES,0.42, giro*1.10, 0.46*vis, 1);
-      anillo(cx,R*1.06,24,0.34,      -giro*1.70, 0.62*vis, 1.5);
-      anillo(cx,R*0.82,8, 0.18,       giro*2.40, 0.80*vis, 2.5);
+      var giro=(1-enc), col=mez(AZUL,CIAN,enc), bri=16*enc;
+      anillo(R*1.34,DIENTES,0.42, giro*1.10, 0.46*vis, 1,   mez(AZUL,VIOLETA,enc*0.5), bri*0.4);
+      anillo(R*1.06,24,0.34,      -giro*1.70, 0.66*vis, 1.5, col, bri*0.7);
+      anillo(R*0.82,8, 0.18,       giro*2.40, 0.88*vis, 2.5, col, bri);
 
-      /* los dientes de medida, cada cinco mas largo */
       cx.save(); cx.translate(W/2,H/2);
       for(var i=0;i<DIENTES;i++){
         var a=i*Math.PI*2/DIENTES, lg=(i%5===0)?12:6;
-        cx.strokeStyle='rgba(150,185,255,'+(((i%5===0)?0.80:0.40)*vis).toFixed(3)+')';
+        cx.strokeStyle=tinta(mez(AZUL,CIAN,enc), ((i%5===0)?0.85:0.42)*vis);
         cx.lineWidth=1;
         cx.beginPath();
         cx.moveTo(Math.cos(a)*(R*1.46),Math.sin(a)*(R*1.46));
         cx.lineTo(Math.cos(a)*(R*1.46+lg),Math.sin(a)*(R*1.46+lg));
         cx.stroke();
       }
-      /* 2 · la cruz de mira, que converge */
+      /* la cruz de mira */
       var c=tramo(p,0.30,0.56), largo=R*2.6*(1-c)+R*0.30*c;
-      cx.strokeStyle='rgba(120,170,255,'+(0.70*vis*c).toFixed(3)+')';
+      cx.strokeStyle=tinta(mez(AZUL,CIAN,enc), 0.72*vis*c);
       cx.lineWidth=1;
       cx.beginPath();
       cx.moveTo(-largo,0); cx.lineTo(-R*0.16,0);
@@ -170,60 +199,64 @@ JS = """<script>
       cx.moveTo(0,-largo); cx.lineTo(0,-R*0.16);
       cx.moveTo(0,R*0.16);  cx.lineTo(0,largo);
       cx.stroke();
+      /* y el destello del enganche: un anillo que sale disparado justo en el
+         instante en que los tres caen en linea */
+      var chas=tramo(p,0.46,0.56)*(1-tramo(p,0.56,0.70));
+      if(chas>0.01){
+        cx.strokeStyle=tinta(CIAN,0.85*chas);
+        cx.lineWidth=2*chas;
+        cx.shadowColor=tinta(CIAN,0.9); cx.shadowBlur=24*chas;
+        cx.beginPath(); cx.arc(0,0,R*(0.82+1.9*(1-chas)),0,Math.PI*2); cx.stroke();
+      }
       cx.restore();
     }
 
     /* 3 · la apertura: un iris de doce palas. No se pinta luz —se RECORTA la
-       camara con destination-out y detras esta el suelo de la ronda—. Un
-       ovalo daba una mancha; doce palas rectas dan un mecanismo, que es lo
-       que se abre de verdad en un objetivo. */
-    var ab=tramo(p,0.58,1.00);
+       camara con destination-out y detras esta la seccion de la ronda—. */
     if(ab>0){
       var PALAS=12;
-      /* el radio pasa de cero a mas que la diagonal, para comerse la pantalla */
       var diag=Math.sqrt(W*W+H*H)*0.62;
-      var rad=Math.pow(ab,1.32)*diag;
-      /* y las palas giran mientras abren, como el anillo de un objetivo */
+      var rad=Math.pow(ab,1.20)*diag;
       var gir=(1-ab)*0.42;
-      var camino=function(){
+      var camino=function(k){
         cx.beginPath();
         for(var i=0;i<=PALAS;i++){
           var a=gir+i*Math.PI*2/PALAS;
-          var x=W/2+Math.cos(a)*rad, y=H/2+Math.sin(a)*rad;
+          var x=W/2+Math.cos(a)*rad*k, y=H/2+Math.sin(a)*rad*k;
           if(i===0)cx.moveTo(x,y); else cx.lineTo(x,y);
         }
         cx.closePath();
       };
-      cx.save();
-      cx.globalCompositeOperation='destination-out';
-      camino(); cx.fill();
-      cx.restore();
-      /* el filo, y un segundo anillo de palas por fuera que lo acompaña */
-      if(ab<0.99){
+      /* el filo, en color, ANTES de recortar: asi el borde del diafragma
+         queda encendido en vez de ser un corte seco */
+      if(ab<0.995){
         cx.save();
-        cx.strokeStyle='rgba(170,205,255,'+(0.62*(1-ab)).toFixed(3)+')';
-        cx.lineWidth=1.5; camino(); cx.stroke();
-        cx.strokeStyle='rgba(120,170,255,'+(0.26*(1-ab)).toFixed(3)+')';
-        cx.lineWidth=1;
-        cx.beginPath();
-        for(var k=0;k<PALAS;k++){
-          var a2=gir+k*Math.PI*2/PALAS;
-          cx.moveTo(W/2+Math.cos(a2)*rad, H/2+Math.sin(a2)*rad);
-          cx.lineTo(W/2+Math.cos(a2)*(rad*1.16+18), H/2+Math.sin(a2)*(rad*1.16+18));
-        }
-        cx.stroke();
+        cx.strokeStyle=tinta(CIAN,0.85*(1-ab));
+        cx.lineWidth=2.5; cx.shadowColor=tinta(CIAN,0.9); cx.shadowBlur=26*(1-ab);
+        camino(1); cx.stroke();
+        cx.strokeStyle=tinta(VIOLETA,0.45*(1-ab));
+        cx.lineWidth=1; cx.shadowBlur=0;
+        camino(1.075); cx.stroke();
         cx.restore();
       }
+      cx.save();
+      cx.globalCompositeOperation='destination-out';
+      /* OPACO, y esto no es un detalle: destination-out borra EN PROPORCION al
+         alfa de lo que pintas. El fillStyle que quedaba puesto era el
+         degradado del halo, cuya ultima parada es transparente, asi que el
+         iris borraba a medias y la ronda se quedaba detras de un velo oscuro
+         para siempre. Se veia como «la pagina en blanco» del final. */
+      cx.fillStyle='#000';
+      camino(1); cx.fill();
+      cx.restore();
     }
   }
-  var visto=-1;
   function pinta(){
     pide=0;
     if(!dentro) return;
     var p=avance();
     dibuja(p);
-    /* la cifra entra con el enganche y se va con la apertura */
-    var e=tramo(p,0.24,0.44)*(1-tramo(p,0.54,0.68));
+    var e=tramo(p,0.24,0.44)*(1-tramo(p,0.52,0.66));
     caja.style.opacity=e.toFixed(3);
     caja.style.transform='translateY('+((1-e)*14).toFixed(1)+'px)';
   }

@@ -66,14 +66,16 @@ SUELO_B = '#D6DEEE'
 # press va detras de network; token detras de presale; join detras de team.
 HONDAS = ('press', 'token', 'join')
 
-# La teja de la pauta, 170x170: cuatro lineas finas y una mayor por lado, Y EL
-# GRANO dentro. Lo del grano no es por ahorrar un archivo: es lo unico que deja
-# meter la rejilla sin sumar una capa. Medido, cualquier sexta capa de fondo
-# sobre estas secciones -hasta un degradado transparente- sube el p90 de 33 a
-# 50 ms y mete cinco cuadros largos mas. Como el grano ya era una capa y ya
-# era una teja que se repite, la pauta viaja dentro de el y el coste es cero.
-TEJA_CLARA = '''url("data:image/svg+xml,<svg%20xmlns='http://www.w3.org/2000/svg'%20width='170'%20height='170'><filter%20id='n'><feTurbulence%20type='fractalNoise'%20baseFrequency='.92'%20numOctaves='3'%20stitchTiles='stitch'/><feColorMatrix%20type='saturate'%20values='0'/></filter><rect%20width='170'%20height='170'%20filter='url%28%2523n%29'%20opacity='.036'/><path%20d='M34.5%200V170M68.5%200V170M102.5%200V170M136.5%200V170M0%2034.5H170M0%2068.5H170M0%20102.5H170M0%20136.5H170'%20fill='none'%20stroke='rgba%2817%2C27%2C48%2C.085%29'%20stroke-width='1'/><path%20d='M.5%200V170M0%20.5H170'%20fill='none'%20stroke='rgba%2817%2C27%2C48%2C.17%29'%20stroke-width='1'/></svg>")'''
-TEJA_OSCURA = '''url("data:image/svg+xml,<svg%20xmlns='http://www.w3.org/2000/svg'%20width='170'%20height='170'><filter%20id='n'><feTurbulence%20type='fractalNoise'%20baseFrequency='.92'%20numOctaves='3'%20stitchTiles='stitch'/><feColorMatrix%20type='saturate'%20values='0'/></filter><rect%20width='170'%20height='170'%20filter='url%28%2523n%29'%20opacity='.036'/><path%20d='M34.5%200V170M68.5%200V170M102.5%200V170M136.5%200V170M0%2034.5H170M0%2068.5H170M0%20102.5H170M0%20136.5H170'%20fill='none'%20stroke='rgba%28140%2C175%2C255%2C.085%29'%20stroke-width='1'/><path%20d='M.5%200V170M0%20.5H170'%20fill='none'%20stroke='rgba%28140%2C175%2C255%2C.16%29'%20stroke-width='1'/></svg>")'''
+# El grano, y SOLO el grano. Aqui hubo una rejilla de ingenieria -fina cada 34
+# px, mayor cada cinco- y estaba mal: de cerca era una acotacion de plano, pero
+# a pantalla completa y repetida por nueve bandas lo que salia era una hoja de
+# cuaderno cuadriculado. Barato. Una malla regular a ese paso no da estructura,
+# da papel pautado, y compite con todo lo que se pone encima.
+# La estructura la dan ahora dos cosas que no son textura: la linea de cota
+# sobre cada rotulo y una sola vertical de referencia por banda. Una linea
+# puesta a proposito estructura mas que mil.
+GRANO_CLARO = '''url("data:image/svg+xml,<svg%20xmlns='http://www.w3.org/2000/svg'%20width='170'%20height='170'><filter%20id='n'><feTurbulence%20type='fractalNoise'%20baseFrequency='.92'%20numOctaves='3'%20stitchTiles='stitch'/><feColorMatrix%20type='saturate'%20values='0'/></filter><rect%20width='170'%20height='170'%20filter='url%28%2523n%29'%20opacity='.042'/></svg>")'''
+GRANO_OSCURO = '''url("data:image/svg+xml,<svg%20xmlns='http://www.w3.org/2000/svg'%20width='170'%20height='170'><filter%20id='n'><feTurbulence%20type='fractalNoise'%20baseFrequency='.92'%20numOctaves='3'%20stitchTiles='stitch'/><feColorMatrix%20type='saturate'%20values='0'/></filter><rect%20width='170'%20height='170'%20filter='url%28%2523n%29'%20opacity='.055'/></svg>")'''
 
 # El tercer nivel de tinta, un paso mas hondo para que aguante el suelo hondo.
 TINTA_VIEJA, TINTA_NUEVA = '#5B657A', '#525C70'
@@ -92,22 +94,25 @@ main>section:is(.press,.tkp,.join){background-color:var(--suelo2);--tapa:var(--s
 /* ── los tonos de la pauta y de la luz ── */
 main>section:is(.paper,.paper2,.secure,.sale,.tkp,.join,.press){
   --tapa:var(--suelo);
-  --grano:__CLARA__;
-  --foco:rgba(255,255,255,.88);
-  --hondo:rgba(11,16,30,.115)}
+  --grano:__GC__;
+  --foco:rgba(255,255,255,.92);
+  --foco2:rgba(214,232,255,.62);
+  --hondo:rgba(11,16,30,.135)}
 main>section:is(.stack,.loop){
-  --grano:__OSCURA__;
-  --foco:rgba(70,125,255,.20);
-  --hondo:rgba(0,0,0,.55)}
+  --grano:__GO__;
+  --foco:rgba(70,125,255,.22);
+  --foco2:rgba(120,200,255,.13);
+  --hondo:rgba(0,0,0,.58)}
 /* Las dos oscuras de fondo liso no traen dibujo propio que respetar, asi que
    aqui la pila se escribe entera. */
 main>section.loop{
   background-image:
-    radial-gradient(74% 48% at 50% 22%, var(--foco) 0%, rgba(255,255,255,0) 70%),
+    radial-gradient(78% 52% at 26% 8%, var(--foco2) 0%, rgba(255,255,255,0) 62%),
+    radial-gradient(92% 58% at 62% 18%, var(--foco) 0%, rgba(255,255,255,0) 68%),
     var(--grano);
-  background-repeat:no-repeat,repeat;
-  background-size:auto,auto;
-  background-position:center,0 0}
+  background-repeat:no-repeat,no-repeat,repeat;
+  background-size:auto,auto,auto;
+  background-position:center,center,0 0}
 
 /* ── la linea de cota, encima de cada rotulo de seccion ──
    Once rotulos sueltos repartidos por la pagina no son una serie. Con una
@@ -136,8 +141,26 @@ main>section :is(.wrap,.sec-head,.join-head):has(.sk)::before{
       linear-gradient(currentColor,currentColor) 0    0/1px 5px no-repeat,
       linear-gradient(currentColor,currentColor) 100% 0/1px 5px no-repeat,
       linear-gradient(currentColor,currentColor) 0    0/100% 1px no-repeat}}
+/* ── y una sola vertical de referencia por banda ──
+   Estructura no es textura. Una linea puesta donde empieza el carril de
+   contenido, de arriba abajo y apagandose por los dos extremos, ordena la
+   banda entera; una malla de lineas cada 34 px la ensucia.
+   Va en el «::after» del mismo carril que ya lleva la cota, asi que no suma
+   ni un elemento ni una capa de fondo. */
+main>section :is(.wrap,.sec-head,.join-head):has(.sk)::after{
+  content:"";position:absolute;left:-1px;top:-22px;bottom:-40vh;width:1px;
+  pointer-events:none;
+  background:linear-gradient(180deg,
+    currentColor 0%, rgba(0,0,0,0) 4%, rgba(0,0,0,0) 0%);
+  opacity:.16;
+  mask-image:linear-gradient(180deg,#000 0%,#000 62%,rgba(0,0,0,0) 100%);
+  -webkit-mask-image:linear-gradient(180deg,#000 0%,#000 62%,rgba(0,0,0,0) 100%)}
+main>section :is(.wrap,.sec-head,.join-head):has(.sk)::after{
+  background:currentColor}
+@media(max-width:760px){
+  main>section :is(.wrap,.sec-head,.join-head):has(.sk)::after{display:none}}
 /* ══ fin: relieve ══ */
-""".replace('__B__', SUELO_B).replace('__CLARA__', TEJA_CLARA).replace('__OSCURA__', TEJA_OSCURA)
+""".replace('__B__', SUELO_B).replace('__GC__', GRANO_CLARO).replace('__GO__', GRANO_OSCURO)
 
 
 CAPAS = (
@@ -147,12 +170,16 @@ CAPAS = (
     #     probar_costura exige que el canto sea EXACTAMENTE el color que la
     #     banda anuncia en su data-bg.
     'radial-gradient(124% 96% at 50% 44%, rgba(0,0,0,0) 0%, rgba(0,0,0,0) 52%, var(--tapa) 88%)',
-    'radial-gradient(74% 48% at 50% 22%, var(--foco) 0%, rgba(255,255,255,0) 70%)',
-    'radial-gradient(112% 76% at 50% 46%, rgba(255,255,255,0) 54%, var(--hondo) 100%)',
+    # la luz de escena: alta, ancha y con temperatura. Dos focos y no uno —uno
+    # frio arriba a la izquierda y uno neutro al centro— porque un solo
+    # degradado centrado se lee como un flash y dos se leen como una sala.
+    'radial-gradient(78% 52% at 26% 8%, var(--foco2) 0%, rgba(255,255,255,0) 62%)',
+    'radial-gradient(92% 58% at 62% 18%, var(--foco) 0%, rgba(255,255,255,0) 68%)',
+    'radial-gradient(118% 82% at 50% 44%, rgba(255,255,255,0) 48%, var(--hondo) 100%)',
 )
-REPITE = ('no-repeat', 'no-repeat', 'no-repeat')
-TAMANO = ('auto', 'auto', 'auto')
-SITIO = ('center', 'center', 'center')
+REPITE = ('no-repeat', 'no-repeat', 'no-repeat', 'no-repeat')
+TAMANO = ('auto', 'auto', 'auto', 'auto')
+SITIO = ('center', 'center', 'center', 'center')
 
 _CLARAS = ('.paper', '.paper2', '.secure', '.sale', '.tkp', '.join', '.press')
 
@@ -195,20 +222,33 @@ def _componer(html):
         ini = html.rfind('{', 0, k) if ini < 0 else html.rfind('{', ini, k)
         sel = html[html.rfind('}', 0, ini) + 1: ini] if ini > 0 else ''
         cierre = html.index('}', k)
-        if not any(c in sel for c in _CLARAS) or 'var(--tapa)' in html[k:cierre]:
+        if not any(c in sel for c in _CLARAS):
             fin = k + 1
             continue
         bloque = html[ini + 1: cierre]
         img = re.search(r'background-image:\s*([^;}]*)', bloque)
-        n = len(_capas(img.group(1)))
+        # Si el modulo ya paso por aqui, sus capas se QUITAN antes de volver a
+        # ponerlas. Saltarselas -que fue lo primero que hice- deja la pagina
+        # con la version vieja del relieve montada para siempre.
+        previas = _capas(img.group(1))
+        mias = 0
+        for c in previas:
+            if any(v in c for v in ('var(--tapa)', 'var(--foco)', 'var(--foco2)',
+                                    'var(--hondo)', 'var(--teja)')):
+                mias += 1
+            else:
+                break
+        previas = previas[mias:]
+        n = len(previas)
         nuevo = bloque.replace(img.group(0),
-                               'background-image:\n    ' + ',\n    '.join(CAPAS) + ',\n    ' + img.group(1).strip(), 1)
+                               'background-image:\n    ' + ',\n    '.join(CAPAS) + ',\n    ' + ','.join(previas), 1)
         for prop, mio, porDefecto in (('background-repeat', REPITE, 'repeat'),
                                       ('background-size', TAMANO, 'auto'),
                                       ('background-position', SITIO, '0 0')):
             m = re.search(prop + r':\s*([^;}]*)', nuevo)
             if m:
-                nuevo = nuevo.replace(m.group(0), prop + ':' + ','.join(mio) + ',' + m.group(1).strip(), 1)
+                resto = _capas(m.group(1))[mias:] or [porDefecto] * n
+                nuevo = nuevo.replace(m.group(0), prop + ':' + ','.join(mio) + ',' + ','.join(resto), 1)
             else:
                 nuevo += ';' + prop + ':' + ','.join(mio) + ',' + ','.join([porDefecto] * n)
         html = html[:ini + 1] + nuevo + html[cierre:]

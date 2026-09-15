@@ -56,20 +56,49 @@ await pg.waitForTimeout(1600);
 const CLARAS = ['network', 'press', 'thesis', 'solutions'];
 const medidas = {};
 for (const id of CLARAS) {
-  const y = await pg.evaluate(k => {
+  await pg.evaluate(k => {
     const s = document.getElementById(k) || document.querySelector('.' + k);
-    s.scrollIntoView(); return 0;
+    s.scrollIntoView();
   }, id);
   await pg.waitForTimeout(700);
-  medidas[id] = await franja(pg, { x: 980, y: 120, width: 400, height: 200 });
+  /* Se esconde el CONTENIDO de la banda y se deja su fondo. Sin esto no se
+     mide el fondo: se mide lo que hay encima. La primera version muestreaba
+     dos recortes «de margen» y en tres de las cuatro bandas caian sobre
+     tarjetas y titulares, asi que la comprobacion daba numeros grandes y
+     seguia dandolos con el modulo quitado. Solo una de las cuatro medía algo.
+     visibility:hidden y no display:none, que display cambia la altura y con
+     ella el encuadre. */
+  await pg.evaluate(k => {
+    const s = document.getElementById(k) || document.querySelector('.' + k);
+    for (const h of s.children) h.style.visibility = 'hidden';
+  }, id);
+  await pg.waitForTimeout(150);
+  medidas[id] = { alto: await franja(pg, { x: 200, y: 60,  width: 1040, height: 150 }),
+                  bajo: await franja(pg, { x: 200, y: 640, width: 1040, height: 150 }) };
+  await pg.evaluate(k => {
+    const s = document.getElementById(k) || document.querySelector('.' + k);
+    for (const h of s.children) h.style.visibility = '';
+  }, id);
 }
-/* El umbral es 0,025 y no es de gusto: medido quitando el modulo, las dos
-   bandas mas vacias -press y solutions- caen a 0,017, y con el puesto suben a
-   0,031 y 0,034. Un umbral por debajo de eso daria verde con el fondo plano,
-   que es justo lo que esta bateria existe para cazar. */
-di(CLARAS.every(k => medidas[k].desv >= 0.025),
-   'cada banda clara tiene relieve por dentro, no un color plano (desv ' +
-   CLARAS.map(k => medidas[k].desv.toFixed(3)).join(' / ') + ')');
+/* Lo que se mide es el GRADO, no la varianza. Aqui hubo una rejilla de
+   ingenieria y la comprobacion miraba la desviacion tipica de un recorte, que
+   es lo que sube una malla. La malla se fue —a pantalla completa y repetida
+   por nueve bandas lo que salia era papel de cuaderno—, y con ella se habria
+   ido la comprobacion si midiera lo mismo.
+   Lo que ahora hace el trabajo es la LUZ: la banda esta iluminada arriba y se
+   hunde abajo. Eso es lo que separa un fondo compuesto de un color plano, y
+   eso es lo que se mide. Con el modulo quitado los dos extremos coinciden y
+   el salto se va a cero. */
+const grado = k => Math.abs(medidas[k].alto.medio - medidas[k].bajo.medio);
+/* Se afirma sobre las bandas de fondo LISO. «network» y «thesis» traen arte
+   propio en el encuadre —la tira de logotipos y la marquesina de al lado—, asi
+   que su numero es alto con modulo y sin el: informan, pero no discriminan, y
+   colgar la comprobacion de ellas seria fingir que mide mas de lo que mide.
+   Medido quitando el modulo: press 0,115 → 0,000 y solutions 0,087 → 0,001. */
+const LISAS = ['press', 'solutions'];
+di(LISAS.every(k => grado(k) >= 0.020),
+   'cada banda lisa esta graduada, no es un color plano (salto arriba-abajo ' +
+   CLARAS.map(k => k + ' ' + grado(k).toFixed(3)).join(' / ') + ')');
 /* Y dos claras SEGUIDAS tienen que distinguirse una de otra. Esto se mide en
    el SUELO, no en un recorte de pantalla: el primer intento comparaba una
    franja de cada banda a la misma altura y daba 0,004, porque las dos llevan
