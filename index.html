@@ -1848,6 +1848,16 @@ body.ann-off{--ann:0px}
   color:#fff;
   transition:height .38s cubic-bezier(.16,.84,.26,1)}
 body.ann-off .ann{height:0}
+/* ══ aviso ══ Lo aplica herramientas/aviso.py ═════════════════════════════
+   La franja de la ronda no se monta. Se queda entera en el marcado: quitando
+   la clase «ann-fuera» del cuerpo vuelve como estaba, con su cuenta y su X.
+
+   Es un estado propio y no el de la X a proposito: el de la X lo quita el
+   script solo en cuanto la recaudacion avanza dos puntos —un aviso que se
+   cierra para siempre deja de avisar—, y eso, que esta bien para quien la
+   cierra, se llevaria por delante la decision. */
+body.ann-fuera{--ann:0px}
+body.ann-fuera .ann{height:0;pointer-events:none;transition:none}
 .ann::after{content:"";position:absolute;inset:0;pointer-events:none;
   background:linear-gradient(100deg,transparent 40%,rgba(255,255,255,.12) 50%,transparent 60%);
   transform:translateX(-100%);animation:annBrillo 7.5s ease-in-out 2s infinite}
@@ -3655,7 +3665,7 @@ footer .fgrid h4,footer .tec-real{color:#5B657A}
 /* ══ fin: negro ══ */
 </style>
 </head>
-<body>
+<body class="ann-fuera">
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
 <!-- El cubo lleva su plata fija: no toma el color del texto como la marca

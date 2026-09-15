@@ -21,16 +21,23 @@ await pg.goto(URL, { waitUntil:'load' });
 await pg.waitForTimeout(2600);
 
 // ── el aviso ──
+// La franja de la ronda se puede apagar por diseno —paso 35, la clase
+// «ann-fuera» en el cuerpo— y entonces no hay nada que mirar arriba, hay que
+// mirar que no deje hueco. Se pregunta como esta puesta y se comprueba una
+// cosa o la otra; lo que no se hace es dar por hecho que esta.
+const MONTADO = !(await pg.evaluate(() => document.body.classList.contains('ann-fuera')));
+console.log('  ··  la franja de la ronda esta ' + (MONTADO ? 'PUESTA' : 'APAGADA'));
+
 const av = await pg.evaluate(() => {
   const a = document.querySelector('.ann');
   const f = document.getElementById('annFill');
   return a ? { alto: Math.round(a.getBoundingClientRect().height),
-               txt: document.querySelector('.ann-in').innerText.replace(/\s+/g,' ').trim(),
+               txt: document.querySelector('.ann-in').textContent.replace(/\s+/g,' ').trim(),
                pct: document.getElementById('annPct').textContent,
                fill: f && f.style.width,
                destino: document.querySelector('.ann-in').getAttribute('href') } : null;
 });
-di(av && av.alto > 20, 'el aviso se ve arriba del todo');
+di(!!av, 'la franja sigue en el marcado, montada o no');
 di(av && /Seed Round/.test(av.txt), 'dice de que ronda habla');
 di(av && /8[0-9]%|9[0-9]%|100%/.test(av.pct), 'lleva el porcentaje: ' + (av && av.pct));
 di(av && av.destino === '#presale', 'y lleva a la ronda al pulsarlo');
@@ -44,28 +51,49 @@ const par = await pg.evaluate(() => {
 di(par.barra !== null, 'la barra de recaudacion tiene su cifra');
 di(par.barra !== null && Math.abs(par.aviso - par.barra) < 1,
    `aviso ${par.aviso}% y barra ${par.barra}%: la misma cifra`);
-
-// la linea de progreso dibuja esa misma cifra
 di(av && Math.abs(parseFloat(av.fill) - par.barra) < 1, 'la linea de abajo dibuja la misma cifra');
 
-// ── cerrar y volver ──
-await pg.click('#annX');
-await pg.waitForTimeout(700);
-di(await pg.evaluate(() => document.querySelector('.ann').getBoundingClientRect().height === 0),
-   'la X lo cierra');
-di(await pg.evaluate(() => Math.round(document.querySelector('.hd').getBoundingClientRect().top)) === 14,
-   'y la barra sube a ocupar su sitio');
-await pg.reload({ waitUntil:'load' }); await pg.waitForTimeout(2200);
-di(await pg.evaluate(() => document.querySelector('.ann').getBoundingClientRect().height === 0),
-   'cerrado sigue cerrado al recargar');
-await pg.evaluate(() => window.__aviso(86)); await pg.waitForTimeout(700);
-di(await pg.evaluate(() => document.querySelector('.ann').getBoundingClientRect().height === 0),
-   'un punto mas no lo devuelve: seria pesado');
-await pg.evaluate(() => window.__aviso(88)); await pg.waitForTimeout(700);
-di(await pg.evaluate(() => document.querySelector('.ann').getBoundingClientRect().height > 20),
-   'dos puntos mas si: la ronda avanzo y hay algo que decir');
-di(await pg.evaluate(() => document.getElementById('annPct').textContent) === '88%',
-   'y trae la cifra nueva');
+if (!MONTADO) {
+  /* Apagada de verdad: ni se ve ni deja hueco. Lo segundo importa tanto como
+     lo primero —el alto de la franja es «--ann», y de esa variable cuelgan la
+     posicion de la cabecera, el relleno de la portada y el techo del menu de
+     movil—, asi que si se apaga la franja y no la variable queda una banda
+     vacia arriba que nadie sabe de donde sale. */
+  di(av.alto === 0, 'apagada: no ocupa nada (' + av.alto + ' px)');
+  /* Se lee en el CUERPO, no en la raiz: ahi es donde vive la clase que lo
+     apaga y donde lo resuelven la cabecera, la portada y el menu, que cuelgan
+     todos de el. En la raiz sigue valiendo lo de siempre, que es lo que hace
+     que devolver la franja sea quitar una clase y nada mas. */
+  di(await pg.evaluate(() => getComputedStyle(document.body)
+       .getPropertyValue('--ann').trim()) === '0px', 'y su hueco tampoco: --ann a cero');
+  di(await pg.evaluate(() => Math.round(document.querySelector('.hd').getBoundingClientRect().top)) === 14,
+     'la cabecera sube a lo alto de la pagina');
+  /* Y no vuelve sola. El estado de la X si vuelve cuando la ronda avanza dos
+     puntos; este no, que es una decision y no un cierre. */
+  await pg.evaluate(() => window.__aviso(88)); await pg.waitForTimeout(700);
+  di(await pg.evaluate(() => document.querySelector('.ann').getBoundingClientRect().height === 0),
+     'y no la devuelve que la ronda avance: es decision, no cierre');
+} else {
+  di(av.alto > 20, 'el aviso se ve arriba del todo');
+  // ── cerrar y volver ──
+  await pg.click('#annX');
+  await pg.waitForTimeout(700);
+  di(await pg.evaluate(() => document.querySelector('.ann').getBoundingClientRect().height === 0),
+     'la X lo cierra');
+  di(await pg.evaluate(() => Math.round(document.querySelector('.hd').getBoundingClientRect().top)) === 14,
+     'y la barra sube a ocupar su sitio');
+  await pg.reload({ waitUntil:'load' }); await pg.waitForTimeout(2200);
+  di(await pg.evaluate(() => document.querySelector('.ann').getBoundingClientRect().height === 0),
+     'cerrado sigue cerrado al recargar');
+  await pg.evaluate(() => window.__aviso(86)); await pg.waitForTimeout(700);
+  di(await pg.evaluate(() => document.querySelector('.ann').getBoundingClientRect().height === 0),
+     'un punto mas no lo devuelve: seria pesado');
+  await pg.evaluate(() => window.__aviso(88)); await pg.waitForTimeout(700);
+  di(await pg.evaluate(() => document.querySelector('.ann').getBoundingClientRect().height > 20),
+     'dos puntos mas si: la ronda avanzo y hay algo que decir');
+  di(await pg.evaluate(() => document.getElementById('annPct').textContent) === '88%',
+     'y trae la cifra nueva');
+}
 
 // ── la marca: la palabra clavada en la punta del rombo ──
 const marca = await pg.evaluate(() => {
@@ -162,8 +190,9 @@ mo.on('pageerror', e => errs.push('movil: ' + e.message));
 await mo.goto(URL, { waitUntil:'load' }); await mo.waitForTimeout(2400);
 di(await mo.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth) === 0,
    'en el telefono no se sale nada por el lado');
-di(await mo.evaluate(() => document.querySelector('.ann').getBoundingClientRect().height > 20),
-   'el aviso tambien se ve en el telefono');
+di(await mo.evaluate(() => document.querySelector('.ann').getBoundingClientRect().height > 20) === MONTADO,
+   MONTADO ? 'el aviso tambien se ve en el telefono'
+           : 'y en el telefono tampoco asoma');
 await mo.click('#burger'); await mo.waitForTimeout(600);
 const hoja = await mo.evaluate(() => {
   const s = document.getElementById('sheet');
@@ -173,7 +202,21 @@ const hoja = await mo.evaluate(() => {
 });
 di(hoja.n === 11 && hoja.fichas === 10, 'el menu del telefono trae las mismas diez y la llamada');
 di(hoja.cta, 'con el boton de entrar en la ronda al final');
-di(hoja.top >= 80, 'y arranca por debajo del aviso y de la barra');
+/* El menu cuelga de «--ann + --bar»: lo que mida la franja mas lo que mida la
+   barra. Se comprueba contra esa cuenta y no contra un numero fijo, que es lo
+   que hacia antes —«>= 80»— y por eso no vio nada cuando la franja se apago:
+   80 lo cumplen tanto los 86 de entonces como los 52 de ahora.
+
+   No se compara con el BORDE de abajo de la barra a proposito: en el telefono
+   la barra flota con diez pixeles de aire por los cuatro lados, asi que su
+   borde cae mas abajo que la cuenta, y el menu asoma por detras de ella. Eso
+   es como esta hecho, no un fallo. */
+const cuenta = await mo.evaluate(() => {
+  const cs = getComputedStyle(document.body);
+  return Math.round(parseFloat(cs.getPropertyValue('--ann')) + parseFloat(cs.getPropertyValue('--bar')));
+});
+di(Math.abs(hoja.top - cuenta) <= 1,
+   'y arranca en la cuenta de la franja mas la barra (' + hoja.top + ' vs ' + cuenta + ')');
 await ctx2.close();
 
 di(errs.length === 0, 'sin errores de pagina' + (errs.length ? ': ' + errs[0] : ''));
