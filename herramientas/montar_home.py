@@ -41,6 +41,8 @@ todo lo que se hizo aqui y el archivo subido no trae:
  33. la simetria de las once secciones, el menu sin ruido y el suelo de acero
  34. la franja azul de la ronda, apagada encima de la cabecera
  35. el indice de la derecha, en su carril: ni tapa texto ni le quita el clic
+ 36. el relieve: las bandas dejan de ser una losa
+ 37. el umbral: la puerta que se abre antes de la ronda
 """
 import sys, os
 
@@ -74,6 +76,8 @@ import proyectos
 import oscuro
 import aviso
 import carril
+import relieve
+import umbral
 subido, publicado = sys.argv[1], '/home/user/nerium/index.html'
 z = open(subido, encoding='utf-8').read()
 p = open(publicado, encoding='utf-8').read()
@@ -260,6 +264,12 @@ rest = aviso.aplicar(rest)
 # ── 35 · el indice de la derecha, en su carril ──
 rest = carril.aplicar(rest)
 
+# ── 36 · el relieve de las bandas ──
+rest = relieve.aplicar(rest)
+
+# ── 37 · el umbral de la ronda ──
+rest = umbral.aplicar(rest)
+
 # ── 31 · que se pueda navegar ──
 # Va al final a proposito: toca codigo que ponen pasos anteriores, asi que
 # tiene que llegar cuando ya esta todo puesto.
@@ -297,4 +307,6 @@ print("montado:", len(salida), "bytes ·", salida.count('var(--hud-b)'), "usos d
       "simetria:", 'las once al margen' if '.stk-copy{text-align:start' in salida
                    else 'LA PILA CENTRADA', "·",
       "aviso:", 'apagado' if 'class="ann-fuera"' in salida else 'PUESTO', "·",
-      "carril:", 'el indice se aparta' if carril.MARCA in salida else 'ENCIMA DEL TEXTO')
+      "carril:", 'el indice se aparta' if carril.MARCA in salida else 'ENCIMA DEL TEXTO', "·",
+      "relieve:", 'dos suelos y pauta' if relieve.MARCA in salida else 'UNA LOSA', "·",
+      "umbral:", 'la puerta, puesta' if 'class="umb"' in salida else 'SIN PUERTA')

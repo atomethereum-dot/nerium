@@ -2074,10 +2074,14 @@ html[dir="rtl"] .ann-in:hover .ann-go{transform:scaleX(-1) translateX(4px)}
    de blanco de plantilla. */
 :root{--grano:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.92' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='.036'/%3E%3C/svg%3E")}
 .paper,.paper2,.secure,.sale,.tkp,.join,.press{
-  background-image:var(--grano),url(img/tapiz.svg);
-  background-repeat:repeat,no-repeat;
-  background-size:auto,cover;
-  background-position:0 0,center}
+  background-image:
+    radial-gradient(124% 96% at 50% 44%, rgba(0,0,0,0) 0%, rgba(0,0,0,0) 52%, var(--tapa) 88%),
+    radial-gradient(74% 48% at 50% 22%, var(--foco) 0%, rgba(255,255,255,0) 70%),
+    radial-gradient(112% 76% at 50% 46%, rgba(255,255,255,0) 54%, var(--hondo) 100%),
+    var(--grano),url(img/tapiz.svg);
+  background-repeat:no-repeat,no-repeat,no-repeat,repeat,no-repeat;
+  background-size:auto,auto,auto,auto,cover;
+  background-position:center,center,center,0 0,center}
 /* Todas lo miran por el centro, y no cada una por una esquina: el tapiz esta
    dibujado para dejar el medio libre, que es por donde se lee, y recortarlo
    por un lado metia los bloques justo detras del titular. */
@@ -2242,8 +2246,11 @@ html[dir="rtl"] .ann-in:hover .ann-go{transform:scaleX(-1) translateX(4px)}
    tapiz, no. Un velo de blanco por delante del tapiz —y solo aqui— le
    devuelve el sitio sin quitarle fondo al resto de la pagina. */
 .tkp{background-image:
-  linear-gradient(rgba(255,255,255,.58),rgba(255,255,255,.58)),
-  var(--grano),url(img/tapiz.svg)}
+    radial-gradient(124% 96% at 50% 44%, rgba(0,0,0,0) 0%, rgba(0,0,0,0) 52%, var(--tapa) 88%),
+    radial-gradient(74% 48% at 50% 22%, var(--foco) 0%, rgba(255,255,255,0) 70%),
+    radial-gradient(112% 76% at 50% 46%, rgba(255,255,255,0) 54%, var(--hondo) 100%),
+    linear-gradient(rgba(255,255,255,.58),rgba(255,255,255,.58)),
+  var(--grano),url(img/tapiz.svg);background-repeat:no-repeat,no-repeat,no-repeat,repeat,repeat,repeat;background-size:auto,auto,auto,auto,auto,auto;background-position:center,center,center,0 0,0 0,0 0}
 
 /* ══ fin: escala ══ */
 /* ══ la mitad clara, decidida ════════════════════════════════════════════
@@ -2273,9 +2280,13 @@ html[dir="rtl"] .ann-in:hover .ann-go{transform:scaleX(-1) translateX(4px)}
 .paper,.press,.secure{background-color:var(--p-papel)}
 .paper2,.tkp{background-color:var(--p-papel2)}
 .sale,.join{background-color:var(--p-alto)}
-:is(.paper,.paper2,.secure,.sale,.tkp,.join,.press){background-image:var(--grano),url(img/papel.svg);
-   background-repeat:repeat,no-repeat;background-size:auto,cover;
-   background-position:0 0,center}
+:is(.paper,.paper2,.secure,.sale,.tkp,.join,.press){background-image:
+    radial-gradient(124% 96% at 50% 44%, rgba(0,0,0,0) 0%, rgba(0,0,0,0) 52%, var(--tapa) 88%),
+    radial-gradient(74% 48% at 50% 22%, var(--foco) 0%, rgba(255,255,255,0) 70%),
+    radial-gradient(112% 76% at 50% 46%, rgba(255,255,255,0) 54%, var(--hondo) 100%),
+    var(--grano),url(img/papel.svg);
+   background-repeat:no-repeat,no-repeat,no-repeat,repeat,no-repeat;background-size:auto,auto,auto,auto,cover;
+   background-position:center,center,center,0 0,center}
 /* En el TELEFONO nada de lo de arriba vale, y esto es el fallo que me costo
    tres rondas de «lo veo igual»: yo miraba capturas de 1440 y el sitio se ve
    en un movil. Con «cover» sobre una seccion de 390x1900 el navegador agranda
@@ -2290,10 +2301,14 @@ html[dir="rtl"] .ann-in:hover .ann-go{transform:scaleX(-1) translateX(4px)}
    Aqui va el dibujo VERTICAL, del ancho de la pantalla y repitiendose hacia
    abajo, asi que las placas conservan su tamano de verdad. */
 @media(max-width:760px){
-  :is(.paper,.paper2,.secure,.sale,.tkp,.join,.press){background-image:var(--grano),url(img/papel-alto.svg);
-     background-size:auto,100% auto;
-     background-repeat:repeat,repeat-y;
-     background-position:0 0,left top}
+  :is(.paper,.paper2,.secure,.sale,.tkp,.join,.press){background-image:
+    radial-gradient(124% 96% at 50% 44%, rgba(0,0,0,0) 0%, rgba(0,0,0,0) 52%, var(--tapa) 88%),
+    radial-gradient(74% 48% at 50% 22%, var(--foco) 0%, rgba(255,255,255,0) 70%),
+    radial-gradient(112% 76% at 50% 46%, rgba(255,255,255,0) 54%, var(--hondo) 100%),
+    var(--grano),url(img/papel-alto.svg);
+     background-size:auto,auto,auto,auto,100% auto;
+     background-repeat:no-repeat,no-repeat,no-repeat,repeat,repeat-y;
+     background-position:center,center,center,0 0,left top}
 }
 
 /* El canto de arriba de cada lamina clara: el mismo filete blanco que llevan
@@ -2343,14 +2358,20 @@ main>section:is(.paper,.paper2,.secure,.sale,.tkp,.join,.press){box-shadow:inset
 /* La rosca es lo unico que hay en su seccion y las placas le competian por
    detras. Un velo blanco extra solo ahi: el dibujo manda, el suelo acompana. */
 :is(.paper,.paper2,.secure,.sale,.tkp,.join,.press).tkp{background-image:
-   linear-gradient(rgba(247,250,253,.72),rgba(247,250,253,.72)),
-   var(--grano),url(img/papel.svg)}
+    radial-gradient(124% 96% at 50% 44%, rgba(0,0,0,0) 0%, rgba(0,0,0,0) 52%, var(--tapa) 88%),
+    radial-gradient(74% 48% at 50% 22%, var(--foco) 0%, rgba(255,255,255,0) 70%),
+    radial-gradient(112% 76% at 50% 46%, rgba(255,255,255,0) 54%, var(--hondo) 100%),
+    linear-gradient(rgba(247,250,253,.72),rgba(247,250,253,.72)),
+   var(--grano),url(img/papel.svg);background-repeat:no-repeat,no-repeat,no-repeat,repeat,repeat,repeat;background-size:auto,auto,auto,auto,auto,auto;background-position:center,center,center,0 0,0 0,0 0}
 @media(max-width:760px){
   :is(.paper,.paper2,.secure,.sale,.tkp,.join,.press).tkp{background-image:
-     linear-gradient(rgba(247,250,253,.72),rgba(247,250,253,.72)),
+    radial-gradient(124% 96% at 50% 44%, rgba(0,0,0,0) 0%, rgba(0,0,0,0) 52%, var(--tapa) 88%),
+    radial-gradient(74% 48% at 50% 22%, var(--foco) 0%, rgba(255,255,255,0) 70%),
+    radial-gradient(112% 76% at 50% 46%, rgba(255,255,255,0) 54%, var(--hondo) 100%),
+    linear-gradient(rgba(247,250,253,.72),rgba(247,250,253,.72)),
      var(--grano),url(img/papel-alto.svg);
-     background-size:auto,auto,100% auto;
-     background-repeat:repeat,repeat,repeat-y}
+     background-size:auto,auto,auto,auto,auto,100% auto;
+     background-repeat:no-repeat,no-repeat,no-repeat,repeat,repeat,repeat-y;background-position:center,center,center,0 0,0 0,0 0}
 }
 
 :is(.paper,.paper2,.secure,.sale,.tkp,.join,.press).logos{padding:clamp(30px,3.2vw,46px) 0 clamp(34px,3.6vw,52px)}
@@ -2378,7 +2399,7 @@ main>section:is(.paper,.paper2,.secure,.sale,.tkp,.join,.press){box-shadow:inset
 :is(.paper,.paper2,.secure,.sale,.tkp,.join,.press) :is(dt,.k,.mono,.sec-k,.pr-k,.pr-n,.w-lab,.w-note,.w-rate,.w-eq,.sale-net,
        .tec-real,.tec-fantasma,
        .join-rule,.raise-foot,.raise-foot span,.tkp-core span,.tkp-core em,
-       .press-all,.w-swap){color:#5B657A}
+       .press-all,.w-swap){color:#525C70}
 /* «.wi» NO entra aqui, y casi entra. Es el tramo de palabra de CUALQUIER
    titular partido, no un rotulo: meterlo en la tinta de rotulo dejaba grises
    todos los titulares de la pagina para que el medidor callara. Salio en una
@@ -2389,13 +2410,13 @@ main>section:is(.paper,.paper2,.secure,.sale,.tkp,.join,.press){box-shadow:inset
    las tarjetas: nada. Un numero que no se ve sobra; uno que se ve y no aporta,
    tambien. El de las filas SI se queda: ahi la lista esta numerada de verdad. */
 :is(.paper,.paper2,.secure,.sale,.tkp,.join,.press) .sec-n{display:none}
-:is(.paper,.paper2,.secure,.sale,.tkp,.join,.press) .rn{color:#5B657A}
+:is(.paper,.paper2,.secure,.sale,.tkp,.join,.press) .rn{color:#525C70}
 /* El rotulo del medio de la rosca y su cifra: 2,20 y 2,65 sobre el papel. */
 :is(.paper,.paper2,.secure,.sale,.tkp,.join,.press) .tkp-core b{color:#1A2233}
 /* El epigrafe de cada tarjeta de prensa iba en el acento del medio, que en
    verde y en rojo no llega: el cuadradito se queda de color y el texto no. */
 :is(.paper,.paper2,.secure,.sale,.tkp,.join,.press) .pcd-tag{color:#3C4557}
-footer :is(.fcopy,.f-legal){color:#5B657A}
+footer :is(.fcopy,.f-legal){color:#525C70}
 /* La palabra gigante del pie llevaba un degradado en blanco roto —hecho para
    un fondo oscuro— sobre un pie claro: casi no se veia. Misma marca de agua,
    en tinta. */
@@ -2831,11 +2852,14 @@ footer :is(.fcopy,.f-legal){color:#5B657A}
 :is(.paper,.paper2,.secure,.sale,.tkp,.join,.press){
   background-color:var(--suelo);
   background-image:
+    radial-gradient(124% 96% at 50% 44%, rgba(0,0,0,0) 0%, rgba(0,0,0,0) 52%, var(--tapa) 88%),
+    radial-gradient(74% 48% at 50% 22%, var(--foco) 0%, rgba(255,255,255,0) 70%),
+    radial-gradient(112% 76% at 50% 46%, rgba(255,255,255,0) 54%, var(--hondo) 100%),
     radial-gradient(62% 74% at 6% -10%,rgba(150,190,255,.34),transparent 68%),
     radial-gradient(58% 70% at 96% -14%,rgba(158,194,255,.30),transparent 66%),
     radial-gradient(64% 72% at 18% 112%,rgba(196,214,246,.26),transparent 70%),
     var(--grano),url(img/papel.svg);
-  background-repeat:no-repeat,no-repeat,no-repeat,repeat,repeat;
+  background-repeat:no-repeat,no-repeat,no-repeat,no-repeat,no-repeat,no-repeat,repeat,repeat;
   /* Las placas, a TAMANO FIJO. Con «cover» el navegador estira el dibujo hasta
      tapar la seccion, y las secciones miden cosas muy distintas: medido, la
      misma placa salia a 36 px en la tesis, 39 en seguridad, 40 en la preventa,
@@ -2844,18 +2868,21 @@ footer :is(.fcopy,.f-legal){color:#5B657A}
      los demas», y no se arregla retocando un color: se arregla no dejando que
      la altura de la seccion decida el tamano del dibujo. Ancho fijo y se
      repite; la placa mide lo mismo en las diez. */
-  background-size:auto,auto,auto,auto,1600px auto;
-  background-position:0 0,0 0,0 0,0 0,center top}
+  background-size:auto,auto,auto,auto,auto,auto,auto,1600px auto;
+  background-position:center,center,center,0 0,0 0,0 0,0 0,center top}
 @media(max-width:760px){
   :is(.paper,.paper2,.secure,.sale,.tkp,.join,.press){
     background-image:
-      radial-gradient(78% 48% at 6% -6%,rgba(150,190,255,.32),transparent 68%),
+    radial-gradient(124% 96% at 50% 44%, rgba(0,0,0,0) 0%, rgba(0,0,0,0) 52%, var(--tapa) 88%),
+    radial-gradient(74% 48% at 50% 22%, var(--foco) 0%, rgba(255,255,255,0) 70%),
+    radial-gradient(112% 76% at 50% 46%, rgba(255,255,255,0) 54%, var(--hondo) 100%),
+    radial-gradient(78% 48% at 6% -6%,rgba(150,190,255,.32),transparent 68%),
       radial-gradient(74% 44% at 96% -8%,rgba(158,194,255,.28),transparent 66%),
       radial-gradient(80% 46% at 18% 106%,rgba(196,214,246,.24),transparent 70%),
       var(--grano),url(img/papel-alto.svg);
-    background-repeat:no-repeat,no-repeat,no-repeat,repeat,repeat-y;
-    background-size:auto,auto,auto,auto,100% auto;
-    background-position:0 0,0 0,0 0,0 0,left top}
+    background-repeat:no-repeat,no-repeat,no-repeat,no-repeat,no-repeat,no-repeat,repeat,repeat-y;
+    background-size:auto,auto,auto,auto,auto,auto,auto,100% auto;
+    background-position:center,center,center,0 0,0 0,0 0,0 0,left top}
 }
 /* La preventa traia sus auroras como elementos animados. Se quedan: son las
    mismas, moviendose despacio, y es la seccion de la que salio el suelo. */
@@ -2864,22 +2891,28 @@ footer :is(.fcopy,.f-legal){color:#5B657A}
    le tapaba las auroras y la dejaba con cinco capas cuando las demas tienen
    doce. Fuera: el suelo es el mismo o no lo es. */
 .tkp.tkp{background-image:
-  radial-gradient(62% 74% at 6% -10%,rgba(150,190,255,.34),transparent 68%),
+    radial-gradient(124% 96% at 50% 44%, rgba(0,0,0,0) 0%, rgba(0,0,0,0) 52%, var(--tapa) 88%),
+    radial-gradient(74% 48% at 50% 22%, var(--foco) 0%, rgba(255,255,255,0) 70%),
+    radial-gradient(112% 76% at 50% 46%, rgba(255,255,255,0) 54%, var(--hondo) 100%),
+    radial-gradient(62% 74% at 6% -10%,rgba(150,190,255,.34),transparent 68%),
   radial-gradient(58% 70% at 96% -14%,rgba(158,194,255,.30),transparent 66%),
   radial-gradient(64% 72% at 18% 112%,rgba(196,214,246,.26),transparent 70%),
   var(--grano),url(img/papel.svg);
-  background-repeat:no-repeat,no-repeat,no-repeat,repeat,repeat;
-  background-size:auto,auto,auto,auto,1600px auto;
-  background-position:0 0,0 0,0 0,0 0,center top}
+  background-repeat:no-repeat,no-repeat,no-repeat,no-repeat,no-repeat,no-repeat,repeat,repeat;
+  background-size:auto,auto,auto,auto,auto,auto,auto,1600px auto;
+  background-position:center,center,center,0 0,0 0,0 0,0 0,center top}
 @media(max-width:760px){
   .tkp.tkp{background-image:
+    radial-gradient(124% 96% at 50% 44%, rgba(0,0,0,0) 0%, rgba(0,0,0,0) 52%, var(--tapa) 88%),
+    radial-gradient(74% 48% at 50% 22%, var(--foco) 0%, rgba(255,255,255,0) 70%),
+    radial-gradient(112% 76% at 50% 46%, rgba(255,255,255,0) 54%, var(--hondo) 100%),
     radial-gradient(78% 48% at 6% -6%,rgba(150,190,255,.32),transparent 68%),
     radial-gradient(74% 44% at 96% -8%,rgba(158,194,255,.28),transparent 66%),
     radial-gradient(80% 46% at 18% 106%,rgba(196,214,246,.24),transparent 70%),
     var(--grano),url(img/papel-alto.svg);
-    background-repeat:no-repeat,no-repeat,no-repeat,repeat,repeat-y;
-    background-size:auto,auto,auto,auto,100% auto;
-    background-position:0 0,0 0,0 0,0 0,left top}
+    background-repeat:no-repeat,no-repeat,no-repeat,no-repeat,no-repeat,no-repeat,repeat,repeat-y;
+    background-size:auto,auto,auto,auto,auto,auto,auto,100% auto;
+    background-position:center,center,center,0 0,0 0,0 0,0 0,left top}
 }
 
 /* Las tres profundas se quedan en negro y con su tinta de siempre: no se
@@ -2900,7 +2933,7 @@ footer :is(.fcopy,.f-legal){color:#5B657A}
    llegan ahi —el pie no es una de las siete— y el efecto de texto revuelto
    les clona el contenido dentro de un «.tec-real», que es lo que delata la
    bateria. */
-footer .fgrid h4,footer .tec-real{color:#5B657A}
+footer .fgrid h4,footer .tec-real{color:#525C70}
 
 /* ── la via, que acaba donde tiene que acabar ──
    Medida, se metia 71 px dentro de la seccion y chocaba con el epigrafe en
@@ -3695,6 +3728,94 @@ body.light .hud::after{background:radial-gradient(120% 120% at 100% 100%,
 .srail{transition:opacity .34s var(--ease)}
 .srail.tapa{opacity:0;pointer-events:none;transition-duration:.12s}
 /* ══ fin: carril ══ */
+/* ══ relieve ═══════════════════════════════════════════════════════════════
+   El plano de fondo: pauta de ingenieria, luz de escena y dos suelos. */
+:root{--suelo2:#D6DEEE}
+
+/* ── dos suelos, para que dos claras seguidas no sean una losa ──
+   background-COLOR, no el atajo: «background» a secas resetea
+   background-image, y con el se iban por delante el papel y el grano que las
+   bandas claras llevan puestos. Lo canto probar_pagina. */
+main>section:is(.press,.tkp,.join){background-color:var(--suelo2);--tapa:var(--suelo2)}
+
+/* ── los tonos de la pauta y de la luz ── */
+main>section:is(.paper,.paper2,.secure,.sale,.tkp,.join,.press){
+  --tapa:var(--suelo);
+  --grano:url("data:image/svg+xml,<svg%20xmlns='http://www.w3.org/2000/svg'%20width='170'%20height='170'><filter%20id='n'><feTurbulence%20type='fractalNoise'%20baseFrequency='.92'%20numOctaves='3'%20stitchTiles='stitch'/><feColorMatrix%20type='saturate'%20values='0'/></filter><rect%20width='170'%20height='170'%20filter='url%28%2523n%29'%20opacity='.036'/><path%20d='M34.5%200V170M68.5%200V170M102.5%200V170M136.5%200V170M0%2034.5H170M0%2068.5H170M0%20102.5H170M0%20136.5H170'%20fill='none'%20stroke='rgba%2817%2C27%2C48%2C.085%29'%20stroke-width='1'/><path%20d='M.5%200V170M0%20.5H170'%20fill='none'%20stroke='rgba%2817%2C27%2C48%2C.17%29'%20stroke-width='1'/></svg>");
+  --foco:rgba(255,255,255,.88);
+  --hondo:rgba(11,16,30,.115)}
+main>section:is(.stack,.loop){
+  --grano:url("data:image/svg+xml,<svg%20xmlns='http://www.w3.org/2000/svg'%20width='170'%20height='170'><filter%20id='n'><feTurbulence%20type='fractalNoise'%20baseFrequency='.92'%20numOctaves='3'%20stitchTiles='stitch'/><feColorMatrix%20type='saturate'%20values='0'/></filter><rect%20width='170'%20height='170'%20filter='url%28%2523n%29'%20opacity='.036'/><path%20d='M34.5%200V170M68.5%200V170M102.5%200V170M136.5%200V170M0%2034.5H170M0%2068.5H170M0%20102.5H170M0%20136.5H170'%20fill='none'%20stroke='rgba%28140%2C175%2C255%2C.085%29'%20stroke-width='1'/><path%20d='M.5%200V170M0%20.5H170'%20fill='none'%20stroke='rgba%28140%2C175%2C255%2C.16%29'%20stroke-width='1'/></svg>");
+  --foco:rgba(70,125,255,.20);
+  --hondo:rgba(0,0,0,.55)}
+/* Las dos oscuras de fondo liso no traen dibujo propio que respetar, asi que
+   aqui la pila se escribe entera. */
+main>section.loop{
+  background-image:
+    radial-gradient(74% 48% at 50% 22%, var(--foco) 0%, rgba(255,255,255,0) 70%),
+    var(--grano);
+  background-repeat:no-repeat,repeat;
+  background-size:auto,auto;
+  background-position:center,0 0}
+
+/* ── la linea de cota, encima de cada rotulo de seccion ──
+   Once rotulos sueltos repartidos por la pagina no son una serie. Con una
+   linea de cota por encima —con su diente en cada extremo, como una acotacion
+   de plano— cada seccion pasa a ser una hoja del mismo dibujo, y el titular
+   deja de empezar en el aire.
+   Se engancha con «:has(.sk)» sobre la caja de contenido, no sobre la que
+   envuelve el rotulo. Eso segundo fue el primer intento y no se veia: en tres
+   secciones el rotulo va dentro de un «.rv», y un «.rv» lleva clip-path para
+   descubrirse tras su mascara, asi que recortaba la linea antes de pintarla.
+   Va ARRIBA del rotulo y no atravesandolo: el rotulo mide distinto en cada
+   uno de los doce idiomas, y una linea que arranca donde acaba el texto se
+   descuadra en cuanto cambias de idioma. */
+main>section :is(.wrap,.sec-head,.join-head):has(.sk){position:relative}
+main>section :is(.wrap,.sec-head,.join-head):has(.sk)::before{
+  content:"";position:absolute;left:0;right:0;top:-22px;height:7px;
+  pointer-events:none;opacity:.20;
+  background:
+    linear-gradient(currentColor,currentColor) 0    0/1px 7px no-repeat,
+    linear-gradient(currentColor,currentColor) 100% 0/1px 7px no-repeat,
+    linear-gradient(currentColor,currentColor) 0    0/100% 1px no-repeat}
+@media(max-width:760px){
+  main>section :is(.wrap,.sec-head,.join-head):has(.sk)::before{
+    top:-15px;height:5px;
+    background:
+      linear-gradient(currentColor,currentColor) 0    0/1px 5px no-repeat,
+      linear-gradient(currentColor,currentColor) 100% 0/1px 5px no-repeat,
+      linear-gradient(currentColor,currentColor) 0    0/100% 1px no-repeat}}
+/* ══ fin: relieve ══ */
+/* ══ umbral ════════════════════════════════════════════════════════════════
+   La camara oscura que se abre antes de la ronda. */
+.umb{position:relative;height:220vh;z-index:1;
+  margin-top:clamp(-36px,-3.4vw,-64px)}
+.umb-esc{position:sticky;top:0;height:100dvh;overflow:hidden;
+  /* El fondo ES el suelo de la ronda: lo que aparece por el hueco del
+     diafragma no imita la luz, es la banda que viene. */
+  background:var(--suelo)}
+.umb-lz{position:absolute;inset:0;width:100%;height:100%;display:block}
+.umb-hud{position:absolute;inset:0;display:grid;place-items:center;
+  pointer-events:none;text-align:center;
+  font-family:var(--m);color:#E9EEF7}
+.umb-caja{display:flex;flex-direction:column;align-items:center;gap:clamp(12px,1.6vw,20px);
+  opacity:0;transform:translateY(14px);will-change:opacity,transform}
+.umb-k{font-size:11px;letter-spacing:.26em;color:#79ABFF}
+.umb-n{display:flex;align-items:baseline;gap:.06em;
+  font-family:var(--f);font-weight:200;letter-spacing:-.05em;
+  font-size:clamp(76px,13vw,190px);line-height:.88;color:#fff;
+  font-variant-numeric:tabular-nums}
+.umb-n i{font-style:normal;font-size:.42em;color:#79ABFF;font-weight:300}
+.umb-sub{font-size:11px;letter-spacing:.2em;color:rgba(233,238,247,.62)}
+@media(max-width:760px){
+  .umb{height:200vh}
+  .umb-k,.umb-sub{font-size:9.5px;letter-spacing:.18em}
+}
+@media(prefers-reduced-motion:reduce){
+  .umb{height:0;margin-top:0}
+  .umb-esc{display:none}
+}
+/* ══ fin: umbral ══ */
 </style>
 </head>
 <body class="ann-fuera">
@@ -3783,7 +3904,9 @@ body.light .hud::after{background:radial-gradient(120% 120% at 100% 100%,
     /* La misma cifra, en la linea de la portada: la franja puede estar
        apagada, pero el dato sigue estando y tiene que seguir siendo el
        mismo. */
-    var hp=document.getElementById('heroPct');
+    var up=document.getElementById('umbPct');
+  if(up) up.textContent=Math.round(p);
+  var hp=document.getElementById('heroPct');
     if(hp) hp.textContent=Math.round(p)+'%';
     var g=guardado();
     if(g!==null && p-g>=2){
@@ -3884,7 +4007,7 @@ body.light .hud::after{background:radial-gradient(120% 120% at 100% 100%,
 
 
 
-<section class="press paper" id="press" data-bg="#E4EAF4" data-acc="#1D6AFF"><i class="via" aria-hidden="true"></i>
+<section class="press paper" id="press" data-bg="#D6DEEE" data-acc="#1D6AFF"><i class="via" aria-hidden="true"></i>
   <div class="wrap press-head">
     <div class="k sk rv"><i class="sk-n">02</i>In the press</div>
     <h2 class="press-h">What they are writing about the chain.</h2>
@@ -4074,6 +4197,16 @@ body.light .hud::after{background:radial-gradient(120% 120% at 100% 100%,
 
 
 
+<div class="umb" aria-hidden="true">
+  <div class="umb-esc">
+    <canvas class="umb-lz" id="umbLz"></canvas>
+    <div class="umb-hud"><div class="umb-caja" id="umbCaja">
+      <span class="umb-k">SEED ROUND</span>
+      <span class="umb-n"><b id="umbPct">85</b><i>%</i></span>
+      <span class="umb-sub">1 NRM = $0.20 &#183; ETHEREUM &#183; BNB CHAIN</span>
+    </div></div>
+  </div>
+</div>
 <section class="sale" id="presale" data-bg="#E4EAF4" data-acc="#2A5BFF"><i class="via" aria-hidden="true"></i>
   <div class="sale-field" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
   <div class="wrap">
@@ -4160,7 +4293,7 @@ body.light .hud::after{background:radial-gradient(120% 120% at 100% 100%,
 </section>
 
 
-<section class="tkp" id="token" data-bg="#E4EAF4" data-acc="#2A5BFF"><i class="via" aria-hidden="true"></i>
+<section class="tkp" id="token" data-bg="#D6DEEE" data-acc="#2A5BFF"><i class="via" aria-hidden="true"></i>
   <div class="wrap tkp-head">
     <div class="k sk rv"><i class="sk-n">08</i>Token</div>
     <h2 class="tkp-h">One hundred and sixty million NRM, fixed at genesis.</h2>
@@ -4459,7 +4592,7 @@ body.light .hud::after{background:radial-gradient(120% 120% at 100% 100%,
   </div>
 </section>
 
-<section class="join" id="join" data-bg="#E4EAF4" data-acc="#2A5BFF"><i class="via" aria-hidden="true"></i>
+<section class="join" id="join" data-bg="#D6DEEE" data-acc="#2A5BFF"><i class="via" aria-hidden="true"></i>
   <div class="wrap">
     <div class="join-head rv">
       <div class="k sk rv"><i class="sk-n">11</i>In the open</div>
@@ -8090,5 +8223,149 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
 })();
 </script>
 
+<script>
+/* ── el umbral: la puerta de la ronda ── */
+(function(){
+  var raiz=document.querySelector('.umb'); if(!raiz) return;
+  var lz=document.getElementById('umbLz'), caja=document.getElementById('umbCaja');
+  var cx=lz.getContext('2d'); if(!cx) return;
+  if(matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+  var W=0,H=0,DPR=1,dentro=false,pide=0;
+  function medir(){
+    DPR=Math.min(2,window.devicePixelRatio||1);
+    var r=lz.getBoundingClientRect();
+    W=Math.max(1,r.width); H=Math.max(1,r.height);
+    lz.width=Math.round(W*DPR); lz.height=Math.round(H*DPR);
+    cx.setTransform(DPR,0,0,DPR,0,0);
+  }
+  /* El mando es el scroll: p va de 0 a 1 mientras la caja alta recorre la
+     pantalla. No hay reloj, asi que la escena no se adelanta ni se pierde. */
+  function avance(){
+    var r=raiz.getBoundingClientRect();
+    var total=r.height-innerHeight;
+    if(total<=0) return 1;
+    return Math.min(1,Math.max(0,-r.top/total));
+  }
+  var suave=function(t){return t*t*(3-2*t)};
+  var tramo=function(p,a,b){return suave(Math.min(1,Math.max(0,(p-a)/(b-a))))};
+
+  var DIENTES=60;
+  function anillo(g,R,seg,hueco,ang,alfa,grueso){
+    cx.save(); cx.translate(W/2,H/2); cx.rotate(ang);
+    cx.strokeStyle='rgba(150,185,255,'+alfa.toFixed(3)+')';
+    cx.lineWidth=grueso; cx.lineCap='butt';
+    var paso=Math.PI*2/seg;
+    for(var i=0;i<seg;i++){
+      cx.beginPath();
+      cx.arc(0,0,R,i*paso,i*paso+paso*(1-hueco));
+      cx.stroke();
+    }
+    cx.restore();
+  }
+  function dibuja(p){
+    cx.clearRect(0,0,W,H);
+    /* la camara */
+    cx.fillStyle='#04070C';
+    cx.fillRect(0,0,W,H);
+    var R=Math.min(W,H)*0.29;
+
+    /* 1 · el instrumento: tres anillos que llegan desalineados */
+    var vis=tramo(p,0.02,0.20)*(1-tramo(p,0.72,0.92));
+    if(vis>0.002){
+      var enc=tramo(p,0.34,0.52);              /* el enganche */
+      var giro=(1-enc);
+      anillo(cx,R*1.34,DIENTES,0.42, giro*1.10, 0.46*vis, 1);
+      anillo(cx,R*1.06,24,0.34,      -giro*1.70, 0.62*vis, 1.5);
+      anillo(cx,R*0.82,8, 0.18,       giro*2.40, 0.80*vis, 2.5);
+
+      /* los dientes de medida, cada cinco mas largo */
+      cx.save(); cx.translate(W/2,H/2);
+      for(var i=0;i<DIENTES;i++){
+        var a=i*Math.PI*2/DIENTES, lg=(i%5===0)?12:6;
+        cx.strokeStyle='rgba(150,185,255,'+(((i%5===0)?0.80:0.40)*vis).toFixed(3)+')';
+        cx.lineWidth=1;
+        cx.beginPath();
+        cx.moveTo(Math.cos(a)*(R*1.46),Math.sin(a)*(R*1.46));
+        cx.lineTo(Math.cos(a)*(R*1.46+lg),Math.sin(a)*(R*1.46+lg));
+        cx.stroke();
+      }
+      /* 2 · la cruz de mira, que converge */
+      var c=tramo(p,0.30,0.56), largo=R*2.6*(1-c)+R*0.30*c;
+      cx.strokeStyle='rgba(120,170,255,'+(0.70*vis*c).toFixed(3)+')';
+      cx.lineWidth=1;
+      cx.beginPath();
+      cx.moveTo(-largo,0); cx.lineTo(-R*0.16,0);
+      cx.moveTo(R*0.16,0);  cx.lineTo(largo,0);
+      cx.moveTo(0,-largo); cx.lineTo(0,-R*0.16);
+      cx.moveTo(0,R*0.16);  cx.lineTo(0,largo);
+      cx.stroke();
+      cx.restore();
+    }
+
+    /* 3 · la apertura: un iris de doce palas. No se pinta luz —se RECORTA la
+       camara con destination-out y detras esta el suelo de la ronda—. Un
+       ovalo daba una mancha; doce palas rectas dan un mecanismo, que es lo
+       que se abre de verdad en un objetivo. */
+    var ab=tramo(p,0.58,1.00);
+    if(ab>0){
+      var PALAS=12;
+      /* el radio pasa de cero a mas que la diagonal, para comerse la pantalla */
+      var diag=Math.sqrt(W*W+H*H)*0.62;
+      var rad=Math.pow(ab,1.32)*diag;
+      /* y las palas giran mientras abren, como el anillo de un objetivo */
+      var gir=(1-ab)*0.42;
+      var camino=function(){
+        cx.beginPath();
+        for(var i=0;i<=PALAS;i++){
+          var a=gir+i*Math.PI*2/PALAS;
+          var x=W/2+Math.cos(a)*rad, y=H/2+Math.sin(a)*rad;
+          if(i===0)cx.moveTo(x,y); else cx.lineTo(x,y);
+        }
+        cx.closePath();
+      };
+      cx.save();
+      cx.globalCompositeOperation='destination-out';
+      camino(); cx.fill();
+      cx.restore();
+      /* el filo, y un segundo anillo de palas por fuera que lo acompaña */
+      if(ab<0.99){
+        cx.save();
+        cx.strokeStyle='rgba(170,205,255,'+(0.62*(1-ab)).toFixed(3)+')';
+        cx.lineWidth=1.5; camino(); cx.stroke();
+        cx.strokeStyle='rgba(120,170,255,'+(0.26*(1-ab)).toFixed(3)+')';
+        cx.lineWidth=1;
+        cx.beginPath();
+        for(var k=0;k<PALAS;k++){
+          var a2=gir+k*Math.PI*2/PALAS;
+          cx.moveTo(W/2+Math.cos(a2)*rad, H/2+Math.sin(a2)*rad);
+          cx.lineTo(W/2+Math.cos(a2)*(rad*1.16+18), H/2+Math.sin(a2)*(rad*1.16+18));
+        }
+        cx.stroke();
+        cx.restore();
+      }
+    }
+  }
+  var visto=-1;
+  function pinta(){
+    pide=0;
+    if(!dentro) return;
+    var p=avance();
+    dibuja(p);
+    /* la cifra entra con el enganche y se va con la apertura */
+    var e=tramo(p,0.24,0.44)*(1-tramo(p,0.54,0.68));
+    caja.style.opacity=e.toFixed(3);
+    caja.style.transform='translateY('+((1-e)*14).toFixed(1)+'px)';
+  }
+  function pedir(){ if(!pide) pide=requestAnimationFrame(pinta) }
+  new IntersectionObserver(function(ee){
+    dentro=ee[0].isIntersecting;
+    if(dentro){ medir(); pedir() }
+  },{rootMargin:'120px 0px'}).observe(raiz);
+  addEventListener('scroll',pedir,{passive:true});
+  addEventListener('resize',function(){ medir(); pedir() },{passive:true});
+  medir(); pedir();
+})();
+</script>
 </body>
 </html>
