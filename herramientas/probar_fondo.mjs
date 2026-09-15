@@ -1,13 +1,4 @@
-// El fondo de la portada: que este pintado, que se mueva y que deje el hueco
-// del medio, que es donde va el titular.
-//
-// El fondo lo puede montar cualquiera de los dos campos que hay escritos: el
-// de losas —tres planos de celdas, del paso 12— o el de cubos —el corredor de
-// la escena de fundido, traido en el paso 34—. Cual esta puesto lo dice
-// «window.__campo»: si vale «apagado», el de losas no arranca y manda el de
-// cubos. Lo que se comprueba de los dos es lo mismo; lo que solo vale para el
-// de losas —los tres planos, el cian, el gris neutro, el camino sin WebGL—
-// se comprueba solo cuando es el que esta puesto.
+// El fondo de la portada: los tres planos, lo que se posa y el hueco del medio.
 //
 // Lo que vigila:
 //  · que el hueco del centro EXISTA. Es la razon de ser del diseno —ahi va el
@@ -38,34 +29,24 @@ const errs = []; pg.on('pageerror', e => errs.push(e.message));
 await pg.goto(URL, { waitUntil:'load' });
 await pg.waitForTimeout(5000);
 
-const LOSAS = (await pg.evaluate(() => window.__campo)) !== 'apagado';
-console.log('  ··  el campo puesto es el de ' + (LOSAS ? 'LOSAS' : 'CUBOS'));
-if (LOSAS) di((await pg.evaluate(() => window.__campo)) === 'canvas', 'sin WebGL tira del camino de lienzo');
-di(errs.length === 0, 'arranca sin reventar' + (errs.length ? ': ' + errs[0] : ''));
+di((await pg.evaluate(() => window.__campo)) === 'canvas', 'sin WebGL tira del camino de lienzo');
+di(errs.length === 0, 'y arranca sin reventar' + (errs.length ? ': ' + errs[0] : ''));
 
-const lee = () => pg.evaluate(id => {
-  const cv = document.getElementById(id);
+const lee = () => pg.evaluate(() => {
+  const cv = document.getElementById('burst');
   const c2 = document.createElement('canvas');
   c2.width = cv.width; c2.height = cv.height;
   c2.getContext('2d').drawImage(cv, 0, 0);
   const d = c2.getContext('2d').getImageData(0, 0, c2.width, c2.height).data;
   const H = c2.height;
   const bandas = [0, 0, 0], n = [0, 0, 0];
-  let cian = 0, gris = 0, vivos = 0, suma = 0, hueco = 0, nh = 0, fuera = 0, nf = 0;
+  let cian = 0, gris = 0, vivos = 0, suma = 0;
   for (let i = 0; i < d.length; i += 4) {
     const px = (i / 4) % c2.width, py = ((i / 4) / c2.width) | 0;
     const r = d[i], g = d[i+1], b = d[i+2];
     const luz = r + g + b;
     const k = py < H * 0.34 ? 0 : (py < H * 0.66 ? 1 : 2);
     bandas[k] += luz; n[k]++;
-    /* Y aparte, el hueco que de verdad protege el campo de cubos: la elipse
-       de media anchura 0,372 y media altura 0,161 donde cada pieza se apaga
-       del todo. El tercio de en medio no sirve para medirlo —es mucho mas
-       alto y mucho mas ancho que la elipse, asi que se le cuelan piezas que
-       vuelan por encima y por debajo del titular con todo el derecho. */
-    const ex = (px - c2.width / 2) / (c2.width * 0.372),
-          ey = (py - H / 2) / (H * 0.1612);
-    if (ex * ex + ey * ey < 1) { hueco += luz; nh++ } else { fuera += luz; nf++ }
     suma += luz;
     if (luz < 90) continue;
     vivos++;
@@ -78,38 +59,21 @@ const lee = () => pg.evaluate(id => {
     if (M > 90 && s < 0.10) gris++;
   }
   return { arriba: bandas[0]/n[0], medio: bandas[1]/n[1], abajo: bandas[2]/n[2],
-           hueco: nh ? hueco/nh : 0, fuera: nf ? fuera/nf : 0,
            cian, gris, vivos, suma };
-}, LOSAS ? 'burst' : 'heroCubos');
+});
 const a = await lee();
 di(a.vivos > 2000, 'el campo esta pintado (' + a.vivos + ' pixeles con luz)');
-if (LOSAS) {
-  di(a.medio < a.arriba * 0.5, `el medio esta vacio para el titular (arriba ${a.arriba.toFixed(1)}, medio ${a.medio.toFixed(1)})`);
-  di(a.medio < a.abajo * 0.5, `y tambien respecto a abajo (abajo ${a.abajo.toFixed(1)})`);
-} else {
-  /* Dentro de la elipse cada pieza se apaga del todo, asi que lo que quede
-     ahi tiene que ser practicamente nada: no se pide «la mitad», se pide un
-     orden de magnitud. Con el hueco puesto sale por debajo del 5 % de lo que
-     hay fuera; sin hueco, los dos numeros se igualan. */
-  const razon = a.fuera ? a.hueco / a.fuera : 1;
-  di(razon < 0.15, 'el hueco del titular esta limpio: ' + (razon * 100).toFixed(1) +
-     ' % de la luz que hay fuera (dentro ' + a.hueco.toFixed(1) + ', fuera ' + a.fuera.toFixed(1) + ')');
-}
+di(a.medio < a.arriba * 0.5, `el medio esta vacio para el titular (arriba ${a.arriba.toFixed(1)}, medio ${a.medio.toFixed(1)})`);
+di(a.medio < a.abajo * 0.5, `y tambien respecto a abajo (abajo ${a.abajo.toFixed(1)})`);
 /* El fallo que esto vigila era una ZONA cian, no un pixel: 1140 de 253074,
    un 0,45 %. Pedir cero exactos hacia que la bateria fallara una vez de cada
    seis por un unico pixel en el filo del umbral de tono, y una prueba que
    grita sin motivo se acaba ignorando. El listón se pone donde separa las dos
    cosas: veinte veces por debajo de aquello. */
-/* El cian y el gris neutro son reglas de la PALETA de las losas. El campo de
-   cubos lleva blanco a proposito —el canto iluminado de cada pieza, que es lo
-   que les da volumen—, asi que pedirle «ni un gris» seria pedirle que no
-   fuera lo que es. */
-if (LOSAS) {
-  const cianPct = a.vivos ? a.cian / a.vivos * 100 : 0;
-  di(cianPct < 0.02, 'no hay zona cian: ' + a.cian + ' de ' + a.vivos +
-     ' pixeles (' + cianPct.toFixed(4) + ' %)');
-  di(a.gris === 0, 'ni un gris neutro: todo lleva azul dentro (' + a.gris + ')');
-}
+const cianPct = a.vivos ? a.cian / a.vivos * 100 : 0;
+di(cianPct < 0.02, 'no hay zona cian: ' + a.cian + ' de ' + a.vivos +
+   ' pixeles (' + cianPct.toFixed(4) + ' %)');
+di(a.gris === 0, 'ni un gris neutro: todo lleva azul dentro (' + a.gris + ')');
 
 // que siga vivo: dos instantes distintos no pueden dar la misma imagen
 const b1 = a.suma;
@@ -118,30 +82,14 @@ const b2 = (await lee()).suma;
 di(Math.abs(b1 - b2) > 1, 'el campo se mueve: dos instantes no dan lo mismo');
 
 // tres planos: los bloques no pueden ser todos del mismo tamano
-if (LOSAS) {
-  const planos = await pg.evaluate(() => {
-    const s = [...document.scripts].map(x => x.textContent).join('');
-    return { esc: /ESC=\[0\.55,1,1\.38\]/.test(s), vel: /VEL=\[0\.42,1,1\.62\]/.test(s),
-             par: /PAR=\[0\.32,0\.76,1\.20\]/.test(s), filas: (s.match(/FILAS=\[([^\]]+)\]/)||[])[1] };
-  });
-  di(planos.esc && planos.vel && planos.par, 'tres planos con celda, velocidad y paralaje propios');
-  di(planos.filas && !planos.filas.split(',').some(v => +v > 0.34 && +v < 0.66),
-     'ninguna fila de aterrizaje cae en la banda del titular');
-} else {
-  /* El de cubos no tiene planos: tiene profundidad de verdad. Lo que se le
-     pide es que la tenga —que las piezas no salgan todas del mismo sitio— y
-     que el hueco del titular sea una BANDA y no un circulo, que con un
-     circulo se llevaba por delante las piezas grandes. */
-  const vuelo = await pg.evaluate(() => {
-    const s = [...document.scripts].map(x => x.textContent).join('');
-    return { hondo: /const HONDO=9/.test(s),
-             banda: /\(px-cx\)\/\(W\*\.60\),\(py-cy\)\/\(H\*\.26\)/.test(s),
-             quieto: /prefers-reduced-motion/.test(s.slice(s.indexOf('heroCubos'), s.indexOf('heroCubos') + 400)) };
-  });
-  di(vuelo.hondo, 'el corredor tiene fondo: las piezas salen a distintas distancias');
-  di(vuelo.banda, 'y el hueco del titular es una banda, no un circulo');
-  di(vuelo.quieto, 'con movimiento reducido no se monta');
-}
+const planos = await pg.evaluate(() => {
+  const s = [...document.scripts].map(x => x.textContent).join('');
+  return { esc: /ESC=\[0\.55,1,1\.38\]/.test(s), vel: /VEL=\[0\.42,1,1\.62\]/.test(s),
+           par: /PAR=\[0\.32,0\.76,1\.20\]/.test(s), filas: (s.match(/FILAS=\[([^\]]+)\]/)||[])[1] };
+});
+di(planos.esc && planos.vel && planos.par, 'tres planos con celda, velocidad y paralaje propios');
+di(planos.filas && !planos.filas.split(',').some(v => +v > 0.34 && +v < 0.66),
+   'ninguna fila de aterrizaje cae en la banda del titular');
 await ctx.close();
 
 // ── y el camino normal, con WebGL disponible ──
@@ -151,8 +99,7 @@ const errs2 = []; pg2.on('pageerror', e => errs2.push(e.message));
 await pg2.goto(URL, { waitUntil:'load' });
 await pg2.waitForTimeout(4500);
 const motor = await pg2.evaluate(() => window.__campo);
-di(['webgl', 'canvas', 'canvas (webgl iba lento)', 'apagado'].includes(motor),
-   'el motor se declara: ' + motor);
+di(['webgl', 'canvas', 'canvas (webgl iba lento)'].includes(motor), 'el motor se declara: ' + motor);
 di(errs2.length === 0, 'sin errores de pagina' + (errs2.length ? ': ' + errs2[0] : ''));
 di((await pg2.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)) === 0,
    'y no se sale nada por el lado');

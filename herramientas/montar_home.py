@@ -39,8 +39,7 @@ todo lo que se hizo aqui y el archivo subido no trae:
  31. que la pagina se pueda navegar en escritorio
  32. las dos tarjetas de proyectos, con la captura de lo que son
  33. la simetria de las once secciones, el menu sin ruido y el suelo de acero
- 34. el campo de cubos de la escena de fundido, tambien en la portada
- 35. la franja azul de la ronda, apagada encima de la cabecera
+ 34. la franja azul de la ronda, apagada encima de la cabecera
 """
 import sys, os
 
@@ -72,7 +71,6 @@ import negro
 import fluidez
 import proyectos
 import oscuro
-import vuelo
 import aviso
 subido, publicado = sys.argv[1], '/home/user/nerium/index.html'
 z = open(subido, encoding='utf-8').read()
@@ -254,10 +252,7 @@ rest = proyectos.aplicar(rest)
 # ── 33 · la simetria, la limpieza y el acero ──
 rest = oscuro.aplicar(rest)
 
-# ── 34 · el campo de cubos, tambien en la portada ──
-rest = vuelo.aplicar(rest)
-
-# ── 35 · el aviso de la ronda, fuera ──
+# ── 34 · el aviso de la ronda, fuera ──
 rest = aviso.aplicar(rest)
 
 # ── 31 · que se pueda navegar ──
@@ -296,5 +291,4 @@ print("montado:", len(salida), "bytes ·", salida.count('var(--hud-b)'), "usos d
       "proyectos:", str(salida.count('class="bcd-shot"')) + ' capturas', "·",
       "simetria:", 'las once al margen' if '.stk-copy{text-align:start' in salida
                    else 'LA PILA CENTRADA', "·",
-      "portada:", 'con cubos' if 'id="heroCubos"' in salida else 'SIN CUBOS', "·",
       "aviso:", 'apagado' if 'class="ann-fuera"' in salida else 'PUESTO')
