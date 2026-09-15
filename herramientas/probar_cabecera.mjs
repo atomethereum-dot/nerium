@@ -51,6 +51,23 @@ const par = await pg.evaluate(() => {
 di(par.barra !== null, 'la barra de recaudacion tiene su cifra');
 di(par.barra !== null && Math.abs(par.aviso - par.barra) < 1,
    `aviso ${par.aviso}% y barra ${par.barra}%: la misma cifra`);
+
+/* La cifra vive ahora en TRES sitios: la franja, la barra de recaudacion y la
+   linea de la portada —ahi es donde se quedo el dato cuando se apago la
+   franja—. Tres sitios con la misma cifra escrita a mano es un sitio con la
+   cifra mal, asi que se comprueba que salgan del mismo numero y que la misma
+   llamada mueva los tres. */
+const hp = await pg.evaluate(() => {
+  const e = document.getElementById('heroPct');
+  return e ? parseFloat(e.textContent) : null;
+});
+di(hp !== null, 'la portada lleva la cifra en su linea');
+di(hp !== null && Math.abs(hp - par.barra) < 1,
+   `portada ${hp}% y barra ${par.barra}%: la misma cifra`);
+await pg.evaluate(() => window.__aviso(91)); await pg.waitForTimeout(400);
+di(await pg.evaluate(() => document.getElementById('heroPct').textContent) === '91%' &&
+   await pg.evaluate(() => document.getElementById('annPct').textContent) === '91%',
+   'y si la ronda avanza avanzan las dos, no una');
 di(av && Math.abs(parseFloat(av.fill) - par.barra) < 1, 'la linea de abajo dibuja la misma cifra');
 
 if (!MONTADO) {

@@ -1858,6 +1858,8 @@ body.ann-off .ann{height:0}
    cierra, se llevaria por delante la decision. */
 body.ann-fuera{--ann:0px}
 body.ann-fuera .ann{height:0;pointer-events:none;transition:none}
+.hero-pr li.hp-pct{gap:5px}
+.hero-pr li.hp-pct b{font-weight:500;font-variant-numeric:tabular-nums;color:#fff}
 .ann::after{content:"";position:absolute;inset:0;pointer-events:none;
   background:linear-gradient(100deg,transparent 40%,rgba(255,255,255,.12) 50%,transparent 60%);
   transform:translateX(-100%);animation:annBrillo 7.5s ease-in-out 2s infinite}
@@ -3748,6 +3750,11 @@ footer .fgrid h4,footer .tec-real{color:#5B657A}
     if(!(p>=0)) return;
     if(txt) txt.textContent=Math.round(p)+'%';
     if(fill) fill.style.width=Math.min(100,p)+'%';
+    /* La misma cifra, en la linea de la portada: la franja puede estar
+       apagada, pero el dato sigue estando y tiene que seguir siendo el
+       mismo. */
+    var hp=document.getElementById('heroPct');
+    if(hp) hp.textContent=Math.round(p)+'%';
     var g=guardado();
     if(g!==null && p-g>=2){
       try{ localStorage.removeItem(K) }catch(e){}
@@ -3821,6 +3828,7 @@ footer .fgrid h4,footer .tec-real{color:#5B657A}
     <div class="lq" id="lq"><i class="lq-rail" aria-hidden="true"></i>
     <ul class="hero-pr">
       <li><i></i>Seed Round open</li>
+      <li class="hp-pct"><b id="heroPct">85%</b> <span>complete</span></li>
       <li>1 NRM = $0.20</li>
       <li>Ethereum &middot; BNB Chain</li>
       <li>Contracts verified</li>

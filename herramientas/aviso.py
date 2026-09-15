@@ -44,10 +44,50 @@ body.ann-fuera .ann{height:0;pointer-events:none;transition:none}"""
 CUERPO_VIEJO = """<body>"""
 CUERPO_NUEVO = """<body class="ann-fuera">"""
 
+# ── y la cifra se queda, en el idioma de la pagina ───────────────────────────
+# Apagar la franja se lleva por delante algo que el boton no dice: que la ronda
+# va por el 85 %. Eso no es adorno, es lo unico de la portada que dice que esto
+# se cierra. Se queda, pero en la linea que ya esta debajo de los botones —mono,
+# en mayusculas, con sus puntos— en vez de en una banda azul.
+#
+# Va pegada a «SEED ROUND OPEN», que es de lo que habla, y con la misma
+# estructura que llevaba en la franja: el numero en su propia etiqueta y la
+# palabra en la suya, que asi el traductor la coge sola —«complete» ya esta en
+# los doce idiomas, no hace falta texto nuevo.
+LINEA_VIEJO = """      <li><i></i>Seed Round open</li>
+      <li>1 NRM = $0.20</li>"""
+LINEA_NUEVO = """      <li><i></i>Seed Round open</li>
+      <li class="hp-pct"><b id="heroPct">85%</b> <span>complete</span></li>
+      <li>1 NRM = $0.20</li>"""
+
+# Los ocho pixeles de hueco que separan los puntos de la linea sobran entre el
+# numero y su palabra: ahi son una cifra y su unidad, no dos datos.
+LINEA_CSS_VIEJO = """body.ann-fuera .ann{height:0;pointer-events:none;transition:none}"""
+LINEA_CSS_NUEVO = """body.ann-fuera .ann{height:0;pointer-events:none;transition:none}
+.hero-pr li.hp-pct{gap:5px}
+.hero-pr li.hp-pct b{font-weight:500;font-variant-numeric:tabular-nums;color:#fff}"""
+
+# Y la cifra tiene que estar VIVA. La misma llamada que movia la franja mueve
+# ahora tambien la de la portada: si la ronda avanza, avanzan las dos o no
+# avanza ninguna. Dos sitios con la misma cifra escrita a mano es un sitio con
+# la cifra mal.
+VIVA_VIEJO = """    if(txt) txt.textContent=Math.round(p)+'%';
+    if(fill) fill.style.width=Math.min(100,p)+'%';"""
+VIVA_NUEVO = """    if(txt) txt.textContent=Math.round(p)+'%';
+    if(fill) fill.style.width=Math.min(100,p)+'%';
+    /* La misma cifra, en la linea de la portada: la franja puede estar
+       apagada, pero el dato sigue estando y tiene que seguir siendo el
+       mismo. */
+    var hp=document.getElementById('heroPct');
+    if(hp) hp.textContent=Math.round(p)+'%';"""
+
 
 CAMBIOS = [
     ('el estado propio', CSS_VIEJO, CSS_NUEVO),
     ('y puesto en el cuerpo', CUERPO_VIEJO, CUERPO_NUEVO),
+    ('la cifra, en la linea de la portada', LINEA_VIEJO, LINEA_NUEVO),
+    ('y su aire', LINEA_CSS_VIEJO, LINEA_CSS_NUEVO),
+    ('la cifra, viva', VIVA_VIEJO, VIVA_NUEVO),
 ]
 
 

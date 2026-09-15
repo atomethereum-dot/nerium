@@ -51,13 +51,21 @@ const lee = () => pg.evaluate(id => {
   const d = c2.getContext('2d').getImageData(0, 0, c2.width, c2.height).data;
   const H = c2.height;
   const bandas = [0, 0, 0], n = [0, 0, 0];
-  let cian = 0, gris = 0, vivos = 0, suma = 0;
+  let cian = 0, gris = 0, vivos = 0, suma = 0, hueco = 0, nh = 0, fuera = 0, nf = 0;
   for (let i = 0; i < d.length; i += 4) {
     const px = (i / 4) % c2.width, py = ((i / 4) / c2.width) | 0;
     const r = d[i], g = d[i+1], b = d[i+2];
     const luz = r + g + b;
     const k = py < H * 0.34 ? 0 : (py < H * 0.66 ? 1 : 2);
     bandas[k] += luz; n[k]++;
+    /* Y aparte, el hueco que de verdad protege el campo de cubos: la elipse
+       de media anchura 0,372 y media altura 0,161 donde cada pieza se apaga
+       del todo. El tercio de en medio no sirve para medirlo —es mucho mas
+       alto y mucho mas ancho que la elipse, asi que se le cuelan piezas que
+       vuelan por encima y por debajo del titular con todo el derecho. */
+    const ex = (px - c2.width / 2) / (c2.width * 0.372),
+          ey = (py - H / 2) / (H * 0.1612);
+    if (ex * ex + ey * ey < 1) { hueco += luz; nh++ } else { fuera += luz; nf++ }
     suma += luz;
     if (luz < 90) continue;
     vivos++;
@@ -70,12 +78,23 @@ const lee = () => pg.evaluate(id => {
     if (M > 90 && s < 0.10) gris++;
   }
   return { arriba: bandas[0]/n[0], medio: bandas[1]/n[1], abajo: bandas[2]/n[2],
+           hueco: nh ? hueco/nh : 0, fuera: nf ? fuera/nf : 0,
            cian, gris, vivos, suma };
 }, LOSAS ? 'burst' : 'heroCubos');
 const a = await lee();
 di(a.vivos > 2000, 'el campo esta pintado (' + a.vivos + ' pixeles con luz)');
-di(a.medio < a.arriba * 0.5, `el medio esta vacio para el titular (arriba ${a.arriba.toFixed(1)}, medio ${a.medio.toFixed(1)})`);
-di(a.medio < a.abajo * 0.5, `y tambien respecto a abajo (abajo ${a.abajo.toFixed(1)})`);
+if (LOSAS) {
+  di(a.medio < a.arriba * 0.5, `el medio esta vacio para el titular (arriba ${a.arriba.toFixed(1)}, medio ${a.medio.toFixed(1)})`);
+  di(a.medio < a.abajo * 0.5, `y tambien respecto a abajo (abajo ${a.abajo.toFixed(1)})`);
+} else {
+  /* Dentro de la elipse cada pieza se apaga del todo, asi que lo que quede
+     ahi tiene que ser practicamente nada: no se pide «la mitad», se pide un
+     orden de magnitud. Con el hueco puesto sale por debajo del 5 % de lo que
+     hay fuera; sin hueco, los dos numeros se igualan. */
+  const razon = a.fuera ? a.hueco / a.fuera : 1;
+  di(razon < 0.15, 'el hueco del titular esta limpio: ' + (razon * 100).toFixed(1) +
+     ' % de la luz que hay fuera (dentro ' + a.hueco.toFixed(1) + ', fuera ' + a.fuera.toFixed(1) + ')');
+}
 /* El fallo que esto vigila era una ZONA cian, no un pixel: 1140 de 253074,
    un 0,45 %. Pedir cero exactos hacia que la bateria fallara una vez de cada
    seis por un unico pixel en el filo del umbral de tono, y una prueba que
