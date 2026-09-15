@@ -30,6 +30,7 @@ Con movimiento reducido no se monta: la portada se queda como estaba.
 """
 
 MARCA = '/* ══ vuelo ══ Lo aplica herramientas/vuelo.py ═══'
+MARCA_JS = '/* ══ vuelo ══ El campo de cubos de la escena de fundido'
 
 # ── el lienzo ────────────────────────────────────────────────────────────────
 LIENZO_VIEJO = """<section class="hero" id="top" data-bg="#04070C" data-acc="#2F6BFF">
@@ -50,7 +51,8 @@ CSS_NUEVO = """#burst{position:absolute;inset:0;width:100%;height:100%}
 # Los numeros son los de la escena de fundido, uno por uno. Los dos que no:
 #   FUERZA  alli sube de 0 a 1 con el scroll; aqui es fija.
 #   VELOCE  alli es «0.9 + fuerza*3.4», que a plena marcha cruza la pantalla
-#           en tres segundos. Aqui es una portada, no un tunel: va a un tercio.
+#           en tres segundos. Aqui va a dos tercios de eso, que es el paso al
+#           que se lee como un corredor y no como un fondo que tiembla.
 JS_VIEJO = """(function(){
   const esq=document.getElementById('xfEsq');"""
 JS_NUEVO = """(function(){
@@ -62,7 +64,7 @@ JS_NUEVO = """(function(){
   if(!cv||matchMedia('(prefers-reduced-motion: reduce)').matches)return;
   const ctx=cv.getContext('2d');
   const PAL=[[77,162,255],[42,91,255],[130,190,255],[255,255,255],[120,145,190],[30,60,150]];
-  const HONDO=9, FUERZA=0.92, VELOCE=1.15;
+  const HONDO=9, FUERZA=0.92, VELOCE=2.80;
   let W=0,H=0,piezas=null,antes=0;
   function mide(){
     const d=Math.min(devicePixelRatio||1,2);
@@ -73,7 +75,7 @@ JS_NUEVO = """(function(){
   }
   function siembra(){
     piezas=[];
-    const cuantas=W<760?150:280;
+    const cuantas=W<760?260:480;
     for(let i=0;i<cuantas;i++)piezas.push({
       x:(Math.random()*2-1)*1.5, y:(Math.random()*2-1)*1.5,
       z:Math.random()*HONDO+0.35,
@@ -101,7 +103,7 @@ JS_NUEVO = """(function(){
       c.giro+=c.vg*dt;
       const k=foco/c.z, kA=foco/zAntes;
       const px=cx+c.x*k, py=cy+c.y*k;
-      const lado=Math.max(1.4, c.lado*k*0.30);
+      const lado=Math.min(Math.min(W,H)*0.30, Math.max(1.4, c.lado*k*0.30));
       if(px<-lado*2||px>W+lado*2||py<-lado*2||py>H+lado*2)continue;
       /* el hueco del titular. No es un circulo: el titular es una BANDA
          —ancha y baja—, asi que el hueco tiene su forma. Un circulo se
@@ -111,7 +113,13 @@ JS_NUEVO = """(function(){
       const hueco=Math.min(1,Math.max(0,(r-0.62)/0.55));
       if(hueco<=0)continue;
       const cerca=1-Math.min(1,(c.z-0.30)/HONDO);
-      const a=c.a*cerca*cerca*FUERZA*hueco;
+      /* Y se apaga lo que pasa DEMASIADO cerca. Una pieza a punto de cruzar
+         la camara se hace enorme y opaca, y deja de leerse como un cubo que
+         pasa: es una plancha gris parada en medio de la portada. Del ultimo
+         palmo del corredor se va disolviendo, que es lo que hace una camara
+         de verdad. */
+      const roza=Math.min(1,(c.z-0.30)/0.95);
+      const a=c.a*cerca*cerca*roza*FUERZA*hueco;
       if(a<0.012)continue;
       const ax=cx+c.x*kA, ay=cy+c.y*kA;
       const dx=px-ax, dy=py-ay;
@@ -171,7 +179,14 @@ CAMBIOS = [
 
 
 def aplicar(html):
-    """Idempotente: si el cambio ya esta, no lo repite."""
+    """Idempotente: si el cambio ya esta, no lo repite.
+
+    El bloque del vuelo TERMINA con el texto que lo ancla —se mete delante de
+    la escena de fundido—, asi que el ancla sigue ahi despues de ponerlo y
+    comparar «nuevo in html» no basta: al cambiar una constante, el ancla
+    volvia a encajar y el bloque se metia dos veces. Se mira la marca."""
+    if MARCA_JS in html:
+        return html
     for nombre, viejo, nuevo in CAMBIOS:
         if nuevo in html:
             continue
