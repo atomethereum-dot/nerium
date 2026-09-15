@@ -182,6 +182,12 @@ body.lock{overflow:hidden}
    la vineta —el «::before» de la seccion— y despues que ella en el marcado,
    asi que se pinta encima y se ve. El titular va a 2 y sigue por delante. */
 #heroCubos{position:absolute;inset:0;width:100%;height:100%;z-index:1;pointer-events:none}
+#burst{display:none}
+/* Sin las losas debajo, las dos vinetas de la portada —uma al 98,5 % en el
+   centro— ya no tapan un fondo: tapan los cubos. Se abren, que el hueco del
+   titular lo hace ahora el propio campo, pieza a pieza. */
+.hero::before{background:radial-gradient(ellipse 58% 44% at 50% 47%,rgba(0,0,0,.72),rgba(0,0,0,0) 74%)}
+.hero::after{background:radial-gradient(ellipse 46% 38% at 50% 44%,rgba(0,0,0,.42),rgba(0,0,0,0) 72%)}
 .hero::after{content:"";position:absolute;inset:0;pointer-events:none;
   background:radial-gradient(ellipse 46% 38% at 50% 44%,rgba(0,0,0,.78),rgba(0,0,0,0) 72%)}
 .hero-in{position:absolute;inset:0;z-index:2;display:flex;flex-direction:column;align-items:center;
@@ -5573,7 +5579,10 @@ function campo2D(){
   new IntersectionObserver(e=>{live=e[0].isIntersecting},{threshold:.02}).observe(cv);
   requestAnimationFrame(ts=>{last=ts;frame(ts)});
 }
-if(!campoGL()){ window.__campo='canvas'; campo2D(); }
+/* El campo de losas se queda apagado: la portada va con los cubos. El lienzo
+   sigue en el marcado porque de el cuelga la entrada —el lockup, las lamas, el
+   suelo de luz—, pero no se le pone motor ni se pinta. */
+window.__campo='apagado';
 (function(){
   const cv=document.getElementById('chroma');if(!cv)return;
   const ctx=cv.getContext('2d',{alpha:false});

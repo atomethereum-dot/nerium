@@ -1,4 +1,13 @@
-// El fondo de la portada: los tres planos, lo que se posa y el hueco del medio.
+// El fondo de la portada: que este pintado, que se mueva y que deje el hueco
+// del medio, que es donde va el titular.
+//
+// El fondo lo puede montar cualquiera de los dos campos que hay escritos: el
+// de losas —tres planos de celdas, del paso 12— o el de cubos —el corredor de
+// la escena de fundido, traido en el paso 34—. Cual esta puesto lo dice
+// «window.__campo»: si vale «apagado», el de losas no arranca y manda el de
+// cubos. Lo que se comprueba de los dos es lo mismo; lo que solo vale para el
+// de losas —los tres planos, el cian, el gris neutro, el camino sin WebGL—
+// se comprueba solo cuando es el que esta puesto.
 //
 // Lo que vigila:
 //  · que el hueco del centro EXISTA. Es la razon de ser del diseno —ahi va el
@@ -29,11 +38,13 @@ const errs = []; pg.on('pageerror', e => errs.push(e.message));
 await pg.goto(URL, { waitUntil:'load' });
 await pg.waitForTimeout(5000);
 
-di((await pg.evaluate(() => window.__campo)) === 'canvas', 'sin WebGL tira del camino de lienzo');
-di(errs.length === 0, 'y arranca sin reventar' + (errs.length ? ': ' + errs[0] : ''));
+const LOSAS = (await pg.evaluate(() => window.__campo)) !== 'apagado';
+console.log('  ··  el campo puesto es el de ' + (LOSAS ? 'LOSAS' : 'CUBOS'));
+if (LOSAS) di((await pg.evaluate(() => window.__campo)) === 'canvas', 'sin WebGL tira del camino de lienzo');
+di(errs.length === 0, 'arranca sin reventar' + (errs.length ? ': ' + errs[0] : ''));
 
-const lee = () => pg.evaluate(() => {
-  const cv = document.getElementById('burst');
+const lee = () => pg.evaluate(id => {
+  const cv = document.getElementById(id);
   const c2 = document.createElement('canvas');
   c2.width = cv.width; c2.height = cv.height;
   c2.getContext('2d').drawImage(cv, 0, 0);
@@ -60,7 +71,7 @@ const lee = () => pg.evaluate(() => {
   }
   return { arriba: bandas[0]/n[0], medio: bandas[1]/n[1], abajo: bandas[2]/n[2],
            cian, gris, vivos, suma };
-});
+}, LOSAS ? 'burst' : 'heroCubos');
 const a = await lee();
 di(a.vivos > 2000, 'el campo esta pintado (' + a.vivos + ' pixeles con luz)');
 di(a.medio < a.arriba * 0.5, `el medio esta vacio para el titular (arriba ${a.arriba.toFixed(1)}, medio ${a.medio.toFixed(1)})`);
@@ -70,10 +81,16 @@ di(a.medio < a.abajo * 0.5, `y tambien respecto a abajo (abajo ${a.abajo.toFixed
    seis por un unico pixel en el filo del umbral de tono, y una prueba que
    grita sin motivo se acaba ignorando. El listón se pone donde separa las dos
    cosas: veinte veces por debajo de aquello. */
-const cianPct = a.vivos ? a.cian / a.vivos * 100 : 0;
-di(cianPct < 0.02, 'no hay zona cian: ' + a.cian + ' de ' + a.vivos +
-   ' pixeles (' + cianPct.toFixed(4) + ' %)');
-di(a.gris === 0, 'ni un gris neutro: todo lleva azul dentro (' + a.gris + ')');
+/* El cian y el gris neutro son reglas de la PALETA de las losas. El campo de
+   cubos lleva blanco a proposito —el canto iluminado de cada pieza, que es lo
+   que les da volumen—, asi que pedirle «ni un gris» seria pedirle que no
+   fuera lo que es. */
+if (LOSAS) {
+  const cianPct = a.vivos ? a.cian / a.vivos * 100 : 0;
+  di(cianPct < 0.02, 'no hay zona cian: ' + a.cian + ' de ' + a.vivos +
+     ' pixeles (' + cianPct.toFixed(4) + ' %)');
+  di(a.gris === 0, 'ni un gris neutro: todo lleva azul dentro (' + a.gris + ')');
+}
 
 // que siga vivo: dos instantes distintos no pueden dar la misma imagen
 const b1 = a.suma;
@@ -82,14 +99,30 @@ const b2 = (await lee()).suma;
 di(Math.abs(b1 - b2) > 1, 'el campo se mueve: dos instantes no dan lo mismo');
 
 // tres planos: los bloques no pueden ser todos del mismo tamano
-const planos = await pg.evaluate(() => {
-  const s = [...document.scripts].map(x => x.textContent).join('');
-  return { esc: /ESC=\[0\.55,1,1\.38\]/.test(s), vel: /VEL=\[0\.42,1,1\.62\]/.test(s),
-           par: /PAR=\[0\.32,0\.76,1\.20\]/.test(s), filas: (s.match(/FILAS=\[([^\]]+)\]/)||[])[1] };
-});
-di(planos.esc && planos.vel && planos.par, 'tres planos con celda, velocidad y paralaje propios');
-di(planos.filas && !planos.filas.split(',').some(v => +v > 0.34 && +v < 0.66),
-   'ninguna fila de aterrizaje cae en la banda del titular');
+if (LOSAS) {
+  const planos = await pg.evaluate(() => {
+    const s = [...document.scripts].map(x => x.textContent).join('');
+    return { esc: /ESC=\[0\.55,1,1\.38\]/.test(s), vel: /VEL=\[0\.42,1,1\.62\]/.test(s),
+             par: /PAR=\[0\.32,0\.76,1\.20\]/.test(s), filas: (s.match(/FILAS=\[([^\]]+)\]/)||[])[1] };
+  });
+  di(planos.esc && planos.vel && planos.par, 'tres planos con celda, velocidad y paralaje propios');
+  di(planos.filas && !planos.filas.split(',').some(v => +v > 0.34 && +v < 0.66),
+     'ninguna fila de aterrizaje cae en la banda del titular');
+} else {
+  /* El de cubos no tiene planos: tiene profundidad de verdad. Lo que se le
+     pide es que la tenga —que las piezas no salgan todas del mismo sitio— y
+     que el hueco del titular sea una BANDA y no un circulo, que con un
+     circulo se llevaba por delante las piezas grandes. */
+  const vuelo = await pg.evaluate(() => {
+    const s = [...document.scripts].map(x => x.textContent).join('');
+    return { hondo: /const HONDO=9/.test(s),
+             banda: /\(px-cx\)\/\(W\*\.60\),\(py-cy\)\/\(H\*\.26\)/.test(s),
+             quieto: /prefers-reduced-motion/.test(s.slice(s.indexOf('heroCubos'), s.indexOf('heroCubos') + 400)) };
+  });
+  di(vuelo.hondo, 'el corredor tiene fondo: las piezas salen a distintas distancias');
+  di(vuelo.banda, 'y el hueco del titular es una banda, no un circulo');
+  di(vuelo.quieto, 'con movimiento reducido no se monta');
+}
 await ctx.close();
 
 // ── y el camino normal, con WebGL disponible ──
@@ -99,7 +132,8 @@ const errs2 = []; pg2.on('pageerror', e => errs2.push(e.message));
 await pg2.goto(URL, { waitUntil:'load' });
 await pg2.waitForTimeout(4500);
 const motor = await pg2.evaluate(() => window.__campo);
-di(['webgl', 'canvas', 'canvas (webgl iba lento)'].includes(motor), 'el motor se declara: ' + motor);
+di(['webgl', 'canvas', 'canvas (webgl iba lento)', 'apagado'].includes(motor),
+   'el motor se declara: ' + motor);
 di(errs2.length === 0, 'sin errores de pagina' + (errs2.length ? ': ' + errs2[0] : ''));
 di((await pg2.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)) === 0,
    'y no se sale nada por el lado');

@@ -136,10 +136,37 @@ JS_NUEVO = """(function(){
   const esq=document.getElementById('xfEsq');"""
 
 
+# ── y se apaga el campo de losas ─────────────────────────────────────────────
+# La portada llevaba dos fondos a la vez: las losas planas —tres planos de
+# celdas, del paso 12— y los cubos. Juntos no se leen: las losas son grandes y
+# planas y los cubos pequenos y con volumen, y cada uno le quita sitio al otro.
+# Se queda el de cubos.
+#
+# El lienzo de las losas NO se quita del marcado, y no es por prudencia: de el
+# cuelga la entrada de la portada —el lockup que se borra, las lamas, el suelo
+# de luz—, que empieza por «if(!cv||!inn)return». Sin el lienzo no hay entrada.
+# Lo que se corta es que se pinte: no arranca el motor y el lienzo se esconde.
+LOSAS_VIEJO = """if(!campoGL()){ window.__campo='canvas'; campo2D(); }"""
+LOSAS_NUEVO = """/* El campo de losas se queda apagado: la portada va con los cubos. El lienzo
+   sigue en el marcado porque de el cuelga la entrada —el lockup, las lamas, el
+   suelo de luz—, pero no se le pone motor ni se pinta. */
+window.__campo='apagado';"""
+LOSAS_CSS_VIEJO = """#heroCubos{position:absolute;inset:0;width:100%;height:100%;z-index:1;pointer-events:none}"""
+LOSAS_CSS_NUEVO = """#heroCubos{position:absolute;inset:0;width:100%;height:100%;z-index:1;pointer-events:none}
+#burst{display:none}
+/* Sin las losas debajo, las dos vinetas de la portada —uma al 98,5 % en el
+   centro— ya no tapan un fondo: tapan los cubos. Se abren, que el hueco del
+   titular lo hace ahora el propio campo, pieza a pieza. */
+.hero::before{background:radial-gradient(ellipse 58% 44% at 50% 47%,rgba(0,0,0,.72),rgba(0,0,0,0) 74%)}
+.hero::after{background:radial-gradient(ellipse 46% 38% at 50% 44%,rgba(0,0,0,.42),rgba(0,0,0,0) 72%)}"""
+
+
 CAMBIOS = [
     ('el lienzo de la portada', LIENZO_VIEJO, LIENZO_NUEVO),
     ('su sitio en la pila', CSS_VIEJO, CSS_NUEVO),
     ('el vuelo', JS_VIEJO, JS_NUEVO),
+    ('fuera el campo de losas', LOSAS_VIEJO, LOSAS_NUEVO),
+    ('y sus vinetas, mas abiertas', LOSAS_CSS_VIEJO, LOSAS_CSS_NUEVO),
 ]
 
 
