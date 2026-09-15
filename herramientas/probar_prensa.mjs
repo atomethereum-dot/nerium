@@ -90,49 +90,19 @@ for (const [ac, real] of Object.entries(CERCA)) {
 const fig = await pg.evaluate(() => getComputedStyle(document.querySelector('.pcd-art')).backgroundImage);
 di(!/repeating-linear-gradient/.test(fig), 'la figura ya no lleva cuadricula');
 
-/* La marca del medio va RECORTADA y con transparencia, no dentro de un cuadro.
-   Era el fallo de verdad: los archivos venian como JPEG cuadrados con su fondo
-   cocido dentro, la tarjeta tenia que meterlos en una baldosa blanca para poder
-   posarlos sobre el color, y la palabra acababa ocupando el 11% del archivo.
-   BENZINGA se dibujaba con 11 px de alto. Aqui se comprueban las dos mitades
-   de esa cura: que el archivo no traiga fondo y que la baldosa no lo pinte. */
-const marca = await pg.evaluate(async () => {
-  const fuera = i => new Promise(r => {
-    const l = new Image(); l.onload = () => r(l); l.src = i.currentSrc || i.src; });
-  const out = [];
-  for (const i of document.querySelectorAll('.cb-logo')) {
-    const l = await fuera(i), cv = document.createElement('canvas');
-    cv.width = l.naturalWidth; cv.height = l.naturalHeight;
-    const cx = cv.getContext('2d'); cx.drawImage(l, 0, 0);
-    const d = cx.getImageData(0, 0, cv.width, cv.height).data;
-    const en = (x, y) => d[(y * cv.width + x) * 4 + 3];
-    const s = getComputedStyle(i.closest('.cb-tile'));
-    out.push({ alt: i.alt,
-      px: Math.round(i.getBoundingClientRect().width),
-      origen: l.naturalWidth,
-      vacio: (() => { let v = 0; for (let k = 3; k < d.length; k += 4) if (d[k] === 0) v++;
-                      return Math.round(100 * v / (cv.width * cv.height)); })(),
-      plato: s.backgroundColor, sombraCaja: s.boxShadow });
-  }
-  return out;
-});
-/* Por la esquina no se puede medir: la marca va recortada al ras y una letra
-   puede empezar justo en el primer pixel. Lo que separa una marca de un cuadro
-   con fondo es cuanto del archivo esta VACIO: un JPEG con su plato cocido no
-   tiene ni un pixel transparente, y una palabra recortada pasa de la mitad. */
-di(marca.every(l => l.vacio >= 30),
-   'la marca llega recortada, sin fondo cocido (vacio el ' +
-   marca.map(l => l.vacio + '%').join('/') + ' del archivo)');
-di(marca.every(l => l.plato === 'rgba(0, 0, 0, 0)' || l.plato === 'transparent'),
-   'y la baldosa ya no pinta plato debajo (' + marca[0].plato + ')');
-di(marca.every(l => l.sombraCaja === 'none'),
-   'ni le pone caja con sombra alrededor');
-/* Contra 3x, no contra el 1x de esta bateria: quien mira la pagina desde un
-   telefono tiene tres pixeles de pantalla por cada uno de CSS, y ahi es donde
-   un archivo corto se nota. Los JPEG cuadrados de antes no llegaban. */
-di(marca.every(l => l.origen >= l.px * 3),
-   'y aguanta 3x sin estirarse: pide ' + marca.map(l => l.px * 3).join('/') +
-   ', tiene ' + marca.map(l => l.origen).join('/'));
+/* En un ordenador corriente hay UN pixel de pantalla por cada pixel de CSS,
+   asi que el logotipo se dibuja con los pixeles que mida su caja y ni uno mas.
+   Con la baldosa de 80 eran 62, y el de Morningstar son once letras de palo
+   seco en ese ancho: cuatro pixeles por letra. Se deshacia. En el telefono no
+   se veia porque alli hay dos o tres pixeles de pantalla por cada uno de CSS.
+   Por debajo de 88 vuelve el problema. */
+const real = await pg.evaluate(() => [...document.querySelectorAll('.cb-logo')].map(i =>
+  ({ alt: i.alt, px: Math.round(i.getBoundingClientRect().width * devicePixelRatio),
+     origen: i.naturalWidth })));
+di(real.every(l => l.px >= 88),
+   'en pantalla de 1x el logotipo se dibuja con ' + real.map(l => l.px).join('/') + ' px reales');
+di(real.every(l => l.origen >= l.px),
+   'y el archivo tiene al menos esa resolucion (' + real.map(l => l.origen).join('/') + ')');
 
 // el hueco entre la figura y el texto: la tarjeta tiene que tener un dentro
 const sep = await pg.evaluate(() => {

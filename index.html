@@ -2024,30 +2024,20 @@ html[dir="rtl"] .ann-in:hover .ann-go{transform:scaleX(-1) translateX(4px)}
   font-size:clamp(17px,1.85vw,24px);font-weight:500;letter-spacing:-.04em;
   text-shadow:0 1px 14px rgba(0,0,0,.28)}
 .cb-rule{width:1px;height:clamp(30px,3.6vw,46px);background:rgba(255,255,255,.34);flex:0 0 auto}
-/* El medio ya no va en baldosa. La baldosa existia porque el logotipo llegaba
-   como un JPEG cuadrado con su fondo cocido dentro —Benzinga blanco sobre azul,
-   MarketWatch verde sobre negro, Morningstar blanco sobre rojo— y un cuadro de
-   color no se puede posar sobre otro color. Salian tres capas: la figura azul,
-   la baldosa blanca y dentro otro cuadro azul. Dos saltos de color para ensenar
-   ocho letras, y encima el color del cuadro era el mismo de la figura.
-   Ahora la marca viene recortada y con transparencia (prensa_marcas.py) y se
-   posa directamente sobre el color de su tarjeta, al lado del de Nereum y con
-   la misma sombra, para que los dos se lean como una sola linea.
-   Y de paso deja de desperdiciar el sitio: la palabra BENZINGA ocupaba 229x32
-   de un archivo de 260x260, o sea el 11% de la superficie, asi que dentro de
-   una baldosa de 92 se dibujaba con 11 px de alto. Once. Recortada, esos 92 px
-   son todo palabra.
-   El ancho va por marca y no por una medida comun, porque cada una reparte su
-   caja de otro modo: la flecha de MarketWatch sube por encima de las letras y
-   la O de Morningstar baja por debajo, de modo que igualar el ancho las dejaria
-   con alturas de letra distintas. Los maximos son los que aguanta cada archivo:
-   a dos pixeles de pantalla por pixel de CSS ninguna pide mas de lo que tiene. */
+/* El medio va en su propia baldosa blanca: sobre el color, su logotipo
+   necesita el fondo con el que esta hecho. */
+/* El tamano NO es decorativo. En un ordenador corriente —un pixel de pantalla
+   por pixel de CSS— la baldosa de 80 dejaba el logotipo en 62 pixeles reales, y
+   el de Morningstar son ONCE letras de palo seco en ese ancho: cuatro pixeles
+   por letra, con trazos por debajo del pixel. Se deshacia. En el telefono no
+   pasaba porque alli hay tres pixeles de pantalla por cada uno de CSS y ese
+   mismo logotipo se dibujaba con 120. Subiendo la baldosa a 112, el ordenador
+   pasa de 62 a 94 pixeles reales y las letras vuelven a tener cuerpo. */
 .cb-tile{flex:0 0 auto;display:grid;place-items:center;
-  filter:drop-shadow(0 1px 14px rgba(0,0,0,.28))}
-.cb-logo{width:100%;height:auto;display:block;border-radius:0}
-.cb-tile.t-benzinga{width:clamp(84px,9.4vw,112px)}
-.cb-tile.t-marketwatch{width:clamp(52px,5.7vw,68px)}
-.cb-tile.t-morningstar{width:clamp(80px,9vw,108px)}
+  width:clamp(72px,8vw,112px);height:clamp(72px,8vw,112px);
+  background:#fff;border-radius:14px;padding:clamp(7px,.72vw,9px);
+  box-shadow:0 8px 22px -10px rgba(0,0,0,.48)}
+.cb-logo{width:100%;height:auto;border-radius:6px;display:block}
 
 /* ── el texto: papel, pero teñido de su color, no blanco pelado ── */
 .pcd-body{padding:clamp(16px,1.7vw,22px) clamp(16px,1.7vw,22px) clamp(18px,2vw,26px);
@@ -3883,7 +3873,7 @@ footer .fgrid h4,footer .tec-real{color:#5B657A}
             <div class="pcd-plate">
               <span class="cb"><svg class="cb-mark" aria-hidden="true"><use href="#nlogo"/></svg><span class="cb-word">Nereum</span></span>
               <span class="cb-rule"></span>
-              <span class="cb-tile t-benzinga"><img class="cb-logo" alt="Benzinga" src="img/p1.png"></span>
+              <span class="cb-tile"><img class="cb-logo" alt="Benzinga" src="img/p1.jpg"></span>
             </div>
           </div>
           <div class="pcd-body">
@@ -3897,7 +3887,7 @@ footer .fgrid h4,footer .tec-real{color:#5B657A}
             <div class="pcd-plate">
               <span class="cb"><svg class="cb-mark" aria-hidden="true"><use href="#nlogo"/></svg><span class="cb-word">Nereum</span></span>
               <span class="cb-rule"></span>
-              <span class="cb-tile t-marketwatch"><img class="cb-logo" alt="MarketWatch" src="img/p2.png"></span>
+              <span class="cb-tile"><img class="cb-logo" alt="MarketWatch" src="img/p2.jpg"></span>
             </div>
           </div>
           <div class="pcd-body">
@@ -3911,7 +3901,7 @@ footer .fgrid h4,footer .tec-real{color:#5B657A}
             <div class="pcd-plate">
               <span class="cb"><svg class="cb-mark" aria-hidden="true"><use href="#nlogo"/></svg><span class="cb-word">Nereum</span></span>
               <span class="cb-rule"></span>
-              <span class="cb-tile t-morningstar"><img class="cb-logo" alt="Morningstar" src="img/p3.png"></span>
+              <span class="cb-tile"><img class="cb-logo" alt="Morningstar" src="img/p3.jpg"></span>
             </div>
           </div>
           <div class="pcd-body">
