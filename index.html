@@ -3642,240 +3642,6 @@ footer .fgrid h4,footer .tec-real{color:#5B657A}
 .builds::before,.ruta::before{display:none}
 
 /* ══ fin: negro ══ */
-
-/* ══ nocturno ══ Lo aplica herramientas/nocturno.py ══════════════════════════════════════════════
-   Las ocho secciones claras, de noche. Lo de abajo del todo lo escribe
-   el recorrido automatico: una linea por cada regla de la hoja que
-   pintaba dando por hecho un fondo blanco. */
-#network{--noche:#070B14}
-#press{--noche:#05080F}
-#thesis{--noche:#060A12}
-#solutions{--noche:#080C16}
-#security{--noche:#05080F}
-#presale{--noche:#070B15}
-#token{--noche:#04070D}
-#join{--noche:#060911}
-#network,#press,#thesis,#solutions,#security,#presale,#token,#join{
-  background-color:var(--noche,#05080F) !important;
-  background-image:
-    radial-gradient(72% 80% at 6% -12%,rgba(47,107,255,.15),transparent 66%),
-    radial-gradient(62% 74% at 96% -14%,rgba(47,107,255,.11),transparent 64%),
-    radial-gradient(68% 76% at 18% 112%,rgba(58,96,190,.10),transparent 70%),
-    var(--grano),url(img/noche.svg) !important;
-  background-repeat:no-repeat,no-repeat,no-repeat,repeat,no-repeat !important;
-  background-size:auto,auto,auto,auto,cover !important;
-  background-position:0 0,0 0,0 0,0 0,center top !important;
-  background-attachment:scroll !important;
-  color:#E9EFFA}
-@media(max-width:760px){#network,#press,#thesis,#solutions,#security,#presale,#token,#join{
-  background-image:
-    radial-gradient(72% 80% at 6% -12%,rgba(47,107,255,.15),transparent 66%),
-    radial-gradient(62% 74% at 96% -14%,rgba(47,107,255,.11),transparent 64%),
-    radial-gradient(68% 76% at 18% 112%,rgba(58,96,190,.10),transparent 70%),
-    var(--grano),url(img/noche-alto.svg) !important;
-  background-repeat:no-repeat,no-repeat,no-repeat,repeat,repeat-y !important;
-  background-size:auto,auto,auto,auto,100% auto !important;
-  background-position:0 0,0 0,0 0,0 0,center top !important}}
-
-/* Lo primero: las fichas de color. Media hoja no escribe un color, escribe el
-   nombre de uno —«var(--ink)», «var(--p-linea)»— y ahi el recorrido automatico
-   no puede entrar, porque lo que lee es el nombre, no el valor. Se les da su
-   version de noche SOLO dentro de estas ocho secciones, que es donde importa.
-   Una linea arregla los ochenta y cuatro titulares que se quedaban negros. */
-#network,#press,#thesis,#solutions,#security,#presale,#token,#join{
-  --ink:#E9EFFA;
-  --mute-d:rgba(233,239,250,.60);
-  --line-d:rgba(150,180,235,.16);
-  --p-linea:rgba(150,180,235,.16);
-  --p-linea2:rgba(150,180,235,.06);
-  --p-relieve:0 24px 54px -30px rgba(0,0,0,.85);
-  --p-relieve2:0 30px 66px -34px rgba(0,0,0,.9);
-  --paper:#0B1220;
-  --paper2:#0D1422;
-  --p-papel:#0B1220;
-  --p-papel2:#0D1422;
-  --p-alto:#0D1422;
-  --pl:rgba(150,180,235,.16);
-  --luz:rgba(47,107,255,.42)}
-/* La fila de compatibilidad: las pastillas eran blancas con el logotipo
-   encima. Ahora son de cristal oscuro, y los logotipos —que vienen en su
-   color de marca— se quedan como estan, que es lo que se quiere ver. */
-.lane-in span{background:rgba(255,255,255,.045);border:1px solid rgba(150,180,235,.14);
-  color:#D7E1F2;box-shadow:none}
-.lane::before,.lane::after{background:linear-gradient(90deg,var(--noche,#070B14),transparent)}
-.lane::after{background:linear-gradient(270deg,var(--noche,#070B14),transparent)}
-
-/* Las pildoras de estado —«VERIFIED», el multiplicador de la ronda— iban en
-   verde palido sobre blanco. En verde encendido sobre negro. */
-.sec-ok,.pr-mult{background:rgba(40,190,120,.12) !important;color:#5FE3A4 !important;
-  border-color:rgba(63,214,140,.28) !important}
-.sec-ok *,.pr-mult *{color:inherit !important}
-
-/* El icono de cada ficha de seguridad. */
-.sec-ic{background:rgba(70,120,255,.14) !important;border-color:rgba(122,166,255,.26) !important;
-  color:#9CC0FF !important}
-
-/* El panel de compra: los campos eran blancos con borde gris. */
-.w-field,.w-out,.w-chips button,.pn{background:rgba(255,255,255,.035) !important;
-  border-color:rgba(150,180,235,.16) !important;color:#E9EFFA !important}
-.w-chips button.on,.w-pay button.on{background:rgba(70,120,255,.20) !important;
-  border-color:#5E8CFF !important;color:#FFFFFF !important}
-.w-pay button{background:rgba(255,255,255,.035) !important;
-  border-color:rgba(150,180,235,.14) !important;color:#D7E1F2 !important}
-
-/* El separador de la mitad «listing» de la tarjeta de precios. */
-.pr.up{background:rgba(70,120,255,.10) !important}
-
-/* El cursor del tecleo se pinta del color del lavado, y el lavado ya es
-   negro: encima del texto claro se lo comia. Va al color del texto. */
-.tec-cur{color:#E9EFFA !important}
-
-/* El pie: las fichas de color, igual que las ocho secciones. */
-footer{--ink:#E9EFFA;--mute-d:rgba(233,239,250,.60);--line-d:rgba(150,180,235,.16)}
-
-/* El NEREUM gigante del pie no es un fondo: es un degradado recortado con la
-   forma de las letras. Iba de negro a transparente, asi que sobre negro
-   desaparecia entero. Va de claro a transparente. */
-footer .fmark span{background-image:linear-gradient(180deg,
-  rgba(233,239,250,.20),rgba(233,239,250,.035)) !important}
-
-/* ── y aqui lo que sale de recorrer la hoja ── */
-footer{background:#0D1422;color:#E9EFFA;border-top:1px solid rgba(150,180,235,0.18)}
-.lane-in span{color:rgba(233,239,250,0.92);background:#0B1220;box-shadow:0 1px 2px rgba(0,0,0,0.45)}
-.lane-in span:hover{color:#E9EFFA;box-shadow:0 10px 24px -14px rgba(0,0,0,0.8)}
-.rows li:hover .rn{color:var(--blue-lite)}
-.rows li:hover .ic{box-shadow:0 6px 22px -6px rgba(0,0,0,0.85)}
-.pcd-t{color:#E9EFFA}
-.press-foot{color:rgba(233,239,250,0.59)}
-.tkp{background:#0D1422;background-image:linear-gradient(#0B1220,#0B1220), var(--grano),url(img/tapiz.svg)}
-.tkp-n{fill:#E9EFFA}
-.tkp-list{border-top:1px solid rgba(150,180,235,0.18)}
-.tkp-row{border-bottom:1px solid rgba(150,180,235,0.135)}
-.sale{background:#0D1422;color:#E9EFFA}
-.sale-field i:nth-child(3){background:radial-gradient(circle,rgba(150,180,235,0.3) 0%,rgba(150,180,235,0.27) 38%,rgba(150,180,235,0) 74%)}
-.sale-field i:nth-child(4){background:radial-gradient(circle,rgba(150,180,235,0.3) 0%,rgba(150,180,235,0.255) 38%,rgba(150,180,235,0) 74%)}
-.sale-top{border-bottom:1px solid rgba(150,180,235,0.18)}
-.sale-live{color:#E9EFFA}
-.sale-live i{box-shadow:0 0 0 4px rgba(0,0,0,0.45)}
-.sale-net{color:rgba(233,239,250,0.6)}
-.sale-h{color:#E9EFFA}
-.sale-sub{color:rgba(233,239,250,0.72)}
-.prices{background:#0B1220;border:1px solid rgba(150,180,235,0.15);box-shadow:0 20px 48px -34px rgba(0,0,0,0.45)}
-.pr.up{background:#101A2C}
-.pr-k{color:rgba(233,239,250,0.58)}
-.pr-v{color:#E9EFFA}
-.pr.up .pr-v{color:#7AA6FF}
-.pr-n{color:rgba(233,239,250,0.52)}
-.pr-arrow svg{stroke:#7AA6FF}
-.pr-mult{background:#0C2019;border-top:1px solid rgba(150,180,235,0.135)}
-.pr-mult b{color:#7AA6FF}
-.pr-mult span{color:rgba(233,239,250,0.58)}
-.raise-head b{color:#E9EFFA}
-.raise-head span{color:rgba(233,239,250,0.62)}
-.raise-foot{color:rgba(233,239,250,0.54)}
-.widget{background:#0B1220;border:1px solid rgba(150,180,235,0.15);box-shadow:0 32px 64px -38px rgba(0,0,0,0.56)}
-.w-top>span:first-child{color:#E9EFFA}
-.w-rate{color:rgba(233,239,250,0.64)}
-.w-lab{color:rgba(233,239,250,0.56)}
-.w-pay button{border:1px solid rgba(150,180,235,0.195);background:#0B1220;color:rgba(233,239,250,0.76)}
-.w-pay button:hover{color:#E9EFFA;border-color:rgba(150,180,235,0.3)}
-.w-pay button.on{background:#101A2C;border-color:rgba(150,180,235,0.3);color:#E9EFFA;box-shadow:0 0 0 2px rgba(0,0,0,0.45)}
-.w-field{border:1px solid rgba(150,180,235,0.195);background:#0B1220}
-.w-field:focus-within{border-color:rgba(150,180,235,0.3);box-shadow:0 0 0 3px rgba(0,0,0,0.45)}
-.w-field.bad{border-color:rgba(150,180,235,0.3);box-shadow:0 0 0 3px rgba(0,0,0,0.45)}
-.w-field>span{color:rgba(233,239,250,0.56)}
-.w-field input{color:#E9EFFA}
-.w-field.out{background:#0E1626}
-.w-field.out input{color:#7AA6FF}
-.w-field em{color:rgba(233,239,250,0.74)}
-.w-eq{color:rgba(233,239,250,0.64)}
-.w-range::-webkit-slider-thumb{box-shadow:0 1px 6px rgba(0,0,0,0.56)}
-.w-range::-moz-range-thumb{box-shadow:0 1px 6px rgba(0,0,0,0.56)}
-.w-chips button{border:1px solid rgba(150,180,235,0.195);background:#0B1220;color:rgba(233,239,250,0.72)}
-.w-chips button:hover{color:#E9EFFA;border-color:rgba(150,180,235,0.3)}
-.w-swap svg{stroke:rgba(233,239,250,0.52)}
-.w-out{border:1px solid rgba(150,180,235,0.15)}
-.w-out>div{background:#0B1220}
-.w-out dt{color:rgba(233,239,250,0.56)}
-.w-out dd{color:#E9EFFA}
-.w-out dd.up{color:#7AA6FF}
-.w-cta{box-shadow:0 12px 26px -12px rgba(0,0,0,0.85)}
-.w-note{color:rgba(233,239,250,0.5)}
-.w-note.bad{color:#E9EFFA}
-.tkp-core em{color:rgba(233,239,250,0.56)}
-.tkp-core.named b{color:#E9EFFA}
-.sec-sub{color:rgba(233,239,250,0.7)}
-.sec-card{background:#0B1220;border:1px solid rgba(150,180,235,0.15);box-shadow:0 20px 46px -34px rgba(0,0,0,0.48)}
-.sec-card:hover{border-color:rgba(150,180,235,0.3);box-shadow:0 32px 62px -34px rgba(0,0,0,0.672)}
-.sec-ic{background:#101A2C;border:1px solid rgba(150,180,235,0.27)}
-.sec-ic svg{stroke:#7AA6FF}
-.sec-ok{background:#0C2019;border:1px solid rgba(150,180,235,0.3);color:#7AA6FF}
-.sec-ok i{box-shadow:0 0 0 3px rgba(0,0,0,0.45)}
-.sec-n{color:rgba(233,239,250,0.34)}
-.sec-k{color:rgba(233,239,250,0.56)}
-.sec-p{color:rgba(233,239,250,0.74)}
-.sec-fields{border-top:1px solid rgba(150,180,235,0.135)}
-.sec-fields>div{border-bottom:1px solid rgba(150,180,235,0.105)}
-.sec-fields dt{color:rgba(233,239,250,0.56)}
-.sec-go{color:#7AA6FF}
-.sec-foot{border-top:1px solid rgba(150,180,235,0.15);color:rgba(233,239,250,0.56)}
-.fend:hover .f-mark{color:#E9EFFA}
-.jbtn:focus-visible{box-shadow:0 0 0 3px rgba(0,0,0,0.45)}
-.join-rule i{background:rgba(150,180,235,0.21)}
-.ffield i:nth-child(3){background:radial-gradient(circle,rgba(150,180,235,0.3) 0%,rgba(150,180,235,0.27) 38%,rgba(150,180,235,0) 74%)}
-.ffield i:nth-child(4){background:radial-gradient(circle,rgba(150,180,235,0.3) 0%,rgba(150,180,235,0.255) 38%,rgba(150,180,235,0) 74%)}
-footer .fbrand{color:#E9EFFA}
-footer .fbrand svg{color:#E9EFFA}
-footer .fcopy{color:rgba(233,239,250,0.64)}
-footer .fgrid h4{color:rgba(233,239,250,0.58)}
-footer .fgrid a{color:rgba(233,239,250,0.8)}
-footer .fgrid a:hover{color:#E9EFFA}
-footer .fend{border-top-color:rgba(150,180,235,0.21)}
-footer .f-legal{color:rgba(233,239,250,0.54)}
-.join{background:#0D1422;color:#E9EFFA}
-.join .join-h{color:#E9EFFA}
-.join .join-note{color:rgba(233,239,250,0.69)}
-.join .jbtn{border-color:rgba(150,180,235,0.24);color:#E9EFFA}
-.join .jbtn-go{border-color:rgba(150,180,235,0.3)}
-.join .jbtn-sub{color:rgba(233,239,250,0.64)}
-.join .join-rule{color:rgba(233,239,250,0.56)}
-.pn{border:1px solid rgba(150,180,235,0.24);color:rgba(233,239,250,0.74)}
-.say p em{color:rgba(233,239,250,0.48)}
-.rows .ic svg{stroke:#00131F}
-.fgrid h4{color:rgba(233,239,250,0.56)}
-.fgrid a{color:rgba(233,239,250,0.82)}
-.fgrid a::before{color:rgba(233,239,250,0.4)}
-.fgrid a:hover{color:#E9EFFA}
-.fbrand{color:#E9EFFA}
-.fcopy{color:rgba(233,239,250,0.64)}
-.f-legal{color:rgba(233,239,250,0.56)}
-.sec-live{color:#E9EFFA}
-.sec-live i{box-shadow:0 0 0 4px rgba(0,0,0,0.45)}
-.sec-cue{color:rgba(233,239,250,0.54)}
-.sec-cue i{border:1px solid rgba(150,180,235,0.3)}
-.sec-cue i::after{border-right:1px solid rgba(150,180,235,0.3);border-bottom:1px solid rgba(150,180,235,0.3)}
-.pcd{background:#0B1220;box-shadow:0 1px 2px rgba(0,0,0,0.45)}
-.lane-in span::before{box-shadow:0 0 0 3px color-mix(in srgb,var(--pt,rgba(0,0,0,0.85)) 16%,transparent)}
-.lane-sub{color:rgba(233,239,250,0.7)}
-.rows .rd{color:rgba(233,239,250,0.7)}
-.rows li:hover .rd{color:rgba(233,239,250,0.92)}
-.jbtn{background:#0B1220}
-:is(.paper,.paper2,.secure,.sale,.tkp,.join,.press){background-image:radial-gradient(62% 74% at 6% -10%,rgba(150,190,255,.34),transparent 68%), radial-gradient(58% 70% at 96% -14%,rgba(158,194,255,.30),transparent 66%), radial-gradient(64% 72% at 18% 112%,rgba(150,180,235,0.3),transparent 70%), var(--grano),url(img/papel.svg)}
-:is(.paper,.paper2,.secure,.sale,.tkp,.join,.press) :is(.sec-card,.pcd,.jbtn){background:#0B1220}
-:is(.paper,.paper2,.secure,.sale,.tkp,.join,.press) .widget{background:#0B1220}
-:is(.paper,.paper2,.secure,.sale,.tkp,.join,.press) .jbtn:hover .jbtn-mark{background:#0B1220}
-:is(.paper,.paper2,.secure,.sale,.tkp,.join,.press).tkp{background-image:linear-gradient(#0B1220,#0B1220), var(--grano),url(img/papel.svg)}
-:is(.paper,.paper2,.secure,.sale,.tkp,.join,.press).logos h2{color:#E9EFFA}
-:is(.paper,.paper2,.secure,.sale,.tkp,.join,.press) :is(.rd,.sec-sub,.sale-sub,.join-note,.press-foot,.tkp-row span, .jbtn-sub,.lane-sub){color:#AEBBD2}
-:is(.paper,.paper2,.secure,.sale,.tkp,.join,.press) :is(dt,.k,.mono,.sec-k,.pr-k,.pr-n,.w-lab,.w-note,.w-rate,.w-eq,.sale-net, .tec-real,.tec-fantasma, .join-rule,.raise-foot,.raise-foot span,.tkp-core span,.tkp-core em, .press-all,.w-swap){color:#93A2BD}
-:is(.paper,.paper2,.secure,.sale,.tkp,.join,.press) .rn{color:#93A2BD}
-:is(.paper,.paper2,.secure,.sale,.tkp,.join,.press) .tkp-core b{color:#E9EFFA}
-:is(.paper,.paper2,.secure,.sale,.tkp,.join,.press) .pcd-tag{color:#AEBBD2}
-footer :is(.fcopy,.f-legal){color:#93A2BD}
-:is(.paper,.paper2,.secure,.sale,.tkp,.join,.press) .sk-n{color:#79ABFF}
-:is(.paper,.paper2,.secure,.sale,.tkp,.join,.press) .rows li+li{border-top:1px solid rgba(150,180,235,0.18)}
-.tkp.tkp{background-image:radial-gradient(62% 74% at 6% -10%,rgba(150,190,255,.34),transparent 68%), radial-gradient(58% 70% at 96% -14%,rgba(158,194,255,.30),transparent 66%), radial-gradient(64% 72% at 18% 112%,rgba(150,180,235,0.3),transparent 70%), var(--grano),url(img/papel.svg)}
-footer .fgrid h4,footer .tec-real{color:#93A2BD}
 </style>
 </head>
 <body>
@@ -4043,7 +3809,7 @@ footer .fgrid h4,footer .tec-real{color:#93A2BD}
 </div>
 
 
-<section class="paper logos" id="network" data-bg="#070B14" data-acc="#1D6AFF"><i class="via" aria-hidden="true"></i>
+<section class="paper logos" id="network" data-bg="#FFFFFF" data-acc="#1D6AFF"><i class="via" aria-hidden="true"></i>
   <div class="wrap">
     <div class="k sk rv"><i class="sk-n">01</i>Network</div>
     <h2 class="rv lane-k">Compatible with</h2>
@@ -4059,7 +3825,7 @@ footer .fgrid h4,footer .tec-real{color:#93A2BD}
 
 
 
-<section class="press paper" id="press" data-bg="#05080F" data-acc="#1D6AFF"><i class="via" aria-hidden="true"></i>
+<section class="press paper" id="press" data-bg="#FFFFFF" data-acc="#1D6AFF"><i class="via" aria-hidden="true"></i>
   <div class="wrap press-head">
     <div class="k sk rv"><i class="sk-n">02</i>In the press</div>
     <h2 class="press-h">What they are writing about the chain.</h2>
@@ -4133,7 +3899,7 @@ footer .fgrid h4,footer .tec-real{color:#93A2BD}
 <section class="chroma" data-bg="#000000" data-acc="#3E86FF"><i class="emb" aria-hidden="true" style="--emb:#000000"></i><canvas id="chroma"></canvas></section>
 
 
-<section class="paper say" id="thesis" data-bg="#060A12" data-acc="#2E60FF"><i class="via" aria-hidden="true"></i>
+<section class="paper say" id="thesis" data-bg="#FFFFFF" data-acc="#2E60FF"><i class="via" aria-hidden="true"></i>
   <div class="wrap">
     <div class="k sk rv"><i class="sk-n">03</i>The thesis</div>
     <p class="rv">When value moves, the rules have to move with it. <em>On Nereum the rules travel with the asset and hold at machine speed &mdash; for desks and contracts alike.</em></p>
@@ -4154,7 +3920,7 @@ footer .fgrid h4,footer .tec-real{color:#93A2BD}
 </section>
 
 
-<section class="paper2 pad" id="solutions" data-bg="#080C16" data-acc="#3B57FF"><i class="via" aria-hidden="true"></i>
+<section class="paper2 pad" id="solutions" data-bg="#F1F2F4" data-acc="#3B57FF"><i class="via" aria-hidden="true"></i>
   <div class="wrap">
     <div class="k sk rv"><i class="sk-n">04</i>Guarantees</div>
     <h2 class="sec-h rows-h rv">Four guarantees, written into the protocol.</h2>
@@ -4190,7 +3956,7 @@ footer .fgrid h4,footer .tec-real{color:#93A2BD}
 </section>
 
 
-<section class="secure" id="security" data-bg="#05080F" data-acc="#2A5BFF"><i class="via" aria-hidden="true"></i>
+<section class="secure" id="security" data-bg="#FFFFFF" data-acc="#2A5BFF"><i class="via" aria-hidden="true"></i>
  <div class="sec-stage">
   <div class="wrap">
     <div class="sec-head">
@@ -4243,13 +4009,13 @@ footer .fgrid h4,footer .tec-real{color:#93A2BD}
     </div>
   </div>
  </div>
-  <span class="hold" data-bg="#05080F" data-acc="#2A5BFF"></span>
+  <span class="hold" data-bg="#FFFFFF" data-acc="#2A5BFF"></span>
 </section>
 
 
 
 
-<section class="sale" id="presale" data-bg="#070B15" data-acc="#2A5BFF"><i class="via" aria-hidden="true"></i>
+<section class="sale" id="presale" data-bg="#FBFCFD" data-acc="#2A5BFF"><i class="via" aria-hidden="true"></i>
   <div class="sale-field" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
   <div class="wrap">
     <div class="sale-top rv">
@@ -4331,11 +4097,11 @@ footer .fgrid h4,footer .tec-real{color:#93A2BD}
 
     </div>
   </div>
-  <span class="hold" data-bg="#070B15" data-acc="#2A5BFF"></span>
+  <span class="hold" data-bg="#FBFCFD" data-acc="#2A5BFF"></span>
 </section>
 
 
-<section class="tkp" id="token" data-bg="#04070D" data-acc="#2A5BFF"><i class="via" aria-hidden="true"></i>
+<section class="tkp" id="token" data-bg="#F5F5F7" data-acc="#2A5BFF"><i class="via" aria-hidden="true"></i>
   <div class="wrap tkp-head">
     <div class="k sk rv"><i class="sk-n">08</i>Token</div>
     <h2 class="tkp-h">One hundred and sixty million NRM, fixed at genesis.</h2>
@@ -4585,7 +4351,7 @@ footer .fgrid h4,footer .tec-real{color:#93A2BD}
 
 
 
-<section class="team" id="team" data-bg="#06090F" data-acc="#2A5BFF">
+<section class="team" id="team" data-bg="#FBFCFD" data-acc="#2A5BFF">
   <div class="wrap">
     <div class="tm-head rv">
       <div class="tm-k"><i></i>The team</div>
@@ -4634,7 +4400,7 @@ footer .fgrid h4,footer .tec-real{color:#93A2BD}
   </div>
 </section>
 
-<section class="join" id="join" data-bg="#060911" data-acc="#2A5BFF"><i class="via" aria-hidden="true"></i>
+<section class="join" id="join" data-bg="#FBFCFD" data-acc="#2A5BFF"><i class="via" aria-hidden="true"></i>
   <div class="wrap">
     <div class="join-head rv">
       <div class="k sk rv"><i class="sk-n">11</i>In the open</div>
@@ -4673,7 +4439,7 @@ footer .fgrid h4,footer .tec-real{color:#93A2BD}
 
 </main>
 
-<footer data-bg="#04060C" data-acc="#2A5BFF">
+<footer data-bg="#FBFCFD" data-acc="#2A5BFF">
   <div class="ffield" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
   <div class="wrap">
     <div class="ftop">

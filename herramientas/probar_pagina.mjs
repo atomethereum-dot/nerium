@@ -40,13 +40,8 @@ di(papel.every(p => /feTurbulence/.test(p.img)),
 /* El paso 17 cambia el tapiz por las placas: es el mismo motivo con otra
    composicion, asi que se comprueba el que la pagina esta usando DE VERDAD.
    Fijar aqui «tapiz.svg» seria medir un archivo que ya nadie pinta. */
-/* Y el paso 35 cambia el dibujo de dia por el de noche: son las mismas placas,
-   la misma semilla y la misma composicion; lo unico distinto son las tres
-   luces, que sobre negro no pueden ir en blanco al 96 %. Se mira cual esta
-   puesto de verdad, que fijar un nombre aqui es medir un archivo muerto. */
-const tap = /noche\.svg/.test(papel[0].img) ? 'noche.svg'
-          : /papel\.svg/.test(papel[0].img) ? 'papel.svg' : 'tapiz.svg';
-const placas = tap !== 'tapiz.svg';   // el dibujo en diagonal, de dia o de noche
+const placas = /papel\.svg/.test(papel[0].img);
+const tap = placas ? 'papel.svg' : 'tapiz.svg';
 di(papel.every(p => p.img.includes(tap)),
    'y el campo de bloques, que es el fondo de verdad (' + tap + ')');
 const svg = fs.readFileSync(path.join(RAIZ, 'img', tap), 'utf8');
