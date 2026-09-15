@@ -152,8 +152,50 @@ SEIS_NUEVO = """.hero-in h1,.hero-in .hero-act{position:relative;z-index:2}
     rgba(47,107,255,.34),rgba(47,107,255,.10) 42%,transparent 72%)}"""
 
 # ── 7 · el suelo claro deja de ser papel ─────────────────────────────────────
+SUELO = '#E4EAF4'
+
 SIETE_VIEJO = """--suelo:#F5F8FC"""
-SIETE_NUEVO = """--suelo:#E4EAF4"""
+SIETE_NUEVO = """--suelo:""" + SUELO
+
+# ── 7b · y el suelo es UNO, no siete ─────────────────────────────────────────
+# Bajar «--suelo» no bastaba, y se veia: aparecia una franja mas clara entre
+# secciones. La causa es que las secciones claras no pintan solas sobre el
+# vacio. Detras hay un lienzo fijo —el «#wash»— cuyo color sale del «data-bg»
+# de cada banda, y ademas la pagina ENCOGE cada seccion al entrar, un 5 % con
+# el scroll. Encogida, la seccion deja de tapar su caja: se ve el lienzo por
+# los cuatro lados. Mientras suelo y lienzo eran casi el mismo blanco no se
+# notaba; con el suelo a #E4EAF4 y el lienzo en #F5F5F7 quedaban diecisiete
+# puntos de diferencia, que es una franja.
+#
+# Y con el lienzo iban seis colores mas escritos a mano para el suelo viejo: el
+# pie, el sosten de la portada, la escena del fundido —incluido el relleno del
+# lienzo en JS— y las lamas que barren de negro a claro. Todos al mismo sitio.
+PIE1_VIEJO = """footer{position:relative;overflow:hidden;background:#FBFCFD;color:#0B0D12"""
+PIE1_NUEVO = """footer{position:relative;overflow:hidden;background:var(--suelo);color:#0B0D12"""
+PIE2_VIEJO = """footer{background:#FBFCFD;border-top"""
+PIE2_NUEVO = """footer{background:var(--suelo);border-top"""
+SOSTEN_VIEJO = """.hero-hold{position:relative;height:calc(100lvh + 42dvh);z-index:0;background:#FBFCFD}"""
+SOSTEN_NUEVO = """.hero-hold{position:relative;height:calc(100lvh + 42dvh);z-index:0;background:var(--suelo)}"""
+FUNDIDO_VIEJO = """.xf-stage{position:sticky;top:0;height:100dvh;overflow:hidden;background:#F5F5F7}"""
+FUNDIDO_NUEVO = """.xf-stage{position:sticky;top:0;height:100dvh;overflow:hidden;background:var(--suelo)}"""
+MALLA_VIEJO = """.sh-mesh{position:absolute;inset:0;opacity:0;background:#FBFCFD;overflow:hidden"""
+MALLA_NUEVO = """.sh-mesh{position:absolute;inset:0;opacity:0;background:var(--suelo);overflow:hidden"""
+LAMAS_VIEJO = """--e:0;flex:1 1 0;background:#FBFCFD;transform:scaleX"""
+LAMAS_NUEVO = """--e:0;flex:1 1 0;background:var(--suelo);transform:scaleX"""
+# El lienzo del fundido se rellena desde JS, donde no hay variables de CSS.
+# El literal se escribe desde el mismo sitio que el resto, asi que no se
+# pueden separar.
+LIENZO_VIEJO = """ctx.fillStyle='#F5F5F7';ctx.fillRect(0,0,W,H);"""
+LIENZO_NUEVO = """ctx.fillStyle='""" + SUELO + """';ctx.fillRect(0,0,W,H);"""
+EQUIPO_VIEJO = """.team{position:relative;background:#FBFCFD;color:var(--ink)"""
+EQUIPO_NUEVO = """.team{position:relative;background:var(--suelo);color:var(--ink)"""
+# La otra escena de fundido —la que vuelve de negro a claro— lleva su papel
+# escrito como tres numeros dentro del JS, que es donde menos se busca. Se veia
+# en la juntura con «In the open»: la escena acababa casi en blanco y la
+# seccion empezaba en acero, con su escalon.
+PAPEL_VIEJO = """  const PAPER=[251,252,253];"""
+PAPEL_NUEVO = """  const PAPER=[""" + ','.join(
+    str(int(SUELO[i:i + 2], 16)) for i in (1, 3, 5)) + """];"""
 
 # ── 8 · el pie de los proyectos, legible ─────────────────────────────────────
 # «Drag or scroll →» iba a blanco al 42 %, que sobre negro son 3,8:1: por
@@ -192,9 +234,23 @@ CAMBIOS = [
     ('el segundo boton, de contorno', CINCO_VIEJO, CINCO_NUEVO),
     ('el horizonte de la portada', SEIS_VIEJO, SEIS_NUEVO),
     ('el suelo, de acero', SIETE_VIEJO, SIETE_NUEVO),
+    ('el pie, al mismo suelo', PIE1_VIEJO, PIE1_NUEVO),
+    ('el pie, la segunda regla', PIE2_VIEJO, PIE2_NUEVO),
+    ('el sosten de la portada', SOSTEN_VIEJO, SOSTEN_NUEVO),
+    ('la escena del fundido', FUNDIDO_VIEJO, FUNDIDO_NUEVO),
+    ('la malla del fundido', MALLA_VIEJO, MALLA_NUEVO),
+    ('las lamas del fundido', LAMAS_VIEJO, LAMAS_NUEVO),
+    ('el lienzo del fundido', LIENZO_VIEJO, LIENZO_NUEVO),
+    ('el equipo, al mismo suelo', EQUIPO_VIEJO, EQUIPO_NUEVO),
+    ('el papel de la vuelta', PAPEL_VIEJO, PAPEL_NUEVO),
     ('el pie de los proyectos, legible', OCHO_VIEJO, OCHO_NUEVO),
     ('la raya del epigrafe', NUEVE_VIEJO, NUEVE_NUEVO),
 ]
+
+
+# Las bandas claras: el «data-bg» es lo que le dice al lienzo fijo de que
+# color ponerse, asi que tiene que ser el suelo y no el blanco de antes.
+CLARAS_BG = ('#FFFFFF', '#FBFCFD', '#F5F5F7', '#F1F2F4', '#F5F8FC')
 
 
 def aplicar(html):
@@ -204,6 +260,9 @@ def aplicar(html):
             continue
         assert html.count(viejo) == 1, 'no esta, o esta repetido: ' + nombre
         html = html.replace(viejo, nuevo, 1)
+    for viejo in CLARAS_BG:
+        html = html.replace('data-bg="%s"' % viejo, 'data-bg="%s"' % SUELO)
+    assert 'data-bg="%s"' % SUELO in html, 'ninguna banda clara ha quedado al suelo'
     return traducir(html)
 
 

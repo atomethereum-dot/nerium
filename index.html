@@ -207,7 +207,7 @@ main>section.dark,main>section.stack{background:var(--wash)}
     rgba(96,156,255,.85),rgba(48,110,255,.44) 36%,rgba(18,58,190,.12) 62%,rgba(0,0,0,0) 82%);
   will-change:opacity}
 .wipe{position:absolute;inset:0;z-index:5;pointer-events:none;overflow:hidden}
-.sh-mesh{position:absolute;inset:0;opacity:0;background:#FBFCFD;overflow:hidden;will-change:opacity}
+.sh-mesh{position:absolute;inset:0;opacity:0;background:var(--suelo);overflow:hidden;will-change:opacity}
 .sh-mesh i{position:absolute;border-radius:50%;will-change:transform;
   animation:meshDrift 26s ease-in-out infinite alternate}
 .sh-mesh i:nth-child(2){animation-duration:31s;animation-delay:-7s}
@@ -228,7 +228,7 @@ main>section.dark,main>section.stack{background:var(--wash)}
 .sh-mesh i:nth-child(4){right:8%;bottom:-16%;width:52%;height:62%;
   background:radial-gradient(circle,rgba(168,196,255,.85) 0%,rgba(168,196,255,.42) 34%,rgba(168,196,255,.12) 58%,rgba(168,196,255,0) 78%)}
 .slats{position:absolute;inset:0;display:flex}
-.slats i{--e:0;flex:1 1 0;background:#FBFCFD;transform:scaleX(calc(var(--e) * 1.02));
+.slats i{--e:0;flex:1 1 0;background:var(--suelo);transform:scaleX(calc(var(--e) * 1.02));
   transform-origin:var(--o,left);will-change:transform}
 .sh-edges{position:absolute;inset:0;opacity:0;pointer-events:none;will-change:opacity;
   background:repeating-linear-gradient(90deg,
@@ -934,7 +934,7 @@ body.light .srail{color:#0B0D12}
 }
 .xf{position:relative;height:158vh}
 @media(max-width:899px){.xf{height:136vh}}
-.xf-stage{position:sticky;top:0;height:100dvh;overflow:hidden;background:#F5F5F7}
+.xf-stage{position:sticky;top:0;height:100dvh;overflow:hidden;background:var(--suelo)}
 .xf-cv{position:absolute;inset:0;width:100%;height:100%;display:block}
 .xf-word{position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);z-index:2;
   text-align:center;pointer-events:none;font-family:var(--m);font-size:clamp(10px,1.1vw,12px);
@@ -997,7 +997,7 @@ body.light .srail{color:#0B0D12}
   font-family:var(--m);font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;
   color:rgba(190,205,240,.34)}
 .join-rule i{flex:1;height:1px;background:rgba(190,205,240,.14)}
-footer{position:relative;overflow:hidden;background:#FBFCFD;color:#0B0D12}
+footer{position:relative;overflow:hidden;background:var(--suelo);color:#0B0D12}
 .ffield{position:absolute;inset:0;z-index:0;pointer-events:none;overflow:hidden}
 .ffield i{position:absolute;border-radius:50%;will-change:transform;
   animation:saleDrift 30s ease-in-out infinite alternate}
@@ -1189,7 +1189,7 @@ body.sm{overscroll-behavior-y:none}
 .rv.sp{opacity:1;transform:none}
 @media(prefers-reduced-motion:reduce){.ws>.wi{transform:none}}
 main>section{position:relative;z-index:1}
-.hero-hold{position:relative;height:calc(100lvh + 42dvh);z-index:0;background:#FBFCFD}
+.hero-hold{position:relative;height:calc(100lvh + 42dvh);z-index:0;background:var(--suelo)}
 @media(max-width:900px){
   .hero-hold{height:calc(100lvh + 125dvh)}
 }
@@ -1319,7 +1319,7 @@ section{position:relative;z-index:1}
 .card .play{position:absolute;right:14px;bottom:14px;z-index:1;display:inline-flex;align-items:center;gap:6px;
   padding:5px 9px;border-radius:4px;background:rgba(0,0,0,.6);border:1px solid var(--line);
   font-family:var(--m);font-size:10px}
-footer{background:#FBFCFD;border-top:1px solid rgba(11,13,18,.12);padding:clamp(46px,5vw,72px) 0 26px;
+footer{background:var(--suelo);border-top:1px solid rgba(11,13,18,.12);padding:clamp(46px,5vw,72px) 0 26px;
   font-family:var(--m);font-size:11.5px}
 .fgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:26px 18px}
 @media(min-width:1430px){.fgrid{grid-template-columns:repeat(6,1fr)}}
@@ -1648,7 +1648,7 @@ body.rtl .hud-band{right:auto;left:16px}
 /* ══ el equipo ══
    Mismo lenguaje que el resto: papel, filete, mono para lo pequeño. Las
    fichas siguen la retícula de las tarjetas de seguridad. */
-.team{position:relative;background:#FBFCFD;color:var(--ink);
+.team{position:relative;background:var(--suelo);color:var(--ink);
   padding:var(--s6) 0 clamp(84px,9vw,140px)}
 .tm-head{max-width:52ch;margin-bottom:clamp(30px,4vw,54px)}
 .tm-k{display:flex;align-items:center;gap:10px;font-family:var(--m);font-size:10.5px;
@@ -3809,7 +3809,7 @@ footer .fgrid h4,footer .tec-real{color:#5B657A}
 </div>
 
 
-<section class="paper logos" id="network" data-bg="#FFFFFF" data-acc="#1D6AFF"><i class="via" aria-hidden="true"></i>
+<section class="paper logos" id="network" data-bg="#E4EAF4" data-acc="#1D6AFF"><i class="via" aria-hidden="true"></i>
   <div class="wrap">
     <div class="k sk rv"><i class="sk-n">01</i>Network</div>
     <h2 class="rv lane-k">Compatible with</h2>
@@ -3825,7 +3825,7 @@ footer .fgrid h4,footer .tec-real{color:#5B657A}
 
 
 
-<section class="press paper" id="press" data-bg="#FFFFFF" data-acc="#1D6AFF"><i class="via" aria-hidden="true"></i>
+<section class="press paper" id="press" data-bg="#E4EAF4" data-acc="#1D6AFF"><i class="via" aria-hidden="true"></i>
   <div class="wrap press-head">
     <div class="k sk rv"><i class="sk-n">02</i>In the press</div>
     <h2 class="press-h">What they are writing about the chain.</h2>
@@ -3899,7 +3899,7 @@ footer .fgrid h4,footer .tec-real{color:#5B657A}
 <section class="chroma" data-bg="#000000" data-acc="#3E86FF"><i class="emb" aria-hidden="true" style="--emb:#000000"></i><canvas id="chroma"></canvas></section>
 
 
-<section class="paper say" id="thesis" data-bg="#FFFFFF" data-acc="#2E60FF"><i class="via" aria-hidden="true"></i>
+<section class="paper say" id="thesis" data-bg="#E4EAF4" data-acc="#2E60FF"><i class="via" aria-hidden="true"></i>
   <div class="wrap">
     <div class="k sk rv"><i class="sk-n">03</i>The thesis</div>
     <p class="rv">When value moves, the rules have to move with it. <em>On Nereum the rules travel with the asset and hold at machine speed &mdash; for desks and contracts alike.</em></p>
@@ -3920,7 +3920,7 @@ footer .fgrid h4,footer .tec-real{color:#5B657A}
 </section>
 
 
-<section class="paper2 pad" id="solutions" data-bg="#F1F2F4" data-acc="#3B57FF"><i class="via" aria-hidden="true"></i>
+<section class="paper2 pad" id="solutions" data-bg="#E4EAF4" data-acc="#3B57FF"><i class="via" aria-hidden="true"></i>
   <div class="wrap">
     <div class="k sk rv"><i class="sk-n">04</i>Guarantees</div>
     <h2 class="sec-h rows-h rv">Four guarantees, written into the protocol.</h2>
@@ -3956,7 +3956,7 @@ footer .fgrid h4,footer .tec-real{color:#5B657A}
 </section>
 
 
-<section class="secure" id="security" data-bg="#FFFFFF" data-acc="#2A5BFF"><i class="via" aria-hidden="true"></i>
+<section class="secure" id="security" data-bg="#E4EAF4" data-acc="#2A5BFF"><i class="via" aria-hidden="true"></i>
  <div class="sec-stage">
   <div class="wrap">
     <div class="sec-head">
@@ -4009,13 +4009,13 @@ footer .fgrid h4,footer .tec-real{color:#5B657A}
     </div>
   </div>
  </div>
-  <span class="hold" data-bg="#FFFFFF" data-acc="#2A5BFF"></span>
+  <span class="hold" data-bg="#E4EAF4" data-acc="#2A5BFF"></span>
 </section>
 
 
 
 
-<section class="sale" id="presale" data-bg="#FBFCFD" data-acc="#2A5BFF"><i class="via" aria-hidden="true"></i>
+<section class="sale" id="presale" data-bg="#E4EAF4" data-acc="#2A5BFF"><i class="via" aria-hidden="true"></i>
   <div class="sale-field" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
   <div class="wrap">
     <div class="sale-top rv">
@@ -4097,11 +4097,11 @@ footer .fgrid h4,footer .tec-real{color:#5B657A}
 
     </div>
   </div>
-  <span class="hold" data-bg="#FBFCFD" data-acc="#2A5BFF"></span>
+  <span class="hold" data-bg="#E4EAF4" data-acc="#2A5BFF"></span>
 </section>
 
 
-<section class="tkp" id="token" data-bg="#F5F5F7" data-acc="#2A5BFF"><i class="via" aria-hidden="true"></i>
+<section class="tkp" id="token" data-bg="#E4EAF4" data-acc="#2A5BFF"><i class="via" aria-hidden="true"></i>
   <div class="wrap tkp-head">
     <div class="k sk rv"><i class="sk-n">08</i>Token</div>
     <h2 class="tkp-h">One hundred and sixty million NRM, fixed at genesis.</h2>
@@ -4351,7 +4351,7 @@ footer .fgrid h4,footer .tec-real{color:#5B657A}
 
 
 
-<section class="team" id="team" data-bg="#FBFCFD" data-acc="#2A5BFF">
+<section class="team" id="team" data-bg="#E4EAF4" data-acc="#2A5BFF">
   <div class="wrap">
     <div class="tm-head rv">
       <div class="tm-k"><i></i>The team</div>
@@ -4400,7 +4400,7 @@ footer .fgrid h4,footer .tec-real{color:#5B657A}
   </div>
 </section>
 
-<section class="join" id="join" data-bg="#FBFCFD" data-acc="#2A5BFF"><i class="via" aria-hidden="true"></i>
+<section class="join" id="join" data-bg="#E4EAF4" data-acc="#2A5BFF"><i class="via" aria-hidden="true"></i>
   <div class="wrap">
     <div class="join-head rv">
       <div class="k sk rv"><i class="sk-n">11</i>In the open</div>
@@ -4439,7 +4439,7 @@ footer .fgrid h4,footer .tec-real{color:#5B657A}
 
 </main>
 
-<footer data-bg="#FBFCFD" data-acc="#2A5BFF">
+<footer data-bg="#E4EAF4" data-acc="#2A5BFF">
   <div class="ffield" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
   <div class="wrap">
     <div class="ftop">
@@ -6564,7 +6564,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
     ctx.globalCompositeOperation='source-over';
   }
   function draw(p){
-    ctx.fillStyle='#F5F5F7';ctx.fillRect(0,0,W,H);
+    ctx.fillStyle='#E4EAF4';ctx.fillRect(0,0,W,H);
     const entrada=clm((0.34-p)/0.26);
     if(esq)esq.style.opacity=entrada.toFixed(3);
     const n=st.n;
@@ -6612,7 +6612,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
   const eOut=t=>1-Math.pow(1-t,3);
   const eIn=t=>t*t*t;
   const dTop=nn=>{let y=0;while(nn){y+=nn.offsetTop;nn=nn.offsetParent}return y};
-  const PAPER=[251,252,253];
+  const PAPER=[228,234,244];
   let W=0,H=0,U=0,cols=0,rows=0,cells=[],last=-1;
   function build(){
     const d=Math.min(devicePixelRatio||1,2);

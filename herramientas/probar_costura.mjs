@@ -30,6 +30,7 @@ const srv = http.createServer((q, r) => {
   r.writeHead(200, {'content-type': TIPO[path.extname(p)] || 'application/octet-stream'});
   r.end(fs.readFileSync(p));
 }).listen(9155);
+const PUERTO = 9155;
 const nav = await chromium.launch({ executablePath:'/opt/pw-browsers/chromium-1194/chrome-linux/chrome', args:['--no-sandbox'] });
 let ok = 0, mal = 0;
 const di = (b, t) => { if (b) { ok++; console.log('  ok  ' + t) } else { mal++; console.log('  MAL ' + t) } };
@@ -106,6 +107,49 @@ for (const cl of BANDAS) {
      cl.padEnd(7) + ' · el embudo va del color de la escena: escena ' + hex(medio) +
      ' (' + cEsc.toFixed(2) + ') vs embudo ' + hex(comp) + ' (' + cEmb.toFixed(2) + ')' +
      ', distancia ' + Math.abs(cEsc - cEmb).toFixed(2));
+}
+
+/* ── y el suelo, uno solo ────────────────────────────────────────────────────
+   Una seccion no pinta sola sobre el vacio: detras hay un lienzo fijo —el
+   «#wash»— que se tine del «data-bg» de la banda. Y la pagina ENCOGE cada
+   seccion al entrar, un 5 % con el scroll, asi que encogida deja de tapar su
+   caja y se ve el lienzo por los cuatro lados.
+
+   Mientras los dos colores coincidan no se nota nada. En cuanto se separan
+   —paso a cambiar «--suelo» y dejar los «data-bg» viejos— aparece una franja
+   mas clara entre secciones, que es lo que se veia. Asi que se comprueba lo
+   unico que hace falta: que cada banda que pinta un fondo opaco lo pinte del
+   MISMO color que anuncia en su «data-bg». */
+{
+  const ctx2 = await nav.newContext({ viewport:{ width:1440, height:900 } });
+  const pg2 = await ctx2.newPage();
+  await pg2.goto('http://127.0.0.1:' + PUERTO + '/', { waitUntil:'load' });
+  await pg2.waitForTimeout(1200);
+  const bandas = await pg2.evaluate(() => {
+    const lee = t => { const m = String(t).match(/\d+/g); return m ? m.slice(0,3).map(Number) : null };
+    const lienzo = getComputedStyle(document.getElementById('wash')).backgroundColor;
+    return [...document.querySelectorAll('[data-bg]')].map(e => {
+      if (!e.offsetHeight && !e.offsetParent) return null;      // las ocultas no pintan
+      const cs = getComputedStyle(e);
+      if (/rgba\(0, 0, 0, 0\)|transparent/.test(cs.backgroundColor)) return null;  // deja ver el lienzo
+      /* Y las que pintan «var(--wash)» —la portada, la pila, el pie— tampoco:
+         esas van SIEMPRE del color del lienzo por construccion, asi que
+         medirlas es medir el lienzo, y el lienzo tarda en llegar a su color. */
+      if (cs.backgroundColor === lienzo) return null;
+      return { id:e.id || e.className.split(' ')[0] || e.tagName.toLowerCase(),
+               dice:e.dataset.bg, pinta:cs.backgroundColor,
+               d:(() => { const a = lee(cs.backgroundColor);
+                          const h = e.dataset.bg.replace('#','');
+                          const b = [0,2,4].map(i => parseInt(h.slice(i,i+2),16));
+                          return a ? Math.max(...a.map((v,i) => Math.abs(v-b[i]))) : -1 })() };
+    }).filter(Boolean);
+  });
+  const fuera = bandas.filter(b => b.d > 2);
+  di(fuera.length === 0,
+     'las ' + bandas.length + ' bandas que pintan fondo lo pintan del color que anuncian' +
+     (fuera.length ? ' — fuera: ' + fuera.map(b => b.id + ' dice ' + b.dice +
+        ' y pinta ' + b.pinta + ' (' + b.d + ')').join(', ') : ''));
+  await ctx2.close();
 }
 
 console.log('\n' + ok + '/' + (ok + mal) + ' correctas');
