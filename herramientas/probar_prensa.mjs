@@ -60,7 +60,7 @@ const col = await pg.evaluate(() => [...document.querySelectorAll('.pcd')].map(c
   const v = n => s.getPropertyValue(n).trim();
   return { ac: v('--ac'), w1: v('--w1'), w2: v('--w2'),
            tag: getComputedStyle(c.querySelector('.pcd-tag')).color,
-           nereum: !!c.querySelector('.cb') };
+           palabra: c.querySelector('.cb') ? getComputedStyle(c.querySelector('.cb')).color : null };
 }));
 const rgb = h => [1,3,5].map(i => parseInt(h.slice(i, i+2), 16));
 const lum = h => { const [r,g,b] = rgb(h); return (0.2126*r + 0.7152*g + 0.0722*b) / 255; };
@@ -72,13 +72,8 @@ di(col.every(c => lum(c.w1) < 0.42),
 di(col.every(c => sat(c.w1) > 0.30 || lum(c.w1) < 0.10),
    'con color de verdad, no gris: saturacion ' + col.map(c => sat(c.w1).toFixed(2)).join(' '));
 di(col.every(c => lum(c.w2) <= lum(c.w1) + 0.02), 'y el degradado va de claro a oscuro');
-/* El logotipo de Nereum sale de la figura: la marca del medio la ocupa entera
-   y dos marcas en el mismo encuadre se estorban. Ojo con como se comprueba
-   esto: el chequeo anterior era un filter().every() sobre las tarjetas que
-   TUVIERAN .cb, asi que al quitarlo se quedo midiendo la lista vacia y seguia
-   dando verde. Aqui se afirma la ausencia, que es lo que se quiere. */
-di(col.every(c => !c.nereum),
-   'y en la figura solo hay una marca, la del medio');
+di(col.filter(c => c.palabra).every(c => c.palabra === 'rgb(255, 255, 255)'),
+   'sobre ese color, la palabra Nereum va en blanco');
 // el acento tiene que parecerse al logotipo del medio, no ser uno cualquiera
 const CERCA = { '#0A11CE': [8,14,190], '#1FA800': [51,255,0], '#DC0206': [244,1,3] };
 const tono = c => { const [r,g,b] = c, M = Math.max(...c), m = Math.min(...c), D = M-m;
@@ -114,9 +109,6 @@ const marca = await pg.evaluate(async () => {
     const s = getComputedStyle(i.closest('.cb-tile'));
     out.push({ alt: i.alt,
       px: Math.round(i.getBoundingClientRect().width),
-      fuente: i.currentSrc || i.src,
-      parte: Math.round(100 * i.getBoundingClientRect().width /
-                        i.closest('.pcd-art').getBoundingClientRect().width),
       origen: l.naturalWidth,
       vacio: (() => { let v = 0; for (let k = 3; k < d.length; k += 4) if (d[k] === 0) v++;
                       return Math.round(100 * v / (cv.width * cv.height)); })(),
@@ -135,16 +127,12 @@ di(marca.every(l => l.plato === 'rgba(0, 0, 0, 0)' || l.plato === 'transparent')
    'y la baldosa ya no pinta plato debajo (' + marca[0].plato + ')');
 di(marca.every(l => l.sombraCaja === 'none'),
    'ni le pone caja con sombra alrededor');
-/* Y no se mide en pixeles, porque ya no los tiene: la marca ocupa la figura
-   entera —en un ordenador retina pide 870 pixeles de pantalla, y el JPEG de
-   origen tenia 229— asi que va en trazo. De ahi que aguante cualquier tamano. */
-di(marca.every(l => /\.svg$/.test(l.fuente)),
-   'la marca va en trazo, no en pixeles (' +
-   marca.map(l => l.fuente.split('/').pop()).join(' ') + ')');
-/* Y ocupa la figura, que es lo que se pedia: de acompanante ocupaba el 24% del
-   ancho, ahora entre el 34% y el 62% segun lo ancha que sea cada una. */
-di(marca.every(l => l.parte >= 30),
-   'y ocupa la figura: el ' + marca.map(l => l.parte + '%').join('/') + ' del ancho');
+/* Contra 3x, no contra el 1x de esta bateria: quien mira la pagina desde un
+   telefono tiene tres pixeles de pantalla por cada uno de CSS, y ahi es donde
+   un archivo corto se nota. Los JPEG cuadrados de antes no llegaban. */
+di(marca.every(l => l.origen >= l.px * 3),
+   'y aguanta 3x sin estirarse: pide ' + marca.map(l => l.px * 3).join('/') +
+   ', tiene ' + marca.map(l => l.origen).join('/'));
 
 // el hueco entre la figura y el texto: la tarjeta tiene que tener un dentro
 const sep = await pg.evaluate(() => {

@@ -12,39 +12,29 @@ Y el cuadro se comia el tamano. La palabra BENZINGA ocupa 229x32 de los 260x260
 del archivo: el 11% de la superficie. Con la baldosa a 92 px la palabra se
 dibujaba con 11 px de alto. Once. De ahi que se deshiciera.
 
-Aqui se separa la marca del fondo y se guarda en SVG, para que ocupe la figura
-entera de su tarjeta sobre su propio color. No hay baldosa, no hay cuadro, no
-hay saltos —y al ser trazo y no pixeles, da igual lo grande que se pinte.
+Aqui se separa la marca del fondo y se guarda en PNG con transparencia, para
+que se pose directamente sobre el color de su tarjeta, junto al logotipo de
+Nereum y con su misma altura. No hay baldosa, no hay cuadro, no hay saltos.
 
   la mascara   cada fondo es plano y separable, asi que no hace falta recortar
                a mano: el canal minimo de RGB distingue el blanco de cualquier
                color saturado (blanco 255, azul Benzinga 8, rojo Morningstar 1),
                y para MarketWatch basta el canal verde sobre el negro.
-  la tinta     el color se fija plano, el de la propia marca. No se conserva el
-               del original: sus pixeles de borde llevan mezclado el fondo
-               viejo, y al posarlos sobre otro color se veria la orla.
-  el trazo     y aqui esta el motivo de que sea SVG. La marca ocupa ahora la
-               figura entera: 62% de 468 px en un ordenador retina son 580
-               pixeles de pantalla, y 620 en el telefono. De un archivo de 229
-               px no salen, y estirarlo deja el borde blando —se vio—. Pero una
-               palabra de color plano no es una fotografia: es una silueta, y
-               una silueta si se puede reconstruir. La mascara se sube a 3x, se
-               le aprieta el contraste y se traza con potrace, que devuelve las
-               curvas. A partir de ahi el tamano da igual.
-               No es magia: si el original hubiera perdido un trazo fino, el
-               trazo seguiria sin estar. Un archivo de verdad grande sigue
-               siendo mejor punto de partida.
+  la tinta     el color se fija plano y solo varia la transparencia. Es lo que
+               evita la orla oscura: si se conserva el color original, los
+               pixeles del borde llevan mezclado el fondo viejo y al posarlos
+               sobre otro color se ve el halo.
+  el doble     la mascara se sube a 2x con Lanczos y se le vuelve a apretar el
+               contraste en el medio. No inventa detalle: el borde de una letra
+               es una curva conocida y la semitransparencia dice por donde pasa,
+               asi que reconstruirla sale mejor que dejar que el navegador la
+               interpole. Aun asi NO sustituye a un archivo de verdad grande.
 
 No es un paso de `montar_home.py`: se ejecuta a mano cuando cambia el arte.
-Necesita `potracer`, que es potrace en python puro.
 
-    pip install potracer
     python3 herramientas/prensa_marcas.py
 """
-import io
-
 import numpy as np
-import potrace
 from PIL import Image
 
 RAIZ = '/home/user/nerium/img/'
@@ -77,50 +67,24 @@ def _recortar(m):
     return m[ys.min():ys.max() + 1, xs.min():xs.max() + 1]
 
 
-ESCALA = 3
-
-
-def _escalar(m):
-    """A ESCALA, apretando el contraste para que el borde no quede blando."""
+def _doble(m):
+    """A 2x, apretando el contraste para que el borde no quede blando."""
     g = Image.fromarray((m * 255).astype(np.uint8), 'L')
-    g = g.resize((g.width * ESCALA, g.height * ESCALA), Image.LANCZOS)
+    g = g.resize((g.width * 2, g.height * 2), Image.LANCZOS)
     x = np.asarray(g).astype(np.float32) / 255.0
     x = np.clip((x - 0.5) * 1.6 + 0.5, 0.0, 1.0)   # smoothstep alrededor del medio
     return x * x * (3.0 - 2.0 * x)
 
 
-def _trazar(m):
-    """Las curvas de la silueta, en el espacio de la propia mascara."""
-    d = []
-    # invertida a proposito: potracer llama a invert() al construir el Bitmap,
-    # asi que pasarle la tinta acaba trazando el fondo. Se veian las letras
-    # recortadas dentro de una caja blanca.
-    for c in potrace.Bitmap(m <= 0.5).trace(turdsize=6, alphamax=1.0,
-                                            opticurve=True, opttolerance=0.2):
-        d.append('M%.1f %.1f' % (c.start_point.x, c.start_point.y))
-        for s in c:
-            if s.is_corner:
-                d.append('L%.1f %.1fL%.1f %.1f'
-                         % (s.c.x, s.c.y, s.end_point.x, s.end_point.y))
-            else:
-                d.append('C%.1f %.1f %.1f %.1f %.1f %.1f'
-                         % (s.c1.x, s.c1.y, s.c2.x, s.c2.y,
-                            s.end_point.x, s.end_point.y))
-        d.append('Z')
-    return ''.join(d)
-
-
 def generar():
     for nombre, (modo, tinta) in MARCAS.items():
-        m = _escalar(_recortar(_mascara(Image.open(RAIZ + nombre + '.jpg'), modo)))
+        m = _doble(_recortar(_mascara(Image.open(RAIZ + nombre + '.jpg'), modo)))
         h, w = m.shape
-        # evenodd: los contornos interiores —la tripa de la B, de la A, de la O
-        # de Morningstar— vienen como curvas aparte y tienen que quedar huecos
-        svg = ('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 %d %d">'
-               '<path fill="#%02X%02X%02X" fill-rule="evenodd" d="%s"/></svg>'
-               % (w, h, tinta[0], tinta[1], tinta[2], _trazar(m)))
-        io.open(RAIZ + nombre + '.svg', 'w', encoding='utf-8').write(svg)
-        print('  %s.svg  %dx%d  %d bytes' % (nombre, w, h, len(svg)))
+        rgba = np.zeros((h, w, 4), dtype=np.uint8)
+        rgba[..., 0], rgba[..., 1], rgba[..., 2] = tinta
+        rgba[..., 3] = (m * 255).round().astype(np.uint8)
+        Image.fromarray(rgba, 'RGBA').save(RAIZ + nombre + '.png', optimize=True)
+        print('  %s.png  %dx%d' % (nombre, w, h))
 
 
 if __name__ == '__main__':

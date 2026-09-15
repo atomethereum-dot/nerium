@@ -113,28 +113,21 @@ CSS = """
 .cn.br{right:14px;bottom:14px}
 .cn.br::before{right:0;bottom:0}.cn.br::after{right:0;bottom:0}
 
-/* ── la marca del medio ES la imagen de la tarjeta ─────────────────────
-   Iba de acompanante —"Nereum | BENZINGA" en pequeno, en mitad de la figura— y
-   la figura se quedaba en un degradado vacio alrededor de una linea de tres
-   centimetros. Ahora la marca ocupa la figura entera, que es lo que una tarjeta
-   de prensa ensena: de quien es la noticia. El logotipo de Nereum sale de aqui:
-   dos marcas en el mismo encuadre se estorban, y el nombre ya esta en el
-   titular, en la cabecera y en el pie. */
-/* Ancorado a la caja, no colocado dentro de ella: .pcd-art es una rejilla con
-   la columna en automatico, asi que un width:100% aqui se mide contra la pista
-   y la pista se mide contra el contenido —la pescadilla—. Daba 300 de 468. */
-.pcd-plate{position:absolute;inset:0;z-index:1;width:auto;height:auto;background:none;
-  border:0;box-shadow:none;display:flex;align-items:center;justify-content:center;
-  gap:0;padding:0}
+/* ── el emblema, ya sobre color: la palabra va en blanco ── */
+.pcd-plate{position:relative;z-index:1;width:auto;height:auto;background:none;
+  border:0;box-shadow:none;display:flex;align-items:center;
+  gap:clamp(14px,1.8vw,22px);padding:0}
+.cb{display:flex;align-items:center;gap:.34em;color:#fff;
+  font-size:clamp(17px,1.85vw,24px);font-weight:500;letter-spacing:-.04em;
+  text-shadow:0 1px 14px rgba(0,0,0,.28)}
+.cb-rule{width:1px;height:clamp(30px,3.6vw,46px);background:rgba(255,255,255,.34);flex:0 0 auto}
 /* El medio ya no va en baldosa. La baldosa existia porque el logotipo llegaba
    como un JPEG cuadrado con su fondo cocido dentro —Benzinga blanco sobre azul,
    MarketWatch verde sobre negro, Morningstar blanco sobre rojo— y un cuadro de
    color no se puede posar sobre otro color. Salian tres capas: la figura azul,
    la baldosa blanca y dentro otro cuadro azul. Dos saltos de color para ensenar
    ocho letras, y encima el color del cuadro era el mismo de la figura.
-   Ahora la marca viene recortada y en trazo, no en pixeles (prensa_marcas.py):
-   es una silueta de color plano, asi que se puede vectorizar, y por eso aguanta
-   ocupar la figura entera sin quedarse blanda. Se
+   Ahora la marca viene recortada y con transparencia (prensa_marcas.py) y se
    posa directamente sobre el color de su tarjeta, al lado del de Nereum y con
    la misma sombra, para que los dos se lean como una sola linea.
    Y de paso deja de desperdiciar el sitio: la palabra BENZINGA ocupaba 229x32
@@ -146,16 +139,12 @@ CSS = """
    la O de Morningstar baja por debajo, de modo que igualar el ancho las dejaria
    con alturas de letra distintas. Los maximos son los que aguanta cada archivo:
    a dos pixeles de pantalla por pixel de CSS ninguna pide mas de lo que tiene. */
-.cb-tile{display:grid;place-items:center;
-  filter:drop-shadow(0 2px 20px rgba(0,0,0,.30))}
+.cb-tile{flex:0 0 auto;display:grid;place-items:center;
+  filter:drop-shadow(0 1px 14px rgba(0,0,0,.28))}
 .cb-logo{width:100%;height:auto;display:block;border-radius:0}
-/* El ancho va por marca, en porcentaje de la figura, y no es el mismo para las
-   tres: BENZINGA es una banda de 7,2 a 1 y la flecha de MarketWatch casi un
-   cuadrado, asi que igualar el ancho dejaria a una con el triple de superficie
-   que la otra. Se igualan a ojo por mancha, no por medida. */
-.cb-tile.t-benzinga{width:62%}
-.cb-tile.t-marketwatch{width:34%}
-.cb-tile.t-morningstar{width:56%}
+.cb-tile.t-benzinga{width:clamp(84px,9.4vw,112px)}
+.cb-tile.t-marketwatch{width:clamp(52px,5.7vw,68px)}
+.cb-tile.t-morningstar{width:clamp(80px,9vw,108px)}
 
 /* ── el texto: papel, pero teñido de su color, no blanco pelado ── */
 .pcd-body{padding:clamp(16px,1.7vw,22px) clamp(16px,1.7vw,22px) clamp(18px,2vw,26px);
@@ -193,7 +182,7 @@ CSS = """
 
 def _color(m):
     a = m.group(0)
-    med = re.search(r'src="img/(p\d)\.(?:jpg|png|svg)"', a)
+    med = re.search(r'src="img/(p\d)\.(?:jpg|png)"', a)
     col = MEDIOS.get(med.group(1)) if med else CASA
     return a.replace('<article class="pcd">',
                      '<article class="pcd" style="%s">' % _estilo(col), 1)
@@ -209,19 +198,13 @@ _ART = re.compile(r'<article class="pcd">.*?</article>', re.S)
 # montada, donde aquellos dos ya no entran.
 _BALDOSA = re.compile(
     r'<span class="cb-tile[^"]*"><img class="cb-logo"([^>]*?)'
-    r'src="img/(p\d)\.(?:jpg|png|svg)"([^>]*)></span>')
+    r'src="img/(p\d)\.(?:jpg|png)"([^>]*)></span>')
 
 
 def _marca(m):
     ant, med, post = m.group(1), m.group(2), m.group(3)
-    return ('<span class="cb-tile %s"><img class="cb-logo"%ssrc="img/%s.svg"%s></span>'
+    return ('<span class="cb-tile %s"><img class="cb-logo"%ssrc="img/%s.png"%s></span>'
             % (MEDIOS[med]['clase'], ant, med, post))
-
-
-# el logotipo de Nereum y su filete salen de la figura: la marca del medio la
-# ocupa entera y dos marcas en el mismo encuadre se estorban
-_NEREUM = re.compile(
-    r'\s*<span class="cb">.*?</span></span>\s*<span class="cb-rule"></span>', re.S)
 
 
 def _una(m):
@@ -249,9 +232,8 @@ def aplicar(html):
     # para el que ya esta publicado
     if 'style="--ac:' not in html:
         html = _ART.sub(_color, html)
-    # la marca de cada medio: recortada, transparente y a toda la figura
+    # la marca de cada medio: recortada, transparente y con su ancho
     html = _BALDOSA.sub(_marca, html)
-    html = _NEREUM.sub('', html)
     html = html.replace(CANVAS, '')
     if MARCA in html:
         i = html.index(MARCA)
