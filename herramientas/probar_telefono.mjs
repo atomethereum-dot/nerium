@@ -34,9 +34,9 @@ const f = await pg.evaluate(() => {
   return { img:c.backgroundImage, size:c.backgroundSize, rep:c.backgroundRepeat,
            ancho:Math.round(r.width) };
 });
-di(/papel-alto\.svg/.test(f.img),
+di(/(?:papel|noche)-alto\.svg/.test(f.img),
    'el telefono pide el dibujo VERTICAL, no el de escritorio (' +
-   (/papel-alto/.test(f.img) ? 'papel-alto.svg' : /papel\.svg/.test(f.img) ? 'papel.svg — el ancho' : '?') + ')');
+   (/noche-alto/.test(f.img) ? 'noche-alto.svg' : /papel-alto/.test(f.img) ? 'papel-alto.svg' : /(?:papel|noche)\.svg/.test(f.img) ? 'el de escritorio, no el vertical' : '?') + ')');
 di(!/cover/.test(f.size),
    'y no lo estira con «cover», que es lo que lo convertia en un borron (' + f.size + ')');
 di(/repeat-y/.test(f.rep), 'se repite hacia abajo en vez de estirarse: ' + f.rep);
@@ -46,7 +46,8 @@ di(/repeat-y/.test(f.rep), 'se repite hacia abajo en vez de estirarse: ' + f.rep
    ancho, servido al ancho del movil, tiene que caer cerca de 28 px. Por debajo
    de 12 deja de leerse como placa y es ruido; por encima de 90 ya no es fondo,
    es una mancha. */
-const svg = fs.readFileSync(path.join(RAIZ, 'img', 'papel-alto.svg'), 'utf8');
+const vertical = /noche-alto/.test(f.img) ? 'noche-alto.svg' : 'papel-alto.svg';
+const svg = fs.readFileSync(path.join(RAIZ, 'img', vertical), 'utf8');
 const vb = (svg.match(/viewBox="0 0 (\d+) (\d+)"/) || []).slice(1).map(Number);
 const alto = +(svg.match(/<rect [^>]*height="(\d+)"/) || [])[1];
 const enPantalla = alto * (f.ancho / vb[0]);

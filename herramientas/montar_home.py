@@ -39,6 +39,7 @@ todo lo que se hizo aqui y el archivo subido no trae:
  31. que la pagina se pueda navegar en escritorio
  32. las dos tarjetas de proyectos, con la captura de lo que son
  33. la simetria de las once secciones, el menu sin ruido y el suelo de acero
+ 34. las ocho secciones claras y el pie, de noche
 """
 import sys, os
 
@@ -70,6 +71,7 @@ import negro
 import fluidez
 import proyectos
 import oscuro
+import nocturno
 subido, publicado = sys.argv[1], '/home/user/nerium/index.html'
 z = open(subido, encoding='utf-8').read()
 p = open(publicado, encoding='utf-8').read()
@@ -250,6 +252,11 @@ rest = proyectos.aplicar(rest)
 # ── 33 · la simetria, la limpieza y el acero ──
 rest = oscuro.aplicar(rest)
 
+# ── 34 · la mitad clara, de noche ──
+# Despues de oscuro, que arregla la simetria sobre el diseño claro: lo que
+# recorre nocturno es la hoja ya terminada.
+rest = nocturno.aplicar(rest)
+
 # ── 31 · que se pueda navegar ──
 # Va al final a proposito: toca codigo que ponen pasos anteriores, asi que
 # tiene que llegar cuando ya esta todo puesto.
@@ -285,4 +292,5 @@ print("montado:", len(salida), "bytes ·", salida.count('var(--hud-b)'), "usos d
                   if 'function lavado(c){' in salida else 'CON ATASCO', "·",
       "proyectos:", str(salida.count('class="bcd-shot"')) + ' capturas', "·",
       "simetria:", 'las once al margen' if '.stk-copy{text-align:start' in salida
-                   else 'LA PILA CENTRADA')
+                   else 'LA PILA CENTRADA', "·",
+      "noche:", 'la pagina entera' if nocturno.MARCA in salida else 'MITAD CLARA')
