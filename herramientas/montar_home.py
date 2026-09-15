@@ -40,6 +40,7 @@ todo lo que se hizo aqui y el archivo subido no trae:
  32. las dos tarjetas de proyectos, con la captura de lo que son
  33. la simetria de las once secciones, el menu sin ruido y el suelo de acero
  34. la franja azul de la ronda, apagada encima de la cabecera
+ 35. el indice de la derecha, en su carril: ni tapa texto ni le quita el clic
 """
 import sys, os
 
@@ -72,6 +73,7 @@ import fluidez
 import proyectos
 import oscuro
 import aviso
+import carril
 subido, publicado = sys.argv[1], '/home/user/nerium/index.html'
 z = open(subido, encoding='utf-8').read()
 p = open(publicado, encoding='utf-8').read()
@@ -255,6 +257,9 @@ rest = oscuro.aplicar(rest)
 # ── 34 · el aviso de la ronda, fuera ──
 rest = aviso.aplicar(rest)
 
+# ── 35 · el indice de la derecha, en su carril ──
+rest = carril.aplicar(rest)
+
 # ── 31 · que se pueda navegar ──
 # Va al final a proposito: toca codigo que ponen pasos anteriores, asi que
 # tiene que llegar cuando ya esta todo puesto.
@@ -291,4 +296,5 @@ print("montado:", len(salida), "bytes ·", salida.count('var(--hud-b)'), "usos d
       "proyectos:", str(salida.count('class="bcd-shot"')) + ' capturas', "·",
       "simetria:", 'las once al margen' if '.stk-copy{text-align:start' in salida
                    else 'LA PILA CENTRADA', "·",
-      "aviso:", 'apagado' if 'class="ann-fuera"' in salida else 'PUESTO')
+      "aviso:", 'apagado' if 'class="ann-fuera"' in salida else 'PUESTO', "·",
+      "carril:", 'el indice se aparta' if carril.MARCA in salida else 'ENCIMA DEL TEXTO')
