@@ -28,13 +28,13 @@ import re
 #   rej  la pauta sobre ese fondo
 #   sh   la sombra al pasar por encima, en componentes
 MEDIOS = {
-    'p1.jpg': {'ac': '#0A11CE', 'w1': '#1C24E4', 'w2': '#05086B',
+    'p1': {'clase': 't-benzinga', 'ac': '#0A11CE', 'w1': '#1C24E4', 'w2': '#05086B',
                'luz': 'rgba(255,255,255,.22)', 'rej': 'rgba(255,255,255,.085)',
                'rej2': 'rgba(255,255,255,.060)', 'sh': '10,17,206'},
-    'p2.jpg': {'ac': '#1FA800', 'w1': '#0D110D', 'w2': '#000000',
+    'p2': {'clase': 't-marketwatch', 'ac': '#1FA800', 'w1': '#0D110D', 'w2': '#000000',
                'luz': 'rgba(51,255,0,.26)', 'rej': 'rgba(51,255,0,.11)',
                'rej2': 'rgba(51,255,0,.075)', 'sh': '20,90,0'},
-    'p3.jpg': {'ac': '#DC0206', 'w1': '#F6181E', 'w2': '#960007',
+    'p3': {'clase': 't-morningstar', 'ac': '#DC0206', 'w1': '#F6181E', 'w2': '#960007',
                'luz': 'rgba(255,255,255,.24)', 'rej': 'rgba(255,255,255,.090)',
                'rej2': 'rgba(255,255,255,.065)', 'sh': '200,10,14'},
 }
@@ -121,20 +121,30 @@ CSS = """
   font-size:clamp(17px,1.85vw,24px);font-weight:500;letter-spacing:-.04em;
   text-shadow:0 1px 14px rgba(0,0,0,.28)}
 .cb-rule{width:1px;height:clamp(30px,3.6vw,46px);background:rgba(255,255,255,.34);flex:0 0 auto}
-/* El medio va en su propia baldosa blanca: sobre el color, su logotipo
-   necesita el fondo con el que esta hecho. */
-/* El tamano NO es decorativo. En un ordenador corriente —un pixel de pantalla
-   por pixel de CSS— la baldosa de 80 dejaba el logotipo en 62 pixeles reales, y
-   el de Morningstar son ONCE letras de palo seco en ese ancho: cuatro pixeles
-   por letra, con trazos por debajo del pixel. Se deshacia. En el telefono no
-   pasaba porque alli hay tres pixeles de pantalla por cada uno de CSS y ese
-   mismo logotipo se dibujaba con 120. Subiendo la baldosa a 112, el ordenador
-   pasa de 62 a 94 pixeles reales y las letras vuelven a tener cuerpo. */
+/* El medio ya no va en baldosa. La baldosa existia porque el logotipo llegaba
+   como un JPEG cuadrado con su fondo cocido dentro —Benzinga blanco sobre azul,
+   MarketWatch verde sobre negro, Morningstar blanco sobre rojo— y un cuadro de
+   color no se puede posar sobre otro color. Salian tres capas: la figura azul,
+   la baldosa blanca y dentro otro cuadro azul. Dos saltos de color para ensenar
+   ocho letras, y encima el color del cuadro era el mismo de la figura.
+   Ahora la marca viene recortada y con transparencia (prensa_marcas.py) y se
+   posa directamente sobre el color de su tarjeta, al lado del de Nereum y con
+   la misma sombra, para que los dos se lean como una sola linea.
+   Y de paso deja de desperdiciar el sitio: la palabra BENZINGA ocupaba 229x32
+   de un archivo de 260x260, o sea el 11% de la superficie, asi que dentro de
+   una baldosa de 92 se dibujaba con 11 px de alto. Once. Recortada, esos 92 px
+   son todo palabra.
+   El ancho va por marca y no por una medida comun, porque cada una reparte su
+   caja de otro modo: la flecha de MarketWatch sube por encima de las letras y
+   la O de Morningstar baja por debajo, de modo que igualar el ancho las dejaria
+   con alturas de letra distintas. Los maximos son los que aguanta cada archivo:
+   a dos pixeles de pantalla por pixel de CSS ninguna pide mas de lo que tiene. */
 .cb-tile{flex:0 0 auto;display:grid;place-items:center;
-  width:clamp(72px,8vw,112px);height:clamp(72px,8vw,112px);
-  background:#fff;border-radius:14px;padding:clamp(7px,.72vw,9px);
-  box-shadow:0 8px 22px -10px rgba(0,0,0,.48)}
-.cb-logo{width:100%;height:auto;border-radius:6px;display:block}
+  filter:drop-shadow(0 1px 14px rgba(0,0,0,.28))}
+.cb-logo{width:100%;height:auto;display:block;border-radius:0}
+.cb-tile.t-benzinga{width:clamp(84px,9.4vw,112px)}
+.cb-tile.t-marketwatch{width:clamp(52px,5.7vw,68px)}
+.cb-tile.t-morningstar{width:clamp(80px,9vw,108px)}
 
 /* ── el texto: papel, pero teñido de su color, no blanco pelado ── */
 .pcd-body{padding:clamp(16px,1.7vw,22px) clamp(16px,1.7vw,22px) clamp(18px,2vw,26px);
@@ -172,13 +182,29 @@ CSS = """
 
 def _color(m):
     a = m.group(0)
-    med = re.search(r'src="img/(p\d\.jpg)"', a)
+    med = re.search(r'src="img/(p\d)\.(?:jpg|png)"', a)
     col = MEDIOS.get(med.group(1)) if med else CASA
     return a.replace('<article class="pcd">',
                      '<article class="pcd" style="%s">' % _estilo(col), 1)
 
 
 _ART = re.compile(r'<article class="pcd">.*?</article>', re.S)
+
+
+# ── la marca recortada, sin baldosa ─────────────────────────────────────
+# El .jpg cuadrado se cambia por el .png recortado que saca prensa_marcas.py, y
+# la baldosa recibe la clase de su medio, que es la que le da el ancho. Va
+# aparte de _una y de _color porque tiene que correr TAMBIEN sobre la pagina ya
+# montada, donde aquellos dos ya no entran.
+_BALDOSA = re.compile(
+    r'<span class="cb-tile[^"]*"><img class="cb-logo"([^>]*?)'
+    r'src="img/(p\d)\.(?:jpg|png)"([^>]*)></span>')
+
+
+def _marca(m):
+    ant, med, post = m.group(1), m.group(2), m.group(3)
+    return ('<span class="cb-tile %s"><img class="cb-logo"%ssrc="img/%s.png"%s></span>'
+            % (MEDIOS[med]['clase'], ant, med, post))
 
 
 def _una(m):
@@ -206,6 +232,8 @@ def aplicar(html):
     # para el que ya esta publicado
     if 'style="--ac:' not in html:
         html = _ART.sub(_color, html)
+    # la marca de cada medio: recortada, transparente y con su ancho
+    html = _BALDOSA.sub(_marca, html)
     html = html.replace(CANVAS, '')
     if MARCA in html:
         i = html.index(MARCA)
