@@ -312,10 +312,15 @@ footer :is(.fcopy,.f-legal){color:#5B657A}
    estimados. Ninguno era del cambio: estaban desde antes. */
 .hero-pr{color:rgba(226,236,250,.72)}   /* la tira de pruebas: 4,10 */
 .bcd-tag{color:rgba(255,255,255,.58)}   /* el pie de las tarjetas: 4,08 */
-/* Los dos botones azules daban 4,43 con tinta casi negra y 3,54 con blanca: el
-   azul de marca esta en mitad de la escala y no gana por ningun lado. Sube un
-   escalon y con tinta negra se va a 5,8. */
-.hb.blue,.get{background:#4C82FF;color:#00070F}
+/* Los dos botones azules —«Join the Seed Round» y «Whitepaper»— van en BLANCO.
+   El azul de marca esta justo en mitad de la escala y no gana por ningun lado:
+   a #4C82FF, la tinta casi negra da 4,43 y la blanca 3,54, asi que la primera
+   vuelta subio el azul un escalon y puso la tinta negra. Queriendolos en
+   blanco hay que bajar el azul, no subirlo, y bajarlo lo justo: #2B5FEF sigue
+   siendo el azul de la casa y con blanco entra a 5,27:1, con margen de sobra
+   sobre el 4,5 que piden 13,5 px. En #2F6BFF clavaria el 4,50, que es pasar
+   por los pelos y quedarse sin sitio para el siguiente ajuste. */
+.hb.blue,.get{background:#2B5FEF;color:#fff}
 """.replace('@@', SECS) + '\n' + FIN
 
 

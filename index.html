@@ -2437,7 +2437,7 @@ footer :is(.fcopy,.f-legal){color:#525C70}
 /* Los dos botones azules daban 4,43 con tinta casi negra y 3,54 con blanca: el
    azul de marca esta en mitad de la escala y no gana por ningun lado. Sube un
    escalon y con tinta negra se va a 5,8. */
-.hb.blue,.get{background:#4C82FF;color:#00070F}
+.hb.blue,.get{background:#2B5FEF;color:#fff}
 
 /* ══ fin: papel ══ */
 /* ══ el sistema: orden e identidad ═══════════════════════════════════════
@@ -5413,7 +5413,7 @@ function campoGL(){
     float lz=1.0-smoothstep(0.0,LUZ.z*1.25,length(q-LUZ.xy));
     lz=lz*lz*0.055;
     vec3 c=texture(tex,gl_FragCoord.xy/R).rgb
-         + vec3(0.34,0.50,0.86)*rej + vec3(0.184,0.420,1.0)*lz;
+         + vec3(0.46,0.40,0.94)*rej + vec3(0.250,0.400,1.0)*lz;
     O=vec4(c,1.0);
   }`;
   /* Pautado y luz en la MISMA pasada: son dos capas a pantalla completa y
@@ -5429,7 +5429,7 @@ function campoGL(){
     float rej=(lx*0.034 + ly*0.022)*smoothstep(0.15,0.50,length((q/R-0.5)*vec2(1.30,1.0)));
     float lz=1.0-smoothstep(0.0,LUZ.z*1.25,length(q-LUZ.xy));
     lz=lz*lz*0.055;
-    vec3 c=vec3(0.34,0.50,0.86)*rej + vec3(0.184,0.420,1.0)*lz;
+    vec3 c=vec3(0.46,0.40,0.94)*rej + vec3(0.250,0.400,1.0)*lz;
     float a=rej+lz;
     O=vec4(c,a);
   }`;
@@ -5453,7 +5453,7 @@ function campoGL(){
     gl.clearColor(0,0,0,1); gl.clear(gl.COLOR_BUFFER_BIT);
     gl.bindFramebuffer(gl.FRAMEBUFFER,null);
   }
-  const T=[[64,132,255],[47,107,255],[124,168,255],[206,220,248],[104,128,182],[26,52,132]];
+  const T=[[70,110,255],[44,80,252],[126,148,255],[222,226,255],[134,100,244],[40,52,176]];
   const TONOS=[[5,5,5,5,4],[1,1,1,0,4],[0,0,1,2,2]];
   const rnd=(a,b)=>a+Math.random()*(b-a);
   const FILAS=[0.045,0.105,0.170,0.240,0.310,0.700,0.770,0.840,0.905,0.960];
@@ -5599,7 +5599,7 @@ function campoGL(){
 function campo2D(){
   const cv=document.getElementById('burst');if(!cv)return;
   const ctx=cv.getContext('2d',{alpha:false});
-  const T=[[64,132,255],[47,107,255],[124,168,255],[206,220,248],[104,128,182],[26,52,132]];
+  const T=[[70,110,255],[44,80,252],[126,148,255],[222,226,255],[134,100,244],[40,52,176]];
   const TONOS=[[5,5,5,5,4],[1,1,1,0,4],[0,0,1,2,2]];
   const ESC=[0.55,1,1.38], VEL=[0.42,1,1.62], PAR=[0.32,0.76,1.20], DER=[2.2,5.0,8.5];
   const FILAS=[0.045,0.105,0.170,0.240,0.310,0.700,0.770,0.840,0.905,0.960];
@@ -5623,7 +5623,7 @@ function campo2D(){
     p.k  = semilla?Math.random():0;
     p.sp = rnd(.5,1.15);
     p.vida = p.posa?rnd(1.6,3.4):rnd(.8,1.7);
-    p.al = [rnd(.07,.17),rnd(.15,.33),rnd(.26,.54)][p.pl];
+    p.al = [rnd(.13,.28),rnd(.26,.50),rnd(.42,.78)][p.pl];
     p.kp = rnd(.22,.46);
     p.rec = p.posa ? Math.abs(p.destino-(p.abajo?1.16:-0.16))
                    : (Math.pow(Math.random(),1.7)*(p.abajo?.70:.86)+.14);
@@ -5679,7 +5679,7 @@ function campo2D(){
     }
     desliz += ((scrollY*0.62) - desliz) * Math.min(1,dt*6);
     ctx.globalCompositeOperation='source-over';
-    ctx.fillStyle='rgba(0,0,0,.32)';ctx.fillRect(0,0,W,H);
+    ctx.fillStyle='rgba(0,0,0,.17)';ctx.fillRect(0,0,W,H);
     rejilla();
     const lx=W*(0.5+0.34*Math.sin(t*0.113)+0.10*Math.sin(t*0.291));
     const ly=H*(0.5+0.30*Math.cos(t*0.087)+0.09*Math.cos(t*0.233));
@@ -6705,7 +6705,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
   const ease=t=>1-Math.pow(1-t,3);
   const dTop=nn=>{let y=0;while(nn){y+=nn.offsetTop;nn=nn.offsetParent}return y};
   const eOut=t=>1-Math.pow(1-t,3);
-  const PAL=[[77,162,255],[42,91,255],[130,190,255],[255,255,255],[120,145,190],[30,60,150]];
+  const PAL=[[70,110,255],[44,80,252],[126,148,255],[248,250,255],[134,100,244],[40,52,176]];
   let vuelo=null, vt=0, vlast=0;
   const HONDO=9;          /* profundidad del corredor */
   function haceVuelo(){
@@ -6889,7 +6889,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
       ctx.restore();
     }
   }
-  const SPAL=[[77,162,255],[42,91,255],[130,190,255],[235,240,250],[120,145,190],[30,60,150]];
+  const SPAL=[[70,110,255],[44,80,252],[126,148,255],[236,240,255],[134,100,244],[40,52,176]];
   let SU=null, suL=0, suVelo=null, suVeloH=0, suFil=null, suFilW=0, suCol=null, suColH=0;
   const srnd=(a,b)=>a+Math.random()*(b-a);
   const scv=document.createElement('canvas');
@@ -8292,29 +8292,6 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
   /* La plancha: la tinta con la cifra RECORTADA. Se dibuja una vez por medida
      y las losas no son mas que tajadas suyas, cada una desplazada. Redibujar
      texto gigante por cuadro es lo que habria hecho esto imposible a 60. */
-  /* ── LA ESCENA ─────────────────────────────────────────────────────────
-     Quinta version, y esta cambia la IDEA, no el acabado. Las cuatro
-     anteriores eran la misma: una cifra enorme en mitad de una pantalla negra
-     y una barra debajo. Se pulio el numero, se le pusieron rotulos, se ato la
-     barra a su ancho... y seguia siendo lo mismo, porque la silueta no cambio
-     nunca. Se ve igual porque ES igual.
-
-     Esta parte de otro sitio: la escena no es un cartel, es un INSTRUMENTO que
-     se lee de izquierda a derecha, y la transicion no es algo que le pase a la
-     cifra, es la propia barra convirtiendose en la seccion.
-
-       · arranca con un FILETE de un pixel cruzando el negro. Nada mas. Los
-         rotulos de la ronda a sus dos extremos, como una escala;
-       · el filete se LLENA de izquierda a derecha y el contador viaja en la
-         cabeza. Aqui todavia no hay ninguna cifra grande;
-       · al llegar a su marca, la cifra SALE DE LA CABEZA: crece desde ahi
-         hasta su tamano y se queda alineada a la izquierda con el filete, no
-         centrada. La composicion es de columna, como el resto de la pagina;
-       · y entonces el tramo lleno se ABRE en vertical: sus cantos se separan
-         y por dentro entra la ronda. La barra no se va: se convierte en ella.
-
-     El plato ya no lleva teselas ni recortes de glifo. Lo que se mueve son
-     cuatro numeros. */
   function plancha(){
     placa.width=Math.round(W*DPR); placa.height=Math.round(H*DPR);
     pc.setTransform(DPR,0,0,DPR,0,0);
@@ -8322,36 +8299,235 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
     var g=pc.createLinearGradient(0,0,0,H);
     g.addColorStop(0,'#070B14'); g.addColorStop(0.55,'#04070C'); g.addColorStop(1,'#02040A');
     pc.fillStyle=g; pc.fillRect(0,0,W,H);
-    cifraTxt=(num.textContent||'85').replace(/[^0-9]/g,'')+'%';
-    meta=Math.min(1,Math.max(0,(parseFloat(num.textContent)||85)/100));
-    /* el cuerpo de la cifra: alto de la columna, nunca mas ancho que ella */
-    /* El cuerpo sale de la COLUMNA, no de la pantalla. Atado a «W*0,26» la
-       cifra caia a 101 px en un telefono -una nota al pie- mientras en
-       escritorio le sobraba sitio. La columna es la misma medida de la que
-       cuelga todo lo demas, asi que la cifra escala con ella. */
-    var tam=Math.min(H*0.30,W*0.40);
+    var txt=(num.textContent||'85').replace(/[^0-9]/g,'')+'%';
+    /* La cifra baja de tamano para dejarle sitio a la barra: antes ocupaba
+       casi toda la altura y la barra acababa aplastada contra el canto. */
+    /* La cifra ocupaba hasta el 86 % del ancho y llegaba a 60 px de cada
+       canto: llena, pero sin aire. Al 70 % quedan margenes de verdad y la
+       escena respira, que es lo que separa un cartel de una portada. */
+    var tam=Math.min(W*0.50,H*0.62);
     pc.font='200 '+tam+'px '+cara;
-    var an=pc.measureText(cifraTxt).width;
-    if(an>ancho()*0.78){ tam=tam*(ancho()*0.78)/an }
+    var an=pc.measureText(txt).width;
+    if(an>W*0.70){ tam=tam*(W*0.70)/an; pc.font='200 '+tam+'px '+cara }
+    pc.textAlign='center'; pc.textBaseline='middle';
     tamCifra=tam;
+    meta=Math.min(1,Math.max(0,(parseFloat(num.textContent)||85)/100));
+    /* La cifra ya no se RECORTA de la tinta. Antes era un hueco -y un hueco o
+       esta o no esta-, asi que para armarla habia que ir tapandolo y
+       destapandolo: el movimiento era de la tapa, no de la cifra. Ahora la
+       cifra se construye con teselas que vuelan a su sitio, que es el mismo
+       lenguaje de la rueda del reparto del token. La plancha se queda siendo
+       tinta lisa y la cifra vive en su propio lienzo. */
+    cifraTxt=txt; cifraY=H/2-tam*0.10;
+    teselas(txt,tam);
+  }
+  /* ── la cifra se construye con teselas ────────────────────────────────
+     El mismo lenguaje que la rueda del reparto del token, que es lo que la
+     pagina ya usa para «esto se esta montando»: cuadrados iguales con un hueco
+     de un pixel entre ellos, cada uno llega volando desde lejos girando sobre
+     si mismo, y aterriza. Repetir ese vocabulario no es pereza: es lo que hace
+     que las dos piezas parezcan de la misma casa.
+
+     Antes la cifra era un hueco recortado en la tinta. Para armar un hueco hay
+     que ir tapandolo, o sea que lo que se movia era la tapa: la cifra no
+     entraba, se destapaba. Con teselas entra de verdad.
+
+     Las teselas salen de dibujar el texto en un lienzo aparte y preguntarle
+     donde hay glifo, no de calcular donde deberia estar: vale para cualquier
+     numero y cualquier tipografia.
+
+     El coste: un fillRect por tesela, sin texto y sin sombra, sobre un lienzo
+     propio que las losas luego reparten con drawImage. Nueve drawImage mas por
+     cuadro en vez de nueve pasadas de teselas. */
+  var tes=[], TLADO=0, cifraTxt='85%', cifraY=0, ojoX=0, ojoY=0, cifraBajo=0, cifraArriba=0, cifraIzq=0, cifraDer=0;
+  var cifraCv=document.createElement('canvas'), cc=cifraCv.getContext('2d');
+  /* La misma rampa que el campo de la portada, violeta incluido. Las teselas
+     iban en cuatro azules puros mientras el campo de arriba tiene azul,
+     indigo y lila: dos mundos distintos a treinta segundos de scroll. Es la
+     misma familia o no es nada. */
+  var TONOS=['#2834B0','#2C50FC','#466EFF','#8664F4','#7E94FF'];
+
+  function teselas(txt,tam){
+    TLADO=Math.max(6,Math.round(tam/58));
+    tes.length=0;
+    /* el glifo, en un lienzo de trabajo del tamano de la escena */
+    var w=Math.max(1,Math.round(W)), h=Math.max(1,Math.round(H));
+    var aux=document.createElement('canvas'); aux.width=w; aux.height=h;
+    var ac=aux.getContext('2d');
+    ac.font='200 '+tam+'px '+cara;
+    ac.textAlign='center'; ac.textBaseline='middle';
+    ac.fillStyle='#fff';
+    ac.fillText(txt,w/2,h/2-tam*0.10);
+    var d=ac.getImageData(0,0,w,h).data;
+    var x0=1e9,x1=-1e9,y0=1e9,y1=-1e9;
+    for(var y=0;y<h;y+=TLADO){
+      for(var x=0;x<w;x+=TLADO){
+        /* la tesela entra si su centro cae dentro del glifo: aqui si vale el
+           centro, porque la tesela SE DIBUJA -no tapa nada-, y una de mas en
+           el borde solo engorda el trazo un pixel */
+        var px=Math.min(w-1,x+(TLADO>>1)), py=Math.min(h-1,y+(TLADO>>1));
+        if(d[(py*w+px)*4+3]<130) continue;
+        if(x<x0)x0=x; if(x>x1)x1=x; if(y<y0)y0=y; if(y>y1)y1=y;
+        tes.push({x:x,y:y});
+      }
+    }
+    var anc=Math.max(1,x1-x0);
+    /* EL CANTO DE ABAJO DE LA CIFRA, medido. La barra se colocaba a
+       «H/2 + tam*0,46», que es una cuenta sobre el cuerpo de la tipografia y
+       no sobre lo que el glifo OCUPA de verdad: con «85%» a peso 200 el haz
+       vertical de la cabeza subia 190 px y se metia dentro del por ciento.
+       Se pregunta donde acaba el dibujo y se coloca debajo. */
+    cifraBajo=y1+TLADO; cifraArriba=y0; cifraIzq=x0; cifraDer=x1+TLADO;
+    /* El PUNTO DE FUGA de la apertura tiene que caer DENTRO del glifo.
+       Agrandando la cifra desde el centro de la caja, el centro cae en el hueco
+       entre el cinco y el por ciento -que es tinta-, asi que por mucho que
+       creciera el hueco lo que quedaba en pantalla era el interior de la cifra:
+       a 0,60 la pantalla se quedaba negra con una curva blanca en una esquina.
+       Escalando alrededor de un punto interior, ese punto se queda quieto y su
+       entorno crece sin limite: el hueco acaba comiendose la pantalla siempre.
+       Y un punto interior seguro ya lo tenemos: cualquier tesela. */
+    var mx=0,my=0;
+    for(var q=0;q<tes.length;q++){ mx+=tes[q].x; my+=tes[q].y }
+    mx/=tes.length; my/=tes.length;
+    var mejor=0, dmin=1e9;
+    for(var q2=0;q2<tes.length;q2++){
+      var dd=(tes[q2].x-mx)*(tes[q2].x-mx)+(tes[q2].y-my)*(tes[q2].y-my);
+      if(dd<dmin){ dmin=dd; mejor=q2 }
+    }
+    ojoX=tes[mejor].x+TLADO/2; ojoY=tes[mejor].y+TLADO/2;
+    for(var i=0;i<tes.length;i++){
+      var t=tes[i];
+      var hh=Math.sin(t.x*12.9898+t.y*78.233)*43758.5453; hh=hh-Math.floor(hh);
+      var hb=Math.sin(t.x*39.3468+t.y*11.1357)*24634.6345; hb=hb-Math.floor(hb);
+      /* DE DONDE VIENEN. Salian disparadas desde un angulo al azar alrededor
+         del centro, y eso a pantalla completa se lee como confeti: sin
+         direccion, no hay intencion. Ahora SUBEN, desde abajo -que es de donde
+         viene la ronda, la seccion que esta a punto de entrar- con una deriva
+         lateral pequena. La misma cantidad de movimiento, contando algo. */
+      t.ox=t.x+(hh-0.5)*W*0.30;
+      t.oy=H+120+hb*H*0.85;
+      t.giro=(hb-0.5)*1.1;
+      t.d=0.78*((t.x-x0)/anc)+0.22*hh;       /* barrido con desorden */
+      /* El color va por POSICION, no al azar: la rueda del token reparte sus
+         tonos por sectores y se lee como una decision. Al azar sale confeti.
+         Recorre la rampa de izquierda a derecha con un punto de mezcla. */
+      var g=(t.x-x0)/anc*(TONOS.length-1)+ (hh-0.5)*0.7;
+      t.c=TONOS[Math.max(0,Math.min(TONOS.length-1,Math.round(g)))];
+    }
   }
 
-  /* La columna: una sola medida de la que cuelga todo. */
-  function ancho(){ return Math.min(W*0.78, 1180) }
-  function colX(){ return (W-ancho())/2 }
-  function rielY(){ return Math.round(H*0.58) }
+  /* Tres tiempos, y cada uno hace una sola cosa:
+       0,00 - 0,24  las teselas vuelan y arman la cifra, en azul;
+       0,24 - 0,40  FUNDEN: se cierran las juntas y el color va a blanco. La
+                    cifra deja de estar HECHA de piezas y pasa a SER una pieza.
+                    Esta es la imagen que se queda;
+       0,40 - 1,00  esa cifra blanca se ABRE: es la ventana por la que entra la
+                    ronda. Crece desde el centro hasta comerse la pantalla.
+     Lo que habia antes era la plancha partida en nueve losas que se iban a los
+     lados. Funcionaba, pero es un recurso de motion graphics: nueve paneles
+     deslizando. Una cifra que se abre y te deja pasar dice lo mismo con una
+     sola idea, que es lo que hace la pagina en todas partes: menos piezas. */
+  var ARMA_A=0.00, ARMA_B=0.24, ARMA_C=0.10;   /* inicio, fin, duracion de tesela */
+  /* La fusion termina en 0,34 y la apertura no empieza hasta 0,40: entre las
+     dos hay un respiro en el que la cifra esta QUIETA, blanca y limpia. Sin
+     ese hueco la fusion y la apertura se pisaban y el contorno escalonado de
+     las teselas seguia asomando justo cuando la cifra tenia que leerse mejor.
+     Un gesto tiene que terminar antes de que empiece el siguiente. */
+  var FUNDE_A=0.24, FUNDE_B=0.34;              /* junta a cero y color a blanco */
+  var ABRE_A=0.40;                             /* la cifra se abre */
+  var cae=function(t){return 1-Math.pow(1-t,3.4)};   /* el mismo de la rueda */
 
-  /* EL AIRE ENTRE LA CIFRA Y EL RIEL, y con el, el tamano del derrame.
-     Se calcula en un sitio porque son la misma decision: el resplandor del
-     riel es una elipse de radio vertical grande, y si se elige sin mirar donde
-     esta la cifra, se le mete dentro. Paso en el telefono, donde la cifra mide
-     101 px y el derrame iba a 135: veintitres filas de la cifra con luz
-     encima. El derrame cede, que es luz; la cifra no. */
-  function hueco(){ return Math.max(56, tamCifra*0.42) }
-  function derrame(){ return Math.max(28, Math.min(H*0.16, hueco()-12)) }
-
-  var ABRE_A=0.46;                 /* cuando la barra empieza a abrirse */
-  var CIFRA_A=0.30, CIFRA_B=0.44;  /* cuando la cifra sale de la cabeza */
+  /* del azul de la tesela al blanco, en el propio espacio del color: echarle
+     una capa blanca encima daria un azul lavado, no blanco. */
+  var _mz={};
+  function mezcla(hex,k){
+    var c=_mz[hex]; if(!c){ c=[parseInt(hex.slice(1,3),16),parseInt(hex.slice(3,5),16),
+                             parseInt(hex.slice(5,7),16)]; _mz[hex]=c }
+    return 'rgb('+Math.round(c[0]+(255-c[0])*k)+','+Math.round(c[1]+(255-c[1])*k)+','
+               +Math.round(c[2]+(255-c[2])*k)+')';
+  }
+  function pintaCifra(p){
+    if(cifraCv.width!==placa.width){ cifraCv.width=placa.width; cifraCv.height=placa.height }
+    cc.setTransform(DPR,0,0,DPR,0,0);
+    cc.clearRect(0,0,W,H);
+    if(!tes.length) return;
+    /* La junta se cierra y el color va a blanco. Es el mismo gesto contado dos
+       veces: la cifra pasa de estar hecha de piezas a ser una pieza. */
+    var fu=tramo(p,FUNDE_A,FUNDE_B);
+    /* Fundida del todo, las teselas SOBRAN y ademas estorban: son cuadrados y
+       su silueta desborda el contorno de la letra, asi que por debajo de la
+       cifra limpia asomaba un reborde escalonado. Cuando la fusion termina se
+       dibuja solo la letra. Las dos son blancas, asi que el relevo no se ve. */
+    var soloLetra=fu>0.99;
+    var lado=Math.max(2,TLADO-1.1*(1-fu));
+    for(var i=0;i<tes.length&&!soloLetra;i++){
+      var t=tes[i];
+      var t0=ARMA_A+t.d*(ARMA_B-ARMA_A);
+      var k=(p-t0)/ARMA_C;
+      if(k<=0) continue;                        /* aun no ha salido */
+      k=cae(Math.min(1,k));
+      var x=t.ox+(t.x-t.ox)*k, y=t.oy+(t.y-t.oy)*k;
+      cc.globalAlpha=k<1?0.30+k*0.70:1;
+      if(k<1){
+        cc.save();
+        cc.translate(x+lado/2,y+lado/2);
+        cc.rotate(t.giro*(1-k));
+        cc.fillStyle=t.c; cc.fillRect(-lado/2,-lado/2,lado,lado);
+        cc.fillStyle='rgba(226,238,255,.55)';
+        cc.fillRect(-lado/2,-lado/2,lado,Math.max(1,lado*0.16));
+        cc.restore();
+      }else{
+        cc.fillStyle=fu>0?mezcla(t.c,fu):t.c; cc.fillRect(x,y,lado,lado);
+        if(fu<1){
+          /* el canto de luz se va con la junta: en una pieza maciza no pinta
+             nada, y dejarlo la volvia a partir en cuadros */
+          cc.globalAlpha=(1-fu);
+          cc.fillStyle='rgba(226,238,255,.55)';
+          cc.fillRect(x,y,lado,Math.max(1,lado*0.16));
+          cc.globalAlpha=1;
+        }
+      }
+    }
+    /* Y cuando la fusion termina, encima va la LETRA. Las teselas pegadas dejan
+       el contorno escalonado -son cuadrados-, y lo que tiene que quedar es una
+       cifra, no un mosaico apretado. Se dibuja la letra de verdad con el alfa
+       de la fusion: al principio no se ve y al final es lo unico que se ve, asi
+       que el paso de mosaico a tipografia no tiene costura. Y es una sola
+       llamada, no mil seiscientos rectangulos. */
+    if(fu>0.002){
+      cc.globalAlpha=fu;
+      /* Un respiro justo antes de abrirse: la cifra toma aire un 1,5 % en los
+         ultimos cuadros de la espera. No se ve como movimiento, se nota como
+         que la apertura la decide ella y no el scroll. */
+      var aire=1+0.015*tramo(p,FUNDE_B,ABRE_A);
+      cc.save(); cc.translate(W/2,cifraY); cc.scale(aire,aire); cc.translate(-W/2,-cifraY);
+      cc.font='200 '+tamCifra+'px '+cara;
+      cc.textAlign='center'; cc.textBaseline='middle';
+      cc.fillStyle='#fff';
+      cc.fillText(cifraTxt,W/2,cifraY);
+      cc.restore();
+      cc.globalAlpha=1;
+      /* Y UN BRILLO QUE LA CRUZA UNA VEZ. La fusion es el momento en que la
+         cifra deja de ser mosaico y pasa a ser pieza, y sin nada que lo marque
+         el cambio ocurre sin que te des cuenta: las teselas simplemente dejan
+         de verse. Una banda de luz que barre de izquierda a derecha, dentro
+         del propio glifo, le pone acento a ese instante. Una sola vez, y
+         recortada al glifo con «source-atop», que asi no hace falta ni mascara
+         ni segundo lienzo. */
+      var br=Math.sin(Math.PI*Math.min(1,Math.max(0,fu)));
+      if(br>0.01){
+        var cxp=(fu*1.5-0.25)*W;
+        var g2=cc.createLinearGradient(cxp-W*0.22,0,cxp+W*0.22,0);
+        g2.addColorStop(0,'rgba(255,255,255,0)');
+        g2.addColorStop(0.5,'rgba(190,215,255,'+(0.85*br).toFixed(3)+')');
+        g2.addColorStop(1,'rgba(255,255,255,0)');
+        cc.globalCompositeOperation='source-atop';
+        cc.fillStyle=g2; cc.fillRect(0,0,W,H);
+        cc.globalCompositeOperation='source-over';
+      }
+    }
+    cc.globalAlpha=1;
+  }
 
   function medir(){
     DPR=Math.min(2,window.devicePixelRatio||1);
@@ -8400,77 +8576,115 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
      comparten canto izquierdo y canto derecho, y lo que eran dos objetos
      apilados pasa a ser una sola columna. Es la unica relacion que hacia falta
      y no costaba nada, porque la caja ya estaba medida para otra cosa. */
-  /* ── EL RIEL ───────────────────────────────────────────────────────────
-     Un filete de un pixel cruzando la columna, y encima el tramo recorrido,
-     encendido. El neon de verdad no es un color claro: son tres pasadas —una
-     ancha y difusa que tine el aire, una media que da el tubo, y un nucleo
-     casi blanco que es lo que el ojo lee como encendido—. Con una sola sale un
-     rectangulo azul, que es lo que parece barato.
-
-     Aqui el riel ya no es un adorno debajo de una cifra: es el objeto
-     principal y el unico que hay hasta bien entrada la escena. */
-  function riel(p,vel){
-    var x0=colX(), an=ancho(), y=rielY();
-    var t=tramo(p,0.06,CIFRA_A);
-    var f=an*meta*t;
-    var alto=Math.max(3,Math.round(H*0.006));
-
-    /* el carril entero, apagado: la escala existe desde el primer cuadro */
-    cx.save(); cx.globalAlpha=vel;
-    cx.fillStyle='rgba('+AZUL+',.18)';
-    cx.fillRect(x0,y-0.5,an,1);
-    /* las marcas de cuarto, cortas, hacia abajo */
-    /* Los dos extremos van MARCADOS, no insinuados: son el cero y el objetivo,
-       o sea los dos numeros que dan sentido a todo lo demas. Dejandolos al
-       mismo tono que las marcas de cuarto, el riel no tenia final visible y
-       lo que se veia era una linea que se pierde. */
+  function barraAncho(){
+    var a=cifraDer-cifraIzq;
+    return a>40?a:Math.min(W*0.70,tamCifra*3.1);
+  }
+  function barraX(){
+    var a=barraAncho();
+    return cifraDer-cifraIzq>40?cifraIzq:(W-a)/2;
+  }
+  function barraY(){
+    var tope=cifraBajo+20;
+    var y=Math.max(tope+DERRAME, H*0.58);
+    return y>H-86?H-86:y;
+  }
+  function barraDerrame(){
+    return Math.max(40,Math.min(DERRAME,barraY()-(cifraBajo+20)));
+  }
+  function barra(dx,p){
+    var an=barraAncho(), x0=barraX()+dx;
+    /* Debajo del canto MEDIDO de la cifra, y contando TODA la luz que la barra
+       reparte, no solo su trazo. El derrame es una elipse de 138 px de radio
+       vertical: colocando la barra a ras del canto de la cifra, el trazo no la
+       tocaba pero el resplandor le subia noventa pixeles por dentro. En el
+       movil, donde la cifra es mas alta en proporcion, se le metia entera.
+       Asi que el sitio se calcula desde el borde del DERRAME: el canto de la
+       cifra, un respiro, y el radio entero. Y si no cabe en pantalla, el que
+       encoge es el derrame -es luz, aguanta- y no el aire. */
+    var y=barraY(), derrame=barraDerrame();
+    var t=tramo(p,0.08,0.34);
+    var f=an*meta*t;                       /* lo recorrido */
+    /* el carril y sus marcas de escala: sin ellas la barra es un cargador
+       generico; con ellas es un instrumento */
+    cx.fillStyle='rgba('+AZUL+',.16)';
+    cx.fillRect(x0,y-1,an,2);
     for(var k=0;k<=4;k++){
-      var mx=x0+an*k/4, fin=(k===0||k===4);
-      cx.fillStyle='rgba('+AZUL+','+(fin?.82:.24)+')';
-      cx.fillRect(mx-(fin?1:0.5),y-(fin?5:0),(fin?1.5:1),fin?22:8);
+      var mx=x0+an*k/4;
+      var fin=(k===4);
+      cx.fillStyle='rgba('+AZUL+',' + (fin?.85:(k%4===0?.48:.26)) + ')';
+      cx.fillRect(mx-(fin?1:0.5),y-(k%4===0?15:8),(fin?2:1),(k%4===0?30:16));
     }
-    if(f>0.5){
-      /* 0 · el derrame: un tubo se nota porque TINE lo que tiene alrededor.
-             En elipse y no en rectangulo, que un rectangulo de degradado se
-             corta en seco por los lados y delata el truco. */
-      cx.save();
-      cx.translate(x0+f*0.52,y);
-      cx.scale(Math.max(1,f*0.62),derrame());
-      var der=cx.createRadialGradient(0,0,0,0,0,1);
-      der.addColorStop(0,'rgba('+AZUL+',.22)');
-      der.addColorStop(0.55,'rgba('+AZUL+',.09)');
-      der.addColorStop(1,'rgba('+AZUL+',0)');
-      cx.fillStyle=der; cx.beginPath(); cx.arc(0,0,1,0,Math.PI*2); cx.fill();
-      cx.restore();
-      /* 1 · el aire */
-      cx.shadowColor='rgba('+AZUL+',.95)'; cx.shadowBlur=64;
-      cx.fillStyle='rgba('+AZUL+',.40)';
-      cx.fillRect(x0,y-alto/2,f,alto);
-      /* 2 · el tubo, con la estela apagandose hacia atras */
-      var g=cx.createLinearGradient(x0,0,x0+f,0);
-      g.addColorStop(0,'rgba('+AZUL+',.22)');
-      g.addColorStop(0.55,'rgba('+AZUL+',.66)');
-      g.addColorStop(1,'rgba('+AZUL+',1)');
-      cx.shadowBlur=26; cx.fillStyle=g;
-      cx.fillRect(x0,y-alto/2,f,alto);
-      /* 3 · el nucleo */
-      var n=cx.createLinearGradient(x0,0,x0+f,0);
-      n.addColorStop(0,'rgba(226,238,255,0)');
-      n.addColorStop(0.7,'rgba(226,238,255,.6)');
-      n.addColorStop(1,'rgba(240,247,255,.96)');
-      cx.shadowBlur=0; cx.fillStyle=n;
-      cx.fillRect(x0,y-1,f,2);
-      /* 4 · la cabeza */
-      var cab=t<0.999?1:0.6;
-      cx.shadowColor='rgba(170,205,255,1)'; cx.shadowBlur=54*cab;
-      cx.fillStyle='rgba(255,255,255,'+(0.97*cab).toFixed(2)+')';
-      cx.fillRect(x0+f-1.5,y-alto*1.9,3,alto*3.8);
-      cx.shadowBlur=0;
+    if(f<=0.5) return;
+    var alto=16;
+    cx.save();
+    /* 0 · el derrame. Un tubo de neon se nota porque TINE lo que tiene
+       alrededor: si el resplandor acaba en el borde del tubo, lo que hay es
+       un rectangulo claro. Esto es una mancha de luz ancha, muy floja, que
+       cae sobre la tinta por encima y por debajo. Es la mitad del efecto. */
+    /* En elipse y no en rectangulo: con un rectangulo de degradado vertical el
+       derrame se corta EN SECO por los lados y se ve un canto recto a la
+       derecha de la cabeza, que delata el truco. Salio en la captura. */
+    cx.save();
+    cx.translate(x0+f*0.52,y);
+    cx.scale(Math.max(1,f*0.66),derrame);
+    var der=cx.createRadialGradient(0,0,0,0,0,1);
+    der.addColorStop(0,  'rgba('+AZUL+',.20)');
+    der.addColorStop(0.55,'rgba('+AZUL+',.085)');
+    der.addColorStop(1,  'rgba('+AZUL+',0)');
+    cx.fillStyle=der;
+    cx.beginPath(); cx.arc(0,0,1,0,Math.PI*2); cx.fill();
+    cx.restore();
+    /* 1 · el aire */
+    cx.shadowColor='rgba('+AZUL+',.95)'; cx.shadowBlur=70;
+    cx.fillStyle='rgba('+AZUL+',.38)';
+    cx.fillRect(x0,y-alto/2,f,alto);
+    /* 2 · el tubo, con la estela apagandose hacia atras */
+    var g=cx.createLinearGradient(x0,0,x0+f,0);
+    g.addColorStop(0,'rgba('+AZUL+',.20)');
+    g.addColorStop(0.55,'rgba('+AZUL+',.62)');
+    g.addColorStop(1,'rgba('+AZUL+',1)');
+    cx.shadowBlur=28; cx.fillStyle=g;
+    cx.fillRect(x0,y-alto/2,f,alto);
+    /* 3 · el nucleo */
+    var n=cx.createLinearGradient(x0,0,x0+f,0);
+    n.addColorStop(0,'rgba(255,255,255,0)');
+    n.addColorStop(0.7,'rgba(226,238,255,.60)');
+    n.addColorStop(1,'rgba(255,255,255,.95)');
+    cx.shadowBlur=0; cx.fillStyle=n;
+    cx.fillRect(x0,y-2,f,4);
+    /* 4 · la cabeza: donde esta pasando ahora */
+    var cab=t<0.999?1:0.55;
+    cx.shadowColor='rgba(170,205,255,1)'; cx.shadowBlur=60*cab;
+    cx.fillStyle='rgba(255,255,255,'+(0.97*cab).toFixed(2)+')';
+    cx.fillRect(x0+f-3,y-30,6,60);
+    /* y el haz vertical de la cabeza: un corte de luz desde donde esta
+       pasando. Va SOLO HACIA ABAJO. Subiendo y bajando pesaba mas, pero la
+       mitad de arriba se metia dentro de la cifra -190 px por encima de la
+       barra, o sea dentro del por ciento- y lo que se veia era una raya
+       cruzando el numero. Hacia abajo cae sobre suelo vacio y no estorba a
+       nadie: la cabeza sigue pesando y la cifra se queda limpia. */
+    var lar=Math.min(200,Math.max(60,H-y-10));
+    var haz=cx.createLinearGradient(0,y,0,y+lar);
+    haz.addColorStop(0,   'rgba(150,190,255,'+(0.55*cab).toFixed(3)+')');
+    haz.addColorStop(1,   'rgba(150,190,255,0)');
+    cx.shadowBlur=0; cx.fillStyle=haz;
+    cx.fillRect(x0+f-1.5,y,3,lar);
+    /* 5 · y el fogonazo al llegar a la meta: una sola vez, corto */
+    var golpe=tramo(p,0.30,0.35)*(1-tramo(p,0.35,0.46));
+    if(golpe>0.01){
+      cx.shadowBlur=70*golpe;
+      cx.fillStyle='rgba(255,255,255,'+(0.5*golpe).toFixed(3)+')';
+      cx.fillRect(x0,y-alto/2-1,f,alto+2);
     }
     cx.restore();
-    return {x0:x0,an:an,y:y,f:f,t:t,alto:alto};
   }
 
+  /* ── la composicion alrededor de la cifra ─────────────────────────────
+     Cada rotulo entra en SU momento, y el orden cuenta la historia: primero
+     que ronda es, luego la barra con sus topes -para que se sepa que mide-,
+     despues la cifra funde y aparece el importe, y al final las condiciones.
+     Todos a la vez seria un cartel; escalonados es una escena. */
   function ren(txt,x,y,tam,alfa,al,col,esp,tope){
     if(!txt||alfa<=0.004) return;
     cx.save();
@@ -8492,125 +8706,157 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
     if(cx.letterSpacing!==undefined) cx.letterSpacing='0px';
     cx.restore();
   }
-  /* ── LOS ROTULOS, EN COLUMNA ───────────────────────────────────────────
-     Todo alineado al canto izquierdo del riel menos lo que pertenece a su
-     extremo derecho. Centrado todo, la escena era un cartel; en columna se lee
-     como la pagina, que es lo que es. */
-  function marco(p,vel,r){
+  function marco(p,vel){
     var tk=Math.max(10,Math.min(14,W*0.0098));
-    var x0=r.x0, x1=r.x0+r.an, y=r.y;
+    var bx=barraAncho(), x0=barraX(), x1=x0+bx;
+    var by=barraY();
 
-    /* que ronda es, sobre el canto izquierdo, con su punto vivo */
-    var a1=tramo(p,0.00,0.10)*vel;
+    /* 1 · que ronda es, con su punto vivo, sobre la cifra */
+    var a1=tramo(p,0.02,0.12)*vel;
     if(a1>0.004&&rot.arriba){
-      var pt=x0+tk*0.42;
-      cx.save(); cx.globalAlpha=a1; cx.fillStyle='#12A45E';
-      cx.beginPath(); cx.arc(pt,y-tk*2.5-tk*0.32,tk*0.25,0,Math.PI*2); cx.fill();
+      var yr=Math.max(tk*3.4, cifraArriba-tk*2.6);
+      /* El ancho se mide CON el interletrado puesto, que es como se va a
+         dibujar: midiendolo sin el, el punto se montaba encima de la primera
+         letra. Y el rotulo se corre a la derecha media distancia del punto
+         para que el conjunto -punto mas texto- quede centrado. */
+      var anc=0;
+      cx.save();
+      cx.font='500 '+tk+'px '+mono;
+      if(cx.letterSpacing!==undefined) cx.letterSpacing=(tk*0.26).toFixed(2)+'px';
+      anc=cx.measureText(rot.arriba).width;
       cx.restore();
-      ren(rot.arriba, pt+tk*1.15, y-tk*2.5, tk, a1, 'left',
-          'rgba(228,234,243,.92)', 0.26, r.an*0.6);
-    }
-    /* y el objetivo, sobre el canto derecho: los dos extremos de la escala */
-    ren(rot.tope, x1, y-tk*2.5, tk*0.92, tramo(p,0.04,0.14)*vel, 'right',
-        'rgba(150,178,230,.78)', 0.20, r.an*0.34);
-
-    /* la lectura viaja en la cabeza mientras el riel corre */
-    if(r.t>0.02&&r.t<0.999&&vel>0.02){
-      var hx=x0+r.f;
-      var derecha=hx>x0+r.an*0.78;
-      ren(Math.round(meta*100*r.t)+'%', hx+(derecha?-tk*0.8:tk*0.8), y+tk*2.4,
-          tk*1.05, Math.min(1,r.t*5)*vel, derecha?'right':'left',
-          'rgba(226,238,255,.96)', 0.06);
+      var hueco=tk*1.15;
+      ren(rot.arriba, W/2+hueco/2, yr, tk, a1, 'center',
+          'rgba(228,234,243,.92)', 0.26, W*0.80);
+      cx.save(); cx.globalAlpha=a1; cx.fillStyle='#12A45E';
+      cx.beginPath();
+      cx.arc(W/2+hueco/2-anc/2-hueco*0.55, yr-tk*0.32, tk*0.25, 0, Math.PI*2);
+      cx.fill();
+      cx.restore();
     }
 
-    /* cuanto se lleva, bajo el canto izquierdo, cuando la cifra ya esta */
-    var a3=tramo(p,CIFRA_B-0.06,CIFRA_B+0.04)*vel;
-    ren(rot.dinero, x0, y+tk*2.4, tk*1.05, a3, 'left',
-        'rgba(236,243,255,.94)', 0.12, r.an*0.86);
-    /* y las condiciones, debajo */
-    ren(rot.pie, x0, y+tk*4.5, tk*0.84, tramo(p,CIFRA_B,CIFRA_B+0.10)*vel,
-        'left', 'rgba(140,166,214,.70)', 0.20, r.an*0.86);
-  }
+    /* 2 · los topes de la barra: sin ellos es un cargador, con ellos es una
+       escala. A la izquierda el cero, a la derecha el objetivo de la ronda. */
+    var a2=tramo(p,0.10,0.22)*vel;
+    /* Por debajo de la CABEZA, que mide 30 px a cada lado del carril. Puestos
+       a «tk*2,6» —26 px en el telefono— el tope de la derecha caia justo
+       encima de la cabeza, que al 85 % esta casi en ese extremo. */
+    var ye=by+Math.max(tk*2.6,42);
+    ren('0', x0, ye, tk*0.86, a2, 'left', 'rgba(150,178,230,.72)', 0.20);
+    ren(rot.tope, x1, ye, tk*0.86, a2, 'right', 'rgba(150,178,230,.72)', 0.20);
 
-  /* ── LA CIFRA SALE DE LA CABEZA ────────────────────────────────────────
-     No aparece: crece desde el punto exacto donde el riel se ha parado, que es
-     lo que la ata al recorrido en vez de dejarla flotando encima. Va alineada
-     al canto izquierdo del riel, no centrada. */
-  function cifra(p,vel,r){
-    var t=tramo(p,CIFRA_A,CIFRA_B);
-    if(t<=0.004) return 0;
-    var esc=0.06+0.94*t;
-    var hx=r.x0+r.an*meta, hy=r.y;
-    var dx=r.x0, dy=r.y-hueco();
-    cx.save();
-    cx.globalAlpha=vel*Math.min(1,t*2.2);
-    cx.translate(hx+(dx-hx)*t, hy+(dy-hy)*t);
-    cx.scale(esc,esc);
-    cx.font='200 '+tamCifra+'px '+cara;
-    cx.textAlign='left'; cx.textBaseline='alphabetic';
-    cx.fillStyle='#fff';
-    cx.fillText(cifraTxt,0,0);
-    cx.restore();
-    return t;
+    /* 3 · cuanto se lleva, debajo de la cifra y pegado a ella: entra cuando la
+       cifra ya esta fundida, que es cuando se puede leer de un golpe */
+    var a3=tramo(p,0.26,0.36)*vel;
+    ren(rot.dinero, W/2, cifraBajo+tk*2.9, tk*1.18, a3, 'center',
+        'rgba(236,243,255,.94)', 0.14, W*0.88);
+
+    /* 4 · LA LECTURA DE LA CABEZA. La cifra gigante y la barra contaban el
+       mismo hecho, pero cada una por su lado: dos objetos compartiendo
+       pantalla. Con un contador pequeno viajando en la cabeza, la barra deja
+       de ser decorativa —se ve lo que marca en cada punto del recorrido— y las
+       dos cosas se atan: el contador llega a su numero en el mismo instante en
+       que la cifra grande funde. Una sola idea contada a dos escalas. */
+    var tb=tramo(p,0.08,FUNDE_B);
+    if(tb>0.02&&vel>0.02){
+      var bx2=bx, bx0=x0;
+      var hx=bx0+bx2*meta*tb;
+      var leo=Math.round(meta*100*tb)+'%';
+      var a5=Math.min(1,tb*4)*vel;
+      /* pegada al lado de la cabeza y por ENCIMA del carril, que es donde no
+         pisa ni las marcas de escala ni los topes */
+      var der=hx>x0+bx2*0.86;
+      ren(leo, hx+(der?-tk*0.9:tk*0.9), by-tk*1.5, tk*1.05, a5,
+          der?'right':'left', 'rgba(226,238,255,.96)', 0.06);
+    }
+
+    /* 5 · y las condiciones, al pie */
+    var a4=tramo(p,0.34,0.46)*vel;
+    ren(rot.pie, W/2, Math.min(H-tk*1.6, ye+tk*3.0), tk*0.84, a4,
+        'center', 'rgba(140,166,214,.70)', 0.20, W*0.88);
   }
 
   function dibuja(p){
     cx.clearRect(0,0,W,H);
     if(p<ABRE_A){
+      /* la tinta entera, la cifra encima y la barra */
       cx.drawImage(placa,0,0,W,H);
-      var r=riel(p,1);
-      cifra(p,1,r);
-      marco(p,1,r);
+      pintaCifra(p);
+      cx.drawImage(cifraCv,0,0,W,H);
+      barra(0,p);
+      marco(p,1);
       return;
     }
-    /* ── EL RIEL SE ABRE ───────────────────────────────────────────────
-       El tramo recorrido separa sus dos cantos y por dentro entra la ronda.
-       La barra no se va de la escena y la escena no se desmonta: la barra SE
-       CONVIERTE en la seccion, que es lo unico que hacia falta que pasara.
+    /* ── LA CIFRA SE ABRE ─────────────────────────────────────────────────
+       La cifra blanca deja de estar pintada sobre la tinta y pasa a ser un
+       hueco EN la tinta, del mismo tamano y en el mismo sitio: en el cambio no
+       se mueve nada. Lo que se ve es que se rellena de blanco por dentro, y
+       ese blanco se apaga mientras la cifra crece, asi que por donde estaba la
+       cifra acaba entrando la ronda.
 
-       El recorte con «destination-out» borra en proporcion al alfa de lo que
-       se pinta, asi que el relleno va opaco siempre: con un degradado, el
-       hueco sale a medias y la pagina se queda detras de un velo. */
-    var t=pesa(Math.min(1,(p-ABRE_A)/(0.99-ABRE_A)));
-    var r=rielY();
-    var x0=colX(), an=ancho();
-    /* el hueco crece a lo alto deprisa y a lo ancho despues: primero se abre
-       la rendija, luego se come los margenes */
-    /* La rendija se abre DESPACIO al principio: ahi es cuando se entiende que
-       lo que se separa son los dos cantos del riel, y con una curva rapida esa
-       lectura se pierde en dos cuadros. Y se come los margenes despues, no a la
-       vez: primero se abre, luego crece. */
-    var alto=Math.max(2,H*1.12*Math.pow(t,1.25));
-    var izq=x0*(1-Math.pow(t,2.4)), anc=an+(W-an)*Math.pow(t,2.4);
-    var y0=r-alto/2, y1=r+alto/2;
+       El recorte con «destination-out» borra EN PROPORCION AL ALFA de lo que
+       se pinta. Con un degradado o un color translucido como fillStyle el
+       hueco sale a medias y la pagina se queda detras de un velo permanente:
+       es exactamente lo que paso la primera vez. Opaco siempre. */
+    var t=pesa(Math.min(1,(p-ABRE_A)/(0.995-ABRE_A)));
+    var esc=1+t*t*80;                       /* al cuadrado: arranca despacio */
+    var blanco=Math.max(0,1-t*3.4);         /* el blanco se va en el primer tercio */
+    /* Un ultimo velo que se va del todo al final. No es lo que abre la escena
+       -eso lo hace el hueco-: es el seguro de que no quede una esquirla de
+       tinta en un canto cuando la ronda ya esta entregada. Empieza tardisimo a
+       proposito; fundiendola antes, la seccion se veia a traves de un velo
+       gris y lo que se leia era suciedad, no transicion. */
+    var tinta=1-tramo(t,0.86,1.0);
+    if(tinta<=0.002) return;                /* ya esta entregada: nada que pintar */
 
-    cx.drawImage(placa,0,0,W,H);
+    /* La tinta se agranda un pelo mientras el hueco crece. Es paralaje: el
+       plano de delante se mueve y el de detras -la pagina- esta quieto, y eso
+       es lo que hace que el hueco parezca una VENTANA y no un recorte. Un 6 %,
+       que no se ve como movimiento pero se nota como profundidad. */
+    var der=1+t*0.06;
+    cx.globalAlpha=tinta;
+    cx.drawImage(placa,-(der-1)*W/2,-(der-1)*H/2,W*der,H*der);
+    cx.globalAlpha=1;
     cx.save();
+    cx.translate(ojoX,ojoY); cx.scale(esc,esc); cx.translate(-ojoX,-ojoY);
+    cx.font='200 '+tamCifra+'px '+cara;
+    cx.textAlign='center'; cx.textBaseline='middle';
     cx.globalCompositeOperation='destination-out';
     cx.fillStyle='#000';
-    cx.fillRect(izq,y0,anc,alto);
-    cx.restore();
-    /* los dos cantos, encendidos mientras se separan: es la luz del riel
-       abriendose, y es lo que hace que se lea como que la barra se abre y no
-       como que aparece un rectangulo */
-    var bri=Math.max(0,1-t*1.35);
-    if(bri>0.01){
-      cx.save(); cx.globalAlpha=bri;
-      cx.shadowColor='rgba(170,205,255,1)'; cx.shadowBlur=44;
-      cx.fillStyle='rgba(240,247,255,.95)';
-      cx.fillRect(izq,y0-1.5,anc,3);
-      cx.fillRect(izq,y1-1.5,anc,3);
-      cx.restore();
+    cx.fillText(cifraTxt,W/2,cifraY);
+    cx.globalCompositeOperation='source-over';
+    if(blanco>0.002){
+      cx.globalAlpha=blanco*tinta;
+      cx.fillStyle='#fff';
+      cx.fillText(cifraTxt,W/2,cifraY);
+      cx.globalAlpha=1;
     }
-    /* y la escena que se va: la cifra y sus rotulos se apagan con la tinta */
-    var q=Math.max(0,1-t*2.1);
-    if(q>0.02){
-      var rr=riel(ABRE_A,q*0.5);
-      cifra(ABRE_A,q,rr);
-      marco(ABRE_A,q,rr);
+    /* EL CANTO DE LA ABERTURA, ENCENDIDO. Sin el, lo que crece es un agujero:
+       se ve la pagina de detras pero no se ve que algo se ESTA abriendo. Un
+       filo de luz siguiendo el contorno del glifo mientras crece -y solo
+       mientras crece- convierte el agujero en una puerta. Va con «stroke», que
+       sigue la misma ruta del texto que se acaba de recortar, asi que no hay
+       manera de que se despegue del hueco. */
+    var filo=Math.sin(Math.PI*Math.min(1,t*1.9));
+    if(filo>0.01){
+      cx.globalAlpha=filo*0.9*tinta;
+      cx.lineWidth=Math.max(0.6,2.2/esc);
+      cx.strokeStyle='rgba(206,226,255,1)';
+      cx.shadowColor='rgba(120,170,255,.95)';
+      cx.shadowBlur=26/esc;
+      cx.strokeText(cifraTxt,W/2,cifraY);
+      cx.shadowBlur=0;
+      cx.globalAlpha=1;
+    }
+    cx.restore();
+    /* la barra se apaga con el blanco: es el instrumento de la cifra, y cuando
+       la cifra deja de serlo no pinta nada */
+    /* los rotulos se van con la cifra: son suyos, no del fondo */
+    if(blanco>0.02){
+      cx.globalAlpha=blanco*tinta; barra(0,p); cx.globalAlpha=1;
+      marco(p,blanco*tinta);
     }
   }
-
   function pinta(){
     pide=0;
     if(!dentro) return;

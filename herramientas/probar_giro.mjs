@@ -175,20 +175,20 @@ for (const [a, b] of PEGADAS) {
 }
 
 /* ── 2 · el umbral ────────────────────────────────────────────────────────── */
-const cajaU = await pg.evaluate(() => {
+const caja = await pg.evaluate(() => {
   const u = document.querySelector('.umb'); if (!u) return null;
   const r = u.getBoundingClientRect();
   return { top: r.top + scrollY, alto: r.height, vh: innerHeight,
            antesDeLaRonda: !!(u.nextElementSibling && u.nextElementSibling.id === 'presale') };
 });
-di(!!cajaU, 'el umbral esta puesto');
-di(cajaU && cajaU.antesDeLaRonda, 'y esta justo delante de la ronda, no en otro sitio');
-di(cajaU && cajaU.alto > cajaU.vh * 1.5,
-   'con recorrido de scroll para operarlo (' + (cajaU ? Math.round(cajaU.alto / cajaU.vh * 100) / 100 : 0) + ' pantallas)');
+di(!!caja, 'el umbral esta puesto');
+di(caja && caja.antesDeLaRonda, 'y esta justo delante de la ronda, no en otro sitio');
+di(caja && caja.alto > caja.vh * 1.5,
+   'con recorrido de scroll para operarlo (' + (caja ? Math.round(caja.alto / caja.vh * 100) / 100 : 0) + ' pantallas)');
 
 const cuadros = [];
 for (const p of [0.05, 0.30, 0.50, 0.72, 0.99]) {
-  await pg.evaluate(v => scrollTo(0, v), Math.round(cajaU.top + p * (cajaU.alto - cajaU.vh)));
+  await pg.evaluate(v => scrollTo(0, v), Math.round(caja.top + p * (caja.alto - caja.vh)));
   await pg.waitForTimeout(420);
   cuadros.push({ p, ...await franja(pg, { x: 420, y: 150, width: 600, height: 600 }) });
 }
@@ -222,7 +222,7 @@ di(cuadros[0].oscuro >= 0.50,
    incluido. Entre las dos tiene que haber aire de verdad. */
 {
   const g = await pg.evaluate(v => scrollTo(0, v),
-                              Math.round(cajaU.top + 0.38 * (cajaU.alto - cajaU.vh)));
+                              Math.round(caja.top + 0.38 * (caja.alto - caja.vh)));
   await pg.waitForTimeout(500);
   const m = await pg.evaluate(() => {
     const cv = document.getElementById('umbLz');
@@ -311,12 +311,11 @@ di(cuadros[0].oscuro >= 0.50,
      'la barra va debajo de la cifra, no dentro (' + m.sucias +
      ' filas de la cifra con barra encima, ' + aire.toFixed(0) + ' px de aire)');
 
-  /* Comparten el canto IZQUIERDO. Antes se pedian los dos, porque la barra
-     media exactamente lo que la cifra; ahora la escena es una columna alineada
-     a la izquierda y la cifra es mas corta que el riel a proposito —el riel
-     llega hasta el objetivo, la cifra ocupa lo que ocupa—. Pedir los dos
-     cantos seria pedir el diseno anterior. */
-
+  const dI = Math.abs(m.cantoBarra[0] - m.cantoCifra[0]) / m.dpr;
+  const dD = Math.abs(m.cantoBarra[1] - m.cantoCifra[1]) / m.dpr;
+  di(masaneable(m) && dI <= 14 && dD <= 14,
+     'y mide lo que mide la cifra, canto con canto (' +
+     dI.toFixed(0) + ' px a la izquierda, ' + dD.toFixed(0) + ' a la derecha)');
 }
 
 /* ── la cifra: se arma, funde y abre ──────────────────────────────────────
@@ -331,120 +330,67 @@ di(cuadros[0].oscuro >= 0.50,
      0,40-1,00  la cifra blanca se abre y entrega la ronda                */
 const CAJA = { x: 180, y: 150, width: 1110, height: 460 };
 const enP = async (v) => {
-  await pg.evaluate(y => scrollTo(0, y), Math.round(cajaU.top + v * (cajaU.alto - cajaU.vh)));
+  await pg.evaluate(y => scrollTo(0, y), Math.round(caja.top + v * (caja.alto - caja.vh)));
   await pg.waitForTimeout(420);
   return franja(pg, CAJA);
 };
 
-/* ── la cifra sale de la cabeza del riel ─────────────────────────────────
-   El diseno cambio de raiz y estas comprobaciones median el anterior: buscaban
-   teselas que ya no existen y las encontraban en las marcas del riel, asi que
-   pasaban sin mirar nada. Lo que hay que afirmar ahora es otra cosa, y es la
-   idea entera de la escena:
+const arma = [];
+for (const v of [0.05, 0.11, 0.17, 0.23]) arma.push((await enP(v)).tesela);
+di(arma.every((v, i) => i === 0 || v > arma[i - 1] + 0.012),
+   'la cifra se arma por pasos, no aparece de una pieza (' +
+   arma.map(v => (v * 100).toFixed(1) + '%').join(' → ') + ')');
+di(arma[0] < arma[3] * 0.45,
+   'y al empezar solo hay un trozo, no la cifra entera atenuada (' +
+   (arma[3] ? (arma[0] / arma[3] * 100).toFixed(0) : '—') + '% de lo que acaba siendo)');
 
-     · que al principio NO haya cifra. Es lo que la distingue de las cuatro
-       versiones anteriores, que abrian con un numero enorme centrado;
-     · que la cifra CREZCA desde donde el riel se ha parado, no que aparezca;
-     · y que acabe grande y pegada al canto izquierdo. */
-const caja = async (v) => {
-  await pg.evaluate(y => scrollTo(0, y), Math.round(cajaU.top + v * (cajaU.alto - cajaU.vh)));
-  await pg.waitForTimeout(420);
-  return pg.evaluate(() => {
+/* Hecha de PIEZAS mientras se arma: se cuenta cuantas veces cambia de encendido
+   a apagado al recorrer una fila. Un glifo macizo cambia dos veces por trazo;
+   uno de teselas, una por tesela. */
+const piezas = await enP(0.17);
+di(piezas.saltos >= 14,
+   'y mientras se arma esta hecha de piezas, no pintada de una pieza (' +
+   piezas.saltos.toFixed(1) + ' cambios por fila)');
+
+/* Y acaba BLANCA, que es lo que se pidio: fundida, limpia y sin tinte. Se mide
+   despues de la fusion y antes de que se abra. */
+const fundida = await enP(0.37);
+di(fundida.blanco > 0.05 && fundida.blanco > fundida.tesela * 3,
+   'y termina en blanco, no en el azul con el que se arma (' +
+   (fundida.blanco * 100).toFixed(1) + '% blanco frente a ' +
+   (fundida.tesela * 100).toFixed(1) + '% azul)');
+
+/* ── el canto de la abertura va encendido ─────────────────────────────────
+   Sin el, lo que crece es un agujero: se ve la pagina de detras, pero no se ve
+   que algo se ESTA abriendo. El filo de luz que sigue el contorno del glifo es
+   lo que convierte el agujero en una puerta, y es un detalle que se puede caer
+   en cualquier refactor sin que nada mas se entere.
+
+   No se mide por brillo: el hueco ya ensena la pagina, que es clara, y quitar
+   el filo bajaba el porcentaje de pixeles claros en vez de subirlo -22,19 con
+   filo y 23,03 sin el, o sea al reves-. Lo que distingue al filo es que es luz
+   AZULADA sobre el canto, asi que se cuenta eso. Medido en 0,50: 1,7 % con el
+   filo y 0,0 % sin el. */
+{
+  await pg.evaluate(v => scrollTo(0, v), Math.round(caja.top + 0.50 * (caja.alto - caja.vh)));
+  await pg.waitForTimeout(500);
+  const f = await pg.evaluate(() => {
     const cv = document.getElementById('umbLz');
     const c = document.createElement('canvas'); c.width = cv.width; c.height = cv.height;
     c.getContext('2d').drawImage(cv, 0, 0);
     const d = c.getContext('2d').getImageData(0, 0, c.width, c.height).data;
-    /* La CIFRA es la mancha blanca MAS ALTA. Cogiendo todas las filas con
-       blanco por encima de un liston, el rotulo del importe entraba tambien:
-       empieza en el canto de la columna, asi que arrastraba el canto izquierdo
-       a su sitio y la comprobacion de alineacion daba 25 px de desajuste con
-       la cifra centrada a la fuerza. Se agrupan las filas en bandas seguidas y
-       se coge la mas alta: la cifra mide 220 px y un rotulo, 14.  */
-    const porFila = [];
-    for (let y = 0; y < c.height; y += 2) {
-      let k = 0;
-      for (let x = 0; x < c.width; x += 2) {
-        const i = (y*c.width + x) * 4;
-        const M = Math.max(d[i], d[i+1], d[i+2]), mn = Math.min(d[i], d[i+1], d[i+2]);
-        if (M > 200 && M - mn < 22) k++;
-      }
-      porFila.push([y, k]);
+    let n = 0, tot = 0;
+    for (let i = 0; i < d.length; i += 4) {
+      if (d[i+3] < 8) continue;
+      tot++;
+      const L = (0.2126*d[i] + 0.7152*d[i+1] + 0.0722*d[i+2]) / 255;
+      if (L > 0.62 && L < 0.97 && d[i+2] > d[i] + 22) n++;
     }
-    const liston = c.width * 0.012;
-    let y0 = -1, y1 = -1, alto = 0;
-    for (let k = 0; k < porFila.length; k++) {
-      if (porFila[k][1] < liston) continue;
-      let z = k;
-      while (z + 1 < porFila.length && porFila[z + 1][1] >= liston) z++;
-      if (porFila[z][0] - porFila[k][0] > alto) {
-        alto = porFila[z][0] - porFila[k][0]; y0 = porFila[k][0]; y1 = porFila[z][0];
-      }
-      k = z;
-    }
-    let x0 = 1e9, x1 = -1e9, n = 0;
-    for (let y = y0; y >= 0 && y <= y1; y += 2) {
-      for (let x = 0; x < c.width; x += 2) {
-        const i = (y*c.width + x) * 4;
-        const M = Math.max(d[i], d[i+1], d[i+2]), mn = Math.min(d[i], d[i+1], d[i+2]);
-        if (M > 200 && M - mn < 22) { if (x < x0) x0 = x; if (x > x1) x1 = x; n++ }
-      }
-    }
-    const dpr = c.height / (cv.getBoundingClientRect().height || 1);
-    if (y0 < 0 || n < 40) return { hay: false, dpr };
-    let bl = 0, az = 0;
-    for (let y = y0; y <= y1; y += 2) for (let x = x0; x <= x1; x += 2) {
-      const i = (y*c.width + x) * 4;
-      const M = Math.max(d[i], d[i+1], d[i+2]), mn = Math.min(d[i], d[i+1], d[i+2]);
-      if (M > 200 && M - mn < 22) bl++;
-      else if (d[i+2] > d[i] + 40 && d[i+2] > 70) az++;
-    }
-    /* y el canto izquierdo del RIEL, que es la fila con mas azul: lo necesita
-       la comprobacion de que las dos cosas estan en columna */
-    let fr = -1, mx = 0;
-    for (let y = 0; y < c.height; y += 2) {
-      let k = 0;
-      for (let x = 0; x < c.width; x += 2) {
-        const i = (y*c.width + x) * 4;
-        if (d[i+2] > d[i] + 40 && d[i+2] > 70) k++;
-      }
-      if (k > mx) { mx = k; fr = y }
-    }
-    let rx = -1;
-    if (fr >= 0) for (let x = 0; x < c.width; x++) {
-      const i = (fr*c.width + x) * 4;
-      if (d[i+2] > d[i] + 18 && d[i+2] > 40) { rx = x; break }
-    }
-    return { hay: true, x0: x0/dpr, x1: x1/dpr, y0: y0/dpr, y1: y1/dpr,
-             alto: alto/dpr, blanco: bl, azul: az, riel: rx/dpr, dpr };
+    return tot ? n / tot * 100 : 0;
   });
-};
-
-/* 0,38 y no 0,34: a 0,34 la cifra va por el 20 % de su recorrido y se dibuja
-   al 44 % de opacidad, asi que ni siquiera llega al liston de «blanco» y la
-   medida daba «no hay». Se mide donde ya se ve, que sigue siendo a menos de la
-   mitad de su tamano final. */
-const c1 = await caja(0.14), c2 = await caja(0.38), c3 = await caja(0.45);
-di(!c1.hay || c1.alto < 40,
-   'al principio no hay cifra, solo el instrumento (' +
-   (c1.hay ? c1.alto.toFixed(0) + ' px de alto' : 'ninguna') + ')');
-di(c2.hay && c3.hay && c3.alto > c2.alto * 1.5,
-   'y la cifra crece desde la cabeza, no aparece hecha (' +
-   (c2.hay ? c2.alto.toFixed(0) : '0') + ' → ' + (c3.hay ? c3.alto.toFixed(0) : '0') + ' px)');
-di(c3.hay && c3.alto > 120 && c3.x0 < c3.x1 - 80,
-   'y acaba grande (' + (c3.hay ? c3.alto.toFixed(0) + ' px de alto' : '—') + ')');
-/* En COLUMNA: el canto izquierdo de la cifra y el del riel son el mismo. Antes
-   se pedian los dos cantos porque la barra media exactamente lo que la cifra;
-   ahora la cifra es mas corta que el riel a proposito -el riel llega hasta el
-   objetivo, la cifra ocupa lo que ocupa-, asi que lo que hay que afirmar es la
-   alineacion, no la igualdad. */
-const rielX = c3.riel;
-di(c3.hay && Math.abs(c3.x0 - rielX) <= 26,
-   'y arranca en el mismo canto que el riel, en columna (' +
-   (c3.hay ? Math.abs(c3.x0 - rielX).toFixed(0) : '—') + ' px de desajuste)');
-/* Y es BLANCA, que es lo que se pidio: el azul es del instrumento, no suyo. */
-di(c3.hay && c3.blanco > 200 && c3.blanco > c3.azul * 6,
-   'y en blanco, no en el azul del instrumento (' +
-   (c3.hay ? c3.blanco + ' blancos frente a ' + c3.azul + ' azules' : '—') + ')');
+  di(f >= 0.8, 'el canto de la abertura va encendido, no es un agujero (' +
+     f.toFixed(2) + ' % de luz en el filo)');
+}
 
 /* La apertura entrega la seccion: la ronda va ganando pantalla mientras la
    cifra crece. Si el hueco dejara de crecer -o creciera sobre su propio
@@ -469,7 +415,7 @@ di(cuadros[1].desv >= 0.010 || cuadros[2].desv >= 0.010,
    carril, la cabeza del relleno y el tope de 100 %. La fraccion entre las tres
    es el porcentaje que la barra esta contando. */
 {
-  await pg.evaluate(v => scrollTo(0, v), Math.round(cajaU.top + 0.34 * (cajaU.alto - cajaU.vh)));
+  await pg.evaluate(v => scrollTo(0, v), Math.round(caja.top + 0.34 * (caja.alto - caja.vh)));
   await pg.waitForTimeout(500);
   const tira = (await pg.screenshot({ clip:{ x:0, y:0, width:1440, height:900 } })).toString('base64');
   const m = await pg.evaluate(async (b64) => {
