@@ -249,13 +249,24 @@ JS = """<script>
        a 0,60 la pantalla se quedaba negra con una curva blanca en una esquina.
        Escalando alrededor de un punto interior, ese punto se queda quieto y su
        entorno crece sin limite: el hueco acaba comiendose la pantalla siempre.
-       Y un punto interior seguro ya lo tenemos: cualquier tesela. */
-    var mx=0,my=0;
-    for(var q=0;q<tes.length;q++){ mx+=tes[q].x; my+=tes[q].y }
-    mx/=tes.length; my/=tes.length;
+       Y un punto interior seguro ya lo tenemos: cualquier tesela.
+
+       Y NO en el centro. El punto de fuga manda hacia donde crece el hueco, y
+       durante mucho tiempo estuvo en el centro del bloque -la tesela mas
+       cercana al centroide-, que puesto en pantalla cae en (0,66 · 0,34):
+       arriba y a la derecha. La ronda que hay detras tiene su tinta -titular,
+       panel, precios- en (0,22 · 0,72): abajo y a la izquierda. Medido a lo
+       largo de toda la apertura, las dos cifras no se mueven: el hueco se
+       abria SIEMPRE en la esquina opuesta a lo que tenia que ensenar, y por
+       eso la transicion no decia nada por mucho que se le retocara el brillo.
+       El ojo se apunta al cuadrante de la tinta y se coge la tesela real mas
+       cercana, que sigue garantizando que el punto cae dentro del glifo. */
+    var okX=cifraIzq+(cifraDer-cifraIzq)*0.30;
+    var okY=cifraY+(cifraBajo-cifraArriba)*0.16;
     var mejor=0, dmin=1e9;
     for(var q2=0;q2<tes.length;q2++){
-      var dd=(tes[q2].x-mx)*(tes[q2].x-mx)+(tes[q2].y-my)*(tes[q2].y-my);
+      var ex=tes[q2].x+TLADO/2-okX, ey=tes[q2].y+TLADO/2-okY;
+      var dd=ex*ex+ey*ey;
       if(dd<dmin){ dmin=dd; mejor=q2 }
     }
     ojoX=tes[mejor].x+TLADO/2; ojoY=tes[mejor].y+TLADO/2;
@@ -291,14 +302,28 @@ JS = """<script>
      lados. Funcionaba, pero es un recurso de motion graphics: nueve paneles
      deslizando. Una cifra que se abre y te deja pasar dice lo mismo con una
      sola idea, que es lo que hace la pagina en todas partes: menos piezas. */
-  var ARMA_A=0.00, ARMA_B=0.24, ARMA_C=0.10;   /* inicio, fin, duracion de tesela */
-  /* La fusion termina en 0,34 y la apertura no empieza hasta 0,40: entre las
-     dos hay un respiro en el que la cifra esta QUIETA, blanca y limpia. Sin
-     ese hueco la fusion y la apertura se pisaban y el contorno escalonado de
-     las teselas seguia asomando justo cuando la cifra tenia que leerse mejor.
-     Un gesto tiene que terminar antes de que empiece el siguiente. */
-  var FUNDE_A=0.24, FUNDE_B=0.34;              /* junta a cero y color a blanco */
-  var ABRE_A=0.40;                             /* la cifra se abre */
+  /* EL RELOJ DE LA PUERTA, Y POR QUE ESTABA MAL.
+     Treinta rondas de retoques a esta transicion y ninguna arreglaba nada,
+     porque lo que fallaba no era el dibujo: era el reloj. La cifra se abria
+     entre 0,40 y 1,00 -el 60 % de la seccion- y DETRAS NO HABIA NADA. Medido
+     apagando el lienzo y mirando la pagina sola: de 0,02 a 0,44 la ronda es
+     un rectangulo claro vacio; el titular no entra en cuadro hasta 0,48 y el
+     panel con el precio no esta bien encuadrado hasta 0,86. O sea que el
+     hueco se abria sobre el margen de arriba de la seccion y lo que se veia
+     era una curva blanca barriendo la pantalla durante media seccion, sin
+     nada dentro. No es un problema de brillo, de color ni de easing: la
+     puerta y lo que hay al otro lado iban desincronizadas un cuarto de
+     seccion.
+
+     El reloj nuevo lo ata a lo que hay detras. La cifra se arma con mas
+     calma, funde, se queda QUIETA un momento -un gesto tiene que terminar
+     antes de que empiece el siguiente- y se abre en 0,58, que es justo
+     cuando el titular de la ronda y su panel ya estan en cuadro. Asi el
+     hueco ensena la ronda, que es lo que la transicion dice que hace. */
+  var ARMA_A=0.00, ARMA_B=0.40, ARMA_C=0.13;   /* inicio, fin, duracion de tesela */
+  var FUNDE_A=0.40, FUNDE_B=0.52;              /* junta a cero y color a blanco */
+  var ABRE_A=0.62;                             /* la cifra se abre */
+  var ABRE_B=0.92;                             /* y esta entregada */
   var cae=function(t){return 1-Math.pow(1-t,3.4)};   /* el mismo de la rueda */
 
   /* del azul de la tesela al blanco, en el propio espacio del color: echarle
@@ -467,7 +492,7 @@ JS = """<script>
        cifra, un respiro, y el radio entero. Y si no cabe en pantalla, el que
        encoge es el derrame -es luz, aguanta- y no el aire. */
     var y=barraY(), derrame=barraDerrame();
-    var t=tramo(p,0.08,0.34);
+    var t=tramo(p,0.08,FUNDE_B);
     var f=an*meta*t;                       /* lo recorrido */
     /* el carril y sus marcas de escala: sin ellas la barra es un cargador
        generico; con ellas es un instrumento */
@@ -662,8 +687,16 @@ JS = """<script>
        se pinta. Con un degradado o un color translucido como fillStyle el
        hueco sale a medias y la pagina se queda detras de un velo permanente:
        es exactamente lo que paso la primera vez. Opaco siempre. */
-    var t=pesa(Math.min(1,(p-ABRE_A)/(0.995-ABRE_A)));
-    var esc=1+t*t*80;                       /* al cuadrado: arranca despacio */
+    var t=pesa(Math.min(1,(p-ABRE_A)/(ABRE_B-ABRE_A)));
+    /* Al cuadrado para que arranque despacio, MAS una cola que se dispara al
+       final. Sin la cola el hueco se quedaba clavado: medido, del 0,68 al
+       0,84 de la seccion el agujero pasaba del 50 % al 53 % de la pantalla y
+       ahi se quedaba, porque el ojo ya esta dentro de un contraforma y el
+       asta de al lado crece al mismo ritmo que el hueco: hasta que el asta no
+       se sale de cuadro no pasa nada. Eso es el sexto de seccion en que solo
+       se ve una curva blanca que no se mueve. La cola saca el asta de la
+       pantalla en vez de pasearla por ella. */
+    var esc=1+t*t*80+Math.pow(t,6)*300;
     var blanco=Math.max(0,1-t*3.4);         /* el blanco se va en el primer tercio */
     /* Un ultimo velo que se va del todo al final. No es lo que abre la escena
        -eso lo hace el hueco-: es el seguro de que no quede una esquirla de

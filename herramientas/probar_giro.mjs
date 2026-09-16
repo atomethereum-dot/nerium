@@ -187,7 +187,7 @@ di(caja && caja.alto > caja.vh * 1.5,
    'con recorrido de scroll para operarlo (' + (caja ? Math.round(caja.alto / caja.vh * 100) / 100 : 0) + ' pantallas)');
 
 const cuadros = [];
-for (const p of [0.05, 0.30, 0.50, 0.72, 0.99]) {
+for (const p of [0.05, 0.30, 0.57, 0.78, 0.99]) {
   await pg.evaluate(v => scrollTo(0, v), Math.round(caja.top + p * (caja.alto - caja.vh)));
   await pg.waitForTimeout(420);
   cuadros.push({ p, ...await franja(pg, { x: 420, y: 150, width: 600, height: 600 }) });
@@ -222,7 +222,7 @@ di(cuadros[0].oscuro >= 0.50,
    incluido. Entre las dos tiene que haber aire de verdad. */
 {
   const g = await pg.evaluate(v => scrollTo(0, v),
-                              Math.round(caja.top + 0.38 * (caja.alto - caja.vh)));
+                              Math.round(caja.top + 0.57 * (caja.alto - caja.vh)));
   await pg.waitForTimeout(500);
   const m = await pg.evaluate(() => {
     const cv = document.getElementById('umbLz');
@@ -325,9 +325,17 @@ di(cuadros[0].oscuro >= 0.50,
    tiempos nuevos es mitad de la fusion, y decia que la cifra no estaba hecha
    de piezas cuando lo que pasaba es que ya habia dejado de estarlo.
 
-     0,00-0,24  las teselas vuelan y arman la cifra, en azul
-     0,24-0,34  funden: se cierran las juntas y el color va a blanco
-     0,40-1,00  la cifra blanca se abre y entrega la ronda                */
+   RELOJ NUEVO. El viejo abria la cifra en 0,40 y detras no habia nada: la
+   ronda no entra en cuadro hasta 0,48 y no esta bien encuadrada hasta 0,86,
+   asi que el hueco se abria sobre el margen vacio de la seccion. El reloj se
+   ato a lo que hay detras, y con el se mueven todos los puntos de muestreo de
+   este fichero. Si vuelven a moverse las fases, se mueven aqui.
+
+     0,00-0,40  las teselas vuelan y arman la cifra, en azul
+     0,40-0,52  funden: se cierran las juntas y el color va a blanco
+     0,52-0,62  quieta: blanca, con su barra y sus rotulos, legible
+     0,62-0,92  la cifra se abre y entrega la ronda, que ya esta detras
+     0,92-1,00  entregada                                                 */
 const CAJA = { x: 180, y: 150, width: 1110, height: 460 };
 const enP = async (v) => {
   await pg.evaluate(y => scrollTo(0, y), Math.round(caja.top + v * (caja.alto - caja.vh)));
@@ -336,7 +344,7 @@ const enP = async (v) => {
 };
 
 const arma = [];
-for (const v of [0.05, 0.11, 0.17, 0.23]) arma.push((await enP(v)).tesela);
+for (const v of [0.08, 0.18, 0.29, 0.38]) arma.push((await enP(v)).tesela);
 di(arma.every((v, i) => i === 0 || v > arma[i - 1] + 0.012),
    'la cifra se arma por pasos, no aparece de una pieza (' +
    arma.map(v => (v * 100).toFixed(1) + '%').join(' → ') + ')');
@@ -347,14 +355,14 @@ di(arma[0] < arma[3] * 0.45,
 /* Hecha de PIEZAS mientras se arma: se cuenta cuantas veces cambia de encendido
    a apagado al recorrer una fila. Un glifo macizo cambia dos veces por trazo;
    uno de teselas, una por tesela. */
-const piezas = await enP(0.17);
+const piezas = await enP(0.29);
 di(piezas.saltos >= 14,
    'y mientras se arma esta hecha de piezas, no pintada de una pieza (' +
    piezas.saltos.toFixed(1) + ' cambios por fila)');
 
 /* Y acaba BLANCA, que es lo que se pidio: fundida, limpia y sin tinte. Se mide
    despues de la fusion y antes de que se abra. */
-const fundida = await enP(0.37);
+const fundida = await enP(0.57);
 di(fundida.blanco > 0.05 && fundida.blanco > fundida.tesela * 3,
    'y termina en blanco, no en el azul con el que se arma (' +
    (fundida.blanco * 100).toFixed(1) + '% blanco frente a ' +
@@ -374,7 +382,7 @@ di(fundida.blanco > 0.05 && fundida.blanco > fundida.tesela * 3,
    contando luz AZULADA sobre el canto. Con filo daba 1,7-2,7 %; sin el,
    0,00 %. El limite se pone en 0,3. */
 {
-  await pg.evaluate(v => scrollTo(0, v), Math.round(caja.top + 0.50 * (caja.alto - caja.vh)));
+  await pg.evaluate(v => scrollTo(0, v), Math.round(caja.top + 0.74 * (caja.alto - caja.vh)));
   await pg.waitForTimeout(500);
   const f = await pg.evaluate(() => {
     const cv = document.getElementById('umbLz');
@@ -394,11 +402,100 @@ di(fundida.blanco > 0.05 && fundida.blanco > fundida.tesela * 3,
      f.toFixed(2) + ' % de luz azulada, limite 0,3)');
 }
 
+/* ── Y DETRAS DE LA PUERTA HAY RONDA ──────────────────────────────────────
+   Esta es la prueba que faltaba, y la que habria ahorrado treinta rondas de
+   retoques. Todas las demas miran el LIENZO: que las teselas vuelen, que
+   funda a blanco, que el hueco crezca. Ninguna miraba lo que el hueco ENSENA.
+   Y ahi estaba el fallo: la cifra se abria en 0,40 sobre el margen de arriba
+   de la ronda, que esta vacio, asi que durante media seccion lo que se veia
+   era una curva blanca barriendo una pagina en blanco. El lienzo estaba
+   perfecto y la transicion no decia nada.
+
+   El primer intento de prueba muestreaba un punto FIJO —0,74— y pasaba con
+   los dos relojes, porque en 0,74 la puerta esta abierta en ambos. Eso no
+   media la sincronia, media el final. Lo que hay que buscar es el INSTANTE en
+   que la puerta se abre, y ese instante depende del reloj: se busca barriendo
+   la seccion hasta que el hueco del lienzo se come un cuarto de la pantalla,
+   y se mira la pagina AHI. Asi la prueba no sabe nada de las constantes y
+   sigue valiendo si manana se mueven.
+
+   La ronda es clara, asi que su contenido -titular, panel, precios, boton-
+   son pixeles oscuros; un margen vacio da casi cero. */
+{
+  let pAbre = null, hueco = 0;
+  for (let v = 0.30; v <= 0.98; v += 0.02) {
+    await pg.evaluate(y => scrollTo(0, y), Math.round(caja.top + v * (caja.alto - caja.vh)));
+    await pg.waitForTimeout(150);
+    hueco = await pg.evaluate(() => {
+      const cv = document.getElementById('umbLz');
+      const c = document.createElement('canvas'); c.width = cv.width; c.height = cv.height;
+      c.getContext('2d').drawImage(cv, 0, 0);
+      const d = c.getContext('2d').getImageData(0, 0, c.width, c.height).data;
+      let n = 0, tot = 0;
+      for (let i = 3; i < d.length; i += 4) { tot++; if (d[i] < 8) n++ }
+      return n / tot;
+    });
+    if (hueco >= 0.25) { pAbre = v; break }
+  }
+  di(pAbre !== null, 'la puerta llega a abrirse de verdad' +
+     (pAbre === null ? ' (el hueco nunca pasa del 25 % de la pantalla)' : ' (en ' + pAbre.toFixed(2) + ')'));
+  /* Y no se cuenta la tinta de toda la pantalla, sino la que cae DENTRO DEL
+     HUECO. Contando la pantalla entera los dos relojes salian parecidos -0,66
+     contra 1,28-, porque en los dos hay algo de ronda en cuadro; la pregunta
+     no es si la ronda esta ahi, es si se ve POR LA PUERTA. Se guarda el hueco
+     como mascara en una rejilla de 160x100 -en coordenadas relativas, que el
+     lienzo y la captura no miden igual-, se apaga el lienzo y se cuenta solo
+     donde la mascara dice que hay hueco. */
+  let hay = 0;
+  if (pAbre !== null) {
+    const mask = await pg.evaluate(() => {
+      const GX = 160, GY = 100;
+      const cv = document.getElementById('umbLz');
+      const c = document.createElement('canvas'); c.width = cv.width; c.height = cv.height;
+      c.getContext('2d').drawImage(cv, 0, 0);
+      const d = c.getContext('2d').getImageData(0, 0, c.width, c.height).data;
+      const m = [];
+      for (let gy = 0; gy < GY; gy++) for (let gx = 0; gx < GX; gx++) {
+        const px = Math.min(c.width - 1, Math.floor((gx + .5) / GX * c.width));
+        const py = Math.min(c.height - 1, Math.floor((gy + .5) / GY * c.height));
+        m.push(d[(py * c.width + px) * 4 + 3] < 8 ? 1 : 0);
+      }
+      return m;
+    });
+    await pg.addStyleTag({ content: '#umbLz{opacity:0!important}' });
+    await pg.waitForTimeout(260);
+    const b64 = (await pg.screenshot()).toString('base64');
+    hay = await pg.evaluate(async ({ s, mask }) => {
+      const GX = 160, GY = 100;
+      const im = new Image();
+      await new Promise(r => { im.onload = r; im.src = 'data:image/png;base64,' + s });
+      const c = document.createElement('canvas'); c.width = im.width; c.height = im.height;
+      const x = c.getContext('2d'); x.drawImage(im, 0, 0);
+      const d = x.getImageData(0, 0, c.width, c.height).data;
+      let n = 0, tot = 0;
+      for (let gy = 0; gy < GY; gy++) for (let gx = 0; gx < GX; gx++) {
+        if (!mask[gy * GX + gx]) continue;
+        const px = Math.min(c.width - 1, Math.floor((gx + .5) / GX * c.width));
+        const py = Math.min(c.height - 1, Math.floor((gy + .5) / GY * c.height));
+        const i = (py * c.width + px) * 4;
+        tot++;
+        const L = (0.2126*d[i] + 0.7152*d[i+1] + 0.0722*d[i+2]) / 255;
+        if (L < 0.45) n++;
+      }
+      return tot ? n / tot * 100 : 0;
+    }, { s: b64, mask });
+  }
+  di(hay >= 1.2, 'y por esa puerta se ve la ronda, no un margen vacio (' +
+     hay.toFixed(2) + ' % de tinta DENTRO del hueco, limite 1,2)');
+  await pg.reload({ waitUntil: 'load' });
+  await pg.waitForTimeout(2400);
+}
+
 /* La apertura entrega la seccion: la ronda va ganando pantalla mientras la
    cifra crece. Si el hueco dejara de crecer -o creciera sobre su propio
    interior, que es tinta- esto se quedaria plano. */
 const abre = [];
-for (const v of [0.46, 0.62, 0.80]) abre.push((await enP(v)).medio);
+for (const v of [0.66, 0.76, 0.88]) abre.push((await enP(v)).medio);
 di(abre[1] > abre[0] + 0.05 && abre[2] > abre[1],
    'y al abrirse va entregando la ronda, no crece sobre si misma (' +
    abre.map(v => v.toFixed(2)).join(' → ') + ')');
@@ -417,7 +514,7 @@ di(cuadros[1].desv >= 0.010 || cuadros[2].desv >= 0.010,
    carril, la cabeza del relleno y el tope de 100 %. La fraccion entre las tres
    es el porcentaje que la barra esta contando. */
 {
-  await pg.evaluate(v => scrollTo(0, v), Math.round(caja.top + 0.34 * (caja.alto - caja.vh)));
+  await pg.evaluate(v => scrollTo(0, v), Math.round(caja.top + 0.57 * (caja.alto - caja.vh)));
   await pg.waitForTimeout(500);
   const tira = (await pg.screenshot({ clip:{ x:0, y:0, width:1440, height:900 } })).toString('base64');
   const m = await pg.evaluate(async (b64) => {

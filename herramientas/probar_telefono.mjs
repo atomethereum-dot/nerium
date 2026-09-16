@@ -153,7 +153,12 @@ di(suelo.arriba > suelo.abajo + 0.05,
   });
   if (!u) { di(false, 'el umbral esta en el telefono'); }
   else {
-    await pg.evaluate(v => scrollTo(0, v), Math.round(u.top + 0.38 * (u.alto - u.vh)));
+    // 0,57 y no 0,38: el reloj del umbral se re-sincronizo con la pagina que
+    // hay detras -la cifra se arma hasta 0,40, funde hasta 0,52 y se queda
+    // quieta hasta 0,62-, asi que el momento en que la cifra esta blanca,
+    // entera y con su barra se movio. En 0,38 esto media la fusion a medias y
+    // cantaba un choque que no existe.
+    await pg.evaluate(v => scrollTo(0, v), Math.round(u.top + 0.57 * (u.alto - u.vh)));
     await pg.waitForTimeout(700);
     const m = await pg.evaluate(() => {
       const cv = document.getElementById('umbLz');
