@@ -8243,12 +8243,51 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
   var W=0,H=0,DPR=1,dentro=false,pide=0;
   var LOSAS=9;                        /* impar: ninguna losa parte la cifra por el medio */
   var placa=document.createElement('canvas'), pc=placa.getContext('2d');
-  var cara='', tamCifra=0, meta=0.85;
+  var cara='', mono='', tamCifra=0, meta=0.85, rot={arriba:'',dinero:'',tope:'',pie:''};
 
   function tipo(){
     /* la misma familia que los titulares de la pagina, leida de la pagina */
     var h=document.querySelector('.hero h1')||document.body;
     return getComputedStyle(h).fontFamily;
+  }
+  function tipoMono(){
+    var e=document.querySelector('.sale-live')||document.querySelector('.mono')||document.body;
+    return getComputedStyle(e).fontFamily;
+  }
+
+  /* ── LO QUE RODEA A LA CIFRA ───────────────────────────────────────────
+     Un 85 % gigante en mitad de la pantalla puede ser cualquier cosa, y una
+     barra encendida debajo, tambien. Hacen falta cuatro datos y ninguno se
+     escribe aqui: se leen de la propia seccion de la ronda, que es la que los
+     tiene vivos y traducidos a los once idiomas. Escribirlos a mano seria
+     tener dos verdades y que una se quedara vieja.
+
+       · que ronda es            → «.sale-live»    («Seed Round open»)
+       · cuanto se lleva         → «#saleRaised» y su hermano
+                                   («$13.616.000 raised of $16,000,000»)
+       · donde acaba la barra    → el importe que aparece en ese hermano
+       · con que condiciones     → «.raise-foot»   (minimo y maximo) */
+  function limpio(e){
+    if(!e) return '';
+    var c=e.cloneNode(true);
+    /* el numero de seccion -«07»- no es parte del rotulo */
+    var n=c.querySelector('.sk-n'); if(n) n.remove();
+    return (c.textContent||'').replace(/\s+/g,' ').trim();
+  }
+  function rotulos(){
+    var r={arriba:'',dinero:'',tope:'',pie:''};
+    r.arriba=limpio(document.querySelector('.sale-live')).toUpperCase();
+    var a=document.getElementById('saleRaised');
+    if(a){
+      var resto=a.nextElementSibling?limpio(a.nextElementSibling):'';
+      r.dinero=((a.textContent||'').trim()+' '+resto).replace(/\s+/g,' ').trim().toUpperCase();
+      /* el tope de la barra es el ultimo importe de esa frase: el objetivo */
+      var m=resto.match(/[^\s]*\d[\d.,]*[^\s]*$/);
+      r.tope=m?m[0]:'';
+    }
+    var f=document.querySelector('.raise-foot');
+    if(f) r.pie=[].map.call(f.children,limpio).join('   ·   ').toUpperCase();
+    return r;
   }
   /* La plancha: la tinta con la cifra RECORTADA. Se dibuja una vez por medida
      y las losas no son mas que tajadas suyas, cada una desplazada. Redibujar
@@ -8297,7 +8336,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
      El coste: un fillRect por tesela, sin texto y sin sombra, sobre un lienzo
      propio que las losas luego reparten con drawImage. Nueve drawImage mas por
      cuadro en vez de nueve pasadas de teselas. */
-  var tes=[], TLADO=0, cifraTxt='85%', cifraY=0, ojoX=0, ojoY=0, cifraBajo=0;
+  var tes=[], TLADO=0, cifraTxt='85%', cifraY=0, ojoX=0, ojoY=0, cifraBajo=0, cifraArriba=0;
   var cifraCv=document.createElement('canvas'), cc=cifraCv.getContext('2d');
   var TONOS=['#1B49E0','#2F6BFF','#2E86FF','#79ABFF'];   /* la rampa, de hondo a claro */
 
@@ -8313,7 +8352,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
     ac.fillStyle='#fff';
     ac.fillText(txt,w/2,h/2-tam*0.10);
     var d=ac.getImageData(0,0,w,h).data;
-    var x0=1e9,x1=-1e9,y1=-1e9;
+    var x0=1e9,x1=-1e9,y0=1e9,y1=-1e9;
     for(var y=0;y<h;y+=TLADO){
       for(var x=0;x<w;x+=TLADO){
         /* la tesela entra si su centro cae dentro del glifo: aqui si vale el
@@ -8321,7 +8360,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
            el borde solo engorda el trazo un pixel */
         var px=Math.min(w-1,x+(TLADO>>1)), py=Math.min(h-1,y+(TLADO>>1));
         if(d[(py*w+px)*4+3]<130) continue;
-        if(x<x0)x0=x; if(x>x1)x1=x; if(y>y1)y1=y;
+        if(x<x0)x0=x; if(x>x1)x1=x; if(y<y0)y0=y; if(y>y1)y1=y;
         tes.push({x:x,y:y});
       }
     }
@@ -8331,7 +8370,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
        no sobre lo que el glifo OCUPA de verdad: con «85%» a peso 200 el haz
        vertical de la cabeza subia 190 px y se metia dentro del por ciento.
        Se pregunta donde acaba el dibujo y se coloca debajo. */
-    cifraBajo=y1+TLADO;
+    cifraBajo=y1+TLADO; cifraArriba=y0;
     /* El PUNTO DE FUGA de la apertura tiene que caer DENTRO del glifo.
        Agrandando la cifra desde el centro de la caja, el centro cae en el hueco
        entre el cinco y el por ciento -que es tinta-, asi que por mucho que
@@ -8483,7 +8522,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
     W=Math.max(1,r.width); H=Math.max(1,r.height);
     lz.width=Math.round(W*DPR); lz.height=Math.round(H*DPR);
     cx.setTransform(DPR,0,0,DPR,0,0);
-    cara=tipo(); plancha();
+    cara=tipo(); mono=tipoMono(); rot=rotulos(); plancha();
   }
   function avance(){
     var r=raiz.getBoundingClientRect();
@@ -8513,6 +8552,17 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
      luz hasta donde el ojo lo llama neon, y el nucleo va casi blanco con tinte
      azul, que es lo que de verdad hace el efecto. */
   var AZUL='62,134,255';
+  /* El sitio de la barra lo necesitan dos: ella y los rotulos que la
+     etiquetan. Se calcula en un solo sitio para que no se separen nunca. */
+  var DERRAME=138;
+  function barraY(){
+    var tope=cifraBajo+20;
+    var y=Math.max(tope+DERRAME, H*0.58);
+    return y>H-86?H-86:y;
+  }
+  function barraDerrame(){
+    return Math.max(40,Math.min(DERRAME,barraY()-(cifraBajo+20)));
+  }
   function barra(dx,p){
     var an=Math.min(W*0.86,tamCifra*3.1), x0=(W-an)/2+dx;
     /* Debajo del canto MEDIDO de la cifra, y contando TODA la luz que la barra
@@ -8523,11 +8573,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
        Asi que el sitio se calcula desde el borde del DERRAME: el canto de la
        cifra, un respiro, y el radio entero. Y si no cabe en pantalla, el que
        encoge es el derrame -es luz, aguanta- y no el aire. */
-    var DERRAME=138;
-    var tope=cifraBajo+20;
-    var y=Math.max(tope+DERRAME, H*0.58);
-    if(y>H-86) y=H-86;
-    var derrame=Math.max(40,Math.min(DERRAME,y-tope));
+    var y=barraY(), derrame=barraDerrame();
     var t=tramo(p,0.08,0.34);
     var f=an*meta*t;                       /* lo recorrido */
     /* el carril y sus marcas de escala: sin ellas la barra es un cargador
@@ -8605,6 +8651,72 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
     cx.restore();
   }
 
+  /* ── la composicion alrededor de la cifra ─────────────────────────────
+     Cada rotulo entra en SU momento, y el orden cuenta la historia: primero
+     que ronda es, luego la barra con sus topes -para que se sepa que mide-,
+     despues la cifra funde y aparece el importe, y al final las condiciones.
+     Todos a la vez seria un cartel; escalonados es una escena. */
+  function ren(txt,x,y,tam,alfa,al,col,esp){
+    if(!txt||alfa<=0.004) return;
+    cx.save();
+    cx.globalAlpha=alfa;
+    cx.font='500 '+tam.toFixed(1)+'px '+mono;
+    cx.textAlign=al; cx.textBaseline='alphabetic';
+    if(cx.letterSpacing!==undefined) cx.letterSpacing=(tam*esp).toFixed(2)+'px';
+    cx.fillStyle=col;
+    cx.fillText(txt,x,y);
+    if(cx.letterSpacing!==undefined) cx.letterSpacing='0px';
+    cx.restore();
+  }
+  function marco(p,vel){
+    var tk=Math.max(10,Math.min(14,W*0.0098));
+    var bx=Math.min(W*0.86,tamCifra*3.1), x0=(W-bx)/2, x1=x0+bx;
+    var by=barraY();
+
+    /* 1 · que ronda es, con su punto vivo, sobre la cifra */
+    var a1=tramo(p,0.02,0.12)*vel;
+    if(a1>0.004&&rot.arriba){
+      var yr=Math.max(tk*3.4, cifraArriba-tk*2.6);
+      /* El ancho se mide CON el interletrado puesto, que es como se va a
+         dibujar: midiendolo sin el, el punto se montaba encima de la primera
+         letra. Y el rotulo se corre a la derecha media distancia del punto
+         para que el conjunto -punto mas texto- quede centrado. */
+      var anc=0;
+      cx.save();
+      cx.font='500 '+tk+'px '+mono;
+      if(cx.letterSpacing!==undefined) cx.letterSpacing=(tk*0.26).toFixed(2)+'px';
+      anc=cx.measureText(rot.arriba).width;
+      cx.restore();
+      var hueco=tk*1.15;
+      ren(rot.arriba, W/2+hueco/2, yr, tk, a1, 'center', 'rgba(228,234,243,.92)', 0.26);
+      cx.save(); cx.globalAlpha=a1; cx.fillStyle='#12A45E';
+      cx.beginPath();
+      cx.arc(W/2+hueco/2-anc/2-hueco*0.55, yr-tk*0.32, tk*0.25, 0, Math.PI*2);
+      cx.fill();
+      cx.restore();
+    }
+
+    /* 2 · los topes de la barra: sin ellos es un cargador, con ellos es una
+       escala. A la izquierda el cero, a la derecha el objetivo de la ronda. */
+    var a2=tramo(p,0.10,0.22)*vel;
+    /* Por debajo de la CABEZA, que mide 30 px a cada lado del carril. Puestos
+       a «tk*2,6» —26 px en el telefono— el tope de la derecha caia justo
+       encima de la cabeza, que al 85 % esta casi en ese extremo. */
+    var ye=by+Math.max(tk*2.6,42);
+    ren('0', x0, ye, tk*0.86, a2, 'left', 'rgba(150,178,230,.72)', 0.20);
+    ren(rot.tope, x1, ye, tk*0.86, a2, 'right', 'rgba(150,178,230,.72)', 0.20);
+
+    /* 3 · cuanto se lleva, debajo de la cifra y pegado a ella: entra cuando la
+       cifra ya esta fundida, que es cuando se puede leer de un golpe */
+    var a3=tramo(p,0.26,0.36)*vel;
+    ren(rot.dinero, W/2, cifraBajo+tk*2.9, tk*1.18, a3, 'center', 'rgba(236,243,255,.94)', 0.14);
+
+    /* 4 · y las condiciones, al pie */
+    var a4=tramo(p,0.30,0.42)*vel;
+    ren(rot.pie, W/2, Math.min(H-tk*1.6, ye+tk*2.4), tk*0.84, a4,
+        'center', 'rgba(140,166,214,.70)', 0.20);
+  }
+
   function dibuja(p){
     cx.clearRect(0,0,W,H);
     if(p<ABRE_A){
@@ -8613,6 +8725,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
       pintaCifra(p);
       cx.drawImage(cifraCv,0,0,W,H);
       barra(0,p);
+      marco(p,1);
       return;
     }
     /* ── LA CIFRA SE ABRE ─────────────────────────────────────────────────
@@ -8662,7 +8775,11 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
     cx.restore();
     /* la barra se apaga con el blanco: es el instrumento de la cifra, y cuando
        la cifra deja de serlo no pinta nada */
-    if(blanco>0.02){ cx.globalAlpha=blanco*tinta; barra(0,p); cx.globalAlpha=1 }
+    /* los rotulos se van con la cifra: son suyos, no del fondo */
+    if(blanco>0.02){
+      cx.globalAlpha=blanco*tinta; barra(0,p); cx.globalAlpha=1;
+      marco(p,blanco*tinta);
+    }
   }
   function pinta(){
     pide=0;

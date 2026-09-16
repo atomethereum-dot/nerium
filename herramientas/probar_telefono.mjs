@@ -118,7 +118,7 @@ di(suelo.arriba > suelo.abajo + 0.05,
       const c = document.createElement('canvas'); c.width = cv.width; c.height = cv.height;
       c.getContext('2d').drawImage(cv, 0, 0);
       const d = c.getContext('2d').getImageData(0, 0, c.width, c.height).data;
-      const bl = [], az = [];
+      const bl = [], az = [], azAncho = [], anchoBl = [];
       for (let y = 0; y < c.height; y++) {
         let b1 = 0, a1 = 0;
         for (let x = 0; x < c.width; x++) {
@@ -127,16 +127,42 @@ di(suelo.arriba > suelo.abajo + 0.05,
           if (M > 200 && M - mn < 22) b1++;
           else if (d[i+2] > d[i] + 18 && d[i+2] > 40) a1++;
         }
-        bl.push(b1 > 10); az.push(a1 >= 2);
+      /* Los listones van en PROPORCION AL ANCHO, no en pixeles sueltos, y es
+         lo que hace que la medida distinga la barra de los rotulos. Con
+         «bl>20 / az>=2» el rotulo de arriba -texto de 14 px- contaba como
+         banda blanca, y sus pixeles de borde antialiasados contaban como
+         azul: la comprobacion daba 0 px de aire con la escena perfectamente
+         bien. La cifra y la barra son objetos ANCHOS -cientos de pixeles por
+         fila-; un rotulo, no. */
+        const anchoMin = c.width * 0.08;
+        bl.push(b1 > anchoMin); anchoBl.push(b1);        /* la CIFRA es ancha; un rotulo, no */
+        az.push(a1 >= 2);              /* de la barra basta un hilo */
+        azAncho.push(a1 > anchoMin);
       }
-      let ini = bl.indexOf(true), fin = ini;
-      if (ini >= 0) { while (fin + 1 < bl.length && bl[fin + 1]) fin++ }
-      return { cifra: [ini, fin], azul: az.indexOf(true),
+      /* De todas las bandas blancas seguidas, la CIFRA es la del pico mas alto.
+         Cogiendo la primera se cogia el rotulo de arriba -que en el telefono
+         tambien es ancho en proporcion- y entonces «dentro de la cifra» era
+         «dentro del rotulo», donde por supuesto no hay barra: la comprobacion
+         daba cero filas sucias con el fallo puesto. */
+      let ini = -1, fin = -1, mejor = -1;
+      for (let y = 0; y < bl.length; y++) {
+        if (!bl[y]) continue;
+        let z = y, pico = 0;
+        while (z < bl.length && bl[z]) { if (anchoBl[z] > pico) pico = anchoBl[z]; z++ }
+        if (pico > mejor) { mejor = pico; ini = y; fin = z - 1 }
+        y = z;
+      }
+      let sucias = 0;
+      for (let y = ini; y >= 0 && y <= fin; y++) if (az[y]) sucias++;
+      let bajo = -1;
+      for (let y = fin + 1; y < azAncho.length; y++) if (azAncho[y]) { bajo = y; break }
+      return { cifra: [ini, fin], sucias, bajo,
                dpr: c.height / (cv.getBoundingClientRect().height || 1) };
     });
-    const aire = (m.azul - m.cifra[1]) / m.dpr;
-    di(m.cifra[0] >= 0 && m.azul > m.cifra[1] && aire >= 30,
-       'la barra va debajo de la cifra, no dentro (' + aire.toFixed(0) + ' px de aire)');
+    const aire = m.bajo < 0 ? 999 : (m.bajo - m.cifra[1]) / m.dpr;
+    di(m.cifra[0] >= 0 && m.sucias === 0 && aire >= 24,
+       'la barra va debajo de la cifra, no dentro (' + m.sucias +
+       ' filas de la cifra con barra encima, ' + aire.toFixed(0) + ' px de aire)');
   }
 }
 

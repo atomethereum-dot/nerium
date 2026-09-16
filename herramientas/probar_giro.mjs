@@ -228,7 +228,7 @@ di(cuadros[0].oscuro >= 0.50,
     const c = document.createElement('canvas'); c.width = cv.width; c.height = cv.height;
     c.getContext('2d').drawImage(cv, 0, 0);
     const d = c.getContext('2d').getImageData(0, 0, c.width, c.height).data;
-    const blanca = [], azul = [];
+    const blanca = [], azul = [], azulAncho = [], anchoBl = [];
     for (let y = 0; y < c.height; y++) {
       let bl = 0, az = 0;
       for (let x = 0; x < c.width; x++) {
@@ -237,23 +237,55 @@ di(cuadros[0].oscuro >= 0.50,
         if (M > 200 && M - mn < 22) bl++;
         else if (d[i+2] > d[i] + 18 && d[i+2] > 40) az++;
       }
-      /* Dos pixeles bastan para «aqui hay barra», y el liston de azul va bajo
-         a proposito. Lo que se metia dentro de la cifra no era el trazo de la
-         barra: era su LUZ -el haz de la cabeza, de tres pixeles, y el derrame,
-         que es una elipse de 138 px de radio-. Con el liston alto la
-         comprobacion pasaba con el fallo puesto y en pantalla se veia. */
-      blanca.push(bl > 20); azul.push(az >= 2);
+      /* Los listones van en PROPORCION AL ANCHO, no en pixeles sueltos, y es
+         lo que hace que la medida distinga la barra de los rotulos. Con
+         «bl>20 / az>=2» el rotulo de arriba -texto de 14 px- contaba como
+         banda blanca, y sus pixeles de borde antialiasados contaban como
+         azul: la comprobacion daba 0 px de aire con la escena perfectamente
+         bien. La cifra y la barra son objetos ANCHOS -cientos de pixeles por
+         fila-; un rotulo, no. */
+      const anchoMin = c.width * 0.08;
+      blanca.push(bl > anchoMin); anchoBl.push(bl);      /* la CIFRA es ancha; un rotulo, no */
+      azul.push(az >= 2);              /* de la barra basta un hilo */
+      azulAncho.push(az > anchoMin);
     }
-    let ini = blanca.indexOf(true), fin = ini;
-    if (ini >= 0) { while (fin + 1 < blanca.length && blanca[fin + 1]) fin++ }
-    const az0 = azul.indexOf(true);
-    return { cifra: [ini, fin], azul: az0, alto: c.height,
+    /* La caja de la cifra: la banda seguida de filas anchas en blanco. El
+       liston de blanco va en proporcion al ancho para que el rotulo de arriba
+       -texto de 14 px- no se cuele como si fuera la cifra. */
+    /* De todas las bandas blancas seguidas, la CIFRA es la del pico mas alto.
+       Cogiendo la primera se cogia el rotulo de arriba -que en el telefono
+       tambien es ancho en proporcion- y entonces «dentro de la cifra» era
+       «dentro del rotulo», donde por supuesto no hay barra: la comprobacion
+       daba cero filas sucias con el fallo puesto. */
+    let ini = -1, fin = -1, mejor = -1;
+    for (let y = 0; y < blanca.length; y++) {
+      if (!blanca[y]) continue;
+      let z = y, pico = 0;
+      while (z < blanca.length && blanca[z]) { if (anchoBl[z] > pico) pico = anchoBl[z]; z++ }
+      if (pico > mejor) { mejor = pico; ini = y; fin = z - 1 }
+      y = z;
+    }
+    /* Y lo que DECIDE: cuantas filas de la cifra llevan barra encima. Un solo
+       numero no valia para las dos cosas que se metian dentro -el haz de la
+       cabeza es un hilo de tres pixeles que llegaba muy arriba, y el derrame
+       es ancho pero poco profundo-. Contado dentro de la caja, con el liston
+       de azul en dos pixeles, se ven las dos. */
+    let sucias = 0;
+    for (let y = ini; y >= 0 && y <= fin; y++) if (azul[y]) sucias++;
+    /* El aire se mide hasta el CUERPO de la barra, no hasta el primer pixel
+       azulado: justo debajo de la cifra estan sus propios bordes antialiasados
+       y el rotulo del importe, y con dos pixeles de liston el aire salia de
+       1 px estando la barra a doscientos. Lo que se mete dentro se cuenta con
+       el hilo; donde EMPIEZA la barra, con su anchura. */
+    let bajo = -1;
+    for (let y = fin + 1; y < azulAncho.length; y++) if (azulAncho[y]) { bajo = y; break }
+    return { cifra: [ini, fin], sucias, bajo,
              dpr: c.height / (cv.getBoundingClientRect().height || 1) };
   });
-  const hueco = (m.azul - m.cifra[1]) / m.dpr;
-  di(m.cifra[0] >= 0 && m.azul > m.cifra[1] && hueco >= 30,
-     'la barra va debajo de la cifra, no dentro (' + hueco.toFixed(0) +
-     ' px de aire entre el canto de la cifra y lo mas alto de la barra)');
+  const aire = m.bajo < 0 ? 999 : (m.bajo - m.cifra[1]) / m.dpr;
+  di(m.cifra[0] >= 0 && m.sucias === 0 && aire >= 24,
+     'la barra va debajo de la cifra, no dentro (' + m.sucias +
+     ' filas de la cifra con barra encima, ' + aire.toFixed(0) + ' px de aire)');
 }
 
 /* ── la cifra: se arma, funde y abre ──────────────────────────────────────
