@@ -22,173 +22,104 @@ Cinco cosas, que son las cinco que bajaban la nota:
 `montar_home.py` lo aplica en el paso 17.
 """
 import os
-import random
-
-import contorno
 
 MARCA = '/* ══ la mitad clara, decidida ══'
 FIN = '/* ══ fin: papel ══ */'
 
 
 # ── 1 · el suelo ─────────────────────────────────────────────────────────────
-def _curvas(semilla, W, H, paso, niveles, bultos, sesgo=0.0):
-    """Las lineas de nivel del campo, ya encadenadas y listas para <path>."""
-    f = contorno.campo(semilla, bultos, W, H, sesgo)
-    m = [f(x * 20, y * 20) for x in range(W // 20 + 1) for y in range(H // 20 + 1)]
-    hi = max(m)
-    salida = []
-    # Los niveles arrancan por encima de CERO, no del minimo: con la ventana de
-    # borde el minimo es cero en todo el contorno del papel, y un nivel ahi
-    # dibujaria el marco.
-    for k in range(1, niveles + 1):
-        n = hi * (0.10 + 0.86 * k / (niveles + 1.0))
-        for pts in contorno.cadenas(contorno.marchar(f, W, H, paso, n)):
-            crudo = pts
-            pts = contorno.adelgaza(pts, 2.4)
-            if len(pts) < 5:
-                continue
-            d = 'M' + ' L'.join('%d %d' % (round(x), round(y)) for x, y in pts)
-            # cerrada o abierta: solo las cerradas se pueden RELLENAR. Una
-            # abierta -la que se sale del lienzo- rellenada da un manchon con
-            # un canto recto en el borde, que fue lo primero que salio.
-            cerrada = (abs(crudo[0][0] - crudo[-1][0]) < 2.0
-                       and abs(crudo[0][1] - crudo[-1][1]) < 2.0)
-            salida.append((k / float(niveles), d, cerrada))
-    return salida
+def _luz(W, H, focos, barrido, vineta):
+    """Un campo de LUZ. Sin trazos, sin figuras, sin motivo.
+
+    Cuatro intentos de darle fondo a la mitad clara y cuatro rechazos, y los
+    cuatro iban en la misma direccion: mas dibujo. Placas; placas con sombra y
+    canto; placas mas planos en diagonal; curvas de nivel rellenas. Cada vuelta
+    anadia materia para que no se viera plano, y cada vuelta se alejaba mas de
+    lo que se pedia, que era minimalista.
+
+    Lo que da profundidad sin anadir materia es la LUZ. Un ciclorama de estudio
+    no tiene ni una linea y no es plano: es una superficie lisa con un gradiente
+    de luz grande, asimetrico y con una sola direccion. Eso es esto. Toda la
+    profundidad viene del reparto de luz, y lo unico que hay encima es el grano,
+    que ya estaba.
+
+    Y ademas sale gratis: un campo liso comprime a nada -8 KB contra los 86 del
+    relieve- y no tiene trazos que re-rasterizar.
+    """
+    defs, capas = [], []
+    for i, (cx, cy, rx, ry, col, op) in enumerate(focos):
+        nid = 'f%d' % i
+        defs.append('<radialGradient id="%s">'
+                    '<stop offset="0" stop-color="%s" stop-opacity="%s"/>'
+                    '<stop offset=".55" stop-color="%s" stop-opacity="%s"/>'
+                    '<stop offset="1" stop-color="%s" stop-opacity="0"/>'
+                    '</radialGradient>' % (nid, col, op, col, str(round(float(op) * 0.42, 4)), col))
+        capas.append('<ellipse cx="%d" cy="%d" rx="%d" ry="%d" fill="url(#%s)"/>'
+                     % (cx, cy, rx, ry, nid))
+    x1, y1, x2, y2, paradas = barrido
+    defs.append('<linearGradient id="bar" x1="%s" y1="%s" x2="%s" y2="%s">%s</linearGradient>'
+                % (x1, y1, x2, y2,
+                   ''.join('<stop offset="%s" stop-color="%s" stop-opacity="%s"/>' % p
+                           for p in paradas)))
+    # El barrido va DEBAJO de los focos: es la direccion de la luz, y los focos
+    # son los acentos que se posan encima.
+    capas.insert(0, '<rect x="0" y="0" width="%d" height="%d" fill="url(#bar)"/>' % (W, H))
+    # Y la vineta, muy floja: es lo que impide que el borde inferior se vaya en
+    # blanco y la banda se cierre por abajo en vez de disolverse.
+    defs.append('<radialGradient id="vin" cx=".5" cy=".42" r=".78">'
+                '<stop offset=".55" stop-color="%s" stop-opacity="0"/>'
+                '<stop offset="1" stop-color="%s" stop-opacity="%s"/>'
+                '</radialGradient>' % (vineta[0], vineta[0], vineta[1]))
+    capas.append('<rect x="0" y="0" width="%d" height="%d" fill="url(#vin)"/>' % (W, H))
+    return ('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 %d %d" '
+            'preserveAspectRatio="xMidYMid slice"><defs>%s</defs>%s</svg>'
+            % (W, H, ''.join(defs), ''.join(capas)))
 
 
 def placas(semilla=31):
-    """El suelo de la mitad clara: un relieve, no un campo de bloques.
+    """El suelo de la mitad clara: luz, y nada mas.
 
-       Lo que habia antes eran ciento veinte rectangulos de 40 px alineados a
-       una rejilla de 40. Da igual con cuanto mimo se iluminen: rectangulos en
-       filas, a la misma altura y con el mismo alto, es papel pautado. Se
-       intento salvarlo dos veces -subiendo la opacidad, poniendoles sombra y
-       canto- y las dos veces siguio leyendose como un cuaderno, porque el
-       problema no era el acabado sino la FORMA.
-
-       Esto no tiene ni un rectangulo. Es un campo escalar suave cortado a
-       catorce alturas: curvas de nivel. Cerradas, anidadas, ninguna igual a
-       otra y ninguna alineada con nada. Una superficie con cotas se lee como
-       una superficie —eso es lo que le faltaba—, y ademas dice de que va la
-       casa: es el dibujo de un plano, no una decoracion.
-
-       Cada curva va GRABADA: una linea clara un pixel arriba y la oscura
-       encima. Es el truco del bajorrelieve y es lo que hace que la linea se
-       hunda en el papel en vez de estar pintada sobre el.
-
-       Y se apaga hacia arriba a la izquierda con una mascara, que es donde va
-       el titular en las siete secciones. El hueco limpio no se compone a ojo:
-       se recorta."""
+       La direccion es fija y es la misma en las siete bandas: entra por arriba
+       a la izquierda -que es el rincon del titular, y ahi hace falta que este
+       limpio y claro- y se hunde hacia abajo a la derecha, que es donde van
+       las tarjetas opacas y donde el peso no estorba."""
     W, H = 1600, 1000
-    curvas = _curvas(semilla, W, H, 9, 26, 28)
-    # PRIMERO LOS RELLENOS, despues las lineas. Con lineas solas lo que hay es
-    # un degradado con rayas encima: se ve el dibujo pero no el volumen. Lo que
-    # da volumen en un plano de cotas es que cada escalon entre dos curvas
-    # tenga su tono. Apiladas, las cerradas van construyendo el relieve.
-    trazos = []
-    for prof, d, cerrada in curvas:
-        if not cerrada:
-            continue
-        trazos.append('<path d="%sZ" fill="rgb(96,126,184)" opacity="%.4f"/>'
-                      % (d, 0.030 + 0.016 * prof))
-    for prof, d, cerrada in curvas:
-        # las cotas altas -el centro de cada loma- van mas marcadas: es lo que
-        # da el orden de lectura, igual que en un plano de verdad
-        op = 0.20 + 0.34 * prof
-        trazos.append('<path d="%s" stroke="rgb(255,255,255)" stroke-width="1.1" '
-                      'fill="none" opacity="%.3f" transform="translate(0,-1.2)"/>'
-                      % (d, op * 0.85))
-        trazos.append('<path d="%s" stroke="rgb(86,116,172)" stroke-width="1" '
-                      'fill="none" opacity="%.3f"/>' % (d, op))
-
-    def rg(nid, col, op):
-        return ('<radialGradient id="' + nid + '">'
-                '<stop offset="0" stop-color="' + col + '" stop-opacity="' + op + '"/>'
-                '<stop offset="1" stop-color="' + col + '" stop-opacity="0"/></radialGradient>')
-    # La mascara: el relieve se desvanece hacia el rincon del titular.
-    mascara = ('<linearGradient id="mk" x1="0" y1="0" x2="1" y2="1">'
-               '<stop offset="0" stop-color="#000"/>'
-               '<stop offset=".22" stop-color="#5c5c5c"/>'
-               '<stop offset=".58" stop-color="#e4e4e4"/>'
-               '<stop offset="1" stop-color="#fff"/></linearGradient>'
-               '<mask id="mrel"><rect x="0" y="0" width="%d" height="%d" fill="url(#mk)"/></mask>'
-               % (W, H))
-    # Y la luz rasante, que es la que da direccion. Un foco redondo ilumina un
-    # punto; una rasante dice de donde viene la luz.
-    rasante = ('<linearGradient id="rasa" x1="0" y1="0" x2="1" y2="1">'
-               '<stop offset="0" stop-color="rgb(255,255,255)" stop-opacity=".58"/>'
-               '<stop offset=".34" stop-color="rgb(255,255,255)" stop-opacity=".18"/>'
-               '<stop offset=".64" stop-color="rgb(255,255,255)" stop-opacity="0"/>'
-               '<stop offset="1" stop-color="rgb(26,44,88)" stop-opacity=".10"/>'
-               '</linearGradient>')
-    defs = ('<defs>' + mascara + rasante
-                     + rg('l1', 'rgb(255,255,255)', '.24')
-                     + rg('l2', 'rgb(47,107,255)', '.11')
-                     + rg('l3', 'rgb(120,150,215)', '.13') + '</defs>')
-    luces = ('<rect x="0" y="0" width="%d" height="%d" fill="url(#rasa)"/>'
-             '<ellipse cx="200" cy="90" rx="600" ry="320" fill="url(#l1)"/>'
-             '<circle cx="1480" cy="900" r="560" fill="url(#l2)"/>'
-             '<circle cx="1560" cy="120" r="420" fill="url(#l3)"/>' % (W, H))
-    return ('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 %d %d" '
-            'preserveAspectRatio="xMidYMid slice">%s'
-            '<g mask="url(#mrel)">%s</g>%s</svg>'
-            % (W, H, defs, ''.join(trazos), luces))
+    return _luz(
+        W, H,
+        focos=(
+            # el foco principal, sobre el rincon del titular
+            (300, 130, 1180, 720, 'rgb(255,255,255)', '.92'),
+            # un azul muy ancho que le da cuerpo al medio sin cerrarlo
+            (1180, 700, 1000, 720, 'rgb(96,140,224)', '.16'),
+            # y un frio alto a la derecha, para que el peso no sea gris
+            (1560, 120, 620, 520, 'rgb(150,180,235)', '.20'),
+        ),
+        barrido=('0', '0', '1', '1',
+                 (('0', 'rgb(246,249,253)', '1'),
+                  ('.42', 'rgb(226,234,246)', '1'),
+                  ('1', 'rgb(198,211,232)', '1'))),
+        vineta=('rgb(40,62,110)', '.085'))
 
 
 def placas_alto(semilla=47):
-    """El mismo relieve, compuesto para una pantalla VERTICAL.
+    """El mismo campo, compuesto en VERTICAL.
 
-       No es un ajuste de tamano: la composicion depende de la FORMA del hueco.
-       Arriba el rincon limpio es la esquina del titular; en vertical el
-       titular ocupa todo el ancho, asi que lo que hay que dejar despejado es
-       la FRANJA DE ARRIBA, y la mascara va de arriba abajo en vez de en
-       diagonal. Y la caja es del ancho del telefono y se repite hacia abajo,
-       para que las cotas conserven su escala en vez de agrandarse ocho veces.
-    """
+       No es un ajuste de tamano: la luz entra por otro sitio. En vertical el
+       titular ocupa todo el ancho, asi que lo que tiene que quedar claro no es
+       una esquina sino la FRANJA DE ARRIBA, y el barrido va de arriba abajo en
+       vez de en diagonal."""
     W, H = 420, 1200
-    curvas = _curvas(semilla, W, H, 5, 22, 24, sesgo=0.42)
-    trazos = []
-    for prof, d, cerrada in curvas:
-        if not cerrada:
-            continue
-        trazos.append('<path d="%sZ" fill="rgb(96,126,184)" opacity="%.4f"/>'
-                      % (d, 0.030 + 0.016 * prof))
-    for prof, d, cerrada in curvas:
-        op = 0.20 + 0.34 * prof
-        trazos.append('<path d="%s" stroke="rgb(255,255,255)" stroke-width="1.1" '
-                      'fill="none" opacity="%.3f" transform="translate(0,-1.2)"/>'
-                      % (d, op * 0.85))
-        trazos.append('<path d="%s" stroke="rgb(70,102,162)" stroke-width="1" '
-                      'fill="none" opacity="%.3f"/>' % (d, op))
-
-    def rg(nid, col, op):
-        return ('<radialGradient id="' + nid + '">'
-                '<stop offset="0" stop-color="' + col + '" stop-opacity="' + op + '"/>'
-                '<stop offset="1" stop-color="' + col + '" stop-opacity="0"/></radialGradient>')
-    mascara = ('<linearGradient id="mkv" x1="0" y1="0" x2="0" y2="1">'
-               '<stop offset="0" stop-color="#000"/>'
-               '<stop offset=".14" stop-color="#151515"/>'
-               '<stop offset=".34" stop-color="#5e5e5e"/>'
-               '<stop offset=".64" stop-color="#e2e2e2"/>'
-               '<stop offset="1" stop-color="#fff"/></linearGradient>'
-               '<mask id="mrelv"><rect x="0" y="0" width="%d" height="%d" fill="url(#mkv)"/></mask>'
-               % (W, H))
-    rasante = ('<linearGradient id="mrasa" x1="0" y1="0" x2=".7" y2="1">'
-               '<stop offset="0" stop-color="rgb(255,255,255)" stop-opacity=".50"/>'
-               '<stop offset=".38" stop-color="rgb(255,255,255)" stop-opacity=".16"/>'
-               '<stop offset=".68" stop-color="rgb(255,255,255)" stop-opacity="0"/>'
-               '<stop offset="1" stop-color="rgb(26,44,88)" stop-opacity=".085"/>'
-               '</linearGradient>')
-    defs = ('<defs>' + mascara + rasante
-                     + rg('m1', 'rgb(255,255,255)', '.26')
-                     + rg('m2', 'rgb(47,107,255)', '.09') + '</defs>')
-    luces = ('<rect x="0" y="0" width="%d" height="%d" fill="url(#mrasa)"/>'
-             '<ellipse cx="210" cy="110" rx="400" ry="280" fill="url(#m1)"/>'
-             '<circle cx="400" cy="1140" r="300" fill="url(#m2)"/>' % (W, H))
-    return ('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 %d %d">%s'
-            '<g mask="url(#mrelv)">%s</g>%s</svg>'
-            % (W, H, defs, ''.join(trazos), luces))
+    return _luz(
+        W, H,
+        focos=(
+            (170, 110, 520, 460, 'rgb(255,255,255)', '.94'),
+            (330, 900, 420, 620, 'rgb(96,140,224)', '.17'),
+        ),
+        barrido=('0', '0', '.35', '1',
+                 (('0', 'rgb(247,250,253)', '1'),
+                  ('.38', 'rgb(228,236,247)', '1'),
+                  ('1', 'rgb(200,213,233)', '1'))),
+        vineta=('rgb(40,62,110)', '.075'))
 
 
 def escribir(raiz):

@@ -65,8 +65,15 @@ async function franja(pg, caja) {
       }
       if (cambios > 0) { saltos += cambios; filas++ }
     }
+    /* Blanco de verdad: claro Y neutro. Solo por luminancia, un azul claro
+       pasaria por blanco, y lo que se pidio fue que la cifra acabara BLANCA. */
+    let bl = 0;
+    for (let i = 0; i < d.length; i += 4) {
+      const M = Math.max(d[i], d[i+1], d[i+2]), mn = Math.min(d[i], d[i+1], d[i+2]);
+      if (M > 205 && M - mn < 20) bl++;
+    }
     return { medio: m, desv: Math.sqrt(s2 / n), oscuro: oscuro / n, claro: claro / n,
-             tesela: tes / n, saltos: filas ? saltos / filas : 0 };
+             tesela: tes / n, blanco: bl / n, saltos: filas ? saltos / filas : 0 };
   }, b64);
 }
 
@@ -202,29 +209,56 @@ di(cuadros[0].oscuro >= 0.50,
    no es el primer cuadro: en 0,05 la ventana de armado apenas ha empezado y no
    hay hueco ninguno, que es justo lo que se quiere. Midiendolo ahi, la
    comprobacion afirmaba lo viejo. */
-di(cuadros[1].saltos >= 14,
-   'y la cifra esta hecha de piezas, no pintada de una pieza (' +
-   cuadros[1].saltos.toFixed(1) + ' cambios por fila)');
+/* ── la cifra: se arma, funde y abre ──────────────────────────────────────
+   Los tres tiempos del umbral hacen cosas distintas y cada uno se mide en SU
+   tramo. Medirlos todos en el mismo cuadro fue el fallo de la version
+   anterior: la comprobacion del enrejado estaba puesta en 0,30, que con los
+   tiempos nuevos es mitad de la fusion, y decia que la cifra no estaba hecha
+   de piezas cuando lo que pasaba es que ya habia dejado de estarlo.
 
-/* ── y se ARMA: entra por pixeles, no de una pieza ────────────────────────
-   Cuatro cuadros dentro de la ventana de armado sobre la caja de la cifra. Lo
-   que se afirma son dos cosas distintas y las dos hacen falta: que crezca en
-   cada paso -si entrara de golpe, tres de los cuatro darian el mismo numero- y
-   que el primero sea una fraccion pequena del ultimo -si solo se pidiera que
-   creciera, un fundido de la cifra entera lo cumpliria igual-. */
+     0,00-0,24  las teselas vuelan y arman la cifra, en azul
+     0,24-0,34  funden: se cierran las juntas y el color va a blanco
+     0,40-1,00  la cifra blanca se abre y entrega la ronda                */
 const CAJA = { x: 180, y: 150, width: 1110, height: 460 };
-const arma = [];
-for (const p of [0.06, 0.14, 0.24, 0.32]) {
-  await pg.evaluate(v => scrollTo(0, v), Math.round(caja.top + p * (caja.alto - caja.vh)));
+const enP = async (v) => {
+  await pg.evaluate(y => scrollTo(0, y), Math.round(caja.top + v * (caja.alto - caja.vh)));
   await pg.waitForTimeout(420);
-  arma.push((await franja(pg, CAJA)).tesela);
-}
+  return franja(pg, CAJA);
+};
+
+const arma = [];
+for (const v of [0.05, 0.11, 0.17, 0.23]) arma.push((await enP(v)).tesela);
 di(arma.every((v, i) => i === 0 || v > arma[i - 1] + 0.012),
    'la cifra se arma por pasos, no aparece de una pieza (' +
    arma.map(v => (v * 100).toFixed(1) + '%').join(' → ') + ')');
 di(arma[0] < arma[3] * 0.45,
    'y al empezar solo hay un trozo, no la cifra entera atenuada (' +
    (arma[3] ? (arma[0] / arma[3] * 100).toFixed(0) : '—') + '% de lo que acaba siendo)');
+
+/* Hecha de PIEZAS mientras se arma: se cuenta cuantas veces cambia de encendido
+   a apagado al recorrer una fila. Un glifo macizo cambia dos veces por trazo;
+   uno de teselas, una por tesela. */
+const piezas = await enP(0.17);
+di(piezas.saltos >= 14,
+   'y mientras se arma esta hecha de piezas, no pintada de una pieza (' +
+   piezas.saltos.toFixed(1) + ' cambios por fila)');
+
+/* Y acaba BLANCA, que es lo que se pidio: fundida, limpia y sin tinte. Se mide
+   despues de la fusion y antes de que se abra. */
+const fundida = await enP(0.37);
+di(fundida.blanco > 0.05 && fundida.blanco > fundida.tesela * 3,
+   'y termina en blanco, no en el azul con el que se arma (' +
+   (fundida.blanco * 100).toFixed(1) + '% blanco frente a ' +
+   (fundida.tesela * 100).toFixed(1) + '% azul)');
+
+/* La apertura entrega la seccion: la ronda va ganando pantalla mientras la
+   cifra crece. Si el hueco dejara de crecer -o creciera sobre su propio
+   interior, que es tinta- esto se quedaria plano. */
+const abre = [];
+for (const v of [0.46, 0.62, 0.80]) abre.push((await enP(v)).medio);
+di(abre[1] > abre[0] + 0.05 && abre[2] > abre[1],
+   'y al abrirse va entregando la ronda, no crece sobre si misma (' +
+   abre.map(v => v.toFixed(2)).join(' → ') + ')');
 di(cuadros[4].medio >= 0.70,
    'y acaba entregando el suelo de la ronda, no un blanco inventado (' + cuadros[4].medio.toFixed(3) + ')');
 // El instrumento tiene que estar dibujado, no solo el negro: en el tramo de

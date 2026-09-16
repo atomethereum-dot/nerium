@@ -8276,6 +8276,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
        cifra se construye con teselas que vuelan a su sitio, que es el mismo
        lenguaje de la rueda del reparto del token. La plancha se queda siendo
        tinta lisa y la cifra vive en su propio lienzo. */
+    cifraTxt=txt; cifraY=H/2-tam*0.10;
     teselas(txt,tam);
   }
   /* ── la cifra se construye con teselas ────────────────────────────────
@@ -8296,7 +8297,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
      El coste: un fillRect por tesela, sin texto y sin sombra, sobre un lienzo
      propio que las losas luego reparten con drawImage. Nueve drawImage mas por
      cuadro en vez de nueve pasadas de teselas. */
-  var tes=[], TLADO=0;
+  var tes=[], TLADO=0, cifraTxt='85%', cifraY=0, ojoX=0, ojoY=0;
   var cifraCv=document.createElement('canvas'), cc=cifraCv.getContext('2d');
   var TONOS=['#1B49E0','#2F6BFF','#2E86FF','#79ABFF'];   /* la rampa, de hondo a claro */
 
@@ -8325,6 +8326,23 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
       }
     }
     var anc=Math.max(1,x1-x0);
+    /* El PUNTO DE FUGA de la apertura tiene que caer DENTRO del glifo.
+       Agrandando la cifra desde el centro de la caja, el centro cae en el hueco
+       entre el cinco y el por ciento -que es tinta-, asi que por mucho que
+       creciera el hueco lo que quedaba en pantalla era el interior de la cifra:
+       a 0,60 la pantalla se quedaba negra con una curva blanca en una esquina.
+       Escalando alrededor de un punto interior, ese punto se queda quieto y su
+       entorno crece sin limite: el hueco acaba comiendose la pantalla siempre.
+       Y un punto interior seguro ya lo tenemos: cualquier tesela. */
+    var mx=0,my=0;
+    for(var q=0;q<tes.length;q++){ mx+=tes[q].x; my+=tes[q].y }
+    mx/=tes.length; my/=tes.length;
+    var mejor=0, dmin=1e9;
+    for(var q2=0;q2<tes.length;q2++){
+      var dd=(tes[q2].x-mx)*(tes[q2].x-mx)+(tes[q2].y-my)*(tes[q2].y-my);
+      if(dd<dmin){ dmin=dd; mejor=q2 }
+    }
+    ojoX=tes[mejor].x+TLADO/2; ojoY=tes[mejor].y+TLADO/2;
     for(var i=0;i<tes.length;i++){
       var t=tes[i];
       var hh=Math.sin(t.x*12.9898+t.y*78.233)*43758.5453; hh=hh-Math.floor(hh);
@@ -8342,21 +8360,51 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
     }
   }
 
-  /* La ventana de armado acaba antes de que la primera losa se mueva (0,36):
-     armarse y desmontarse a la vez seria dos cosas peleandose. */
-  /* Acaba en 0,24 y no en 0,30: la primera losa arranca en 0,36 y con la
-     ventana anterior las ultimas teselas seguian aterrizando cuando la tinta
-     ya se estaba abriendo. Dos cosas a la vez y ninguna se lee. */
+  /* Tres tiempos, y cada uno hace una sola cosa:
+       0,00 - 0,24  las teselas vuelan y arman la cifra, en azul;
+       0,24 - 0,40  FUNDEN: se cierran las juntas y el color va a blanco. La
+                    cifra deja de estar HECHA de piezas y pasa a SER una pieza.
+                    Esta es la imagen que se queda;
+       0,40 - 1,00  esa cifra blanca se ABRE: es la ventana por la que entra la
+                    ronda. Crece desde el centro hasta comerse la pantalla.
+     Lo que habia antes era la plancha partida en nueve losas que se iban a los
+     lados. Funcionaba, pero es un recurso de motion graphics: nueve paneles
+     deslizando. Una cifra que se abre y te deja pasar dice lo mismo con una
+     sola idea, que es lo que hace la pagina en todas partes: menos piezas. */
   var ARMA_A=0.00, ARMA_B=0.24, ARMA_C=0.10;   /* inicio, fin, duracion de tesela */
+  /* La fusion termina en 0,34 y la apertura no empieza hasta 0,40: entre las
+     dos hay un respiro en el que la cifra esta QUIETA, blanca y limpia. Sin
+     ese hueco la fusion y la apertura se pisaban y el contorno escalonado de
+     las teselas seguia asomando justo cuando la cifra tenia que leerse mejor.
+     Un gesto tiene que terminar antes de que empiece el siguiente. */
+  var FUNDE_A=0.24, FUNDE_B=0.34;              /* junta a cero y color a blanco */
+  var ABRE_A=0.40;                             /* la cifra se abre */
   var cae=function(t){return 1-Math.pow(1-t,3.4)};   /* el mismo de la rueda */
 
+  /* del azul de la tesela al blanco, en el propio espacio del color: echarle
+     una capa blanca encima daria un azul lavado, no blanco. */
+  var _mz={};
+  function mezcla(hex,k){
+    var c=_mz[hex]; if(!c){ c=[parseInt(hex.slice(1,3),16),parseInt(hex.slice(3,5),16),
+                             parseInt(hex.slice(5,7),16)]; _mz[hex]=c }
+    return 'rgb('+Math.round(c[0]+(255-c[0])*k)+','+Math.round(c[1]+(255-c[1])*k)+','
+               +Math.round(c[2]+(255-c[2])*k)+')';
+  }
   function pintaCifra(p){
     if(cifraCv.width!==placa.width){ cifraCv.width=placa.width; cifraCv.height=placa.height }
     cc.setTransform(DPR,0,0,DPR,0,0);
     cc.clearRect(0,0,W,H);
     if(!tes.length) return;
-    var lado=Math.max(2,TLADO-1.1);            /* el hueco de 1,1 px, como la rueda */
-    for(var i=0;i<tes.length;i++){
+    /* La junta se cierra y el color va a blanco. Es el mismo gesto contado dos
+       veces: la cifra pasa de estar hecha de piezas a ser una pieza. */
+    var fu=tramo(p,FUNDE_A,FUNDE_B);
+    /* Fundida del todo, las teselas SOBRAN y ademas estorban: son cuadrados y
+       su silueta desborda el contorno de la letra, asi que por debajo de la
+       cifra limpia asomaba un reborde escalonado. Cuando la fusion termina se
+       dibuja solo la letra. Las dos son blancas, asi que el relevo no se ve. */
+    var soloLetra=fu>0.99;
+    var lado=Math.max(2,TLADO-1.1*(1-fu));
+    for(var i=0;i<tes.length&&!soloLetra;i++){
       var t=tes[i];
       var t0=ARMA_A+t.d*(ARMA_B-ARMA_A);
       var k=(p-t0)/ARMA_C;
@@ -8373,10 +8421,29 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
         cc.fillRect(-lado/2,-lado/2,lado,Math.max(1,lado*0.16));
         cc.restore();
       }else{
-        cc.fillStyle=t.c; cc.fillRect(x,y,lado,lado);
-        cc.fillStyle='rgba(226,238,255,.55)';
-        cc.fillRect(x,y,lado,Math.max(1,lado*0.16));
+        cc.fillStyle=fu>0?mezcla(t.c,fu):t.c; cc.fillRect(x,y,lado,lado);
+        if(fu<1){
+          /* el canto de luz se va con la junta: en una pieza maciza no pinta
+             nada, y dejarlo la volvia a partir en cuadros */
+          cc.globalAlpha=(1-fu);
+          cc.fillStyle='rgba(226,238,255,.55)';
+          cc.fillRect(x,y,lado,Math.max(1,lado*0.16));
+          cc.globalAlpha=1;
+        }
       }
+    }
+    /* Y cuando la fusion termina, encima va la LETRA. Las teselas pegadas dejan
+       el contorno escalonado -son cuadrados-, y lo que tiene que quedar es una
+       cifra, no un mosaico apretado. Se dibuja la letra de verdad con el alfa
+       de la fusion: al principio no se ve y al final es lo unico que se ve, asi
+       que el paso de mosaico a tipografia no tiene costura. Y es una sola
+       llamada, no mil seiscientos rectangulos. */
+    if(fu>0.002){
+      cc.globalAlpha=fu;
+      cc.font='200 '+tamCifra+'px '+cara;
+      cc.textAlign='center'; cc.textBaseline='middle';
+      cc.fillStyle='#fff';
+      cc.fillText(cifraTxt,W/2,cifraY);
     }
     cc.globalAlpha=1;
   }
@@ -8496,56 +8563,57 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
 
   function dibuja(p){
     cx.clearRect(0,0,W,H);
-    var alto=H/LOSAS;
-    /* la cifra se pinta UNA vez por cuadro en su propio lienzo, y cada losa
-       reparte su tajada con el mismo desplazamiento que la tinta: asi cuando
-       la plancha se desmonta, la cifra se rasga con ella */
-    pintaCifra(p);
-    /* Cada losa arranca en su momento y se va a su lado: las pares a la
-       izquierda, las impares a la derecha. El desfase va del centro hacia
-       fuera, asi que la cifra se abre por el medio y no de arriba abajo, que
-       es lo que la haria parecer una persiana. */
-    for(var i=0;i<LOSAS;i++){
-      var d=Math.abs(i-(LOSAS-1)/2)/((LOSAS-1)/2);   /* 0 centro, 1 extremos */
-      /* El desfase es largo a proposito: con todas las losas saliendo a la
-         vez lo que se ve es un glitch, y un glitch es otro cliché. Con esto
-         solo hay dos o tres en movimiento en cada instante y se lee como un
-         desmontaje deliberado. */
-      var arranca=0.36+0.30*d;
-      var t=pesa(Math.min(1,Math.max(0,(p-arranca)/(0.99-arranca))));
-      var lado=(i%2===0)?-1:1;
-      var dx=lado*t*(W*1.35);
-      var y=i*alto;
-      if(t>=1) continue;                              /* fuera de pantalla */
-      cx.save();
-      cx.beginPath(); cx.rect(0,y,W,alto+1); cx.clip();
-      cx.drawImage(placa,
-        0,Math.round(y*DPR),Math.round(W*DPR),Math.round((alto+1)*DPR),
-        dx,y,W,alto+1);
-      cx.drawImage(cifraCv,
-        0,Math.round(y*DPR),Math.round(W*DPR),Math.round((alto+1)*DPR),
-        dx,y,W,alto+1);
-      /* La barra va DENTRO del recorte de la losa y con su mismo
-         desplazamiento, asi que cuando la tinta se desmonta la barra se rasga
-         con ella. Flotando por encima seria un adorno pegado encima de la
-         escena; asi es parte de la misma materia. */
-      barra(dx,p);
-      cx.restore();
-      /* el filo de ataque, encendido en proporcion a lo que corre: es lo unico
-         que lleva color, y solo mientras se mueve */
-      if(t>0.001&&t<0.999){
-        var borde=(lado<0)?(dx+W):dx;
-        var lg=cx.createLinearGradient(borde-lado*90,0,borde,0);
-        lg.addColorStop(0,'rgba(62,134,255,0)');
-        lg.addColorStop(1,'rgba(62,134,255,'+(0.60*Math.sin(Math.PI*t)).toFixed(3)+')');
-        cx.save();
-        cx.beginPath(); cx.rect(0,y,W,alto+1); cx.clip();
-        cx.fillStyle=lg; cx.fillRect(Math.min(borde,borde-lado*90),y,90,alto+1);
-        cx.fillStyle='rgba(180,214,255,'+(0.80*Math.sin(Math.PI*t)).toFixed(3)+')';
-        cx.fillRect(borde-(lado<0?1.5:0),y,1.5,alto+1);
-        cx.restore();
-      }
+    if(p<ABRE_A){
+      /* la tinta entera, la cifra encima y la barra */
+      cx.drawImage(placa,0,0,W,H);
+      pintaCifra(p);
+      cx.drawImage(cifraCv,0,0,W,H);
+      barra(0,p);
+      return;
     }
+    /* ── LA CIFRA SE ABRE ─────────────────────────────────────────────────
+       La cifra blanca deja de estar pintada sobre la tinta y pasa a ser un
+       hueco EN la tinta, del mismo tamano y en el mismo sitio: en el cambio no
+       se mueve nada. Lo que se ve es que se rellena de blanco por dentro, y
+       ese blanco se apaga mientras la cifra crece, asi que por donde estaba la
+       cifra acaba entrando la ronda.
+
+       El recorte con «destination-out» borra EN PROPORCION AL ALFA de lo que
+       se pinta. Con un degradado o un color translucido como fillStyle el
+       hueco sale a medias y la pagina se queda detras de un velo permanente:
+       es exactamente lo que paso la primera vez. Opaco siempre. */
+    var t=pesa(Math.min(1,(p-ABRE_A)/(0.995-ABRE_A)));
+    var esc=1+t*t*80;                       /* al cuadrado: arranca despacio */
+    var blanco=Math.max(0,1-t*3.4);         /* el blanco se va en el primer tercio */
+    /* Un ultimo velo que se va del todo al final. No es lo que abre la escena
+       -eso lo hace el hueco-: es el seguro de que no quede una esquirla de
+       tinta en un canto cuando la ronda ya esta entregada. Empieza tardisimo a
+       proposito; fundiendola antes, la seccion se veia a traves de un velo
+       gris y lo que se leia era suciedad, no transicion. */
+    var tinta=1-tramo(t,0.86,1.0);
+    if(tinta<=0.002) return;                /* ya esta entregada: nada que pintar */
+
+    cx.globalAlpha=tinta;
+    cx.drawImage(placa,0,0,W,H);
+    cx.globalAlpha=1;
+    cx.save();
+    cx.translate(ojoX,ojoY); cx.scale(esc,esc); cx.translate(-ojoX,-ojoY);
+    cx.font='200 '+tamCifra+'px '+cara;
+    cx.textAlign='center'; cx.textBaseline='middle';
+    cx.globalCompositeOperation='destination-out';
+    cx.fillStyle='#000';
+    cx.fillText(cifraTxt,W/2,cifraY);
+    cx.globalCompositeOperation='source-over';
+    if(blanco>0.002){
+      cx.globalAlpha=blanco*tinta;
+      cx.fillStyle='#fff';
+      cx.fillText(cifraTxt,W/2,cifraY);
+      cx.globalAlpha=1;
+    }
+    cx.restore();
+    /* la barra se apaga con el blanco: es el instrumento de la cifra, y cuando
+       la cifra deja de serlo no pinta nada */
+    if(blanco>0.02){ cx.globalAlpha=blanco*tinta; barra(0,p); cx.globalAlpha=1 }
   }
   function pinta(){
     pide=0;

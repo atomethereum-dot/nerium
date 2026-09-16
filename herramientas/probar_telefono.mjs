@@ -63,33 +63,35 @@ const forma = await pg.evaluate(async (url) => {
 di(forma.h > forma.w, 'el dibujo del movil es mas alto que ancho, como la pantalla: ' +
    forma.w + 'x' + forma.h);
 
-/* El hueco limpio del movil es la franja de ARRIBA —ahi va el titular—, no una
-   esquina: en vertical el titular ocupa todo el ancho y no deja rincon libre. */
-const tinta = await pg.evaluate(async (url) => {
+/* El suelo del movil promete lo mismo que el de escritorio, con el hueco
+   limpio en otro sitio: en vertical el titular ocupa todo el ancho, asi que lo
+   que tiene que quedar claro es la FRANJA DE ARRIBA, no una esquina.
+   Se mide luz, no trazo: el suelo es un campo liso a proposito y contar trazo
+   daba cero estando el fondo bien. */
+const suelo = await pg.evaluate(async (url) => {
   const im = new Image();
   await new Promise((ok, no) => { im.onload = ok; im.onerror = no; im.src = url });
-  const c = document.createElement('canvas'); c.width = 390; c.height = 1114;
+  const c = document.createElement('canvas'); c.width = 200; c.height = 560;
   const x = c.getContext('2d');
-  x.fillStyle = '#EEF2F8'; x.fillRect(0, 0, c.width, c.height);
   x.drawImage(im, 0, 0, c.width, c.height);
   const d = x.getImageData(0, 0, c.width, c.height).data;
   const L = i => (0.2126*d[i] + 0.7152*d[i+1] + 0.0722*d[i+2]) / 255;
   const corte = c.height * 0.35;
-  let arriba = 0, abajo = 0;
-  for (let y = 2; y < c.height; y++) {
+  let lo = 1, hi = 0, sA = 0, nA = 0, sB = 0, nB = 0;
+  for (let y = 0; y < c.height; y++) {
     for (let px = 0; px < c.width; px++) {
-      const i = (y*c.width + px) * 4;
-      if (Math.abs(L(i) - L(i - 2*c.width*4)) < 0.018) continue;
-      if (y < corte) arriba++; else abajo++;
+      const l = L((y*c.width + px) * 4);
+      if (l < lo) lo = l; if (l > hi) hi = l;
+      if (y < corte) { sA += l; nA++ } else { sB += l; nB++ }
     }
   }
-  return { arriba, abajo,
-           dA: arriba/(c.width*corte), dB: abajo/(c.width*(c.height-corte)) };
+  return { rango: hi - lo, arriba: sA/nA, abajo: sB/nB };
 }, 'http://127.0.0.1:9133/img/' + arch);
-di(tinta.dA < tinta.dB * 0.5, 'y la franja de leer, despejada: ' +
-   (tinta.dB ? (tinta.dA / tinta.dB).toFixed(2) : '—') + ' de trazo arriba por cada 1 abajo');
-di(tinta.arriba + tinta.abajo > 12000,
-   'con dibujo de verdad y no cuatro trazos: ' + (tinta.arriba + tinta.abajo) + ' px');
+di(suelo.rango > 0.10,
+   'el suelo del movil no es un color plano: ' + suelo.rango.toFixed(3) + ' de recorrido de luz');
+di(suelo.arriba > suelo.abajo + 0.05,
+   'y la franja de leer es la mas clara, que es donde va el titular (' +
+   suelo.arriba.toFixed(3) + ' contra ' + suelo.abajo.toFixed(3) + ')');
 
 /* Nada se sale por el lado. Ojo con como se mide: la primera version miraba
    elemento por elemento si su borde derecho pasaba del ancho, y delataba el

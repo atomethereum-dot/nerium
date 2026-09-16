@@ -47,59 +47,49 @@ di(papel.every(p => /feTurbulence/.test(p.img)),
 const tap = (papel[0].img.match(/img\/([a-z0-9-]+\.(?:svg|webp|png|avif))/) || [, 'tapiz.svg'])[1];
 di(papel.every(p => p.img.includes(tap)),
    'y el dibujo del suelo, que es el fondo de verdad (' + tap + ')');
-/* ── el dibujo del suelo ──────────────────────────────────────────────────
-   Esto media el archivo: contaba <rect>, sumaba area por opacidad y comparaba
-   rincones. Servia mientras el dibujo eran ciento veinte rectangulos; ahora
-   son curvas de nivel y contar rectangulos daba cero estando el fondo lleno.
+/* ── el suelo de la mitad clara ───────────────────────────────────────────
+   Tercera version de estas comprobaciones, y la primera que mide lo que el
+   diseno de verdad afirma. La primera contaba <rect> del archivo; la segunda
+   contaba TRAZO —pixeles que se separan de su vecino de dos filas arriba—, que
+   servia mientras el fondo era un dibujo. Ahora no hay dibujo: el suelo es un
+   campo de LUZ, liso a proposito, y contar trazo daba cero estando el fondo
+   perfectamente bien.
 
-   Se pasa a medir PIXELES. Es mejor prueba, no un apano: lo que importa no es
-   con que primitiva esta hecho el dibujo sino cuanto dibujo hay y donde, y eso
-   sobrevive al siguiente rediseno. Se pinta el SVG solo, sin pagina encima, y
-   se cuenta TRAZO: pixeles que se separan de su vecino de dos filas mas
-   arriba. Una linea lo hace; un degradado liso, no. */
-const tinta = await pg.evaluate(async (url) => {
+   Lo que el suelo promete son tres cosas, y son estas tres las que se miden:
+     · que NO sea plano. Es el fallo que se quiere cazar: un color liso;
+     · que el rincon del titular sea lo mas CLARO. Ahi va tinta negra en las
+       siete secciones, y ademas es lo que da la direccion de la luz;
+     · y que el campo tire a frio, no a gris de plantilla.
+   Se miden pixeles del archivo que la pagina PIDE, no del que haya en disco. */
+const suelo = await pg.evaluate(async (url) => {
   const im = new Image();
   await new Promise((ok, no) => { im.onload = ok; im.onerror = no; im.src = url });
-  const c = document.createElement('canvas'); c.width = 1440; c.height = 900;
+  const c = document.createElement('canvas'); c.width = 400; c.height = 250;
   const x = c.getContext('2d');
-  x.fillStyle = '#EEF2F8'; x.fillRect(0, 0, c.width, c.height);
   x.drawImage(im, 0, 0, c.width, c.height);
   const d = x.getImageData(0, 0, c.width, c.height).data;
   const L = i => (0.2126*d[i] + 0.7152*d[i+1] + 0.0722*d[i+2]) / 255;
-  let rincon = 0, resto = 0, frio = 0, trazo = 0;
-  for (let y = 2; y < c.height; y++) {
+  let lo = 1, hi = 0, sRin = 0, nRin = 0, sRes = 0, nRes = 0, frios = 0, tot = 0;
+  for (let y = 0; y < c.height; y++) {
     for (let px = 0; px < c.width; px++) {
-      const i = (y*c.width + px) * 4;
-      /* 0,018 y no un pelo mas abajo: por debajo de ahi lo que se cuenta es el
-         escalonado del propio degradado de luz, no dibujo. Medido sobre el
-         mismo archivo, la proporcion rincon/resto sale 0,90 con umbral 0,004 y
-         0,33 con 0,018 — el primero dice que el rincon esta tan cargado como
-         el resto, y a ojo no lo esta: es que estaba midiendo el degradado. */
-      if (Math.abs(L(i) - L(i - 2*c.width*4)) < 0.018) continue;
-      if (px < c.width*0.42 && y < c.height*0.40) rincon++; else resto++;
-      /* y de que color es el trazo. Antes esto se leia del archivo -«fill=
-         rgb(...)»-; con el dibujo rasterizado ahi no hay nada que leer, asi
-         que se mira el pixel. Es mejor prueba: lo que importa es el color que
-         se ve, no el que esta escrito. */
-      trazo++;
-      if (d[i+2] > d[i] + 6) frio++;
+      const i = (y*c.width + px) * 4, l = L(i);
+      if (l < lo) lo = l; if (l > hi) hi = l;
+      if (px < c.width*0.42 && y < c.height*0.40) { sRin += l; nRin++ } else { sRes += l; nRes++ }
+      if (d[i+2] > d[i] + 3) frios++;
+      tot++;
     }
   }
-  const areaR = c.width*0.42 * c.height*0.40;
-  return { rincon, resto, frio, trazo,
-           dR: rincon/areaR, dF: resto/(c.width*c.height - areaR) };
+  return { rango: hi - lo, rincon: sRin/nRin, resto: sRes/nRes, frio: frios/tot };
 }, 'http://127.0.0.1:' + PUERTO + '/img/' + tap);
 
-di(tinta.trazo > 0 && tinta.frio / tinta.trazo > 0.7,
-   'dibujado en color, no en un gris cualquiera (' +
-   (tinta.trazo ? (tinta.frio / tinta.trazo * 100).toFixed(0) : '—') + ' % del trazo tira a azul)');
-di(tinta.rincon + tinta.resto > 30000,
-   'y con dibujo de verdad, no cuatro trazos: ' + (tinta.rincon + tinta.resto) + ' px de trazo');
-/* El hueco limpio se mide por unidad de area, que es la unica comparacion
-   honesta cuando las dos zonas no miden igual. El rincon de arriba a la
-   izquierda es donde va el titular en las siete secciones. */
-di(tinta.dR < tinta.dF * 0.5, 'y el rincon del titular despejado: ' +
-   (tinta.dF ? (tinta.dR / tinta.dF).toFixed(2) : '—') + ' de trazo dentro por cada 1 fuera');
+di(suelo.rango > 0.10,
+   'el suelo no es un color plano: ' + suelo.rango.toFixed(3) + ' de recorrido de luz');
+di(suelo.rincon > suelo.resto + 0.05,
+   'y el rincon del titular es lo mas claro, que es donde va la tinta negra (' +
+   suelo.rincon.toFixed(3) + ' contra ' + suelo.resto.toFixed(3) + ')');
+di(suelo.frio > 0.8,
+   'y el campo tira a frio, no a gris de plantilla (' +
+   (suelo.frio * 100).toFixed(0) + ' % de la pantalla)');
 
 // ── «Compatible with» ──
 const comp = await pg.evaluate(() => {
