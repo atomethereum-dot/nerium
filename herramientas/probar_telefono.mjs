@@ -40,9 +40,51 @@ const f = await pg.evaluate(() => {
 const arch = (f.img.match(/img\/([a-z0-9-]+\.(?:svg|webp|png|avif))/) || [, '?'])[1];
 di(/^papel-alto/.test(arch),
    'el telefono pide el dibujo VERTICAL, no el de escritorio (' + arch + ')');
-di(!/cover/.test(f.size),
-   'y no lo estira con «cover», que es lo que lo convertia en un borron (' + f.size + ')');
-di(/repeat-y/.test(f.rep), 'se repite hacia abajo en vez de estirarse: ' + f.rep);
+/* Antes se pedia que el dibujo SE REPITIERA, y era lo correcto mientras era un
+   motivo de placas: estirandolo, la misma placa medía 36 px en una seccion y
+   56 en otra. Ahora el dibujo es luz lisa —no hay motivo que deformar— y
+   repetirlo tiene un precio que antes no se veia: el campo lleva un gradiente
+   fuerte de arriba abajo, asi que en cada vuelta hay un salto de tono. En el
+   telefono cae cada 1.114 px y la seccion de seguridad mide 2.026: una raya
+   horizontal partiendola por la mitad, con lo de abajo lavado. Es lo que se
+   vio en pantalla.
+
+   Se intento medirlo en pixeles —buscar la fila donde el tono salta de borde a
+   borde— y no separa: el suelo repetido da 0,106 y estirado 0,060, y ese 0,060
+   no es ninguna costura sino el canto de la seccion y el filete de la tarjeta.
+   Con tan poco margen, un liston entre los dos seria inventado.
+
+   Asi que se afirma el MECANISMO, que aqui si es exacto: la capa del dibujo
+   —la ultima de la pila— no se repite, y su tamano llena la caja. Son dos
+   hechos, sin umbral que ajustar, y saltan en cuanto alguien vuelva a poner
+   «repeat-y». */
+{
+  const capa = t => { const v = t.split(',').map(x => x.trim()); return v[v.length - 1] };
+  di(capa(f.rep) === 'no-repeat',
+     'el suelo no se repite: una costura por vuelta era la raya que partia la seccion (' +
+     capa(f.rep) + ')');
+  di(capa(f.size) === '100% 100%',
+     'y llena la seccion entera, sin dejar el resto en blanco (' + capa(f.size) + ')');
+}
+
+/* ── el HUD no se va con el documento ─────────────────────────────────────
+   El «.hud» es hijo de <body> y esta en «absolute», asi que vive en el
+   documento: a media portada su canto de abajo —con el contador y su velo
+   oscuro— quedaba flotando en mitad de la pantalla. Es la franja negra que se
+   subia al hacer scroll. Se comprueba donde acaba el contador despues de
+   desplazarse: tiene que seguir en su esquina. */
+{
+  await pg.evaluate(() => scrollTo(0, 700));
+  await pg.waitForTimeout(500);
+  const g = await pg.evaluate(() => {
+    const e = document.querySelector('.hud-count'); if (!e) return null;
+    const r = e.getBoundingClientRect();
+    return { abajo: Math.round(innerHeight - r.bottom), vh: innerHeight };
+  });
+  di(!!g && g.abajo >= 0 && g.abajo < 120,
+     'el contador se queda en su esquina al desplazarse (' +
+     (g ? g.abajo + ' px del canto de abajo' : 'no esta') + ')');
+}
 
 /* Lo que de verdad importa no es que regla gane, sino el TAMANO al que acaban
    el dibujo en la pantalla. Esto se medía leyendo el alto del primer <rect>

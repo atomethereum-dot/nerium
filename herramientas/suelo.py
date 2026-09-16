@@ -51,7 +51,7 @@ CSS = """
     radial-gradient(58% 70% at 96% -14%,rgba(158,194,255,.30),transparent 66%),
     radial-gradient(64% 72% at 18% 112%,rgba(196,214,246,.26),transparent 70%),
     var(--grano),url(img/papel.webp);
-  background-repeat:no-repeat,no-repeat,no-repeat,repeat,repeat;
+  background-repeat:no-repeat,no-repeat,no-repeat,repeat,no-repeat;
   /* Las placas, a TAMANO FIJO. Con «cover» el navegador estira el dibujo hasta
      tapar la seccion, y las secciones miden cosas muy distintas: medido, la
      misma placa salia a 36 px en la tesis, 39 en seguridad, 40 en la preventa,
@@ -60,7 +60,7 @@ CSS = """
      los demas», y no se arregla retocando un color: se arregla no dejando que
      la altura de la seccion decida el tamano del dibujo. Ancho fijo y se
      repite; la placa mide lo mismo en las diez. */
-  background-size:auto,auto,auto,auto,1600px auto;
+  background-size:auto,auto,auto,auto,100% 100%;
   background-position:0 0,0 0,0 0,0 0,center top}
 @media(max-width:760px){
   :is(.paper,.paper2,.secure,.sale,.tkp,.join,.press){
@@ -69,8 +69,8 @@ CSS = """
       radial-gradient(74% 44% at 96% -8%,rgba(158,194,255,.28),transparent 66%),
       radial-gradient(80% 46% at 18% 106%,rgba(196,214,246,.24),transparent 70%),
       var(--grano),url(img/papel-alto.webp);
-    background-repeat:no-repeat,no-repeat,no-repeat,repeat,repeat-y;
-    background-size:auto,auto,auto,auto,100% auto;
+    background-repeat:no-repeat,no-repeat,no-repeat,repeat,no-repeat;
+    background-size:auto,auto,auto,auto,100% 100%;
     background-position:0 0,0 0,0 0,0 0,left top}
 }
 /* La preventa traia sus auroras como elementos animados. Se quedan: son las
@@ -84,8 +84,8 @@ CSS = """
   radial-gradient(58% 70% at 96% -14%,rgba(158,194,255,.30),transparent 66%),
   radial-gradient(64% 72% at 18% 112%,rgba(196,214,246,.26),transparent 70%),
   var(--grano),url(img/papel.webp);
-  background-repeat:no-repeat,no-repeat,no-repeat,repeat,repeat;
-  background-size:auto,auto,auto,auto,1600px auto;
+  background-repeat:no-repeat,no-repeat,no-repeat,repeat,no-repeat;
+  background-size:auto,auto,auto,auto,100% 100%;
   background-position:0 0,0 0,0 0,0 0,center top}
 @media(max-width:760px){
   .tkp.tkp{background-image:
@@ -93,8 +93,8 @@ CSS = """
     radial-gradient(74% 44% at 96% -8%,rgba(158,194,255,.28),transparent 66%),
     radial-gradient(80% 46% at 18% 106%,rgba(196,214,246,.24),transparent 70%),
     var(--grano),url(img/papel-alto.webp);
-    background-repeat:no-repeat,no-repeat,no-repeat,repeat,repeat-y;
-    background-size:auto,auto,auto,auto,100% auto;
+    background-repeat:no-repeat,no-repeat,no-repeat,repeat,no-repeat;
+    background-size:auto,auto,auto,auto,100% 100%;
     background-position:0 0,0 0,0 0,0 0,left top}
 }
 

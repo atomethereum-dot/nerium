@@ -176,7 +176,7 @@ CSS = """
 .paper2,.tkp{background-color:var(--p-papel2)}
 .sale,.join{background-color:var(--p-alto)}
 @@{background-image:var(--grano),url(img/papel.webp);
-   background-repeat:repeat,no-repeat;background-size:auto,cover;
+   background-repeat:repeat,no-repeat;background-size:auto,100% 100%;
    background-position:0 0,center}
 /* En el TELEFONO nada de lo de arriba vale, y esto es el fallo que me costo
    tres rondas de «lo veo igual»: yo miraba capturas de 1440 y el sitio se ve
@@ -193,8 +193,8 @@ CSS = """
    abajo, asi que las placas conservan su tamano de verdad. */
 @media(max-width:760px){
   @@{background-image:var(--grano),url(img/papel-alto.webp);
-     background-size:auto,100% auto;
-     background-repeat:repeat,repeat-y;
+     background-size:auto,100% 100%;
+     background-repeat:repeat,no-repeat;
      background-position:0 0,left top}
 }
 
@@ -251,8 +251,8 @@ main>section@@{box-shadow:inset 0 1px 0 rgba(255,255,255,.92)}
   @@.tkp{background-image:
      linear-gradient(rgba(247,250,253,.72),rgba(247,250,253,.72)),
      var(--grano),url(img/papel-alto.webp);
-     background-size:auto,auto,100% auto;
-     background-repeat:repeat,repeat,repeat-y}
+     background-size:auto,auto,100% 100%;
+     background-repeat:repeat,repeat,no-repeat}
 }
 
 @@.logos{padding:clamp(30px,3.2vw,46px) 0 clamp(34px,3.6vw,52px)}

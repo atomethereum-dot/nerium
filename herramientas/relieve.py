@@ -114,51 +114,18 @@ main>section.loop{
   background-size:auto,auto,auto;
   background-position:center,center,0 0}
 
-/* ── la linea de cota, encima de cada rotulo de seccion ──
-   Once rotulos sueltos repartidos por la pagina no son una serie. Con una
-   linea de cota por encima —con su diente en cada extremo, como una acotacion
-   de plano— cada seccion pasa a ser una hoja del mismo dibujo, y el titular
-   deja de empezar en el aire.
-   Se engancha con «:has(.sk)» sobre la caja de contenido, no sobre la que
-   envuelve el rotulo. Eso segundo fue el primer intento y no se veia: en tres
-   secciones el rotulo va dentro de un «.rv», y un «.rv» lleva clip-path para
-   descubrirse tras su mascara, asi que recortaba la linea antes de pintarla.
-   Va ARRIBA del rotulo y no atravesandolo: el rotulo mide distinto en cada
-   uno de los doce idiomas, y una linea que arranca donde acaba el texto se
-   descuadra en cuanto cambias de idioma. */
+/* ── ni linea de cota ni vertical de referencia ──
+   Aqui hubo una acotacion de plano: sobre cada rotulo una horizontal con su
+   diente en cada extremo, y por banda una vertical que bajaba 40vh mas alla
+   de su carril. La idea era que las once secciones se leyeran como hojas del
+   mismo dibujo. En la pagina no se leia asi. La vertical, al pasar de largo
+   el final de su carril, entraba en la banda siguiente y acababa cruzando el
+   titular de la de abajo —montada sobre el texto—, y la horizontal con sus
+   dos dientes dejaba cada seccion a medio enmarcar, con la esquina justo
+   encima del rotulo. Fuera las dos.
+   Se queda el «position:relative»: no dibuja nada, y de el cuelga lo que si
+   va anclado al carril. */
 main>section :is(.wrap,.sec-head,.join-head):has(.sk){position:relative}
-main>section :is(.wrap,.sec-head,.join-head):has(.sk)::before{
-  content:"";position:absolute;left:0;right:0;top:-22px;height:7px;
-  pointer-events:none;opacity:.20;
-  background:
-    linear-gradient(currentColor,currentColor) 0    0/1px 7px no-repeat,
-    linear-gradient(currentColor,currentColor) 100% 0/1px 7px no-repeat,
-    linear-gradient(currentColor,currentColor) 0    0/100% 1px no-repeat}
-@media(max-width:760px){
-  main>section :is(.wrap,.sec-head,.join-head):has(.sk)::before{
-    top:-15px;height:5px;
-    background:
-      linear-gradient(currentColor,currentColor) 0    0/1px 5px no-repeat,
-      linear-gradient(currentColor,currentColor) 100% 0/1px 5px no-repeat,
-      linear-gradient(currentColor,currentColor) 0    0/100% 1px no-repeat}}
-/* ── y una sola vertical de referencia por banda ──
-   Estructura no es textura. Una linea puesta donde empieza el carril de
-   contenido, de arriba abajo y apagandose por los dos extremos, ordena la
-   banda entera; una malla de lineas cada 34 px la ensucia.
-   Va en el «::after» del mismo carril que ya lleva la cota, asi que no suma
-   ni un elemento ni una capa de fondo. */
-main>section :is(.wrap,.sec-head,.join-head):has(.sk)::after{
-  content:"";position:absolute;left:-1px;top:-22px;bottom:-40vh;width:1px;
-  pointer-events:none;
-  background:linear-gradient(180deg,
-    currentColor 0%, rgba(0,0,0,0) 4%, rgba(0,0,0,0) 0%);
-  opacity:.16;
-  mask-image:linear-gradient(180deg,#000 0%,#000 62%,rgba(0,0,0,0) 100%);
-  -webkit-mask-image:linear-gradient(180deg,#000 0%,#000 62%,rgba(0,0,0,0) 100%)}
-main>section :is(.wrap,.sec-head,.join-head):has(.sk)::after{
-  background:currentColor}
-@media(max-width:760px){
-  main>section :is(.wrap,.sec-head,.join-head):has(.sk)::after{display:none}}
 /* ══ fin: relieve ══ */
 """.replace('__B__', SUELO_B).replace('__GC__', GRANO_CLARO).replace('__GO__', GRANO_OSCURO)
 
