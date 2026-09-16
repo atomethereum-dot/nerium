@@ -39,8 +39,9 @@ async function franja(pg, caja) {
       v.push(L); su += L; n++;
     }
     const m = su / n;
-    let s2 = 0; for (const L of v) s2 += (L - m) * (L - m);
-    return { medio: m, desv: Math.sqrt(s2 / n) };
+    let s2 = 0, oscuro = 0, claro = 0;
+    for (const L of v) { s2 += (L - m) * (L - m); if (L < 0.15) oscuro++; if (L > 0.60) claro++ }
+    return { medio: m, desv: Math.sqrt(s2 / n), oscuro: oscuro / n, claro: claro / n };
   }, b64);
 }
 
@@ -164,8 +165,16 @@ for (const p of [0.05, 0.30, 0.50, 0.72, 0.99]) {
 const recorrido = Math.max(...cuadros.map(c => c.medio)) - Math.min(...cuadros.map(c => c.medio));
 di(recorrido >= 0.45,
    'la escena avanza con el scroll, no esta parada (recorrido de claridad ' + recorrido.toFixed(2) + ')');
-di(cuadros[0].medio <= 0.10,
-   'empieza en camara oscura (' + cuadros[0].medio.toFixed(3) + ')');
+/* Aqui no vale la media, y por eso esta comprobacion se reescribio: la escena
+   empieza con la cifra de la ronda RECORTADA en la tinta a media pantalla de
+   alto, asi que hay un glifo enorme y claro que sube la media a 0,20 estando
+   la pantalla cubierta de tinta. Se mide lo que de verdad define la entrada:
+   que la mayor parte sea tinta, Y que la cifra este calada. Las dos cosas: sin
+   la segunda, un fundido a negro pasaria. */
+di(cuadros[0].oscuro >= 0.50,
+   'empieza en camara: la mayor parte es tinta (' + (cuadros[0].oscuro * 100).toFixed(0) + '%)');
+di(cuadros[0].claro >= 0.04,
+   'y la cifra va calada en ella, no pintada encima (' + (cuadros[0].claro * 100).toFixed(0) + '% de hueco)');
 di(cuadros[4].medio >= 0.70,
    'y acaba entregando el suelo de la ronda, no un blanco inventado (' + cuadros[4].medio.toFixed(3) + ')');
 // El instrumento tiene que estar dibujado, no solo el negro: en el tramo de
