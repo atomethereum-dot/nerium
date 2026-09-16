@@ -209,6 +209,53 @@ di(cuadros[0].oscuro >= 0.50,
    no es el primer cuadro: en 0,05 la ventana de armado apenas ha empezado y no
    hay hueco ninguno, que es justo lo que se quiere. Midiendolo ahi, la
    comprobacion afirmaba lo viejo. */
+/* ── la barra no se monta en la cifra ─────────────────────────────────────
+   Esto no tenia comprobacion, y por eso se colo: la barra se colocaba a
+   «H/2 + tam*0,46», una cuenta sobre el cuerpo de la tipografia y no sobre lo
+   que el glifo OCUPA, y su haz vertical subia 190 px y cruzaba el por ciento.
+   Se ve a simple vista y ninguna de las veintitres comprobaciones lo miraba.
+
+   Se mide asi: bajando desde arriba, la primera banda seguida de filas con
+   blanco es la CIFRA -es lo unico blanco y ancho que hay ahi arriba-. La
+   primera fila con azul es lo mas alto que llega la barra, resplandor
+   incluido. Entre las dos tiene que haber aire de verdad. */
+{
+  const g = await pg.evaluate(v => scrollTo(0, v),
+                              Math.round(caja.top + 0.38 * (caja.alto - caja.vh)));
+  await pg.waitForTimeout(500);
+  const m = await pg.evaluate(() => {
+    const cv = document.getElementById('umbLz');
+    const c = document.createElement('canvas'); c.width = cv.width; c.height = cv.height;
+    c.getContext('2d').drawImage(cv, 0, 0);
+    const d = c.getContext('2d').getImageData(0, 0, c.width, c.height).data;
+    const blanca = [], azul = [];
+    for (let y = 0; y < c.height; y++) {
+      let bl = 0, az = 0;
+      for (let x = 0; x < c.width; x++) {
+        const i = (y*c.width + x) * 4;
+        const M = Math.max(d[i], d[i+1], d[i+2]), mn = Math.min(d[i], d[i+1], d[i+2]);
+        if (M > 200 && M - mn < 22) bl++;
+        else if (d[i+2] > d[i] + 18 && d[i+2] > 40) az++;
+      }
+      /* Dos pixeles bastan para «aqui hay barra», y el liston de azul va bajo
+         a proposito. Lo que se metia dentro de la cifra no era el trazo de la
+         barra: era su LUZ -el haz de la cabeza, de tres pixeles, y el derrame,
+         que es una elipse de 138 px de radio-. Con el liston alto la
+         comprobacion pasaba con el fallo puesto y en pantalla se veia. */
+      blanca.push(bl > 20); azul.push(az >= 2);
+    }
+    let ini = blanca.indexOf(true), fin = ini;
+    if (ini >= 0) { while (fin + 1 < blanca.length && blanca[fin + 1]) fin++ }
+    const az0 = azul.indexOf(true);
+    return { cifra: [ini, fin], azul: az0, alto: c.height,
+             dpr: c.height / (cv.getBoundingClientRect().height || 1) };
+  });
+  const hueco = (m.azul - m.cifra[1]) / m.dpr;
+  di(m.cifra[0] >= 0 && m.azul > m.cifra[1] && hueco >= 30,
+     'la barra va debajo de la cifra, no dentro (' + hueco.toFixed(0) +
+     ' px de aire entre el canto de la cifra y lo mas alto de la barra)');
+}
+
 /* ── la cifra: se arma, funde y abre ──────────────────────────────────────
    Los tres tiempos del umbral hacen cosas distintas y cada uno se mide en SU
    tramo. Medirlos todos en el mismo cuadro fue el fallo de la version

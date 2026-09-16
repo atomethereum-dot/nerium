@@ -93,6 +93,53 @@ di(suelo.arriba > suelo.abajo + 0.05,
    'y la franja de leer es la mas clara, que es donde va el titular (' +
    suelo.arriba.toFixed(3) + ' contra ' + suelo.abajo.toFixed(3) + ')');
 
+/* ── la barra no se monta en la cifra ─────────────────────────────────────
+   Se comprueba AQUI y no solo en escritorio porque aqui es donde aprieta: en
+   vertical la cifra ocupa mucha mas proporcion de pantalla, asi que es el
+   telefono el que decide si la barra cabe debajo. Con la geometria vieja la
+   barra le subia 32 px por ENCIMA del canto de arriba de la cifra.
+
+   Bajando desde arriba, la primera banda seguida de filas con blanco es la
+   cifra. La primera fila con azul es lo mas alto que llega la barra, y se mide
+   con el liston bajo porque lo que se metia dentro no era el trazo sino la
+   LUZ: el haz de la cabeza, de tres pixeles, y el derrame. */
+{
+  const u = await pg.evaluate(() => {
+    const e = document.querySelector('.umb'); if (!e) return null;
+    const r = e.getBoundingClientRect();
+    return { top: r.top + scrollY, alto: r.height, vh: innerHeight };
+  });
+  if (!u) { di(false, 'el umbral esta en el telefono'); }
+  else {
+    await pg.evaluate(v => scrollTo(0, v), Math.round(u.top + 0.38 * (u.alto - u.vh)));
+    await pg.waitForTimeout(700);
+    const m = await pg.evaluate(() => {
+      const cv = document.getElementById('umbLz');
+      const c = document.createElement('canvas'); c.width = cv.width; c.height = cv.height;
+      c.getContext('2d').drawImage(cv, 0, 0);
+      const d = c.getContext('2d').getImageData(0, 0, c.width, c.height).data;
+      const bl = [], az = [];
+      for (let y = 0; y < c.height; y++) {
+        let b1 = 0, a1 = 0;
+        for (let x = 0; x < c.width; x++) {
+          const i = (y*c.width + x) * 4;
+          const M = Math.max(d[i], d[i+1], d[i+2]), mn = Math.min(d[i], d[i+1], d[i+2]);
+          if (M > 200 && M - mn < 22) b1++;
+          else if (d[i+2] > d[i] + 18 && d[i+2] > 40) a1++;
+        }
+        bl.push(b1 > 10); az.push(a1 >= 2);
+      }
+      let ini = bl.indexOf(true), fin = ini;
+      if (ini >= 0) { while (fin + 1 < bl.length && bl[fin + 1]) fin++ }
+      return { cifra: [ini, fin], azul: az.indexOf(true),
+               dpr: c.height / (cv.getBoundingClientRect().height || 1) };
+    });
+    const aire = (m.azul - m.cifra[1]) / m.dpr;
+    di(m.cifra[0] >= 0 && m.azul > m.cifra[1] && aire >= 30,
+       'la barra va debajo de la cifra, no dentro (' + aire.toFixed(0) + ' px de aire)');
+  }
+}
+
 /* Nada se sale por el lado. Ojo con como se mide: la primera version miraba
    elemento por elemento si su borde derecho pasaba del ancho, y delataba el
    carrusel de nombres y el de prensa —que son mas anchos A PROPOSITO y viven

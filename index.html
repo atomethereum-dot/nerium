@@ -8297,7 +8297,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
      El coste: un fillRect por tesela, sin texto y sin sombra, sobre un lienzo
      propio que las losas luego reparten con drawImage. Nueve drawImage mas por
      cuadro en vez de nueve pasadas de teselas. */
-  var tes=[], TLADO=0, cifraTxt='85%', cifraY=0, ojoX=0, ojoY=0;
+  var tes=[], TLADO=0, cifraTxt='85%', cifraY=0, ojoX=0, ojoY=0, cifraBajo=0;
   var cifraCv=document.createElement('canvas'), cc=cifraCv.getContext('2d');
   var TONOS=['#1B49E0','#2F6BFF','#2E86FF','#79ABFF'];   /* la rampa, de hondo a claro */
 
@@ -8313,7 +8313,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
     ac.fillStyle='#fff';
     ac.fillText(txt,w/2,h/2-tam*0.10);
     var d=ac.getImageData(0,0,w,h).data;
-    var x0=1e9,x1=-1e9;
+    var x0=1e9,x1=-1e9,y1=-1e9;
     for(var y=0;y<h;y+=TLADO){
       for(var x=0;x<w;x+=TLADO){
         /* la tesela entra si su centro cae dentro del glifo: aqui si vale el
@@ -8321,11 +8321,17 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
            el borde solo engorda el trazo un pixel */
         var px=Math.min(w-1,x+(TLADO>>1)), py=Math.min(h-1,y+(TLADO>>1));
         if(d[(py*w+px)*4+3]<130) continue;
-        if(x<x0)x0=x; if(x>x1)x1=x;
+        if(x<x0)x0=x; if(x>x1)x1=x; if(y>y1)y1=y;
         tes.push({x:x,y:y});
       }
     }
     var anc=Math.max(1,x1-x0);
+    /* EL CANTO DE ABAJO DE LA CIFRA, medido. La barra se colocaba a
+       «H/2 + tam*0,46», que es una cuenta sobre el cuerpo de la tipografia y
+       no sobre lo que el glifo OCUPA de verdad: con «85%» a peso 200 el haz
+       vertical de la cabeza subia 190 px y se metia dentro del por ciento.
+       Se pregunta donde acaba el dibujo y se coloca debajo. */
+    cifraBajo=y1+TLADO;
     /* El PUNTO DE FUGA de la apertura tiene que caer DENTRO del glifo.
        Agrandando la cifra desde el centro de la caja, el centro cae en el hueco
        entre el cinco y el por ciento -que es tinta-, asi que por mucho que
@@ -8347,10 +8353,14 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
       var t=tes[i];
       var hh=Math.sin(t.x*12.9898+t.y*78.233)*43758.5453; hh=hh-Math.floor(hh);
       var hb=Math.sin(t.x*39.3468+t.y*11.1357)*24634.6345; hb=hb-Math.floor(hb);
-      var ang=hh*Math.PI*2, lejos=560+hb*900;
-      t.ox=W/2+Math.cos(ang)*lejos;          /* de donde viene */
-      t.oy=H/2+Math.sin(ang)*lejos;
-      t.giro=(hb-0.5)*1.8;
+      /* DE DONDE VIENEN. Salian disparadas desde un angulo al azar alrededor
+         del centro, y eso a pantalla completa se lee como confeti: sin
+         direccion, no hay intencion. Ahora SUBEN, desde abajo -que es de donde
+         viene la ronda, la seccion que esta a punto de entrar- con una deriva
+         lateral pequena. La misma cantidad de movimiento, contando algo. */
+      t.ox=t.x+(hh-0.5)*W*0.30;
+      t.oy=H+120+hb*H*0.85;
+      t.giro=(hb-0.5)*1.1;
       t.d=0.78*((t.x-x0)/anc)+0.22*hh;       /* barrido con desorden */
       /* El color va por POSICION, no al azar: la rueda del token reparte sus
          tonos por sectores y se lee como una decision. Al azar sale confeti.
@@ -8444,6 +8454,25 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
       cc.textAlign='center'; cc.textBaseline='middle';
       cc.fillStyle='#fff';
       cc.fillText(cifraTxt,W/2,cifraY);
+      cc.globalAlpha=1;
+      /* Y UN BRILLO QUE LA CRUZA UNA VEZ. La fusion es el momento en que la
+         cifra deja de ser mosaico y pasa a ser pieza, y sin nada que lo marque
+         el cambio ocurre sin que te des cuenta: las teselas simplemente dejan
+         de verse. Una banda de luz que barre de izquierda a derecha, dentro
+         del propio glifo, le pone acento a ese instante. Una sola vez, y
+         recortada al glifo con «source-atop», que asi no hace falta ni mascara
+         ni segundo lienzo. */
+      var br=Math.sin(Math.PI*Math.min(1,Math.max(0,fu)));
+      if(br>0.01){
+        var cxp=(fu*1.5-0.25)*W;
+        var g2=cc.createLinearGradient(cxp-W*0.22,0,cxp+W*0.22,0);
+        g2.addColorStop(0,'rgba(255,255,255,0)');
+        g2.addColorStop(0.5,'rgba(190,215,255,'+(0.85*br).toFixed(3)+')');
+        g2.addColorStop(1,'rgba(255,255,255,0)');
+        cc.globalCompositeOperation='source-atop';
+        cc.fillStyle=g2; cc.fillRect(0,0,W,H);
+        cc.globalCompositeOperation='source-over';
+      }
     }
     cc.globalAlpha=1;
   }
@@ -8486,8 +8515,19 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
   var AZUL='62,134,255';
   function barra(dx,p){
     var an=Math.min(W*0.86,tamCifra*3.1), x0=(W-an)/2+dx;
-    var y=H/2+tamCifra*0.46;
+    /* Debajo del canto MEDIDO de la cifra, y contando TODA la luz que la barra
+       reparte, no solo su trazo. El derrame es una elipse de 138 px de radio
+       vertical: colocando la barra a ras del canto de la cifra, el trazo no la
+       tocaba pero el resplandor le subia noventa pixeles por dentro. En el
+       movil, donde la cifra es mas alta en proporcion, se le metia entera.
+       Asi que el sitio se calcula desde el borde del DERRAME: el canto de la
+       cifra, un respiro, y el radio entero. Y si no cabe en pantalla, el que
+       encoge es el derrame -es luz, aguanta- y no el aire. */
+    var DERRAME=138;
+    var tope=cifraBajo+20;
+    var y=Math.max(tope+DERRAME, H*0.58);
     if(y>H-86) y=H-86;
+    var derrame=Math.max(40,Math.min(DERRAME,y-tope));
     var t=tramo(p,0.08,0.34);
     var f=an*meta*t;                       /* lo recorrido */
     /* el carril y sus marcas de escala: sin ellas la barra es un cargador
@@ -8512,7 +8552,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
        derecha de la cabeza, que delata el truco. Salio en la captura. */
     cx.save();
     cx.translate(x0+f*0.52,y);
-    cx.scale(Math.max(1,f*0.66),138);
+    cx.scale(Math.max(1,f*0.66),derrame);
     var der=cx.createRadialGradient(0,0,0,0,0,1);
     der.addColorStop(0,  'rgba('+AZUL+',.20)');
     der.addColorStop(0.55,'rgba('+AZUL+',.085)');
@@ -8543,14 +8583,18 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
     cx.shadowColor='rgba(170,205,255,1)'; cx.shadowBlur=60*cab;
     cx.fillStyle='rgba(255,255,255,'+(0.97*cab).toFixed(2)+')';
     cx.fillRect(x0+f-3,y-30,6,60);
-    /* y el haz vertical de la cabeza: un corte de luz que sube y baja desde
-       donde esta pasando. Es lo que hace que la cabeza pese. */
-    var haz=cx.createLinearGradient(0,y-190,0,y+190);
-    haz.addColorStop(0,   'rgba(150,190,255,0)');
-    haz.addColorStop(0.5, 'rgba(150,190,255,'+(0.50*cab).toFixed(3)+')');
+    /* y el haz vertical de la cabeza: un corte de luz desde donde esta
+       pasando. Va SOLO HACIA ABAJO. Subiendo y bajando pesaba mas, pero la
+       mitad de arriba se metia dentro de la cifra -190 px por encima de la
+       barra, o sea dentro del por ciento- y lo que se veia era una raya
+       cruzando el numero. Hacia abajo cae sobre suelo vacio y no estorba a
+       nadie: la cabeza sigue pesando y la cifra se queda limpia. */
+    var lar=Math.min(200,Math.max(60,H-y-10));
+    var haz=cx.createLinearGradient(0,y,0,y+lar);
+    haz.addColorStop(0,   'rgba(150,190,255,'+(0.55*cab).toFixed(3)+')');
     haz.addColorStop(1,   'rgba(150,190,255,0)');
     cx.shadowBlur=0; cx.fillStyle=haz;
-    cx.fillRect(x0+f-1.5,y-190,3,380);
+    cx.fillRect(x0+f-1.5,y,3,lar);
     /* 5 · y el fogonazo al llegar a la meta: una sola vez, corto */
     var golpe=tramo(p,0.30,0.35)*(1-tramo(p,0.35,0.46));
     if(golpe>0.01){
@@ -8593,8 +8637,13 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
     var tinta=1-tramo(t,0.86,1.0);
     if(tinta<=0.002) return;                /* ya esta entregada: nada que pintar */
 
+    /* La tinta se agranda un pelo mientras el hueco crece. Es paralaje: el
+       plano de delante se mueve y el de detras -la pagina- esta quieto, y eso
+       es lo que hace que el hueco parezca una VENTANA y no un recorte. Un 6 %,
+       que no se ve como movimiento pero se nota como profundidad. */
+    var der=1+t*0.06;
     cx.globalAlpha=tinta;
-    cx.drawImage(placa,0,0,W,H);
+    cx.drawImage(placa,-(der-1)*W/2,-(der-1)*H/2,W*der,H*der);
     cx.globalAlpha=1;
     cx.save();
     cx.translate(ojoX,ojoY); cx.scale(esc,esc); cx.translate(-ojoX,-ojoY);
