@@ -73,7 +73,19 @@ di(a.medio < a.abajo * 0.5, `y tambien respecto a abajo (abajo ${a.abajo.toFixed
 const cianPct = a.vivos ? a.cian / a.vivos * 100 : 0;
 di(cianPct < 0.02, 'no hay zona cian: ' + a.cian + ' de ' + a.vivos +
    ' pixeles (' + cianPct.toFixed(4) + ' %)');
-di(a.gris === 0, 'ni un gris neutro: todo lleva azul dentro (' + a.gris + ')');
+/* Y esto pedia CERO exactos, que es la misma trampa que el aviso de tres
+   lineas mas arriba y que aqui no se habia aplicado. El cuarto tono del campo
+   -206,220,248- tiene saturacion 0,17: cuando dos placas se suman y el
+   resultado tira a blanco, esa saturacion baja de 0,10 y el pixel cuenta como
+   gris sin que nada este mal. Depende del cuadro que se capture, asi que la
+   bateria fallaba de vez en cuando —una vez en diez aqui— y por un motivo que
+   no era el suyo.
+   Se mide en fraccion y el liston se pone donde separa las dos cosas de
+   verdad. Medido: el campo como esta, 0 en nueve capturas de diez y 2,1 % en
+   la decima; con la paleta cambiada a grises, 21 %. */
+const grisPct = a.vivos ? a.gris / a.vivos * 100 : 0;
+di(grisPct < 5, 'ni un gris neutro: todo lleva azul dentro (' + a.gris + ' de ' +
+   a.vivos + ', ' + grisPct.toFixed(2) + ' %)');
 
 // que siga vivo: dos instantes distintos no pueden dar la misma imagen
 const b1 = a.suma;

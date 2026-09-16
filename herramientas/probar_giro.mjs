@@ -173,8 +173,32 @@ di(recorrido >= 0.45,
    la segunda, un fundido a negro pasaria. */
 di(cuadros[0].oscuro >= 0.50,
    'empieza en camara: la mayor parte es tinta (' + (cuadros[0].oscuro * 100).toFixed(0) + '%)');
-di(cuadros[0].claro >= 0.04,
-   'y la cifra va calada en ella, no pintada encima (' + (cuadros[0].claro * 100).toFixed(0) + '% de hueco)');
+/* El calado se mide donde la cifra YA ESTA, que desde que se arma por pixeles
+   no es el primer cuadro: en 0,05 la ventana de armado apenas ha empezado y no
+   hay hueco ninguno, que es justo lo que se quiere. Midiendolo ahi, la
+   comprobacion afirmaba lo viejo. */
+di(cuadros[1].claro >= 0.04,
+   'y la cifra va calada en la tinta, no pintada encima (' + (cuadros[1].claro * 100).toFixed(0) + '% de hueco)');
+
+/* ── y se ARMA: entra por pixeles, no de una pieza ────────────────────────
+   Cuatro cuadros dentro de la ventana de armado sobre la caja de la cifra. Lo
+   que se afirma son dos cosas distintas y las dos hacen falta: que crezca en
+   cada paso -si entrara de golpe, tres de los cuatro darian el mismo numero- y
+   que el primero sea una fraccion pequena del ultimo -si solo se pidiera que
+   creciera, un fundido de la cifra entera lo cumpliria igual-. */
+const CAJA = { x: 180, y: 150, width: 1110, height: 460 };
+const arma = [];
+for (const p of [0.06, 0.14, 0.24, 0.32]) {
+  await pg.evaluate(v => scrollTo(0, v), Math.round(caja.top + p * (caja.alto - caja.vh)));
+  await pg.waitForTimeout(420);
+  arma.push((await franja(pg, CAJA)).claro);
+}
+di(arma.every((v, i) => i === 0 || v > arma[i - 1] + 0.012),
+   'la cifra se arma por pasos, no aparece de una pieza (' +
+   arma.map(v => (v * 100).toFixed(1) + '%').join(' → ') + ')');
+di(arma[0] < arma[3] * 0.45,
+   'y al empezar solo hay un trozo, no la cifra entera atenuada (' +
+   (arma[3] ? (arma[0] / arma[3] * 100).toFixed(0) : '—') + '% de lo que acaba siendo)');
 di(cuadros[4].medio >= 0.70,
    'y acaba entregando el suelo de la ronda, no un blanco inventado (' + cuadros[4].medio.toFixed(3) + ')');
 // El instrumento tiene que estar dibujado, no solo el negro: en el tramo de
@@ -204,12 +228,17 @@ di(cuadros[1].desv >= 0.010 || cuadros[2].desv >= 0.010,
        estan llenas de pixeles claros. Buscando «la fila mas encendida» a secas
        la comprobacion pasaba igual con la barra quitada. El tubo es lo unico
        de la escena donde el azul y el verde le sacan ventaja al rojo. */
-    const cian = i => d[i+2] > d[i] + 26 && d[i+1] > d[i] + 14;
+    /* Y AZUL, no «frio». La version de antes pedia solo que el azul y el verde
+       le sacaran ventaja al rojo, y eso lo cumple igual un cian que un azul:
+       con el tubo en cian la comprobacion pasaba diciendo que estaba en el
+       color de la marca. Ahora el azul tiene que ganarle tambien al verde.
+       Medido: azul 62,134,255 pasa; cian 95,233,255 no. */
+    const azul = i => d[i+2] > d[i] + 40 && d[i+2] > d[i+1] + 30;
     let mejor = -1, mejorN = 0;
     for (let y = Math.floor(c.height * 0.55); y < c.height - 30; y++) {
       let n = 0;
       for (let px = 0; px < c.width; px++) { const i = (y*c.width + px) * 4;
-        if (luz(i) > 0.45 && cian(i)) n++ }
+        if (luz(i) > 0.45 && azul(i)) n++ }
       if (n > mejorN) { mejorN = n; mejor = y }
     }
     if (mejorN < 80) return null;
@@ -223,7 +252,7 @@ di(cuadros[1].desv >= 0.010 || cuadros[2].desv >= 0.010,
     return { fila: mejor, ini, cabeza, tope, ancho: c.width };
   }, tira);
   di(!!m && m.ini > 0 && m.cabeza > m.ini,
-     'la barra de neon esta encendida, y en cian (fila ' + (m ? m.fila : 'NO LA HAY') + ')');
+     'la barra de neon esta encendida, y en azul (fila ' + (m ? m.fila : 'NO LA HAY') + ')');
   if (m && m.tope > m.ini) {
     const pct = 100 * (m.cabeza - m.ini) / (m.tope - m.ini);
     const dice = parseFloat(await pg.evaluate(() => (document.getElementById('umbPct')||{}).textContent)) || 0;

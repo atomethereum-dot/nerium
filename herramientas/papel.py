@@ -67,29 +67,83 @@ def placas(semilla=31):
             continue
         an = r.choice([2, 3, 3, 4, 4, 5, 6]) * U     # placas largas: arquitectura
         c = FRIO[r.randrange(len(FRIO))]
-        a = round((.035 + .13 * d) * r.uniform(.6, 1.0), 3)
+        a = round((.045 + .17 * d) * r.uniform(.6, 1.0), 3)
         x, y = cx * U, cy * U
+        # LA SOMBRA VA PRIMERO, y va debajo del canto de abajo. Es lo que
+        # convierte la placa en una placa: sin ella son manchas del mismo tono
+        # sobre el mismo suelo, y la banda entera se lee como un degradado
+        # plano por mucha mancha que lleve. Va como <path> a proposito: asi la
+        # medida del rincon limpio de probar_pagina sigue contando PLACAS, que
+        # es lo que se escribio para contar, y no se le cuela la sombra.
+        piezas.append('<path d="M%d %dh%dv6h-%dz" fill="url(#sombra)" '
+                      'opacity="%s"/>' % (x, y + U, an, an, round(min(.5, a * 2.6), 3)))
         piezas.append('<rect x="%d" y="%d" width="%d" height="%d" fill="rgb(%d,%d,%d)" '
                       'opacity="%s"/>' % (x, y, an, U, c[0], c[1], c[2], a))
         # el filete de arriba: la luz viene de arriba, siempre la misma
         piezas.append('<rect x="%d" y="%d" width="%d" height="1" fill="#FFFFFF" '
-                      'opacity="%s"/>' % (x, y, an, round(min(.55, a * 2.2), 3)))
+                      'opacity="%s"/>' % (x, y, an, round(min(.62, a * 2.4), 3)))
+
+    # ── los planos ────────────────────────────────────────────────────────────
+    # Lo que de verdad quitaba lo PLANO no eran las placas: era que a pantalla
+    # completa no habia nada grande. Ciento veinte piezas de 40 px sobre 1600
+    # son textura, y la textura no da profundidad, la da la composicion.
+    #
+    # Tres planos del tamano de la pantalla, en diagonal y traslapados, cada
+    # uno con UN canto nitido de 1 px. Son laminas de vidrio mate puestas una
+    # encima de otra: se ve el borde, se ve que una esta delante de la otra, y
+    # eso es profundidad sin dibujar ni una linea de mas. No es una cuadricula
+    # —no se repiten, no se cruzan en angulo recto, no hay modulo—; es la misma
+    # geometria de las placas leida a tamano de sala.
+    #
+    # Van faltos de tinta arriba a la izquierda, por lo mismo que las placas:
+    # ahi va el titular en las siete secciones.
+    PLANOS = (
+        # (x del corte arriba, x del corte abajo, opacidad, opacidad del canto)
+        (-120,  560, .045, .30),
+        ( 430, 1180, .062, .38),
+        (1020, 1720, .050, .32),
+    )
+    planos = []
+    for xa, xb, op, ca in PLANOS:
+        planos.append('<path d="M%d 0L%d %d L%d %d L%d 0Z" fill="rgb(126,156,205)" '
+                      'opacity="%.3f"/>' % (xa, xb, H, xb + 460, H, xa + 460, op))
+        planos.append('<path d="M%d 0L%d %d" stroke="rgb(255,255,255)" stroke-width="1" '
+                      'fill="none" opacity="%.3f"/>' % (xa, xb, H, ca))
+        planos.append('<path d="M%d 0L%d %d" stroke="rgb(96,126,180)" stroke-width="1" '
+                      'fill="none" opacity="%.3f"/>' % (xa + 460, xb + 460, H, ca * .62))
 
     def rg(nid, col, op):
         return ('<radialGradient id="' + nid + '">'
                 '<stop offset="0" stop-color="' + col + '" stop-opacity="' + op + '"/>'
                 '<stop offset="1" stop-color="' + col + '" stop-opacity="0"/></radialGradient>')
-    defs = ('<defs>' + rg('l1', 'rgb(255,255,255)', '.96')
-                     + rg('l2', 'rgb(47,107,255)', '.09')
-                     + rg('l3', 'rgb(120,150,215)', '.12') + '</defs>')
+    # La sombra de placa: un degradado vertical que muere en seis pixeles. Uno
+    # solo, compartido por las ciento veinte.
+    sombra = ('<linearGradient id="sombra" x1="0" y1="0" x2="0" y2="1">'
+              '<stop offset="0" stop-color="rgb(44,66,104)" stop-opacity=".55"/>'
+              '<stop offset="1" stop-color="rgb(44,66,104)" stop-opacity="0"/>'
+              '</linearGradient>')
+    # Y la luz rasante: una banda ancha cruzando en diagonal. Un foco redondo
+    # ilumina un punto; una rasante da DIRECCION, que es lo que le faltaba a la
+    # banda para no parecer un degradado de plantilla.
+    rasante = ('<linearGradient id="rasa" x1="0" y1="0" x2="1" y2="1">'
+               '<stop offset="0" stop-color="rgb(255,255,255)" stop-opacity=".50"/>'
+               '<stop offset=".34" stop-color="rgb(255,255,255)" stop-opacity=".16"/>'
+               '<stop offset=".62" stop-color="rgb(255,255,255)" stop-opacity="0"/>'
+               '<stop offset="1" stop-color="rgb(28,48,92)" stop-opacity=".085"/>'
+               '</linearGradient>')
+    defs = ('<defs>' + sombra + rasante
+                     + rg('l1', 'rgb(255,255,255)', '.42')
+                     + rg('l2', 'rgb(47,107,255)', '.10')
+                     + rg('l3', 'rgb(120,150,215)', '.13') + '</defs>')
     # el foco blanco remata el rincon del titular; los otros dos tinan de azul
     # la esquina cargada, para que el peso no sea gris
-    luces = ('<ellipse cx="270" cy="150" rx="900" ry="460" fill="url(#l1)"/>'
+    luces = ('<rect x="0" y="0" width="%d" height="%d" fill="url(#rasa)"/>'
+             '<ellipse cx="220" cy="110" rx="720" ry="380" fill="url(#l1)"/>'
              '<circle cx="1480" cy="900" r="560" fill="url(#l2)"/>'
-             '<circle cx="1560" cy="120" r="420" fill="url(#l3)"/>')
+             '<circle cx="1560" cy="120" r="420" fill="url(#l3)"/>' % (W, H))
     return ('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 %d %d" '
-            'preserveAspectRatio="xMidYMid slice">%s%s%s</svg>'
-            % (W, H, defs, ''.join(piezas), luces))
+            'preserveAspectRatio="xMidYMid slice">%s%s%s%s</svg>'
+            % (W, H, defs, ''.join(planos), ''.join(piezas), luces))
 
 
 def placas_alto(semilla=47):
@@ -122,25 +176,50 @@ def placas_alto(semilla=47):
             continue
         an = r.choice([1, 2, 2, 3, 3, 4, 5]) * U
         c = FRIO[r.randrange(len(FRIO))]
-        a = round((.03 + .12 * hy) * r.uniform(.6, 1.0), 3)
+        a = round((.04 + .155 * hy) * r.uniform(.6, 1.0), 3)
         x, y = cx * U, cy * U
+        piezas.append('<path d="M%d %dh%dv5h-%dz" fill="url(#msombra)" '
+                      'opacity="%s"/>' % (x, y + U, an, an, round(min(.5, a * 2.6), 3)))
         piezas.append('<rect x="%d" y="%d" width="%d" height="%d" fill="rgb(%d,%d,%d)" '
                       'opacity="%s"/>' % (x, y, an, U, c[0], c[1], c[2], a))
         piezas.append('<rect x="%d" y="%d" width="%d" height="1" fill="#FFFFFF" '
-                      'opacity="%s"/>' % (x, y, an, round(min(.55, a * 2.2), 3)))
+                      'opacity="%s"/>' % (x, y, an, round(min(.62, a * 2.4), 3)))
+
+    # Los mismos planos, girados al reves: en vertical la diagonal tiene que
+    # ser mucho mas tumbada o el plano se sale de la caja antes de cruzarla, y
+    # lo que queda es una cuna en una esquina. Dos, no tres: en 420 de ancho el
+    # tercero solo aprieta.
+    planos = []
+    for xa, xb, op, ca in ((-260, 120, .048, .26), (150, 560, .038, .20)):
+        planos.append('<path d="M%d 0L%d %d L%d %d L%d 0Z" fill="rgb(126,156,205)" '
+                      'opacity="%.3f"/>' % (xa, xb, H, xb + 300, H, xa + 300, op))
+        planos.append('<path d="M%d 0L%d %d" stroke="rgb(255,255,255)" stroke-width="1" '
+                      'fill="none" opacity="%.3f"/>' % (xa, xb, H, ca))
 
     def rg(nid, col, op):
         return ('<radialGradient id="' + nid + '">'
                 '<stop offset="0" stop-color="' + col + '" stop-opacity="' + op + '"/>'
                 '<stop offset="1" stop-color="' + col + '" stop-opacity="0"/></radialGradient>')
-    defs = ('<defs>' + rg('m1', 'rgb(255,255,255)', '.94')
-                     + rg('m2', 'rgb(47,107,255)', '.07') + '</defs>')
+    sombra = ('<linearGradient id="msombra" x1="0" y1="0" x2="0" y2="1">'
+              '<stop offset="0" stop-color="rgb(44,66,104)" stop-opacity=".55"/>'
+              '<stop offset="1" stop-color="rgb(44,66,104)" stop-opacity="0"/>'
+              '</linearGradient>')
+    rasante = ('<linearGradient id="mrasa" x1="0" y1="0" x2=".7" y2="1">'
+               '<stop offset="0" stop-color="rgb(255,255,255)" stop-opacity=".46"/>'
+               '<stop offset=".38" stop-color="rgb(255,255,255)" stop-opacity=".14"/>'
+               '<stop offset=".68" stop-color="rgb(255,255,255)" stop-opacity="0"/>'
+               '<stop offset="1" stop-color="rgb(28,48,92)" stop-opacity=".075"/>'
+               '</linearGradient>')
+    defs = ('<defs>' + sombra + rasante
+                     + rg('m1', 'rgb(255,255,255)', '.44')
+                     + rg('m2', 'rgb(47,107,255)', '.08') + '</defs>')
     # El foco blanco remata la franja de arriba, que es la de leer. Se corta a
     # la altura de la costura para que al repetirse no deje un halo a mitad.
-    luces = ('<ellipse cx="210" cy="120" rx="430" ry="300" fill="url(#m1)"/>'
-             '<circle cx="400" cy="1140" r="300" fill="url(#m2)"/>')
-    return ('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 %d %d">%s%s%s</svg>'
-            % (W, H, defs, ''.join(piezas), luces))
+    luces = ('<rect x="0" y="0" width="%d" height="%d" fill="url(#mrasa)"/>'
+             '<ellipse cx="210" cy="120" rx="430" ry="300" fill="url(#m1)"/>'
+             '<circle cx="400" cy="1140" r="300" fill="url(#m2)"/>' % (W, H))
+    return ('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 %d %d">%s%s%s%s</svg>'
+            % (W, H, defs, ''.join(planos), ''.join(piezas), luces))
 
 
 def escribir(raiz):

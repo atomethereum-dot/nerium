@@ -139,7 +139,118 @@ JS = """<script>
     pc.globalCompositeOperation='source-over';
     tamCifra=tam;
     meta=Math.min(1,Math.max(0,(parseFloat(num.textContent)||85)/100));
+    reticula(tam);
   }
+  /* ── la cifra se ARMA, no aparece ─────────────────────────────────────
+     La cifra es un hueco recortado en la tinta, y un hueco o esta o no esta:
+     entraba de golpe, ya hecha. Ahora entra como se construye una cifra en una
+     pantalla, pixel a pixel, barriendo de izquierda a derecha.
+
+     Lo que NO se puede hacer es rehacer la plancha cada cuadro: dibujar texto
+     de medio metro sesenta veces por segundo es justo lo que hacia esto
+     imposible, y por eso la plancha se dibuja una vez por medida. Asi que el
+     recorte se queda entero y lo que se mueve es la TAPA: se vuelve a cubrir
+     con tinta cada celda que todavia no ha llegado, y se destapan por orden.
+     Un fillRect por celda, sin texto y sin sombra.
+
+     Las celdas se sacan preguntandole al alfa de la plancha donde hay hueco
+     -una vez, al medir-, no calculando donde deberia estar la cifra: asi vale
+     para cualquier numero y cualquier tipografia sin tocar nada. */
+  var celdas=[], LADO=0;
+
+  function reticula(tam){
+    LADO=Math.max(12,Math.round(tam/16));
+    celdas.length=0;
+    var d=pc.getImageData(0,0,placa.width,placa.height).data;
+    var anc=placa.width;
+    var nc=Math.ceil(W/LADO), nf=Math.ceil(H/LADO);
+    /* Primero el mapa de que celda TOCA hueco. Con muestreo a secas quedaban
+       esquirlas: trocitos de glifo mas finos que la rejilla de muestras, que
+       asomaban desde el primer cuadro porque ninguna muestra caia encima.
+       Se muestrea 5x5 y luego se DILATA el mapa una celda: la tapa se pasa un
+       poco por fuera —cubrir tinta con tinta no se ve— y el borde del glifo
+       queda cubierto entero. El canto azul solo lo llevan las celdas que de
+       verdad tienen hueco, para no dibujar una rejilla alrededor de la cifra. */
+    var hay=new Uint8Array(nc*nf);
+    for(var f=0;f<nf;f++){
+      for(var c=0;c<nc;c++){
+        var x=c*LADO, y=f*LADO, toca=0;
+        for(var sy=0;sy<5&&!toca;sy++){
+          for(var sx=0;sx<5;sx++){
+            var px=Math.min(placa.width-1,Math.round((x+LADO*(sx+0.5)/5)*DPR));
+            var py=Math.min(placa.height-1,Math.round((y+LADO*(sy+0.5)/5)*DPR));
+            if(d[(py*anc+px)*4+3]<=110){ toca=1; break }
+          }
+        }
+        hay[f*nc+c]=toca;
+      }
+    }
+    for(var f2=0;f2<nf;f2++){
+      for(var c2=0;c2<nc;c2++){
+        var propio=hay[f2*nc+c2];
+        var vecino=propio
+          || (c2>0     && hay[f2*nc+c2-1])
+          || (c2<nc-1  && hay[f2*nc+c2+1])
+          || (f2>0     && hay[(f2-1)*nc+c2])
+          || (f2<nf-1  && hay[(f2+1)*nc+c2]);
+        if(!vecino) continue;
+        /* El orden: un barrido de izquierda a derecha con desorden. Todo
+           barrido y se ve una persiana; todo azar y se ve ruido. El azar es
+           una funcion de la posicion, no Math.random: tiene que dar lo mismo
+           en cada cuadro o las celdas parpadean. */
+        var hh=Math.sin(c2*12.9898+f2*78.233)*43758.5453;
+        hh=hh-Math.floor(hh);
+        celdas.push({x:c2*LADO,y:f2*LADO,h:hh,c:propio?1:0,t:0});
+      }
+    }
+    /* El barrido se reparte sobre el ANCHO DE LA CIFRA, no sobre el de la
+       pantalla. Normalizando por W, una cifra que ocupa el 60 % central usaba
+       el 60 % central de la ventana: al llegar arriba ya iba medio armada y
+       terminaba antes de tiempo. Se mide la caja real. */
+    var x0=1e9, x1=-1e9;
+    for(var k=0;k<celdas.length;k++){
+      if(celdas[k].x<x0) x0=celdas[k].x;
+      if(celdas[k].x>x1) x1=celdas[k].x;
+    }
+    var ancho=Math.max(1,x1-x0);
+    for(var k2=0;k2<celdas.length;k2++){
+      var ce=celdas[k2];
+      ce.t=0.80*((ce.x-x0)/ancho)+0.20*ce.h;
+    }
+  }
+
+  /* La ventana de armado acaba antes de que la primera losa se mueva (0,36):
+     armarse y desmontarse a la vez seria dos cosas peleandose. */
+  var ARMA_A=0.00, ARMA_B=0.30, ARMA_C=0.09;   /* inicio, fin, duracion de celda */
+
+  function mosaico(p){
+    if(!celdas.length) return;
+    var g=cx.createLinearGradient(0,0,0,H);
+    g.addColorStop(0,'#070B14'); g.addColorStop(0.55,'#04070C'); g.addColorStop(1,'#02040A');
+    for(var i=0;i<celdas.length;i++){
+      var c=celdas[i];
+      var t0=ARMA_A+c.t*(ARMA_B-ARMA_A);
+      var l=(p-t0)/ARMA_C;
+      if(l>=1) continue;                            /* ya llego: el hueco se ve */
+      if(l<=0){                                      /* aun no: tinta maciza */
+        cx.globalAlpha=1; cx.fillStyle=g;
+        cx.fillRect(c.x,c.y,LADO+1,LADO+1);
+        continue;
+      }
+      /* llegando: la tapa se desvanece y la celda lleva un canto encendido,
+         que es lo que hace que se vea CAER en su sitio y no fundirse */
+      cx.globalAlpha=1-l; cx.fillStyle=g;
+      cx.fillRect(c.x,c.y,LADO+1,LADO+1);
+      if(c.c){
+        cx.globalAlpha=Math.sin(Math.PI*l)*0.85;
+        cx.fillStyle='rgba('+AZUL+',1)';
+        cx.fillRect(c.x,c.y,LADO+1,1);
+        cx.fillRect(c.x,c.y,1,LADO+1);
+      }
+    }
+    cx.globalAlpha=1;
+  }
+
   function medir(){
     DPR=Math.min(2,window.devicePixelRatio||1);
     var r=lz.getBoundingClientRect();
@@ -170,7 +281,12 @@ JS = """<script>
      Y la estela: lo ya recorrido no queda a brillo plano, se apaga hacia atras.
      Eso es lo fosforescente —el fosforo sigue luciendo un rato donde le dio el
      haz— y es lo que hace que la barra parezca haber PASADO por ahi. */
-  var CIAN='95,233,255';
+  /* Azul de neon, no azul de marca. El #2F6BFF de la pagina tiene luminancia
+     0,20: como tinta va bien, pero un tubo encendido a 0,20 sobre negro no se
+     lee como encendido, se lee como pintado. Este es el mismo azul subido de
+     luz hasta donde el ojo lo llama neon, y el nucleo va casi blanco con tinte
+     azul, que es lo que de verdad hace el efecto. */
+  var AZUL='62,134,255';
   function barra(dx,p){
     var an=Math.min(W*0.86,tamCifra*3.1), x0=(W-an)/2+dx;
     var y=H/2+tamCifra*0.46;
@@ -179,12 +295,12 @@ JS = """<script>
     var f=an*meta*t;                       /* lo recorrido */
     /* el carril y sus marcas de escala: sin ellas la barra es un cargador
        generico; con ellas es un instrumento */
-    cx.fillStyle='rgba('+CIAN+',.16)';
+    cx.fillStyle='rgba('+AZUL+',.16)';
     cx.fillRect(x0,y-1,an,2);
     for(var k=0;k<=4;k++){
       var mx=x0+an*k/4;
       var fin=(k===4);
-      cx.fillStyle='rgba('+CIAN+',' + (fin?.85:(k%4===0?.48:.26)) + ')';
+      cx.fillStyle='rgba('+AZUL+',' + (fin?.85:(k%4===0?.48:.26)) + ')';
       cx.fillRect(mx-(fin?1:0.5),y-(k%4===0?15:8),(fin?2:1),(k%4===0?30:16));
     }
     if(f<=0.5) return;
@@ -201,41 +317,41 @@ JS = """<script>
     cx.translate(x0+f*0.52,y);
     cx.scale(Math.max(1,f*0.66),138);
     var der=cx.createRadialGradient(0,0,0,0,0,1);
-    der.addColorStop(0,  'rgba('+CIAN+',.20)');
-    der.addColorStop(0.55,'rgba('+CIAN+',.085)');
-    der.addColorStop(1,  'rgba('+CIAN+',0)');
+    der.addColorStop(0,  'rgba('+AZUL+',.20)');
+    der.addColorStop(0.55,'rgba('+AZUL+',.085)');
+    der.addColorStop(1,  'rgba('+AZUL+',0)');
     cx.fillStyle=der;
     cx.beginPath(); cx.arc(0,0,1,0,Math.PI*2); cx.fill();
     cx.restore();
     /* 1 · el aire */
-    cx.shadowColor='rgba('+CIAN+',.95)'; cx.shadowBlur=70;
-    cx.fillStyle='rgba('+CIAN+',.38)';
+    cx.shadowColor='rgba('+AZUL+',.95)'; cx.shadowBlur=70;
+    cx.fillStyle='rgba('+AZUL+',.38)';
     cx.fillRect(x0,y-alto/2,f,alto);
     /* 2 · el tubo, con la estela apagandose hacia atras */
     var g=cx.createLinearGradient(x0,0,x0+f,0);
-    g.addColorStop(0,'rgba('+CIAN+',.20)');
-    g.addColorStop(0.55,'rgba('+CIAN+',.62)');
-    g.addColorStop(1,'rgba('+CIAN+',1)');
+    g.addColorStop(0,'rgba('+AZUL+',.20)');
+    g.addColorStop(0.55,'rgba('+AZUL+',.62)');
+    g.addColorStop(1,'rgba('+AZUL+',1)');
     cx.shadowBlur=28; cx.fillStyle=g;
     cx.fillRect(x0,y-alto/2,f,alto);
     /* 3 · el nucleo */
     var n=cx.createLinearGradient(x0,0,x0+f,0);
     n.addColorStop(0,'rgba(255,255,255,0)');
-    n.addColorStop(0.7,'rgba(230,252,255,.55)');
+    n.addColorStop(0.7,'rgba(226,238,255,.60)');
     n.addColorStop(1,'rgba(255,255,255,.95)');
     cx.shadowBlur=0; cx.fillStyle=n;
     cx.fillRect(x0,y-2,f,4);
     /* 4 · la cabeza: donde esta pasando ahora */
     var cab=t<0.999?1:0.55;
-    cx.shadowColor='rgba(210,250,255,1)'; cx.shadowBlur=60*cab;
+    cx.shadowColor='rgba(170,205,255,1)'; cx.shadowBlur=60*cab;
     cx.fillStyle='rgba(255,255,255,'+(0.97*cab).toFixed(2)+')';
     cx.fillRect(x0+f-3,y-30,6,60);
     /* y el haz vertical de la cabeza: un corte de luz que sube y baja desde
        donde esta pasando. Es lo que hace que la cabeza pese. */
     var haz=cx.createLinearGradient(0,y-190,0,y+190);
-    haz.addColorStop(0,   'rgba(190,245,255,0)');
-    haz.addColorStop(0.5, 'rgba(190,245,255,'+(0.50*cab).toFixed(3)+')');
-    haz.addColorStop(1,   'rgba(190,245,255,0)');
+    haz.addColorStop(0,   'rgba(150,190,255,0)');
+    haz.addColorStop(0.5, 'rgba(150,190,255,'+(0.50*cab).toFixed(3)+')');
+    haz.addColorStop(1,   'rgba(150,190,255,0)');
     cx.shadowBlur=0; cx.fillStyle=haz;
     cx.fillRect(x0+f-1.5,y-190,3,380);
     /* 5 · y el fogonazo al llegar a la meta: una sola vez, corto */
@@ -283,16 +399,20 @@ JS = """<script>
       if(t>0.001&&t<0.999){
         var borde=(lado<0)?(dx+W):dx;
         var lg=cx.createLinearGradient(borde-lado*90,0,borde,0);
-        lg.addColorStop(0,'rgba(95,233,255,0)');
-        lg.addColorStop(1,'rgba(95,233,255,'+(0.55*Math.sin(Math.PI*t)).toFixed(3)+')');
+        lg.addColorStop(0,'rgba(62,134,255,0)');
+        lg.addColorStop(1,'rgba(62,134,255,'+(0.60*Math.sin(Math.PI*t)).toFixed(3)+')');
         cx.save();
         cx.beginPath(); cx.rect(0,y,W,alto+1); cx.clip();
         cx.fillStyle=lg; cx.fillRect(Math.min(borde,borde-lado*90),y,90,alto+1);
-        cx.fillStyle='rgba(180,240,255,'+(0.75*Math.sin(Math.PI*t)).toFixed(3)+')';
+        cx.fillStyle='rgba(180,214,255,'+(0.80*Math.sin(Math.PI*t)).toFixed(3)+')';
         cx.fillRect(borde-(lado<0?1.5:0),y,1.5,alto+1);
         cx.restore();
       }
     }
+    /* el armado va DESPUES de las losas y sin recorte: mientras dura, ninguna
+       losa se ha movido todavia -la primera arranca en 0,36-, asi que la tinta
+       esta entera y la tapa cae justo encima de donde esta el hueco */
+    if(p<ARMA_B+ARMA_C) mosaico(p);
   }
   function pinta(){
     pide=0;
