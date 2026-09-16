@@ -5,8 +5,13 @@
 //    titular— y es lo primero que se pierde si alguien toca las filas o el
 //    reparto horizontal. Se mide: la banda del medio tiene que estar muy por
 //    debajo de la de arriba y la de abajo.
-//  · que no vuelva el cian. La mezcla suma luz; con la de antes, dos azules
-//    encima daban rgb(111,239,255).
+//  · que la mezcla no invente un color que no es de la marca. La suma de luz
+//    es el mecanismo: con la paleta azul, dos luces encima daban un cian
+//    rgb(111,239,255) que no estaba en ningun sitio del codigo. Se medía
+//    literalmente «cuanto cian hay», y con la paleta en lima eso dejo de
+//    querer decir nada: sin azul no puede salir cian, y el numero se llenaba
+//    de pixeles de borde. Se mide lo que la comprobacion queria decir: cuanta
+//    pantalla se va LEJOS del tono de la marca.
 //  · que los dos caminos arranquen sin reventar. El de lienzo se rompio dos
 //    veces por leer una variable antes de declararla y en pantalla no se
 //    notaba: la portada se quedaba quieta y parecia una decision.
@@ -39,6 +44,7 @@ const lee = () => pg.evaluate(() => {
   c2.getContext('2d').drawImage(cv, 0, 0);
   const d = c2.getContext('2d').getImageData(0, 0, c2.width, c2.height).data;
   const H = c2.height;
+  const MARCA = 77;                 // el tono de la marca, en grados
   const bandas = [0, 0, 0], n = [0, 0, 0];
   let cian = 0, gris = 0, vivos = 0, suma = 0;
   for (let i = 0; i < d.length; i += 4) {
@@ -55,7 +61,9 @@ const lee = () => pg.evaluate(() => {
     let h = 0;
     if (D) h = (M === r ? (((g-b)/D)%6) : M === g ? ((b-r)/D+2) : ((r-g)/D+4)) * 60;
     h = (h + 360) % 360;
-    if (h >= 170 && h <= 205 && s > 0.25) cian++;
+    // distancia angular al tono de la marca, por el lado corto
+    const dh = Math.min(Math.abs(h - MARCA), 360 - Math.abs(h - MARCA));
+    if (dh > 45 && s > 0.25) cian++;
     if (M > 90 && s < 0.10) gris++;
   }
   return { arriba: bandas[0]/n[0], medio: bandas[1]/n[1], abajo: bandas[2]/n[2],
@@ -65,14 +73,13 @@ const a = await lee();
 di(a.vivos > 2000, 'el campo esta pintado (' + a.vivos + ' pixeles con luz)');
 di(a.medio < a.arriba * 0.5, `el medio esta vacio para el titular (arriba ${a.arriba.toFixed(1)}, medio ${a.medio.toFixed(1)})`);
 di(a.medio < a.abajo * 0.5, `y tambien respecto a abajo (abajo ${a.abajo.toFixed(1)})`);
-/* El fallo que esto vigila era una ZONA cian, no un pixel: 1140 de 253074,
-   un 0,45 %. Pedir cero exactos hacia que la bateria fallara una vez de cada
-   seis por un unico pixel en el filo del umbral de tono, y una prueba que
-   grita sin motivo se acaba ignorando. El listón se pone donde separa las dos
-   cosas: veinte veces por debajo de aquello. */
+/* El fallo que esto vigila era una ZONA, no un pixel: 1140 de 253074, un
+   0,45 %. Pedir cero exactos hacia que la bateria fallara una vez de cada seis
+   por un unico pixel en el filo del umbral de tono, y una prueba que grita sin
+   motivo se acaba ignorando. El listón se pone donde separa las dos cosas. */
 const cianPct = a.vivos ? a.cian / a.vivos * 100 : 0;
-di(cianPct < 0.02, 'no hay zona cian: ' + a.cian + ' de ' + a.vivos +
-   ' pixeles (' + cianPct.toFixed(4) + ' %)');
+di(cianPct < 0.05, 'la mezcla no se va del tono de la marca: ' + a.cian +
+   ' de ' + a.vivos + ' pixeles fuera (' + cianPct.toFixed(4) + ' %)');
 di(a.gris === 0, 'ni un gris neutro: todo lleva azul dentro (' + a.gris + ')');
 
 // que siga vivo: dos instantes distintos no pueden dar la misma imagen

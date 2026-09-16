@@ -34,9 +34,13 @@ const f = await pg.evaluate(() => {
   return { img:c.backgroundImage, size:c.backgroundSize, rep:c.backgroundRepeat,
            ancho:Math.round(r.width) };
 });
-di(/papel-alto\.svg/.test(f.img),
-   'el telefono pide el dibujo VERTICAL, no el de escritorio (' +
-   (/papel-alto/.test(f.img) ? 'papel-alto.svg' : /papel\.svg/.test(f.img) ? 'papel.svg — el ancho' : '?') + ')');
+/* Se mira el nombre que la banda PIDE, no uno fijado aqui: el giro a negro
+   sirve la version de noche del mismo dibujo («papel-alto-noche.svg») y fijar
+   el nombre habria hecho fallar una pagina correcta. Lo que se afirma sigue
+   siendo lo mismo: que el movil pide el dibujo VERTICAL y no el de escritorio. */
+const arch = (f.img.match(/img\/([a-z0-9-]+\.svg)/) || [, '?'])[1];
+di(/^papel-alto/.test(arch),
+   'el telefono pide el dibujo VERTICAL, no el de escritorio (' + arch + ')');
 di(!/cover/.test(f.size),
    'y no lo estira con «cover», que es lo que lo convertia en un borron (' + f.size + ')');
 di(/repeat-y/.test(f.rep), 'se repite hacia abajo en vez de estirarse: ' + f.rep);
@@ -46,7 +50,7 @@ di(/repeat-y/.test(f.rep), 'se repite hacia abajo en vez de estirarse: ' + f.rep
    ancho, servido al ancho del movil, tiene que caer cerca de 28 px. Por debajo
    de 12 deja de leerse como placa y es ruido; por encima de 90 ya no es fondo,
    es una mancha. */
-const svg = fs.readFileSync(path.join(RAIZ, 'img', 'papel-alto.svg'), 'utf8');
+const svg = fs.readFileSync(path.join(RAIZ, 'img', arch), 'utf8');
 const vb = (svg.match(/viewBox="0 0 (\d+) (\d+)"/) || []).slice(1).map(Number);
 const alto = +(svg.match(/<rect [^>]*height="(\d+)"/) || [])[1];
 const enPantalla = alto * (f.ancho / vb[0]);

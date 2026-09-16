@@ -39,9 +39,12 @@ di(papel.every(p => /feTurbulence/.test(p.img)),
    'y todas llevan el grano, que es lo que quita el blanco de plantilla');
 /* El paso 17 cambia el tapiz por las placas: es el mismo motivo con otra
    composicion, asi que se comprueba el que la pagina esta usando DE VERDAD.
-   Fijar aqui «tapiz.svg» seria medir un archivo que ya nadie pinta. */
-const placas = /papel\.svg/.test(papel[0].img);
-const tap = placas ? 'papel.svg' : 'tapiz.svg';
+   Fijar aqui «tapiz.svg» seria medir un archivo que ya nadie pinta.
+   El giro a negro anade una vuelta mas: las mismas placas, invertidas, en
+   «papel-noche.svg». Encadenar aqui un tercer «si es esto, entonces aquello»
+   seria volver a fijar un archivo. Se lee el nombre que la banda pinta. */
+const tap = (papel[0].img.match(/img\/([a-z0-9-]+\.svg)/) || [, 'tapiz.svg'])[1];
+const placas = /^papel/.test(tap);   // la composicion, no el archivo
 di(papel.every(p => p.img.includes(tap)),
    'y el campo de bloques, que es el fondo de verdad (' + tap + ')');
 const svg = fs.readFileSync(path.join(RAIZ, 'img', tap), 'utf8');

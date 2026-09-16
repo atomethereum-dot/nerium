@@ -159,6 +159,18 @@ JS = """<script>
     pc.globalCompositeOperation='destination-out';
     pc.fillStyle='#000';
     pc.fillText(txt,W/2,H/2-tam*0.10);
+    /* Y POR EL HUECO SE VE LUZ, NO LA PAGINA.
+       Antes el calado dejaba ver la pagina de detras, y funcionaba mientras la
+       pagina era clara: tinta oscura, cifra clara. En negro el calado abria un
+       agujero negro sobre tinta negra y la cifra desaparecia -0% de hueco, lo
+       canto probar_giro-. Asi que la luz se la pone la plancha: con
+       «destination-over» el degradado entra DEBAJO de lo ya pintado, y como
+       todo lo demas es opaco solo asoma por la cifra. Un relleno mas, sin
+       segundo lienzo y sin redibujar el texto. */
+    pc.globalCompositeOperation='destination-over';
+    var lz2=pc.createLinearGradient(0,H/2-tam*0.6,0,H/2+tam*0.6);
+    lz2.addColorStop(0,'#D8FF4A'); lz2.addColorStop(0.5,'#A2E200'); lz2.addColorStop(1,'#6FA800');
+    pc.fillStyle=lz2; pc.fillRect(0,0,W,H);
     pc.globalCompositeOperation='source-over';
     tamCifra=tam;
     meta=Math.min(1,Math.max(0,(parseFloat(num.textContent)||85)/100));
@@ -171,7 +183,7 @@ JS = """<script>
     var arriba=(rotulo('.sale-live')||'SEED ROUND').toUpperCase();
     var abajo=dinero();
     pc.textAlign='center'; pc.textBaseline='alphabetic';
-    pc.fillStyle='rgba(0,229,138,.92)';
+    pc.fillStyle='rgba(162,226,0,.92)';
     var tk=Math.max(11,Math.min(15,W*0.0105));
     pc.font='500 '+tk+'px '+mono;
     pc.letterSpacing=(tk*0.24).toFixed(1)+'px';
@@ -180,7 +192,7 @@ JS = """<script>
       /* justo debajo de la barra, no al pie de la pantalla: ahi se juntaba
          con el HUD y parecia parte de el */
       var yb=H/2+tam*0.46; if(yb>H-86) yb=H-86;
-      pc.fillStyle='rgba(226,255,240,.62)';
+      pc.fillStyle='rgba(226,247,180,.62)';
       pc.font='400 '+tk+'px '+mono;
       pc.fillText(abajo, W/2, yb+46);
     }
@@ -221,7 +233,7 @@ JS = """<script>
   /* El verde de la casa. La barra iba en cian y el branding paso a verde
      fosforescente: un acento que no es el de la marca en el momento mas
      importante de la pagina es un despiste, no una decision. */
-  var NEON='0,229,138';
+  var NEON='162,226,0';
   function barra(dx,p){
     var an=Math.min(W*0.86,tamCifra*3.1), x0=(W-an)/2+dx;
     var y=H/2+tamCifra*0.46;
@@ -271,15 +283,15 @@ JS = """<script>
     cx.fillRect(x0,y-alto/2,f,alto);
     /* 3 · el nucleo */
     var n=cx.createLinearGradient(x0,0,x0+f,0);
-    n.addColorStop(0,'rgba(255,255,255,0)');
-    n.addColorStop(0.7,'rgba(226,255,240,.55)');
-    n.addColorStop(1,'rgba(255,255,255,.95)');
+    n.addColorStop(0,'rgba(233,255,168,0)');
+    n.addColorStop(0.7,'rgba(226,247,180,.55)');
+    n.addColorStop(1,'rgba(233,255,168,.95)');
     cx.shadowBlur=0; cx.fillStyle=n;
     cx.fillRect(x0,y-2,f,4);
     /* 4 · la cabeza: donde esta pasando ahora */
     var cab=t<0.999?1:0.55;
     cx.shadowColor='rgba(180,255,220,1)'; cx.shadowBlur=60*cab;
-    cx.fillStyle='rgba(255,255,255,'+(0.97*cab).toFixed(2)+')';
+    cx.fillStyle='rgba(233,255,168,'+(0.97*cab).toFixed(2)+')';
     cx.fillRect(x0+f-3,y-30,6,60);
     /* y el haz vertical de la cabeza: un corte de luz que sube y baja desde
        donde esta pasando. Es lo que hace que la cabeza pese. */
@@ -293,7 +305,7 @@ JS = """<script>
     var golpe=tramo(p,0.30,0.35)*(1-tramo(p,0.35,0.46));
     if(golpe>0.01){
       cx.shadowBlur=70*golpe;
-      cx.fillStyle='rgba(255,255,255,'+(0.5*golpe).toFixed(3)+')';
+      cx.fillStyle='rgba(233,255,168,'+(0.5*golpe).toFixed(3)+')';
       cx.fillRect(x0,y-alto/2-1,f,alto+2);
     }
     cx.restore();
@@ -339,7 +351,7 @@ JS = """<script>
         cx.save();
         cx.beginPath(); cx.rect(0,y,W,alto+1); cx.clip();
         cx.fillStyle=lg; cx.fillRect(Math.min(borde,borde-lado*90),y,90,alto+1);
-        cx.fillStyle='rgba(180,240,255,'+(0.75*Math.sin(Math.PI*t)).toFixed(3)+')';
+        cx.fillStyle='rgba(209,255,120,'+(0.75*Math.sin(Math.PI*t)).toFixed(3)+')';
         cx.fillRect(borde-(lado<0?1.5:0),y,1.5,alto+1);
         cx.restore();
       }

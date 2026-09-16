@@ -162,9 +162,19 @@ for (const p of [0.05, 0.30, 0.50, 0.72, 0.99]) {
 // Que la escena AVANCE: si el lienzo estuviera parado, los cinco cuadros
 // darian la misma media. El fallo que esto caza es el peor de todos —una
 // animacion que no se mueve pasa desapercibida en una captura suelta—.
-const recorrido = Math.max(...cuadros.map(c => c.medio)) - Math.min(...cuadros.map(c => c.medio));
-di(recorrido >= 0.45,
-   'la escena avanza con el scroll, no esta parada (recorrido de claridad ' + recorrido.toFixed(2) + ')');
+/* Se midio la CLARIDAD media mientras la pagina era clara: la plancha era
+   tinta oscura sobre papel, y el recorrido de la escena era el recorrido del
+   brillo —0,45 de sobra—. En negro ya no: la plancha y la pagina de debajo
+   comparten suelo y la media apenas se mueve 0,08 aunque la escena entera
+   pase por delante. Medir eso seria medir el fondo, no la animacion.
+   Lo que de verdad cambia es CUANTO de la pantalla ocupa la cifra encendida y
+   cuanta estructura hay dibujada, asi que se toma el mayor de los tres
+   recorridos. Con la escena congelada los cinco cuadros son el mismo y los
+   tres se van a cero a la vez; medido asi: 0,20 moviendose, 0,00 parada. */
+const rango = f => Math.max(...cuadros.map(f)) - Math.min(...cuadros.map(f));
+const recorrido = Math.max(rango(c => c.medio), rango(c => c.claro), rango(c => c.desv));
+di(recorrido >= 0.10,
+   'la escena avanza con el scroll, no esta parada (recorrido ' + recorrido.toFixed(2) + ')');
 /* Aqui no vale la media, y por eso esta comprobacion se reescribio: la escena
    empieza con la cifra de la ronda RECORTADA en la tinta a media pantalla de
    alto, asi que hay un glifo enorme y claro que sube la media a 0,20 estando
@@ -175,8 +185,28 @@ di(cuadros[0].oscuro >= 0.50,
    'empieza en camara: la mayor parte es tinta (' + (cuadros[0].oscuro * 100).toFixed(0) + '%)');
 di(cuadros[0].claro >= 0.04,
    'y la cifra va calada en ella, no pintada encima (' + (cuadros[0].claro * 100).toFixed(0) + '% de hueco)');
-di(cuadros[4].medio >= 0.70,
-   'y acaba entregando el suelo de la ronda, no un blanco inventado (' + cuadros[4].medio.toFixed(3) + ')');
+/* Y al final entrega la SECCION, no una pantalla vacia. Esto tambien se medÍa
+   por brillo —«>= 0,70», o sea «se ve papel»— y en negro no significa nada: un
+   fundido a negro lo cumpliria igual de bien que la pagina. El fallo que esta
+   comprobacion existe para cazar es el que ya paso una vez: la plancha se va y
+   detras no queda nada. Asi que se cuenta lo unico que lo distingue, texto de
+   verdad visible en pantalla. Con el agujero abierto salian 3; con la seccion
+   entregada, entre 39 y 52. */
+const vivos = await pg.evaluate(() => {
+  let n = 0;
+  for (const e of document.querySelectorAll('h1,h2,h3,p,li,dd,dt,a,span,button')) {
+    if (e.children.length) continue;
+    const t = (e.textContent || '').trim(); if (t.length < 2) continue;
+    const r = e.getBoundingClientRect();
+    if (r.bottom < 0 || r.top > innerHeight || r.width < 4 || r.height < 4) continue;
+    const s = getComputedStyle(e);
+    if (s.visibility === 'hidden' || +s.opacity < 0.08) continue;
+    n++;
+  }
+  return n;
+});
+di(vivos >= 20,
+   'y acaba entregando la seccion de la ronda, no una pantalla vacia (' + vivos + ' textos visibles)');
 // El instrumento tiene que estar dibujado, no solo el negro: en el tramo de
 // los anillos hay relieve dentro del recorte.
 di(cuadros[1].desv >= 0.010 || cuadros[2].desv >= 0.010,
