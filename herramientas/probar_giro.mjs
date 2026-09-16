@@ -41,7 +41,32 @@ async function franja(pg, caja) {
     const m = su / n;
     let s2 = 0, oscuro = 0, claro = 0;
     for (const L of v) { s2 += (L - m) * (L - m); if (L < 0.15) oscuro++; if (L > 0.60) claro++ }
-    return { medio: m, desv: Math.sqrt(s2 / n), oscuro: oscuro / n, claro: claro / n };
+    /* La cifra dejo de ser un hueco claro y paso a ser teselas AZULES, asi que
+       contar «pixeles claros» ya no la ve: a 0,20 de luminancia el azul de la
+       marca no llega al 0,60 que pedia «claro». Se cuenta tesela: pixel donde
+       el azul le saca ventaja al rojo y hay algo de luz. */
+    let tes = 0;
+    for (let i = 0; i < d.length; i += 4) {
+      if (d[i+2] > d[i] + 40 && (0.2126*d[i] + 0.7152*d[i+1] + 0.0722*d[i+2]) > 26) tes++;
+    }
+    /* Y el ENREJADO: cuantas veces cambia de encendido a apagado al recorrer
+       una fila. Un glifo macizo cambia dos veces por trazo; uno de teselas,
+       una por tesela. Es lo que distingue «esta hecho de piezas» de «esta
+       pintado de una pieza», que es lo que la comprobacion del calado decia
+       antes con otras palabras. */
+    let saltos = 0, filas = 0;
+    for (let y = 0; y < c.height; y += 3) {
+      let cambios = 0, prev = null;
+      for (let x = 0; x < c.width; x++) {
+        const i = (y*c.width + x) * 4;
+        const on = d[i+2] > d[i] + 40;
+        if (prev !== null && on !== prev) cambios++;
+        prev = on;
+      }
+      if (cambios > 0) { saltos += cambios; filas++ }
+    }
+    return { medio: m, desv: Math.sqrt(s2 / n), oscuro: oscuro / n, claro: claro / n,
+             tesela: tes / n, saltos: filas ? saltos / filas : 0 };
   }, b64);
 }
 
@@ -177,8 +202,9 @@ di(cuadros[0].oscuro >= 0.50,
    no es el primer cuadro: en 0,05 la ventana de armado apenas ha empezado y no
    hay hueco ninguno, que es justo lo que se quiere. Midiendolo ahi, la
    comprobacion afirmaba lo viejo. */
-di(cuadros[1].claro >= 0.04,
-   'y la cifra va calada en la tinta, no pintada encima (' + (cuadros[1].claro * 100).toFixed(0) + '% de hueco)');
+di(cuadros[1].saltos >= 14,
+   'y la cifra esta hecha de piezas, no pintada de una pieza (' +
+   cuadros[1].saltos.toFixed(1) + ' cambios por fila)');
 
 /* ── y se ARMA: entra por pixeles, no de una pieza ────────────────────────
    Cuatro cuadros dentro de la ventana de armado sobre la caja de la cifra. Lo
@@ -191,7 +217,7 @@ const arma = [];
 for (const p of [0.06, 0.14, 0.24, 0.32]) {
   await pg.evaluate(v => scrollTo(0, v), Math.round(caja.top + p * (caja.alto - caja.vh)));
   await pg.waitForTimeout(420);
-  arma.push((await franja(pg, CAJA)).claro);
+  arma.push((await franja(pg, CAJA)).tesela);
 }
 di(arma.every((v, i) => i === 0 || v > arma[i - 1] + 0.012),
    'la cifra se arma por pasos, no aparece de una pieza (' +

@@ -50,7 +50,7 @@ CSS = """
     radial-gradient(62% 74% at 6% -10%,rgba(150,190,255,.34),transparent 68%),
     radial-gradient(58% 70% at 96% -14%,rgba(158,194,255,.30),transparent 66%),
     radial-gradient(64% 72% at 18% 112%,rgba(196,214,246,.26),transparent 70%),
-    var(--grano),url(img/papel.svg);
+    var(--grano),url(img/papel.webp);
   background-repeat:no-repeat,no-repeat,no-repeat,repeat,repeat;
   /* Las placas, a TAMANO FIJO. Con «cover» el navegador estira el dibujo hasta
      tapar la seccion, y las secciones miden cosas muy distintas: medido, la
@@ -68,7 +68,7 @@ CSS = """
       radial-gradient(78% 48% at 6% -6%,rgba(150,190,255,.32),transparent 68%),
       radial-gradient(74% 44% at 96% -8%,rgba(158,194,255,.28),transparent 66%),
       radial-gradient(80% 46% at 18% 106%,rgba(196,214,246,.24),transparent 70%),
-      var(--grano),url(img/papel-alto.svg);
+      var(--grano),url(img/papel-alto.webp);
     background-repeat:no-repeat,no-repeat,no-repeat,repeat,repeat-y;
     background-size:auto,auto,auto,auto,100% auto;
     background-position:0 0,0 0,0 0,0 0,left top}
@@ -83,7 +83,7 @@ CSS = """
   radial-gradient(62% 74% at 6% -10%,rgba(150,190,255,.34),transparent 68%),
   radial-gradient(58% 70% at 96% -14%,rgba(158,194,255,.30),transparent 66%),
   radial-gradient(64% 72% at 18% 112%,rgba(196,214,246,.26),transparent 70%),
-  var(--grano),url(img/papel.svg);
+  var(--grano),url(img/papel.webp);
   background-repeat:no-repeat,no-repeat,no-repeat,repeat,repeat;
   background-size:auto,auto,auto,auto,1600px auto;
   background-position:0 0,0 0,0 0,0 0,center top}
@@ -92,7 +92,7 @@ CSS = """
     radial-gradient(78% 48% at 6% -6%,rgba(150,190,255,.32),transparent 68%),
     radial-gradient(74% 44% at 96% -8%,rgba(158,194,255,.28),transparent 66%),
     radial-gradient(80% 46% at 18% 106%,rgba(196,214,246,.24),transparent 70%),
-    var(--grano),url(img/papel-alto.svg);
+    var(--grano),url(img/papel-alto.webp);
     background-repeat:no-repeat,no-repeat,no-repeat,repeat,repeat-y;
     background-size:auto,auto,auto,auto,100% auto;
     background-position:0 0,0 0,0 0,0 0,left top}

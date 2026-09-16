@@ -34,38 +34,62 @@ const f = await pg.evaluate(() => {
   return { img:c.backgroundImage, size:c.backgroundSize, rep:c.backgroundRepeat,
            ancho:Math.round(r.width) };
 });
-di(/papel-alto\.svg/.test(f.img),
-   'el telefono pide el dibujo VERTICAL, no el de escritorio (' +
-   (/papel-alto/.test(f.img) ? 'papel-alto.svg' : /papel\.svg/.test(f.img) ? 'papel.svg — el ancho' : '?') + ')');
+/* Se lee el nombre que la banda PIDE, no uno fijado aqui: asi el resto de las
+   comprobaciones miden el archivo que de verdad se sirve. Lo que se afirma es
+   lo mismo de siempre: que el movil pide el VERTICAL y no el de escritorio. */
+const arch = (f.img.match(/img\/([a-z0-9-]+\.(?:svg|webp|png|avif))/) || [, '?'])[1];
+di(/^papel-alto/.test(arch),
+   'el telefono pide el dibujo VERTICAL, no el de escritorio (' + arch + ')');
 di(!/cover/.test(f.size),
    'y no lo estira con «cover», que es lo que lo convertia en un borron (' + f.size + ')');
 di(/repeat-y/.test(f.rep), 'se repite hacia abajo en vez de estirarse: ' + f.rep);
 
 /* Lo que de verdad importa no es que regla gane, sino el TAMANO al que acaban
-   las placas en la pantalla. Una placa de 30 unidades en un dibujo de 420 de
-   ancho, servido al ancho del movil, tiene que caer cerca de 28 px. Por debajo
-   de 12 deja de leerse como placa y es ruido; por encima de 90 ya no es fondo,
-   es una mancha. */
-const svg = fs.readFileSync(path.join(RAIZ, 'img', 'papel-alto.svg'), 'utf8');
-const vb = (svg.match(/viewBox="0 0 (\d+) (\d+)"/) || []).slice(1).map(Number);
-const alto = +(svg.match(/<rect [^>]*height="(\d+)"/) || [])[1];
-const enPantalla = alto * (f.ancho / vb[0]);
-di(enPantalla > 12 && enPantalla < 90,
-   'y cada placa cae a ' + enPantalla.toFixed(1) + ' px en pantalla, que es tamano de placa');
-di(vb[1] > vb[0], 'el dibujo del movil es mas alto que ancho, como la pantalla: ' + vb.join('x'));
+   el dibujo en la pantalla. Esto se medía leyendo el alto del primer <rect>
+   del archivo, y con el dibujo en curvas de nivel ya no hay rects: leia el
+   rectangulo de la mascara —del alto entero— y daba 1.114 px.
 
-/* Y que no se quede sin nada: el hueco limpio del movil es la franja de
-   ARRIBA —ahi va el titular—, no una esquina, porque en vertical el titular
-   ocupa todo el ancho. */
-const cajas = [...svg.matchAll(/<rect x="(\d+)" y="(\d+)" width="(\d+)" height="(\d+)"[^>]*opacity="([\d.]+)"/g)]
-  .map(m => ({ y:+m[2], w:+m[3], h:+m[4], a:+m[5] })).filter(c => c.h > 1);
-const tinta = f2 => cajas.filter(f2).reduce((s, c) => s + c.w * c.h * c.a, 0);
-const corte = vb[1] * .35;
-const dArriba = tinta(c => c.y < corte) / (vb[0] * corte);
-const dAbajo = tinta(c => c.y >= corte) / (vb[0] * (vb[1] - corte));
-di(dArriba < dAbajo * 0.5, 'y la franja de leer, despejada: ' +
-   (dArriba / dAbajo).toFixed(2) + ' de tinta arriba por cada 1 abajo');
-di(cajas.length > 60, 'con placas de verdad y no cuatro: ' + cajas.length);
+   Se pasa a medir PIXELES, igual que en probar_pagina: se pinta el SVG solo y
+   se cuenta TRAZO —pixeles que se separan de su vecino de dos filas mas
+   arriba—. Lo que importa no es con que primitiva esta hecho el dibujo, sino
+   cuanto dibujo hay y donde. */
+/* La forma se le pregunta a la IMAGEN, no al archivo: el relieve se sirve
+   rasterizado y ahi no hay «viewBox» que leer. */
+const forma = await pg.evaluate(async (url) => {
+  const im = new Image();
+  await new Promise((ok, no) => { im.onload = ok; im.onerror = no; im.src = url });
+  return { w: im.naturalWidth, h: im.naturalHeight };
+}, 'http://127.0.0.1:9133/img/' + arch);
+di(forma.h > forma.w, 'el dibujo del movil es mas alto que ancho, como la pantalla: ' +
+   forma.w + 'x' + forma.h);
+
+/* El hueco limpio del movil es la franja de ARRIBA —ahi va el titular—, no una
+   esquina: en vertical el titular ocupa todo el ancho y no deja rincon libre. */
+const tinta = await pg.evaluate(async (url) => {
+  const im = new Image();
+  await new Promise((ok, no) => { im.onload = ok; im.onerror = no; im.src = url });
+  const c = document.createElement('canvas'); c.width = 390; c.height = 1114;
+  const x = c.getContext('2d');
+  x.fillStyle = '#EEF2F8'; x.fillRect(0, 0, c.width, c.height);
+  x.drawImage(im, 0, 0, c.width, c.height);
+  const d = x.getImageData(0, 0, c.width, c.height).data;
+  const L = i => (0.2126*d[i] + 0.7152*d[i+1] + 0.0722*d[i+2]) / 255;
+  const corte = c.height * 0.35;
+  let arriba = 0, abajo = 0;
+  for (let y = 2; y < c.height; y++) {
+    for (let px = 0; px < c.width; px++) {
+      const i = (y*c.width + px) * 4;
+      if (Math.abs(L(i) - L(i - 2*c.width*4)) < 0.018) continue;
+      if (y < corte) arriba++; else abajo++;
+    }
+  }
+  return { arriba, abajo,
+           dA: arriba/(c.width*corte), dB: abajo/(c.width*(c.height-corte)) };
+}, 'http://127.0.0.1:9133/img/' + arch);
+di(tinta.dA < tinta.dB * 0.5, 'y la franja de leer, despejada: ' +
+   (tinta.dB ? (tinta.dA / tinta.dB).toFixed(2) : '—') + ' de trazo arriba por cada 1 abajo');
+di(tinta.arriba + tinta.abajo > 12000,
+   'con dibujo de verdad y no cuatro trazos: ' + (tinta.arriba + tinta.abajo) + ' px');
 
 /* Nada se sale por el lado. Ojo con como se mide: la primera version miraba
    elemento por elemento si su borde derecho pasaba del ancho, y delataba el

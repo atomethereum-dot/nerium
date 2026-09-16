@@ -207,6 +207,10 @@ rest = escala.aplicar(rest)
 # Detras de la escala: rehace las siete secciones claras, y para ganarle en
 # especificidad a lo original tiene que entrar despues.
 papel.escribir('/home/user/nerium')          # img/papel.svg y papel-alto.svg
+# Los dibujos se sirven RASTERIZADOS: el relieve son ~580 trazos y el navegador
+# los re-rasteriza en cada paso de la escala que las secciones llevan atada al
+# scroll —el p90 del cuadro se iba de 50 a 83 ms—. Despues de tocar papel.py:
+#     node herramientas/rasterizar.mjs
 rest = papel.aplicar(rest)
 
 # ── 18 · el sistema ──

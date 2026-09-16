@@ -24,202 +24,171 @@ Cinco cosas, que son las cinco que bajaban la nota:
 import os
 import random
 
+import contorno
+
 MARCA = '/* ══ la mitad clara, decidida ══'
 FIN = '/* ══ fin: papel ══ */'
 
 
 # ── 1 · el suelo ─────────────────────────────────────────────────────────────
+def _curvas(semilla, W, H, paso, niveles, bultos, sesgo=0.0):
+    """Las lineas de nivel del campo, ya encadenadas y listas para <path>."""
+    f = contorno.campo(semilla, bultos, W, H, sesgo)
+    m = [f(x * 20, y * 20) for x in range(W // 20 + 1) for y in range(H // 20 + 1)]
+    hi = max(m)
+    salida = []
+    # Los niveles arrancan por encima de CERO, no del minimo: con la ventana de
+    # borde el minimo es cero en todo el contorno del papel, y un nivel ahi
+    # dibujaria el marco.
+    for k in range(1, niveles + 1):
+        n = hi * (0.10 + 0.86 * k / (niveles + 1.0))
+        for pts in contorno.cadenas(contorno.marchar(f, W, H, paso, n)):
+            crudo = pts
+            pts = contorno.adelgaza(pts, 2.4)
+            if len(pts) < 5:
+                continue
+            d = 'M' + ' L'.join('%d %d' % (round(x), round(y)) for x, y in pts)
+            # cerrada o abierta: solo las cerradas se pueden RELLENAR. Una
+            # abierta -la que se sale del lienzo- rellenada da un manchon con
+            # un canto recto en el borde, que fue lo primero que salio.
+            cerrada = (abs(crudo[0][0] - crudo[-1][0]) < 2.0
+                       and abs(crudo[0][1] - crudo[-1][1]) < 2.0)
+            salida.append((k / float(niveles), d, cerrada))
+    return salida
+
+
 def placas(semilla=31):
-    """El campo de bloques de la portada, quieto, pero como PLACAS.
+    """El suelo de la mitad clara: un relieve, no un campo de bloques.
 
-       Dos diferencias con el tapiz que sustituye, y las dos son la misma
-       decision tomada en serio:
+       Lo que habia antes eran ciento veinte rectangulos de 40 px alineados a
+       una rejilla de 40. Da igual con cuanto mimo se iluminen: rectangulos en
+       filas, a la misma altura y con el mismo alto, es papel pautado. Se
+       intento salvarlo dos veces -subiendo la opacidad, poniendoles sombra y
+       canto- y las dos veces siguio leyendose como un cuaderno, porque el
+       problema no era el acabado sino la FORMA.
 
-       · opacidad. El otro iba de .022 a .072 y por eso no se veia. Este llega
-         a .34. Un fondo que no se ve no es sutil, es un fondo que no esta.
-       · composicion. El otro dejaba libre el CENTRO, pensando en texto
-         centrado. Pero en esta pagina el titular de cada seccion va arriba a
-         la IZQUIERDA, asi que el hueco no protegia lo unico que habia que
-         proteger. El primer intento de este las aparto en vertical —limpio en
-         la franja de en medio— y salio peor todavia: densas justo detras del
-         titular, que es donde mas estorban.
+       Esto no tiene ni un rectangulo. Es un campo escalar suave cortado a
+       catorce alturas: curvas de nivel. Cerradas, anidadas, ninguna igual a
+       otra y ninguna alineada con nada. Una superficie con cotas se lee como
+       una superficie —eso es lo que le faltaba—, y ademas dice de que va la
+       casa: es el dibujo de un plano, no una decoracion.
 
-         Van en diagonal. Limpio arriba a la izquierda, que es el rincon del
-         titular en las siete secciones; denso abajo y a la derecha, que es
-         donde o no hay nada o hay tarjetas opacas por encima. La composicion
-         sale del sitio real del contenido, no de una simetria bonita.
+       Cada curva va GRABADA: una linea clara un pixel arriba y la oscura
+       encima. Es el truco del bajorrelieve y es lo que hace que la linea se
+       hunda en el papel en vez de estar pintada sobre el.
 
-       Cada placa lleva un filete claro de 1 px en el canto de arriba. Es lo
-       que la convierte en una placa con luz encima y no en una mancha."""
-    W, H, U = 1600, 1000, 40
-    FRIO = [(176, 196, 226), (150, 176, 216), (198, 213, 236), (128, 158, 206)]
-    r = random.Random(semilla)
-    piezas = []
-    cols, filas = W // U, H // U
-    for _ in range(120):
-        for _ in range(40):
-            cx, cy = r.randrange(cols), r.randrange(filas)
-            hx, hy = cx / (cols - 1), cy / (filas - 1)
-            d = .42 * hx + .58 * hy          # 0 arriba-izquierda, 1 abajo-derecha
-            if r.random() < d ** 1.45:
-                break
-        else:
+       Y se apaga hacia arriba a la izquierda con una mascara, que es donde va
+       el titular en las siete secciones. El hueco limpio no se compone a ojo:
+       se recorta."""
+    W, H = 1600, 1000
+    curvas = _curvas(semilla, W, H, 9, 26, 28)
+    # PRIMERO LOS RELLENOS, despues las lineas. Con lineas solas lo que hay es
+    # un degradado con rayas encima: se ve el dibujo pero no el volumen. Lo que
+    # da volumen en un plano de cotas es que cada escalon entre dos curvas
+    # tenga su tono. Apiladas, las cerradas van construyendo el relieve.
+    trazos = []
+    for prof, d, cerrada in curvas:
+        if not cerrada:
             continue
-        an = r.choice([2, 3, 3, 4, 4, 5, 6]) * U     # placas largas: arquitectura
-        c = FRIO[r.randrange(len(FRIO))]
-        a = round((.045 + .17 * d) * r.uniform(.6, 1.0), 3)
-        x, y = cx * U, cy * U
-        # LA SOMBRA VA PRIMERO, y va debajo del canto de abajo. Es lo que
-        # convierte la placa en una placa: sin ella son manchas del mismo tono
-        # sobre el mismo suelo, y la banda entera se lee como un degradado
-        # plano por mucha mancha que lleve. Va como <path> a proposito: asi la
-        # medida del rincon limpio de probar_pagina sigue contando PLACAS, que
-        # es lo que se escribio para contar, y no se le cuela la sombra.
-        piezas.append('<path d="M%d %dh%dv6h-%dz" fill="url(#sombra)" '
-                      'opacity="%s"/>' % (x, y + U, an, an, round(min(.5, a * 2.6), 3)))
-        piezas.append('<rect x="%d" y="%d" width="%d" height="%d" fill="rgb(%d,%d,%d)" '
-                      'opacity="%s"/>' % (x, y, an, U, c[0], c[1], c[2], a))
-        # el filete de arriba: la luz viene de arriba, siempre la misma
-        piezas.append('<rect x="%d" y="%d" width="%d" height="1" fill="#FFFFFF" '
-                      'opacity="%s"/>' % (x, y, an, round(min(.62, a * 2.4), 3)))
-
-    # ── los planos ────────────────────────────────────────────────────────────
-    # Lo que de verdad quitaba lo PLANO no eran las placas: era que a pantalla
-    # completa no habia nada grande. Ciento veinte piezas de 40 px sobre 1600
-    # son textura, y la textura no da profundidad, la da la composicion.
-    #
-    # Tres planos del tamano de la pantalla, en diagonal y traslapados, cada
-    # uno con UN canto nitido de 1 px. Son laminas de vidrio mate puestas una
-    # encima de otra: se ve el borde, se ve que una esta delante de la otra, y
-    # eso es profundidad sin dibujar ni una linea de mas. No es una cuadricula
-    # —no se repiten, no se cruzan en angulo recto, no hay modulo—; es la misma
-    # geometria de las placas leida a tamano de sala.
-    #
-    # Van faltos de tinta arriba a la izquierda, por lo mismo que las placas:
-    # ahi va el titular en las siete secciones.
-    PLANOS = (
-        # (x del corte arriba, x del corte abajo, opacidad, opacidad del canto)
-        (-120,  560, .045, .30),
-        ( 430, 1180, .062, .38),
-        (1020, 1720, .050, .32),
-    )
-    planos = []
-    for xa, xb, op, ca in PLANOS:
-        planos.append('<path d="M%d 0L%d %d L%d %d L%d 0Z" fill="rgb(126,156,205)" '
-                      'opacity="%.3f"/>' % (xa, xb, H, xb + 460, H, xa + 460, op))
-        planos.append('<path d="M%d 0L%d %d" stroke="rgb(255,255,255)" stroke-width="1" '
-                      'fill="none" opacity="%.3f"/>' % (xa, xb, H, ca))
-        planos.append('<path d="M%d 0L%d %d" stroke="rgb(96,126,180)" stroke-width="1" '
-                      'fill="none" opacity="%.3f"/>' % (xa + 460, xb + 460, H, ca * .62))
+        trazos.append('<path d="%sZ" fill="rgb(96,126,184)" opacity="%.4f"/>'
+                      % (d, 0.030 + 0.016 * prof))
+    for prof, d, cerrada in curvas:
+        # las cotas altas -el centro de cada loma- van mas marcadas: es lo que
+        # da el orden de lectura, igual que en un plano de verdad
+        op = 0.20 + 0.34 * prof
+        trazos.append('<path d="%s" stroke="rgb(255,255,255)" stroke-width="1.1" '
+                      'fill="none" opacity="%.3f" transform="translate(0,-1.2)"/>'
+                      % (d, op * 0.85))
+        trazos.append('<path d="%s" stroke="rgb(86,116,172)" stroke-width="1" '
+                      'fill="none" opacity="%.3f"/>' % (d, op))
 
     def rg(nid, col, op):
         return ('<radialGradient id="' + nid + '">'
                 '<stop offset="0" stop-color="' + col + '" stop-opacity="' + op + '"/>'
                 '<stop offset="1" stop-color="' + col + '" stop-opacity="0"/></radialGradient>')
-    # La sombra de placa: un degradado vertical que muere en seis pixeles. Uno
-    # solo, compartido por las ciento veinte.
-    sombra = ('<linearGradient id="sombra" x1="0" y1="0" x2="0" y2="1">'
-              '<stop offset="0" stop-color="rgb(44,66,104)" stop-opacity=".55"/>'
-              '<stop offset="1" stop-color="rgb(44,66,104)" stop-opacity="0"/>'
-              '</linearGradient>')
-    # Y la luz rasante: una banda ancha cruzando en diagonal. Un foco redondo
-    # ilumina un punto; una rasante da DIRECCION, que es lo que le faltaba a la
-    # banda para no parecer un degradado de plantilla.
+    # La mascara: el relieve se desvanece hacia el rincon del titular.
+    mascara = ('<linearGradient id="mk" x1="0" y1="0" x2="1" y2="1">'
+               '<stop offset="0" stop-color="#000"/>'
+               '<stop offset=".22" stop-color="#5c5c5c"/>'
+               '<stop offset=".58" stop-color="#e4e4e4"/>'
+               '<stop offset="1" stop-color="#fff"/></linearGradient>'
+               '<mask id="mrel"><rect x="0" y="0" width="%d" height="%d" fill="url(#mk)"/></mask>'
+               % (W, H))
+    # Y la luz rasante, que es la que da direccion. Un foco redondo ilumina un
+    # punto; una rasante dice de donde viene la luz.
     rasante = ('<linearGradient id="rasa" x1="0" y1="0" x2="1" y2="1">'
-               '<stop offset="0" stop-color="rgb(255,255,255)" stop-opacity=".50"/>'
-               '<stop offset=".34" stop-color="rgb(255,255,255)" stop-opacity=".16"/>'
-               '<stop offset=".62" stop-color="rgb(255,255,255)" stop-opacity="0"/>'
-               '<stop offset="1" stop-color="rgb(28,48,92)" stop-opacity=".085"/>'
+               '<stop offset="0" stop-color="rgb(255,255,255)" stop-opacity=".58"/>'
+               '<stop offset=".34" stop-color="rgb(255,255,255)" stop-opacity=".18"/>'
+               '<stop offset=".64" stop-color="rgb(255,255,255)" stop-opacity="0"/>'
+               '<stop offset="1" stop-color="rgb(26,44,88)" stop-opacity=".10"/>'
                '</linearGradient>')
-    defs = ('<defs>' + sombra + rasante
-                     + rg('l1', 'rgb(255,255,255)', '.42')
-                     + rg('l2', 'rgb(47,107,255)', '.10')
+    defs = ('<defs>' + mascara + rasante
+                     + rg('l1', 'rgb(255,255,255)', '.24')
+                     + rg('l2', 'rgb(47,107,255)', '.11')
                      + rg('l3', 'rgb(120,150,215)', '.13') + '</defs>')
-    # el foco blanco remata el rincon del titular; los otros dos tinan de azul
-    # la esquina cargada, para que el peso no sea gris
     luces = ('<rect x="0" y="0" width="%d" height="%d" fill="url(#rasa)"/>'
-             '<ellipse cx="220" cy="110" rx="720" ry="380" fill="url(#l1)"/>'
+             '<ellipse cx="200" cy="90" rx="600" ry="320" fill="url(#l1)"/>'
              '<circle cx="1480" cy="900" r="560" fill="url(#l2)"/>'
              '<circle cx="1560" cy="120" r="420" fill="url(#l3)"/>' % (W, H))
     return ('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 %d %d" '
-            'preserveAspectRatio="xMidYMid slice">%s%s%s%s</svg>'
-            % (W, H, defs, ''.join(planos), ''.join(piezas), luces))
+            'preserveAspectRatio="xMidYMid slice">%s'
+            '<g mask="url(#mrel)">%s</g>%s</svg>'
+            % (W, H, defs, ''.join(trazos), luces))
 
 
 def placas_alto(semilla=47):
-    """El mismo campo, compuesto para una pantalla VERTICAL.
+    """El mismo relieve, compuesto para una pantalla VERTICAL.
 
-       Esto es lo que me faltaba y no es un ajuste: es que la composicion
-       depende de la FORMA del hueco. El dibujo de arriba va en diagonal
-       —limpio arriba a la izquierda, denso abajo a la derecha— porque esta
-       pensado para 1440 de ancho. Metido en un telefono con «cover», el
-       navegador lo agranda casi ocho veces y recorta el medio: los bloques
-       dejan de ser bloques y se quedan en dos manchas azules gigantes. Una
-       pantalla entera de nada.
-
-       Aqui la caja es del ancho del telefono y se repite hacia abajo, asi que
-       las placas conservan su tamano de verdad. Y el hueco limpio ya no es
-       una esquina: es la FRANJA DE ARRIBA, porque en vertical el titular
-       ocupa todo el ancho y no deja rincon libre a la derecha."""
-    W, H, U = 420, 1200, 30
-    FRIO = [(176, 196, 226), (150, 176, 216), (198, 213, 236), (128, 158, 206)]
-    r = random.Random(semilla)
-    piezas = []
-    cols, filas = W // U, H // U
-    for _ in range(95):
-        for _ in range(40):
-            cx, cy = r.randrange(cols), r.randrange(filas)
-            hy = cy / (filas - 1)
-            if r.random() < hy ** 1.6:
-                break
-        else:
+       No es un ajuste de tamano: la composicion depende de la FORMA del hueco.
+       Arriba el rincon limpio es la esquina del titular; en vertical el
+       titular ocupa todo el ancho, asi que lo que hay que dejar despejado es
+       la FRANJA DE ARRIBA, y la mascara va de arriba abajo en vez de en
+       diagonal. Y la caja es del ancho del telefono y se repite hacia abajo,
+       para que las cotas conserven su escala en vez de agrandarse ocho veces.
+    """
+    W, H = 420, 1200
+    curvas = _curvas(semilla, W, H, 5, 22, 24, sesgo=0.42)
+    trazos = []
+    for prof, d, cerrada in curvas:
+        if not cerrada:
             continue
-        an = r.choice([1, 2, 2, 3, 3, 4, 5]) * U
-        c = FRIO[r.randrange(len(FRIO))]
-        a = round((.04 + .155 * hy) * r.uniform(.6, 1.0), 3)
-        x, y = cx * U, cy * U
-        piezas.append('<path d="M%d %dh%dv5h-%dz" fill="url(#msombra)" '
-                      'opacity="%s"/>' % (x, y + U, an, an, round(min(.5, a * 2.6), 3)))
-        piezas.append('<rect x="%d" y="%d" width="%d" height="%d" fill="rgb(%d,%d,%d)" '
-                      'opacity="%s"/>' % (x, y, an, U, c[0], c[1], c[2], a))
-        piezas.append('<rect x="%d" y="%d" width="%d" height="1" fill="#FFFFFF" '
-                      'opacity="%s"/>' % (x, y, an, round(min(.62, a * 2.4), 3)))
-
-    # Los mismos planos, girados al reves: en vertical la diagonal tiene que
-    # ser mucho mas tumbada o el plano se sale de la caja antes de cruzarla, y
-    # lo que queda es una cuna en una esquina. Dos, no tres: en 420 de ancho el
-    # tercero solo aprieta.
-    planos = []
-    for xa, xb, op, ca in ((-260, 120, .048, .26), (150, 560, .038, .20)):
-        planos.append('<path d="M%d 0L%d %d L%d %d L%d 0Z" fill="rgb(126,156,205)" '
-                      'opacity="%.3f"/>' % (xa, xb, H, xb + 300, H, xa + 300, op))
-        planos.append('<path d="M%d 0L%d %d" stroke="rgb(255,255,255)" stroke-width="1" '
-                      'fill="none" opacity="%.3f"/>' % (xa, xb, H, ca))
+        trazos.append('<path d="%sZ" fill="rgb(96,126,184)" opacity="%.4f"/>'
+                      % (d, 0.030 + 0.016 * prof))
+    for prof, d, cerrada in curvas:
+        op = 0.20 + 0.34 * prof
+        trazos.append('<path d="%s" stroke="rgb(255,255,255)" stroke-width="1.1" '
+                      'fill="none" opacity="%.3f" transform="translate(0,-1.2)"/>'
+                      % (d, op * 0.85))
+        trazos.append('<path d="%s" stroke="rgb(70,102,162)" stroke-width="1" '
+                      'fill="none" opacity="%.3f"/>' % (d, op))
 
     def rg(nid, col, op):
         return ('<radialGradient id="' + nid + '">'
                 '<stop offset="0" stop-color="' + col + '" stop-opacity="' + op + '"/>'
                 '<stop offset="1" stop-color="' + col + '" stop-opacity="0"/></radialGradient>')
-    sombra = ('<linearGradient id="msombra" x1="0" y1="0" x2="0" y2="1">'
-              '<stop offset="0" stop-color="rgb(44,66,104)" stop-opacity=".55"/>'
-              '<stop offset="1" stop-color="rgb(44,66,104)" stop-opacity="0"/>'
-              '</linearGradient>')
+    mascara = ('<linearGradient id="mkv" x1="0" y1="0" x2="0" y2="1">'
+               '<stop offset="0" stop-color="#000"/>'
+               '<stop offset=".14" stop-color="#151515"/>'
+               '<stop offset=".34" stop-color="#5e5e5e"/>'
+               '<stop offset=".64" stop-color="#e2e2e2"/>'
+               '<stop offset="1" stop-color="#fff"/></linearGradient>'
+               '<mask id="mrelv"><rect x="0" y="0" width="%d" height="%d" fill="url(#mkv)"/></mask>'
+               % (W, H))
     rasante = ('<linearGradient id="mrasa" x1="0" y1="0" x2=".7" y2="1">'
-               '<stop offset="0" stop-color="rgb(255,255,255)" stop-opacity=".46"/>'
-               '<stop offset=".38" stop-color="rgb(255,255,255)" stop-opacity=".14"/>'
+               '<stop offset="0" stop-color="rgb(255,255,255)" stop-opacity=".50"/>'
+               '<stop offset=".38" stop-color="rgb(255,255,255)" stop-opacity=".16"/>'
                '<stop offset=".68" stop-color="rgb(255,255,255)" stop-opacity="0"/>'
-               '<stop offset="1" stop-color="rgb(28,48,92)" stop-opacity=".075"/>'
+               '<stop offset="1" stop-color="rgb(26,44,88)" stop-opacity=".085"/>'
                '</linearGradient>')
-    defs = ('<defs>' + sombra + rasante
-                     + rg('m1', 'rgb(255,255,255)', '.44')
-                     + rg('m2', 'rgb(47,107,255)', '.08') + '</defs>')
-    # El foco blanco remata la franja de arriba, que es la de leer. Se corta a
-    # la altura de la costura para que al repetirse no deje un halo a mitad.
+    defs = ('<defs>' + mascara + rasante
+                     + rg('m1', 'rgb(255,255,255)', '.26')
+                     + rg('m2', 'rgb(47,107,255)', '.09') + '</defs>')
     luces = ('<rect x="0" y="0" width="%d" height="%d" fill="url(#mrasa)"/>'
-             '<ellipse cx="210" cy="120" rx="430" ry="300" fill="url(#m1)"/>'
+             '<ellipse cx="210" cy="110" rx="400" ry="280" fill="url(#m1)"/>'
              '<circle cx="400" cy="1140" r="300" fill="url(#m2)"/>' % (W, H))
-    return ('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 %d %d">%s%s%s%s</svg>'
-            % (W, H, defs, ''.join(planos), ''.join(piezas), luces))
+    return ('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 %d %d">%s'
+            '<g mask="url(#mrelv)">%s</g>%s</svg>'
+            % (W, H, defs, ''.join(trazos), luces))
 
 
 def escribir(raiz):
@@ -275,7 +244,7 @@ CSS = """
 .paper,.press,.secure{background-color:var(--p-papel)}
 .paper2,.tkp{background-color:var(--p-papel2)}
 .sale,.join{background-color:var(--p-alto)}
-@@{background-image:var(--grano),url(img/papel.svg);
+@@{background-image:var(--grano),url(img/papel.webp);
    background-repeat:repeat,no-repeat;background-size:auto,cover;
    background-position:0 0,center}
 /* En el TELEFONO nada de lo de arriba vale, y esto es el fallo que me costo
@@ -292,7 +261,7 @@ CSS = """
    Aqui va el dibujo VERTICAL, del ancho de la pantalla y repitiendose hacia
    abajo, asi que las placas conservan su tamano de verdad. */
 @media(max-width:760px){
-  @@{background-image:var(--grano),url(img/papel-alto.svg);
+  @@{background-image:var(--grano),url(img/papel-alto.webp);
      background-size:auto,100% auto;
      background-repeat:repeat,repeat-y;
      background-position:0 0,left top}
@@ -346,11 +315,11 @@ main>section@@{box-shadow:inset 0 1px 0 rgba(255,255,255,.92)}
    detras. Un velo blanco extra solo ahi: el dibujo manda, el suelo acompana. */
 @@.tkp{background-image:
    linear-gradient(rgba(247,250,253,.72),rgba(247,250,253,.72)),
-   var(--grano),url(img/papel.svg)}
+   var(--grano),url(img/papel.webp)}
 @media(max-width:760px){
   @@.tkp{background-image:
      linear-gradient(rgba(247,250,253,.72),rgba(247,250,253,.72)),
-     var(--grano),url(img/papel-alto.svg);
+     var(--grano),url(img/papel-alto.webp);
      background-size:auto,auto,100% auto;
      background-repeat:repeat,repeat,repeat-y}
 }
