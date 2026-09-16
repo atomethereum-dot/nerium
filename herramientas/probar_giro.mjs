@@ -22,6 +22,7 @@ const srv = http.createServer((q, r) => {
 }).listen(8987);
 const nav = await chromium.launch({ executablePath:'/opt/pw-browsers/chromium-1194/chrome-linux/chrome', args:['--no-sandbox'] });
 let ok = 0, mal = 0;
+const masaneable = m => m.cantoCifra[1] > m.cantoCifra[0] && m.cantoBarra[1] > m.cantoBarra[0];
 const di = (b, t) => { if (b) { ok++; console.log('  ok  ' + t) } else { mal++; console.log('  MAL ' + t) } };
 const luz = (r, g, b) => (0.2126*r + 0.7152*g + 0.0722*b) / 255;
 // media y desviacion de la claridad de un recorte, leyendo el PNG en la pagina
@@ -279,13 +280,42 @@ di(cuadros[0].oscuro >= 0.50,
        el hilo; donde EMPIEZA la barra, con su anchura. */
     let bajo = -1;
     for (let y = fin + 1; y < azulAncho.length; y++) if (azulAncho[y]) { bajo = y; break }
+    /* Los cantos de las dos: la cifra en su banda, la barra en la fila de su
+       carril. La barra mide lo que mide la cifra y comparte sus cantos, y eso
+       es lo que hace que se lean como una columna y no como dos cosas
+       apiladas. Es una relacion de diseno, no una casualidad: si un dia una de
+       las dos cambia de ancho por su cuenta, se rompe sin avisar. */
+    const canto = (y0, y1, azul) => {
+      let a = 1e9, b = -1e9;
+      for (let y = y0; y <= y1; y++) for (let x = 0; x < c.width; x++) {
+        const i = (y*c.width + x) * 4;
+        const M = Math.max(d[i], d[i+1], d[i+2]), mn = Math.min(d[i], d[i+1], d[i+2]);
+        const hay = azul ? (d[i+2] > d[i] + 18 && d[i+2] > 40) : (M > 200 && M - mn < 22);
+        if (hay) { if (x < a) a = x; if (x > b) b = x }
+      }
+      return [a, b];
+    };
+    let filaBarra = -1, masAncha = 0;
+    for (let y = fin + 1; y < azulAncho.length; y++) {
+      if (!azulAncho[y]) continue;
+      const [a, b] = canto(y, y, true);
+      if (b - a > masAncha) { masAncha = b - a; filaBarra = y }
+    }
     return { cifra: [ini, fin], sucias, bajo,
+             cantoCifra: canto(ini, fin, false),
+             cantoBarra: filaBarra < 0 ? [0, 0] : canto(filaBarra, filaBarra, true),
              dpr: c.height / (cv.getBoundingClientRect().height || 1) };
   });
   const aire = m.bajo < 0 ? 999 : (m.bajo - m.cifra[1]) / m.dpr;
   di(m.cifra[0] >= 0 && m.sucias === 0 && aire >= 24,
      'la barra va debajo de la cifra, no dentro (' + m.sucias +
      ' filas de la cifra con barra encima, ' + aire.toFixed(0) + ' px de aire)');
+
+  const dI = Math.abs(m.cantoBarra[0] - m.cantoCifra[0]) / m.dpr;
+  const dD = Math.abs(m.cantoBarra[1] - m.cantoCifra[1]) / m.dpr;
+  di(masaneable(m) && dI <= 14 && dD <= 14,
+     'y mide lo que mide la cifra, canto con canto (' +
+     dI.toFixed(0) + ' px a la izquierda, ' + dD.toFixed(0) + ' a la derecha)');
 }
 
 /* ── la cifra: se arma, funde y abre ──────────────────────────────────────

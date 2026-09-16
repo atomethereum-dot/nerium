@@ -8302,10 +8302,13 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
     var txt=(num.textContent||'85').replace(/[^0-9]/g,'')+'%';
     /* La cifra baja de tamano para dejarle sitio a la barra: antes ocupaba
        casi toda la altura y la barra acababa aplastada contra el canto. */
-    var tam=Math.min(W*0.58,H*0.66);
+    /* La cifra ocupaba hasta el 86 % del ancho y llegaba a 60 px de cada
+       canto: llena, pero sin aire. Al 70 % quedan margenes de verdad y la
+       escena respira, que es lo que separa un cartel de una portada. */
+    var tam=Math.min(W*0.50,H*0.62);
     pc.font='200 '+tam+'px '+cara;
     var an=pc.measureText(txt).width;
-    if(an>W*0.86){ tam=tam*(W*0.86)/an; pc.font='200 '+tam+'px '+cara }
+    if(an>W*0.70){ tam=tam*(W*0.70)/an; pc.font='200 '+tam+'px '+cara }
     pc.textAlign='center'; pc.textBaseline='middle';
     tamCifra=tam;
     meta=Math.min(1,Math.max(0,(parseFloat(num.textContent)||85)/100));
@@ -8336,7 +8339,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
      El coste: un fillRect por tesela, sin texto y sin sombra, sobre un lienzo
      propio que las losas luego reparten con drawImage. Nueve drawImage mas por
      cuadro en vez de nueve pasadas de teselas. */
-  var tes=[], TLADO=0, cifraTxt='85%', cifraY=0, ojoX=0, ojoY=0, cifraBajo=0, cifraArriba=0;
+  var tes=[], TLADO=0, cifraTxt='85%', cifraY=0, ojoX=0, ojoY=0, cifraBajo=0, cifraArriba=0, cifraIzq=0, cifraDer=0;
   var cifraCv=document.createElement('canvas'), cc=cifraCv.getContext('2d');
   var TONOS=['#1B49E0','#2F6BFF','#2E86FF','#79ABFF'];   /* la rampa, de hondo a claro */
 
@@ -8370,7 +8373,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
        no sobre lo que el glifo OCUPA de verdad: con «85%» a peso 200 el haz
        vertical de la cabeza subia 190 px y se metia dentro del por ciento.
        Se pregunta donde acaba el dibujo y se coloca debajo. */
-    cifraBajo=y1+TLADO; cifraArriba=y0;
+    cifraBajo=y1+TLADO; cifraArriba=y0; cifraIzq=x0; cifraDer=x1+TLADO;
     /* El PUNTO DE FUGA de la apertura tiene que caer DENTRO del glifo.
        Agrandando la cifra desde el centro de la caja, el centro cae en el hueco
        entre el cinco y el por ciento -que es tinta-, asi que por mucho que
@@ -8555,6 +8558,22 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
   /* El sitio de la barra lo necesitan dos: ella y los rotulos que la
      etiquetan. Se calcula en un solo sitio para que no se separen nunca. */
   var DERRAME=138;
+  /* El ancho de la barra tambien en un solo sitio: lo necesitan ella, sus
+     topes y la lectura de la cabeza. Calculado por separado, los topes
+     quedaban a cien pixeles de los extremos del carril. */
+  /* LA BARRA MIDE LO QUE MIDE LA CIFRA. No una proporcion de la pantalla que
+     casualmente se le parezca: exactamente su caja, medida. Asi las dos cosas
+     comparten canto izquierdo y canto derecho, y lo que eran dos objetos
+     apilados pasa a ser una sola columna. Es la unica relacion que hacia falta
+     y no costaba nada, porque la caja ya estaba medida para otra cosa. */
+  function barraAncho(){
+    var a=cifraDer-cifraIzq;
+    return a>40?a:Math.min(W*0.70,tamCifra*3.1);
+  }
+  function barraX(){
+    var a=barraAncho();
+    return cifraDer-cifraIzq>40?cifraIzq:(W-a)/2;
+  }
   function barraY(){
     var tope=cifraBajo+20;
     var y=Math.max(tope+DERRAME, H*0.58);
@@ -8564,7 +8583,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
     return Math.max(40,Math.min(DERRAME,barraY()-(cifraBajo+20)));
   }
   function barra(dx,p){
-    var an=Math.min(W*0.86,tamCifra*3.1), x0=(W-an)/2+dx;
+    var an=barraAncho(), x0=barraX()+dx;
     /* Debajo del canto MEDIDO de la cifra, y contando TODA la luz que la barra
        reparte, no solo su trazo. El derrame es una elipse de 138 px de radio
        vertical: colocando la barra a ras del canto de la cifra, el trazo no la
@@ -8656,21 +8675,30 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
      que ronda es, luego la barra con sus topes -para que se sepa que mide-,
      despues la cifra funde y aparece el importe, y al final las condiciones.
      Todos a la vez seria un cartel; escalonados es una escena. */
-  function ren(txt,x,y,tam,alfa,al,col,esp){
+  function ren(txt,x,y,tam,alfa,al,col,esp,tope){
     if(!txt||alfa<=0.004) return;
     cx.save();
     cx.globalAlpha=alfa;
-    cx.font='500 '+tam.toFixed(1)+'px '+mono;
     cx.textAlign=al; cx.textBaseline='alphabetic';
-    if(cx.letterSpacing!==undefined) cx.letterSpacing=(tam*esp).toFixed(2)+'px';
     cx.fillStyle=col;
+    /* Y SE ENCOGE SI NO CABE. Los rotulos son frases traducidas a once idiomas
+       y con importes de longitud variable: «$13.616.000 RAISED OF $16,000,000»
+       cabe en 1440 y se sale por los dos lados en un telefono. Se mide y se
+       baja el cuerpo hasta que entra, en vez de fiarlo a que el texto sea
+       corto. Es lo mismo que ya hace la cifra grande. */
+    for(var k=0;k<6;k++){
+      cx.font='500 '+tam.toFixed(1)+'px '+mono;
+      if(cx.letterSpacing!==undefined) cx.letterSpacing=(tam*esp).toFixed(2)+'px';
+      if(!tope||cx.measureText(txt).width<=tope||tam<7) break;
+      tam*=0.88;
+    }
     cx.fillText(txt,x,y);
     if(cx.letterSpacing!==undefined) cx.letterSpacing='0px';
     cx.restore();
   }
   function marco(p,vel){
     var tk=Math.max(10,Math.min(14,W*0.0098));
-    var bx=Math.min(W*0.86,tamCifra*3.1), x0=(W-bx)/2, x1=x0+bx;
+    var bx=barraAncho(), x0=barraX(), x1=x0+bx;
     var by=barraY();
 
     /* 1 · que ronda es, con su punto vivo, sobre la cifra */
@@ -8688,7 +8716,8 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
       anc=cx.measureText(rot.arriba).width;
       cx.restore();
       var hueco=tk*1.15;
-      ren(rot.arriba, W/2+hueco/2, yr, tk, a1, 'center', 'rgba(228,234,243,.92)', 0.26);
+      ren(rot.arriba, W/2+hueco/2, yr, tk, a1, 'center',
+          'rgba(228,234,243,.92)', 0.26, W*0.80);
       cx.save(); cx.globalAlpha=a1; cx.fillStyle='#12A45E';
       cx.beginPath();
       cx.arc(W/2+hueco/2-anc/2-hueco*0.55, yr-tk*0.32, tk*0.25, 0, Math.PI*2);
@@ -8709,12 +8738,32 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
     /* 3 · cuanto se lleva, debajo de la cifra y pegado a ella: entra cuando la
        cifra ya esta fundida, que es cuando se puede leer de un golpe */
     var a3=tramo(p,0.26,0.36)*vel;
-    ren(rot.dinero, W/2, cifraBajo+tk*2.9, tk*1.18, a3, 'center', 'rgba(236,243,255,.94)', 0.14);
+    ren(rot.dinero, W/2, cifraBajo+tk*2.9, tk*1.18, a3, 'center',
+        'rgba(236,243,255,.94)', 0.14, W*0.88);
 
-    /* 4 · y las condiciones, al pie */
-    var a4=tramo(p,0.30,0.42)*vel;
-    ren(rot.pie, W/2, Math.min(H-tk*1.6, ye+tk*2.4), tk*0.84, a4,
-        'center', 'rgba(140,166,214,.70)', 0.20);
+    /* 4 · LA LECTURA DE LA CABEZA. La cifra gigante y la barra contaban el
+       mismo hecho, pero cada una por su lado: dos objetos compartiendo
+       pantalla. Con un contador pequeno viajando en la cabeza, la barra deja
+       de ser decorativa —se ve lo que marca en cada punto del recorrido— y las
+       dos cosas se atan: el contador llega a su numero en el mismo instante en
+       que la cifra grande funde. Una sola idea contada a dos escalas. */
+    var tb=tramo(p,0.08,FUNDE_B);
+    if(tb>0.02&&vel>0.02){
+      var bx2=bx, bx0=x0;
+      var hx=bx0+bx2*meta*tb;
+      var leo=Math.round(meta*100*tb)+'%';
+      var a5=Math.min(1,tb*4)*vel;
+      /* pegada al lado de la cabeza y por ENCIMA del carril, que es donde no
+         pisa ni las marcas de escala ni los topes */
+      var der=hx>x0+bx2*0.86;
+      ren(leo, hx+(der?-tk*0.9:tk*0.9), by-tk*1.5, tk*1.05, a5,
+          der?'right':'left', 'rgba(226,238,255,.96)', 0.06);
+    }
+
+    /* 5 · y las condiciones, al pie */
+    var a4=tramo(p,0.34,0.46)*vel;
+    ren(rot.pie, W/2, Math.min(H-tk*1.6, ye+tk*3.0), tk*0.84, a4,
+        'center', 'rgba(140,166,214,.70)', 0.20, W*0.88);
   }
 
   function dibuja(p){
