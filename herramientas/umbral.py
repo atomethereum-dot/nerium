@@ -114,6 +114,29 @@ JS = """<script>
     var h=document.querySelector('.hero h1')||document.body;
     return getComputedStyle(h).fontFamily;
   }
+  var mono='';
+  function rotulo(sel){
+    var e=document.querySelector(sel);
+    if(!e) return '';
+    /* sin el ordinal: el epigrafe de la seccion lleva delante su numero de
+       orden en un <i>, y concatenado salia «07SEED ROUND OPEN» */
+    var t='';
+    for(var i=0;i<e.childNodes.length;i++){
+      var n=e.childNodes[i];
+      if(n.nodeType===1&&n.classList&&n.classList.contains('sk-n')) continue;
+      t+=n.textContent||'';
+    }
+    return t.replace(/\s+/g,' ').trim();
+  }
+  /* «$13,616,000 raised of $16,000,000», leido de la propia ronda */
+  function dinero(){
+    var b=document.getElementById('saleRaised');
+    if(!b) return '';
+    var t=(b.textContent||'').trim();
+    var sig=b.nextElementSibling;
+    var resto=sig?(sig.textContent||'').replace(/\s+/g,' ').trim():'';
+    return (t+' '+resto).toUpperCase().trim();
+  }
   /* La plancha: la tinta con la cifra RECORTADA. Se dibuja una vez por medida
      y las losas no son mas que tajadas suyas, cada una desplazada. Redibujar
      texto gigante por cuadro es lo que habria hecho esto imposible a 60. */
@@ -139,6 +162,29 @@ JS = """<script>
     pc.globalCompositeOperation='source-over';
     tamCifra=tam;
     meta=Math.min(1,Math.max(0,(parseFloat(num.textContent)||85)/100));
+
+    /* Y los rotulos, que sin ellos la cifra no dice nada: un 85 % gigante en
+       mitad de la pantalla puede ser cualquier cosa. Arriba QUE es, abajo
+       CUANTO es en dinero. Los dos datos se leen de la propia seccion de la
+       ronda -no se escriben aqui-, asi que cambian con ella y ya vienen
+       traducidos. */
+    var arriba=(rotulo('.sale-live')||'SEED ROUND').toUpperCase();
+    var abajo=dinero();
+    pc.textAlign='center'; pc.textBaseline='alphabetic';
+    pc.fillStyle='rgba(0,229,138,.92)';
+    var tk=Math.max(11,Math.min(15,W*0.0105));
+    pc.font='500 '+tk+'px '+mono;
+    pc.letterSpacing=(tk*0.24).toFixed(1)+'px';
+    pc.fillText(arriba, W/2, H/2-tam*0.60);
+    if(abajo){
+      /* justo debajo de la barra, no al pie de la pantalla: ahi se juntaba
+         con el HUD y parecia parte de el */
+      var yb=H/2+tam*0.46; if(yb>H-86) yb=H-86;
+      pc.fillStyle='rgba(226,255,240,.62)';
+      pc.font='400 '+tk+'px '+mono;
+      pc.fillText(abajo, W/2, yb+46);
+    }
+    pc.letterSpacing='0px';
   }
   function medir(){
     DPR=Math.min(2,window.devicePixelRatio||1);
@@ -146,7 +192,9 @@ JS = """<script>
     W=Math.max(1,r.width); H=Math.max(1,r.height);
     lz.width=Math.round(W*DPR); lz.height=Math.round(H*DPR);
     cx.setTransform(DPR,0,0,DPR,0,0);
-    cara=tipo(); plancha();
+    cara=tipo();
+    mono=getComputedStyle(document.body).getPropertyValue('--m').trim()||'ui-monospace,monospace';
+    plancha();
   }
   function avance(){
     var r=raiz.getBoundingClientRect();
@@ -170,7 +218,10 @@ JS = """<script>
      Y la estela: lo ya recorrido no queda a brillo plano, se apaga hacia atras.
      Eso es lo fosforescente —el fosforo sigue luciendo un rato donde le dio el
      haz— y es lo que hace que la barra parezca haber PASADO por ahi. */
-  var CIAN='95,233,255';
+  /* El verde de la casa. La barra iba en cian y el branding paso a verde
+     fosforescente: un acento que no es el de la marca en el momento mas
+     importante de la pagina es un despiste, no una decision. */
+  var NEON='0,229,138';
   function barra(dx,p){
     var an=Math.min(W*0.86,tamCifra*3.1), x0=(W-an)/2+dx;
     var y=H/2+tamCifra*0.46;
@@ -179,12 +230,12 @@ JS = """<script>
     var f=an*meta*t;                       /* lo recorrido */
     /* el carril y sus marcas de escala: sin ellas la barra es un cargador
        generico; con ellas es un instrumento */
-    cx.fillStyle='rgba('+CIAN+',.16)';
+    cx.fillStyle='rgba('+NEON+',.16)';
     cx.fillRect(x0,y-1,an,2);
     for(var k=0;k<=4;k++){
       var mx=x0+an*k/4;
       var fin=(k===4);
-      cx.fillStyle='rgba('+CIAN+',' + (fin?.85:(k%4===0?.48:.26)) + ')';
+      cx.fillStyle='rgba('+NEON+',' + (fin?.85:(k%4===0?.48:.26)) + ')';
       cx.fillRect(mx-(fin?1:0.5),y-(k%4===0?15:8),(fin?2:1),(k%4===0?30:16));
     }
     if(f<=0.5) return;
@@ -201,41 +252,41 @@ JS = """<script>
     cx.translate(x0+f*0.52,y);
     cx.scale(Math.max(1,f*0.66),138);
     var der=cx.createRadialGradient(0,0,0,0,0,1);
-    der.addColorStop(0,  'rgba('+CIAN+',.20)');
-    der.addColorStop(0.55,'rgba('+CIAN+',.085)');
-    der.addColorStop(1,  'rgba('+CIAN+',0)');
+    der.addColorStop(0,  'rgba('+NEON+',.20)');
+    der.addColorStop(0.55,'rgba('+NEON+',.085)');
+    der.addColorStop(1,  'rgba('+NEON+',0)');
     cx.fillStyle=der;
     cx.beginPath(); cx.arc(0,0,1,0,Math.PI*2); cx.fill();
     cx.restore();
     /* 1 · el aire */
-    cx.shadowColor='rgba('+CIAN+',.95)'; cx.shadowBlur=70;
-    cx.fillStyle='rgba('+CIAN+',.38)';
+    cx.shadowColor='rgba('+NEON+',.95)'; cx.shadowBlur=70;
+    cx.fillStyle='rgba('+NEON+',.38)';
     cx.fillRect(x0,y-alto/2,f,alto);
     /* 2 · el tubo, con la estela apagandose hacia atras */
     var g=cx.createLinearGradient(x0,0,x0+f,0);
-    g.addColorStop(0,'rgba('+CIAN+',.20)');
-    g.addColorStop(0.55,'rgba('+CIAN+',.62)');
-    g.addColorStop(1,'rgba('+CIAN+',1)');
+    g.addColorStop(0,'rgba('+NEON+',.20)');
+    g.addColorStop(0.55,'rgba('+NEON+',.62)');
+    g.addColorStop(1,'rgba('+NEON+',1)');
     cx.shadowBlur=28; cx.fillStyle=g;
     cx.fillRect(x0,y-alto/2,f,alto);
     /* 3 · el nucleo */
     var n=cx.createLinearGradient(x0,0,x0+f,0);
     n.addColorStop(0,'rgba(255,255,255,0)');
-    n.addColorStop(0.7,'rgba(230,252,255,.55)');
+    n.addColorStop(0.7,'rgba(226,255,240,.55)');
     n.addColorStop(1,'rgba(255,255,255,.95)');
     cx.shadowBlur=0; cx.fillStyle=n;
     cx.fillRect(x0,y-2,f,4);
     /* 4 · la cabeza: donde esta pasando ahora */
     var cab=t<0.999?1:0.55;
-    cx.shadowColor='rgba(210,250,255,1)'; cx.shadowBlur=60*cab;
+    cx.shadowColor='rgba(180,255,220,1)'; cx.shadowBlur=60*cab;
     cx.fillStyle='rgba(255,255,255,'+(0.97*cab).toFixed(2)+')';
     cx.fillRect(x0+f-3,y-30,6,60);
     /* y el haz vertical de la cabeza: un corte de luz que sube y baja desde
        donde esta pasando. Es lo que hace que la cabeza pese. */
     var haz=cx.createLinearGradient(0,y-190,0,y+190);
-    haz.addColorStop(0,   'rgba(190,245,255,0)');
-    haz.addColorStop(0.5, 'rgba(190,245,255,'+(0.50*cab).toFixed(3)+')');
-    haz.addColorStop(1,   'rgba(190,245,255,0)');
+    haz.addColorStop(0,   'rgba(150,255,205,0)');
+    haz.addColorStop(0.5, 'rgba(150,255,205,'+(0.50*cab).toFixed(3)+')');
+    haz.addColorStop(1,   'rgba(150,255,205,0)');
     cx.shadowBlur=0; cx.fillStyle=haz;
     cx.fillRect(x0+f-1.5,y-190,3,380);
     /* 5 · y el fogonazo al llegar a la meta: una sola vez, corto */

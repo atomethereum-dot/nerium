@@ -43,6 +43,7 @@ todo lo que se hizo aqui y el archivo subido no trae:
  35. el indice de la derecha, en su carril: ni tapa texto ni le quita el clic
  36. el relieve: las bandas dejan de ser una losa
  37. el umbral: la puerta que se abre antes de la ronda
+ 38. el branding, a negro y verde fosforescente
 """
 import sys, os
 
@@ -78,6 +79,7 @@ import aviso
 import carril
 import relieve
 import umbral
+import neon
 subido, publicado = sys.argv[1], '/home/user/nerium/index.html'
 z = open(subido, encoding='utf-8').read()
 p = open(publicado, encoding='utf-8').read()
@@ -270,6 +272,9 @@ rest = relieve.aplicar(rest)
 # ── 37 · el umbral de la ronda ──
 rest = umbral.aplicar(rest)
 
+# ── 38 · el branding, en verde ──
+rest = neon.aplicar(rest)
+
 # ── 31 · que se pueda navegar ──
 # Va al final a proposito: toca codigo que ponen pasos anteriores, asi que
 # tiene que llegar cuando ya esta todo puesto.
@@ -309,4 +314,5 @@ print("montado:", len(salida), "bytes ·", salida.count('var(--hud-b)'), "usos d
       "aviso:", 'apagado' if 'class="ann-fuera"' in salida else 'PUESTO', "·",
       "carril:", 'el indice se aparta' if carril.MARCA in salida else 'ENCIMA DEL TEXTO', "·",
       "relieve:", 'dos suelos y pauta' if relieve.MARCA in salida else 'UNA LOSA', "·",
-      "umbral:", 'la puerta, puesta' if 'class="umb"' in salida else 'SIN PUERTA')
+      "umbral:", 'la puerta, puesta' if 'class="umb"' in salida else 'SIN PUERTA', "·",
+      "neon:", 'verde' if '#2F6BFF' not in salida else 'TODAVIA AZUL')

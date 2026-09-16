@@ -200,16 +200,17 @@ di(cuadros[1].desv >= 0.010 || cuadros[2].desv >= 0.010,
     const x = c.getContext('2d'); x.drawImage(im, 0, 0);
     const d = x.getImageData(0, 0, c.width, c.height).data;
     const luz = i => (0.2126*d[i] + 0.7152*d[i+1] + 0.0722*d[i+2]) / 255;
-    /* CIAN, no solo encendido: la cifra calada es blanca y sus filas tambien
-       estan llenas de pixeles claros. Buscando «la fila mas encendida» a secas
-       la comprobacion pasaba igual con la barra quitada. El tubo es lo unico
-       de la escena donde el azul y el verde le sacan ventaja al rojo. */
-    const cian = i => d[i+2] > d[i] + 26 && d[i+1] > d[i] + 14;
+    /* Del color de la marca, no solo encendido: la cifra calada es blanca y
+       sus filas tambien estan llenas de pixeles claros, asi que buscando «la
+       fila mas encendida» a secas la comprobacion pasaba igual con la barra
+       quitada. El tubo es lo unico de la escena donde el VERDE le saca
+       ventaja a los otros dos. */
+    const acento = i => d[i+1] > d[i] + 26 && d[i+1] > d[i+2] + 12;
     let mejor = -1, mejorN = 0;
     for (let y = Math.floor(c.height * 0.55); y < c.height - 30; y++) {
       let n = 0;
       for (let px = 0; px < c.width; px++) { const i = (y*c.width + px) * 4;
-        if (luz(i) > 0.45 && cian(i)) n++ }
+        if (luz(i) > 0.45 && acento(i)) n++ }
       if (n > mejorN) { mejorN = n; mejor = y }
     }
     if (mejorN < 80) return null;
@@ -223,7 +224,7 @@ di(cuadros[1].desv >= 0.010 || cuadros[2].desv >= 0.010,
     return { fila: mejor, ini, cabeza, tope, ancho: c.width };
   }, tira);
   di(!!m && m.ini > 0 && m.cabeza > m.ini,
-     'la barra de neon esta encendida, y en cian (fila ' + (m ? m.fila : 'NO LA HAY') + ')');
+     'la barra de neon esta encendida, y en el verde de la marca (fila ' + (m ? m.fila : 'NO LA HAY') + ')');
   if (m && m.tope > m.ini) {
     const pct = 100 * (m.cabeza - m.ini) / (m.tope - m.ini);
     const dice = parseFloat(await pg.evaluate(() => (document.getElementById('umbPct')||{}).textContent)) || 0;
