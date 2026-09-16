@@ -360,17 +360,19 @@ di(fundida.blanco > 0.05 && fundida.blanco > fundida.tesela * 3,
    (fundida.blanco * 100).toFixed(1) + '% blanco frente a ' +
    (fundida.tesela * 100).toFixed(1) + '% azul)');
 
-/* ── el canto de la abertura va encendido ─────────────────────────────────
-   Sin el, lo que crece es un agujero: se ve la pagina de detras, pero no se ve
-   que algo se ESTA abriendo. El filo de luz que sigue el contorno del glifo es
-   lo que convierte el agujero en una puerta, y es un detalle que se puede caer
-   en cualquier refactor sin que nada mas se entere.
+/* ── la cifra se abre SIN fogonazo ────────────────────────────────────────
+   Aqui hubo un filo encendido en el contorno del glifo, y esta prueba exigia
+   que estuviera. Duro una version: cuando la cifra se abre ocupa la pantalla
+   entera, asi que ese halo no bordeaba una forma, tapizaba el viewport, y a
+   mitad de transicion lo que se veia era un fogonazo blanco. La prueba se da
+   la vuelta y pasa a defender lo contrario, que es lo que hay que defender:
+   que nadie vuelva a colgarle luz difusa al canto.
 
-   No se mide por brillo: el hueco ya ensena la pagina, que es clara, y quitar
-   el filo bajaba el porcentaje de pixeles claros en vez de subirlo -22,19 con
-   filo y 23,03 sin el, o sea al reves-. Lo que distingue al filo es que es luz
-   AZULADA sobre el canto, asi que se cuenta eso. Medido en 0,50: 1,7 % con el
-   filo y 0,0 % sin el. */
+   Se mide igual que antes, porque la medida SI discriminaba: no por brillo
+   -el hueco ya ensena la pagina clara, y quitar el filo BAJABA los pixeles
+   claros, 22,19 con el y 23,03 sin el, al reves de lo que uno espera- sino
+   contando luz AZULADA sobre el canto. Con filo daba 1,7-2,7 %; sin el,
+   0,00 %. El limite se pone en 0,3. */
 {
   await pg.evaluate(v => scrollTo(0, v), Math.round(caja.top + 0.50 * (caja.alto - caja.vh)));
   await pg.waitForTimeout(500);
@@ -388,8 +390,8 @@ di(fundida.blanco > 0.05 && fundida.blanco > fundida.tesela * 3,
     }
     return tot ? n / tot * 100 : 0;
   });
-  di(f >= 0.8, 'el canto de la abertura va encendido, no es un agujero (' +
-     f.toFixed(2) + ' % de luz en el filo)');
+  di(f <= 0.3, 'la cifra se abre sin fogonazo: nada de halo difuso en el canto (' +
+     f.toFixed(2) + ' % de luz azulada, limite 0,3)');
 }
 
 /* La apertura entrega la seccion: la ronda va ganando pantalla mientras la

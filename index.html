@@ -8833,23 +8833,14 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
       cx.fillText(cifraTxt,W/2,cifraY);
       cx.globalAlpha=1;
     }
-    /* EL CANTO DE LA ABERTURA, ENCENDIDO. Sin el, lo que crece es un agujero:
-       se ve la pagina de detras pero no se ve que algo se ESTA abriendo. Un
-       filo de luz siguiendo el contorno del glifo mientras crece -y solo
-       mientras crece- convierte el agujero en una puerta. Va con «stroke», que
-       sigue la misma ruta del texto que se acaba de recortar, asi que no hay
-       manera de que se despegue del hueco. */
-    var filo=Math.sin(Math.PI*Math.min(1,t*1.9));
-    if(filo>0.01){
-      cx.globalAlpha=filo*0.9*tinta;
-      cx.lineWidth=Math.max(0.6,2.2/esc);
-      cx.strokeStyle='rgba(206,226,255,1)';
-      cx.shadowColor='rgba(120,170,255,.95)';
-      cx.shadowBlur=26/esc;
-      cx.strokeText(cifraTxt,W/2,cifraY);
-      cx.shadowBlur=0;
-      cx.globalAlpha=1;
-    }
+    /* Aqui hubo un filo encendido siguiendo el contorno del glifo mientras se
+       abria: un «stroke» claro con 26 px de sombra azul. La intencion era que
+       el hueco se leyera como una puerta y no como un agujero. En movimiento
+       no se leia asi. La cifra, al abrirse, ocupa la pantalla entera, asi que
+       ese halo no bordea una forma: tapiza el viewport, y lo que se ve es un
+       fogonazo blanco a mitad de la transicion. Sin el, la cifra llega limpia
+       al hueco y lo que se abre se entiende por el movimiento, que es de donde
+       tenia que venir. */
     cx.restore();
     /* la barra se apaga con el blanco: es el instrumento de la cifra, y cuando
        la cifra deja de serlo no pinta nada */
