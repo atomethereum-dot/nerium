@@ -111,7 +111,19 @@ TRES_NUEVO = """.stk-steps i b{display:block;height:100%;width:0;background:var(
 .stk-sub s{transform:translateY(10px)}
 .stk-sub s.on{transform:none}
 .stk-steps{position:static;transform:none;left:auto;bottom:auto;
-  justify-content:flex-start;margin-bottom:clamp(16px,2vw,24px)}"""
+  justify-content:flex-start;margin-bottom:clamp(16px,2vw,24px)}
+/* Y la escena necesita sitio. Al traer la copia al flujo se quedo centrada en
+   vertical, y la marca se arma en la franja que queda POR ENCIMA de ella: de
+   la cabecera al texto. En una pantalla ancha y baja esa franja es un pasillo
+   —medido en 1523x772: de 78 px a 223, o sea 145— y debajo del texto sobran
+   339 px de negro. La marca salia a 84 px con teselas de 4,7: a ese tamano el
+   escalon derecho y los dos cuadros azules no resuelven, y lo que se lee no es
+   la marca sino un disco mordido. En el telefono salia a 210 px y se leia
+   perfectamente, que es la prueba de que el dibujo nunca estuvo mal: estaba
+   pequeno. El telefono ya bajaba la copia con un margen; el escritorio nunca
+   lo tuvo. Se lo damos, con el mismo criterio: la copia a poco mas de la
+   mitad de la altura, la franja crece a ~334 px y la marca a ~194. */
+@media(min-width:761px){.stk-copy{margin-top:clamp(200px,36vh,360px)}}"""
 
 # ── 4 · fuera las fichas del menu ────────────────────────────────────────────
 CUATRO_VIEJO = """.nav>a:hover .chip,.nav>a.on .chip{background:var(--blue);border-color:var(--blue);color:#fff}"""

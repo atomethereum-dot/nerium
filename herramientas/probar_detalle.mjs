@@ -116,6 +116,54 @@ di(calma.clip === 'none', 'ni tapado por una mascara');
 di(calma.tits === 0, 'y los titulares ni se marcan');
 await ctx2.close();
 
+// ── 7 · la marca de «the stack» se arma a tamano legible ──
+//
+// El tercer paso de la seccion arma las teselas en la marca de Nereum: el
+// disco, el escalon de la derecha y los dos cuadros azules. La escena se
+// dimensiona con la franja que queda entre la cabecera y el texto, asi que en
+// una pantalla ANCHA Y BAJA -donde el texto sube- esa franja se estrecha y la
+// marca encoge sola. Medido en 1523x772 salia a 84 px: con 18 teselas por
+// lado eso son 4,7 px cada una, y a ese tamano el escalon y los cuadros no
+// resuelven. Lo que se veia no era la marca, era un disco mordido. En el
+// telefono salia a 210 px y se leia perfecta, que es la prueba de que el
+// dibujo estaba bien y el tamano no.
+//
+// No se comprueba la formula, se comprueba el DIBUJO: se mide la caja de lo
+// que el lienzo pinta de verdad. Asi la prueba sigue valiendo si manana la
+// escena se dimensiona de otra manera. Con el margen puesto: 165 px. Sin el:
+// 84. El limite va en 140.
+const ctx3 = await nav.newContext({ viewport:{width:1523,height:772} });
+const w = await ctx3.newPage();
+await w.goto('http://127.0.0.1:9017/', { waitUntil:'load' }); await w.waitForTimeout(2400);
+const marca = await w.evaluate(async () => {
+  const sec = document.querySelector('.stack');
+  const r = sec.getBoundingClientRect();
+  scrollTo(0, Math.round(r.top + scrollY + 0.80 * (r.height - innerHeight)));
+  await new Promise(s => setTimeout(s, 900));
+  const cv = document.getElementById('stkCv');
+  const c = document.createElement('canvas'); c.width = cv.width; c.height = cv.height;
+  c.getContext('2d').drawImage(cv, 0, 0);
+  const d = c.getContext('2d').getImageData(0, 0, c.width, c.height).data;
+  let y0 = 1e9, y1 = -1, x0 = 1e9, x1 = -1;
+  for (let y = 0; y < c.height; y++) for (let x = 0; x < c.width; x++) {
+    const i = (y * c.width + x) * 4;
+    // solo tesela, no el halo: el resplandor de fondo es tenue y translucido
+    if (d[i+3] < 150) continue;
+    const L = (0.2126*d[i] + 0.7152*d[i+1] + 0.0722*d[i+2]) / 255;
+    if (L < 0.30) continue;
+    if (y < y0) y0 = y; if (y > y1) y1 = y;
+    if (x < x0) x0 = x; if (x > x1) x1 = x;
+  }
+  const esc = c.height / cv.getBoundingClientRect().height;
+  return { alto: y1 < 0 ? 0 : Math.round((y1 - y0 + 1) / esc),
+           ancho: x1 < 0 ? 0 : Math.round((x1 - x0 + 1) / esc) };
+});
+di(marca.alto >= 140, 'en 1523x772 la marca del tercer paso se arma a tamano legible (' +
+   marca.alto + ' px de alto, limite 140)');
+di(marca.ancho >= 140, 'y no es un hilo: tambien tiene cuerpo a lo ancho (' +
+   marca.ancho + ' px)');
+await ctx3.close();
+
 console.log(mal ? `\n${ok} bien, ${mal} MAL` : `\n${ok}/${ok} correctas`);
 await nav.close(); srv.close();
 process.exit(mal ? 1 : 0);
