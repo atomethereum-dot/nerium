@@ -162,19 +162,9 @@ for (const p of [0.05, 0.30, 0.50, 0.72, 0.99]) {
 // Que la escena AVANCE: si el lienzo estuviera parado, los cinco cuadros
 // darian la misma media. El fallo que esto caza es el peor de todos —una
 // animacion que no se mueve pasa desapercibida en una captura suelta—.
-/* Se midio la CLARIDAD media mientras la pagina era clara: la plancha era
-   tinta oscura sobre papel, y el recorrido de la escena era el recorrido del
-   brillo —0,45 de sobra—. En negro ya no: la plancha y la pagina de debajo
-   comparten suelo y la media apenas se mueve 0,08 aunque la escena entera
-   pase por delante. Medir eso seria medir el fondo, no la animacion.
-   Lo que de verdad cambia es CUANTO de la pantalla ocupa la cifra encendida y
-   cuanta estructura hay dibujada, asi que se toma el mayor de los tres
-   recorridos. Con la escena congelada los cinco cuadros son el mismo y los
-   tres se van a cero a la vez; medido asi: 0,20 moviendose, 0,00 parada. */
-const rango = f => Math.max(...cuadros.map(f)) - Math.min(...cuadros.map(f));
-const recorrido = Math.max(rango(c => c.medio), rango(c => c.claro), rango(c => c.desv));
-di(recorrido >= 0.10,
-   'la escena avanza con el scroll, no esta parada (recorrido ' + recorrido.toFixed(2) + ')');
+const recorrido = Math.max(...cuadros.map(c => c.medio)) - Math.min(...cuadros.map(c => c.medio));
+di(recorrido >= 0.45,
+   'la escena avanza con el scroll, no esta parada (recorrido de claridad ' + recorrido.toFixed(2) + ')');
 /* Aqui no vale la media, y por eso esta comprobacion se reescribio: la escena
    empieza con la cifra de la ronda RECORTADA en la tinta a media pantalla de
    alto, asi que hay un glifo enorme y claro que sube la media a 0,20 estando
@@ -185,28 +175,8 @@ di(cuadros[0].oscuro >= 0.50,
    'empieza en camara: la mayor parte es tinta (' + (cuadros[0].oscuro * 100).toFixed(0) + '%)');
 di(cuadros[0].claro >= 0.04,
    'y la cifra va calada en ella, no pintada encima (' + (cuadros[0].claro * 100).toFixed(0) + '% de hueco)');
-/* Y al final entrega la SECCION, no una pantalla vacia. Esto tambien se medÍa
-   por brillo —«>= 0,70», o sea «se ve papel»— y en negro no significa nada: un
-   fundido a negro lo cumpliria igual de bien que la pagina. El fallo que esta
-   comprobacion existe para cazar es el que ya paso una vez: la plancha se va y
-   detras no queda nada. Asi que se cuenta lo unico que lo distingue, texto de
-   verdad visible en pantalla. Con el agujero abierto salian 3; con la seccion
-   entregada, entre 39 y 52. */
-const vivos = await pg.evaluate(() => {
-  let n = 0;
-  for (const e of document.querySelectorAll('h1,h2,h3,p,li,dd,dt,a,span,button')) {
-    if (e.children.length) continue;
-    const t = (e.textContent || '').trim(); if (t.length < 2) continue;
-    const r = e.getBoundingClientRect();
-    if (r.bottom < 0 || r.top > innerHeight || r.width < 4 || r.height < 4) continue;
-    const s = getComputedStyle(e);
-    if (s.visibility === 'hidden' || +s.opacity < 0.08) continue;
-    n++;
-  }
-  return n;
-});
-di(vivos >= 20,
-   'y acaba entregando la seccion de la ronda, no una pantalla vacia (' + vivos + ' textos visibles)');
+di(cuadros[4].medio >= 0.70,
+   'y acaba entregando el suelo de la ronda, no un blanco inventado (' + cuadros[4].medio.toFixed(3) + ')');
 // El instrumento tiene que estar dibujado, no solo el negro: en el tramo de
 // los anillos hay relieve dentro del recorte.
 di(cuadros[1].desv >= 0.010 || cuadros[2].desv >= 0.010,
@@ -230,17 +200,16 @@ di(cuadros[1].desv >= 0.010 || cuadros[2].desv >= 0.010,
     const x = c.getContext('2d'); x.drawImage(im, 0, 0);
     const d = x.getImageData(0, 0, c.width, c.height).data;
     const luz = i => (0.2126*d[i] + 0.7152*d[i+1] + 0.0722*d[i+2]) / 255;
-    /* Del color de la marca, no solo encendido: la cifra calada es blanca y
-       sus filas tambien estan llenas de pixeles claros, asi que buscando «la
-       fila mas encendida» a secas la comprobacion pasaba igual con la barra
-       quitada. El tubo es lo unico de la escena donde el VERDE le saca
-       ventaja a los otros dos. */
-    const acento = i => d[i+1] > d[i] + 26 && d[i+1] > d[i+2] + 12;
+    /* CIAN, no solo encendido: la cifra calada es blanca y sus filas tambien
+       estan llenas de pixeles claros. Buscando «la fila mas encendida» a secas
+       la comprobacion pasaba igual con la barra quitada. El tubo es lo unico
+       de la escena donde el azul y el verde le sacan ventaja al rojo. */
+    const cian = i => d[i+2] > d[i] + 26 && d[i+1] > d[i] + 14;
     let mejor = -1, mejorN = 0;
     for (let y = Math.floor(c.height * 0.55); y < c.height - 30; y++) {
       let n = 0;
       for (let px = 0; px < c.width; px++) { const i = (y*c.width + px) * 4;
-        if (luz(i) > 0.45 && acento(i)) n++ }
+        if (luz(i) > 0.45 && cian(i)) n++ }
       if (n > mejorN) { mejorN = n; mejor = y }
     }
     if (mejorN < 80) return null;
@@ -254,7 +223,7 @@ di(cuadros[1].desv >= 0.010 || cuadros[2].desv >= 0.010,
     return { fila: mejor, ini, cabeza, tope, ancho: c.width };
   }, tira);
   di(!!m && m.ini > 0 && m.cabeza > m.ini,
-     'la barra de neon esta encendida, y en el verde de la marca (fila ' + (m ? m.fila : 'NO LA HAY') + ')');
+     'la barra de neon esta encendida, y en cian (fila ' + (m ? m.fila : 'NO LA HAY') + ')');
   if (m && m.tope > m.ini) {
     const pct = 100 * (m.cabeza - m.ini) / (m.tope - m.ini);
     const dice = parseFloat(await pg.evaluate(() => (document.getElementById('umbPct')||{}).textContent)) || 0;

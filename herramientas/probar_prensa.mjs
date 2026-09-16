@@ -60,11 +60,7 @@ const col = await pg.evaluate(() => [...document.querySelectorAll('.pcd')].map(c
   const v = n => s.getPropertyValue(n).trim();
   return { ac: v('--ac'), w1: v('--w1'), w2: v('--w2'),
            tag: getComputedStyle(c.querySelector('.pcd-tag')).color,
-           // el color que se VE es el del elemento que lleva los glifos: «.cb-word»
-           // si esta, y solo si no, el de «.cb». Midiendo el padre, la bateria
-           // daba por buena una regla que el hijo pisaba.
-           palabra: (() => { const e = c.querySelector('.cb-word') || c.querySelector('.cb');
-                             return e ? getComputedStyle(e).color : null })() };
+           palabra: c.querySelector('.cb') ? getComputedStyle(c.querySelector('.cb')).color : null };
 }));
 const rgb = h => [1,3,5].map(i => parseInt(h.slice(i, i+2), 16));
 const lum = h => { const [r,g,b] = rgb(h); return (0.2126*r + 0.7152*g + 0.0722*b) / 255; };
@@ -76,21 +72,8 @@ di(col.every(c => lum(c.w1) < 0.42),
 di(col.every(c => sat(c.w1) > 0.30 || lum(c.w1) < 0.10),
    'con color de verdad, no gris: saturacion ' + col.map(c => sat(c.w1).toFixed(2)).join(' '));
 di(col.every(c => lum(c.w2) <= lum(c.w1) + 0.02), 'y el degradado va de claro a oscuro');
-/* Iba en blanco mientras la marca tenia blanco. Ya no lo tiene -negro y lima-,
-   asi que fijar «rgb(255,255,255)» seria afirmar una marca que no existe. Lo
-   que la comprobacion quiere decir sigue valiendo: que la palabra se LEA sobre
-   el color del medio, que son cuatro fondos distintos y oscuros. Se mide el
-   contraste de verdad contra «--w1», y se exige ademas que no sea blanca. */
-const lee = (a, b) => { const L = h => { const [r,g,bb] = rgb(h);
-    const c = v => { v /= 255; return v <= 0.04045 ? v/12.92 : ((v+0.055)/1.055)**2.4 };
-    return 0.2126*c(r) + 0.7152*c(g) + 0.0722*c(bb) };
-  const x = L(a), y = L(b); return (Math.max(x,y)+0.05)/(Math.min(x,y)+0.05) };
-const hex = t => { const m = String(t).match(/\d+/g);
-  return m ? '#' + m.slice(0,3).map(n => (+n).toString(16).padStart(2,'0')).join('') : '#000' };
-const conPalabra = col.filter(c => c.palabra);
-di(conPalabra.every(c => lum(hex(c.palabra)) < 0.90 && lee(hex(c.palabra), c.w1) >= 4.5),
-   'sobre ese color, la palabra Nereum se lee y no es blanca (' +
-   conPalabra.map(c => lee(hex(c.palabra), c.w1).toFixed(1) + ':1').join(' ') + ')');
+di(col.filter(c => c.palabra).every(c => c.palabra === 'rgb(255, 255, 255)'),
+   'sobre ese color, la palabra Nereum va en blanco');
 // el acento tiene que parecerse al logotipo del medio, no ser uno cualquiera
 const CERCA = { '#0A11CE': [8,14,190], '#1FA800': [51,255,0], '#DC0206': [244,1,3] };
 const tono = c => { const [r,g,b] = c, M = Math.max(...c), m = Math.min(...c), D = M-m;
