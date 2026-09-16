@@ -91,11 +91,38 @@ CSS = """
      libre el boton de subir, que se colocaba a 62 px del fondo y mide 42, o
      sea que su borde de arriba caia a 104.
 
-     Pero ese boton va a la DERECHA y lo unico que hay debajo —el idioma— va a
-     la izquierda: en su columna no tiene nada que esquivar. Baja al canto, y
-     el carril pasa de 112 a 64. La tarjeta se queda esos 48 px y la franja de
-     abajo deja de estar vacia: lo que queda es justo el alto de los mandos. */
+     El razonamiento que habia aqui era falso, y costo un choque: decia que a
+     la derecha no hay nada debajo del boton porque «lo unico que hay abajo es
+     el idioma, y va a la izquierda». En la columna derecha hay DOS cosas mas,
+     las dos pegadas al canto: el contador «02 / 11» en «var(--hud-b)» y la
+     banda con el nombre de la seccion en «var(--hud-b) + 22». Bajando el
+     boton a «var(--hud-b)» se le sienta encima a las dos: medido en 390x844,
+     el boton ocupa de 788 a 830 y el contador de 813 a 830. El numero se leia
+     a traves del cristal del boton.
+
+     Subirlo encima de la banda, en la misma columna, tampoco vale: el boton
+     mide 42 y la banda acaba en 32, asi que el borde de arriba se va a 82 y
+     la tarjeta de seguridad se le mete debajo. Catorce tamanos de pantalla lo
+     cantaron en «probar_tarjeta», y reservando los 82 la tarjeta ya no cabe:
+     las tres fichas se salian entre 20 y 39 px en los telefonos cortos. El
+     canto de la derecha no da para tres cosas.
+
+     Subirlo encima de la banda tampoco vale, ni en su columna ni en la otra:
+     el boton mide 42, asi que levantado su borde de arriba se va a 72 u 82 y
+     la tarjeta de seguridad se le mete debajo. Reservando ese hueco la
+     tarjeta ya no cabe: las tres fichas se salian entre 20 y 39 px en los
+     telefonos cortos. Probado por los dos lados y los dos fallan igual,
+     porque el problema no es el lado: es APILAR.
+
+     Asi que no se apila. El boton se queda donde estaba, en el canto, y lo
+     que se aparta es lo otro: el contador y la banda se corren a su izquierda
+     -16 del canto, 42 del boton y 12 de aire: 70- y quedan los tres en la
+     misma linea de abajo. La altura de los mandos sigue siendo la del boton,
+     42, asi que el carril de la tarjeta se queda en sus 64 y las fichas
+     vuelven a caber. Nadie pisa a nadie y no se pierde ni un pixel. */
   .subir{bottom:var(--hud-b)}
+  .hud-count{right:70px}
+  .hud-band{right:70px}
   .secure .sec-stage{padding-bottom:calc(var(--hud-b) + 50px) !important}
 }
 

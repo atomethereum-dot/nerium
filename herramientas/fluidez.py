@@ -346,6 +346,73 @@ CURSOR_NUEVO = """        const cur=document.createElement('span');
            cada letra, asi que el color se le pone aqui. */
         if(lavadoEl)cur.style.color=lavadoEl.style.getPropertyValue('--wash');"""
 
+
+# ── 12 · la bandera de tono se pregunta por el rincon, no por la media ───────
+# «body.light» la consumen nueve reglas y las nueve son cromo de esquina. Se
+# decidia con el lavado, que es la media de la seccion interpolada entre una y
+# la siguiente: media y rincon no son lo mismo, y ademas la media va con
+# retraso. Medido sobre la huella exacta de los mandos, barriendo la pagina:
+# catorce puntos en escritorio y diecisiete en movil con el tono cambiado.
+# Preguntando por la seccion que cubre el canto de abajo: doce y once.
+RINCON_VIEJO = """  (function mira(){
+    requestAnimationFrame(mira);
+    /* El estilo EN LINEA y NO «getComputedStyle»: lo segundo recalcula el
+       estilo del documento entero, y esto corre en cada cuadro mientras la
+       pagina este abierta. Era el 33 % del coste de desplazarse. El lavado se
+       escribe en linea sobre el #wash, asi que leerlo de ahi es exacto y
+       gratis; sin valor, la cadena vacia da luminancia 0, que es el oscuro
+       del CSS. */
+    const q=lum(sitio?sitio.style.getPropertyValue('--wash'):'')>.35;
+    if(q!==claro){claro=q;document.body.classList.toggle('light',q)}
+  })();"""
+RINCON_NUEVO = """  /* LA BANDERA DE TONO SE PREGUNTA POR EL RINCON, NO POR LA MEDIA.
+     «body.light» la consumen nueve reglas y las nueve son cromo de esquina:
+     el contador, la banda de seccion, el idioma, el boton de subir, el velo
+     del rincon, el carril, las marcas del HUD. Todas viven en el canto de
+     abajo. Y se decidia con el lavado, que es la media de la SECCION ENTERA
+     interpolada entre una y la siguiente. Media y rincon no son lo mismo, y
+     ademas la media va con retraso: mientras cambia, por el canto de abajo ya
+     asoma la seccion siguiente.
+     Medido sobre la huella exacta de los mandos -la caja que ocupan, con 6 px
+     de aire- barriendo la pagina de 0,30 de pantalla en 0,30: CATORCE puntos
+     en escritorio y DIECISIETE en movil con el tono cambiado. El peor, y es
+     el que se ve: fondo a 0,85 de luminancia con el HUD en oscuro, o sea velo
+     negro y numeros claros encima de una pagina casi blanca.
+     Se pregunta entonces por la seccion que cubre el canto. La lista se
+     cachea; por cuadro son diecinueve «getBoundingClientRect», que leen
+     geometria y no recalculan estilo, que era lo caro. De atras hacia
+     delante: cuando dos se solapan manda la de despues, que se pinta encima.
+     Y solo cuando el scroll ha cambiado: parado no hay nada que preguntar. */
+  const bandas=[...document.querySelectorAll('main>section[data-bg]')]
+    .map(el=>({el,bg:el.getAttribute('data-bg'),hero:el.classList.contains('hero')}))
+    .filter(b=>b.bg);
+  const f8=v=>{v/=255;return v<=.03928?v/12.92:Math.pow((v+.055)/1.055,2.4)};
+  const lumHex=h=>{
+    const m=/^#?([0-9a-f]{6})$/i.exec((h||'').trim()); if(!m)return 0;
+    const n=parseInt(m[1],16);
+    return .2126*f8(n>>16&255)+.7152*f8(n>>8&255)+.0722*f8(n&255);
+  };
+  let ultimoY=-1e9;
+  (function mira(){
+    requestAnimationFrame(mira);
+    const sy=scrollY;
+    if(Math.abs(sy-ultimoY)<2)return;
+    ultimoY=sy;
+    const yp=innerHeight-24;
+    let b=null;
+    for(let i=bandas.length-1;i>=0;i--){
+      const r=bandas[i].el.getBoundingClientRect();
+      if(r.top<=yp&&r.bottom>=yp){b=bandas[i];break}
+    }
+    /* La portada es el unico «data-bg» que miente a proposito: dice «#04070C»
+       pero la cortina la deja CLARA al final. Sin esto el HUD se queda oscuro
+       sobre el suelo claro con el que la portada termina. */
+    let q;
+    if(b) q = (b.hero && window.__cortina>0.5) ? true : lumHex(b.bg)>.35;
+    else  q = lum(sitio?sitio.style.getPropertyValue('--wash'):'')>.35;
+    if(q!==claro){claro=q;document.body.classList.toggle('light',q)}
+  })();"""
+
 CAMBIOS = [
     ('el vigilante del tono', TONO_VIEJO, TONO_NUEVO),
     ('el bucle muerto del carril', MUERTO_VIEJO, MUERTO_NUEVO),
@@ -358,6 +425,7 @@ CAMBIOS = [
     ('la tinta del cursor', TINTA_VIEJO, TINTA_NUEVO),
     ('el wash para el tecleo', TECLEO_VIEJO, TECLEO_NUEVO),
     ('el cursor del tecleo', CURSOR_VIEJO, CURSOR_NUEVO),
+    ('el tono lo decide el rincon', RINCON_VIEJO, RINCON_NUEVO),
 ]
 
 

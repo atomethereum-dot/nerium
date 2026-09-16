@@ -3166,11 +3166,38 @@ footer .fgrid h4,footer .tec-real{color:#525C70}
      libre el boton de subir, que se colocaba a 62 px del fondo y mide 42, o
      sea que su borde de arriba caia a 104.
 
-     Pero ese boton va a la DERECHA y lo unico que hay debajo —el idioma— va a
-     la izquierda: en su columna no tiene nada que esquivar. Baja al canto, y
-     el carril pasa de 112 a 64. La tarjeta se queda esos 48 px y la franja de
-     abajo deja de estar vacia: lo que queda es justo el alto de los mandos. */
+     El razonamiento que habia aqui era falso, y costo un choque: decia que a
+     la derecha no hay nada debajo del boton porque «lo unico que hay abajo es
+     el idioma, y va a la izquierda». En la columna derecha hay DOS cosas mas,
+     las dos pegadas al canto: el contador «02 / 11» en «var(--hud-b)» y la
+     banda con el nombre de la seccion en «var(--hud-b) + 22». Bajando el
+     boton a «var(--hud-b)» se le sienta encima a las dos: medido en 390x844,
+     el boton ocupa de 788 a 830 y el contador de 813 a 830. El numero se leia
+     a traves del cristal del boton.
+
+     Subirlo encima de la banda, en la misma columna, tampoco vale: el boton
+     mide 42 y la banda acaba en 32, asi que el borde de arriba se va a 82 y
+     la tarjeta de seguridad se le mete debajo. Catorce tamanos de pantalla lo
+     cantaron en «probar_tarjeta», y reservando los 82 la tarjeta ya no cabe:
+     las tres fichas se salian entre 20 y 39 px en los telefonos cortos. El
+     canto de la derecha no da para tres cosas.
+
+     Subirlo encima de la banda tampoco vale, ni en su columna ni en la otra:
+     el boton mide 42, asi que levantado su borde de arriba se va a 72 u 82 y
+     la tarjeta de seguridad se le mete debajo. Reservando ese hueco la
+     tarjeta ya no cabe: las tres fichas se salian entre 20 y 39 px en los
+     telefonos cortos. Probado por los dos lados y los dos fallan igual,
+     porque el problema no es el lado: es APILAR.
+
+     Asi que no se apila. El boton se queda donde estaba, en el canto, y lo
+     que se aparta es lo otro: el contador y la banda se corren a su izquierda
+     -16 del canto, 42 del boton y 12 de aire: 70- y quedan los tres en la
+     misma linea de abajo. La altura de los mandos sigue siendo la del boton,
+     42, asi que el carril de la tarjeta se queda en sus 64 y las fichas
+     vuelven a caber. Nadie pisa a nadie y no se pierde ni un pixel. */
   .subir{bottom:var(--hud-b)}
+  .hud-count{right:70px}
+  .hud-band{right:70px}
   .secure .sec-stage{padding-bottom:calc(var(--hud-b) + 50px) !important}
 }
 
@@ -4760,7 +4787,12 @@ const CALM=matchMedia('(prefers-reduced-motion: reduce)').matches;
     }else{
       const prev=S.y;S.y=scrollY;S.v=S.y-prev;
     }
-    const max=Math.max(1,document.documentElement.scrollHeight-S.vh);
+    /* Aqui habia un «document.documentElement.scrollHeight» por cuadro, y la
+       variable que guardaba no se usaba. Leer «scrollHeight» obliga al
+       navegador a recalcular el estilo y el layout del documento ENTERO antes
+       de contestar, asi que cada cuadro pagaba un layout completo para tirar
+       el resultado. Medido con las metricas del navegador: 7,3 ms de estilo
+       por cuadro en escritorio. Fuera. */
     for(const j of jobs)j.run(S);
     requestAnimationFrame(frame);
   }
@@ -5253,15 +5285,75 @@ const CALM=matchMedia('(prefers-reduced-motion: reduce)').matches;
     const f=v=>{v/=255;return v<=.03928?v/12.92:Math.pow((v+.055)/1.055,2.4)};
     return .2126*f(+m[0])+.7152*f(+m[1])+.0722*f(+m[2]);
   };
+  /* LA BANDERA DE TONO SE PREGUNTA POR EL RINCON, NO POR LA MEDIA.
+     «body.light» la consumen nueve reglas y las nueve son cromo de esquina:
+     el contador, la banda de seccion, el idioma, el boton de subir, el velo
+     del rincon, el carril, las marcas del HUD. Todas viven en el canto de
+     abajo. Y se decidia con el lavado, que es la media de la SECCION ENTERA
+     interpolada entre una y la siguiente. Media y rincon no son lo mismo, y
+     ademas la media va con retraso: mientras cambia, por el canto de abajo ya
+     asoma la seccion siguiente.
+     Medido sobre la huella exacta de los mandos -la caja que ocupan, con 6 px
+     de aire- barriendo la pagina de 0,30 de pantalla en 0,30: CATORCE puntos
+     en escritorio y DIECISIETE en movil con el tono cambiado. El peor, y es
+     el que se ve: fondo a 0,85 de luminancia con el HUD en oscuro, o sea velo
+     negro y numeros claros encima de una pagina casi blanca.
+     Se pregunta entonces por la seccion que cubre el canto. La lista se
+     cachea; por cuadro son diecinueve «getBoundingClientRect», que leen
+     geometria y no recalculan estilo, que era lo caro. De atras hacia
+     delante: cuando dos se solapan manda la de despues, que se pinta encima.
+     Y solo cuando el scroll ha cambiado: parado no hay nada que preguntar. */
+  const bandas=[...document.querySelectorAll('main>section[data-bg]')]
+    .map(el=>({el,bg:el.getAttribute('data-bg'),hero:el.classList.contains('hero')}))
+    .filter(b=>b.bg);
+  const f8=v=>{v/=255;return v<=.03928?v/12.92:Math.pow((v+.055)/1.055,2.4)};
+  const lumHex=h=>{
+    const m=/^#?([0-9a-f]{6})$/i.exec((h||'').trim()); if(!m)return 0;
+    const n=parseInt(m[1],16);
+    return .2126*f8(n>>16&255)+.7152*f8(n>>8&255)+.0722*f8(n&255);
+  };
+  /* Y las cajas se miden UNA VEZ, no en cada cuadro. Medir las diecinueve
+     secciones por cuadro era, junto con el iman, el otro gran lector de
+     geometria, y una lectura de geometria obliga al navegador a recalcular
+     estilo antes de responder. Medido con las metricas del navegador: con los
+     bucles vivos, 7,1 ms de estilo por cuadro; parandolos, 1,0. Las secciones
+     no se mueven de sitio en el documento mientras te desplazas -lo que se
+     mueve es la ventana-, asi que se guardan en coordenadas de DOCUMENTO y
+     por cuadro solo se hace aritmetica con «scrollY». Se remiden al cambiar
+     el tamano y de vez en cuando, por si algo de arriba ha crecido. */
+  let cajas=null;
+  const mide=()=>{
+    cajas=bandas.map(b=>{const r=b.el.getBoundingClientRect();
+      return {b, t:r.top+scrollY, b2:r.bottom+scrollY}});
+  };
+  addEventListener('resize',()=>{cajas=null},{passive:true});
+  setInterval(()=>{cajas=null}, 2000);
+  let ultimoY=-1e9;
   (function mira(){
     requestAnimationFrame(mira);
-    /* El estilo EN LINEA y NO «getComputedStyle»: lo segundo recalcula el
-       estilo del documento entero, y esto corre en cada cuadro mientras la
-       pagina este abierta. Era el 33 % del coste de desplazarse. El lavado se
-       escribe en linea sobre el #wash, asi que leerlo de ahi es exacto y
-       gratis; sin valor, la cadena vacia da luminancia 0, que es el oscuro
-       del CSS. */
-    const q=lum(sitio?sitio.style.getPropertyValue('--wash'):'')>.35;
+    const sy=scrollY;
+    if(Math.abs(sy-ultimoY)<2&&cajas)return;
+    ultimoY=sy;
+    if(!cajas)mide();
+    const yd=sy+innerHeight-24;
+    /* De las que cubren el punto se coge LA QUE EMPIEZA MAS ABAJO, no la
+       ultima del documento. Varias secciones son «sticky» dentro de un
+       soporte de tres o cuatro pantallas, asi que sus cajas se solapan y
+       «la ultima del marcado» elegia una que todavia no se pinta ahi: en la
+       prueba salian «chroma» y «kin» -negras- con el HUD en claro, y «tkp» y
+       «join» -claras- con el HUD en oscuro. Las secciones van en orden, asi
+       que a una altura dada la que se ve es la que arranca mas abajo. */
+    let b=null, topB=-1e9;
+    for(let i=0;i<cajas.length;i++){
+      const c=cajas[i];
+      if(c.t<=yd&&c.b2>=yd&&c.t>topB){topB=c.t;b=c.b}
+    }
+    /* La portada es el unico «data-bg» que miente a proposito: dice «#04070C»
+       pero la cortina la deja CLARA al final. Sin esto el HUD se queda oscuro
+       sobre el suelo claro con el que la portada termina. */
+    let q;
+    if(b) q = (b.hero && window.__cortina>0.5) ? true : lumHex(b.bg)>.35;
+    else  q = lum(sitio?sitio.style.getPropertyValue('--wash'):'')>.35;
     if(q!==claro){claro=q;document.body.classList.toggle('light',q)}
   })();
 })();
@@ -5411,7 +5503,7 @@ function campoGL(){
     float lz=1.0-smoothstep(0.0,LUZ.z*1.25,length(q-LUZ.xy));
     lz=lz*lz*0.055;
     vec3 c=texture(tex,gl_FragCoord.xy/R).rgb
-         + vec3(0.46,0.40,0.94)*rej + vec3(0.250,0.400,1.0)*lz;
+         + vec3(0.34,0.40,0.92)*rej + vec3(0.250,0.400,1.0)*lz;
     O=vec4(c,1.0);
   }`;
   /* Pautado y luz en la MISMA pasada: son dos capas a pantalla completa y
@@ -5427,7 +5519,7 @@ function campoGL(){
     float rej=(lx*0.034 + ly*0.022)*smoothstep(0.15,0.50,length((q/R-0.5)*vec2(1.30,1.0)));
     float lz=1.0-smoothstep(0.0,LUZ.z*1.25,length(q-LUZ.xy));
     lz=lz*lz*0.055;
-    vec3 c=vec3(0.46,0.40,0.94)*rej + vec3(0.250,0.400,1.0)*lz;
+    vec3 c=vec3(0.34,0.40,0.92)*rej + vec3(0.250,0.400,1.0)*lz;
     float a=rej+lz;
     O=vec4(c,a);
   }`;
@@ -5451,7 +5543,7 @@ function campoGL(){
     gl.clearColor(0,0,0,1); gl.clear(gl.COLOR_BUFFER_BIT);
     gl.bindFramebuffer(gl.FRAMEBUFFER,null);
   }
-  const T=[[62,96,240],[34,60,214],[118,140,252],[214,222,255],[124,92,236],[26,34,124]];
+  const T=[[62,96,240],[34,60,214],[118,140,252],[214,222,255],[174,188,236],[26,34,124]];
   const TONOS=[[5,5,5,5,4],[1,1,1,0,4],[0,0,1,2,2]];
   const rnd=(a,b)=>a+Math.random()*(b-a);
   const FILAS=[0.045,0.105,0.170,0.240,0.310,0.700,0.770,0.840,0.905,0.960];
@@ -5597,7 +5689,7 @@ function campoGL(){
 function campo2D(){
   const cv=document.getElementById('burst');if(!cv)return;
   const ctx=cv.getContext('2d',{alpha:false});
-  const T=[[62,96,240],[34,60,214],[118,140,252],[214,222,255],[124,92,236],[26,34,124]];
+  const T=[[62,96,240],[34,60,214],[118,140,252],[214,222,255],[174,188,236],[26,34,124]];
   const TONOS=[[5,5,5,5,4],[1,1,1,0,4],[0,0,1,2,2]];
   const ESC=[0.55,1,1.38], VEL=[0.42,1,1.62], PAR=[0.32,0.76,1.20], DER=[2.2,5.0,8.5];
   const FILAS=[0.045,0.105,0.170,0.240,0.310,0.700,0.770,0.840,0.905,0.960];
@@ -6400,9 +6492,18 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
     const r=l.el.getBoundingClientRect();
     l.cx=r.left+r.width/2; l.cy=r.top+r.height/2;
   });
+  /* Medir en CADA evento de scroll era el mayor lector de geometria de la
+     pagina: diecinueve letras por diecinueve «getBoundingClientRect», una vez
+     por cuadro, durante toda la pagina y no solo en la portada. Y esas
+     posiciones solo hacen falta cuando el raton esta encima del titular, que
+     es cuando el iman tira. Se marcan sucias y se miden PEREZOSAMENTE, dentro
+     del bucle y solo si el efecto esta encendido. Con el raton fuera -o en un
+     telefono, donde no hay raton- no se mide nunca. */
   measure();
-  addEventListener('resize',measure,{passive:true});
-  addEventListener('scroll',measure,{passive:true});
+  let sucio=false;
+  const ensucia=()=>{sucio=true};
+  addEventListener('resize',ensucia,{passive:true});
+  addEventListener('scroll',ensucia,{passive:true});
   let mx=-1e5,my=-1e5,on=0,want=0;
   const hero=h1.closest('.hero')||document.body;
   hero.addEventListener('pointermove',e=>{
@@ -6413,6 +6514,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
   (function tick(){
     on+=(want-on)*.09;
     if(on>.002){
+      if(sucio){measure();sucio=false}
       const R=190;
       for(const l of L){
         const dx=l.cx-mx, dy=l.cy-my, d=Math.hypot(dx,dy);
@@ -6719,7 +6821,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
   const ease=t=>1-Math.pow(1-t,3);
   const dTop=nn=>{let y=0;while(nn){y+=nn.offsetTop;nn=nn.offsetParent}return y};
   const eOut=t=>1-Math.pow(1-t,3);
-  const PAL=[[70,110,255],[44,80,252],[126,148,255],[248,250,255],[134,100,244],[40,52,176]];
+  const PAL=[[70,110,255],[44,80,252],[126,148,255],[248,250,255],[174,188,236],[40,52,176]];
   let vuelo=null, vt=0, vlast=0;
   const HONDO=9;          /* profundidad del corredor */
   function haceVuelo(){
@@ -6903,7 +7005,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
       ctx.restore();
     }
   }
-  const SPAL=[[70,110,255],[44,80,252],[126,148,255],[236,240,255],[134,100,244],[40,52,176]];
+  const SPAL=[[70,110,255],[44,80,252],[126,148,255],[236,240,255],[174,188,236],[40,52,176]];
   let SU=null, suL=0, suVelo=null, suVeloH=0, suFil=null, suFilW=0, suCol=null, suColH=0;
   const srnd=(a,b)=>a+Math.random()*(b-a);
   const scv=document.createElement('canvas');
@@ -8359,7 +8461,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
      iban en cuatro azules puros mientras el campo de arriba tiene azul,
      indigo y lila: dos mundos distintos a treinta segundos de scroll. Es la
      misma familia o no es nada. */
-  var TONOS=['#2834B0','#2C50FC','#466EFF','#8664F4','#7E94FF'];
+  var TONOS=['#2834B0','#2C50FC','#466EFF','#A8BCEC','#7E94FF'];
 
   function teselas(txt,tam){
     TLADO=Math.max(6,Math.round(tam/58));

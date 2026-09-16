@@ -209,7 +209,7 @@ JS = """<script>
      iban en cuatro azules puros mientras el campo de arriba tiene azul,
      indigo y lila: dos mundos distintos a treinta segundos de scroll. Es la
      misma familia o no es nada. */
-  var TONOS=['#2834B0','#2C50FC','#466EFF','#8664F4','#7E94FF'];
+  var TONOS=['#2834B0','#2C50FC','#466EFF','#A8BCEC','#7E94FF'];
 
   function teselas(txt,tam){
     TLADO=Math.max(6,Math.round(tam/58));

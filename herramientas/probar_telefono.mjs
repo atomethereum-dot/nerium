@@ -232,6 +232,144 @@ di(lado.scrollW <= lado.clientW + 2 && lado.movido === 0,
    'y la pagina no se arrastra de lado: ' + lado.scrollW + ' de ancho para ' +
    lado.clientW + ' de pantalla');
 
+// ── los mandos del rincon no se montan ────────────────────────────────────
+// En la columna de la derecha hay tres cosas pegadas al canto: el contador
+// «02 / 11», la banda con el nombre de la seccion y el boton de subir. Una
+// regla para pantallas cortas bajaba el boton al canto con el argumento de
+// que «a la derecha no hay nada debajo», que era falso, y el boton se sentaba
+// encima del contador: medido en 390x844, boton de 788 a 830 y contador de
+// 813 a 830. El numero se leia a traves del cristal del boton. Se comprueban
+// los tres contra todos, que es la unica manera de que no vuelva a pasar por
+// otro lado.
+{
+  await pg.evaluate(() => scrollTo(0, innerHeight * 3));
+  await pg.waitForTimeout(700);
+  const cajas = await pg.evaluate(() => {
+    const ns = ['.hud-count', '.hud-band', '.subir'];
+    return ns.map(s => {
+      const e = document.querySelector(s);
+      if (!e) return null;
+      const r = e.getBoundingClientRect();
+      const c = getComputedStyle(e);
+      if (!r.width || !r.height || c.visibility === 'hidden') return null;
+      return { s, l: r.left, t: r.top, r: r.right, b: r.bottom };
+    }).filter(Boolean);
+  });
+  const chocan = [];
+  for (let i = 0; i < cajas.length; i++) for (let j = i + 1; j < cajas.length; j++) {
+    const a = cajas[i], b = cajas[j];
+    const sx = Math.min(a.r, b.r) - Math.max(a.l, b.l);
+    const sy = Math.min(a.b, b.b) - Math.max(a.t, b.t);
+    if (sx > 1 && sy > 1) chocan.push(a.s + ' con ' + b.s + ' (' +
+      Math.round(sx) + 'x' + Math.round(sy) + ' px)');
+  }
+  di(chocan.length === 0, 'los mandos del rincon no se montan entre ellos' +
+     (chocan.length ? ': ' + chocan.join(', ') : ' (' + cajas.length + ' medidos)'));
+}
+
+// ── y el HUD va del tono de lo que tiene debajo ───────────────────────────
+// «body.light» la consumen nueve reglas y las nueve son cromo de esquina. Se
+// decidia con el lavado, que es la media de la seccion ENTERA interpolada
+// entre una y la siguiente: llega tarde, y mientras llega, por el canto de
+// abajo ya asoma la seccion siguiente. Lo que se veia -y es lo que se
+// reporto- era el velo negro y el contador azul claro encima de la pagina
+// casi blanca de «in the press».
+//
+// El primer intento de prueba se paraba en medio de cada seccion y exigia que
+// el HUD llevara el tono de ESA seccion. Estaba mal planteado y lo canto
+// solo: parado en medio de «chroma» -negra- lo que hay bajo el canto de abajo
+// ya es «paper2» -clara-, porque las secciones son «sticky» dentro de
+// soportes de tres pantallas. Exigir el tono de la seccion en la que estas es
+// exigir justo el fallo que se arregla.
+//
+// Asi que no se comprueba el mecanismo, se comprueba el RESULTADO PINTADO: se
+// apaga el HUD, se fotografia su huella exacta -la caja que ocupan los mandos
+// con 6 px de aire- y se compara su luminancia con la bandera. Y solo se
+// cuentan los desfases GRANDES, los que se ven: fondo claro de verdad con el
+// HUD en oscuro, o fondo negro con el HUD en claro.
+//
+// Medido: con el lavado, 13 de 36; preguntando por la seccion del canto, 7.
+// Los siete que quedan son tres sitios conocidos y ninguno es el reportado:
+// el foco claro que la portada tiene justo en ese rincon, la franja en que
+// entre dos secciones no asoma ninguna y se ve el telon negro, y los dos
+// fundidos «xf» y «xl», que declaran negro y terminan casi blancos porque
+// ninguna etiqueta fija describe algo que cambia de tono mientras lo cruzas.
+// El limite va en 8: por debajo de lo que hay, no se toca; si sube, algo se
+// ha roto.
+{
+  const caja = await pg.evaluate(() => {
+    const es = ['.hud-count', '.hud-band', '.subir'].map(s => document.querySelector(s)).filter(Boolean);
+    let l = 1e9, t = 1e9, r = -1e9, b = -1e9;
+    for (const e of es) { const q = e.getBoundingClientRect(); if (!q.width) continue;
+      l = Math.min(l, q.left); t = Math.min(t, q.top); r = Math.max(r, q.right); b = Math.max(b, q.bottom) }
+    return r < 0 ? null : { x: Math.max(0, Math.round(l - 6)), y: Math.max(0, Math.round(t - 6)),
+                            width: Math.round(r - l + 12), height: Math.round(b - t + 12) };
+  });
+  di(!!caja, 'los mandos del rincon estan en pantalla para poder medirlos');
+  let malos = 0, n = 0;
+  if (caja) {
+    await pg.addStyleTag({ content: '.hud,.hud::after,.subir,.srail,.scrollbtn,.lang-menu{opacity:0!important}' });
+    const alto = await pg.evaluate(() => document.documentElement.scrollHeight - innerHeight);
+    const paso = await pg.evaluate(() => Math.round(innerHeight * 0.6));
+    for (let y = 0; y <= alto; y += paso) {
+      await pg.evaluate(v => scrollTo(0, v), y);
+      await pg.waitForTimeout(300); n++;
+      const b64 = (await pg.screenshot({ clip: caja })).toString('base64');
+      const r = await pg.evaluate(async s => {
+        const im = new Image();
+        await new Promise(z => { im.onload = z; im.src = 'data:image/png;base64,' + s });
+        const c = document.createElement('canvas'); c.width = im.width; c.height = im.height;
+        const x = c.getContext('2d'); x.drawImage(im, 0, 0);
+        const d = x.getImageData(0, 0, c.width, c.height).data;
+        const f = v => { v /= 255; return v <= .03928 ? v / 12.92 : Math.pow((v + .055) / 1.055, 2.4) };
+        let su = 0, m = 0;
+        for (let i = 0; i < d.length; i += 4) { su += .2126*f(d[i]) + .7152*f(d[i+1]) + .0722*f(d[i+2]); m++ }
+        return { L: su / m, light: document.body.classList.contains('light') };
+      }, b64);
+      if ((r.L > 0.70 && !r.light) || (r.L < 0.06 && r.light)) malos++;
+    }
+  }
+  di(caja && malos <= 8, 'el HUD lleva el tono de lo que tiene debajo (' +
+     malos + ' desfases grandes en ' + n + ' paradas, limite 8)');
+
+  // Y el caso concreto que se reporto, que es el que si discrimina. El
+  // barrido de arriba es un humo: a esta resolucion el mecanismo viejo y el
+  // nuevo empatan, porque los desfases que quedan son los tres sitios
+  // conocidos y caen en las dos versiones. Medido denso -97 paradas- el
+  // nuevo baja de 17 a 14 en movil y de 20 a 16 en escritorio: mejora real
+  // pero modesta. Lo que SI arregla del todo es la travesia de «in the
+  // press», que es donde se vio: con el lavado, el velo negro y el contador
+  // azul claro sobre la pagina casi blanca.
+  if (caja) {
+    const p2 = await pg.evaluate(() => {
+      const e = document.querySelector('.press');
+      const r = e.getBoundingClientRect();
+      return { y: Math.round(r.top + scrollY), h: Math.round(r.height) };
+    });
+    let mal2 = 0, n2 = 0, peor = 0;
+    for (let k = 0.15; k <= 0.9; k += 0.15) {
+      await pg.evaluate(v => scrollTo(0, v), Math.round(p2.y + p2.h * k));
+      await pg.waitForTimeout(340); n2++;
+      const b64 = (await pg.screenshot({ clip: caja })).toString('base64');
+      const r = await pg.evaluate(async s => {
+        const im = new Image();
+        await new Promise(z => { im.onload = z; im.src = 'data:image/png;base64,' + s });
+        const c = document.createElement('canvas'); c.width = im.width; c.height = im.height;
+        const x = c.getContext('2d'); x.drawImage(im, 0, 0);
+        const d = x.getImageData(0, 0, c.width, c.height).data;
+        const f = v => { v /= 255; return v <= .03928 ? v / 12.92 : Math.pow((v + .055) / 1.055, 2.4) };
+        let su = 0, m = 0;
+        for (let i = 0; i < d.length; i += 4) { su += .2126*f(d[i]) + .7152*f(d[i+1]) + .0722*f(d[i+2]); m++ }
+        return { L: su / m, light: document.body.classList.contains('light') };
+      }, b64);
+      if (r.L > 0.55 && !r.light) { mal2++; peor = Math.max(peor, r.L) }
+    }
+    di(mal2 === 0, 'y cruzando «in the press» no se queda oscuro sobre la pagina clara' +
+       (mal2 ? ' (' + mal2 + ' de ' + n2 + ', el peor a ' + peor.toFixed(2) + ' de luminancia)'
+             : ' (' + n2 + ' paradas)'));
+  }
+}
+
 await ctx.close(); await nav.close(); srv.close();
 console.log(mal ? `\n${ok} bien, ${mal} MAL` : `\n${ok}/${ok} correctas`);
 process.exit(mal ? 1 : 0);
