@@ -183,6 +183,56 @@ di(cuadros[1].desv >= 0.010 || cuadros[2].desv >= 0.010,
    'y por el camino hay instrumento dibujado, no un fundido a negro (desv ' +
    cuadros[1].desv.toFixed(3) + ' / ' + cuadros[2].desv.toFixed(3) + ')');
 
+/* ── 2b · la barra de neon dice la cifra de verdad ────────────────────────── */
+/* Una barra de progreso decorativa es una raya. Esta tiene que estar llena
+   EXACTAMENTE hasta donde va la ronda, y eso se mide en el pixel: se busca la
+   fila mas encendida de la mitad baja —la barra—, y en ella el arranque del
+   carril, la cabeza del relleno y el tope de 100 %. La fraccion entre las tres
+   es el porcentaje que la barra esta contando. */
+{
+  await pg.evaluate(v => scrollTo(0, v), Math.round(caja.top + 0.34 * (caja.alto - caja.vh)));
+  await pg.waitForTimeout(500);
+  const tira = (await pg.screenshot({ clip:{ x:0, y:0, width:1440, height:900 } })).toString('base64');
+  const m = await pg.evaluate(async (b64) => {
+    const im = new Image();
+    await new Promise(r => { im.onload = r; im.src = 'data:image/png;base64,' + b64 });
+    const c = document.createElement('canvas'); c.width = im.width; c.height = im.height;
+    const x = c.getContext('2d'); x.drawImage(im, 0, 0);
+    const d = x.getImageData(0, 0, c.width, c.height).data;
+    const luz = i => (0.2126*d[i] + 0.7152*d[i+1] + 0.0722*d[i+2]) / 255;
+    /* CIAN, no solo encendido: la cifra calada es blanca y sus filas tambien
+       estan llenas de pixeles claros. Buscando «la fila mas encendida» a secas
+       la comprobacion pasaba igual con la barra quitada. El tubo es lo unico
+       de la escena donde el azul y el verde le sacan ventaja al rojo. */
+    const cian = i => d[i+2] > d[i] + 26 && d[i+1] > d[i] + 14;
+    let mejor = -1, mejorN = 0;
+    for (let y = Math.floor(c.height * 0.55); y < c.height - 30; y++) {
+      let n = 0;
+      for (let px = 0; px < c.width; px++) { const i = (y*c.width + px) * 4;
+        if (luz(i) > 0.45 && cian(i)) n++ }
+      if (n > mejorN) { mejorN = n; mejor = y }
+    }
+    if (mejorN < 80) return null;
+    if (mejor < 0) return null;
+    const fila = px => luz((mejor*c.width + px) * 4);
+    let ini = -1, cabeza = -1, tope = -1;
+    for (let px = 0; px < c.width; px++) if (fila(px) > 0.45) { ini = px; break }
+    for (let px = c.width - 1; px >= 0; px--) if (fila(px) > 0.30) { tope = px; break }
+    // la cabeza: donde acaba la tirada continua que arranca en «ini»
+    for (let px = ini; px < c.width; px++) { if (fila(px) < 0.30) { cabeza = px - 1; break } }
+    return { fila: mejor, ini, cabeza, tope, ancho: c.width };
+  }, tira);
+  di(!!m && m.ini > 0 && m.cabeza > m.ini,
+     'la barra de neon esta encendida, y en cian (fila ' + (m ? m.fila : 'NO LA HAY') + ')');
+  if (m && m.tope > m.ini) {
+    const pct = 100 * (m.cabeza - m.ini) / (m.tope - m.ini);
+    const dice = parseFloat(await pg.evaluate(() => (document.getElementById('umbPct')||{}).textContent)) || 0;
+    di(Math.abs(pct - dice) <= 5,
+       'y esta llena hasta la cifra de la ronda, no hasta un sitio decorativo (' +
+       pct.toFixed(1) + '% frente a ' + dice + '%)');
+  }
+}
+
 /* ── 3 · la cifra, la misma en los cuatro sitios ──────────────────────────── */
 const cifras = await pg.evaluate(() => {
   const t = s => { const e = document.querySelector(s); return e ? (e.textContent || '').replace(/[^\d]/g, '') : null };

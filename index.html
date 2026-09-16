@@ -8243,7 +8243,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
   var W=0,H=0,DPR=1,dentro=false,pide=0;
   var LOSAS=9;                        /* impar: ninguna losa parte la cifra por el medio */
   var placa=document.createElement('canvas'), pc=placa.getContext('2d');
-  var cara='';
+  var cara='', tamCifra=0, meta=0.85;
 
   function tipo(){
     /* la misma familia que los titulares de la pagina, leida de la pagina */
@@ -8262,15 +8262,19 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
     pc.fillStyle=g; pc.fillRect(0,0,W,H);
     /* la cifra, a cuchillo */
     var txt=(num.textContent||'85').replace(/[^0-9]/g,'')+'%';
-    var tam=Math.min(W*0.62,H*0.95);
+    /* La cifra baja de tamano para dejarle sitio a la barra: antes ocupaba
+       casi toda la altura y la barra acababa aplastada contra el canto. */
+    var tam=Math.min(W*0.58,H*0.66);
     pc.font='200 '+tam+'px '+cara;
     var an=pc.measureText(txt).width;
     if(an>W*0.86){ tam=tam*(W*0.86)/an; pc.font='200 '+tam+'px '+cara }
     pc.textAlign='center'; pc.textBaseline='middle';
     pc.globalCompositeOperation='destination-out';
     pc.fillStyle='#000';
-    pc.fillText(txt,W/2,H/2+tam*0.02);
+    pc.fillText(txt,W/2,H/2-tam*0.10);
     pc.globalCompositeOperation='source-over';
+    tamCifra=tam;
+    meta=Math.min(1,Math.max(0,(parseFloat(num.textContent)||85)/100));
   }
   function medir(){
     DPR=Math.min(2,window.devicePixelRatio||1);
@@ -8291,6 +8295,94 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
   /* la salida: rapida al principio y larga al final, que es como se mueve algo
      pesado al que sueltas */
   var pesa=function(t){return 1-Math.pow(1-t,2.6)};
+
+  /* ── la barra: lo unico que EMITE luz ──────────────────────────────────
+     La cifra es un hueco -luz que pasa-; la barra es luz que sale. Ese par es
+     lo que hace que las dos cosas no compitan.
+     El neon de verdad no es un color claro: son tres pasadas. Una ancha y
+     difusa que tine el aire, una media que da el tubo, y un nucleo casi blanco
+     que es lo que el ojo lee como encendido. Con una sola pasada sale un
+     rectangulo cian, que es lo que parece barato.
+     Y la estela: lo ya recorrido no queda a brillo plano, se apaga hacia atras.
+     Eso es lo fosforescente —el fosforo sigue luciendo un rato donde le dio el
+     haz— y es lo que hace que la barra parezca haber PASADO por ahi. */
+  var CIAN='95,233,255';
+  function barra(dx,p){
+    var an=Math.min(W*0.86,tamCifra*3.1), x0=(W-an)/2+dx;
+    var y=H/2+tamCifra*0.46;
+    if(y>H-86) y=H-86;
+    var t=tramo(p,0.08,0.34);
+    var f=an*meta*t;                       /* lo recorrido */
+    /* el carril y sus marcas de escala: sin ellas la barra es un cargador
+       generico; con ellas es un instrumento */
+    cx.fillStyle='rgba('+CIAN+',.16)';
+    cx.fillRect(x0,y-1,an,2);
+    for(var k=0;k<=4;k++){
+      var mx=x0+an*k/4;
+      var fin=(k===4);
+      cx.fillStyle='rgba('+CIAN+',' + (fin?.85:(k%4===0?.48:.26)) + ')';
+      cx.fillRect(mx-(fin?1:0.5),y-(k%4===0?15:8),(fin?2:1),(k%4===0?30:16));
+    }
+    if(f<=0.5) return;
+    var alto=16;
+    cx.save();
+    /* 0 · el derrame. Un tubo de neon se nota porque TINE lo que tiene
+       alrededor: si el resplandor acaba en el borde del tubo, lo que hay es
+       un rectangulo claro. Esto es una mancha de luz ancha, muy floja, que
+       cae sobre la tinta por encima y por debajo. Es la mitad del efecto. */
+    /* En elipse y no en rectangulo: con un rectangulo de degradado vertical el
+       derrame se corta EN SECO por los lados y se ve un canto recto a la
+       derecha de la cabeza, que delata el truco. Salio en la captura. */
+    cx.save();
+    cx.translate(x0+f*0.52,y);
+    cx.scale(Math.max(1,f*0.66),138);
+    var der=cx.createRadialGradient(0,0,0,0,0,1);
+    der.addColorStop(0,  'rgba('+CIAN+',.20)');
+    der.addColorStop(0.55,'rgba('+CIAN+',.085)');
+    der.addColorStop(1,  'rgba('+CIAN+',0)');
+    cx.fillStyle=der;
+    cx.beginPath(); cx.arc(0,0,1,0,Math.PI*2); cx.fill();
+    cx.restore();
+    /* 1 · el aire */
+    cx.shadowColor='rgba('+CIAN+',.95)'; cx.shadowBlur=70;
+    cx.fillStyle='rgba('+CIAN+',.38)';
+    cx.fillRect(x0,y-alto/2,f,alto);
+    /* 2 · el tubo, con la estela apagandose hacia atras */
+    var g=cx.createLinearGradient(x0,0,x0+f,0);
+    g.addColorStop(0,'rgba('+CIAN+',.20)');
+    g.addColorStop(0.55,'rgba('+CIAN+',.62)');
+    g.addColorStop(1,'rgba('+CIAN+',1)');
+    cx.shadowBlur=28; cx.fillStyle=g;
+    cx.fillRect(x0,y-alto/2,f,alto);
+    /* 3 · el nucleo */
+    var n=cx.createLinearGradient(x0,0,x0+f,0);
+    n.addColorStop(0,'rgba(255,255,255,0)');
+    n.addColorStop(0.7,'rgba(230,252,255,.55)');
+    n.addColorStop(1,'rgba(255,255,255,.95)');
+    cx.shadowBlur=0; cx.fillStyle=n;
+    cx.fillRect(x0,y-2,f,4);
+    /* 4 · la cabeza: donde esta pasando ahora */
+    var cab=t<0.999?1:0.55;
+    cx.shadowColor='rgba(210,250,255,1)'; cx.shadowBlur=60*cab;
+    cx.fillStyle='rgba(255,255,255,'+(0.97*cab).toFixed(2)+')';
+    cx.fillRect(x0+f-3,y-30,6,60);
+    /* y el haz vertical de la cabeza: un corte de luz que sube y baja desde
+       donde esta pasando. Es lo que hace que la cabeza pese. */
+    var haz=cx.createLinearGradient(0,y-190,0,y+190);
+    haz.addColorStop(0,   'rgba(190,245,255,0)');
+    haz.addColorStop(0.5, 'rgba(190,245,255,'+(0.50*cab).toFixed(3)+')');
+    haz.addColorStop(1,   'rgba(190,245,255,0)');
+    cx.shadowBlur=0; cx.fillStyle=haz;
+    cx.fillRect(x0+f-1.5,y-190,3,380);
+    /* 5 · y el fogonazo al llegar a la meta: una sola vez, corto */
+    var golpe=tramo(p,0.30,0.35)*(1-tramo(p,0.35,0.46));
+    if(golpe>0.01){
+      cx.shadowBlur=70*golpe;
+      cx.fillStyle='rgba(255,255,255,'+(0.5*golpe).toFixed(3)+')';
+      cx.fillRect(x0,y-alto/2-1,f,alto+2);
+    }
+    cx.restore();
+  }
 
   function dibuja(p){
     cx.clearRect(0,0,W,H);
@@ -8316,6 +8408,11 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
       cx.drawImage(placa,
         0,Math.round(y*DPR),Math.round(W*DPR),Math.round((alto+1)*DPR),
         dx,y,W,alto+1);
+      /* La barra va DENTRO del recorte de la losa y con su mismo
+         desplazamiento, asi que cuando la tinta se desmonta la barra se rasga
+         con ella. Flotando por encima seria un adorno pegado encima de la
+         escena; asi es parte de la misma materia. */
+      barra(dx,p);
       cx.restore();
       /* el filo de ataque, encendido en proporcion a lo que corre: es lo unico
          que lleva color, y solo mientras se mueve */
