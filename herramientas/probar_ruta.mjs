@@ -158,16 +158,36 @@ for (let y = 0; y < alto; y += 450) { await pg.evaluate(v => scrollTo(0, v), y);
   });
   di(r.puntos === 1 && r.aros === 0,
      'un solo punto y ningun aro, como en la referencia (' + r.puntos + ' punto, ' + r.aros + ' aros)');
-  /* Ya no es azul: la pagina paso a negro y plata, asi que el color concreto
-     que habia escrito aqui -«rgb(62,134,255)»- dejo de existir. Lo que el
-     punto tiene que seguir siendo es lo que la prueba defendia de verdad:
-     LLENO -radio 50 %, no un aro- y del ACENTO de la pagina, o sea plata con
-     luz. Se comprueba eso: redondo, neutro y claro. */
-  const pc = (r.colorPunto.match(/[\d.]+/g) || []).map(Number);
-  const neutro = pc.length >= 3 && (Math.max(pc[0],pc[1],pc[2]) - Math.min(pc[0],pc[1],pc[2])) <= 18;
-  const claro = pc.length >= 3 && Math.max(pc[0],pc[1],pc[2]) >= 120;
-  di(neutro && claro && r.radio.startsWith('50%'),
-     'el punto va LLENO y de plata, que es el acento de la pagina: ' + r.colorPunto);
+  /* El color concreto no se escribe aqui NUNCA MAS. Llevaba «rgb(62,134,255)»
+     a mano, salto cuando la pagina paso a plata, lo cambie a «neutro y claro»
+     y volvio a saltar cuando el azul regreso. Dos veces el mismo error: fijar
+     un color en la prueba y que la prueba se rompa cada vez que la marca
+     cambia de idea. Lo que el punto tiene que ser es LLENO -radio 50 %, no un
+     aro- y del ACENTO DE LA PAGINA, asi que se le pregunta a la pagina cual
+     es su acento en vez de recordarlo. */
+  const acento = await pg.evaluate(() =>
+    getComputedStyle(document.documentElement).getPropertyValue('--blue').trim());
+  const aRGB = await pg.evaluate(c => { const d = document.createElement('div');
+    d.style.color = c; document.body.appendChild(d);
+    const v = getComputedStyle(d).color; d.remove(); return v; }, acento);
+  /* Y se compara por TONO, no byte a byte. La pagina tiene una familia de
+     azules -uno para marcas, uno mas claro para texto sobre negro- y el punto
+     usa uno de ellos; exigir el valor exacto de «--blue» seria volver a fijar
+     un color, que es el error que esta prueba ya cometio dos veces. Lo que
+     define «el acento» es el tono, no la luminosidad. */
+  const num = s => (s.match(/[\d.]+/g) || []).map(Number).slice(0, 3);
+  const tonoDe = c => { const [r0,g0,b0] = c, M = Math.max(r0,g0,b0), m = Math.min(r0,g0,b0), D = M-m;
+    if (!D) return -1;
+    const h = M === r0 ? (((g0-b0)/D)%6) : M === g0 ? ((b0-r0)/D+2) : ((r0-g0)/D+4);
+    return (h*60 + 360) % 360; };
+  const [p1, p2] = [num(r.colorPunto), num(aRGB)];
+  const [h1, h2] = [tonoDe(p1), tonoDe(p2)];
+  const cerca = h1 >= 0 && h2 >= 0 && Math.abs(h1 - h2) <= 14 &&
+    Math.max(...p1) >= 120;
+  di(cerca && r.radio.startsWith('50%'),
+     'el punto va LLENO y del tono del acento que la pagina declara (' +
+     r.colorPunto + ' a ' + h1.toFixed(0) + 'deg contra --blue ' + aRGB +
+     ' a ' + h2.toFixed(0) + 'deg)');
   di(r.sombra === 'none', 'y sin halo, que la referencia no lo lleva (' + r.sombra + ')');
   di(r.rectas === 0, 'no queda ninguna barra recta encima del dibujo (' + r.rectas + ' piezas)');
   di(r.viva && /inset/.test(r.recorte), 'la barra es la propia hebra encendida: ' + r.recorte);

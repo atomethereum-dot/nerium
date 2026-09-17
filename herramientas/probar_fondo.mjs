@@ -97,10 +97,16 @@ di(cianPct < 0.02, 'no hay zona cian: ' + a.cian + ' de ' + a.vivos +
    verde- rompe la pagina entera, y eso es lo que hay que cazar ahora. Se
    cuentan los pixeles con tono de verdad; el limite en 5 % deja pasar el frio
    leve que hace que el metal no sea gris muerto. */
-const conTono = a.claros ? (a.claros - a.gris) / a.claros * 100 : 0;
-di(conTono < 8, 'el campo es de plata, no de color: solo ' + conTono.toFixed(2) +
-   ' % de los pixeles CLAROS lleva tono (' + (a.claros - a.gris) + ' de ' +
-   a.claros + ', limite 8)');
+/* Y vuelve a su forma original, porque el campo vuelve a ser azul. Esta
+   prueba se dio la vuelta cuando la pagina paso a plata y ahora se da otra
+   vez: defiende que el campo NO sea gris neutro, que era la senal de que la
+   paleta se habia caido y quedaba el relleno por defecto. Se mide sobre los
+   pixeles CLAROS, que es la poblacion honrada -un pixel casi negro no tiene
+   color que juzgar-, cosa que la version original no hacia. */
+const grisPct = a.claros ? a.gris / a.claros * 100 : 0;
+di(grisPct < 8, 'ni un gris neutro: el campo lleva azul dentro (' + a.gris +
+   ' de ' + a.claros + ' pixeles claros son grises, ' + grisPct.toFixed(2) +
+   ' %, limite 8)');
 
 // que siga vivo: dos instantes distintos no pueden dar la misma imagen
 const b1 = a.suma;

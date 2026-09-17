@@ -56,7 +56,14 @@ async function franja(pg, caja) {
     let tes = 0;
     for (let i = 0; i < d.length; i += 4) {
       const M = Math.max(d[i], d[i+1], d[i+2]), m = Math.min(d[i], d[i+1], d[i+2]);
-      if (M - m <= 26 && (0.2126*d[i] + 0.7152*d[i+1] + 0.0722*d[i+2]) > 46) tes++;
+      const L2 = 0.2126*d[i] + 0.7152*d[i+1] + 0.0722*d[i+2];
+      /* La tesela puede ser AZUL o PLATA: la pagina lleva las dos desde que el
+         azul volvio a los cubos y el metal se quedo en las superficies. Lo que
+         no cambia es que una tesela TIENE LUZ -se separa del negro- y no es
+         texto ni fondo. Se acepta neutra o de azul dominante; exigir una sola
+         de las dos es lo que hizo que esta medida devolviera cero dos veces,
+         una con cada paleta, y cero no es aprobar, es no mirar. */
+      if (L2 > 46 && (M - m <= 26 || d[i+2] > d[i] + 34)) tes++;
     }
     /* Y el ENREJADO: cuantas veces cambia de encendido a apagado al recorrer
        una fila. Un glifo macizo cambia dos veces por trazo; uno de teselas,
