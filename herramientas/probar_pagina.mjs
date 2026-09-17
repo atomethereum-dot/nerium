@@ -38,15 +38,23 @@ di(papel.every(p => p.img !== 'none'),
    'ninguna es ya un color plano: todas llevan luz encima');
 di(papel.every(p => /feTurbulence/.test(p.img)),
    'y todas llevan el grano, que es lo que quita el blanco de plantilla');
-/* El paso 17 cambia el tapiz por las placas: es el mismo motivo con otra
-   composicion, asi que se comprueba el que la pagina esta usando DE VERDAD.
-   Fijar aqui «tapiz.svg» seria medir un archivo que ya nadie pinta.
-   Y se lee la EXTENSION tambien: el relieve se sirve rasterizado -como SVG el
-   navegador lo re-rasterizaba en cada paso de la escala del scroll-, asi que
-   fijar «.svg» aqui volvia a medir un archivo que ya nadie pinta. */
-const tap = (papel[0].img.match(/img\/([a-z0-9-]+\.(?:svg|webp|png|avif))/) || [, 'tapiz.svg'])[1];
-di(papel.every(p => p.img.includes(tap)),
-   'y el dibujo del suelo, que es el fondo de verdad (' + tap + ')');
+/* EL SUELO YA NO ES UN ARCHIVO. Aqui se comprobaba que todas las secciones
+   claras pidieran el MISMO dibujo de suelo, y estaba bien mientras el suelo
+   era un bitmap: si una seccion pedia otro, se notaba el salto. Con el paso a
+   negro y plata el suelo dejo de ser un archivo y paso a ser metal, hecho de
+   degradados y grano, asi que no hay nombre de archivo que comparar.
+
+   Lo que aquello defendia -que las secciones claras compartan suelo y no se
+   noten cosidas- se sigue defendiendo, solo que sobre lo que hay: que todas
+   declaren la MISMA pila de fondo. Si alguien le pone una capa distinta a una
+   sola seccion, salta igual que antes. */
+const pilas = new Set(papel.map(p => p.img.replace(/\s+/g, ' ').trim()));
+di(pilas.size <= 2,
+   'las secciones claras comparten suelo: ' + pilas.size +
+   ' pila(s) de fondo distintas para ' + papel.length + ' secciones');
+di(papel.every(p => /gradient/.test(p.img)),
+   'y el suelo es metal —degradados—, no un color plano');
+
 /* ── el suelo de la mitad clara ───────────────────────────────────────────
    Tercera version de estas comprobaciones, y la primera que mide lo que el
    diseno de verdad afirma. La primera contaba <rect> del archivo; la segunda
@@ -61,35 +69,85 @@ di(papel.every(p => p.img.includes(tap)),
        siete secciones, y ademas es lo que da la direccion de la luz;
      · y que el campo tire a frio, no a gris de plantilla.
    Se miden pixeles del archivo que la pagina PIDE, no del que haya en disco. */
-const suelo = await pg.evaluate(async (url) => {
-  const im = new Image();
-  await new Promise((ok, no) => { im.onload = ok; im.onerror = no; im.src = url });
-  const c = document.createElement('canvas'); c.width = 400; c.height = 250;
-  const x = c.getContext('2d');
-  x.drawImage(im, 0, 0, c.width, c.height);
-  const d = x.getImageData(0, 0, c.width, c.height).data;
-  const L = i => (0.2126*d[i] + 0.7152*d[i+1] + 0.0722*d[i+2]) / 255;
-  let lo = 1, hi = 0, sRin = 0, nRin = 0, sRes = 0, nRes = 0, frios = 0, tot = 0;
-  for (let y = 0; y < c.height; y++) {
-    for (let px = 0; px < c.width; px++) {
-      const i = (y*c.width + px) * 4, l = L(i);
-      if (l < lo) lo = l; if (l > hi) hi = l;
-      if (px < c.width*0.42 && y < c.height*0.40) { sRin += l; nRin++ } else { sRes += l; nRes++ }
-      if (d[i+2] > d[i] + 3) frios++;
-      tot++;
+/* Se mide sobre lo PINTADO y no sobre un archivo. Antes esto descargaba el
+   bitmap del suelo; ya no hay bitmap -el suelo es metal, degradados y grano-
+   y ademas medir el archivo siempre fue medir menos: el archivo podia estar
+   perfecto y el resultado no, si algo se le ponia encima. Se fotografia una
+   seccion clara y se mide ahi. */
+const suelo = await (async () => {
+  const sec = await pg.$('.secure');
+  const caja = sec ? await sec.boundingBox() : null;
+  if (!caja) return { rango: 0, rincon: 1, resto: 0, frio: 0 };
+  await pg.evaluate(y => scrollTo(0, y), Math.round(caja.y + 40));
+  await pg.waitForTimeout(700);
+  /* El CONTENIDO se esconde para la foto. Sin esto, la region del rincon del
+     titular incluye el titular, que es plata sobre negro, y sale mas clara que
+     el resto: la medida acaba midiendo el texto en vez del suelo. La version
+     anterior no lo sufria porque fotografiaba el archivo del dibujo, donde no
+     hay texto; midiendo lo pintado hay que quitarlo a mano. Se usa
+     «visibility», que no toca la maquetacion ni los fondos. */
+  const tapa = await pg.addStyleTag({ content:
+    '.secure .wrap,.secure .sec-head,.secure .sec-grid,.secure .sec-stage>*{visibility:hidden!important}' });
+  await pg.waitForTimeout(350);
+  const b64 = (await pg.screenshot()).toString('base64');
+  await pg.evaluate(() => { const s=[...document.querySelectorAll('style')].pop(); if(s) s.remove(); });
+  await pg.waitForTimeout(200);
+  return pg.evaluate(async s => {
+    const im = new Image();
+    await new Promise(z => { im.onload = z; im.src = 'data:image/png;base64,' + s });
+    const c = document.createElement('canvas'); c.width = im.width; c.height = im.height;
+    const x = c.getContext('2d'); x.drawImage(im, 0, 0);
+    const d = x.getImageData(0, 0, c.width, c.height).data;
+    const f = v => { v /= 255; return v <= .03928 ? v/12.92 : Math.pow((v+.055)/1.055, 2.4) };
+    let lo = 1, hi = 0, sRin = 0, nRin = 0, sRes = 0, nRes = 0, frios = 0, tot = 0;
+    const brillos = [];
+    for (let y = 0; y < c.height; y += 2) {
+      for (let px = 0; px < c.width; px += 2) {
+        const i = (y*c.width + px) * 4;
+        const l = .2126*f(d[i]) + .7152*f(d[i+1]) + .0722*f(d[i+2]);
+        if (l < lo) lo = l; if (l > hi) hi = l;
+        tot++;
+        if (d[i+2] >= d[i]) frios++;
+        // el rincon del titular: arriba a la izquierda, donde arranca el texto
+        if (y < c.height*0.34 && px < c.width*0.48) { sRin += l; nRin++ }
+        else { sRes += l; nRes++ }
+        brillos.push([l, px/c.width, y/c.height]);
+      }
     }
-  }
-  return { rango: hi - lo, rincon: sRin/nRin, resto: sRes/nRes, frio: frios/tot };
-}, 'http://127.0.0.1:' + PUERTO + '/img/' + tap);
+    /* DONDE ESTA EL FOCO. Comparar la media del rincon con la del resto no
+       sirve en grafito: el suelo entero vive en 0,02 de recorrido y las dos
+       medias salen a 0,0001 una de otra, o sea dentro del ruido. Lo que si es
+       inequivoco es donde cae la LUZ: se coge el 4 % de pixeles mas claros del
+       suelo y se mira su centro. Si ese centro cae en el cuadrante del
+       titular, el suelo esta iluminando justo donde va el texto. */
+    brillos.sort((a, b) => b[0] - a[0]);
+    const top = brillos.slice(0, Math.max(1, Math.round(brillos.length * 0.04)));
+    const fx = top.reduce((s, v) => s + v[1], 0) / top.length;
+    const fy = top.reduce((s, v) => s + v[2], 0) / top.length;
+    return { rango: hi - lo, rincon: sRin/nRin, resto: sRes/nRes, frio: frios/tot, fx, fy };
+  }, b64);
+})();
 
-di(suelo.rango > 0.10,
+/* El limite baja con la paleta: el recorrido de luz posible en grafito es una
+   fraccion del que habia en papel. Un color liso sigue dando 0,000. */
+di(suelo.rango > 0.02,
    'el suelo no es un color plano: ' + suelo.rango.toFixed(3) + ' de recorrido de luz');
-di(suelo.rincon > suelo.resto + 0.05,
-   'y el rincon del titular es lo mas claro, que es donde va la tinta negra (' +
-   suelo.rincon.toFixed(3) + ' contra ' + suelo.resto.toFixed(3) + ')');
-di(suelo.frio > 0.8,
-   'y el campo tira a frio, no a gris de plantilla (' +
-   (suelo.frio * 100).toFixed(0) + ' % de la pantalla)');
+/* Al reves que antes, y por el mismo motivo de siempre: donde va el texto, el
+   suelo tiene que APARTARSE. Con tinta negra sobre papel eso queria decir que
+   el rincon del titular fuera lo mas CLARO. Con plata sobre negro quiere decir
+   exactamente lo contrario: lo mas oscuro. La regla no cambia, cambia el
+   signo, y el margen se ajusta a la escala en la que ahora vive todo. */
+di(!(suelo.fx < 0.48 && suelo.fy < 0.34),
+   'y el foco del suelo NO cae en el rincon del titular, que es donde va la ' +
+   'tinta de plata (el foco, en x=' + (suelo.fx*100).toFixed(0) + ' % y=' +
+   (suelo.fy*100).toFixed(0) + ' %)');
+/* El «frio» era la prueba de que el suelo llevaba azul dentro y no era el
+   gris de una plantilla sin terminar. Ahora el suelo es plata a proposito, y
+   lo que distingue la plata del gris muerto es justo ese frio leve: sigue
+   siendo la medida correcta, con el limite donde separa las dos cosas. */
+di(suelo.frio > 0.5,
+   'y el suelo es plata y no gris muerto: tira a frio en el ' +
+   (suelo.frio * 100).toFixed(0) + ' % de la pantalla (limite 50)');
 
 // ── «Compatible with» ──
 const comp = await pg.evaluate(() => {

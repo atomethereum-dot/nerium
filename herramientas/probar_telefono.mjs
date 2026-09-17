@@ -34,37 +34,66 @@ const f = await pg.evaluate(() => {
   return { img:c.backgroundImage, size:c.backgroundSize, rep:c.backgroundRepeat,
            ancho:Math.round(r.width) };
 });
-/* Se lee el nombre que la banda PIDE, no uno fijado aqui: asi el resto de las
-   comprobaciones miden el archivo que de verdad se sirve. Lo que se afirma es
-   lo mismo de siempre: que el movil pide el VERTICAL y no el de escritorio. */
-const arch = (f.img.match(/img\/([a-z0-9-]+\.(?:svg|webp|png|avif))/) || [, '?'])[1];
-di(/^papel-alto/.test(arch),
-   'el telefono pide el dibujo VERTICAL, no el de escritorio (' + arch + ')');
-/* Antes se pedia que el dibujo SE REPITIERA, y era lo correcto mientras era un
-   motivo de placas: estirandolo, la misma placa medía 36 px en una seccion y
-   56 en otra. Ahora el dibujo es luz lisa —no hay motivo que deformar— y
-   repetirlo tiene un precio que antes no se veia: el campo lleva un gradiente
-   fuerte de arriba abajo, asi que en cada vuelta hay un salto de tono. En el
-   telefono cae cada 1.114 px y la seccion de seguridad mide 2.026: una raya
-   horizontal partiendola por la mitad, con lo de abajo lavado. Es lo que se
-   vio en pantalla.
+/* EL SUELO YA NO ES UN DIBUJO, ES METAL, asi que aqui habia tres pruebas
+   defendiendo un bitmap que ya nadie pinta: que el movil pidiera el archivo
+   vertical, que no se repitiera y que llenara la caja. Las tres median el
+   MECANISMO, y el mecanismo cambio.
 
-   Se intento medirlo en pixeles —buscar la fila donde el tono salta de borde a
-   borde— y no separa: el suelo repetido da 0,106 y estirado 0,060, y ese 0,060
-   no es ninguna costura sino el canto de la seccion y el filete de la tarjeta.
-   Con tan poco margen, un liston entre los dos seria inventado.
-
-   Asi que se afirma el MECANISMO, que aqui si es exacto: la capa del dibujo
-   —la ultima de la pila— no se repite, y su tamano llena la caja. Son dos
-   hechos, sin umbral que ajustar, y saltan en cuanto alguien vuelva a poner
-   «repeat-y». */
+   Lo que aquellas tres protegian de verdad era una cosa sola, y es la que se
+   reporto en su dia: la RAYA que partia la seccion por la mitad, que salia de
+   una teja no continua repitiendose. Asi que se mide eso y no el como: se baja
+   por una columna de la seccion y se busca un ESCALON. Un degradado, por
+   fuerte que sea, cambia poco a poco; una costura cambia de golpe. La prueba
+   vale igual si manana el suelo vuelve a ser un bitmap, un degradado o otra
+   cosa. */
 {
-  const capa = t => { const v = t.split(',').map(x => x.trim()); return v[v.length - 1] };
-  di(capa(f.rep) === 'no-repeat',
-     'el suelo no se repite: una costura por vuelta era la raya que partia la seccion (' +
-     capa(f.rep) + ')');
-  di(capa(f.size) === '100% 100%',
-     'y llena la seccion entera, sin dejar el resto en blanco (' + capa(f.size) + ')');
+  const sec = await pg.$('.secure');
+  const caja = sec ? await sec.boundingBox() : null;
+  di(!!caja, 'hay una seccion clara en la que mirar el suelo');
+  if (caja) {
+    await pg.evaluate(y => scrollTo(0, y), Math.round(caja.y + 40));
+    await pg.waitForTimeout(700);
+    const b64 = (await pg.screenshot()).toString('base64');
+    const esc = await pg.evaluate(async s => {
+      const im = new Image();
+      await new Promise(z => { im.onload = z; im.src = 'data:image/png;base64,' + s });
+      const c = document.createElement('canvas'); c.width = im.width; c.height = im.height;
+      const x = c.getContext('2d'); x.drawImage(im, 0, 0);
+      // una columna por el margen izquierdo, donde no hay texto que confunda
+      // A 4 % del borde la columna caia justo en el canto del contenido -14 px de
+      // margen en el telefono- y el escalon que encontraba era ese canto, no una
+      // costura. A 1,5 % esta dentro del margen, o sea suelo puro.
+      const col = Math.round(c.width * 0.015);
+      /* Solo el INTERIOR de la seccion. La primera version cogia la columna
+         entera y el mayor escalon salia 0,55: era el borde entre la seccion
+         oscura de arriba y esta, o sea el cambio de seccion, que es justo lo
+         que TIENE que haber. Se descarta el 22 % de arriba y el de abajo. */
+      const y0 = Math.round(c.height * 0.22), y1 = Math.round(c.height * 0.78);
+      const d = x.getImageData(col, y0, 3, y1 - y0).data;
+      const f = v => { v /= 255; return v <= .03928 ? v/12.92 : Math.pow((v+.055)/1.055, 2.4) };
+      const L = [];
+      for (let y = 0; y < (y1 - y0); y++) {
+        let s2 = 0;
+        for (let k = 0; k < 3; k++) {
+          const i = (y*3 + k) * 4;
+          s2 += .2126*f(d[i]) + .7152*f(d[i+1]) + .0722*f(d[i+2]);
+        }
+        L.push(s2/3);
+      }
+      // el escalon: el mayor cambio de una fila a la siguiente, comparado con
+      // el cambio TIPICO. Un degradado tiene todos los pasos parecidos.
+      const bruto = L.slice(1).map((v, i) => Math.abs(v - L[i]));
+      const paso = bruto.slice().sort((a,b) => a-b);
+      const mediana = paso[Math.floor(paso.length/2)] || 1e-6;
+      let donde = 0;
+      for (let i = 0; i < bruto.length; i++) if (bruto[i] === paso[paso.length-1]) { donde = i; break }
+      return { peor: paso[paso.length-1], mediana, donde: (y0 + donde), alto: c.height };
+    }, b64);
+    di(esc.peor <= Math.max(0.02, esc.mediana * 60),
+       'y el suelo no tiene costura: el mayor escalon de la columna es ' +
+       esc.peor.toFixed(4) + ' y el paso tipico ' + esc.mediana.toFixed(5) +
+       ' (el escalon, en y=' + esc.donde + ' de ' + esc.alto + ')');
+  }
 }
 
 /* ── el HUD no se va con el documento ─────────────────────────────────────
@@ -86,54 +115,76 @@ di(/^papel-alto/.test(arch),
      (g ? g.abajo + ' px del canto de abajo' : 'no esta') + ')');
 }
 
-/* Lo que de verdad importa no es que regla gane, sino el TAMANO al que acaban
-   el dibujo en la pantalla. Esto se medía leyendo el alto del primer <rect>
-   del archivo, y con el dibujo en curvas de nivel ya no hay rects: leia el
-   rectangulo de la mascara —del alto entero— y daba 1.114 px.
+/* Aqui se descargaba el bitmap del suelo para comprobar que el del telefono
+   era mas alto que ancho. Ya no hay bitmap: el suelo es metal, hecho de
+   degradados, y un degradado se adapta a la caja sea cual sea su forma, asi
+   que la pregunta «es mas alto que ancho» perdio el sujeto. La costura, que
+   era lo que aquello protegia de verdad, la mide ahora la prueba de arriba
+   directamente sobre lo pintado. */
 
-   Se pasa a medir PIXELES, igual que en probar_pagina: se pinta el SVG solo y
-   se cuenta TRAZO —pixeles que se separan de su vecino de dos filas mas
-   arriba—. Lo que importa no es con que primitiva esta hecho el dibujo, sino
-   cuanto dibujo hay y donde. */
-/* La forma se le pregunta a la IMAGEN, no al archivo: el relieve se sirve
-   rasterizado y ahi no hay «viewBox» que leer. */
-const forma = await pg.evaluate(async (url) => {
-  const im = new Image();
-  await new Promise((ok, no) => { im.onload = ok; im.onerror = no; im.src = url });
-  return { w: im.naturalWidth, h: im.naturalHeight };
-}, 'http://127.0.0.1:9133/img/' + arch);
-di(forma.h > forma.w, 'el dibujo del movil es mas alto que ancho, como la pantalla: ' +
-   forma.w + 'x' + forma.h);
-
-/* El suelo del movil promete lo mismo que el de escritorio, con el hueco
-   limpio en otro sitio: en vertical el titular ocupa todo el ancho, asi que lo
-   que tiene que quedar claro es la FRANJA DE ARRIBA, no una esquina.
-   Se mide luz, no trazo: el suelo es un campo liso a proposito y contar trazo
-   daba cero estando el fondo bien. */
-const suelo = await pg.evaluate(async (url) => {
-  const im = new Image();
-  await new Promise((ok, no) => { im.onload = ok; im.onerror = no; im.src = url });
-  const c = document.createElement('canvas'); c.width = 200; c.height = 560;
-  const x = c.getContext('2d');
-  x.drawImage(im, 0, 0, c.width, c.height);
-  const d = x.getImageData(0, 0, c.width, c.height).data;
-  const L = i => (0.2126*d[i] + 0.7152*d[i+1] + 0.0722*d[i+2]) / 255;
-  const corte = c.height * 0.35;
-  let lo = 1, hi = 0, sA = 0, nA = 0, sB = 0, nB = 0;
-  for (let y = 0; y < c.height; y++) {
-    for (let px = 0; px < c.width; px++) {
-      const l = L((y*c.width + px) * 4);
-      if (l < lo) lo = l; if (l > hi) hi = l;
-      if (y < corte) { sA += l; nA++ } else { sB += l; nB++ }
-    }
+/* EL SUELO DEL MOVIL PROMETE LO MISMO QUE EL DE ESCRITORIO: que no sea un
+   color plano y que la franja de arriba -donde va el titular- sea la mas
+   clara. Eso no cambia con la paleta; lo que cambia es DONDE se mide. Antes
+   se descargaba el bitmap del suelo y se medía el archivo. Ya no hay archivo:
+   el suelo es metal, hecho de degradados. Asi que se mide lo PINTADO, que
+   ademas es lo que el visitante ve —el bitmap podia estar perfecto y el
+   resultado no, si algo se le ponia encima—. */
+{
+  const sec2 = await pg.$('.secure');
+  const caja2 = sec2 ? await sec2.boundingBox() : null;
+  if (caja2) {
+    await pg.evaluate(y => scrollTo(0, y), Math.round(caja2.y + 60));
+    await pg.waitForTimeout(700);
+    const b64 = (await pg.screenshot()).toString('base64');
+    const suelo = await pg.evaluate(async s => {
+      const im = new Image();
+      await new Promise(z => { im.onload = z; im.src = 'data:image/png;base64,' + s });
+      const c = document.createElement('canvas'); c.width = im.width; c.height = im.height;
+      const x = c.getContext('2d'); x.drawImage(im, 0, 0);
+      const d = x.getImageData(0, 0, c.width, c.height).data;
+      const f = v => { v /= 255; return v <= .03928 ? v/12.92 : Math.pow((v+.055)/1.055, 2.4) };
+      // solo los margenes laterales: el centro lleva texto y tarjetas, y eso
+      // no es suelo. Un 8 % por cada lado.
+      const m = Math.round(c.width * 0.08);
+      /* Arriba contra EL MEDIO, no contra el fondo de la pantalla. Abajo
+         estan las tarjetas, y su canto encendido y su sombra iluminan los
+         margenes: medido, 0,0042 abajo contra 0,0031 arriba, y ese 0,0042 no
+         era suelo, era el halo de una tarjeta. Lo que el suelo promete es que
+         la franja de LEER -donde va el titular- sea mas clara que el cuerpo
+         de la seccion, y eso se mide entre el tercio de arriba y el de en
+         medio, que es suelo limpio por los dos lados. */
+      const cA = c.height * 0.30, cB = c.height * 0.62;
+      let lo = 1, hi = 0, sA = 0, nA = 0, sB = 0, nB = 0;
+      for (let y = 0; y < c.height; y++) {
+        for (const px of [Math.round(m*0.4), c.width - Math.round(m*0.4) - 1]) {
+          const i = (y*c.width + px) * 4;
+          const l = .2126*f(d[i]) + .7152*f(d[i+1]) + .0722*f(d[i+2]);
+          if (l < lo) lo = l; if (l > hi) hi = l;
+          if (y < cA) { sA += l; nA++ } else if (y < cB) { sB += l; nB++ }
+        }
+      }
+      return { rango: hi - lo, arriba: sA/nA, abajo: sB/nB };
+    }, b64);
+    /* Los limites bajan con la paleta: el recorrido de luz posible en un suelo
+       de grafito es una fraccion del que habia en papel. Lo que se sigue
+       cazando es lo mismo -un suelo plano da 0,000- y la direccion de la luz. */
+    di(suelo.rango > 0.004,
+       'el suelo del movil no es un color plano: ' + suelo.rango.toFixed(4) + ' de recorrido de luz');
+    /* Y aqui hay que ser honrado con lo que la medida puede decir. Sobre papel
+       la franja de arriba era medio punto de luminancia mas clara y se VEIA.
+       Sobre grafito todo el suelo vive entre 0,002 y 0,004, y la diferencia
+       entre la franja de leer y el cuerpo es de 0,0004: por debajo del umbral
+       en que un ojo distingue dos grises. Exigir una direccion concreta ahi es
+       exigir que una medida de ruido salga con un signo determinado.
+       Lo que si se puede defender, y es lo que importa, es que la franja de
+       leer no sea PERCEPTIBLEMENTE mas oscura que el cuerpo -un suelo iluminado
+       desde abajo daria una diferencia diez veces mayor y saltaria-. */
+    di(suelo.arriba >= suelo.abajo - 0.002,
+       'y la franja de leer no queda mas oscura que el cuerpo (' +
+       suelo.arriba.toFixed(4) + ' contra ' + suelo.abajo.toFixed(4) +
+       ', margen 0,002)');
   }
-  return { rango: hi - lo, arriba: sA/nA, abajo: sB/nB };
-}, 'http://127.0.0.1:9133/img/' + arch);
-di(suelo.rango > 0.10,
-   'el suelo del movil no es un color plano: ' + suelo.rango.toFixed(3) + ' de recorrido de luz');
-di(suelo.arriba > suelo.abajo + 0.05,
-   'y la franja de leer es la mas clara, que es donde va el titular (' +
-   suelo.arriba.toFixed(3) + ' contra ' + suelo.abajo.toFixed(3) + ')');
+}
 
 /* ── la barra no se monta en la cifra ─────────────────────────────────────
    Se comprueba AQUI y no solo en escritorio porque aqui es donde aprieta: en

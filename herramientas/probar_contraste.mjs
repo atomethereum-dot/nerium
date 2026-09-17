@@ -142,7 +142,10 @@ for (let y = 0; y < alto - 700; y += 620) {
 }
 const lista = [...fallos.values()].sort((a,b) => a.cr - b.cr);
 di(lista.length === 0, 'todo el texto de la pagina se lee' +
-   (lista.length ? ' — ' + lista.length + ' por debajo del minimo' : ''));
+   (lista.length ? ' — ' + lista.length + ' por debajo del minimo:\n' +
+     lista.map(x => '        ' + x.cr.toFixed(2) + ' (min ' + x.min + ') ' +
+       String(x.px).padStart(3) + 'px  ' + x.q.padEnd(16) + ' «' + x.txt + '»').join('\n')
+    : ''));
 if (sobreLienzo.size) console.log('      (sin medir, el fondo no esta en el CSS: ' +
   [...sobreLienzo].join(', ') + ')');
 lista.slice(0, 80).forEach(m => console.log('      ' + m.cr + ':1 (min ' + m.min + ') ' +

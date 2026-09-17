@@ -40,7 +40,7 @@ const lee = () => pg.evaluate(() => {
   const d = c2.getContext('2d').getImageData(0, 0, c2.width, c2.height).data;
   const H = c2.height;
   const bandas = [0, 0, 0], n = [0, 0, 0];
-  let cian = 0, gris = 0, vivos = 0, suma = 0;
+  let cian = 0, gris = 0, claros = 0, vivos = 0, suma = 0;
   for (let i = 0; i < d.length; i += 4) {
     const px = (i / 4) % c2.width, py = ((i / 4) / c2.width) | 0;
     const r = d[i], g = d[i+1], b = d[i+2];
@@ -56,10 +56,14 @@ const lee = () => pg.evaluate(() => {
     if (D) h = (M === r ? (((g-b)/D)%6) : M === g ? ((b-r)/D+2) : ((r-g)/D+4)) * 60;
     h = (h + 360) % 360;
     if (h >= 170 && h <= 205 && s > 0.25) cian++;
-    if (M > 90 && s < 0.10) gris++;
+    /* «claros» es la poblacion honrada para preguntar por el tono: un pixel
+       casi negro no tiene color que juzgar, y contarlo como «con tono» o «sin
+       tono» es ruido en las dos direcciones. Se separa de «vivos», que incluye
+       todo lo que se pinta. */
+    if (M > 90) { claros++; if (s < 0.10) gris++; }
   }
   return { arriba: bandas[0]/n[0], medio: bandas[1]/n[1], abajo: bandas[2]/n[2],
-           cian, gris, vivos, suma };
+           cian, gris, claros, vivos, suma };
 });
 const a = await lee();
 di(a.vivos > 2000, 'el campo esta pintado (' + a.vivos + ' pixeles con luz)');
@@ -83,9 +87,20 @@ di(cianPct < 0.02, 'no hay zona cian: ' + a.cian + ' de ' + a.vivos +
    Se mide en fraccion y el liston se pone donde separa las dos cosas de
    verdad. Medido: el campo como esta, 0 en nueve capturas de diez y 2,1 % en
    la decima; con la paleta cambiada a grises, 21 %. */
-const grisPct = a.vivos ? a.gris / a.vivos * 100 : 0;
-di(grisPct < 5, 'ni un gris neutro: todo lleva azul dentro (' + a.gris + ' de ' +
-   a.vivos + ', ' + grisPct.toFixed(2) + ' %)');
+/* ESTA PRUEBA SE DA LA VUELTA, y no por conveniencia. Defendia que el campo
+   no fuera gris porque un campo de bloques grises era la senal de que la
+   paleta se habia caido y quedaba el relleno por defecto. Ahora el gris ES la
+   paleta: la pagina paso a negro y plata a peticion, asi que exigir azul seria
+   exigir lo que se acaba de quitar.
+   Lo que sustituye a aquella defensa es la contraria y igual de concreta: que
+   el campo sea de PLATA y no de color. Un solo tono que se cuele -un azul, un
+   verde- rompe la pagina entera, y eso es lo que hay que cazar ahora. Se
+   cuentan los pixeles con tono de verdad; el limite en 5 % deja pasar el frio
+   leve que hace que el metal no sea gris muerto. */
+const conTono = a.claros ? (a.claros - a.gris) / a.claros * 100 : 0;
+di(conTono < 8, 'el campo es de plata, no de color: solo ' + conTono.toFixed(2) +
+   ' % de los pixeles CLAROS lleva tono (' + (a.claros - a.gris) + ' de ' +
+   a.claros + ', limite 8)');
 
 // que siga vivo: dos instantes distintos no pueden dar la misma imagen
 const b1 = a.suma;

@@ -69,22 +69,37 @@ di(col.length === 4 && new Set(col.map(c => c.ac)).size === 4,
    'cada tarjeta lleva su propio acento: ' + col.map(c => c.ac).join(' '));
 di(col.every(c => lum(c.w1) < 0.42),
    'y la figura no es blanca, es color: luminancia ' + col.map(c => lum(c.w1).toFixed(2)).join(' '));
-di(col.every(c => sat(c.w1) > 0.30 || lum(c.w1) < 0.10),
-   'con color de verdad, no gris: saturacion ' + col.map(c => sat(c.w1).toFixed(2)).join(' '));
+// Y AHORA AL REVES, a proposito. La pagina entera paso a negro y plata, asi
+// que lo que esta prueba tiene que defender ya no es que haya color: es que NO
+// lo haya. Tres platas y un verde no son una serie. El limite en 0,28 de
+// saturacion deja pasar el frio leve que hace que el metal no sea gris muerto
+// y corta cualquier tono de verdad.
+di(col.every(c => sat(c.w1) <= 0.28),
+   'la lamina es neutra, del material del sitio, no un campo de color (saturacion ' +
+   col.map(c => sat(c.w1).toFixed(2)).join(' ') + ')');
 di(col.every(c => lum(c.w2) <= lum(c.w1) + 0.02), 'y el degradado va de claro a oscuro');
 di(col.filter(c => c.palabra).every(c => c.palabra === 'rgb(255, 255, 255)'),
    'sobre ese color, la palabra Nereum va en blanco');
-// el acento tiene que parecerse al logotipo del medio, no ser uno cualquiera
-const CERCA = { '#0A11CE': [8,14,190], '#1FA800': [51,255,0], '#DC0206': [244,1,3] };
+// ── los cuatro acentos: del mismo material, pero distinguibles ──
+// Antes cada acento era el TONO del logotipo del medio -el azul de Benzinga,
+// el verde de MarketWatch, el rojo de Morningstar-. Con la pagina en negro y
+// plata eso ya no se sostiene: eran los unicos colores que quedaban. Ahora los
+// cuatro son plata, y lo que hay que defender cambia con ellos: que sigan
+// siendo CUATRO y no uno repetido -si no, las tarjetas se vuelven una sola
+// cosa- y que se distingan por LUMINANCIA, que es lo unico que queda cuando
+// quitas el tono.
 const tono = c => { const [r,g,b] = c, M = Math.max(...c), m = Math.min(...c), D = M-m;
   if (!D) return -1;
   const h = M === r ? ((g-b)/D % 6) : M === g ? ((b-r)/D + 2) : ((r-g)/D + 4);
   return (h*60 + 360) % 360; };
-for (const [ac, real] of Object.entries(CERCA)) {
-  const usado = col.find(c => c.ac.toUpperCase() === ac);
-  const d = usado ? Math.abs(tono(rgb(ac)) - tono(real)) : 999;
-  di(usado && (d < 25 || d > 335), 'el acento ' + ac + ' es el tono del logotipo (' + d.toFixed(0) + 'deg)');
-}
+di(col.every(c => sat(c.ac) <= 0.16),
+   'los cuatro acentos son plata, sin tono (saturacion ' +
+   col.map(c => sat(c.ac).toFixed(2)).join(' ') + ')');
+const luces = col.map(c => lum(c.ac)).sort((a,b) => a-b);
+const saltos = luces.slice(1).map((v,i) => v - luces[i]);
+di(saltos.every(d => d >= 0.05),
+   'y se distinguen por luminancia, que es lo unico que queda sin tono (saltos ' +
+   saltos.map(d => d.toFixed(2)).join(' ') + ', minimo 0,05)');
 
 // ── ni cuadricula, ni logotipos deshechos ──
 const fig = await pg.evaluate(() => getComputedStyle(document.querySelector('.pcd-art')).backgroundImage);

@@ -158,8 +158,16 @@ for (let y = 0; y < alto; y += 450) { await pg.evaluate(v => scrollTo(0, v), y);
   });
   di(r.puntos === 1 && r.aros === 0,
      'un solo punto y ningun aro, como en la referencia (' + r.puntos + ' punto, ' + r.aros + ' aros)');
-  di(/^rgb\(62, 134, 255\)/.test(r.colorPunto) && r.radio.startsWith('50%'),
-     'el punto va LLENO y azul: ' + r.colorPunto);
+  /* Ya no es azul: la pagina paso a negro y plata, asi que el color concreto
+     que habia escrito aqui -«rgb(62,134,255)»- dejo de existir. Lo que el
+     punto tiene que seguir siendo es lo que la prueba defendia de verdad:
+     LLENO -radio 50 %, no un aro- y del ACENTO de la pagina, o sea plata con
+     luz. Se comprueba eso: redondo, neutro y claro. */
+  const pc = (r.colorPunto.match(/[\d.]+/g) || []).map(Number);
+  const neutro = pc.length >= 3 && (Math.max(pc[0],pc[1],pc[2]) - Math.min(pc[0],pc[1],pc[2])) <= 18;
+  const claro = pc.length >= 3 && Math.max(pc[0],pc[1],pc[2]) >= 120;
+  di(neutro && claro && r.radio.startsWith('50%'),
+     'el punto va LLENO y de plata, que es el acento de la pagina: ' + r.colorPunto);
   di(r.sombra === 'none', 'y sin halo, que la referencia no lo lleva (' + r.sombra + ')');
   di(r.rectas === 0, 'no queda ninguna barra recta encima del dibujo (' + r.rectas + ' piezas)');
   di(r.viva && /inset/.test(r.recorte), 'la barra es la propia hebra encendida: ' + r.recorte);

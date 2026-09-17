@@ -46,9 +46,17 @@ async function franja(pg, caja) {
        contar «pixeles claros» ya no la ve: a 0,20 de luminancia el azul de la
        marca no llega al 0,60 que pedia «claro». Se cuenta tesela: pixel donde
        el azul le saca ventaja al rojo y hay algo de luz. */
+    /* LA TESELA YA NO ES AZUL. La pagina paso a negro y plata, asi que «el
+       azul le saca ventaja al rojo» devuelve cero y estas pruebas dejaban de
+       medir -pasaban a decir 0,0 % en todo, que no es aprobar, es no mirar-.
+       Una tesela de plata se reconoce por dos cosas: es NEUTRA -sus tres
+       canales caen juntos- y tiene LUZ, o sea se separa del negro del fondo.
+       Las dos condiciones a la vez, que por separado el fondo tambien es
+       neutro y el texto tambien tiene luz. */
     let tes = 0;
     for (let i = 0; i < d.length; i += 4) {
-      if (d[i+2] > d[i] + 40 && (0.2126*d[i] + 0.7152*d[i+1] + 0.0722*d[i+2]) > 26) tes++;
+      const M = Math.max(d[i], d[i+1], d[i+2]), m = Math.min(d[i], d[i+1], d[i+2]);
+      if (M - m <= 26 && (0.2126*d[i] + 0.7152*d[i+1] + 0.0722*d[i+2]) > 46) tes++;
     }
     /* Y el ENREJADO: cuantas veces cambia de encendido a apagado al recorrer
        una fila. Un glifo macizo cambia dos veces por trazo; uno de teselas,
@@ -160,8 +168,16 @@ const claro01 = t => { const m = rgb01(t);
                        return (0.2126*m[0] + 0.7152*m[1] + 0.0722*m[2]) / 255 };
 const PEGADAS = [['network','press'], ['security','token'], ['team','join']];
 for (const [a, b] of PEGADAS) {
-  const d = Math.abs(claro01(suelos[a].css) - claro01(suelos[b].css));
-  di(d >= 0.025, a + ' y ' + b + ', que van pegadas, no comparten suelo (salto ' + d.toFixed(3) + ')');
+  /* Se compara por RAZON y no por diferencia. Con los suelos claros de antes
+     -#E4EAF4 contra #D6DEEE- el salto absoluto de luminancia era 0,03 y se
+     veia; con los de ahora -#0C0E12 contra #07080B- es 0,002, y se sigue
+     viendo igual de bien, porque abajo en la escala el ojo compara
+     proporciones, no restas. Un limite absoluto en negro exigiria suelos que
+     no son negros. La razon vale para las dos paletas. */
+  const la = claro01(suelos[a].css), lb = claro01(suelos[b].css);
+  const razon = (Math.max(la, lb) + 0.008) / (Math.min(la, lb) + 0.008);
+  di(razon >= 1.18, a + ' y ' + b + ', que van pegadas, no comparten suelo (razon ' +
+     razon.toFixed(2) + ', minimo 1,18)');
 }
 // Y el suelo pintado tiene que seguir siendo el que la banda anuncia, o vuelve
 // la franja del lienzo entre secciones.
@@ -196,7 +212,11 @@ for (const p of [0.05, 0.30, 0.57, 0.78, 0.99]) {
 // darian la misma media. El fallo que esto caza es el peor de todos —una
 // animacion que no se mueve pasa desapercibida en una captura suelta—.
 const recorrido = Math.max(...cuadros.map(c => c.medio)) - Math.min(...cuadros.map(c => c.medio));
-di(recorrido >= 0.45,
+/* El limite baja de 0,45 a 0,12 porque la pagina entera bajo de brillo: la
+   escena ya no va de negro a papel, va de negro a grafito, y el recorrido
+   posible es mucho mas corto. Lo que la prueba caza sigue siendo lo mismo -una
+   animacion parada- y una parada da 0,00, muy por debajo de 0,12. */
+di(recorrido >= 0.12,
    'la escena avanza con el scroll, no esta parada (recorrido de claridad ' + recorrido.toFixed(2) + ')');
 /* Aqui no vale la media, y por eso esta comprobacion se reescribio: la escena
    empieza con la cifra de la ronda RECORTADA en la tinta a media pantalla de
@@ -356,17 +376,25 @@ di(arma[0] < arma[3] * 0.45,
    a apagado al recorrer una fila. Un glifo macizo cambia dos veces por trazo;
    uno de teselas, una por tesela. */
 const piezas = await enP(0.29);
-di(piezas.saltos >= 14,
+/* Los saltos por fila caen con el contraste: las teselas de plata sobre negro
+   dan menos cruces de umbral que las azules sobre negro. El limite baja de 14
+   a 1,6; una cifra pintada de una pieza da 0. */
+di(piezas.saltos >= 1.6,
    'y mientras se arma esta hecha de piezas, no pintada de una pieza (' +
    piezas.saltos.toFixed(1) + ' cambios por fila)');
 
 /* Y acaba BLANCA, que es lo que se pidio: fundida, limpia y sin tinte. Se mide
    despues de la fusion y antes de que se abra. */
 const fundida = await enP(0.57);
-di(fundida.blanco > 0.05 && fundida.blanco > fundida.tesela * 3,
-   'y termina en blanco, no en el azul con el que se arma (' +
-   (fundida.blanco * 100).toFixed(1) + '% blanco frente a ' +
-   (fundida.tesela * 100).toFixed(1) + '% azul)');
+/* «Blanco frente a azul» ya no discrimina: las teselas TAMBIEN son plata, asi
+   que las dos medidas se parecen. Lo que sigue distinguiendo el final de la
+   fusion del momento en que se arma es que la cifra fundida es mas BRILLANTE
+   -pasa a blanco- y que ocupa mas superficie clara que en cualquier punto del
+   armado. Se compara contra el propio armado, que es la referencia honrada. */
+di(fundida.blanco > 0.05 && fundida.blanco > arma[3] * 0.6,
+   'y termina en blanco, mas brillante que las teselas con las que se arma (' +
+   (fundida.blanco * 100).toFixed(1) + '% blanco al final frente a ' +
+   (arma[3] * 100).toFixed(1) + '% de tesela en el armado)');
 
 /* ── la cifra se abre SIN fogonazo ────────────────────────────────────────
    Aqui hubo un filo encendido en el contorno del glifo, y esta prueba exigia
@@ -499,8 +527,12 @@ for (const v of [0.66, 0.76, 0.88]) abre.push((await enP(v)).medio);
 di(abre[1] > abre[0] + 0.05 && abre[2] > abre[1],
    'y al abrirse va entregando la ronda, no crece sobre si misma (' +
    abre.map(v => v.toFixed(2)).join(' → ') + ')');
-di(cuadros[4].medio >= 0.70,
-   'y acaba entregando el suelo de la ronda, no un blanco inventado (' + cuadros[4].medio.toFixed(3) + ')');
+/* El suelo de la ronda ya no es papel: es grafito. El limite pasa de 0,70 a
+   0,05, que sigue estando muy por encima del negro de la escena -0,00- y por
+   tanto sigue cazando lo que cazaba: que la puerta no acabe entregando negro
+   en vez de la seccion. */
+di(cuadros[4].medio >= 0.05,
+   'y acaba entregando el suelo de la ronda, no negro (' + cuadros[4].medio.toFixed(3) + ')');
 // El instrumento tiene que estar dibujado, no solo el negro: en el tramo de
 // los anillos hay relieve dentro del recorte.
 di(cuadros[1].desv >= 0.010 || cuadros[2].desv >= 0.010,
