@@ -157,7 +157,24 @@ const menu = await pg.evaluate(() => [...document.querySelectorAll('.nav>a')].ma
            ficha: !!a.querySelector('.chip svg path, .chip svg circle'),
            destino: !!d, visible: d ? getComputedStyle(d).display !== 'none' : false };
 }));
-di(menu.length === 10, 'las diez secciones de la pagina en el centro (' + menu.length + ')');
+// Nueve, no diez: «03 The thesis» se oculto y con ella se fue su entrada.
+// Y no se compara contra un numero escrito a mano, que es lo que hizo falta
+// tocar aqui: se compara contra las secciones que la pagina considera
+// enlazables. Asi el dia que se esconda o se anada otra, la prueba sigue
+// midiendo lo que dice medir en vez de una constante vieja.
+const enlazables = await pg.evaluate(() => {
+  // Las de transicion y las decorativas nunca tuvieron entrada. «ruta»
+  // tampoco, y esa si es una decision: la hoja de ruta esta numerada y se ve,
+  // pero vive dentro del recorrido y no se salta a ella desde la barra.
+  const FUERA = new Set(['chroma','kin','xfade','xlight','hpin','docs','blog',
+                         'loop','dark','umb','hero','logos','team','tkp','ruta']);
+  return [...document.querySelectorAll('main>section[id]')]
+    .filter(s => getComputedStyle(s).display !== 'none')
+    .map(s => s.id).filter(i => !FUERA.has(i)).length;
+});
+di(menu.length === enlazables,
+   'una entrada por seccion enlazable, ni una de mas ni de menos (' +
+   menu.length + ' entradas, ' + enlazables + ' secciones)');
 di(menu.every(m => m.ficha), 'cada una con su ficha');
 di(menu.every(m => m.destino), 'todas apuntan a una seccion que existe');
 di(menu.every(m => m.visible), 'y ninguna a una seccion oculta');
@@ -173,7 +190,10 @@ di(await pg.evaluate(() => getComputedStyle(document.querySelector('.nav')).disp
 // ── el subrayado ──
 di((await pg.evaluate(() => document.querySelectorAll('.nav>a.on').length)) === 0,
    'en la portada no hay nada subrayado');
-for (const id of ['network','press','thesis','solutions','stack','security','presale','token','builds','join']) {
+// «thesis» sale de la lista: la seccion esta oculta, asi que no hay adonde
+// desplazarse ni que subrayar. Dejarla aqui era pedirle a la prueba que
+// comprobara algo que ya no existe.
+for (const id of ['network','press','solutions','stack','security','presale','token','builds','join']) {
   await pg.evaluate(i => { const e = document.getElementById(i); let y=0,n=e;
     while(n){y+=n.offsetTop;n=n.offsetParent} scrollTo(0, y + e.offsetHeight/2 - innerHeight/2); }, id);
   await pg.waitForTimeout(800);
@@ -217,7 +237,9 @@ const hoja = await mo.evaluate(() => {
            n: s.querySelectorAll('a').length, fichas: s.querySelectorAll('.chip').length,
            cta: !!s.querySelector('.sheet-cta') };
 });
-di(hoja.n === 11 && hoja.fichas === 10, 'el menu del telefono trae las mismas diez y la llamada');
+di(hoja.n === menu.length + 1 && hoja.fichas === menu.length,
+   'el menu del telefono trae las mismas que la barra y la llamada (' +
+   hoja.fichas + ' + 1)');
 di(hoja.cta, 'con el boton de entrar en la ronda al final');
 /* El menu cuelga de «--ann + --bar»: lo que mida la franja mas lo que mida la
    barra. Se comprueba contra esa cuenta y no contra un numero fijo, que es lo

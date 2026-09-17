@@ -85,7 +85,11 @@ for (let y = 0; y < alto; y += 450) { await pg.evaluate(v => scrollTo(0, v), y);
   di(r.fases === 3, 'tres fases (' + r.fases + ')');
   di(r.bg === r.bgBuilds && r.dbg === r.dbgBuilds,
      'mismo suelo que proyectos: ' + r.bg + ' / ' + r.dbg);
-  di(r.menu === 10 && !r.enMenu, 'no entra en el menu, que sigue con ' + r.menu + ' entradas');
+  // Lo que esta prueba defiende es que la ruta NO se cuela en el menu, no que
+  // el menu tenga un numero concreto de entradas. Estaba escrito «10» a mano y
+  // salto en cuanto se oculto «03 The thesis» y su entrada se fue con ella,
+  // senalando un fallo donde no lo habia. Se comprueba lo que importa.
+  di(!r.enMenu, 'no entra en el menu (que tiene ' + r.menu + ' entradas)');
 }
 
 // ── 3 · el recorrido y la hebra son UNA cosa ───────────────────────────────
