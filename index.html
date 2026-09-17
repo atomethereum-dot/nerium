@@ -1013,7 +1013,7 @@ footer .fmark span{background-image:linear-gradient(180deg,rgba(232,236,244,.26)
 footer .fmark-logo{--fmg-a:.24;--fmg-b:.05}
 .xl{position:relative;height:172vh}
 @media(max-width:899px){.xl{height:150vh}}
-.xl-stage{position:sticky;top:0;height:100dvh;overflow:hidden;background:#0A0E18}
+.xl-stage{position:sticky;top:0;height:100dvh;overflow:hidden;background:#06070A}
 .xl-cv{position:absolute;inset:0;width:100%;height:100%;display:block}
 .xl-word{position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);z-index:2;
   text-align:center;pointer-events:none;font-family:var(--m);
@@ -4448,7 +4448,35 @@ main>section:is(.paper,.paper2,.secure,.sale,.tkp,.join,.press){
 /* ── la niebla del pie y la de la preventa ──
    Ya se tiñeron de azul honda arriba; aqui se bajan ademas de tamaño, porque
    una aurora que cubre el pie ENTERO no es una luz, es un suelo distinto. */
-.ffield i,.sh-mesh i{opacity:.62}
+.sh-mesh i{opacity:.62}
+/* El pie se apagaba aparte: sus cuatro auroras al 62 % dejaban una franja
+   azulada donde empieza, y una banda que cambia de tono sin motivo respecto a
+   la de encima es exactamente lo que hace que una pagina parezca montada por
+   piezas. Al 30 % el pie sigue teniendo aire y ya no anuncia el corte. */
+.ffield i{opacity:.34}
+/* Y ademas se recorta por arriba. Las cuatro auroras nacen en «top:-26 %», o
+   sea que su parte MAS fuerte cae justo en el borde donde empieza el pie:
+   medido, la seccion de encima acaba en rgb(3,4,5) y el pie arrancaba en
+   rgb(14,21,41). Eso no es una luz, es un escalon. Con la mascara la luz
+   empieza a existir un quinto mas abajo y el corte deja de verse. */
+.ffield{-webkit-mask-image:linear-gradient(180deg,rgba(0,0,0,0) 0%,rgba(0,0,0,0) 8%,#000 34%);
+        mask-image:linear-gradient(180deg,rgba(0,0,0,0) 0%,rgba(0,0,0,0) 8%,#000 34%)}
+
+/* ── y el pie se sale del ritmo de bandas ──
+   Cada seccion va iluminada arriba y hundida abajo, y eso esta bien MIENTRAS
+   haya otra seccion detras: es lo que da relieve. El pie no tiene detras, asi
+   que su especular no separaba nada, solo encendia el borde donde acababa la
+   ultima banda: medido, arriba rgb(3,4,5) y el pie arrancando en
+   rgb(14,21,41). El pie recibe su propio suelo, que baja en vez de subir. */
+footer{background-color:#040507 !important;
+  background-image:
+    radial-gradient(64% 54% at 86% 10%, rgba(30,90,225,.035) 0%, rgba(30,90,225,0) 62%),
+    linear-gradient(180deg,#05060A 0%,#030406 54%,#010203 100%),
+    var(--grano) !important;
+  background-repeat:no-repeat,no-repeat,repeat !important;
+  background-size:auto,auto,auto !important;
+  background-position:center,center,0 0 !important;
+  --tapa:#040507}
 
 /* ── el logotipo del pie: la ultima pieza de metal de la pagina ── */
 footer .fmark span{background-image:linear-gradient(180deg,
@@ -4506,6 +4534,113 @@ p.sec-sub,p.sale-sub,p.join-note,span.rd,.rd,.jbtn-sub,.lane-sub,.stk-sub s,
 .sec-ic{background:rgba(20,80,230,.07) !important;
   border-color:rgba(20,80,230,.24) !important}
 /* ══ fin: mas negro ══ */
+
+/* ══ TIER 1 ═══════════════════════════════════════════════════════════════
+   Lo que separa una pagina oscura cara de una barata no es el negro: es el
+   CANTO. Una superficie cara se reconoce por un filo de un pixel al 6 % y una
+   sombra larga y casi invisible; una barata, por un relleno de color plano
+   con un borde grueso. La pagina tenia las dos cosas mezcladas, y las piezas
+   que se pidieron -los dos botones de comunidad- eran justo del segundo tipo:
+   dos rectangulos de azul macizo de 660 px.
+
+   Tres reglas para todo lo que se toca aqui:
+     · el color plano se cambia por PLACA: casi negro, un filo claro arriba
+       -que es la luz cayendo sobre el canto- y una sombra larga debajo.
+     · el borde nunca pesa: un pixel entre el 7 y el 9 %, y sube al 20 % solo
+       cuando el raton esta encima. Un borde que se ve siempre es un borde
+       que grita.
+     · el color se gana. El azul se queda en las piezas que MANDAN -la llamada
+       principal, el numero de seccion, la barra de la ronda- y sale de las
+       que solo acompañan. */
+
+:root{ --l1:rgba(255,255,255,.075); --l2:rgba(255,255,255,.19); --l0:rgba(255,255,255,.045) }
+
+/* ── los dos botones de comunidad ──
+   Eran azul macizo porque cayeron en la familia de la llamada principal, y
+   ahi no es donde viven: la llamada principal es UNA en toda la pagina, y si
+   hay tres cosas del mismo azul no manda ninguna. Pasan a placa negra con
+   filo, y el simbolo de la marca -la X, el avion- se queda DESNUDO en blanco,
+   sin baldosa de color debajo. Una baldosa de color alrededor de un logotipo
+   es un icono de aplicacion; sin ella es una marca. */
+.join .jbtn{
+  background-color:#090B10 !important;
+  background-image:
+    radial-gradient(125% 150% at 0% 0%, rgba(255,255,255,.05) 0%, rgba(255,255,255,0) 44%),
+    linear-gradient(180deg, rgba(255,255,255,.022) 0%, rgba(255,255,255,0) 36%, rgba(0,0,0,.34) 100%) !important;
+  border:1px solid var(--l1) !important; border-radius:4px;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.055), 0 26px 60px -44px #000 !important;
+  transition:border-color .5s var(--ease), transform .5s var(--ease), box-shadow .5s var(--ease)}
+.join .jbtn::before{
+  background:radial-gradient(100% 130% at 50% 100%,
+     rgba(255,255,255,.055) 0%, rgba(255,255,255,0) 72%) !important}
+.join .jbtn:hover,.join .jbtn:focus-visible{
+  border-color:var(--l2) !important; transform:translateY(-3px);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.09), 0 34px 70px -42px #000 !important}
+.join .jbtn:focus-visible{outline:none;
+  box-shadow:0 0 0 2px rgba(255,255,255,.22), 0 34px 70px -42px #000 !important}
+.join .jbtn-mark,.join .jbtn:hover .jbtn-mark{
+  background:none !important; background-color:transparent !important;
+  box-shadow:none !important; padding:0 !important;
+  color:#FFFFFF !important; fill:#FFFFFF !important;
+  width:clamp(30px,3.1vw,38px) !important; height:clamp(30px,3.1vw,38px) !important}
+.join .jbtn-go{border-color:var(--l1) !important;background:none !important}
+.join .jbtn:hover .jbtn-go{border-color:var(--l2) !important}
+.join .jbtn-name{color:#F3F6FB !important;letter-spacing:-.035em}
+/* El renglon de apoyo va en color MACIZO y no en opacidad. Al 46 % sobre la
+   placa daba 4,08 y hace falta 4,5: una opacidad que se veia bien sobre el
+   azul macizo se queda corta sobre negro, que es el mismo error que ya
+   aparecio al invertir la pagina. Medido: 5,3. */
+.join .jbtn-sub,.join .jbtn .jbtn-sub,.join .jbtn .jbtn-sub *{
+  color:#7E889A !important}
+.join .jbtn:hover .jbtn-sub,.join .jbtn:hover .jbtn-sub *{
+  color:#C9D2E0 !important}
+
+/* ── la baldosa de los logotipos de prensa ──
+   Era una tarjeta BLANCA con el icono de la marca dentro, y en una pagina
+   negra lo que se ve no es el logotipo: es el rectangulo blanco. Los tres
+   archivos son cuadrados de color macizo -azul, negro, rojo- o sea que ya
+   traen su propio soporte. Se les quita el blanco y se dejan posados con un
+   filo de un pixel, como un icono sobre una mesa oscura. */
+.cb-tile{background:none !important;background-color:transparent !important;
+  background-image:none !important;padding:0 !important;
+  border-radius:11px !important;overflow:hidden;
+  box-shadow:0 0 0 1px rgba(255,255,255,.10), 0 14px 30px -20px #000 !important}
+.cb-logo{border-radius:11px;display:block}
+
+/* ── los cuatro iconos de las garantias ──
+   Cuadrados de azul macizo con el dibujo en negro dentro. Es el mismo error
+   que los botones: color plano donde hace falta materia. Placa oscura, filo
+   de un pixel y el dibujo trazado EN azul, que ademas es como se lee un icono
+   de linea: por la linea, no por el fondo. */
+.rows .ic{background:rgba(255,255,255,.035) !important;
+  box-shadow:inset 0 0 0 1px var(--l1) !important;border-radius:4px}
+.rows .ic svg{stroke:var(--blue-lite) !important;fill:none !important}
+.rows li:hover .ic{background:rgba(20,80,230,.12) !important;
+  box-shadow:inset 0 0 0 1px rgba(60,120,255,.34) !important}
+
+/* ── las placas, todas con el mismo canto ──
+   Estaban con seis bordes distintos heredados de tres paletas. Un solo filo,
+   y arriba la linea de luz que es lo que hace que una placa parezca tener
+   grosor en vez de ser un recorte. */
+.pcd,.sec-card,.tk-card,.hp-card,.pn,.w-out,.bcard,.tm-card,.pr,.panel,
+.widget,.prices,.pr-mult,.w-field,.bcd-plate{
+  border-color:var(--l1) !important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.05), 0 24px 56px -44px #000 !important}
+.pcd:hover,.sec-card:hover,.tk-card:hover,.hp-card:hover,.bcard:hover{
+  border-color:rgba(255,255,255,.13) !important}
+
+/* ── el boton secundario: filo y nada mas ── */
+.hb.ghost{background:none !important;background-color:transparent !important;
+  border:1px solid var(--l1) !important;color:#DCE3EF !important}
+.hb.ghost:hover{border-color:var(--l2) !important;color:#FFFFFF !important;
+  background:rgba(255,255,255,.03) !important}
+
+/* ── y las tres bandas que se habian quedado en el gris viejo ──
+   «#0A0E18» era el negro de antes de esta ronda. Al bajar el resto a
+   «#06070A» estas tres se quedaron mas claras que sus vecinas, y una banda
+   mas clara que la de al lado sin motivo es lo que hace que una pagina
+   parezca montada por piezas. */
+.builds,.hpin{background-color:#000000 !important}
 </style>
 </head>
 <body class="ann-fuera">
@@ -5227,7 +5362,7 @@ p.sec-sub,p.sale-sub,p.join-note,span.rd,.rd,.jbtn-sub,.lane-sub,.stk-sub s,
 </section>
 
 
-<section class="xl" id="xlight" data-bg="#000000" data-acc="#1A7AFF"><i class="emb" aria-hidden="true" style="--emb:#0A0E18"></i>
+<section class="xl" id="xlight" data-bg="#000000" data-acc="#1A7AFF"><i class="emb" aria-hidden="true" style="--emb:#06070A"></i>
   <div class="xl-stage" id="xlStage">
     <canvas class="xl-cv" id="xlCv"></canvas>
     <div class="xl-word">Nereum Labs</div>
@@ -5329,7 +5464,7 @@ p.sec-sub,p.sale-sub,p.join-note,span.rd,.rd,.jbtn-sub,.lane-sub,.stk-sub s,
 
 </main>
 
-<footer data-bg="#06070A" data-acc="#0A5CF5">
+<footer data-bg="#040507" data-acc="#0A5CF5">
   <div class="ffield" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
   <div class="wrap">
     <div class="ftop">
@@ -6221,7 +6356,7 @@ function campoGL(){
     gl.clearColor(0,0,0,1); gl.clear(gl.COLOR_BUFFER_BIT);
     gl.bindFramebuffer(gl.FRAMEBUFFER,null);
   }
-  const T=[[22,80,240],[4,34,182],[26,62,136],[46,72,122],[24,32,56],[2,14,92]];
+  const T=[[22,56,240],[4,24,182],[26,43,136],[46,50,122],[24,22,56],[2,10,92]];
   const TONOS=[[5,5,5,5,4],[1,1,1,0,4],[0,0,1,2,2]];
   const rnd=(a,b)=>a+Math.random()*(b-a);
   const FILAS=[0.045,0.105,0.170,0.240,0.310,0.700,0.770,0.840,0.905,0.960];
@@ -6367,7 +6502,7 @@ function campoGL(){
 function campo2D(){
   const cv=document.getElementById('burst');if(!cv)return;
   const ctx=cv.getContext('2d',{alpha:false});
-  const T=[[22,80,240],[4,34,182],[26,62,136],[46,72,122],[24,32,56],[2,14,92]];
+  const T=[[22,56,240],[4,24,182],[26,43,136],[46,50,122],[24,22,56],[2,10,92]];
   const TONOS=[[5,5,5,5,4],[1,1,1,0,4],[0,0,1,2,2]];
   const ESC=[0.55,1,1.38], VEL=[0.42,1,1.62], PAR=[0.32,0.76,1.20], DER=[2.2,5.0,8.5];
   const FILAS=[0.045,0.105,0.170,0.240,0.310,0.700,0.770,0.840,0.905,0.960];
@@ -7550,7 +7685,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
   const ease=t=>1-Math.pow(1-t,3);
   const dTop=nn=>{let y=0;while(nn){y+=nn.offsetTop;nn=nn.offsetParent}return y};
   const eOut=t=>1-Math.pow(1-t,3);
-  const PAL=[[24,84,246],[8,40,196],[28,66,140],[48,76,128],[26,36,60],[4,18,104]];
+  const PAL=[[24,59,246],[8,28,196],[28,46,140],[48,53,128],[26,25,60],[4,13,104]];
   let vuelo=null, vt=0, vlast=0;
   const HONDO=9;          /* profundidad del corredor */
   function haceVuelo(){
@@ -7610,7 +7745,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
     ctx.globalCompositeOperation='source-over';
   }
   function draw(p){
-    ctx.fillStyle='#0C0E12';ctx.fillRect(0,0,W,H);
+    ctx.fillStyle='#06070A';ctx.fillRect(0,0,W,H);
     const entrada=clm((0.34-p)/0.26);
     if(esq)esq.style.opacity=entrada.toFixed(3);
     const n=st.n;
@@ -7660,7 +7795,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
   const dTop=nn=>{let y=0;while(nn){y+=nn.offsetTop;nn=nn.offsetParent}return y};
   /* El fundido terminaba en papel claro; ahora termina en el mismo grafito
      que el resto, que es a donde entrega la escena. */
-  const PAPER=[20,23,32];
+  const PAPER=[6,7,10];
   let W=0,H=0,U=0,cols=0,rows=0,cells=[],last=-1;
   function build(){
     const d=Math.min(devicePixelRatio||1,2);
@@ -7688,7 +7823,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
      hacia el cian, y meter uno de entrada es lo que reventaba la paleta- y su
      hueco lo ocupa el azul claro. */
   const NEGRO=[5,6,10], AZUL=[22,80,240], AZULP=[12,48,190],
-        AZULC=[60,112,206], CIAN=[120,152,200], ACERO=[36,48,76];
+        AZULC=[46,92,180], CIAN=[80,110,164], ACERO=[26,34,56];
   let piezas=null, pt=0, pl=0;
   function hacePiezas(){
     piezas=[];
@@ -7742,7 +7877,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
       ctx.restore();
     }
   }
-  const SPAL=[[24,84,246],[8,40,196],[28,66,140],[46,72,122],[26,36,60],[4,18,104]];
+  const SPAL=[[24,59,246],[8,28,196],[28,46,140],[46,50,122],[26,25,60],[4,13,104]];
   let SU=null, suL=0, suVelo=null, suVeloH=0, suFil=null, suFilW=0, suCol=null, suColH=0;
   const srnd=(a,b)=>a+Math.random()*(b-a);
   const scv=document.createElement('canvas');
