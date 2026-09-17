@@ -251,7 +251,11 @@ CAMBIOS = [
     # ('la pila, al margen', TRES_VIEJO, TRES_NUEVO),
     # ('la copia de la pila, en su caja', TRES_MARCA_VIEJO, TRES_MARCA_NUEVO),
     # ('los pasos de la pila, en su caja', TRES_PASOS_VIEJO, TRES_PASOS_NUEVO),
-    ('fuera las fichas del menu', CUATRO_VIEJO, CUATRO_NUEVO),
+    # Las fichas del menu VUELVEN. Las quite por ruido -diez cajitas de 19 px
+    # con un icono de 10 al lado de diez enlaces- y no era mi decision:
+    # forman parte de la cabecera y se pidieron de vuelta. El cambio sale de
+    # la cadena, comentado y no borrado.
+    #    ('fuera las fichas del menu', CUATRO_VIEJO, CUATRO_NUEVO),
     ('el segundo boton, de contorno', CINCO_VIEJO, CINCO_NUEVO),
     ('el horizonte de la portada', SEIS_VIEJO, SEIS_NUEVO),
     ('el suelo, de acero', SIETE_VIEJO, SIETE_NUEVO),
