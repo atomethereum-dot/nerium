@@ -528,12 +528,22 @@ di(fundida.blanco > 0.05 && fundida.blanco > arma[3] * 0.6,
 
 /* La apertura entrega la seccion: la ronda va ganando pantalla mientras la
    cifra crece. Si el hueco dejara de crecer -o creciera sobre su propio
-   interior, que es tinta- esto se quedaria plano. */
+   interior, que es tinta- esto se quedaria plano.
+
+   El salto se mide en PROPORCION y no en luminancia absoluta. El limite era
+   «+0,05 de luz media», y ese numero no describia la apertura sino el brillo
+   que tenia el suelo cuando se escribio: al bajar la pagina a negro la misma
+   apertura -que sigue entregando la seccion igual de bien- pasa de 0,04 a
+   0,07, o sea crece un 75 %, y suspendia por no llegar a un umbral heredado.
+   Lo que la prueba quiere saber es si el hueco CRECE, y eso es una razon.
+   Comprobado inyectando el fallo: congelando la escala de la apertura los
+   tres instantes dan la misma luz y la razon cae a 1,00. */
 const abre = [];
 for (const v of [0.66, 0.76, 0.88]) abre.push((await enP(v)).medio);
-di(abre[1] > abre[0] + 0.05 && abre[2] > abre[1],
+const razon = abre[0] > 0 ? abre[1] / abre[0] : 0;
+di(razon >= 1.35 && abre[2] > abre[1] * 1.02,
    'y al abrirse va entregando la ronda, no crece sobre si misma (' +
-   abre.map(v => v.toFixed(2)).join(' → ') + ')');
+   abre.map(v => v.toFixed(3)).join(' → ') + ', x' + razon.toFixed(2) + ', limite 1,35)');
 /* El suelo de la ronda ya no es papel: es grafito. El limite pasa de 0,70 a
    0,05, que sigue estando muy por encima del negro de la escena -0,00- y por
    tanto sigue cazando lo que cazaba: que la puerta no acabe entregando negro
