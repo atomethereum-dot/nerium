@@ -236,6 +236,73 @@ di(Math.abs(hoja.top - cuenta) <= 1,
    'y arranca en la cuenta de la franja mas la barra (' + hoja.top + ' vs ' + cuenta + ')');
 await ctx2.close();
 
+// ── las fichas del menu: azules y con trazo ──────────────────────────────
+// Iban en gris y a 10,5 px desde una rejilla de 24, o sea con la escala en
+// 0,44: un trazo de 1,6 acababa midiendo 0,7 px de pantalla, y medio pixel no
+// se puede pintar, se reparte entre dos y los dos salen grises. Medido a DPR
+// 1 sobre el interior del icono -sin el borde de la ficha, que si no
+// contamina-: 8,4 % de trazo macizo contra 18,2 % de niebla. No habia icono,
+// habia niebla.
+// Se comprueban las dos cosas que se pidieron, y las dos sobre el PIXEL, no
+// sobre el CSS: que el icono sea azul, y que el trazo tenga cuerpo. El fondo
+// de la ficha se saca del tono mas repetido del recorte y el trazo es lo que
+// se aleja de el, asi que la medida vale sea cual sea el color.
+// Con el arreglo: azul 23,8 %, macizo 13,7 %, niebla 15,7 %.
+{
+  const ctx3 = await nav.newContext({ viewport:{width:1440,height:900}, deviceScaleFactor:1 });
+  const ch = await ctx3.newPage();
+  await ch.goto(URL, { waitUntil:'load' });
+  await ch.waitForTimeout(2200);
+  await ch.evaluate(() => scrollTo(0, 0));
+  await ch.waitForTimeout(400);
+  const cajas = await ch.evaluate(() => [...document.querySelectorAll('.nav .chip')].slice(0, 6)
+    .map(e => { const r = e.getBoundingClientRect();
+      return { x: Math.round(r.left) + 4, y: Math.round(r.top) + 4,
+               width: Math.round(r.width) - 8, height: Math.round(r.height) - 8 }; })
+    .filter(c => c.width > 4 && c.height > 4));
+  di(cajas.length >= 5, 'las fichas del menu estan a la vista para medirlas (' + cajas.length + ')');
+  let macizo = 0, niebla = 0, azul = 0, tot = 0;
+  for (const q of cajas) {
+    const b64 = (await ch.screenshot({ clip:q })).toString('base64');
+    const r = await ch.evaluate(async s => {
+      const im = new Image();
+      await new Promise(z => { im.onload = z; im.src = 'data:image/png;base64,' + s });
+      const cv = document.createElement('canvas'); cv.width = im.width; cv.height = im.height;
+      const x = cv.getContext('2d'); x.drawImage(im, 0, 0);
+      const d = x.getImageData(0, 0, cv.width, cv.height).data;
+      const cu = {};
+      for (let i = 0; i < d.length; i += 4) {
+        const k = (d[i]>>3) + ',' + (d[i+1]>>3) + ',' + (d[i+2]>>3);
+        cu[k] = (cu[k] || 0) + 1;
+      }
+      let mj = null, mx = 0;
+      for (const k in cu) if (cu[k] > mx) { mx = cu[k]; mj = k }
+      const f = mj.split(',').map(v => +v * 8 + 4);
+      const dd = [];
+      for (let i = 0; i < d.length; i += 4) dd.push(Math.hypot(d[i]-f[0], d[i+1]-f[1], d[i+2]-f[2]));
+      const top = Math.max(...dd);
+      let n = 0, m = 0, g = 0, az = 0;
+      for (let i = 0, j = 0; i < d.length; i += 4, j++) {
+        n++;
+        const r0 = top ? dd[j] / top : 0;
+        if (r0 >= 0.70) g++; else if (r0 >= 0.22) m++;
+        const L = (0.2126*d[i] + 0.7152*d[i+1] + 0.0722*d[i+2]) / 255;
+        if (d[i+2] > d[i] + 40 && L > 0.12) az++;
+      }
+      return { n, m, g, az };
+    }, b64);
+    macizo += r.g; niebla += r.m; azul += r.az; tot += r.n;
+  }
+  const pAz = tot ? azul / tot * 100 : 0, pMa = tot ? macizo / tot * 100 : 0;
+  // En REPOSO apagadas: el azul se reserva para el seleccionado. Diez fichas
+  // azules en fila compiten con el enlace activo y el azul deja de senalar.
+  di(pAz <= 6, 'y en reposo van apagadas, el azul es del seleccionado (' +
+     pAz.toFixed(1) + ' % de pixeles azules, limite 6)');
+  di(pMa >= 11, 'y el trazo tiene cuerpo a 20 px, no es niebla (' + pMa.toFixed(1) +
+     ' % macizo frente a ' + (niebla / tot * 100).toFixed(1) + ' % de niebla, limite 11)');
+  await ctx3.close();
+}
+
 di(errs.length === 0, 'sin errores de pagina' + (errs.length ? ': ' + errs[0] : ''));
 console.log(mal ? `\n${ok} bien, ${mal} MAL` : `\n${ok}/${ok} correctas`);
 await nav.close();

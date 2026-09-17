@@ -167,6 +167,155 @@ CSS = """
   .pcd,.pcd-body::after{transition:none}
   .pcd:hover{transform:none}
 }
+/* ══ LA SECCION DE PRENSA, EN CLAVE CINEMATOGRAFICA ═════════════════════════
+   Lo de arriba pintaba cada tarjeta del color del medio, a toda la caja: un
+   campo azul, uno verde y uno rojo, saturados, con el logotipo en una baldosa
+   blanca encima. La intencion era que se distinguieran unas de otras. El
+   efecto es el contrario del que se busca: tres rectangulos de color plano en
+   fila no se leen como una seccion de prensa, se leen como tres banners, y un
+   banner es lo mas barato que puede haber en una pagina.
+
+   El color del medio no desaparece, cambia de papel: deja de ser el RELLENO y
+   pasa a ser el ACENTO. Las tres laminas comparten ahora la misma superficie
+   de grafito -la misma que el resto de la pagina usa para lo oscuro-, y de
+   cada medio quedan dos cosas: un filete de 2 px arriba con su color y un
+   resplandor suyo al 30 % en una esquina. Uniformes se leen como una serie; lo
+   que las distingue pasa a ser el logotipo y el titular, que es lo que hay que
+   mirar.
+
+   Y se mueven, que es lo que pedia la seccion. Tres gestos, los tres atados a
+   la entrada y no a un bucle que gire porque si:
+     · la lamina se DESTAPA de abajo arriba, como un fotograma revelandose;
+     · el filete del medio CRECE de izquierda a derecha justo detras;
+     · una luz CRUZA la lamina una vez, en diagonal, y no vuelve.
+   Escalonados card a card, que es lo que convierte tres animaciones en una
+   escena. */
+
+/* ── la lamina: una sola superficie, el color como acento ── */
+.pcd-art{
+  border-bottom:1px solid rgba(255,255,255,.07);
+  background:
+    linear-gradient(180deg,rgba(0,0,0,0) 54%,rgba(0,0,0,.42) 100%),
+    radial-gradient(84% 118% at 80% -12%, rgba(var(--sh),var(--gl,.34)) 0%, rgba(0,0,0,0) 60%),
+    radial-gradient(70% 90% at 14% 100%, rgba(255,255,255,.055) 0%, rgba(0,0,0,0) 62%),
+    linear-gradient(168deg,#171C26 0%,#0B0F17 54%,#06080D 100%);
+  clip-path:inset(100% 0 0 0);
+  overflow:hidden}
+.press-rail.in .pcd .pcd-art{
+  clip-path:inset(0 0 0 0);
+  transition:clip-path 1.05s cubic-bezier(.16,.84,.26,1) var(--d,0s)}
+
+/* el filete del medio, creciendo por detras de la lamina */
+.pcd-art::before{content:"";position:absolute;left:0;top:0;z-index:3;
+  width:100%;height:2px;background:var(--ac);
+  transform:scaleX(0);transform-origin:left center}
+.press-rail.in .pcd .pcd-art::before{transform:none;
+  transition:transform 1.15s cubic-bezier(.16,.84,.26,1) calc(var(--d,0s) + .12s)}
+
+/* la luz que cruza una vez: un haz estrecho en diagonal que entra por la
+   izquierda y sale por la derecha, y ahi se queda parado fuera de cuadro */
+.pcd-art::after{content:"";position:absolute;inset:-30% -60%;z-index:2;
+  pointer-events:none;
+  background:linear-gradient(74deg,
+    rgba(255,255,255,0) 42%, rgba(255,255,255,.10) 48%,
+    rgba(255,255,255,.26) 50%, rgba(255,255,255,.10) 52%,
+    rgba(255,255,255,0) 58%);
+  transform:translateX(-72%)}
+.press-rail.in .pcd .pcd-art::after{transform:translateX(72%);
+  transition:transform 1.5s cubic-bezier(.30,.72,.28,1) calc(var(--d,0s) + .34s)}
+
+/* ── el emblema, sin gritar ──
+   La baldosa del logotipo llevaba una sombra de 22 px y se despegaba de la
+   lamina como una pegatina. Ahora es una placa con filete, del tamano justo
+   que «probar_prensa» exige para que las once letras de Morningstar tengan
+   cuerpo en una pantalla de un pixel por pixel. */
+/* La baldosa es lo que mas grita de la lamina: un rectangulo blanco al 100 %
+   sobre grafito. Se baja de tamano -sigue por encima del minimo que
+   «probar_prensa» exige para que las once letras de Morningstar tengan
+   cuerpo a un pixel por pixel- y se le quita la sombra, que la despegaba como
+   una pegatina. Un filete y nada mas. */
+.cb-tile{background:#fff;border-radius:9px;
+  width:clamp(72px,7.8vw,108px);height:clamp(72px,7.8vw,108px);
+  box-shadow:0 0 0 1px rgba(255,255,255,.13)}
+
+/* ── y la lamina responde al pasar por encima ──
+   El resplandor del medio sube, las escuadras se meten hacia dentro y la luz
+   vuelve a cruzar. Es el mismo gesto de la entrada, repetido a peticion: no
+   hay que inventarse uno nuevo. */
+.pcd-art{--gl:.34;transition:--gl .5s ease}
+@property --gl{syntax:'<number>';inherits:true;initial-value:.34}
+.pcd:hover .pcd-art{--gl:.58}
+.pcd .cn{transition:inset .45s cubic-bezier(.16,.84,.26,1)}
+.pcd:hover .cn.tl{left:11px;top:11px}
+.pcd:hover .cn.tr{right:11px;top:11px}
+.pcd:hover .cn.bl{left:11px;bottom:11px}
+.pcd:hover .cn.br{right:11px;bottom:11px}
+.press-rail.in .pcd:hover .pcd-art::after{transform:translateX(72%);
+  transition:transform 1.25s cubic-bezier(.30,.72,.28,1)}
+.cb{font-weight:400;letter-spacing:-.035em;text-shadow:none;color:#fff}
+.cb-rule{background:rgba(255,255,255,.18)}
+.pcd-plate{gap:clamp(16px,2vw,26px)}
+/* y el conjunto entra un poco despues que su lamina, no a la vez */
+.pcd-plate{opacity:0;transform:translateY(14px)}
+.press-rail.in .pcd .pcd-plate{opacity:1;transform:none;
+  transition:opacity .7s ease calc(var(--d,0s) + .42s),
+             transform .9s cubic-bezier(.16,.84,.26,1) calc(var(--d,0s) + .42s)}
+
+/* ── las escuadras: mas finas y mas dentro, que son una nota al pie ── */
+.cn::before,.cn::after{background:rgba(255,255,255,.26)}
+.cn{width:13px;height:13px}
+.cn::before{width:13px}.cn::after{height:13px}
+.cn.tl{left:16px;top:16px}.cn.tr{right:16px;top:16px}
+.cn.bl{left:16px;bottom:16px}.cn.br{right:16px;bottom:16px}
+
+/* ── la tarjeta: papel, filete y nada mas ──
+   Sin sombra en reposo. La sombra es para cuando algo se levanta; puesta
+   siempre, es relleno. */
+.pcd{background:#fff;border:1px solid rgba(11,13,18,.09);border-radius:14px;
+  box-shadow:none;
+  transition:transform .55s cubic-bezier(.16,.84,.26,1),
+             box-shadow .45s ease, border-color .35s ease}
+.pcd:hover{transform:translateY(-5px);
+  border-color:rgba(var(--sh),.30);
+  box-shadow:0 30px 60px -34px rgba(var(--sh),.42)}
+
+/* ── el texto ── */
+.pcd-body{background:none;padding:clamp(18px,1.9vw,26px) clamp(18px,1.9vw,26px) clamp(20px,2.1vw,28px);
+  gap:14px}
+.pcd-tag{font-size:10px;letter-spacing:.24em;color:rgba(11,13,18,.44)}
+.pcd-tag::before{width:5px;height:5px;border-radius:1px;background:var(--ac)}
+.pcd-t{font-weight:450;font-size:clamp(18px,1.9vw,23px);line-height:1.25;
+  letter-spacing:-.028em;color:#0A0C10}
+.pcd-body::after{height:1px;width:100%;border-radius:0;opacity:1;
+  background:linear-gradient(90deg,var(--ac) 0%,var(--ac) var(--av,18%),
+             rgba(11,13,18,.10) var(--av,18%),rgba(11,13,18,.10) 100%);
+  transition:--av .5s ease}
+.pcd:hover .pcd-body::after{width:100%;--av:62%}
+@property --av{syntax:'<percentage>';inherits:false;initial-value:18%}
+
+/* ── el escalonado, que es lo que hace la escena ── */
+.pcd:nth-child(1){--d:0s}
+.pcd:nth-child(2){--d:.13s}
+.pcd:nth-child(3){--d:.26s}
+.pcd:nth-child(4){--d:.39s}
+.pcd:nth-child(5){--d:.52s}
+/* la tarjeta ya no se mueve por su cuenta: quien entra es la lamina */
+.pcd{opacity:1;transform:none}
+.press-rail.in .pcd{opacity:1;transform:none;transition-delay:0s}
+
+/* ── y el paralaje del riel ──
+   Al arrastrar, el contenido de cada lamina se desplaza un poco CONTRA el
+   riel. Es lo que separa una fila de imagenes de una fila de ventanas: si lo
+   de dentro y el marco van pegados, es un mosaico; si lo de dentro se retrasa,
+   hay profundidad. El desplazamiento lo escribe el riel en «--px». */
+.pcd-plate{will-change:transform}
+.press-rail.in .pcd .pcd-plate{transform:translate3d(var(--px,0px),0,0)}
+
+@media(prefers-reduced-motion:reduce){
+  .pcd-art,.pcd-art::before,.pcd-art::after,.pcd-plate{
+    clip-path:none !important;transform:none !important;opacity:1 !important;
+    transition:none !important}
+}
 /* ══ fin: prensa ══ */
 """
 
