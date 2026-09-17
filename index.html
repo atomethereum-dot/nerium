@@ -894,38 +894,6 @@ body.light .srail{color:#0B0D12}
   z-index:2;display:flex;gap:8px}
 .stk-steps i{width:34px;height:2px;background:rgba(190,205,240,.2);border-radius:2px;overflow:hidden}
 .stk-steps i b{display:block;height:100%;width:0;background:var(--blue);border-radius:2px}
-/* ══ oscuro ══ Lo aplica herramientas/oscuro.py ═══════════════════════
-   Era la unica seccion centrada de las once. El borde izquierdo de todas las
-   cabeceras es el del «.wrap», asi que la manera honrada de alinearla es
-   darle el «.wrap»: la caja se la calcula el mismo sitio que a las demas, y
-   los cambios de tamano la siguen solos. Van con ella el titular y el
-   subtitulo, que colgaban de «left:50%».
-
-   Y los tres pasos se suben ENCIMA del epigrafe, dentro del bloque. Estaban
-   sueltos, pegados al suelo de la escena y centrados; al traerlos al margen
-   izquierdo se pusieron justo donde vive el selector de idioma y se pisaban.
-   Arriba no estorban a nadie, van con el texto al que pertenecen y se leen
-   como lo que son: por donde va la escena. */
-.stk-copy{text-align:start;padding-inline:0}
-.stk-t b,.stk-sub s{left:0;right:auto}
-.stk-t b{transform:translateY(14px)}
-.stk-t b.on{transform:none}
-.stk-sub s{transform:translateY(10px)}
-.stk-sub s.on{transform:none}
-.stk-steps{position:static;transform:none;left:auto;bottom:auto;
-  justify-content:flex-start;margin-bottom:clamp(16px,2vw,24px)}
-/* Y la escena necesita sitio. Al traer la copia al flujo se quedo centrada en
-   vertical, y la marca se arma en la franja que queda POR ENCIMA de ella: de
-   la cabecera al texto. En una pantalla ancha y baja esa franja es un pasillo
-   —medido en 1523x772: de 78 px a 223, o sea 145— y debajo del texto sobran
-   339 px de negro. La marca salia a 84 px con teselas de 4,7: a ese tamano el
-   escalon derecho y los dos cuadros azules no resuelven, y lo que se lee no es
-   la marca sino un disco mordido. En el telefono salia a 210 px y se leia
-   perfectamente, que es la prueba de que el dibujo nunca estuvo mal: estaba
-   pequeno. El telefono ya bajaba la copia con un margen; el escritorio nunca
-   lo tuvo. Se lo damos, con el mismo criterio: la copia a poco mas de la
-   mitad de la altura, la franja crece a ~334 px y la marca a ~194. */
-@media(min-width:761px){.stk-copy{margin-top:clamp(200px,36vh,360px)}}
 @media(max-width:760px){.stk-copy{margin-top:clamp(230px,38vh,340px)}}
 .hero-in h1,.hero-in .hero-act{position:relative;z-index:2}
 /* ══ oscuro ══ Lo aplica herramientas/oscuro.py ═══════════════════════
@@ -4143,8 +4111,7 @@ main>section :is(.wrap,.sec-head,.join-head):has(.sk){position:relative}
 <section class="stack stk-hold" id="stack" data-bg="#000000" data-acc="#5B7BFF"><i class="via" aria-hidden="true"></i>
   <div class="stk-stage">
     <canvas class="stk-cv" id="stkCv"></canvas>
-    <div class="stk-copy wrap">
-      <div class="stk-steps"><i><b></b></i><i><b></b></i><i><b></b></i></div>
+    <div class="stk-copy">
       <div class="k sk"><i class="sk-n">05</i>The stack</div>
       <div class="stk-t">
         <b data-i="0">One chain, four layers.</b>
@@ -4157,7 +4124,8 @@ main>section :is(.wrap,.sec-head,.join-head):has(.sk){position:relative}
         <s data-i="2">They settle as a single unit. A transfer either clears every layer or it does not clear at all.</s>
       </div>
     </div>
-  </div><!-- los tres pasos viven ahora dentro de .stk-copy -->
+    <div class="stk-steps"><i><b></b></i><i><b></b></i><i><b></b></i></div>
+  </div>
   <span class="hold" data-bg="#000000" data-acc="#5B7BFF"></span>
 </section>
 
@@ -6707,7 +6675,13 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
     const cvTop=cv.getBoundingClientRect().top;
     const copyTop=copyEl?copyEl.getBoundingClientRect().top-cvTop:H*.62;
     const bandBot=Math.max(bandTop+140, copyTop-16);
-    const S=Math.min(W*(W<760?.60:.30), (bandBot-bandTop)/1.72);
+    /* El divisor reparte la franja entre la marca y su aire. Estaba en 1,72
+       -la marca ocupaba el 58 % de lo que tiene- y con el texto centrado y
+       pegado abajo la franja es ancha, asi que sobra sitio: a 1,45 la marca
+       usa el 69 % y deja noventa pixeles por arriba y por abajo. En el
+       telefono no cambia nada porque ahi manda el tope de ancho, no el de
+       alto. */
+    const S=Math.min(W*(W<760?.60:.30), (bandBot-bandTop)/1.45);
     const U=S/NV;
     const cxp=W*.5, cyp=(bandTop+bandBot)*.5;
     const k=1-ease(clm(p));            /* 1 disperso → 0 en su sitio */

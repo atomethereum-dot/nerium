@@ -130,8 +130,14 @@ await ctx2.close();
 //
 // No se comprueba la formula, se comprueba el DIBUJO: se mide la caja de lo
 // que el lienzo pinta de verdad. Asi la prueba sigue valiendo si manana la
-// escena se dimensiona de otra manera. Con el margen puesto: 165 px. Sin el:
-// 84. El limite va en 140.
+// escena se dimensiona de otra manera.
+//
+// La historia del numero: con la copia sacada al margen izquierdo y metida
+// en el flujo, la marca salia a 84 px; bajando la copia con un margen, a
+// 165; devuelta la seccion a su estado CENTRADO -copia pegada al canto de
+// abajo, que es como estaba y como se ha quedado- la franja es ancha y la
+// marca sale a 315. El limite sube a 240: por debajo, alguien ha vuelto a
+// ahogar la franja, que es justo lo que no puede repetirse.
 const ctx3 = await nav.newContext({ viewport:{width:1523,height:772} });
 const w = await ctx3.newPage();
 await w.goto('http://127.0.0.1:9017/', { waitUntil:'load' }); await w.waitForTimeout(2400);
@@ -158,9 +164,9 @@ const marca = await w.evaluate(async () => {
   return { alto: y1 < 0 ? 0 : Math.round((y1 - y0 + 1) / esc),
            ancho: x1 < 0 ? 0 : Math.round((x1 - x0 + 1) / esc) };
 });
-di(marca.alto >= 140, 'en 1523x772 la marca del tercer paso se arma a tamano legible (' +
-   marca.alto + ' px de alto, limite 140)');
-di(marca.ancho >= 140, 'y no es un hilo: tambien tiene cuerpo a lo ancho (' +
+di(marca.alto >= 240, 'en 1523x772 la marca del tercer paso se arma a tamano legible (' +
+   marca.alto + ' px de alto, limite 240)');
+di(marca.ancho >= 240, 'y no es un hilo: tambien tiene cuerpo a lo ancho (' +
    marca.ancho + ' px)');
 await ctx3.close();
 

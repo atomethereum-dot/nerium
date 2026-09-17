@@ -239,9 +239,18 @@ CAMBIOS = [
     ('el titular de Network', UNO_VIEJO, UNO_NUEVO),
     ('el titular de Guarantees', DOS_VIEJO, DOS_NUEVO),
     ('el aire del titular nuevo', DOS_CSS_VIEJO, DOS_CSS_NUEVO),
-    ('la pila, al margen', TRES_VIEJO, TRES_NUEVO),
-    ('la copia de la pila, en su caja', TRES_MARCA_VIEJO, TRES_MARCA_NUEVO),
-    ('los pasos de la pila, en su caja', TRES_PASOS_VIEJO, TRES_PASOS_NUEVO),
+    # «05 The stack» vuelve a estar CENTRADA, asi que estos tres cambios se
+    # quedan fuera de la cadena. Los traje aqui para alinearla con el resto de
+    # cabeceras -al borde del «.wrap»- y el resultado no valia: sacaba el
+    # texto del centro de la escena, se lo metia entre los cubos por el lado
+    # izquierdo, y de paso metia la copia en el flujo, con lo que se quedaba
+    # centrada en vertical y ahogaba la franja donde se arma la marca -medido,
+    # 84 px de marca en 1523x772-. Centrada y pegada abajo la franja es ancha
+    # y la marca sale a 268. Las constantes se quedan por si alguna vez se
+    # vuelve a intentar, pero sabiendo lo que cuesta.
+    # ('la pila, al margen', TRES_VIEJO, TRES_NUEVO),
+    # ('la copia de la pila, en su caja', TRES_MARCA_VIEJO, TRES_MARCA_NUEVO),
+    # ('los pasos de la pila, en su caja', TRES_PASOS_VIEJO, TRES_PASOS_NUEVO),
     ('fuera las fichas del menu', CUATRO_VIEJO, CUATRO_NUEVO),
     ('el segundo boton, de contorno', CINCO_VIEJO, CINCO_NUEVO),
     ('el horizonte de la portada', SEIS_VIEJO, SEIS_NUEVO),

@@ -90,11 +90,21 @@ for (const [W, H] of [[1440,900],[1280,900],[768,1024],[390,844]]) {
     const f = await pg.evaluate(i => {
       const sec = document.getElementById(i); if (!sec) return null;
       const caja = sec.querySelector('.wrap') || sec;
-      const iz = e => { if (!e) return null; const b = e.getBoundingClientRect(); return b.width ? b.left : null; };
+      const cajaR = caja.getBoundingClientRect();
+      /* «05 The stack» es la unica CENTRADA de las once, y a proposito: su
+         escena es una marca que se arma en el eje. Sacar el texto al margen
+         izquierdo lo metia entre los cubos y ademas ahogaba la franja donde
+         la marca se dibuja -de 268 px de marca a 84-. Se intento alinearla
+         como las demas y se revirtio. Asi que lo que las tres piezas tienen
+         que compartir en ella no es el borde: es el CENTRO. */
+      const centrada = i === 'stack';
+      const iz = e => { if (!e) return null; const b = e.getBoundingClientRect();
+        return b.width ? (centrada ? b.left + b.width / 2 : b.left) : null; };
       // La pila no escribe su titular en un «h2» ni su entradilla en un «p»:
       // son tres «b» y tres «s» que se van relevando, y solo el que lleva
       // «.on» esta a la vista. Los demas miden cero y «iz» ya los descarta.
-      return { base:iz(caja), ep:iz(sec.querySelector('.sk')),
+      return { base: centrada ? cajaR.left + cajaR.width / 2 : cajaR.left,
+               ep:iz(sec.querySelector('.sk')),
                ti:iz(sec.querySelector('h2, .stk-t b.on')),
                su:iz(sec.querySelector('.sec-sub,.join-note,.lane-sub,.sale-sub,.sub,.stk-sub s.on')) };
     }, s);
@@ -106,7 +116,8 @@ for (const [W, H] of [[1440,900],[1280,900],[768,1024],[390,844]]) {
     // absoluto cambia a cada cuadro. Lo que no puede cambiar es que las tres
     // piezas compartan ese borde, sea cual sea.
     di(fuera.length === 0,
-       W + 'px · ' + s.padEnd(10) + ' las ' + partes.length + ' piezas comparten el borde de su caja' +
+       W + 'px · ' + s.padEnd(10) + ' las ' + partes.length + ' piezas comparten el ' +
+       (s === 'stack' ? 'centro' : 'borde') + ' de su caja' +
        (fuera.length ? ' — fuera: ' + fuera.map(p => p[0] + ' a ' + Math.round(p[1] - f.base) + ' px') .join(', ') : ''));
   }
   await ctx.close();
