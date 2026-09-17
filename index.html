@@ -457,6 +457,9 @@ main>section.logos::after{display:none}
   .hp{flex:none;min-height:70svh;border-right:0;border-bottom:1px solid rgba(255,255,255,.09)}
   .hpin-hint{display:none}
 }
+/* «hidden» en una seccion no basta: las reglas de «main>section» le dan
+   «display» y lo pisan. Se refuerza aqui. */
+.kin[hidden]{display:none !important}
 .kin{background:#050609;padding:var(--s6) 0;overflow:hidden;
   border-block:1px solid rgba(255,255,255,.08)}
 .kin-row{overflow:hidden}
@@ -4245,7 +4248,12 @@ main>section :is(.wrap,.sec-head,.join-head):has(.sk){position:relative}
 
 
 
-<section class="kin" data-bg="#000000" data-acc="#2F6BFF" aria-hidden="true"><i class="emb" aria-hidden="true" style="--emb:#050609"></i>
+<!-- La tira de palabras se OCULTA. Es decorativa -«aria-hidden», sin
+     rotulo de seccion, sin entrada en el menu y sin contar para el «/ 11»-,
+     asi que esconderla no arrastra nada: ni renumera secciones ni deja un
+     enlace apuntando al vacio. Se quita con «hidden» y no borrando el
+     marcado, para que volver sea quitar una palabra. -->
+<section class="kin" data-bg="#000000" data-acc="#2F6BFF" aria-hidden="true" hidden><i class="emb" aria-hidden="true" style="--emb:#050609"></i>
   <div class="kin-row" data-dir="1"><div class="kin-in">
     <span>Issuance</span><span class="o">Custody</span><span>Real assets</span><span class="o">Redemption</span>
     <span>Issuance</span><span class="o">Custody</span><span>Real assets</span><span class="o">Redemption</span>

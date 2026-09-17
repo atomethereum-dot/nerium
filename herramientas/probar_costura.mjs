@@ -75,6 +75,10 @@ for (const cl of BANDAS) {
   }, cl);
   const comp = dice.v.split(/[\s,]+/).map(Number);
   if (comp.length !== 3 || comp.some(isNaN)) { di(false, cl + ': «--embc» no dice un color (' + dice.v + ')'); continue; }
+  // Una seccion OCULTA no tiene costura que medir, y pedirle una captura de
+  // ancho cero tumba la bateria entera. Se salta y se dice, que no es lo
+  // mismo que aprobarla en silencio.
+  if (!dice.ancho || !dice.alto) { console.log('  --  ' + cl + ': oculta, no hay costura que medir'); continue; }
 
   // Y el color que la escena tiene DE VERDAD ahi. Con el embudo apagado: si
   // no, se estaria midiendo a si mismo y aprobaria siempre.
