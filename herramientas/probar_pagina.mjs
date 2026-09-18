@@ -31,7 +31,8 @@ await pg.waitForTimeout(2600);
 const papel = await pg.evaluate(() => ['.paper', '.paper2', '.secure', '.sale', '.tkp', '.join', '.press']
   .map(s => { const e = document.querySelector(s); if (!e) return null;
     const c = getComputedStyle(e);
-    return { sel: s, img: c.backgroundImage, capas: c.backgroundImage.split(/,(?![^()]*\))/).length }; })
+    return { sel: s, claro: e.classList.contains('claro'), col: c.backgroundColor,
+             img: c.backgroundImage, capas: c.backgroundImage.split(/,(?![^()]*\))/).length }; })
   .filter(Boolean));
 di(papel.length >= 6, 'estan las secciones claras (' + papel.length + ')');
 di(papel.every(p => p.img !== 'none'),
@@ -48,10 +49,29 @@ di(papel.every(p => /feTurbulence/.test(p.img)),
    noten cosidas- se sigue defendiendo, solo que sobre lo que hay: que todas
    declaren la MISMA pila de fondo. Si alguien le pone una capa distinta a una
    sola seccion, salta igual que antes. */
-const pilas = new Set(papel.map(p => p.img.replace(/\s+/g, ' ').trim()));
-di(pilas.size <= 2,
-   'las secciones claras comparten suelo: ' + pilas.size +
-   ' pila(s) de fondo distintas para ' + papel.length + ' secciones');
+/* «UNA SOLA PILA PARA LAS SIETE» YA NO DESCRIBE LA PAGINA, Y AGRUPAR POR
+   CLARO/OSCURO TAMPOCO. Hay tres niveles de suelo y los tres son a proposito:
+   el papel de las tres bandas claras, y DOS negros, porque dos secciones
+   oscuras seguidas con el mismo negro exacto son una losa -eso ya se decidio
+   y «probar_costura» lo defiende por el otro lado-.
+   Lo unico que esta comprobacion defendio nunca es que nadie se invente un
+   suelo suelto, y eso se dice mejor asi: dos secciones que declaran el MISMO
+   color de fondo tienen que pintarlo con la MISMA pila. Un nivel nuevo es una
+   decision y se ve en el color; una capa colada en una sola seccion es un
+   descuido, y sigue saltando.
+   Comprobado inyectando el fallo: anadiendo una capa de mas a «.sale» -que
+   comparte color con «.paper» y «.join»- la prueba falla. */
+const norm = s => s.replace(/\s+/g, ' ').trim();
+const porColor = new Map();
+for (const p of papel) {
+  if (!porColor.has(p.col)) porColor.set(p.col, new Set());
+  porColor.get(p.col).add(norm(p.img));
+}
+const rotas = [...porColor].filter(([, s]) => s.size > 1).map(([c]) => c);
+di(rotas.length === 0,
+   'las secciones que declaran el mismo suelo lo pintan igual: ' +
+   porColor.size + ' nivel(es) para ' + papel.length + ' secciones' +
+   (rotas.length ? ' — descuadran ' + rotas.join(', ') : ''));
 di(papel.every(p => /gradient/.test(p.img)),
    'y el suelo es metal —degradados—, no un color plano');
 

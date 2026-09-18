@@ -68,12 +68,14 @@ for (let y = 0; y < alto; y += 450) { await pg.evaluate(v => scrollTo(0, v), y);
     const s = document.getElementById('ruta');
     if (!s) return null;
     const b = document.getElementById('builds'), d = document.getElementById('docs');
-    const cs = getComputedStyle(s), cb = getComputedStyle(b);
+    const cs = getComputedStyle(s), cb = getComputedStyle(b), cd = getComputedStyle(d);
     return { padre:s.parentElement.tagName,
              tras:s.previousElementSibling && s.previousElementSibling.id,
              antes:s.nextElementSibling && s.nextElementSibling.id,
-             bg:cs.backgroundColor, bgBuilds:cb.backgroundColor,
+             bg:cs.backgroundColor, bgBuilds:cb.backgroundColor, bgDocs:cd.backgroundColor,
              dbg:s.getAttribute('data-bg'), dbgBuilds:b.getAttribute('data-bg'),
+             dbgDocs:d.getAttribute('data-bg'),
+             buildsClaro:b.classList.contains('claro'),
              fases:document.querySelectorAll('.ruta-f').length,
              menu:document.querySelectorAll('.nav>a').length,
              enMenu:!!document.querySelector('.nav>a[href="#ruta"]') };
@@ -83,8 +85,27 @@ for (let y = 0; y < alto; y += 450) { await pg.evaluate(v => scrollTo(0, v), y);
   di(r.tras === 'builds', 'va justo DEBAJO de la seccion de proyectos (tras «' + r.tras + '»)');
   di(r.antes === 'docs', 'y justo encima de la de documentacion (antes de «' + r.antes + '»)');
   di(r.fases === 3, 'tres fases (' + r.fases + ')');
-  di(r.bg === r.bgBuilds && r.dbg === r.dbgBuilds,
-     'mismo suelo que proyectos: ' + r.bg + ' / ' + r.dbg);
+  /* ESTO DECIA «MISMO SUELO QUE PROYECTOS» Y HA DEJADO DE SER VERDAD A
+     PROPOSITO. Proyectos paso a ser una de las tres bandas de PAPEL, asi que
+     el borde de arriba de la hoja de ruta ya no es una continuidad: es uno de
+     los tres cortes de la pagina, y lleva su filo encima. Pedir que los dos
+     suelos coincidan seria pedir que el corte no exista.
+     Lo que la comprobacion defendia -que la hoja de ruta no se invente un
+     suelo suelto- se dice ahora por los dos lados, y asi caza dos fallos en
+     vez de uno: sigue cosida HACIA ABAJO con documentacion, que es su familia,
+     y separada HACIA ARRIBA de proyectos mientras proyectos sea papel.
+     Comprobado inyectando los dos fallos que caza: cambiando el «data-bg» de
+     la ruta falla la primera mitad, y pintando de negro una banda que se
+     declara papel -que es como se pierde un corte sin darse cuenta- falla la
+     segunda. Si algun dia proyectos vuelve a ser oscuro no falla ninguna: la
+     comprobacion cambia de rama sola y vuelve a exigir continuidad, que es lo
+     correcto entonces. */
+  di(r.bg === r.bgDocs && r.dbg === r.dbgDocs,
+     'cosida hacia abajo: mismo suelo que documentacion (' + r.bg + ' / ' + r.dbg + ')');
+  di(r.buildsClaro ? (r.bg !== r.bgBuilds) : (r.bg === r.bgBuilds),
+     r.buildsClaro
+       ? 'y separada hacia arriba: proyectos es papel y el corte existe (' + r.bgBuilds + ')'
+       : 'y cosida hacia arriba: proyectos vuelve a ser oscuro (' + r.bgBuilds + ')');
   // Lo que esta prueba defiende es que la ruta NO se cuela en el menu, no que
   // el menu tenga un numero concreto de entradas. Estaba escrito «10» a mano y
   // salto en cuanto se oculto «03 The thesis» y su entrada se fue con ella,

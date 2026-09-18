@@ -4641,6 +4641,238 @@ p.sec-sub,p.sale-sub,p.join-note,span.rd,.rd,.jbtn-sub,.lane-sub,.stk-sub s,
    mas clara que la de al lado sin motivo es lo que hace que una pagina
    parezca montada por piezas. */
 .builds,.hpin{background-color:#000000 !important}
+
+/* ══ LA INVERSION: TRES BANDAS DE PAPEL ═══════════════════════════════════
+   Una pagina toda negra es segura y por eso es comun. Lo que no es comun es
+   SOSTENER un negro y romperlo tres veces: el corte de negro a papel es el
+   unico gesto que no se puede imitar bajando una opacidad, porque obliga a
+   que todo lo de dentro cambie de signo a la vez.
+
+   Cuales tres, y por que esas:
+     · 03 GARANTIAS. Es una lista. Una lista es un documento, y un documento
+       se lee sobre papel. Ademas entra pronto: el lector aprende en la tercera
+       seccion que esta pagina tiene dos estados, y a partir de ahi cada corte
+       es una promesa cumplida en vez de una sorpresa.
+     · 05 SEGURIDAD. Es LA seccion de prueba -registro mercantil, auditoria,
+       KYC-. Sale justo despues del campo de cubos, que es lo mas oscuro de la
+       pagina: negro tridimensional y al cuadro siguiente papel blanco. Es el
+       corte mas violento de las tres y esta puesto donde mas significa, que es
+       donde se pide confianza.
+     · 08 LO QUE ESTAMOS CONSTRUYENDO. Sus dos capturas son interfaces claras.
+       Llevaban un filtro que las bajaba al 34 % para que no gritaran sobre el
+       negro; sobre papel no hace falta filtro NINGUNO. La seccion deja de
+       pelearse con su propio contenido: el producto se ve como es.
+
+   Y el papel no es el papel de antes. Aquel era gris, con textura y tres
+   auroras; este es blanco de tinta, con una sola luz arriba y un grano de la
+   mitad de fuerza, porque sobre claro el grano pesa el doble que sobre negro. */
+
+:root{
+  --c-piso:#F1F2F5; --c-papel:#FFFFFF;
+  --c-tinta:#06080C; --c-tinta2:#4B5261; --c-tinta3:#5E6573;
+  --c-linea:rgba(8,11,17,.11); --c-linea2:rgba(8,11,17,.20);
+  --c-azul:#0E3AC4; --c-azul2:#0A2B96;
+  --grano-claro:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='.019'/%3E%3C/svg%3E");
+}
+
+main>section.claro.claro{
+  background-color:var(--c-piso) !important;
+  background-image:
+    radial-gradient(86% 58% at 50% -12%, #FFFFFF 0%, rgba(255,255,255,0) 64%),
+    radial-gradient(64% 46% at 90% 104%, rgba(14,58,196,.045) 0%, rgba(14,58,196,0) 62%),
+    linear-gradient(180deg,#FAFBFD 0%,#F1F2F5 48%,#E7E9EF 100%),
+    var(--grano-claro) !important;
+  background-repeat:no-repeat,no-repeat,no-repeat,repeat !important;
+  background-size:auto,auto,auto,auto !important;
+  background-position:center,center,center,0 0 !important;
+  color:var(--c-tinta) !important;
+  --tapa:var(--c-piso)}
+/* el canto de la lamina se da la vuelta: en negro es luz, en papel es sombra */
+main>section.claro.claro{box-shadow:inset 0 1px 0 rgba(255,255,255,.9),
+  inset 0 -1px 0 rgba(8,11,17,.07) !important}
+
+/* ── la tinta ── */
+.claro :is(h1,h2,h3,h4,b,strong,.sec-h,.builds-h,.sec-t,.bcd-t,.rows b){
+  color:var(--c-tinta) !important}
+.claro :is(p,li,dd,dt,span,em,small,.sec-sub,.sec-p,.bcd-d,.rd,.rows .rd){
+  color:var(--c-tinta2) !important}
+/* Los titulares van partidos en letras -cada una en su «span»- para poder
+   entrar escalonadas, y esa regla de arriba los cazaba por «span»: el «h2»
+   quedaba en tinta y sus letras en gris de parrafo. Las piezas de reparto
+   heredan y no deciden. */
+.claro :is(h1,h2,h3,h4,.sec-h,.builds-h,.rows b,.bcd-t,.sec-t) :is(.ws,.wi,span){
+  color:inherit !important;-webkit-text-fill-color:currentColor !important}
+.claro :is(.k,.sk,.mono,.rn,.sec-k,.bcd-tag,.builds-foot,.sec-fields,.tk-k,.pr-k){
+  color:var(--c-tinta3) !important}
+.claro :is(.sk-n,.sec-n,.sec-go,.bcd-go,.press-all,a.mono){color:var(--c-azul) !important}
+.claro :is(.sec-go,.bcd-go,.press-all):hover{color:var(--c-azul2) !important}
+
+/* ── las placas: papel sobre papel, que se separan por sombra y no por color ── */
+.claro :is(.sec-card,.bcd,.bcd-plate,.pcd){
+  background-color:var(--c-papel) !important;
+  background-image:none !important;
+  border:1px solid var(--c-linea) !important;
+  box-shadow:0 1px 2px rgba(8,11,17,.04),
+             0 14px 34px -22px rgba(8,11,17,.28) !important}
+.claro :is(.sec-card,.bcd):hover{
+  border-color:var(--c-linea2) !important;
+  box-shadow:0 2px 4px rgba(8,11,17,.05),
+             0 22px 50px -24px rgba(8,11,17,.34) !important}
+
+/* ── las capturas de producto se quitan el filtro ──
+   Estaban al 34 % de brillo para no gritar sobre el negro. Sobre papel no
+   tienen que disimular nada: son la unica prueba visual de que el producto
+   existe, y aqui se ven como son. */
+.claro :is(.bcd-foto,.bcd-plate) img,.claro .bcd-shot{
+  filter:none !important}
+.claro :is(.bcd-foto,.bcd-plate)::after{display:none !important}
+.claro .bcd-plate{padding:0;overflow:hidden}
+/* El marco de la captura seguia en azul de noche: un reborde oscuro alrededor
+   de una interfaz clara sobre papel. El marco desaparece y lo que separa la
+   imagen del suelo es su propia sombra. */
+.claro .bcd-art{background:transparent !important;background-color:transparent !important}
+.claro .bcd-art .bcd-plate{border:1px solid var(--c-linea) !important;border-radius:4px}
+
+/* ── los iconos y las insignias, del otro lado ── */
+.claro .rows .ic{background:rgba(14,58,196,.07) !important;
+  box-shadow:inset 0 0 0 1px rgba(14,58,196,.20) !important}
+.claro .rows .ic svg{stroke:var(--c-azul) !important}
+.claro .rows li:hover .ic{background:rgba(14,58,196,.13) !important;
+  box-shadow:inset 0 0 0 1px rgba(14,58,196,.34) !important}
+.claro .sec-ic{background:rgba(14,58,196,.07) !important;
+  border:1px solid rgba(14,58,196,.20) !important;color:var(--c-azul) !important}
+.claro .sec-ic svg{stroke:var(--c-azul) !important}
+.claro .sec-ok{background:rgba(14,58,196,.07) !important;
+  border:1px solid rgba(14,58,196,.22) !important;color:var(--c-azul2) !important}
+.claro .sec-ok::before,.claro .sec-ok i:first-child{background:var(--c-azul) !important}
+/* El punto de «Testnet» NO pasa a azul. Es el verde de la casa y significa
+   «esto esta vivo»; su bateria comprueba que sea el MISMO verde que el punto
+   del aviso de portada, y un verde que cambia de banda deja de ser un estado
+   para ser un adorno. Se queda como esta. */
+
+/* ── los filetes ── */
+.claro :is(.rows li,.sec-fields>*,.sec-foot,.builds-foot,.sec-top){
+  border-color:var(--c-linea) !important}
+.claro .cn{border-color:var(--c-linea2) !important;color:var(--c-linea2) !important}
+.claro .via{--via-c:rgba(8,11,17,.16)}
+.claro .via::after{background:var(--c-azul)}
+.claro .sec-dots i{background:rgba(8,11,17,.16)}
+.claro .sec-dots i.on{background:var(--c-azul)}
+
+/* ── y el HUD recupera su modo claro ──
+   Se lo habia quitado -«ya no hay nada claro debajo»- y volvio a haberlo. La
+   bandera la pone sola la pagina leyendo el «data-bg» de la banda que cubre el
+   rincon, asi que basta con devolverle las reglas. */
+body.light .hud-band,body.light .hud-count,body.light .hud .lang,
+body.light .hud-count b,body.light .srail,body.light .scrollbtn svg{
+  color:var(--c-azul) !important;stroke:var(--c-azul) !important}
+body.light .hud-band i{background:var(--c-azul) !important}
+body.light .subir{background:rgba(255,255,255,.72) !important;
+  border-color:rgba(8,11,17,.14) !important}
+body.light .subir svg{stroke:var(--c-tinta) !important}
+body.light .hud::after{background:radial-gradient(120% 120% at 100% 100%,
+    rgba(244,245,248,.92) 0%, rgba(244,245,248,.60) 42%, rgba(244,245,248,0) 78%) !important}
+
+/* ══ EL CORTE, Y LO QUE PASA CUANDO SE CRUZA ══════════════════════════════
+   Una pagina que cambia de negro a papel tiene tres sitios donde pasa algo, y
+   los tres son el MISMO sitio: la linea donde acaba uno y empieza el otro. Un
+   fundido ahi seria tirar el gesto a la basura. Lo que hace cada corte:
+
+     1 · EL FILO. Una linea de dos pixeles que no aparece: se ABRE desde el
+         centro hacia los dos lados, con el brillo por delante y apagandose
+         detras. Dura medio segundo y no vuelve a salir hasta que se sale y se
+         entra otra vez. Es lo que convierte un borde en un acontecimiento.
+     2 · EL BARRIDO. Al cruzar, una sola linea recorre la pantalla entera de
+         arriba abajo, una vez, en 700 ms. No es decoracion: es lo que le dice
+         al ojo que el cambio es del SITIO, no del trozo que esta mirando.
+     3 · LA REJILLA. El papel trae una retícula de un pixel al 4 %, que se
+         mueve mas despacio que el scroll. Sobre negro una retícula es ruido;
+         sobre papel es lo que hace que el blanco tenga PROFUNDIDAD en vez de
+         ser un hueco.
+
+   Y las placas responden al raton con una inclinacion de tres grados. Tres,
+   no diez: a diez es un truco, a tres es un objeto que pesa. */
+
+.corte{position:absolute;left:0;right:0;top:-1px;height:2px;z-index:6;
+  pointer-events:none;overflow:visible}
+.corte i{position:absolute;inset:0;display:block;transform:scaleX(0);
+  transform-origin:50% 50%;
+  background:linear-gradient(90deg,
+    rgba(26,86,255,0) 0%, rgba(26,86,255,.55) 18%,
+    #FFFFFF 50%, rgba(26,86,255,.55) 82%, rgba(26,86,255,0) 100%);
+  box-shadow:0 0 22px -2px rgba(40,110,255,.75)}
+.corte.on i{transform:scaleX(1);
+  transition:transform .62s cubic-bezier(.16,.84,.26,1)}
+.corte.on i{animation:filoApaga 1.5s .42s ease-out forwards}
+@keyframes filoApaga{ to{ box-shadow:0 0 0 0 rgba(40,110,255,0); opacity:.34 } }
+.claro .corte i{background:linear-gradient(90deg,
+    rgba(14,58,196,0) 0%, rgba(14,58,196,.5) 18%,
+    #0B1020 50%, rgba(14,58,196,.5) 82%, rgba(14,58,196,0) 100%);
+  box-shadow:0 0 18px -4px rgba(14,58,196,.5)}
+
+/* el barrido: una sola pasada, en una capa fija que no toca el flujo */
+#barrido{position:fixed;inset:0;z-index:70;pointer-events:none;opacity:0;
+  background:linear-gradient(180deg,
+    rgba(255,255,255,0) 0%, rgba(140,180,255,.10) 42%,
+    rgba(255,255,255,.85) 50%, rgba(140,180,255,.10) 58%,
+    rgba(255,255,255,0) 100%);
+  background-size:100% 26%;background-repeat:no-repeat;background-position:0 -30%;
+  mix-blend-mode:screen}
+#barrido.va{animation:barre .72s cubic-bezier(.4,0,.2,1) forwards}
+@keyframes barre{
+  0%{opacity:0;background-position:0 -30%}
+  12%{opacity:1}
+  88%{opacity:1}
+  100%{opacity:0;background-position:0 130%}
+}
+#barrido.oscuro{mix-blend-mode:multiply;
+  background:linear-gradient(180deg,
+    rgba(0,0,0,0) 0%, rgba(10,20,60,.10) 42%,
+    rgba(6,10,26,.42) 50%, rgba(10,20,60,.10) 58%,
+    rgba(0,0,0,0) 100%);
+  background-size:100% 26%;background-repeat:no-repeat}
+
+/* la reticula del papel */
+.claro>.malla{position:absolute;inset:0;z-index:0;pointer-events:none;opacity:0;
+  transition:opacity 1.1s ease;
+  background-image:
+    linear-gradient(90deg, rgba(8,11,17,.055) 0 1px, transparent 1px 100%),
+    linear-gradient(180deg, rgba(8,11,17,.045) 0 1px, transparent 1px 100%);
+  background-size:124px 124px,124px 124px;
+  transform:translate3d(0,var(--malla-y,0px),0);
+  -webkit-mask-image:radial-gradient(120% 92% at 50% 40%,#000 0%,#000 46%,transparent 86%);
+          mask-image:radial-gradient(120% 92% at 50% 40%,#000 0%,#000 46%,transparent 86%)}
+.claro.vista>.malla{opacity:1}
+/* OJO: «.sec-stage» ES STICKY. Ponerle «position:relative» para subirlo por
+   encima de la reticula le quitaba el pegado, y en movil eso deja media
+   pantalla de papel vacio al final de la seccion -la escena se iba con el
+   scroll en vez de quedarse-. Sobre negro no se veia; sobre papel un hueco
+   blanco de una pantalla es lo primero que se ve. Sticky ya crea contexto de
+   apilado, asi que con el «z-index» basta. */
+.claro>.wrap{position:relative;z-index:1}
+.claro>.sec-stage{z-index:1}
+/* y la reticula, en pantalla estrecha, mas grande y mas tenue: a 124 px en un
+   movil de 430 se lee como papel cuadriculado en vez de como profundidad */
+@media(max-width:760px){
+  .claro>.malla{background-size:82px 82px,82px 82px;
+    background-image:
+      linear-gradient(90deg, rgba(8,11,17,.032) 0 1px, transparent 1px 100%),
+      linear-gradient(180deg, rgba(8,11,17,.026) 0 1px, transparent 1px 100%)}
+}
+
+/* la inclinacion de las placas */
+.tilt{transform:perspective(900px)
+      rotateX(calc(var(--ty,0) * -3deg))
+      rotateY(calc(var(--tx,0) * 3deg))
+      translate3d(0,0,0);
+  transition:transform .5s cubic-bezier(.16,.84,.26,1)}
+.tilt.agarra{transition:transform .12s linear}
+@media(prefers-reduced-motion:reduce){
+  .tilt{transform:none !important}
+  .corte i{transition:none !important;animation:none !important;transform:scaleX(1) !important}
+  #barrido{display:none !important}
+  .claro>.malla{transform:none !important}
+}
 </style>
 </head>
 <body class="ann-fuera">
@@ -4939,7 +5171,7 @@ p.sec-sub,p.sale-sub,p.join-note,span.rd,.rd,.jbtn-sub,.lane-sub,.stk-sub s,
 </section>
 
 
-<section class="paper2 pad" id="solutions" data-bg="#06070A" data-acc="#0861F1"><i class="via" aria-hidden="true"></i>
+<section class="paper2 pad claro" id="solutions" data-bg="#F1F2F5" data-acc="#0861F1"><i class="via" aria-hidden="true"></i>
   <div class="wrap">
     <div class="k sk rv"><i class="sk-n">03</i>Guarantees</div>
     <h2 class="sec-h rows-h rv">Four guarantees, written into the protocol.</h2>
@@ -4975,7 +5207,7 @@ p.sec-sub,p.sale-sub,p.join-note,span.rd,.rd,.jbtn-sub,.lane-sub,.stk-sub s,
 </section>
 
 
-<section class="secure" id="security" data-bg="#06070A" data-acc="#0A5CF5"><i class="via" aria-hidden="true"></i>
+<section class="secure claro" id="security" data-bg="#F1F2F5" data-acc="#0A5CF5"><i class="via" aria-hidden="true"></i>
  <div class="sec-stage">
   <div class="wrap">
     <div class="sec-head">
@@ -5211,7 +5443,7 @@ p.sec-sub,p.sale-sub,p.join-note,span.rd,.rd,.jbtn-sub,.lane-sub,.stk-sub s,
 </section>
 
 
-<section class="builds" id="builds" data-bg="#000000" data-acc="#63A9FF"><i class="via" aria-hidden="true"></i>
+<section class="builds claro" id="builds" data-bg="#F1F2F5" data-acc="#63A9FF"><i class="via" aria-hidden="true"></i>
   <div class="wrap builds-head">
     <div class="k sk rv"><i class="sk-n">08</i>What we are building</div>
     <h2 class="builds-h">Two pieces, both already running.</h2>
@@ -5831,9 +6063,20 @@ const CALM=matchMedia('(prefers-reduced-motion: reduce)').matches;
     const mix=(a,b,t)=>[a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t,a[2]+(b[2]-a[2])*t];
     const css=c=>'rgb('+c.map(v=>Math.round(v)).join(',')+')';
     const dark=c=>c.map(v=>v*0.42);
-    const bands=[...document.querySelectorAll('[data-bg]')].map(n=>({
-      n, top:0, bg:hex(n.dataset.bg), acc:hex(n.dataset.acc)
-    }));
+    /* LAS BANDAS DE PAPEL SE QUEDAN FUERA DEL LAVADO, Y NO ES UN DETALLE.
+       El lavado es un fondo fijo que interpola entre el color de una banda y
+       el de la siguiente, y lo consumen cuatro elementos TRANSPARENTES: la
+       portada, la pila de cubos, las secciones oscuras y el pie. Mientras
+       todas las bandas eran negras eso daba continuidad. Con tres bandas de
+       papel dentro, la interpolacion arrastraba el blanco hasta la pila: se
+       veia el campo de cubos sobre un gris de lavadora.
+       Y no se arregla con un color: lo que se pide de una banda de papel es
+       justo lo contrario de interpolar. El corte tiene que ser SECO. Las tres
+       pintan su propio suelo, opaco, asi que dejarlas fuera no quita nada y
+       devuelve el lavado a lo que hace bien, que es coser negros entre si. */
+    const bands=[...document.querySelectorAll('[data-bg]')]
+      .filter(n=>!n.closest('.claro'))
+      .map(n=>({ n, top:0, bg:hex(n.dataset.bg), acc:hex(n.dataset.acc) }));
     if(!bands.length)return;
     let vivas=bands;
     /* NI UNA VARIABLE HEREDABLE EN LA RAIZ POR CUADRO.
@@ -9886,6 +10129,115 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
     .observe(num,{childList:true,characterData:true,subtree:true});
   if(document.fonts&&document.fonts.ready) document.fonts.ready.then(function(){ if(W){medir();pedir()} });
   medir(); pedir();
+})();
+</script>
+<script>
+/* ── el corte, el barrido, la reticula y la inclinacion ──
+   Todo cuelga de un solo IntersectionObserver y de un solo bucle de scroll,
+   y los dos escriben unicamente propiedades que NO obligan a recalcular
+   geometria: una clase, una variable de transformacion. La pagina ya tenia
+   un presupuesto de cuadro justo -treinta y tres milisegundos de techo en
+   esta maquina- y esto no puede costarle nada. */
+(function(){
+  const claras=[...document.querySelectorAll('main>section.claro')];
+  if(!claras.length)return;
+  const quieto=matchMedia('(prefers-reduced-motion:reduce)').matches;
+
+  /* 1 · el filo, en el borde de cada banda de papel y en el de la que la
+         sigue: los cortes van de dos en dos, entrando y saliendo. */
+  const bordes=[];
+  for(const s of claras){
+    bordes.push(s);
+    const sig=s.nextElementSibling;
+    if(sig&&sig.tagName==='SECTION')bordes.push(sig);
+  }
+  for(const s of bordes){
+    if(s.querySelector(':scope>.corte'))continue;
+    if(getComputedStyle(s).position==='static')s.style.position='relative';
+    const c=document.createElement('i');
+    c.className='corte';c.setAttribute('aria-hidden','true');
+    c.appendChild(document.createElement('i'));
+    s.insertBefore(c,s.firstChild);
+  }
+  /* 2 · la reticula, solo en el papel */
+  for(const s of claras){
+    if(s.querySelector(':scope>.malla'))continue;
+    const m=document.createElement('i');
+    m.className='malla';m.setAttribute('aria-hidden','true');
+    s.insertBefore(m,s.firstChild);
+  }
+  /* 3 · la capa del barrido */
+  let capa=document.getElementById('barrido');
+  if(!capa){capa=document.createElement('div');capa.id='barrido';
+    capa.setAttribute('aria-hidden','true');document.body.appendChild(capa)}
+
+  const oi=new IntersectionObserver(es=>{
+    for(const e of es){
+      const c=e.target.querySelector(':scope>.corte');
+      if(c)c.classList.toggle('on',e.isIntersecting);
+      if(e.target.classList.contains('claro'))
+        e.target.classList.toggle('vista',e.isIntersecting);
+    }
+  },{rootMargin:'-2px 0px -92% 0px',threshold:0});
+  for(const s of bordes)oi.observe(s);
+
+  /* el barrido se dispara al CRUZAR, no al estar: se mira si la banda de
+     papel pasa de fuera a dentro del tercio central de la pantalla, que es
+     donde el ojo esta. Una vez por cruce y con un candado de un segundo,
+     porque si no al arrastrar rapido salen tres seguidos y eso ya no es un
+     corte, es un parpadeo. */
+  let ultimo=0, dentro=new WeakMap();
+  const cruce=new IntersectionObserver(es=>{
+    if(quieto)return;
+    const t=performance.now();
+    for(const e of es){
+      const antes=dentro.get(e.target)||false;
+      dentro.set(e.target,e.isIntersecting);
+      if(antes===e.isIntersecting)continue;
+      if(t-ultimo<900)continue;
+      ultimo=t;
+      capa.classList.toggle('oscuro',e.isIntersecting);
+      capa.classList.remove('va');void capa.offsetWidth;
+      capa.classList.add('va');
+    }
+  },{rootMargin:'-34% 0px -34% 0px',threshold:0});
+  for(const s of claras)cruce.observe(s);
+
+  /* 4 · la reticula se mueve mas despacio que el scroll */
+  if(!quieto){
+    let pend=false;
+    const mueve=()=>{
+      pend=false;
+      for(const s of claras){
+        if(!s.classList.contains('vista'))continue;
+        const m=s.querySelector(':scope>.malla');if(!m)continue;
+        const r=s.getBoundingClientRect();
+        m.style.setProperty('--malla-y',(r.top*-0.06).toFixed(1)+'px');
+      }
+    };
+    addEventListener('scroll',()=>{ if(pend)return;pend=true;requestAnimationFrame(mueve) },{passive:true});
+    mueve();
+  }
+
+  /* 5 · la inclinacion: solo con raton de verdad, y leyendo la caja UNA vez
+         por entrada en vez de en cada movimiento. */
+  if(!quieto&&matchMedia('(hover:hover) and (pointer:fine)').matches){
+    const placas=[...document.querySelectorAll('.claro .sec-card, .claro .bcd, .pcd, .join .jbtn')];
+    for(const p of placas){
+      p.classList.add('tilt');
+      let caja=null;
+      p.addEventListener('pointerenter',()=>{caja=p.getBoundingClientRect();p.classList.add('agarra')});
+      p.addEventListener('pointermove',ev=>{
+        if(!caja)return;
+        p.style.setProperty('--tx',((ev.clientX-caja.left)/caja.width*2-1).toFixed(3));
+        p.style.setProperty('--ty',((ev.clientY-caja.top)/caja.height*2-1).toFixed(3));
+      },{passive:true});
+      p.addEventListener('pointerleave',()=>{
+        caja=null;p.classList.remove('agarra');
+        p.style.setProperty('--tx',0);p.style.setProperty('--ty',0);
+      });
+    }
+  }
 })();
 </script>
 </body>
