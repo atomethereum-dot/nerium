@@ -4833,20 +4833,30 @@ body.light .hud::after{background:radial-gradient(120% 120% at 100% 100%,
    animar sin volver a pintar, y son las dos unicas que usa. Se ve igual: el
    blanco al 85 % sobre negro ya aclara sin necesitar «screen», y sobre papel
    entra la version oscura, que es la misma tira con la tinta al reves. */
-#barrido{position:fixed;left:0;right:0;top:0;height:26vh;z-index:70;
+/* EL TIEMPO. A 0,72 s esto no era una luz cruzando: era un fogonazo. Una
+   pasada de luz se lee como luz cuando se puede SEGUIR con el ojo, y para eso
+   hace falta que tarde mas de lo que tarda un parpadeo -unos 300 ms-. Va a
+   1,6 s, que es el doble largo, y con la curva cambiada: entra sin acelerones
+   y frena al final en vez de salir disparada. La tira ademas se hace mas alta
+   -40 % de pantalla en vez de 26 %- y se difumina mas: una banda estrecha y
+   rapida es un destello, una ancha y lenta es un barrido. Sigue sin costar
+   nada: transformacion y opacidad, como antes. */
+#barrido{position:fixed;left:0;right:0;top:0;height:40vh;z-index:70;
   pointer-events:none;opacity:0;
-  transform:translate3d(0,-130%,0);
+  transform:translate3d(0,-115%,0);
   will-change:transform,opacity;
   background:linear-gradient(180deg,
-    rgba(255,255,255,0) 0%, rgba(150,190,255,.14) 40%,
-    rgba(238,244,255,.62) 50%, rgba(150,190,255,.14) 60%,
+    rgba(255,255,255,0) 0%, rgba(150,190,255,.07) 30%,
+    rgba(198,220,255,.22) 44%,
+    rgba(238,244,255,.50) 50%,
+    rgba(198,220,255,.22) 56%, rgba(150,190,255,.07) 70%,
     rgba(255,255,255,0) 100%)}
-#barrido.va{animation:barre .72s cubic-bezier(.4,0,.2,1) forwards}
+#barrido.va{animation:barre 1.6s cubic-bezier(.33,.06,.28,1) forwards}
 @keyframes barre{
-  0%  {opacity:0;   transform:translate3d(0,-130%,0)}
-  12% {opacity:1}
-  88% {opacity:1}
-  100%{opacity:0;   transform:translate3d(0,500%,0)}
+  0%  {opacity:0;   transform:translate3d(0,-115%,0)}
+  9%  {opacity:1}
+  84% {opacity:1}
+  100%{opacity:0;   transform:translate3d(0,290%,0)}
 }
 #barrido.oscuro{background:linear-gradient(180deg,
     rgba(8,11,17,0) 0%, rgba(12,26,72,.10) 40%,
@@ -5027,6 +5037,76 @@ body.light .hud::after{background:radial-gradient(120% 120% at 100% 100%,
 /* la banda deja de tener caja propia: es una linea de creditos, no un carril */
 .lane::before{display:none !important}
 .lane{padding:clamp(10px,1.2vw,16px) 0 !important}
+
+/* ══ EL SISTEMA: MARGEN, ESCALA Y MEDIDA ══════════════════════════════════
+   Auditada la pagina entera midiendo, no mirando. Lo que salio:
+
+     · la caja de contenido es «min(1360px, 100% - 64px)». A 1440 eso deja el
+       contenido ocupando el 94 % del ancho, con 40 px de margen. Noventa y
+       cuatro por ciento es la proporcion de un PANEL DE CONTROL. Una
+       publicacion deja respirar el borde: el margen es lo primero que dice
+       si algo esta compuesto o solo colocado.
+     · el cuerpo va a 15 px. Es el tamaño de una interfaz, no el de un texto
+       que alguien va a leer de verdad.
+     · y la medida de linea va de 41 a 103 caracteres segun la seccion. 103 es
+       ilegible —el ojo pierde el renglon al volver— y 41 se corta a cada paso.
+       Un sistema no tiene medidas distintas: tiene UNA, entre 55 y 70.
+
+   Lo que se hace, y solo en pantallas grandes, que es donde se notaba:
+     · la caja baja a 1240 px con 112 px de margen a cada lado a 1440. El
+       contenido pasa del 94 % al 86 %. Ocho puntos de ancho no suenan a nada
+       y son exactamente la diferencia entre las dos cosas.
+     · el cuerpo sube a 16,5 px con la interlinea a 1,62. Un texto que se lee
+       sin esfuerzo es la señal mas barata de que alguien penso en el lector.
+     · y toda la prosa se acota a 68 caracteres. Las que se quedaban cortas
+       suben; la que se iba a 103 baja.
+     · el aire entre secciones sube de 132 a 168 px. El vacio no es espacio
+       sobrante: es lo que le dice al ojo donde acaba una idea. */
+
+@media(min-width:1200px){
+  .wrap{width:min(1240px, 100% - 112px)}
+}
+@media(min-width:1600px){
+  .wrap{width:min(1300px, 100% - 160px)}
+}
+
+:root{
+  --s5:clamp(54px,6.8vw,108px);
+  --s6:clamp(72px,10vw,168px);
+}
+
+body{font-size:16.5px;line-height:1.62}
+@media(max-width:760px){ body{font-size:16px;line-height:1.6} }
+
+/* ── la medida, una sola para toda la pagina ──
+   Se acota por caracteres y no por pixeles: asi sigue valiendo cuando el
+   tamaño de letra cambia con la pantalla, que es justo cuando una medida en
+   pixeles deja de significar nada. */
+p.sec-sub,p.sale-sub,p.lane-sub,p.tkp-sub,p.press-sub,p.builds-sub,
+.ruta-p,.hp-p,.bcd-d,.sec-p,.stk-sub s,.join-note{
+  max-width:68ch}
+.lane-sub{max-width:64ch}
+/* Las que se quedaban CORTAS suben: «join-note» iba a 42ch y «sale-sub» a 44,
+   y una columna de 46 caracteres al lado de otra de 67 no es un sistema, son
+   dos decisiones distintas tomadas en dias distintos. */
+.join-note,.sale-sub,.press-sub{max-width:62ch !important}
+
+/* ── y el titular se acota, pero con la medida de TITULAR ──
+   Primer intento: 17ch. Y la bateria lo canto, con razon y con el motivo ya
+   escrito de una vez anterior: «el de Security estaba encerrado en una columna
+   de 484 px teniendo 1360 de seccion, porque la caja llevaba la medida de LEER
+   y ahogaba al titular». Yo acababa de repetir ese error con otro numero:
+   52 %, 52 %, 44 % y 52 % del ancho de su seccion, y el limite esta en 45.
+   Un texto de lectura y un titular no tienen la misma medida buena. Leer comodo
+   son 55-70 caracteres porque el ojo tiene que volver al principio del renglon
+   muchas veces seguidas; un titular se lee UNA vez y de un golpe, asi que
+   aguanta mucho mas ancho y lo que necesita es MANDAR. 22ch: dos o tres
+   renglones, ocupa dos tercios de su columna, y no se estira hasta el borde. */
+h1,.sec-h,.press-h,.builds-h,.tkp-h,.sale-h,.ruta-h,.join-h{max-width:22ch}
+.hero h1{max-width:none}
+@media(max-width:899px){
+  h1,.sec-h,.press-h,.builds-h,.tkp-h,.sale-h,.ruta-h,.join-h{max-width:18ch}
+}
 </style>
 </head>
 <body class="ann-fuera">
@@ -10412,7 +10492,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
       const antes=dentro.get(e.target)||false;
       dentro.set(e.target,e.isIntersecting);
       if(antes===e.isIntersecting)continue;
-      if(t-ultimo<900)continue;
+      if(t-ultimo<1900)continue;   /* el candado acompaña a la duracion: 1,6 s + aire */
       ultimo=t;
       capa.classList.toggle('oscuro',e.isIntersecting);
       capa.classList.remove('va');void capa.offsetWidth;

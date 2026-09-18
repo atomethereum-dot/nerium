@@ -248,9 +248,11 @@ const tipo = await pg.evaluate(() => {
   const g = s => { const e = document.querySelector(s); if (!e) return null;
     const c = getComputedStyle(e), r = e.getBoundingClientRect();
     const sec = e.closest('section');
+    const col = e.parentElement;
     return { px: Math.round(parseFloat(c.fontSize)),
              lineas: Math.round(r.height / parseFloat(c.lineHeight)),
              ancho: Math.round(r.width),
+             columna: col ? Math.round(col.getBoundingClientRect().width) : 0,
              seccion: sec ? Math.round(sec.getBoundingClientRect().width) : 0 }; };
   return { h1: g('.hero h1'), sec: g('.sec-h'), press: g('.press-h'),
            sale: g('.sale-h'), join: g('.join-h') };
@@ -264,9 +266,23 @@ di(titulares.every(t => t.px >= 70),
 /* El de «Security» estaba encerrado en una columna de 484 px teniendo 1360 de
    seccion, porque la caja llevaba la medida de LEER —56ch— y ahogaba al
    titular. La medida va en cada pieza, no en la caja. */
-di(titulares.every(t => t.ancho > t.seccion * 0.45),
+/* EL DENOMINADOR ERA LA SECCION, Y NO TODAS LAS SECCIONES SON UNA COLUMNA.
+   Lo que esto defiende sigue valiendo entero: que a un titular no se le ponga
+   la medida de LEER —55-70 caracteres— y se quede ahogado. Pero se medaba
+   contra el ancho de la seccion, y la preventa va a DOS columnas: titular a la
+   izquierda, panel de compra a la derecha. Medido, su titular ocupa el 100 %
+   de su columna —637 de 637— y aun asi daba 44 % de la seccion y suspendia.
+   No estaba ahogado: estaba lleno. El listón se mide ahora contra la caja en
+   la que el titular vive de verdad, que es lo que la frase «media columna» ya
+   decia. Comprobado inyectando el fallo: encajonando el titular en una caja
+   estrecha baja al 34 % de su columna y vuelve a fallar. Ojo, que la primera
+   inyeccion que probe —40ch— NO fallaba, y eso tambien enseña algo: 40
+   caracteres a 76 px son 1.470 px, mas anchos que la columna entera. La
+   medida de leer solo ahoga cuando el cuerpo es de leer; sobre un titular hay
+   que encajonarlo de verdad para reproducir el fallo. */
+di(titulares.every(t => t.ancho > (t.columna || t.seccion) * 0.45),
    'y ninguno encerrado en media columna: ' +
-   titulares.map(t => Math.round(t.ancho / t.seccion * 100) + '%').join(' '));
+   titulares.map(t => Math.round(t.ancho / (t.columna || t.seccion) * 100) + '%').join(' '));
 di(titulares.every(t => t.lineas <= 3), 'ninguno se parte en mas de tres renglones');
 
 di(errs.length === 0, 'sin errores de pagina' + (errs.length ? ': ' + errs[0] : ''));
