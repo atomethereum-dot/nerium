@@ -5146,6 +5146,85 @@ h1,.sec-h,.press-h,.builds-h,.tkp-h,.sale-h,.ruta-h,.join-h{max-width:22ch}
   h1,.sec-h,.press-h,.builds-h,.tkp-h,.sale-h,.ruta-h,.join-h{
     max-width:16ch;line-height:1.04}
 }
+
+/* ══ EL TELEFONO, LO QUE SE TOCA Y LO QUE SE LEE ══════════════════════════
+   Auditado a 360, 390 y 430 px. Lo bueno: no se sale nada por el lado en
+   ninguno de los tres -«scrollWidth» igual al ancho- y la rejilla aguanta.
+   Lo que sale mal son las dos cosas que en un movil se notan de verdad, y
+   ninguna es de gusto:
+
+   1 · LO QUE SE TOCA ES DEMASIADO PEQUEÑO. La guia de Apple y la de Google
+       dicen 44 px de lado; aqui la HAMBURGUESA mide 36, la equis del aviso
+       26, la flecha de bajar 30, las flechas de prensa 38 y «All coverage»
+       DIECIOCHO px de alto. No es un detalle de accesibilidad: es la
+       diferencia entre un sitio que responde al primer toque y uno en el que
+       hay que apuntar. Y apuntar con el pulgar en un movil es exactamente la
+       sensacion de «esto esta mal hecho», aunque nadie sepa decir por que.
+       Se agranda la ZONA, no el dibujo: el icono sigue midiendo lo que media
+       y lo que crece es el area que escucha. Asi no cambia nada de como se
+       ve y cambia todo de como se usa.
+
+   2 · SEIS ROTULOS A 10 px. La fila de datos de la portada entera -«Seed
+       Round open», «85 % complete», «1 NRM = $0.20», «Ethereum · BNB Chain»,
+       «Contracts verified»-, el idioma y la firma del telon. Diez pixeles en
+       una pantalla de 430 es letra que se MIRA, no que se lee: se reconoce
+       que hay algo escrito y no se llega a leer sin acercar el telefono.
+       Suben a 12, que con el tracking que llevan sigue siendo un rotulo
+       pequeño y ya es legible. */
+
+@media(max-width:899px){
+  /* ── el area que escucha ── */
+  .burger{width:44px;height:44px}
+  /* La equis del aviso NO crece de caja: escrito arriba esta que «se agranda
+     la ZONA, no el dibujo», y luego la agrande con «width/height», que es
+     justo lo contrario. A 320 px de ancho el aviso dejo de caber y su texto
+     chocaba con ella —lo canto «probar_portada»—. La forma correcta es un
+     pseudo-elemento que sobresale: el dedo encuentra 44 px, la maqueta sigue
+     viendo 26 y nada se mueve. */
+  /* Y el «position:relative» sobraba y ademas rompia: la equis YA era
+     «absolute», o sea que ya estaba fuera del flujo y ya era contexto para su
+     pseudo-elemento. Ponerla en «relative» la metio en la fila y empujo el
+     aviso 13 px a la izquierda —exactamente medio boton—, que es el mismo
+     error que su comentario lleva anotado tres veces: descontar el hueco de un
+     boton por un solo lado. Basta con el pseudo-elemento. */
+  .ann-x::after{content:"";position:absolute;inset:-9px;border-radius:inherit}
+  .scrollbtn,.subir{width:44px;height:44px}
+  .pn{width:44px;height:44px}
+  .brand{padding:7px 0}
+  .hd .get{min-height:42px;display:inline-flex;align-items:center}
+  .press-all,.sec-go,.bcd-go,.hp-go,.tk-go,.lane a,a.mono{
+    display:inline-flex;align-items:center;min-height:44px}
+  .srail button{min-height:44px}
+
+  /* ── lo que se lee ── */
+  /* LA FILA DE DATOS DE LA PORTADA: SOLO EL TAMAÑO, Y AQUI ME EQUIVOQUE
+     PRIMERO. La vi caer en cinco renglones centrados y la di por mal ajustada:
+     intente apretarla a dos por linea bajando el tracking. No funcionaba, y al
+     ir a ver por que aparecio «.lq .hero-pr», que la pone en COLUMNA a
+     proposito —«en columna las patas entran alternando arriba/abajo, que en
+     vertical un desplazamiento lateral no se lee como llegar»—. O sea que los
+     cinco renglones no son un desajuste: son una coreografia, y mi primer
+     arreglo la habria roto.
+     Lo que si estaba mal es el tamaño: 10 px en una pantalla de 430 es letra
+     que se mira y no se lee. Sube a 12 y la columna se queda como esta. */
+  .lq .hero-pr,.lq .hero-pr li,.hero-pr li,.hero-pr li b,.hero-pr li span{
+    font-size:12px}
+  .hud .lang{font-size:12px}
+  .lk-tag span{font-size:12px}
+  .ann-k,.ann-n b{font-size:12.5px}
+  .hud-count{font-size:12px}
+  .bcd-tag,.sec-k,.pcd-tag{font-size:11.5px}
+
+  /* Segunda pasada: al arreglar los diez primeros aparecieron los que estaban
+     detras. Los importes del panel de compra median 31 px de alto —y eso es
+     un formulario donde se mete DINERO, el sitio de la pagina donde menos
+     gracia tiene fallar el toque— y los enlaces del pie 28. */
+  .w-chips button,.widget .prices button,.widget .pr-mult button,.w-swap button{
+    min-height:42px;padding-top:0;padding-bottom:0;
+    display:inline-flex;align-items:center;justify-content:center}
+  footer .fgrid a{min-height:40px;display:flex;align-items:center}
+  .fbrand{padding:6px 0}
+}
 </style>
 </head>
 <body class="ann-fuera">
