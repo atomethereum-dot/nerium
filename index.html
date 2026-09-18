@@ -11783,6 +11783,16 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
     var n=(sk.textContent||'').trim();
     if(!/^[0-9]{1,2}$/.test(n)) return;
     var cabeza=sk.closest('.sec-head,.press-head,.tkp-head,.builds-head,.join-head,.tm-head,.sale-top,.wrap');
+    /* Y NO DENTRO DE ALGO QUE RECORTE. El sistema de aparicion —«.rv»— lleva un
+       «clip-path» que recorta a sus hijos a la caja del bloque. En la ronda, el
+       cintillo vive en «.sale-top», que es «.rv»: una fila de 38 px de alto.
+       El numeral se pintaba entero y se cortaba ahi, y lo que se veia eran los
+       arcos de arriba del cero y del seis colgando bajo el cintillo. Si la
+       caja elegida recorta, se sube a la siguiente que no lo haga. */
+    while(cabeza && cabeza!==s && getComputedStyle(cabeza).clipPath!=='none'){
+      cabeza = cabeza.parentElement && cabeza.parentElement.closest(
+        '.sec-head,.press-head,.tkp-head,.builds-head,.join-head,.tm-head,.wrap,main>section');
+    }
     if(!cabeza || cabeza.querySelector(':scope>.cifron')) return;
     if(getComputedStyle(cabeza).position==='static') cabeza.style.position='relative';
     var c=document.createElement('i');
