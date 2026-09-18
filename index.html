@@ -5313,6 +5313,28 @@ h1,.sec-h,.press-h,.builds-h,.tkp-h,.sale-h,.ruta-h,.join-h{max-width:22ch}
   .sk>*{transform:none !important}
   .corte-sec i{animation:none !important;transform:scaleX(1) !important}
 }
+
+/* ══ EL VELO DEL RINCON SE VA ENTERO ══════════════════════════════════════
+   «.hud::after» es una capa FIJA con un «radial-gradient(120% 120% at 100%
+   100%)» —pegada a la esquina inferior derecha— que existe para que los
+   mandos del rincon se lean sobre lo que haya debajo. Tiene una version
+   oscura y otra clara, y la clara la pinte yo casi blanca al montar las
+   bandas de papel.
+
+   El problema no es la version clara en si: es que la bandera que decide cual
+   se pinta se calcula por cuadro a partir de la banda que cubre el rincon, y
+   al bajar rapido va medio segundo por detras. En ese medio segundo se pinta
+   un velo CLARO sobre una seccion OSCURA, y eso es la mancha blanca que sale
+   «en todas las secciones»: no esta en una seccion concreta, esta en el
+   CAMBIO entre una y otra, que es justo lo que uno hace al bajar.
+
+   Se podria perseguir la latencia. No merece la pena: el velo existia para
+   dar contraste a cuatro rotulos pequeños, y esos rotulos ya llevan su propio
+   color solido desde hace varias rondas —la bateria de contraste los mide y
+   pasan sin el—. Una capa fija a pantalla completa que solo sirve para algo
+   que ya esta resuelto por otro lado es una capa que sobra. Fuera las dos
+   versiones, la clara y la oscura. */
+.hud::after{display:none !important}
 </style>
 </head>
 <body class="ann-fuera">
