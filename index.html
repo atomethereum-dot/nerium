@@ -4873,6 +4873,135 @@ body.light .hud::after{background:radial-gradient(120% 120% at 100% 100%,
   #barrido{display:none !important}
   .claro>.malla{transform:none !important}
 }
+
+/* ══ EL MOVIMIENTO, REESCRITO ═════════════════════════════════════════════
+   La pagina ya revelaba tras mascara -eso estaba bien-, pero lo hacia MAL en
+   las tres cosas que deciden si un movimiento se lee caro o barato:
+
+   1 · IBA LENTO. 1,15 s de bloque y 1 s por palabra, con 42 ms entre palabra
+       y palabra: un titular de veinte palabras tardaba 1,8 s en terminar de
+       entrar. Lento no es elegante, es pesado. Lo caro es RAPIDO Y EXACTO:
+       0,62 s de bloque, 0,52 s de palabra y 19 ms de escalonado. Se termina
+       antes de que el ojo pregunte, que es justo lo que hace que parezca que
+       la pagina ya estaba hecha y solo se ha descubierto.
+
+   2 · MOVIA CUATRO PROPIEDADES A LA VEZ. Opacidad, desplazamiento, mascara y
+       desenfoque, las cuatro con curvas distintas. Eso no se lee como una
+       cosa: se lee como cuatro cosas mal sincronizadas, y es exactamente la
+       textura de una plantilla. Se queda la MASCARA -que es la que cuenta la
+       historia, «esto estaba impreso y se descubre»- y un desplazamiento
+       corto. Fuera la opacidad y fuera el desenfoque: un objeto que aparece
+       de la nada es un objeto de humo.
+
+   3 · ENTRABA EN EL BORDE. El disparador saltaba al asomar el elemento por
+       abajo, o sea que el movimiento ocurria donde nadie mira y para cuando
+       el ojo llegaba ya estaba quieto. Ahora entra un 14 % mas adentro.
+
+   Y la curva cambia: de (.16,.84,.26,1) a (.22,1,.30,1). La primera sale
+   despacio y se toma su tiempo; la segunda arranca de golpe y frena largo,
+   que es como se mueve algo que pesa y esta bien hecho. */
+
+:root{ --sal:cubic-bezier(.22,1,.30,1); --sal-l:cubic-bezier(.16,.9,.28,1) }
+
+.rv{opacity:1 !important;filter:none !important;
+  transform:translateY(16px);
+  clip-path:inset(0 -.35em 100% -.35em);
+  transition:transform .62s var(--sal), clip-path .62s var(--sal) !important}
+.rv.in{transform:none;clip-path:inset(-.4em -.35em -.4em -.35em)}
+
+.ws>.wi{transition:transform .52s var(--sal) var(--wd,0s), color .3s linear !important}
+.hero h1 .ws>.wi{transition:transform .58s var(--sal) var(--wd,0s),
+                            filter .40s ease var(--wd,0s) !important}
+[data-tit]{transition:clip-path .68s var(--sal), transform .68s var(--sal) !important}
+
+/* el escalonado de grupo: 70 ms, no 100 */
+.sec-grid>.rv:nth-child(2),.join-grid>*:nth-child(2){transition-delay:.07s !important}
+.sec-grid>.rv:nth-child(3){transition-delay:.14s !important}
+.builds-rail>.bcd:nth-child(2){transition-delay:.07s}
+.rows li:nth-child(2){transition-delay:.06s}
+.rows li:nth-child(3){transition-delay:.12s}
+.rows li:nth-child(4){transition-delay:.18s}
+
+/* ── y los filetes SE DIBUJAN, no se encienden ──
+   Un filete que aparece con opacidad es una linea que estaba ahi y alguien
+   subio el brillo. Un filete que se dibuja de izquierda a derecha es una
+   maquina trazandolo. Cuesta lo mismo y no se parecen en nada. */
+.sk::after,.k::after,.sec-head .sk i:last-child{transform-origin:0 50%}
+.rv .sk::after,.sk::after{transform:scaleX(0);
+  transition:transform .8s var(--sal-l) .12s}
+.rv.in .sk::after,.in .sk::after,.vis .sk::after{transform:scaleX(1)}
+
+/* ── el estado de reposo de las placas ──
+   Entraban con el mismo bloque que su seccion. Ahora entran DESPUES y desde
+   mas abajo, que es lo que separa «el titulo y sus tarjetas» de «una seccion
+   entera parpadeando». */
+.sec-card,.bcd,.pcd{transition:transform .66s var(--sal),
+  border-color .45s ease, box-shadow .45s ease}
+
+@media(prefers-reduced-motion:reduce){
+  .rv,.rv.in{transform:none !important;clip-path:none !important}
+  .ws>.wi{transform:none !important}
+  .sk::after{transform:scaleX(1) !important}
+}
+
+/* ── la cifra del centro de la rosca ──
+   «160M» estaba en #1A2233 sobre negro, o sea casi invisible: una regla del
+   diseño claro -«sobre papel el numero va oscuro»- que nunca se revirtio al
+   pasar la pagina a negro. Lleva meses ahi. Y la bateria de contraste NO podia
+   cazarla: su fondo lo pinta un lienzo, y lo que no esta en el CSS la bateria
+   lo declara «sin medir» en vez de inventarselo. Es la cifra que da nombre a
+   la seccion; va en tinta viva. */
+.tkp .tkp-core b,.tkp .tkp-core.named b{color:#EDF1F8 !important}
+.tkp .tkp-core span{color:#8E99AD !important}
+.tkp .tkp-core em{color:#7E889A !important}
+.tkp .tkp-row span{color:#C8D0DE !important}
+
+/* ── y las guias de la rosca, mas finas y mas calladas ──
+   La linea lleva al ojo; si pesa lo mismo que el rotulo, compiten. */
+.tkp-lead{stroke-width:1 !important;opacity:.5}
+.tkp-cal .tkp-dot{opacity:.9}
+.tkp-n{font-variant-numeric:tabular-nums}
+
+/* ══ LA FILA DE COMPATIBILIDAD ════════════════════════════════════════════
+   Esto era lo peor de la pagina y es lo SEGUNDO que se ve. Siete pastillas
+   blancas de 12 px de radio, con sombra y borde, flotando sobre el negro, y
+   dentro —medido— «background: rgba(255,255,255,.92)» con «color:
+   rgba(232,236,244,.78)»: BLANCO SOBRE BLANCO. Los nombres de Ethereum, BNB,
+   MetaMask y compania llevaban meses invisibles, a 1,14 de contraste. Lo que
+   se veia era una fila de rectangulos blancos vacios con un iconito a la
+   izquierda, y eso es exactamente la textura de una plantilla.
+
+   La bateria de contraste lo cazaba a rachas y no siempre: la fila es una
+   marquesina que se mueve, y segun donde estuviera al medir, el texto caia
+   dentro o fuera del recorte. Una prueba que solo acierta a veces es una
+   prueba que se acaba ignorando; por eso aparecia y desaparecia.
+
+   Fuera la pastilla. Una fila de compatibilidad no es una botonera: es un
+   creditos. Logotipo y nombre, sin caja, sobre el suelo de la pagina, en gris
+   callado; al pasar el raton el nombre sube a tinta viva y el logotipo a
+   opacidad plena. La fila entera se lee como UNA textura en vez de como siete
+   objetos, que es lo que hace que parezca pensada. */
+.lane-in span{
+  background:none !important;background-color:transparent !important;
+  border:0 !important;box-shadow:none !important;
+  padding:6px 0 !important;border-radius:0 !important;
+  gap:12px !important;
+  font-size:clamp(14px,1.25vw,16px) !important;font-weight:400 !important;
+  letter-spacing:-.005em !important;
+  color:#8A93A5 !important;
+  transition:color .3s var(--sal),opacity .3s ease !important;
+  transform:none !important}
+.lane-in span img{opacity:.72;transition:opacity .3s ease}
+.lane-in span:hover{color:#EDF1F8 !important;transform:none !important}
+.lane-in span:hover img{opacity:1}
+/* y una separacion de verdad entre uno y otro, que antes la daba la caja */
+.lane-in{gap:clamp(34px,4vw,60px) !important}
+/* el punto de color sobra: donde hay logotipo ya lo decia el logotipo, y
+   donde no lo hay el nombre basta */
+.lane-in span::before{display:none !important}
+/* la banda deja de tener caja propia: es una linea de creditos, no un carril */
+.lane::before{display:none !important}
+.lane{padding:clamp(10px,1.2vw,16px) 0 !important}
 </style>
 </head>
 <body class="ann-fuera">
@@ -5366,53 +5495,53 @@ body.light .hud::after{background:radial-gradient(120% 120% at 100% 100%,
   <figure class="tkp-fig" id="tkpFig">
     <canvas class="tkp-cv" id="tkpCv"></canvas>
     <svg class="tkp-svg" viewBox="0 0 1400 980" aria-label="Token allocation">
-      <g class="tkp-cal" data-k="0" style="--d:0.10s;--c:#0A5CF5">
-        <polyline class="tkp-lead" points="1012.0,470.0 1100,470.0 1178,470.0" pathLength="100"/>
-        <circle class="tkp-dot" cx="1012.0" cy="470.0" r="4.5"/><circle class="tkp-dot" cx="1178" cy="470.0" r="4.5"/>
+      <g class="tkp-cal" data-k="0" style="--d:0.10s;--c:#1A54F0">
+        <polyline class="tkp-lead" points="1012.0,470.0 1046.0,470.0 1120.0,470.0 1178.0,470.0" pathLength="100"/>
+        <circle class="tkp-dot" cx="1012.0" cy="470.0" r="4"/>
         <text class="tkp-n" x="1196" y="461.0" text-anchor="start">50.0%</text>
         <text class="tkp-l" x="1196" y="492.0" text-anchor="start">PRIVATE SALE</text>
       </g>
-      <g class="tkp-cal" data-k="1" style="--d:0.17s;--c:#3985FF">
-        <polyline class="tkp-lead" points="558.4,748.0 300,703.4 222,703.4" pathLength="100"/>
-        <circle class="tkp-dot" cx="558.4" cy="748.0" r="4.5"/><circle class="tkp-dot" cx="222" cy="703.4" r="4.5"/>
-        <text class="tkp-n" x="204" y="694.4" text-anchor="end">15.0%</text>
-        <text class="tkp-l" x="204" y="725.4" text-anchor="end">CEX LISTING</text>
+      <g class="tkp-cal" data-k="1" style="--d:0.17s;--c:#0E3AC4">
+        <polyline class="tkp-lead" points="558.4,748.0 542.9,778.3 280.0,763.1 222.0,763.1" pathLength="100"/>
+        <circle class="tkp-dot" cx="558.4" cy="748.0" r="4"/>
+        <text class="tkp-n" x="204" y="754.1" text-anchor="end">15.0%</text>
+        <text class="tkp-l" x="204" y="785.1" text-anchor="end">CEX LISTING</text>
       </g>
-      <g class="tkp-cal" data-k="2" style="--d:0.25s;--c:#134CA8">
-        <polyline class="tkp-lead" points="403.3,566.4 300,537.3 222,537.3" pathLength="100"/>
-        <circle class="tkp-dot" cx="403.3" cy="566.4" r="4.5"/><circle class="tkp-dot" cx="222" cy="537.3" r="4.5"/>
-        <text class="tkp-n" x="204" y="528.3" text-anchor="end">10.0%</text>
-        <text class="tkp-l" x="204" y="559.3" text-anchor="end">MARKETING</text>
+      <g class="tkp-cal" data-k="2" style="--d:0.25s;--c:#0A2B96">
+        <polyline class="tkp-lead" points="403.3,566.4 370.9,576.9 280.0,581.5 222.0,581.5" pathLength="100"/>
+        <circle class="tkp-dot" cx="403.3" cy="566.4" r="4"/>
+        <text class="tkp-n" x="204" y="572.5" text-anchor="end">10.0%</text>
+        <text class="tkp-l" x="204" y="603.5" text-anchor="end">MARKETING</text>
       </g>
-      <g class="tkp-cal" data-k="3" style="--d:0.32s;--c:#1A2436">
-        <polyline class="tkp-lead" points="391.8,421.2 300,453.3 222,453.3" pathLength="100"/>
-        <circle class="tkp-dot" cx="391.8" cy="421.2" r="4.5"/><circle class="tkp-dot" cx="222" cy="453.3" r="4.5"/>
-        <text class="tkp-n" x="204" y="444.3" text-anchor="end">5.0%</text>
-        <text class="tkp-l" x="204" y="475.3" text-anchor="end">RESERVE</text>
+      <g class="tkp-cal" data-k="3" style="--d:0.32s;--c:#0B2270">
+        <polyline class="tkp-lead" points="391.8,421.2 358.3,415.9 280.0,488.9 222.0,488.9" pathLength="100"/>
+        <circle class="tkp-dot" cx="391.8" cy="421.2" r="4"/>
+        <text class="tkp-n" x="204" y="479.9" text-anchor="end">5.0%</text>
+        <text class="tkp-l" x="204" y="510.9" text-anchor="end">RESERVE</text>
       </g>
-      <g class="tkp-cal" data-k="4" style="--d:0.40s;--c:#8A93A6">
-        <polyline class="tkp-lead" points="422.0,328.4 300,369.3 222,369.3" pathLength="100"/>
-        <circle class="tkp-dot" cx="422.0" cy="328.4" r="4.5"/><circle class="tkp-dot" cx="222" cy="369.3" r="4.5"/>
-        <text class="tkp-n" x="204" y="360.3" text-anchor="end">5.0%</text>
-        <text class="tkp-l" x="204" y="391.3" text-anchor="end">TEAM (LOCKED)</text>
+      <g class="tkp-cal" data-k="4" style="--d:0.40s;--c:#101B44">
+        <polyline class="tkp-lead" points="422.0,328.4 391.7,312.9 280.0,410.9 222.0,410.9" pathLength="100"/>
+        <circle class="tkp-dot" cx="422.0" cy="328.4" r="4"/>
+        <text class="tkp-n" x="204" y="401.9" text-anchor="end">5.0%</text>
+        <text class="tkp-l" x="204" y="432.9" text-anchor="end">TEAM (LOCKED)</text>
       </g>
-      <g class="tkp-cal" data-k="5" style="--d:0.47s;--c:#BFC7D4">
-        <polyline class="tkp-lead" points="479.4,249.4 300,285.3 222,285.3" pathLength="100"/>
-        <circle class="tkp-dot" cx="479.4" cy="249.4" r="4.5"/><circle class="tkp-dot" cx="222" cy="285.3" r="4.5"/>
-        <text class="tkp-n" x="204" y="276.3" text-anchor="end">5.0%</text>
-        <text class="tkp-l" x="204" y="307.3" text-anchor="end">ADVISORS</text>
+      <g class="tkp-cal" data-k="5" style="--d:0.47s;--c:#16213F">
+        <polyline class="tkp-lead" points="479.4,249.4 455.3,225.3 280.0,332.9 222.0,332.9" pathLength="100"/>
+        <circle class="tkp-dot" cx="479.4" cy="249.4" r="4"/>
+        <text class="tkp-n" x="204" y="323.9" text-anchor="end">5.0%</text>
+        <text class="tkp-l" x="204" y="354.9" text-anchor="end">ADVISORS</text>
       </g>
-      <g class="tkp-cal" data-k="6" style="--d:0.55s;--c:#AACBFF">
-        <polyline class="tkp-lead" points="558.4,192.0 300,201.3 222,201.3" pathLength="100"/>
-        <circle class="tkp-dot" cx="558.4" cy="192.0" r="4.5"/><circle class="tkp-dot" cx="222" cy="201.3" r="4.5"/>
-        <text class="tkp-n" x="204" y="192.3" text-anchor="end">5.0%</text>
-        <text class="tkp-l" x="204" y="223.3" text-anchor="end">DEVELOPMENT</text>
+      <g class="tkp-cal" data-k="6" style="--d:0.55s;--c:#1C2740">
+        <polyline class="tkp-lead" points="558.4,192.0 542.9,161.7 280.0,254.9 222.0,254.9" pathLength="100"/>
+        <circle class="tkp-dot" cx="558.4" cy="192.0" r="4"/>
+        <text class="tkp-n" x="204" y="245.9" text-anchor="end">5.0%</text>
+        <text class="tkp-l" x="204" y="276.9" text-anchor="end">DEVELOPMENT</text>
       </g>
-      <g class="tkp-cal" data-k="7" style="--d:0.62s;--c:#93BCFF">
-        <polyline class="tkp-lead" points="651.2,161.8 300,117.3 222,117.3" pathLength="100"/>
-        <circle class="tkp-dot" cx="651.2" cy="161.8" r="4.5"/><circle class="tkp-dot" cx="222" cy="117.3" r="4.5"/>
-        <text class="tkp-n" x="204" y="108.3" text-anchor="end">5.0%</text>
-        <text class="tkp-l" x="204" y="139.3" text-anchor="end">AIRDROP</text>
+      <g class="tkp-cal" data-k="7" style="--d:0.62s;--c:#242E44">
+        <polyline class="tkp-lead" points="651.2,161.8 645.9,128.3 280.0,176.9 222.0,176.9" pathLength="100"/>
+        <circle class="tkp-dot" cx="651.2" cy="161.8" r="4"/>
+        <text class="tkp-n" x="204" y="167.9" text-anchor="end">5.0%</text>
+        <text class="tkp-l" x="204" y="198.9" text-anchor="end">AIRDROP</text>
       </g>
     </svg>
     <figcaption class="tkp-core" id="tkpCore">
@@ -5997,13 +6126,13 @@ const CALM=matchMedia('(prefers-reduced-motion: reduce)').matches;
         });
       };
       walk(h);
-      const step=h.matches('.hero h1')?.028:.042;
+      const step=h.matches('.hero h1')?.014:.019;
       [...h.querySelectorAll('.ws>.wi')].forEach((i,k)=>i.style.setProperty('--wd',(k*step).toFixed(3)+'s'));
       h.classList.add('sp');
     });
     const io=new IntersectionObserver(es=>es.forEach(e=>{
       if(!e.isIntersecting)return;io.unobserve(e.target);e.target.classList.add('in');
-    }),{threshold:.1,rootMargin:'0px 0px -8% 0px'});
+    }),{threshold:.1,rootMargin:'0px 0px -14% 0px'});
     heads.forEach(h=>io.observe(h));
   })();
   (function(){
@@ -6329,7 +6458,7 @@ const CALM=matchMedia('(prefers-reduced-motion: reduce)').matches;
 (function(){
   const io=new IntersectionObserver(es=>es.forEach(e=>{
     if(!e.isIntersecting)return;io.unobserve(e.target);e.target.classList.add('in');
-  }),{threshold:.12,rootMargin:'0px 0px -6% 0px'});
+  }),{threshold:.12,rootMargin:'0px 0px -13% 0px'});
   document.querySelectorAll('.rv, #diag').forEach(el=>io.observe(el));
 })();
 (function(){
@@ -6626,14 +6755,14 @@ function campoGL(){
     cv.width=Math.round(W*dpr);cv.height=Math.round(H*dpr);
     gl.viewport(0,0,cv.width,cv.height);
     U=Math.max(15,Math.round(Math.min(cv.width,cv.height)/26));
-    N=cv.width<1200?190:cv.width<2000?320:420;
+    N=cv.width<1200?92:cv.width<2000?150:196;
     const A=new Float32Array(N*4), B=new Float32Array(N*4), C=new Float32Array(N*4);
     for(let i=0;i<N;i++){
       const r=Math.random();
       const plano = r<0.44 ? 0 : (r<0.80 ? 1 : 2);
       const esc=[0.55,1,1.38][plano];
       const cols=Math.ceil(cv.width/(U*esc));
-      const posa=Math.random()<0.46;
+      const posa=Math.random()<0.62;
       /* Las que se posan aterrizan en una de estas filas, y no hay ninguna en
          la banda del medio: ahi va el titular. Salen del canto mas cercano a
          su fila, asi que el campo converge arriba y abajo y deja el centro. */
@@ -6642,14 +6771,14 @@ function campoGL(){
       const paleta=TONOS[plano];
       /* y en horizontal se apartan del centro por el mismo motivo */
       let ux=Math.random();
-      ux = 0.5 + Math.sign(ux-0.5)*Math.pow(Math.abs(ux-0.5)*2,0.62)*0.5;
+      ux = 0.5 + Math.sign(ux-0.5)*Math.pow(Math.abs(ux-0.5)*2,0.52)*0.5;
       A[i*4]  =Math.min(cols-1,(ux*cols)|0);
-      A[i*4+1]=plano===0?Math.round(rnd(1,4)):Math.round(rnd(1,3));
+      A[i*4+1]=Math.round([rnd(1,2.99),rnd(2,4.99),rnd(3,8.99)][plano]);
       A[i*4+2]=paleta[(Math.random()*paleta.length)|0];
       A[i*4+3]=Math.random();
       B[i*4]  =rnd(.5,1.15);
       B[i*4+1]=posa?rnd(1.6,3.4):rnd(.8,1.7);
-      B[i*4+2]=[rnd(.07,.17),rnd(.15,.33),rnd(.26,.54)][plano];
+      B[i*4+2]=[rnd(.05,.11),rnd(.11,.22),rnd(.19,.40)][plano];
       B[i*4+3]=plano;
       C[i*4]  =posa?Math.abs(destino-(abajo?1.16:-0.16)):(Math.pow(Math.random(),1.7)*(abajo?.70:.86)+.14);
       C[i*4+1]=abajo?1:0;
@@ -6756,20 +6885,20 @@ function campo2D(){
   function reset(p,semilla){
     const r=Math.random();
     p.pl = r<0.44?0:(r<0.80?1:2);
-    p.posa = Math.random()<0.46;
+    p.posa = Math.random()<0.62;
     p.destino = p.posa ? FILAS[(Math.random()*FILAS.length)|0]+rnd(-.022,.022) : 0;
     p.abajo = p.posa ? p.destino>0.5 : Math.random()<0.38;
     const cols=Math.ceil(W/(U*ESC[p.pl]));
     let ux=Math.random();
-    ux = 0.5 + Math.sign(ux-0.5)*Math.pow(Math.abs(ux-0.5)*2,0.62)*0.5;
+    ux = 0.5 + Math.sign(ux-0.5)*Math.pow(Math.abs(ux-0.5)*2,0.52)*0.5;
     p.gx = Math.min(cols-1,(ux*cols)|0);
-    p.w  = p.pl===0?Math.round(rnd(1,4)):Math.round(rnd(1,3));
+    p.w  = Math.round([rnd(1,2.99),rnd(2,4.99),rnd(3,8.99)][p.pl]);
     const pal=TONOS[p.pl];
     p.c  = T[pal[(Math.random()*pal.length)|0]];
     p.k  = semilla?Math.random():0;
     p.sp = rnd(.5,1.15);
     p.vida = p.posa?rnd(1.6,3.4):rnd(.8,1.7);
-    p.al = [rnd(.13,.28),rnd(.26,.50),rnd(.42,.78)][p.pl];
+    p.al = [rnd(.06,.13),rnd(.13,.26),rnd(.22,.46)][p.pl];
     p.kp = rnd(.22,.46);
     p.rec = p.posa ? Math.abs(p.destino-(p.abajo?1.16:-0.16))
                    : (Math.pow(Math.random(),1.7)*(p.abajo?.70:.86)+.14);
@@ -6780,7 +6909,7 @@ function campo2D(){
     cv.width=W*dpr;cv.height=H*dpr;ctx.setTransform(dpr,0,0,dpr,0,0);
     ctx.fillStyle='#000';ctx.fillRect(0,0,W,H);
     U=Math.max(15,Math.round(Math.min(W,H)/26));
-    const quiere=W<760?130:W<1300?195:245;
+    const quiere=W<760?62:W<1300?94:122;
     while(P.length<quiere)P.push({});
     P.length=quiere;
     P.forEach(p=>{if(p.k===undefined)reset(p,true)});
@@ -7296,7 +7425,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
   const fig=document.getElementById('tkpFig'),cv=document.getElementById('tkpCv');
   if(!fig||!cv)return;
   const ctx=cv.getContext('2d');
-  const SEG=[{"a0": -88.85, "a1": 88.85, "c": "#0A5CF5", "p": 50.0}, {"a0": 91.15, "a1": 142.85, "c": "#3985FF", "p": 15.0}, {"a0": 145.15, "a1": 178.85, "c": "#134CA8", "p": 10.0}, {"a0": 181.15, "a1": 196.85, "c": "#1A2436", "p": 5.0}, {"a0": 199.15, "a1": 214.85, "c": "#8A93A6", "p": 5.0}, {"a0": 217.15, "a1": 232.85, "c": "#BFC7D4", "p": 5.0}, {"a0": 235.15, "a1": 250.85, "c": "#AACBFF", "p": 5.0}, {"a0": 253.15, "a1": 268.85, "c": "#93BCFF", "p": 5.0}];
+  const SEG=[{"a0": -88.85, "a1": 88.85, "c": "#1A54F0", "p": 50.0}, {"a0": 91.15, "a1": 142.85, "c": "#0E3AC4", "p": 15.0}, {"a0": 145.15, "a1": 178.85, "c": "#0A2B96", "p": 10.0}, {"a0": 181.15, "a1": 196.85, "c": "#0B2270", "p": 5.0}, {"a0": 199.15, "a1": 214.85, "c": "#101B44", "p": 5.0}, {"a0": 217.15, "a1": 232.85, "c": "#16213F", "p": 5.0}, {"a0": 235.15, "a1": 250.85, "c": "#1C2740", "p": 5.0}, {"a0": 253.15, "a1": 268.85, "c": "#242E44", "p": 5.0}];
   const DX=1400,CX=700,CY=470,RO=300,RI=181,D2R=Math.PI/180;
   const slow=matchMedia('(prefers-reduced-motion: reduce)').matches;
   const core=document.getElementById('tkpCore'),keyEl=document.getElementById('tkpKey'),

@@ -171,18 +171,58 @@ di(suelo.frio > 0.5,
 
 // ── «Compatible with» ──
 const comp = await pg.evaluate(() => {
+  const f = v => { v /= 255; return v <= .03928 ? v/12.92 : Math.pow((v+.055)/1.055, 2.4) };
+  const rgba = c => { const m = (c||'').match(/[\d.]+/g); return m ? m.map(Number) : null };
+  /* el fondo REAL: se sube por los padres componiendo cada capa con su alfa,
+     que es justo el paso que faltaba para ver el fallo que esto tapaba */
+  const fondoReal = el => {
+    let capas = [], n = el;
+    while (n && n !== document.documentElement) {
+      const c = rgba(getComputedStyle(n).backgroundColor);
+      if (c && (c[3] === undefined || c[3] > 0)) capas.push(c);
+      n = n.parentElement;
+    }
+    capas.push([0,0,0,1]);
+    let out = capas[capas.length-1].slice(0,3);
+    for (let i = capas.length-2; i >= 0; i--) {
+      const a = capas[i][3] === undefined ? 1 : capas[i][3];
+      out = out.map((v,k) => capas[i][k]*a + v*(1-a));
+    }
+    return out;
+  };
+  const L = c => .2126*f(c[0]) + .7152*f(c[1]) + .0722*f(c[2]);
   const sub = document.querySelector('.lane-sub');
   const chips = [...document.querySelectorAll('.lane-in span')];
+  const razones = chips.slice(0, 7).map(c => {
+    const t = rgba(getComputedStyle(c).color), b = fondoReal(c);
+    if (!t) return 0;
+    const a = t[3] === undefined ? 1 : t[3];
+    const mez = b.map((v,k) => t[k]*a + v*(1-a));
+    const x = L(mez), y = L(b);
+    return (Math.max(x,y)+.05) / (Math.min(x,y)+.05);
+  });
   const puntos = chips.map(c => getComputedStyle(c, '::before').backgroundColor);
-  const uno = chips[0] ? getComputedStyle(chips[0]) : null;
   return { sub: sub ? sub.textContent.trim().length : 0, n: chips.length,
-           borde: uno && uno.borderTopWidth, radio: uno && parseFloat(uno.borderRadius),
-           fondo: uno && uno.backgroundColor, colores: new Set(puntos).size, puntos: puntos.slice(0,7) };
+           razones, peor: Math.min(...razones),
+           colores: new Set(puntos).size, puntos: puntos.slice(0,7) };
 });
 di(comp.sub > 40, 'la seccion dice ya para que sirve (' + comp.sub + ' caracteres)');
 di(comp.n >= 14, 'siguen las ' + comp.n + ' fichas de la fila');
-di(parseFloat(comp.borde) >= 1 && comp.radio >= 8,
-   'cada nombre va en su ficha, con filete y esquinas (' + comp.borde + ' / ' + comp.radio + 'px)');
+/* ESTO PEDIA «FILETE Y ESQUINAS», Y ESO NO ES UNA PROPIEDAD DE LA PAGINA: ES
+   UNA PASTILLA QUE HABIA. La pastilla se fue —era blanca sobre negro, y una
+   fila de compatibilidad no es una botonera— y la comprobacion habria hecho
+   que volviera, que es lo que hace una prueba escrita sobre el estilo en vez
+   de sobre lo que el estilo tiene que conseguir.
+   Y ademas tapaba el fallo. Dentro de esa pastilla blanca el nombre iba en
+   «rgba(232,236,244,.78)»: BLANCO SOBRE BLANCO, 1,14 de contraste, invisible.
+   La ficha existia, tenia su filete y sus esquinas, y la prueba pasaba tan
+   contenta mientras los siete nombres no se leian.
+   Lo que hay que pedir es que se LEAN, sobre lo que de verdad tengan detras,
+   componiendo cada alfa. Comprobado inyectando el fallo viejo —el fondo blanco
+   con la tinta clara— y la razon cae a 1,14. */
+di(comp.peor >= 4.5,
+   'y los siete nombres se leen sobre lo que tienen detras (el peor, ' +
+   comp.peor.toFixed(2) + ':1; minimo 4,5)');
 di(comp.colores >= 5, 'y con el color de su marca: ' + comp.colores + ' colores distintos');
 
 // ── las cuatro garantias ──
