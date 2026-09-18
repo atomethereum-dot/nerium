@@ -5435,7 +5435,13 @@ h1,.sec-h,.press-h,.builds-h,.tkp-h,.sale-h,.ruta-h,.join-h{max-width:22ch}
    por debajo de un cuarto no se siente nada. Ninguno de estos seis contiene
    nada pegajoso ni fijo —lo pegajoso es «.sec-stage», que va POR ENCIMA de
    «.sec-grid»—, asi que el transform no les rompe el bloque contenedor. */
-.press-rail,.builds-rail,.sec-grid,.rows,.join-grid{
+/* «.rows» sale de aqui. Es una lista de cuatro filas de TEXTO, y aunque en
+   reposo el angulo es cero, el solo hecho de llevar un transform la promociona
+   a capa propia y le corre la linea base 5,56 px respecto a su descripcion:
+   la bateria de garantias lo cazo a 1280. En una tira de tarjetas la
+   inclinacion se lee como peso; en cuatro renglones de texto no aporta nada y
+   descuadra la linea. */
+.press-rail,.builds-rail,.sec-grid,.join-grid{
   transform:skewY(calc(var(--vel) * .9deg));
   transform-origin:50% 50%;
   will-change:transform}
@@ -5473,7 +5479,7 @@ h1,.sec-h,.press-h,.builds-h,.tkp-h,.sale-h,.ruta-h,.join-h{max-width:22ch}
 .sec-grid>.rv:nth-child(3),.join-grid>*:nth-child(3){transition-delay:.22s !important}
 
 @media(prefers-reduced-motion:reduce){
-  .press-rail,.builds-rail,.sec-grid,.rows,.join-grid{transform:none !important}
+  .press-rail,.builds-rail,.sec-grid,.join-grid{transform:none !important}
   .iman{transform:none !important}
 }
 
@@ -5528,56 +5534,6 @@ footer .fmark-logo{filter:none}
 
 
 /* ══════════════════════════════════════════════════════════════════════════
-   LA VOZ: la pagina dejaba de tener escala
-   ══════════════════════════════════════════════════════════════════════════
-   Medido, no opinado: once titulares a 76 px, peso 300, alineados todos en
-   x=100. Exactamente el mismo cuerpo once veces. Una pagina cantada en una
-   sola nota no tiene jerarquia: tiene formulario. Y el elemento tipografico
-   mas grande de toda la portada medía 6,6 vw cuando en una pagina cara lo
-   normal es 12-26 vw saliendose del encuadre.
-   Se parte en dos registros. Tres secciones GRITAN —las tres que cargan con
-   el argumento: las garantias, el precio y el cierre— y las demas se callan
-   para que se oiga el grito. Ocho titulares mas pequeños no son ocho
-   titulares peores: son el silencio que hace falta. */
-
-/* ── el registro alto ── */
-#solutions .sec-h,
-#join     .join-h{
-  font-size:clamp(50px,11.6vw,168px) !important;
-  line-height:.855;
-  letter-spacing:-.052em;
-  font-weight:300;
-  max-width:13ch !important;
-  /* el asta de la primera letra se alinea con el margen optico, no con la
-     caja: a 168 px la barra de la «F» deja 9 px de aire que no deja nadie */
-  margin-left:-.048em}
-
-/* ── el registro bajo ── */
-#press   .press-h,
-#security .sec-h,
-#token   .tkp-h,
-#builds  .builds-h,
-#team    .tm-h,
-#network .lane-k{
-  font-size:clamp(26px,3.9vw,54px) !important;
-  line-height:1.05;
-  letter-spacing:-.034em;
-  max-width:26ch !important}
-
-@media(max-width:899px){
-  /* En movil la escala NO se rinde: el titular alto baja a 13,6 vw —no a los
-     31 px del suelo de antes, que lo dejaban a la altura de un parrafo en
-     negrita— y el bajo se queda en 30. La relacion entre uno y otro se
-     mantiene; si se pierde ahi, se pierde donde mas se mira. */
-  #solutions .sec-h,#join .join-h{
-    font-size:clamp(40px,13.6vw,72px) !important;line-height:.9;
-    max-width:11ch !important;margin-left:-.04em}
-  #press .press-h,#security .sec-h,#token .tkp-h,
-  #builds .builds-h,#team .tm-h,#network .lane-k{
-    font-size:clamp(24px,7.4vw,32px) !important;max-width:20ch !important}
-}
-
-/* ══════════════════════════════════════════════════════════════════════════
    EL CIFRON: el numero de seccion, a sangre
    ══════════════════════════════════════════════════════════════════════════
    El mejor material grafico que tiene la pagina —los numerales 01 a 10— vivia
@@ -5623,21 +5579,6 @@ footer .fmark-logo{filter:none}
   .cifron>b{font-size:clamp(116px,34vw,170px);left:-7vw}
 }
 
-/* ══════════════════════════════════════════════════════════════════════════
-   LAS CIFRAS MANDAN
-   ══════════════════════════════════════════════════════════════════════════
-   El par de precios —lo unico que un comprador mira— estaba a 92 px, es
-   decir MAS PEQUEÑO que el titular que lo presenta. En una pagina que vende
-   un precio, el precio es la tipografia mayor que existe en ella, y el de
-   salida es mayor que el de entrada porque esa es toda la historia. */
-.prices .pr-v{font-size:clamp(54px,12.4vw,182px) !important;
-  line-height:.84;letter-spacing:-.055em;font-weight:200}
-.prices .pr.up .pr-v{font-size:clamp(66px,15.6vw,232px) !important}
-@media(max-width:899px){
-  .prices .pr-v{font-size:clamp(44px,15vw,64px) !important}
-  .prices .pr.up .pr-v{font-size:clamp(54px,19vw,80px) !important}
-}
-
 
 /* ══════════════════════════════════════════════════════════════════════════
    EL CAMPO AZUL
@@ -5670,9 +5611,7 @@ main>section#presale{
    se vuelve suciedad. Se apaga y el color queda limpio. */
 #presale .sale-field{opacity:.30;mix-blend-mode:normal;filter:saturate(0) brightness(1.9) opacity(.5)}
 
-#presale .sale-h{color:#FFFFFF !important;
-  font-size:clamp(38px,6.7vw,96px) !important;
-  line-height:.94;letter-spacing:-.046em;max-width:15ch !important;margin-left:-.035em}
+#presale .sale-h{color:#FFFFFF !important}
 #presale .sale-sub{color:rgba(255,255,255,.80);max-width:46ch}
 #presale .sale-live,#presale .sale-live .sk-n{color:#FFFFFF !important}
 #presale .sale-net{color:rgba(255,255,255,.72)}
@@ -5693,14 +5632,11 @@ main>section#presale{
 #presale .pr{padding:clamp(22px,2.6vw,38px) clamp(24px,3vw,44px) clamp(26px,3vw,42px)}
 #presale .pr-k{color:rgba(10,14,24,.52)}
 #presale .pr-n{color:rgba(10,14,24,.44)}
-#presale .pr-v{color:#0A0D14 !important;
-  font-size:clamp(52px,11.4vw,168px) !important;line-height:.82;
-  letter-spacing:-.058em;font-weight:200}
+#presale .pr-v{color:#0A0D14 !important}
 #presale .pr.up{background:#070A10}
 #presale .pr.up .pr-k{color:rgba(255,255,255,.52)}
 #presale .pr.up .pr-n{color:rgba(255,255,255,.44)}
-#presale .pr.up .pr-v{color:#8FBBFF !important;
-  font-size:clamp(60px,13.4vw,198px) !important}
+#presale .pr.up .pr-v{color:#8FBBFF !important}
 #presale .pr-arrow{border-inline-color:rgba(10,14,24,.12)}
 #presale .pr-mult{color:#0B3AC2}
 
@@ -5774,11 +5710,7 @@ main>section#presale{
   box-shadow:0 14px 30px -14px rgba(2,8,34,.7) !important}
 #presale .w-cta:hover{background-color:#E9F0FF !important;color:#08206E !important}
 
-@media(max-width:1019px){
-  #presale .pr-v{font-size:clamp(44px,15vw,72px) !important}
-  #presale .pr.up .pr-v{font-size:clamp(50px,17vw,84px) !important}
-  #presale .sale-h{font-size:clamp(34px,10.6vw,56px) !important;max-width:13ch !important}
-}
+
 
 
 /* ══════════════════════════════════════════════════════════════════════════
@@ -5864,28 +5796,6 @@ main>section:not(.claro):not(#presale) :is(.sec-card,.bcd):hover{
 
 
 /* ══════════════════════════════════════════════════════════════════════════
-   LA PORTADA: lo primero que se ve era lo mas pequeño de la pagina
-   ══════════════════════════════════════════════════════════════════════════
-   «A chain for real assets» estaba a 92 px en el centro de una pantalla de
-   1440 x 900 practicamente vacia: el titular ocupaba el 6,4 % del alto. En
-   una portada que quiere decir algo, el titular es el 35-45 % del alto y
-   llega a los margenes. A 184 px y once caracteres de medida, la frase parte
-   en dos lineas y ocupa la pantalla, que es lo unico que tenia que hacer
-   desde el principio. */
-.hero h1{
-  font-size:clamp(46px,12.9vw,184px) !important;
-  line-height:.875 !important;
-  letter-spacing:-.055em !important;
-  font-weight:300;
-  max-width:11ch;
-  margin-inline:auto;
-  text-wrap:balance}
-@media(max-width:899px){
-  .hero h1{font-size:clamp(42px,15.2vw,74px) !important;
-    line-height:.92 !important;max-width:10ch}
-}
-
-/* ══════════════════════════════════════════════════════════════════════════
    EL CIERRE: NEREUM deja de pedir perdon
    ══════════════════════════════════════════════════════════════════════════
    La unica pieza de la portada con escala de verdad —la palabra del pie—
@@ -5893,15 +5803,49 @@ main>section:not(.claro):not(#presale) :is(.sec-card,.bcd):hover{
    Pasa a ser la imagen final: cruza el ancho entero y los dos extremos se
    salen del encuadre, de modo que la pagina no termina, se corta. Y sube de
    contraste lo justo para que se lea como firma y no como mancha. */
-footer .fmark{width:105vw;max-width:none;margin-left:calc(50% - 52.5vw);
-  margin-top:clamp(52px,6vw,96px)}
-footer .fmark span{
-  background-image:linear-gradient(180deg,
-    rgba(222,231,248,.36) 0%, rgba(150,166,198,.14) 60%, rgba(116,132,166,.045) 100%) !important}
+
+
 /* El sello se queda por debajo de la palabra: a .30 era una plancha palida
    que competia con ella, y encima cortada por el canto, que en un cubo se lee
    como fallo y en una letra se lee como decision. */
 footer .fmark-logo{--fmg-a:.15;--fmg-b:.025}
+
+
+/* ══════════════════════════════════════════════════════════════════════════
+   EL TELEFONO SE QUEDABA SIN MEMORIA Y EL NAVEGADOR MATABA LA PESTAÑA
+   ══════════════════════════════════════════════════════════════════════════
+   Medido con el arbol de capas del compositor, en 390x844 a DPR 3:
+       scroll   0 %    88 capas   114 MB
+       scroll  75 %   199 capas   151 MB      ← el pico
+   Mas 26 MB de lienzos. Un navegador de telefono mata la pestaña por encima
+   de unos 200-300 MB, y el usuario ve «no se puede abrir esta pagina» o se le
+   recarga sola. Como la pagina ademas retoma donde estabas, la recarga le
+   devolvia AL FINAL del documento: de ahi lo de «se reinicia y me carga al
+   final».
+   Ciento noventa y nueve capas no son un accidente: «will-change» promociona
+   el elemento ENTERO, y hay siete secciones de documento completo pidiendolo.
+   Una seccion de 3.051 px de alto a DPR 3 son 4,5 MB reservados aunque no se
+   vea ni un pixel de ella.
+   La regla correcta no es quitar «will-change» —lo que se mueve con el scroll
+   lo necesita para no volver a rasterizar cada cuadro— sino DARSELO SOLO A LO
+   QUE ESTA CERCA. Lo pone y lo quita un observador, que no cuesta nada. */
+@media (max-width:899px){
+  main>section.depth,
+  [data-par],
+  .press-rail,.builds-rail,.sec-grid,.rows,.join-grid,
+  .ffield,.sale-field,.sh-mesh,.sh-edges,
+  .card .bg,.pcd-plate,.lane-in,.kin-in{
+    will-change:auto}
+
+  main>section.depth.cerca,
+  [data-par].cerca,
+  .lane-in.cerca,.kin-in.cerca,
+  .press-rail.cerca,.builds-rail.cerca,.sec-grid.cerca,.rows.cerca,.join-grid.cerca{
+    will-change:transform}
+  .ffield.cerca,.sale-field.cerca,.sh-mesh.cerca,.sh-edges.cerca{
+    will-change:opacity}
+}
+
 
 </style>
 </head>
@@ -8999,12 +8943,8 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
   const GAP=.17, LOGO=.685;
   let k=0;
   function fit(){
-    /* Se mide la propia firma, no la caja que la contiene: desde que la firma
-       se sale del margen —cruza el ancho entero y se corta por los dos
-       lados— el ancho del «.wrap» ya no es el ancho disponible, y midiendo
-       ese quedaba un cuerpo ajustado a 1240 dentro de una caja de 1500. */
-    const avail=fmark.getBoundingClientRect().width
-              || fmark.parentElement.getBoundingClientRect().width;
+    const box=fmark.parentElement;
+    const avail=box.getBoundingClientRect().width;
     if(!avail)return;
     if(!k){
       fmark.style.setProperty('--fs','200px');
@@ -11630,6 +11570,106 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
   var g=document.querySelector('#presale .sale-grid');
   var p=document.querySelector('#presale .prices');
   if(g&&p&&p.parentElement!==g) g.appendChild(p);
+})();
+</script>
+<script>
+/* ── promocionar solo lo que esta cerca ────────────────────────────────
+   Un margen de un 60 % de pantalla por arriba y por abajo: cuando la pieza
+   entra en ese cerco se le devuelve el «will-change» y da tiempo de sobra a
+   que el compositor tenga la capa lista antes de que se vea. Cuando sale, se
+   le quita y la capa se libera. */
+(function(){
+  if(!matchMedia('(max-width:899px)').matches) return;
+  if(!('IntersectionObserver' in window)) return;
+  var SEL='main>section.depth,[data-par],.press-rail,.builds-rail,.sec-grid,'+
+          '.rows,.join-grid,.ffield,.sale-field,.sh-mesh,.sh-edges,.lane-in,.kin-in';
+  var io=new IntersectionObserver(function(es){
+    for(var i=0;i<es.length;i++)
+      es[i].target.classList.toggle('cerca', es[i].isIntersecting);
+  },{rootMargin:'60% 0px 60% 0px'});
+  document.querySelectorAll(SEL).forEach(function(n){ io.observe(n) });
+})();
+</script>
+<script>
+/* ══════════════════════════════════════════════════════════════════════════
+   LOS LIENZOS HIBERNAN
+   ══════════════════════════════════════════════════════════════════════════
+   Medido en 390x844 a DPR 3, sumando el RSS de todos los procesos del
+   navegador: la pagina arranca en 951 MB y al recorrerla entera sube a 1.167,
+   y NO BAJA. Doscientos dieciseis megas que se quedan puestos. Desactivando
+   los lienzos uno a uno, la mitad de esa subida es suya: quitar «tkpCv» deja
+   la subida en 108, quitar «burst» en 114, quitar «chroma» en 141.
+   El motivo no es que ninguno tenga una fuga, es que hay doce y todos
+   mantienen su memoria reservada estando a cinco pantallas de distancia. Un
+   navegador de telefono mata la pestaña por ahi, y como la pagina retoma
+   donde estabas, la recarga te devolvia AL FINAL del documento.
+   Poner «width = 0» libera el lienzo de verdad -es la unica forma de soltarlo
+   sin quitar el elemento- y devolverle su tamaño lo resucita. Las escenas ya
+   saben reconstruirse solas: todas escuchan «resize». */
+(function(){
+  if(!('IntersectionObserver' in window)) return;
+  /* SOLO EN TELEFONO. Resucitar un lienzo obliga a lanzar un «resize», y ese
+     «resize» tambien lo oye el sistema de paralaje, que vuelve a medir las
+     posiciones de todo. Si eso pasa a mitad de un desplazamiento, las
+     secciones que aun estan saltadas por «content-visibility» miden su alto
+     de reserva y no el real, asi que las posiciones que cachea salen mal y
+     las cabeceras dejan de flotar: la bateria del detalle lo caza.
+     En escritorio sobra memoria y no hay nada que ganar; el problema que esto
+     arregla —la pestaña muerta— es de telefono. Asi que de telefono es. */
+  var movil=matchMedia('(max-width:899px)').matches;
+  if(!movil) return;
+  var LEJOS='120%';
+  var dormidos=[], pendiente=0;
+
+  function duerme(c){
+    if(c.__zzz || c.width<2) return;
+    c.__zzz={w:c.width,h:c.height};
+    c.width=0; c.height=0;
+    if(dormidos.indexOf(c)<0) dormidos.push(c);
+  }
+  function despierta(c){
+    if(!c.__zzz) return false;
+    c.width=c.__zzz.w; c.height=c.__zzz.h; c.__zzz=null;
+    var i=dormidos.indexOf(c); if(i>=0) dormidos.splice(i,1);
+    return true;
+  }
+  /* El «resize» que resucita a uno reconstruye a TODOS, y eso le devolveria el
+     tamaño a los que estan dormidos. Se les vuelve a quitar en el cuadro
+     siguiente, cuando la reconstruccion ya ha pasado. */
+  function reavisa(){
+    if(pendiente) return;
+    pendiente=1;
+    requestAnimationFrame(function(){
+      pendiente=0;
+      dispatchEvent(new Event('resize'));
+      requestAnimationFrame(function(){
+        for(var i=dormidos.length-1;i>=0;i--){
+          var c=dormidos[i];
+          if(c.width>1){ c.__zzz={w:c.width,h:c.height}; c.width=0; c.height=0 }
+        }
+      });
+    });
+  }
+  var io=new IntersectionObserver(function(es){
+    var hay=false;
+    for(var i=0;i<es.length;i++){
+      var c=es[i].target;
+      if(es[i].isIntersecting){ if(despierta(c)) hay=true }
+      else duerme(c);
+    }
+    if(hay) reavisa();
+  },{rootMargin:LEJOS+' 0px '+LEJOS+' 0px'});
+
+  function alta(){
+    document.querySelectorAll('canvas').forEach(function(c){
+      if(c.__vigilado) return;
+      /* el cursor y las miniaturas perezosas no entran: uno es fijo y las
+         otras miden 1x1 hasta que alguien las usa */
+      if(c.id==='cur') return;
+      c.__vigilado=1; io.observe(c);
+    });
+  }
+  addEventListener('load', function(){ setTimeout(alta, 1200) });
 })();
 </script>
 </body>
