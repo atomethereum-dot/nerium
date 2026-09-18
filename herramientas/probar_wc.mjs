@@ -1,5 +1,12 @@
 import { chromium, devices } from 'playwright';
 import http from 'node:http'; import fs from 'node:fs'; import path from 'node:path';
+/* Los iconos viven al lado de esta bateria, no en la carpeta desde la que se
+   la lance. Escrito como 'iconos/...' a secas, la bateria solo funcionaba si
+   uno entraba antes en «herramientas/»; lanzada desde la raiz —que es como la
+   lanza el guion que las corre todas— moria con ENOENT antes de la primera
+   comprobacion, y llevaba asi todas las pasadas. Se resuelve contra el propio
+   fichero. */
+const AQUI = path.dirname(new URL(import.meta.url).pathname);
 const RAIZ='/home/user/nerium';
 const T={'.html':'text/html','.js':'text/javascript','.css':'text/css','.json':'application/json',
 '.woff2':'font/woff2','.jpg':'image/jpeg','.png':'image/png','.svg':'image/svg+xml','.ico':'image/x-icon'};
@@ -60,7 +67,7 @@ async function montar(extra={}, movil=false){
     r.request().url().indexOf('/logo/lg/') > 0
       ? r.fulfill({status:404, body:''})
       : r.fulfill({status:200,contentType:'image/png',
-          body:fs.readFileSync('iconos/reg_'+((r.request().url().match(/logo\/\w+\/(\w+)/)||[])[1]||'t1')+'.png')}));
+          body:fs.readFileSync(path.join(AQUI,'iconos','reg_')+((r.request().url().match(/logo\/\w+\/(\w+)/)||[])[1]||'t1')+'.png')}));
   // El paquete se sirve desde el propio sitio: se sustituye por el simulado.
   await pg.route('**/assets/walletconnect.js', r=>
     extra.sinSdk ? r.abort() : r.fulfill({status:200,contentType:'text/javascript',body:SDK}));
