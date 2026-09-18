@@ -5225,6 +5225,52 @@ h1,.sec-h,.press-h,.builds-h,.tkp-h,.sale-h,.ruta-h,.join-h{max-width:22ch}
   footer .fgrid a{min-height:40px;display:flex;align-items:center}
   .fbrand{padding:6px 0}
 }
+
+/* ══ EL TELON DE ENTRADA ══════════════════════════════════════════════════
+   Y aqui tienes toda la razon en algo que no habia visto: esta es la PRIMERA
+   pantalla que ve cualquiera, y en toda la sesion no la habia tocado. Todo lo
+   que he arreglado estaba mas abajo. Se puede haber mejorado la pagina entera
+   y, si esto sigue igual, lo que se ve al entrar sigue igual.
+
+   Tres cosas, las tres medidas:
+
+   1 · LA LUZ BLANCA DE ABAJO A LA DERECHA. Es «.glowfloor»:
+       «radial-gradient(84% 100% at 50% 132%, rgba(186,188,194,.85) …)». Un
+       elipse gris-blanco de media pantalla de alto. Es exactamente la plata
+       que llevamos toda la sesion quitando de la pagina, y estaba en el primer
+       cuadro. Fuera.
+
+   2 · «Nereum» Y SU ROTULO NO COMPARTIAN EJE. Medido: el conjunto palabra +
+       barra esta centrado en x=210 y el rotulo en x=215. La causa es que el
+       conjunto lleva «translate(calc(-50% - .16em))» —para compensar la barra
+       que le cuelga por la izquierda— y el rotulo solo «-50%». Cinco pixeles.
+       Suena a nada y se ve, porque son dos cosas pequeñas, juntas y centradas:
+       ahi el ojo compara ejes con una precision que no tiene en ningun otro
+       sitio. El rotulo recibe el mismo desplazamiento y los dos caen sobre la
+       misma vertical.
+
+   3 · Y EL ROTULO SE PARTIA EN DOS RENGLONES. «REAL-WORLD ASSET CHAIN» a 10,5
+       px con 0,3em de tracking mide 215 px, y en un telefono no cabe: se
+       quedaba «REAL-WORLD ASSET / CHAIN». Un rotulo de firma partido en dos ya
+       no es una firma. Se le baja el tracking en movil y se le prohibe partir.
+
+   Y la palabra sube de tamaño. «clamp(34px,6.6vw,86px)»: 6,6 % de 390 son 26
+   px, por debajo del suelo, o sea el MISMO error del «clamp» que ya corregi en
+   los titulares —la pendiente cae fuera del rango del movil y el suelo se lo
+   traga entero—. Aqui seguia. A 13vw, en un telefono de 390 la palabra pasa de
+   34 a 51 px. */
+
+.glowfloor{display:none !important}
+
+.lk-tag{transform:translate(calc(-50% - .16em),calc(-50% + clamp(46px,5.6vw,84px))) !important}
+.lk-tag span{white-space:nowrap}
+.lockup{font-size:clamp(42px,13vw,86px)}
+
+@media(max-width:560px){
+  .lk-tag span{letter-spacing:.2em;font-size:11px}
+  .lk-tag i{width:clamp(150px,52vw,300px)}
+  .lk-tag{gap:11px}
+}
 </style>
 </head>
 <body class="ann-fuera">
