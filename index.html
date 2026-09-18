@@ -5852,7 +5852,127 @@ footer .fmark-logo{--fmg-a:.15;--fmg-b:.025}
 }
 
 
+
+/* ══════════════════════════════════════════════════════════════════════════
+   EL FRENO: lo que no se ve, no se anima
+   ══════════════════════════════════════════════════════════════════════════
+   Medido con el reloj del propio navegador, en 390x844 y con la pagina
+   COMPLETAMENTE QUIETA —sin scroll, sin dedo, sin nada—:
+
+       ruta      40,4 %       xlight    40,8 %       builds    34,9 %
+       pila      33,1 %       join      31,7 %       token     27,7 %
+       …y ninguna seccion por debajo del 15 %
+
+   O sea: entre un quinto y casi la mitad de un nucleo, de forma permanente,
+   para enseñar una imagen fija. En un escritorio eso no se ve. En un telefono
+   es calor, es bateria, y acaba siendo el sistema matando la pestaña: es el
+   «se reinicia al llegar a algunas secciones».
+
+   La causa no es una sola cosa, pero si tiene un patron: las animaciones de
+   CSS NO se paran cuando el elemento sale de pantalla. La marca de la ruta
+   gira, cabecea, pasea y se le pasa un reflejo por encima —cuatro keyframes
+   sobre un elemento de 1.441 px— esté o no esté a la vista, y lo mismo el
+   resto. El navegador sigue rasterizando todo eso para nadie.
+
+   La regla es de una linea: una seccion que no esta cerca no anima. El
+   observador que ya reparte «.cerca» para el «will-change» reparte tambien
+   esto, asi que no hay maquinaria nueva. */
+/* La primera version de esto era una regla de CSS —«main>section:not(.cerca)
+   *»— y NO LLEGABA: de las noventa y ocho animaciones, las gordas viven en
+   elementos que no cuelgan de «main>section» —la malla del telon, la marca de
+   la ruta—, asi que el selector pasaba de largo por ellas. Se hace por la via
+   exacta, en el guion de abajo: se pregunta al navegador que animaciones tiene
+   corriendo y se para cada una segun donde este SU elemento. No hay selector
+   que se pueda quedar corto. */
+
 </style>
+<script>
+/* ══════════════════════════════════════════════════════════════════════════
+   EL TECHO DE DENSIDAD, UNO SOLO Y CONSCIENTE DEL TELEFONO
+   ══════════════════════════════════════════════════════════════════════════
+   Doce lienzos y cada uno capaba la densidad por su cuenta a 2. En un telefono
+   de 390x844 con DPR 3, un lienzo a pantalla completa a densidad 2 reserva
+   780x1688x4 = 5,3 MB, y hay cuatro asi. Pero el coste de verdad no es la
+   reserva: es que el compositor rasteriza y sube a la GPU CUATRO VECES mas
+   pixeles de los que la pantalla necesita para unas escenas que son campos de
+   cubos y degradados —nada de tipografia fina, nada que se note a 1x—.
+   Medido en la pestaña: el proceso de render sube a 461 MB y el de GPU a 153.
+   Un navegador de telefono mata mucho antes, y de ahi el «se reinicia al
+   llegar a algunas secciones».
+   A partir de aqui el techo es 1,25 en telefono y sigue en 2 en escritorio,
+   donde no hay problema que resolver. Es una sola linea y la leen los doce. */
+window.__dens = function(){
+  var d = window.devicePixelRatio || 1;
+  var techo = (innerWidth < 900) ? 1.25 : 2;
+  return Math.min(d, techo);
+};
+</script>
+<script>
+/* ══════════════════════════════════════════════════════════════════════════
+   EL RALENTI
+   ══════════════════════════════════════════════════════════════════════════
+   Medido con el reloj del navegador, en 390x844 y con la pagina QUIETA —sin
+   scroll, sin dedo, sin nada—: entre el 15 % y el 41 % de un nucleo, de forma
+   permanente, para enseñar una imagen fija. «xlight» 41 %, «ruta» 37 %, la
+   pila 32 %. Y de eso, once o doce puntos son GUION: las escenas repintan
+   sesenta veces por segundo aunque su unica entrada —la posicion del scroll—
+   no se haya movido ni un pixel.
+   En un escritorio no se nota. En un telefono es calor, es bateria y acaba
+   siendo el sistema matando la pestaña, que es exactamente el «se reinicia al
+   llegar a algunas secciones».
+   Doce escenas con doce bucles propios no se arreglan una a una sin tocar
+   doce sitios. Se arregla el reloj que las mueve a todas: mientras nadie toca
+   nada, «requestAnimationFrame» entrega a 20 cuadros por segundo en vez de a
+   60. Lo que se mueve solo —la corriente de cubos, el campo de la portada—
+   sigue moviendose, y a 20 cuadros una deriva lenta no se distingue; lo que
+   se mueve con el dedo vuelve a 60 en cuanto hay dedo, que es cuando importa.
+   Va en la cabecera a proposito: tiene que estar puesto antes de que arranque
+   la primera escena. */
+(function(){
+  if(innerWidth >= 900) return;                 /* el problema es de telefono */
+  var raf = window.requestAnimationFrame && window.requestAnimationFrame.bind(window);
+  if(!raf) return;
+  var CALLADO = 900;      /* ms sin actividad para entrar en ralenti */
+  var PASO    = 50;       /* 20 cuadros por segundo */
+  var activo = 0;
+  function toca(){ activo = Date.now() }
+  ['scroll','wheel','pointerdown','pointermove','pointerup','touchstart','touchmove',
+   'keydown','resize','orientationchange','focus'].forEach(function(e){
+    addEventListener(e, toca, {passive:true, capture:true});
+  });
+  toca();
+
+  var cola = [], prog = false, id = 1, muertos = null;
+  try{ muertos = new Set() }catch(e){ muertos = null }
+
+  window.requestAnimationFrame = function(cb){
+    if(document.hidden) { /* pestaña de fondo: el navegador ya lo para */ }
+    if(Date.now() - activo < CALLADO) return raf(cb);
+    var mio = id++;
+    cola.push([mio, cb]);
+    if(!prog){
+      prog = true;
+      setTimeout(function(){
+        prog = false;
+        var c = cola; cola = [];
+        raf(function(ts){
+          for(var i=0;i<c.length;i++){
+            if(muertos && muertos.has(c[i][0])) continue;
+            try{ c[i][1](ts) }catch(e){}
+          }
+          if(muertos) muertos.clear();
+        });
+      }, PASO);
+    }
+    return mio;
+  };
+  var caf = window.cancelAnimationFrame && window.cancelAnimationFrame.bind(window);
+  window.cancelAnimationFrame = function(i){
+    if(muertos) muertos.add(i);
+    if(caf) try{ caf(i) }catch(e){}
+  };
+})();
+</script>
 </head>
 <body class="ann-fuera">
 
@@ -8039,7 +8159,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
 
   function mide(){
     var r=cv.getBoundingClientRect();
-    dpr=Math.min(devicePixelRatio||1,1.75);
+    dpr=__dens();
     W=Math.max(1,Math.round(r.width)); H=Math.max(1,Math.round(r.height));
     cv.width=Math.round(W*dpr); cv.height=Math.round(H*dpr);
     ctx.setTransform(dpr,0,0,dpr,0,0);
@@ -8111,7 +8231,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
   document.querySelectorAll('.card .bg').forEach(cv=>{
     const ctx=cv.getContext('2d');
     const r=cv.getBoundingClientRect();
-    const dpr=Math.min(devicePixelRatio||1,2);
+    const dpr=__dens();
     cv.width=Math.max(1,r.width*dpr);cv.height=Math.max(1,r.height*dpr);
     ctx.setTransform(dpr,0,0,dpr,0,0);
     const seed=+cv.dataset.seed||1;
@@ -8275,7 +8395,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
   if(cv){
     const draw=()=>{
       const r=cv.getBoundingClientRect();if(!r.width)return;
-      const dpr=Math.min(devicePixelRatio||1,2);
+      const dpr=__dens();
       cv.width=r.width*dpr;cv.height=r.height*dpr;
       const c=cv.getContext('2d');c.setTransform(dpr,0,0,dpr,0,0);
       c.fillStyle='#0A1024';c.fillRect(0,0,r.width,r.height);
@@ -8383,7 +8503,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
   const mixc=(c,t,k)=>'rgb('+c.map((v,i)=>Math.round(v+(t[i]-v)*k)).join(',')+')';
   function build(){
     const r=cv.getBoundingClientRect();if(!r.width)return;
-    dpr=Math.min(devicePixelRatio||1,2);
+    dpr=__dens();
     W=r.width;H=r.height;narrow=innerWidth<880;
     sc=narrow?H/(DX*0.72):W/DX;
     cv.width=W*dpr;cv.height=H*dpr;
@@ -8713,7 +8833,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
   let W=0,H=0,top=0,hh=0,vh=innerHeight,last=-1;
   let dirty=true, lastT=0;
   function size(){
-    const d=Math.min(devicePixelRatio||1,2);
+    const d=__dens();
     W=cv.clientWidth;H=cv.clientHeight;
     cv.width=W*d;cv.height=H*d;ctx.setTransform(d,0,0,d,0,0);
     top=dTop(hold);hh=hold.offsetHeight;vh=innerHeight;
@@ -9021,7 +9141,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
   let W=0,H=0,bars=[],raf=0,last=-1;
   const st={n:0};
   function build(){
-    const d=Math.min(devicePixelRatio||1,2);
+    const d=__dens();
     W=cv.clientWidth;H=cv.clientHeight;
     cv.width=W*d;cv.height=H*d;ctx.setTransform(d,0,0,d,0,0);
     st.n=Math.max(6,Math.round(W/108));
@@ -9144,7 +9264,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
   const PAPER=[6,7,10];
   let W=0,H=0,U=0,cols=0,rows=0,cells=[],last=-1;
   function build(){
-    const d=Math.min(devicePixelRatio||1,2);
+    const d=__dens();
     W=cv.clientWidth;H=cv.clientHeight;
     cv.width=W*d;cv.height=H*d;ctx.setTransform(d,0,0,d,0,0);
     U=Math.max(34,Math.round(Math.min(W,H)/13));
@@ -9241,7 +9361,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
     if(!SU)haceSuelo();
     const ahora=performance.now()/1000;
     const dt=Math.min(.05,(ahora-suL)||.016); suL=ahora;
-    const d=Math.min(devicePixelRatio||1,2);
+    const d=__dens();
     if(scvW!==Math.round(W*d)||scvH!==Math.round(H*d)){
       scvW=scv.width=Math.round(W*d); scvH=scv.height=Math.round(H*d);
       sctx.setTransform(d,0,0,d,0,0);
@@ -9385,7 +9505,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
             '.rm-stop,.rm-row,.nav>a,.get,.scrollbtn,.w-field,[data-hov]';
   let W=0,H=0,mx=-999,my=-999,hov=null,box=null,DPR=1;
   function size(){
-    const d=Math.min(devicePixelRatio||1,2);
+    const d=__dens();
     DPR=d;
     const r=cv.getBoundingClientRect();
     W=r.width||innerWidth; H=r.height||innerHeight;
@@ -9811,7 +9931,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
     const ctx=cv.getContext('2d');
     let W=0,H=0,t0=performance.now()+k*2100;
     function arma(){
-      const d=Math.min(devicePixelRatio||1,2);
+      const d=__dens();
       const r=cv.getBoundingClientRect();
       W=r.width; H=r.height;
       cv.width=W*d; cv.height=H*d; ctx.setTransform(d,0,0,d,0,0);
@@ -9820,7 +9940,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
     let sello=null, R=0;
     function haceSello(){
       R=Math.max(40, W*0.42);
-      const d=Math.min(devicePixelRatio||1,2);
+      const d=__dens();
       sello=document.createElement('canvas');
       sello.width=Math.ceil(R*2*d); sello.height=Math.ceil(R*2*d);
       const c=sello.getContext('2d');
@@ -10990,7 +11110,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
   }
 
   function medir(){
-    DPR=Math.min(2,window.devicePixelRatio||1);
+    DPR=__dens();
     var r=lz.getBoundingClientRect();
     W=Math.max(1,r.width); H=Math.max(1,r.height);
     lz.width=Math.round(W*DPR); lz.height=Math.round(H*DPR);
@@ -11682,7 +11802,10 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
 (function(){
   if(!matchMedia('(max-width:899px)').matches) return;
   if(!('IntersectionObserver' in window)) return;
-  var SEL='main>section.depth,[data-par],.press-rail,.builds-rail,.sec-grid,'+
+  /* Todas las secciones, no solo las que pedian capa: «.cerca» gobierna ahora
+     dos cosas —quien se promociona y quien tiene derecho a animarse— y la
+     segunda vale para cualquier seccion, tenga «will-change» o no. */
+  var SEL='main>section,footer,[data-par],.press-rail,.builds-rail,.sec-grid,'+
           '.rows,.join-grid,.ffield,.sale-field,.sh-mesh,.sh-edges,.lane-in,.kin-in';
   var io=new IntersectionObserver(function(es){
     for(var i=0;i<es.length;i++)
@@ -11794,6 +11917,50 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
     });
   }
   addEventListener('load', function(){ setTimeout(alta, 1200) });
+})();
+</script>
+<script>
+/* ══════════════════════════════════════════════════════════════════════════
+   EL FRENO DE LAS ANIMACIONES
+   ══════════════════════════════════════════════════════════════════════════
+   Contadas con el propio navegador: NOVENTA Y OCHO animaciones de CSS
+   corriendo a la vez, y casi todas FUERA DE PANTALLA. «marcaGira» sobre un
+   elemento de 536.000 px², «marcaCabecea» sobre 417.000, «meshDrift» cuatro
+   veces sobre 175.000 cada una… todas girando para nadie, porque una
+   animacion de CSS no se para sola al salir del encuadre: el navegador sigue
+   recalculando estilo y rasterizando.
+   Medido en el reloj: en «join» el recalculo de estilo se comia el 10,5 % de
+   un nucleo con la pagina completamente quieta.
+   Se pregunta al navegador que tiene corriendo y se para lo que este a mas de
+   media pantalla de distancia. Se reanuda al acercarse, y SOLO lo que hemos
+   parado nosotros: si la pagina paro algo a proposito, se queda parado. */
+(function(){
+  if(innerWidth >= 900) return;
+  if(!document.getAnimations) return;
+  function revisa(){
+    var vh = innerHeight, M = vh * 0.6, l;
+    try{ l = document.getAnimations() }catch(e){ return }
+    for(var i=0;i<l.length;i++){
+      var a = l[i], e = a.effect && a.effect.target;
+      if(!e || !e.getBoundingClientRect) continue;
+      var r;
+      try{ r = e.getBoundingClientRect() }catch(err){ continue }
+      var cerca = r.width > 0 && r.bottom > -M && r.top < vh + M;
+      try{
+        if(cerca){ if(a.__freno){ a.__freno = 0; a.play() } }
+        else if(a.playState === 'running'){ a.__freno = 1; a.pause() }
+      }catch(err){}
+    }
+  }
+  var pide = (function(){
+    var p = 0;
+    return function(){ if(p) return; p = 1;
+      setTimeout(function(){ p = 0; revisa() }, 260) };
+  })();
+  addEventListener('scroll', pide, {passive:true});
+  addEventListener('resize', pide, {passive:true});
+  addEventListener('load', function(){ setTimeout(revisa, 1600) });
+  setInterval(revisa, 2400);
 })();
 </script>
 </body>
