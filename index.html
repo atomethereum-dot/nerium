@@ -5271,6 +5271,48 @@ h1,.sec-h,.press-h,.builds-h,.tkp-h,.sale-h,.ruta-h,.join-h{max-width:22ch}
   .lk-tag i{width:clamp(150px,52vw,300px)}
   .lk-tag{gap:11px}
 }
+
+/* ── el filo de seccion: mas discreto que el de las bandas de papel, porque
+      ahora hay veintitres y no tres. Dos pixeles, azul, y se apaga solo. ── */
+.corte-sec i{background:linear-gradient(90deg,
+    rgba(26,86,255,0) 0%, rgba(26,86,255,.34) 26%,
+    rgba(120,175,255,.85) 50%, rgba(26,86,255,.34) 74%,
+    rgba(26,86,255,0) 100%);
+  box-shadow:none}
+.corte-sec.on i{animation:filoApaga 2.1s .5s ease-out forwards}
+.claro .corte-sec i{background:linear-gradient(90deg,
+    rgba(14,58,196,0) 0%, rgba(14,58,196,.3) 26%,
+    rgba(11,16,32,.75) 50%, rgba(14,58,196,.3) 74%,
+    rgba(14,58,196,0) 100%)}
+
+/* ── el epigrafe entra por detras de su filete ──
+      La palabra sale de debajo de la linea mientras la linea se dibuja: el
+      filete no acompaña al texto, lo DESCUBRE. */
+.sk{overflow:hidden}
+.sk>*{display:inline-block;transform:translateY(105%);
+  transition:transform .74s var(--sal) .06s}
+.entrada .sk>*,.in .sk>*,.sk.in>*{transform:none}
+.sk-n{transition:transform .74s var(--sal),color .3s ease}
+.entrada .sk .sk-n{transition-delay:0s}
+
+/* ── y en el telefono la entrada es un punto mas larga ──
+      En escritorio ves tres o cuatro piezas entrar a la vez y el conjunto se
+      lee de golpe; en un telefono entran de una en una segun bajas, asi que
+      lo que en pantalla grande seria lento aqui es lo que hace que se VEA.
+      0,62 s pasan a 0,78, y el escalonado de 70 ms a 95. */
+@media(max-width:899px){
+  .rv{transition:transform .78s var(--sal), clip-path .78s var(--sal) !important}
+  .ws>.wi{transition:transform .66s var(--sal) var(--wd,0s) !important}
+  .sec-grid>.rv:nth-child(2),.join-grid>*:nth-child(2){transition-delay:.095s !important}
+  .sec-grid>.rv:nth-child(3){transition-delay:.19s !important}
+  .rows li:nth-child(2){transition-delay:.08s}
+  .rows li:nth-child(3){transition-delay:.16s}
+  .rows li:nth-child(4){transition-delay:.24s}
+}
+@media(prefers-reduced-motion:reduce){
+  .sk>*{transform:none !important}
+  .corte-sec i{animation:none !important;transform:scaleX(1) !important}
+}
 </style>
 </head>
 <body class="ann-fuera">
@@ -10709,6 +10751,75 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
       });
     }
   }
+})();
+</script>
+<script>
+/* ══ QUE EL CORTE ENTRE SECCIONES SE VEA ══════════════════════════════════
+   El filo existia solo en los tres bordes de las bandas de papel. Las otras
+   veinte fronteras de la pagina no tenian nada: se pasaba de una seccion a la
+   siguiente sin que ocurriera nada, y por eso al bajar en el movil «no se ve
+   cambio» — no es que las transiciones sean flojas, es que en veinte de
+   veintitres sitios NO HABIA transicion.
+
+   Tres cosas, y las tres cuestan solo transformacion y opacidad, que es lo
+   unico que un navegador anima sin repintar:
+
+     1 · EL FILO EN TODAS LAS FRONTERAS. Dos pixeles que se abren desde el
+         centro hacia los lados al entrar la seccion.
+     2 · EL NUMERO DE SECCION CUENTA. «05» no aparece: sube desde «00» en
+         cuatro decimas. Es el detalle que hace que una pagina parezca un
+         instrumento y no un documento, y son doce lineas de codigo.
+     3 · EL EPIGRAFE ENTRA POR DETRAS DE SU PROPIO FILETE, con la palabra
+         desplazandose desde la izquierda mientras la linea se dibuja.
+
+   Todo con un solo observador y sin leer geometria en ningun cuadro. */
+(function(){
+  const quieto=matchMedia('(prefers-reduced-motion:reduce)').matches;
+  const secs=[...document.querySelectorAll('main>section')];
+  if(!secs.length)return;
+
+  /* 1 · el filo donde no lo habia */
+  for(const s of secs){
+    if(s.querySelector(':scope>.corte'))continue;
+    if(getComputedStyle(s).position==='static')s.style.position='relative';
+    const c=document.createElement('i');
+    c.className='corte corte-sec';c.setAttribute('aria-hidden','true');
+    c.appendChild(document.createElement('i'));
+    s.insertBefore(c,s.firstChild);
+  }
+
+  /* 2 · el numero que cuenta */
+  const nums=[...document.querySelectorAll('.sk-n')].filter(n=>/^\d+$/.test(n.textContent.trim()));
+  for(const n of nums){ n.dataset.fin=n.textContent.trim() }
+
+  function cuenta(el){
+    if(quieto||el.dataset.hecho)return;
+    el.dataset.hecho='1';
+    const fin=parseInt(el.dataset.fin,10);
+    if(!(fin>0))return;
+    const anchos=el.dataset.fin.length;
+    const t0=performance.now(), dur=460;
+    (function paso(t){
+      const k=Math.min(1,(t-t0)/dur);
+      /* frena al final, como todo lo demas de la pagina */
+      const e=1-Math.pow(1-k,3);
+      el.textContent=String(Math.round(e*fin)).padStart(anchos,'0');
+      if(k<1)requestAnimationFrame(paso);
+      else el.textContent=el.dataset.fin;   /* el valor bueno, siempre */
+    })(t0);
+  }
+
+  const ojo=new IntersectionObserver(es=>{
+    for(const e of es){
+      if(!e.isIntersecting)continue;
+      const c=e.target.querySelector(':scope>.corte');
+      if(c)c.classList.add('on');
+      const k=e.target.querySelector('.sk-n[data-fin]');
+      if(k)cuenta(k);
+      e.target.classList.add('entrada');
+    }
+  },{rootMargin:'0px 0px -22% 0px',threshold:0});
+  for(const s of secs)ojo.observe(s);
 })();
 </script>
 </body>
