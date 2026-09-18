@@ -5107,6 +5107,45 @@ h1,.sec-h,.press-h,.builds-h,.tkp-h,.sale-h,.ruta-h,.join-h{max-width:22ch}
 @media(max-width:899px){
   h1,.sec-h,.press-h,.builds-h,.tkp-h,.sale-h,.ruta-h,.join-h{max-width:18ch}
 }
+
+/* ══ Y EN EL TELEFONO NO HABIA LLEGADO NADA ══════════════════════════════
+   La ronda anterior arreglo el margen y la medida… dentro de
+   «@media(min-width:1200px)». O sea que en un movil no cambio ni un pixel, y
+   es donde se estaba mirando. Auditado a 430 px, que es un telefono normal:
+
+     · EL MARGEN ERA DE 16 px. Sobre 430 de ancho eso es el 3,7 %. El texto va
+       pegado al canto de la pantalla; no hay borde, hay recorte.
+     · Y EL TITULAR SE QUEDABA CLAVADO EN 28 px. «clamp(28px, 5.5vw, 76px)»:
+       5,5 % de 430 son 23,6 px, por debajo del suelo, asi que en CUALQUIER
+       telefono -360, 390, 430- el titular mide exactamente lo mismo, 28. No
+       escalaba: estaba tocando el minimo en todos. Y 28 px de titular en una
+       pantalla de 430 no manda sobre nada; es el tamaño de un subtitulo.
+
+   El «clamp» estaba mal planteado, y es un error facil de cometer: se elige
+   un vw pensando en el escritorio y se le pone un suelo para que en el movil
+   «no se quede pequeño», y lo que pasa es que el suelo se traga todo el rango
+   del movil. La pendiente tiene que estar puesta para que el tramo util caiga
+   DENTRO de los tamaños de telefono, no por debajo. */
+
+.wrap{width:min(1360px,100% - 44px)}
+@media(min-width:900px){.wrap{width:min(1360px,100% - 72px)}}
+@media(min-width:1200px){.wrap{width:min(1240px, 100% - 112px)}}
+@media(min-width:1600px){.wrap{width:min(1300px, 100% - 160px)}}
+
+:root{
+  --fs-h1:clamp(36px, 10.4vw, 92px);
+  --fs-h2:clamp(31px,  8.4vw, 76px);
+  --fs-h3:clamp(20px,  4.4vw, 36px);
+}
+
+/* el epigrafe y los rotulos tambien suben: a 10,5 px en una pantalla de 430
+   son letras que se miran, no que se leen */
+@media(max-width:899px){
+  .k,.sk,.mono,.rn,.sec-k,.bcd-tag,.lane-sub{letter-spacing:.16em}
+  .sk,.k{font-size:11.5px}
+  h1,.sec-h,.press-h,.builds-h,.tkp-h,.sale-h,.ruta-h,.join-h{
+    max-width:16ch;line-height:1.04}
+}
 </style>
 </head>
 <body class="ann-fuera">
@@ -7123,7 +7162,16 @@ function campo2D(){
       if(a<.012)continue;
       let c=p.c;
       if(lit>.01) c=[c[0]+(T[3][0]-c[0])*lit*.30, c[1]+(T[3][1]-c[1])*lit*.30, c[2]+(T[3][2]-c[2])*lit*.30];
-      if(dest>.01) c=[c[0]+(230-c[0])*dest*.80, c[1]+(240-c[1])*dest*.80, c[2]+(255-c[2])*dest*.80];
+      /* EL DESTELLO AL POSARSE ERA BLANCO, Y ESE ERA EL FALLO.
+         Empujaba el color del bloque hacia (230,240,255): casi blanco y, lo
+         que importa, NEUTRO. Los bloques se componen en «screen», que suma
+         luz, asi que dos o tres destellos solapados se van a blanco puro y
+         aparecen esas manchas claras en las esquinas de la portada. Un
+         destello no tiene por que ser blanco: lo que lo hace destello es que
+         suba de golpe y baje rapido. Se va hacia un azul CLARO, que sube
+         igual y nunca se sale de la familia por mucho que se apile, y con
+         menos fuerza: 0,55 en vez de 0,80. */
+      if(dest>.01) c=[c[0]+(108-c[0])*dest*.55, c[1]+(156-c[1])*dest*.55, c[2]+(255-c[2])*dest*.55];
       const col=(c[0]|0)+','+(c[1]|0)+','+(c[2]|0);
       if(estira>0.002){
         /* la estela: un rectangulo mas flojo detras de la cabeza */
@@ -7135,7 +7183,7 @@ function campo2D(){
         ctx.fillStyle='rgba('+col+','+a.toFixed(3)+')';
         ctx.fillRect(Math.round(x)+1,Math.round(yc)+1,Math.max(1,w-2),Math.max(1,hc-2));
         if(hc>3){
-          ctx.fillStyle='rgba(235,238,245,'+(a*0.55).toFixed(3)+')';
+          ctx.fillStyle='rgba(126,170,255,'+(a*0.40).toFixed(3)+')';
           ctx.fillRect(Math.round(x)+1,Math.round(yc)+1,Math.max(1,w-2),1);
         }
       }else{
@@ -7150,7 +7198,7 @@ function campo2D(){
            las tarjetas de la mitad clara, asi que ademas es la misma gramatica.
            Un fillRect mas por pieza, sin degradado y sin sombra. */
         if(bh>2){
-          ctx.fillStyle='rgba(235,238,245,'+(a*0.55).toFixed(3)+')';
+          ctx.fillStyle='rgba(126,170,255,'+(a*0.40).toFixed(3)+')';
           ctx.fillRect(bx,by,bw,1);
         }
       }
