@@ -57,6 +57,34 @@ for (const [nombre, opciones] of [['móvil', {...devices['iPhone 13']}],
   });
   chk(`${nombre}: ninguna sección cambia al volver a pasar`,
       cambios.map(c=>`${c.id} ${c.de}→${c.a}`).join(', ') || 'ninguna', 'ninguna');
+
+  /* Y LO QUE DE VERDAD SE VE: QUE LA PÁGINA NO SE MUEVA SOLA.
+     Las dos pruebas de arriba miden el ALTO del documento, y el fallo que el
+     visitante reportó —«se reinicia al llegar a algunas secciones»— no cambiaba
+     el alto ni un píxel: el documento medía 16678 antes y después. Lo que se
+     movía era el SCROLL. Un aviso de «resize» —la barra de direcciones del
+     móvil al desplazarse, o el que la propia página se manda para despertar los
+     lienzos dormidos— disparaba un remedido completo que reponía el scroll a un
+     número de píxeles ya caducado, y tiraba de la lectura 781 px hacia atrás.
+     Cuatro veces en un recorrido. Así que se para en cada tramo, se deja a la
+     página sola medio segundo, y se comprueba que siga donde se la dejó. */
+  const quieta = await (async () => {
+    const h = await pg.evaluate(()=>document.documentElement.scrollHeight);
+    let peor = 0, dondeError = 0;
+    for (let y = 0; y < h; y += 300) {
+      await pg.evaluate(v=>scrollTo(0,v), y);
+      await pg.waitForTimeout(60);
+      const a = await pg.evaluate(()=>Math.round(scrollY));
+      await pg.waitForTimeout(420);
+      const b = await pg.evaluate(()=>Math.round(scrollY));
+      if (Math.abs(b-a) > Math.abs(peor)) { peor = b-a; dondeError = y }
+    }
+    return { peor, dondeError };
+  })();
+  chk(`${nombre}: la página no se desplaza sola mientras se lee` +
+      (Math.abs(quieta.peor) > 20 ? ` (${quieta.peor}px en y=${quieta.dondeError})` : ''),
+      Math.abs(quieta.peor) <= 20, true);
+
   await ctx.close();
 }
 await nav.close(); srv.close();

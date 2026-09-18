@@ -728,8 +728,34 @@
        de que la página haya cargado: la primera pintada, que es la que el
        visitante nota, ya ocurrió, así que este trabajo extra no retrasa nada de
        lo que ve. */
+    /* EL ANCLA. Volver a un número de píxeles solo vale si el documento mide lo
+       mismo antes y después, y aquí no lo mide: pintarlo todo y despintarlo
+       cambia el alto de todo lo que queda por encima, y el número guardado
+       deja de caer donde caía. Medido en el móvil, eso tiraba de la página
+       781 px hacia atrás mientras el visitante leía. Se guarda la SECCIÓN que
+       está en pantalla y a qué altura está, que sobreviven al cambio de alto
+       igual que sobreviven al recargar unas líneas más abajo. */
+    function ancla() {
+      var vh = window.innerHeight;
+      for (var i = 0; i < secciones.length; i++) {
+        var r = secciones[i].getBoundingClientRect();
+        if (r.bottom > 0 && r.top < vh) return { s: secciones[i], t: r.top };
+      }
+      return null;
+    }
+    function vuelve(a) {
+      if (!a) return;
+      /* Dos pasadas: corregir el scroll puede pintar o despintar una sección
+         más, y eso mueve otra vez lo que hay por encima. Converge. */
+      for (var n = 0; n < 3; n++) {
+        var d = a.s.getBoundingClientRect().top - a.t;
+        if (Math.abs(d) <= 1) return;
+        window.scrollBy(0, d);
+      }
+    }
+
     function medirTodas() {
-      var y = window.scrollY || 0;
+      var suelo = ancla();
       var previo = secciones.map(function (s) { return s.style.contentVisibility; });
       var estilaza = secciones.map(function (s) { return getComputedStyle(s).contentVisibility; });
       secciones.forEach(function (s) { s.style.contentVisibility = 'visible'; });
@@ -741,7 +767,7 @@
       void document.body.offsetHeight;
       /* Pintar y despintar cambia el alto del documento un instante, y el
          navegador puede reajustar el scroll: se deja donde estaba. */
-      if ((window.scrollY || 0) !== y) window.scrollTo(0, y);
+      vuelve(suelo);
     }
 
     function cuandoHaya(fn) {
@@ -764,8 +790,20 @@
     secciones.forEach(function (s) { io.observe(s); });
 
     /* Al girar el teléfono los altos son otros y lo fijado deja de valer. */
-    var reloj = null;
+    /* PERO UN «resize» NO ES SIEMPRE UN CAMBIO DE TAMAÑO. En el móvil la barra
+       de direcciones aparece y desaparece al desplazarse —y eso llega aquí como
+       «resize»—, y la propia página se manda el aviso para resucitar los lienzos
+       que duermen fuera de pantalla. Cualquiera de los dos borraba TODOS los
+       altos fijados y volvía a medirlo todo mientras el visitante leía: es de
+       ahí de donde salía el tirón hacia atrás. Lo que invalida los altos es el
+       ANCHO de la ventana; el alto, solo cuando pega el salto de girar el
+       teléfono. Lo demás no se toca. */
+    var reloj = null, anchoPrev = window.innerWidth, altoPrev = window.innerHeight;
     addEventListener('resize', function () {
+      var dw = Math.abs(window.innerWidth - anchoPrev);
+      var dh = Math.abs(window.innerHeight - altoPrev);
+      anchoPrev = window.innerWidth; altoPrev = window.innerHeight;
+      if (dw === 0 && dh < 200) return;
       clearTimeout(reloj);
       reloj = setTimeout(function () {
         secciones.forEach(function (s) { s.style.containIntrinsicSize = ''; });
