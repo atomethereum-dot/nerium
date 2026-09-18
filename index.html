@@ -5368,6 +5368,164 @@ h1,.sec-h,.press-h,.builds-h,.tkp-h,.sale-h,.ruta-h,.join-h{max-width:22ch}
 @media(prefers-reduced-motion:reduce){
   .press-rail .pcd{opacity:1;transform:none;clip-path:none}
 }
+
+/* ══ EL FILO SE VA DE TODAS LAS SECCIONES ═════════════════════════════════
+   «la luz que salia en la portada ya no sale pero sigue saliendo en todas las
+   secciones». Era esto, y era mio: el filo que monte la ronda pasada sobre las
+   veintitres fronteras. Su nucleo es «#FFFFFF» al 50 % con «box-shadow:0 0
+   22px -2px rgba(40,110,255,.75)» encima. O sea una raya BLANCA con halo, y
+   una por seccion. Yo lo llamaba transicion; en pantalla es exactamente «una
+   luz que sale en todas las secciones».
+
+   Se retira entero: el de las bandas de papel y el de las demas. La linea de
+   corte se queda —el borde entre negro y papel sigue siendo un corte seco—
+   pero deja de encenderse. Las transiciones que quedan son las que mueven
+   CONTENIDO: el titular que se pliega, las tarjetas que suben tras su
+   mascara, el numero que cuenta, el epigrafe que sale de debajo de su filete.
+   Eso es lo que se pidio; el destello no. */
+.corte,.corte-sec{display:none !important}
+
+/* ══ LA FIRMA ═════════════════════════════════════════════════════════════
+   La palabra «NEREUM» del pie mide entre 110 y 200 px y es lo ultimo que se
+   ve de la pagina. Hoy entra con un «clip-path» de 1,3 segundos —una cortina
+   que sube— y ahi se queda quieta para siempre. Un cierre que tarda segundo y
+   medio en aparecer y luego no hace nada mas es un cierre que no cierra.
+
+   Ahora la firma se ESCRIBE: cada letra sube desde detras de su propia
+   mascara, de izquierda a derecha, con 55 ms entre una y la siguiente. Una
+   palabra de seis letras tarda 0,9 s en completarse y se lee como una mano
+   escribiendo, no como una persiana subiendo. Y la marca, que va al final de
+   la palabra, entra la ULTIMA y girando sobre su propio eje: la firma acaba
+   con el sello.
+
+   El «clip-path» de 1,3 s se retira —no se suma, se sustituye—, asi que esto
+   ademas es mas barato que lo que habia: una mascara a pantalla completa
+   menos, y en su sitio seis transformaciones pequeñas. */
+/* Sin «overflow» en el conjunto: cada letra ya lleva su propia mascara en
+   «.fl», asi que el de aqui era redundante… y ademas recortaba el logotipo
+   que va al final de la palabra, porque la palabra ocupa el ancho entero y el
+   sello queda fuera de la caja. Se veia «NEREUM» y se perdia el sello. */
+.fmark{clip-path:none !important;transition:none !important;
+  padding-bottom:.08em}
+.fmark .fl{display:inline-block;overflow:hidden;vertical-align:bottom}
+.fmark .fl>i{display:inline-block;font-style:normal;
+  transform:translateY(106%);
+  transition:transform .78s var(--sal) var(--fd,0s)}
+.fmark.in .fl>i{transform:none}
+.fmark-logo{transform-origin:50% 60%;
+  transform:translateY(calc(var(--fs) * .008)) rotate(-24deg) scale(.6);
+  opacity:0;
+  transition:transform .9s var(--sal) var(--fdl,.4s), opacity .5s ease var(--fdl,.4s)}
+.fmark.in .fmark-logo{transform:translateY(calc(var(--fs) * .008)) rotate(0) scale(1);
+  opacity:1}
+@media(prefers-reduced-motion:reduce){
+  .fmark .fl>i{transform:none !important}
+  .fmark-logo,.fmark.in .fmark-logo{transform:translateY(calc(var(--fs) * .008)) !important;opacity:1 !important}
+}
+
+/* ══ 1 · el peso del gesto ═══════════════════════════════════════════════
+   Todo entraba y, una vez dentro, se quedaba quieto. Una pagina cara acusa
+   el gesto: cuando tiras de la rueda, lo que hay dentro pesa y se retrasa un
+   poco. Va con «--vel», la velocidad de la rueda normalizada a [-1,1], que
+   escribe un unico rAF que se apaga solo en cuanto paras.
+   Solo transform. Ni filtros ni sombras ni fondos por cuadro. */
+:root{--vel:0}
+
+/* medio grado por unidad: el techo es 0,55. Por encima de dos se ve el truco;
+   por debajo de un cuarto no se siente nada. Ninguno de estos seis contiene
+   nada pegajoso ni fijo —lo pegajoso es «.sec-stage», que va POR ENCIMA de
+   «.sec-grid»—, asi que el transform no les rompe el bloque contenedor. */
+.press-rail,.builds-rail,.sec-grid,.rows,.join-grid{
+  transform:skewY(calc(var(--vel) * .9deg));
+  transform-origin:50% 50%;
+  will-change:transform}
+
+/* ══ 2 · el iman ═════════════════════════════════════════════════════════
+   Las placas miran al cursor. Solo con raton fino: en tactil no hay cursor al
+   que mirar y el «hover» se queda pegado despues del toque.
+   Cinco grados es el techo: por encima, el rasterizado en 3D desenfoca el
+   texto y se nota mas el efecto que la tarjeta. */
+@media (hover:hover) and (pointer:fine){
+  .iman{--mx:0;--my:0}
+  .press-rail.in .pcd.iman:hover,
+  .builds-rail.in .bcd.iman:hover,
+  .bcd.iman:hover,
+  .sec-card.iman:hover{
+    transform:perspective(900px)
+      rotateX(calc(var(--my) * -4.2deg))
+      rotateY(calc(var(--mx) * 5deg))
+      translate3d(calc(var(--mx) * 6px), calc(var(--my) * 6px - 6px), 0);
+    transition:transform .34s cubic-bezier(.2,.9,.3,1),
+               border-color .35s ease, box-shadow .45s ease;
+    transition-delay:0s}
+  .jbtn.iman:hover,.jbtn.iman:focus-visible{
+    transform:translate3d(calc(var(--mx) * 7px), calc(var(--my) * 4px - 3px), 0);
+    transition:transform .3s cubic-bezier(.2,.9,.3,1),
+               border-color .35s ease, color .35s ease}
+}
+
+/* ══ 3 · la secuencia ════════════════════════════════════════════════════
+   Tres tarjetas que aparecen a la vez son un bloque. Con 110 ms entre una y
+   otra son una secuencia, y se lee de izquierda a derecha como se lee todo
+   lo demas. Los 70 ms de antes eran tan cortos que el ojo las juntaba. */
+.sec-grid>.rv:nth-child(1){transition-delay:0s !important}
+.sec-grid>.rv:nth-child(2),.join-grid>*:nth-child(2){transition-delay:.11s !important}
+.sec-grid>.rv:nth-child(3),.join-grid>*:nth-child(3){transition-delay:.22s !important}
+
+@media(prefers-reduced-motion:reduce){
+  .press-rail,.builds-rail,.sec-grid,.rows,.join-grid{transform:none !important}
+  .iman{transform:none !important}
+}
+
+
+/* ══ 4 · el sello del pie, que llevaba meses invisible ═══════════════════
+   «.fmark-logo» va a silueta con «brightness(0)» —negro— al 15 %. Eso se
+   escribio cuando el pie era de papel. El pie es #040507: un sello negro al
+   15 % sobre un negro es exactamente nada, y por eso la palabra gigante
+   terminaba en el aire.
+   Y no hace falta inventarle un color: el SVG del pie YA esta dibujado como
+   marca de agua clara —#E3E6EE con «--fmg-a» y «--fmg-b» de opacidad, que el
+   propio pie baja a .18 y .03—. El filtro lo estaba aplastando por segunda
+   vez y ademas en negro. Quitarlo es toda la correccion. */
+footer .fmark-logo{filter:none}
+
+/* ══ 5 · la hoja ═════════════════════════════════════════════════════════
+   Las tres bandas de papel entraban por un canto horizontal: salia una linea
+   recta y detras, de golpe, todo el blanco. Ahora el canto llega inclinado y
+   se endereza mientras sube, como una hoja que alguien deja sobre la mesa.
+   Es la MISMA banda y el MISMO borde en reposo: con «--hj» a cero el
+   triangulo mide cero y no queda nada dibujado. Lo que cambia es como llega.
+   Un unico clip-path sobre un rectangulo de color plano —el color de la
+   seccion que tiene encima, que lo pone el guion— y nada mas. */
+.claro::before{content:"";position:absolute;left:0;right:0;top:0;
+  height:26vh;z-index:0;pointer-events:none;
+  background:var(--hoja-c,#05070B);
+  clip-path:polygon(0 0, 100% 0,
+                    100% calc(var(--hj,0) * 100%),
+                    0 calc(var(--hj,0) * 24%))}
+@media(prefers-reduced-motion:reduce){.claro::before{display:none}}
+
+
+/* ══ 6 · las placas se POSAN ═════════════════════════════════════════════
+   Entraban subiendo treinta pixeles y encendiendose. Subir es lo que hace
+   todo el mundo. Posarse es otra cosa: la tarjeta llega inclinada, con el
+   canto de abajo por delante, y se apoya. Seis grados —con la perspectiva a
+   1100 y el eje de giro en el canto inferior— es justo lo que se lee como
+   peso sin que el texto se vea borroso al rasterizar en 3D.
+   Y como es transform, entra por el mismo carril que ya tenian. */
+.press-rail .pcd,
+.builds-rail .bcd,
+.sec-grid>.sec-card{
+  transform:perspective(1100px) rotateX(6deg) translate3d(0,32px,0);
+  transform-origin:50% 100%}
+.press-rail.in .pcd,
+.builds-rail.in .bcd,
+.sec-grid>.sec-card.in{transform:none}
+
+@media(prefers-reduced-motion:reduce){
+  .press-rail .pcd,.builds-rail .bcd,.sec-grid>.sec-card{transform:none !important}
+}
+
 </style>
 </head>
 <body class="ann-fuera">
@@ -10925,5 +11083,143 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
   for(const s of secs)ojo.observe(s);
 })();
 </script>
+<script>
+/* ── la firma del pie, letra a letra ──
+   Se parte la palabra en letras UNA vez, al cargar, y cada una recibe su
+   retardo como variable. A partir de ahi no hay JS: la clase «.in» que ya
+   ponia el guion de siempre dispara las seis transiciones. */
+(function(){
+  const m=document.querySelector('.fmark'); if(!m)return;
+  const sp=m.querySelector('span'); if(!sp||sp.querySelector('.fl'))return;
+  const txt=(sp.textContent||'').trim();
+  if(!txt)return;
+  sp.setAttribute('aria-label',txt);
+  const frag=document.createDocumentFragment();
+  [...txt].forEach((ch,k)=>{
+    if(ch===' '){ frag.appendChild(document.createTextNode(' ')); return }
+    const caja=document.createElement('span'); caja.className='fl';
+    const let_=document.createElement('i'); let_.textContent=ch;
+    caja.style.setProperty('--fd',(k*0.055).toFixed(3)+'s');
+    caja.appendChild(let_); frag.appendChild(caja);
+  });
+  sp.textContent=''; sp.appendChild(frag);
+  m.style.setProperty('--fdl',(txt.replace(/\s/g,'').length*0.055+0.12).toFixed(3)+'s');
+})();
+</script>
+<script>
+/* ── el peso del gesto: un solo rAF, y se apaga solo ────────────────────
+   Lee «scrollY» una vez por cuadro y no toca geometria de nadie, asi que no
+   provoca ni un calculo de estilo forzado. Cuando pasan 140 ms sin un solo
+   evento de rueda, frena, pone «--vel» a cero y se muere: parado no cuesta
+   nada. */
+(function(){
+  if(matchMedia('(prefers-reduced-motion:reduce)').matches) return;
+  var raiz=document.documentElement, ant=scrollY, v=0, corre=false, ultimo=0;
+
+  /* Las bandas de papel. El color de la cuña es el de la seccion que tienen
+     justo encima, leido del marcado: asi la hoja tapa con el negro que ya
+     habia y no con un negro inventado que no case. */
+  var bandas=[], mapa=new WeakMap();
+  [].forEach.call(document.querySelectorAll('.claro'),function(s){
+    var pr=s.previousElementSibling, c=null;
+    while(pr && !c){ c=pr.getAttribute && pr.getAttribute('data-bg'); pr=pr.previousElementSibling }
+    s.style.setProperty('--hoja-c', c || '#05070B');
+    var b={n:s,top:0,p:-1,cerca:false};
+    bandas.push(b); mapa.set(s,b);
+  });
+  function hoja(){
+    var y=scrollY, vh=innerHeight;
+    for(var i=0;i<bandas.length;i++){
+      var b=bandas[i]; if(!b.cerca) continue;
+      var p=(y+vh-b.top)/(vh*.55);
+      p = p<0?0 : p>1?1 : p;
+      if(Math.abs(p-b.p)<.002) continue;
+      b.p=p;
+      b.n.style.setProperty('--hj', Math.pow(1-p,1.6).toFixed(4));
+    }
+  }
+  /* El observador da la caja medida DENTRO del propio aviso, asi que la
+     posicion se refresca sola justo cuando importa y el bucle no mide nada
+     por cuadro. Con «content-visibility:auto» encima, cachear la posicion al
+     cargar y no volver a mirarla era la via rapida a una cuña descolocada. */
+  if(bandas.length && 'IntersectionObserver' in window){
+    var io=new IntersectionObserver(function(es){
+      var y=scrollY;
+      es.forEach(function(e){
+        var b=mapa.get(e.target); if(!b) return;
+        b.top=e.boundingClientRect.top+y;
+        b.cerca=e.isIntersecting;
+        if(!b.cerca){ b.p=-1; e.target.style.setProperty('--hj', e.boundingClientRect.top>0?'1':'0') }
+      });
+      hoja();
+    },{rootMargin:'130% 0px 130% 0px'});
+    bandas.forEach(function(b){ io.observe(b.n) });
+  }
+  addEventListener('resize',function(){
+    var y=scrollY;
+    bandas.forEach(function(b){ b.top=b.n.getBoundingClientRect().top+y; b.p=-1 });
+    hoja();
+  },{passive:true});
+
+  function paso(){
+    var y=scrollY, d=y-ant; ant=y;
+    hoja();
+    v += (d - v) * .2;
+    /* 62 px por cuadro es un tiron fuerte de rueda; con 32 saturaba a tope
+       con un solo clic y la inclinacion era siempre la maxima. */
+    var n=Math.max(-1,Math.min(1, v/62));
+    raiz.style.setProperty('--vel', n.toFixed(4));
+    if(performance.now()-ultimo > 140){
+      /* nadie toca la rueda: se frena deprisa y se apaga. La condicion de
+         antes miraba solo la velocidad suavizada, que desde un tiron fuerte
+         tarda medio segundo en bajar del umbral —y el desplazamiento suave
+         del navegador sigue emitiendo eventos mientras tanto—, asi que el
+         bucle se quedaba vivo con un resto de inclinacion puesto. */
+      v *= .62;
+      if(Math.abs(v) < .25){ corre=false; raiz.style.setProperty('--vel','0'); return }
+    }
+    requestAnimationFrame(paso);
+  }
+  addEventListener('scroll',function(){
+    ultimo=performance.now();
+    if(corre) return;
+    corre=true; ant=scrollY; requestAnimationFrame(paso);
+  },{passive:true});
+})();
+
+/* ── el iman ────────────────────────────────────────────────────────────
+   La caja se mide UNA vez, al entrar, y no en cada movimiento del raton:
+   medirla por evento es el calculo forzado clasico. Solo se vuelve a medir
+   si la pagina se ha movido mas de seis pixeles por debajo del cursor. */
+(function(){
+  if(!matchMedia('(hover:hover) and (pointer:fine)').matches) return;
+  if(matchMedia('(prefers-reduced-motion:reduce)').matches) return;
+  var SEL='.pcd,.bcd,.sec-card,.jbtn', act=null, caja=null, sy=0;
+  function mide(el){ caja=el.getBoundingClientRect(); sy=scrollY }
+  function suelta(){
+    if(!act) return;
+    act.classList.remove('iman');
+    act.style.removeProperty('--mx'); act.style.removeProperty('--my');
+    act=null; caja=null;
+  }
+  document.addEventListener('pointerover',function(e){
+    var el=e.target.closest ? e.target.closest(SEL) : null;
+    if(el===act) return;
+    suelta();
+    if(!el) return;
+    act=el; act.classList.add('iman'); mide(act);
+  },true);
+  document.addEventListener('pointermove',function(e){
+    if(!act||!caja||!caja.width||!caja.height) return;
+    if(Math.abs(scrollY-sy)>6) mide(act);
+    var x=((e.clientX-caja.left)/caja.width - .5) * 2;
+    var y=((e.clientY-caja.top)/caja.height - .5) * 2;
+    act.style.setProperty('--mx', Math.max(-1,Math.min(1,x)).toFixed(3));
+    act.style.setProperty('--my', Math.max(-1,Math.min(1,y)).toFixed(3));
+  },{passive:true});
+  addEventListener('blur',suelta);
+})();
+</script>
+
 </body>
 </html>
