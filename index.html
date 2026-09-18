@@ -7984,105 +7984,200 @@ function campo2D(){
 }
 if(!campoGL()){ window.__campo='canvas'; campo2D(); }
 (function(){
-  const cv=document.getElementById('chroma');if(!cv)return;
-  const ctx=cv.getContext('2d',{alpha:false});
-  const HUES=[212,214,216,218,220,222,222,224,226,228,230,232,218,222,226,220];
-  let W=0,H=0,dpr=1,bars=[],live=true,last=0;
-  const rnd=(a,b)=>a+Math.random()*(b-a);
-  function paint(b){
-    const g=ctx.createLinearGradient(0,1,0,0);
-    g.addColorStop(0,   `hsla(${b.hue},${b.sat}%,${b.lum}%,${(b.a*.92).toFixed(3)})`);
-    g.addColorStop(.55, `hsla(${b.hue},${b.sat}%,${Math.min(74,b.lum+10)}%,${(b.a*.72).toFixed(3)})`);
-    g.addColorStop(.9,  `hsla(${b.hue},${b.sat}%,${Math.min(88,b.lum+24)}%,${(b.a*.2).toFixed(3)})`);
-    g.addColorStop(1,   `hsla(${b.hue},${b.sat}%,94%,0)`);
-    b.g=g;
-    if(b.hero){
-      const h=ctx.createLinearGradient(0,0,1,0);
-      h.addColorStop(0,`hsla(${b.hue},${b.sat}%,${b.lum}%,0)`);
-      h.addColorStop(.5,`hsla(${b.hue},${b.sat}%,${b.lum}%,${(b.a*.13).toFixed(3)})`);
-      h.addColorStop(1,`hsla(${b.hue},${b.sat}%,${b.lum}%,0)`);
-      b.gh=h;
-      const c=ctx.createLinearGradient(0,1,0,0);
-      c.addColorStop(0,`hsla(${b.hue},100%,86%,${(b.a*.5).toFixed(3)})`);
-      c.addColorStop(.8,`hsla(${b.hue},100%,97%,${(b.a*.34).toFixed(3)})`);
-      c.addColorStop(1,'hsla(0,0%,100%,0)');
-      b.gc=c;
-    }
-  }
-  function mk(){
-    const hero=Math.random()<.13;
-    const b={
-      x:Math.random(),
-      w:hero?rnd(.005,.013):rnd(.0015,.0062),
-      h:hero?rnd(.62,1):rnd(.18,.80),
-      hue:HUES[(Math.random()*HUES.length)|0],
-      sat:rnd(78,92),
-      lum:hero?rnd(56,66):rnd(46,60),
-      a:hero?rnd(.6,.92):rnd(.24,.62),
-      v:rnd(8,58)*(hero?.5:1),
-      ph:Math.random()*Math.PI*2,
-      pv:rnd(.35,1.5),
-      hero
-    };
-    paint(b);return b;
-  }
-  function build(){
-    dpr=1;   /* neón desenfocado: nadie ve el píxel, y el relleno cae a la cuarta parte */
-    W=cv.clientWidth;H=cv.clientHeight;
-    cv.width=W*dpr;cv.height=H*dpr;ctx.setTransform(dpr,0,0,dpr,0,0);
-    ctx.fillStyle='#000';ctx.fillRect(0,0,W,H);
-    const n=Math.max(34,Math.round(W/21));
-    bars=[];for(let i=0;i<n;i++)bars.push(mk());
-  }
-  function step(dt){
-    ctx.globalCompositeOperation='source-over';
-    ctx.fillStyle='rgba(0,0,0,.40)';
-    ctx.fillRect(0,0,W,H);
-    ctx.globalCompositeOperation='lighter';
-    for(const b of bars){
-      b.x+=(b.v*dt)/W;
-      if(b.x>1.06){b.x=-.06;b.hue=HUES[(Math.random()*HUES.length)|0];paint(b)}
-      b.ph+=dt*b.pv;
-      const breath=.6+(Math.sin(b.ph)*.5+.5)*.6;
-      const h=Math.min(H,H*b.h*breath), y=H-h;
-      const x=b.x*W, w=Math.max(1,b.w*W);
-      if(b.hero){
-        const gw=w*8;
-        ctx.save();ctx.translate(x-gw/2,y);ctx.scale(gw,h);
-        ctx.fillStyle=b.gh;ctx.fillRect(0,0,1,1);ctx.restore();
+  /* ══════════════════════════════════════════════════════════════════════════
+     LA HOJA DE REGISTRO
+     ══════════════════════════════════════════════════════════════════════════
+     Aqui habia barras de neon cruzando la pantalla: el ecualizador. Es el
+     fondo generativo que lleva puesto media internet desde 2023, y por eso
+     esta banda no decia nada de Nereum —podria estar en cualquier sitio—.
+     Ahora es una hoja de registro de la propiedad pasando despacio por debajo
+     del canto de un mostrador. A la izquierda del canto las parcelas estan
+     INSCRITAS: azul macizo, con su identificador. A la derecha son solo
+     contorno discontinuo: todavia no son nada. Tres no se inscriben nunca y
+     se quedan en ambar con la marca PENDING.
+     Eso es literalmente lo que hace la cadena —inscribir activos reales— y
+     cae justo encima del titular «Four guarantees, WRITTEN INTO the protocol»:
+     la banda esta escribiendo en un registro mientras el titular dice
+     «escritas en».
+     Y al pararla sigue habiendo un objeto: una hoja medio entintada. Un
+     pantallazo de las barras de neon no era nada. */
+  var cv=document.getElementById('chroma'); if(!cv) return;
+  var ctx=cv.getContext('2d',{alpha:false}); if(!ctx) return;
+  var CALMA=matchMedia('(prefers-reduced-motion:reduce)').matches;
+
+  var F='#05070C', AZUL='#0E3AC4', AZUL_SECO='#0A2069',
+      TRANSITO='#0B1836', HUECO='#0A0C12';
+  var CANTO='rgba(255,255,255,.45)', B_IN='rgba(255,255,255,.30)',
+      B_SECO='rgba(126,170,255,.22)',
+      B_NO='rgba(255,255,255,.10)', REGLA='rgba(255,255,255,.25)',
+      REGLA2='rgba(255,255,255,.40)', TINTA='rgba(255,255,255,.70)',
+      AMBAR='rgba(232,182,122,.55)', AMBAR2='#E8B67A',
+      SELLO='rgba(255,255,255,.40)';
+
+  var W=0,H=0,TIRA=2400,MINW=70,MINH=54,ANCHO_ID=150;
+  var par=[], vivo=true, t0=0, cantoX=0, y0=0, y1=0, mono='';
+
+  /* Misma hoja en cada carga: el generador lleva semilla fija. Una hoja que
+     cambia en cada recarga es un fondo; una que no cambia es un documento. */
+  function dado(s){ return function(){ s=(s*1664525+1013904223)>>>0; return s/4294967296 } }
+
+  function cuadrada(w,h){ var r=w/h; return r>0.85 && r<1.18 }
+
+  function reparte(){
+    var R=dado(20260118), out=[];
+    (function corta(x,y,w,h,prof,ejeAnt,seg){
+      var puedeX = w/2 > MINW, puedeY = h/2 > MINH;
+      /* Se rechaza el casi-cuadrado: tres parcelas cuadradas seguidas y el
+         ojo ya no ve un catastro, ve una cuadricula. */
+      var forzar = cuadrada(w,h) && (puedeX||puedeY);
+      if((prof<=0 && !forzar) || (!puedeX && !puedeY) || out.length>150){ out.push({x:x,y:y,w:w,h:h}); return }
+      var eje = (puedeX&&puedeY) ? (R()<0.5?0:1) : (puedeX?0:1);
+      if(forzar) eje = (w>=h) ? (puedeX?0:1) : (puedeY?1:0);
+      else if(seg>=2 && eje===ejeAnt){
+        var otro=1-eje;
+        if((otro===0&&puedeX)||(otro===1&&puedeY)) eje=otro;
       }
-      ctx.save();ctx.translate(x-w/2,y);ctx.scale(w,h);
-      ctx.fillStyle=b.g;ctx.fillRect(0,0,1,1);ctx.restore();
-      if(b.hero){
-        const cw=Math.max(1,w*.3);
-        ctx.save();ctx.translate(x-cw/2,y);ctx.scale(cw,h);
-        ctx.fillStyle=b.gc;ctx.fillRect(0,0,1,1);ctx.restore();
+      var k = 0.28 + R()*0.44;
+      var sig = (eje===ejeAnt) ? seg+1 : 1;
+      if(eje===0){ var a=Math.round(w*k);
+        corta(x,y,a,h,prof-1,0,sig); corta(x+a,y,w-a,h,prof-1,0,sig);
+      }else{ var b=Math.round(h*k);
+        corta(x,y,w,b,prof-1,1,sig); corta(x,y+b,w,h-b,prof-1,1,sig);
+      }
+    })(0,0,TIRA,Math.max(120,y1-y0),7,-1,0);
+
+    /* Tres que no se inscriben nunca, repartidas por la tira para que no
+       aparezcan las tres juntas. Son el UNICO calido de la escena. */
+    out.sort(function(a,b){ return a.x-b.x });
+    var n=out.length;
+    out.forEach(function(p,i){
+      p.id = 'NR-118-' + String(i+1).padStart(4,'0');
+      p.pend = false;
+    });
+    [Math.round(n*0.21), Math.round(n*0.47), Math.round(n*0.78)].forEach(function(i){
+      var p=out[Math.min(n-1,i)]; if(p) p.pend=true;
+    });
+    par=out;
+  }
+
+  function mide(){
+    var r=cv.getBoundingClientRect();
+    var dpr=Math.min(devicePixelRatio||1, 1.75);
+    W=Math.max(1,Math.round(r.width)); H=Math.max(1,Math.round(r.height));
+    cv.width=Math.round(W*dpr); cv.height=Math.round(H*dpr);
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    var estrecho = W<640;
+    TIRA = estrecho ? 900 : 2400;
+    /* En 390 px con parcelas de 64x48 se veian seis y parecia un mosaico de
+       bloques. La hoja tiene que leerse como MUCHAS fincas pequeñas tambien en
+       el telefono: es una ventana sobre el mismo plano, no una miniatura. */
+    MINW = estrecho ? 40 : 70; MINH = estrecho ? 30 : 54;
+    ANCHO_ID = estrecho ? 104 : 150;
+    /* el panel de papel de la seccion siguiente pisa el canto de abajo con su
+       esquina redondeada: las parcelas no llegan hasta ahi */
+    y0 = 28; y1 = H - (estrecho ? 46 : 58);
+    /* El canto estaba en el 62 % del ancho y eso dejaba dos tercios de banda
+       en azul macizo: una mancha, no un documento. A 0,40 la hoja se lee como
+       lo que es —mayoritariamente por inscribir— y el azul es una zona. */
+    cantoX = Math.round(0.40*W);
+    mono = (estrecho?'8px ':'9px ') + "ui-monospace,'DM Mono',monospace";
+    reparte();
+  }
+
+  function pinta(ts){
+    if(!vivo || !W || !cv.width){ requestAnimationFrame(pinta); return }
+    if(!t0) t0=ts;
+    /* 14 px por segundo. La hoja tarda casi tres minutos en dar la vuelta:
+       no es una animacion, es un mostrador abierto. */
+    var off = CALMA ? 0 : ((ts-t0)*0.014) % TIRA;
+
+    ctx.fillStyle=F; ctx.fillRect(0,0,W,H);
+    ctx.lineWidth=1;
+
+    for(var copia=0; copia<2; copia++){
+      var base = -off + copia*TIRA;
+      if(base > W || base+TIRA < 0) continue;
+
+      /* la regla graduada, que viaja con la hoja */
+      ctx.fillStyle=REGLA;
+      var sello0 = W<640 ? 14 : 96, sello1 = W<640 ? 232 : 396;
+      for(var t=0; t<TIRA; t+=40){
+        var tx=Math.round(base+t)+0.5; if(tx<-2||tx>W+2) continue;
+        /* el sello de la hoja va en esta misma franja: los tiques se apartan
+           en vez de que el texto les caiga encima */
+        if(tx>sello0-8 && tx<sello1) continue;
+        var alto = (t % 200 === 0) ? 12 : 5;
+        ctx.fillRect(tx, 11, 1, alto);
+      }
+
+      for(var i=0;i<par.length;i++){
+        var p=par[i];
+        var x=base+p.x+1.5, y=y0+p.y+1.5, w=p.w-3, h=p.h-3;
+        if(x>W+4 || x+w<-4) continue;
+        var rx=Math.round(x)+0.5, ry=Math.round(y)+0.5,
+            rw=Math.round(w), rh=Math.round(h);
+
+        if(p.pend){
+          /* nunca se inscribe: contorno discontinuo ambar y su marca */
+          ctx.setLineDash([3,3]); ctx.strokeStyle=AMBAR;
+          ctx.strokeRect(rx,ry,rw,rh); ctx.setLineDash([]);
+          if(rw>92 && rh>30){
+            ctx.font=mono; ctx.fillStyle=AMBAR2; ctx.textBaseline='top';
+            ctx.fillText('PENDING', rx+7, ry+7);
+          }
+          continue;
+        }
+
+        var der = x+w;
+        if(der <= cantoX){
+          /* INSCRITA: el paso es duro y por parcela entera, no un barrido.
+             Y la tinta FRESCA —lo que acaba de pasar por el mostrador— va
+             encendida; a 260 px del canto ya se ha secado y se queda en azul
+             hondo. Asi el ojo sabe por donde va el mostrador sin que haya una
+             linea de barrido en ninguna parte. */
+          var fresca = (cantoX - der) < 260;
+          ctx.fillStyle = fresca ? AZUL : AZUL_SECO;
+          ctx.fillRect(rx,ry,rw,rh);
+          ctx.strokeStyle = fresca ? B_IN : B_SECO; ctx.strokeRect(rx,ry,rw,rh);
+          if(rw>=ANCHO_ID && rh>26){
+            ctx.font=mono; ctx.fillStyle=TINTA; ctx.textBaseline='top';
+            ctx.fillText(p.id, rx+8, ry+8);
+          }
+        }else if(x < cantoX){
+          /* EN TRANSITO: un solo escalon intermedio, sin degradado */
+          ctx.fillStyle=TRANSITO; ctx.fillRect(rx,ry,rw,rh);
+          ctx.strokeStyle='rgba(255,255,255,.18)'; ctx.strokeRect(rx,ry,rw,rh);
+        }else{
+          ctx.setLineDash([4,4]); ctx.strokeStyle=B_NO;
+          ctx.strokeRect(rx,ry,rw,rh); ctx.setLineDash([]);
+        }
       }
     }
-    ctx.globalCompositeOperation='source-over';
+
+    /* EL CANTO DEL MOSTRADOR. No es una linea de barrido: es el borde de un
+       pliego apoyado, fijo, con su espesor y sus cotas de delineacion. Lo que
+       se mueve es la hoja. */
+    var cx=Math.round(cantoX)+0.5;
+    ctx.fillStyle=HUECO; ctx.fillRect(cx, 0, 10, H);
+    ctx.fillStyle=CANTO; ctx.fillRect(cx,0,1,H); ctx.fillRect(cx+10,0,1,H);
+    ctx.fillStyle=REGLA2;
+    ctx.fillRect(cx-9, 12, 8, 1);  ctx.fillRect(cx+12, 12, 8, 1);
+    ctx.fillRect(cx-9, H-13, 8, 1); ctx.fillRect(cx+12, H-13, 8, 1);
+
+    /* el sello de la hoja, alineado con la numeracion de secciones */
+    ctx.font=mono; ctx.fillStyle=SELLO; ctx.textBaseline='top';
+    ctx.fillText(W<640 ? 'NEREUM REGISTER · SHEET 118'
+                       : 'NEREUM REGISTER · SHEET 118 · 1:2000',
+                 W<640?14:96, 11);
+
+    requestAnimationFrame(pinta);
   }
-  function frame(ts){
-    if(!live){last=ts;requestAnimationFrame(frame);return}
-    const dt=Math.min(.05,(ts-last)/1000||.016);last=ts;
-    step(dt);
-    requestAnimationFrame(frame);
-  }
-  let warm=false;
-  function warmUp(){
-    if(warm||!W)return; warm=true;
-    for(let i=0;i<80;i++)step(1/60);
-  }
-  function boot(){
-    build();
-    if('requestIdleCallback' in window)requestIdleCallback(warmUp,{timeout:1500});
-    else setTimeout(warmUp,900);
-  }
-  boot();
-  addEventListener('resize',()=>{warm=false;build();warmUp()},{passive:true});
-  new IntersectionObserver(e=>{
-    if(e[0].isIntersecting){warmUp();live=true}else live=false;
-  },{rootMargin:'90% 0px 60% 0px',threshold:0}).observe(cv);
-  requestAnimationFrame(ts=>{last=ts;frame(ts)});
+
+  mide();
+  addEventListener('resize', function(){ mide() }, {passive:true});
+  new IntersectionObserver(function(e){ vivo=e[0].isIntersecting },
+    {rootMargin:'80% 0px 60% 0px',threshold:0}).observe(cv);
+  requestAnimationFrame(pinta);
 })();
 (function(){
   document.querySelectorAll('.card .bg').forEach(cv=>{
@@ -8677,242 +8772,355 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
   })();
 })();
 (function(){
-  const hold=document.getElementById('stack'), cv=document.getElementById('stkCv');
-  if(!hold||!cv)return;
-  const ctx=cv.getContext('2d');
-  const titles=[...hold.querySelectorAll('.stk-t b')];
-  const subs=[...hold.querySelectorAll('.stk-sub s')];
-  const bars=[...hold.querySelectorAll('.stk-steps i b')];
-  const NAMES=['Issuance registry','Policy engine','Access control','Liquidity rails'];
-  const clm=(v,a=0,b=1)=>Math.min(b,Math.max(a,v));
-  const ease=t=>t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;
-  const dTop=n=>{let y=0;while(n){y+=n.offsetTop;n=n.offsetParent}return y};
-  let W=0,H=0,top=0,hh=0,vh=innerHeight,last=-1;
-  let dirty=true, lastT=0;
+  /* ══════════════════════════════════════════════════════════════════════════
+     EL TITULO AL PORTADOR
+     ══════════════════════════════════════════════════════════════════════════
+     Aqui habia un campo de cubos flotando que se juntaban: el fondo generativo
+     de cualquier web de 2024. La seccion dice, literal, «una cadena, cuatro
+     capas… miralas juntarse… UNA garantia de liquidacion: o pasan las cuatro o
+     no pasa ninguna». Un campo de cubos no dice eso; un titulo al portador con
+     cuatro cupones, si: el documento no vale NADA mientras le falte un cupon,
+     y vale entero cuando estan los cuatro. Es la misma frase, dibujada.
+     Todo con filetes de 1 px sobre negro —orla doble, guilloche, vineta,
+     microtexto, perforado, sello seco—: el vocabulario del papel moneda y de
+     los titulos de deuda, que es de donde viene «activo del mundo real» y que
+     practicamente nadie usa en pantalla.
+     Y congelado en el primer fotograma ya esta contada la historia: un
+     documento al que le faltan cuatro piezas y las cuatro piezas al lado,
+     legibles una a una. */
+  var hold=document.getElementById('stack'), cv=document.getElementById('stkCv');
+  if(!hold||!cv) return;
+  var ctx=cv.getContext('2d'); if(!ctx) return;
+  var titles=[].slice.call(hold.querySelectorAll('.stk-t b'));
+  var subs=[].slice.call(hold.querySelectorAll('.stk-sub s'));
+  var bars=[].slice.call(hold.querySelectorAll('.stk-steps i b'));
+  var clm=function(v,a,b){a=a===undefined?0:a;b=b===undefined?1:b;return Math.min(b,Math.max(a,v))};
+  var suave=function(t){return t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2};
+  var dTop=function(n){var y=0;while(n){y+=n.offsetTop;n=n.offsetParent}return y};
+
+  var CAPAS=['ISSUANCE','POLICY','ACCESS','LIQUIDITY'];
+  var AUDIT=['AUD-4471','AUD-4472','AUD-4473','AUD-4474'];
+  /* Desplazamientos del primer tiempo, en unidades de documento (780x400).
+     Desiguales, con giros de signo distinto y uno pisando el cuerpo: cuatro
+     rectangulos escalonados en abanico son un mazo de cartas. */
+  var SUELTO=[{dx: 188,dy:-72,r:-3.2},{dx: 206,dy: 44,r: 2.4},
+              {dx: -40,dy:150,r:-1.8},{dx: 130,dy: 96,r: 4.2}];
+
+  var BL='rgba(255,255,255,', AZ='#1A7AFF', AZM='#0E3AC4', AMB='#E8B67A', FON='#05070C';
+  var W=0,H=0,dpr=1,top=0,hh=0,vh=innerHeight,last=-1,sucio=true,ultimo=0;
+  var DX=0,DY=0,DW=0,DH=0,ESC=1,vertical=false;
+  var spInt=null, spCup=[], spPerf=null, spSello=null, mono='';
+
+  /* ── las piezas que no cambian, rasterizadas una vez ─────────────────── */
+  function lienzo(w,h){
+    var c=document.createElement('canvas');
+    c.width=Math.max(1,Math.round(w*dpr)); c.height=Math.max(1,Math.round(h*dpr));
+    var x=c.getContext('2d'); x.setTransform(dpr,0,0,dpr,0,0);
+    return {c:c,x:x,w:w,h:h};
+  }
+  function roseta(x,cx,cy,r,a){
+    /* guilloche: dos familias de arcos desfasados, que es lo que hace el
+       dibujo de una orla de billete y no un circulo mas */
+    x.lineWidth=1;
+    for(var k=0;k<7;k++){
+      x.strokeStyle=BL+(a*(1-k/9)).toFixed(3)+')';
+      x.beginPath();
+      for(var t=0;t<=42;t++){
+        var u=t/42*Math.PI*2;
+        var rr=r*(0.42+0.5*Math.abs(Math.sin(u*3+k*0.46)))*(1-k*0.055);
+        var px=cx+Math.cos(u)*rr, py=cy+Math.sin(u)*rr;
+        t?x.lineTo(px,py):x.moveTo(px,py);
+      }
+      x.closePath(); x.stroke();
+    }
+  }
+  function horneaInterior(){
+    var s=lienzo(DW,DH), x=s.x;
+    x.lineWidth=1;
+    /* la vineta: un ovalo de filetes concentricos. Hueco se leeria «falta la
+       foto»; relleno de lineas es una vineta grabada. */
+    /* la vineta, mas pequeña: a 0,155 del ancho del cuerpo se comia el centro
+       del documento y se leia como una diana */
+    var vx=DW*0.60, vy=DH*0.38, vw=DW*0.088, vh2=DH*0.155;
+    /* Reduciendo cada elipse un 8 % de la anterior, las veintiseis se apilan
+       cerca del centro y lo que sale es un BORRON, no una vineta grabada. El
+       paso tiene que ser lineal para que los filetes queden a la misma
+       distancia unos de otros, que es lo que hace el grabado. */
+    /* Diecisiete filetes, no veintiseis, y mas claros hacia dentro: con los
+       veintiseis apretados el ovalo se leia como una DIANA en mitad del
+       documento. Una vineta grabada es un tramado suelto, no un blanco. */
+    for(var i=0;i<17;i++){
+      var k=i/16;
+      x.strokeStyle=BL+(0.26*(1-k*0.72)).toFixed(3)+')';
+      x.beginPath();
+      x.ellipse(vx,vy,vw*(1-k*0.90),vh2*(1-k*0.90),0,0,Math.PI*2);
+      x.stroke();
+    }
+    /* el fantasma del sello dentro de la vineta */
+    x.strokeStyle=BL+'.08)'; x.beginPath();
+    for(var j=0;j<6;j++){
+      var a2=Math.PI/3*j-Math.PI/2, rr=Math.min(vw,vh2)*0.5;
+      var px=vx+Math.cos(a2)*rr, py=vy+Math.sin(a2)*rr;
+      j?x.lineTo(px,py):x.moveTo(px,py);
+    }
+    x.closePath(); x.stroke();
+    /* microtexto: filetes clavados a la rejilla del dispositivo. Sin redondear
+       la Y, con DPR fraccionario titilan o desaparecen a bandas. */
+    var mx=DW*0.06, my=DH*0.56, mw=DW*0.38;
+    x.fillStyle=BL+'.42)';
+    for(var m=0;m<22;m++){
+      var yy=Math.round((my+m*3)*dpr)/dpr;
+      x.fillRect(mx, yy, mw*(0.62+((m*37)%29)/29*0.38), 1/dpr);
+    }
+    x.font=mono; x.textBaseline='top'; x.fillStyle=BL+'.58)';
+    x.fillText('REGISTERED WITHOUT FIXED MATURITY · TRANSFERABLE BY DELIVERY',
+               mx, my+70);
+    /* rosetas de esquina */
+    var R=Math.max(16,DW*0.034);
+    roseta(x, R+10, R+10, R, .62); roseta(x, DW-R-10, R+10, R, .62);
+    roseta(x, R+10, DH-R-10, R, .62); roseta(x, DW-R-10, DH-R-10, R, .62);
+    return s;
+  }
+  function horneaCupon(i,cw,ch){
+    var s=lienzo(cw,ch), x=s.x;
+    x.lineWidth=1;
+    x.strokeStyle=BL+'.66)'; x.strokeRect(.5,.5,cw-1,ch-1);
+    roseta(x, cw-15, 15, 12, .58);
+    x.textBaseline='top';
+    x.font=(Math.round(ch*0.24))+"px ui-monospace,'DM Mono',monospace";
+    x.fillStyle=BL+'.42)'; x.fillText('0'+(i+1), 8, 8);
+    x.font=mono; x.fillStyle=BL+'.86)';
+    x.fillText(CAPAS[i], 8, ch-30);
+    return s;
+  }
+  function horneaPerf(h){
+    var s=lienzo(3,h), x=s.x;
+    x.fillStyle='rgba(26,122,255,.55)';
+    for(var y=3;y<h-2;y+=5) x.fillRect(1,y,1,1);
+    return s;
+  }
+  function horneaSello(d){
+    var s=lienzo(d,d), x=s.x, r=d*0.46, cx=d/2, cy=d/2;
+    function hexa(ox,oy,col){
+      x.strokeStyle=col; x.lineWidth=1; x.beginPath();
+      for(var j=0;j<6;j++){
+        var a=Math.PI/3*j-Math.PI/2;
+        var px=cx+ox+Math.cos(a)*r, py=cy+oy+Math.sin(a)*r;
+        j?x.lineTo(px,py):x.moveTo(px,py);
+      }
+      x.closePath(); x.stroke();
+    }
+    hexa(2,2,BL+'.12)');          /* el relieve del seco */
+    hexa(0,0,BL+'.72)');
+    x.strokeStyle=BL+'.30)';
+    for(var k=0;k<14;k++){
+      var a3=Math.PI*2/14*k;
+      x.beginPath();
+      x.moveTo(cx+Math.cos(a3)*r*0.62, cy+Math.sin(a3)*r*0.62);
+      x.lineTo(cx+Math.cos(a3)*r*0.82, cy+Math.sin(a3)*r*0.82);
+      x.stroke();
+    }
+    x.font=(Math.max(7,Math.round(d*0.085)))+"px ui-monospace,'DM Mono',monospace";
+    x.fillStyle=BL+'.78)'; x.textAlign='center'; x.textBaseline='middle';
+    x.fillText('VALID ONLY WITH', cx, cy-6);
+    x.fillText('ALL FOUR COUPONS', cx, cy+6);
+    x.textAlign='left';
+    return s;
+  }
+
   function size(){
-    const d=Math.min(devicePixelRatio||1,2);
-    W=cv.clientWidth;H=cv.clientHeight;
-    cv.width=W*d;cv.height=H*d;ctx.setTransform(d,0,0,d,0,0);
-    top=dTop(hold);hh=hold.offsetHeight;vh=innerHeight;
-    dirty=true;
+    dpr=Math.min(devicePixelRatio||1,1.75);
+    W=cv.clientWidth; H=cv.clientHeight;
+    if(!W||!H) return;
+    cv.width=Math.round(W*dpr); cv.height=Math.round(H*dpr);
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    top=dTop(hold); hh=hold.offsetHeight; vh=innerHeight;
+
+    vertical = W < 700;
+    /* Una sola topologia: el perforado SIEMPRE en el canto derecho. En
+       pantalla estrecha el documento se escala y los cupones sueltos se alojan
+       en una fila por debajo, porque a la derecha no hay sitio. */
+    /* Estaba a 0,60 del ancho y ocupaba un cuarto de la pantalla: un sello en
+       medio del negro. El documento es el asunto de la seccion, asi que manda
+       en el encuadre. El cuerpo se va a 0,74 y se planta a la izquierda del
+       centro para dejarle sitio a los cupones sueltos, que salen por la
+       derecha hasta +206 unidades. */
+    var maxW = vertical ? W-24 : Math.min(1040, W*0.74);
+    /* El bloque de texto de la seccion vive abajo: el documento tiene que
+       caber ENTERO por encima. Antes solo se limitaba por ancho y el canto
+       inferior de la orla se metia debajo del titular. */
+    var maxH = vertical ? H*0.44 : H*0.50;
+    ESC = Math.min(maxW/780, maxH/400);
+    DW = Math.round(780*ESC); DH = Math.round(400*ESC);
+    DX = Math.round(vertical ? (W-DW)/2 : W*0.40 - DW*0.5);
+    DY = Math.round(vertical ? H*0.17 : H*0.16);
+    mono = Math.max(7,Math.round(9*ESC*1.25)) + "px ui-monospace,'DM Mono',monospace";
+
+    spInt = horneaInterior();
+    var cw=Math.round(150*ESC), ch=Math.round(100*ESC);
+    spCup=[0,1,2,3].map(function(i){ return horneaCupon(i,cw,ch) });
+    spPerf = horneaPerf(DH);
+    spSello = horneaSello(Math.round(92*ESC));
+    sucio=true;
   }
-  size();
-  addEventListener('resize',size,{passive:true});
-  addEventListener('load',()=>setTimeout(size,600));
-  new IntersectionObserver(es=>{if(es[0].isIntersecting){size()}},
-    {rootMargin:'40% 0px'}).observe(hold);
-  function plate(cx,cy,w,h,lift,a,lit){
-    ctx.beginPath();
-    ctx.moveTo(cx,cy-h/2-lift);
-    ctx.lineTo(cx+w/2,cy-lift);
-    ctx.lineTo(cx,cy+h/2-lift);
-    ctx.lineTo(cx-w/2,cy-lift);
-    ctx.closePath();
-    const g=ctx.createLinearGradient(cx,cy-h/2-lift,cx,cy+h/2-lift);
-    g.addColorStop(0,'rgba(194,196,202,'+(.26*a*(.55+lit*.45)).toFixed(3)+')');
-    g.addColorStop(1,'rgba(137,138,143,'+(.06*a).toFixed(3)+')');
-    ctx.fillStyle=g;ctx.fill();
-    ctx.strokeStyle='rgba(208,211,217,'+(.34*a*(.4+lit*.6)).toFixed(3)+')';
-    ctx.lineWidth=1.2;ctx.stroke();
-  }
-  const LOGO='M336 0 H464 V224 H672 V336 H560 V560 H464 V672 H336 A336 336 0 0 1 336 0 Z';
-  const LCHIPS=[[464,112,112,112],[560,336,112,112]];
-  /* La paleta de la pila va en HSL y por eso el paso a plata no la alcanzo:
-     el conversor buscaba azules en RGB. Se desatura -de 100 a 8-14 de
-     saturacion, lo justo para que el metal no sea gris muerto sino que
-     refleje algo frio- y se reparte el brillo para que las caras del cubo
-     sigan distinguiendose unas de otras. */
-  /* Azul Y BLANCO, que es lo que se pidio: no todos los cubos azules -eso era
-     lo de antes- ni todos de plata -eso fue el paso intermedio-. Tres tonos
-     con azul de verdad, uno casi blanco y dos hondos para que el cubo tenga
-     caras distinguibles. */
-  const TONES=[{h:222,s:98,l:44},{h:226,s:96,l:34},{h:218,s:72,l:31},
-               {h:214,s:30,l:30},{h:220,s:32,l:20},{h:226,s:84,l:15}];
-  const OWN={body:{h:212,s:9,l:90}, chip:{h:222,s:98,l:50}};
-  const mixTone=(a,b,k)=>({h:a.h+(b.h-a.h)*k, s:a.s+(b.s-a.s)*k, l:a.l+(b.l-a.l)*k});
-  const NV=18;
-  let vox=null;
-  function bakeVox(){
-    const off=document.createElement('canvas');off.width=off.height=NV;
-    const o=off.getContext('2d');
-    o.setTransform(NV/672,0,0,NV/672,0,0);
-    o.fillStyle='#fff';o.fill(new Path2D(LOGO));
-    const body=o.getImageData(0,0,NV,NV).data;
-    o.clearRect(0,0,672,672);
-    LCHIPS.forEach(c=>o.fillRect(c[0],c[1],c[2],c[3]));
-    const chip=o.getImageData(0,0,NV,NV).data;
-    vox=[];
-    const cg=(NV-1)/2;
-    for(let y=0;y<NV;y++)for(let x=0;x<NV;x++){
-      const k=(y*NV+x)*4;
-      const isChip=chip[k+3]>110, isBody=body[k+3]>110;
-      if(!isChip&&!isBody)continue;
-      let tone;
-      if(isChip){ tone=((x+y)%2)?TONES[0]:TONES[1] }
-      else{
-        const r=Math.sin(x*127.1+y*311.7)*43758.5453, u=r-Math.floor(r);
-        tone = u<.40?TONES[3] : u<.64?TONES[4] : u<.80?TONES[2] : u<.93?TONES[0] : TONES[5];
-      }
-      const h1=Math.sin(x*57.13+y*91.7)*43758.5453,  u1=h1-Math.floor(h1);
-      const h2=Math.sin(x*13.7+y*217.3)*24634.6345,  u2=h2-Math.floor(h2);
-      const h3=Math.sin(x*39.7+y*74.3)*13571.2468,   u3=h3-Math.floor(h3);
-      const h4=Math.sin(x*91.1+y*33.9)*57231.7531,   u4=h4-Math.floor(h4);
-      vox.push({gx:x-cg, gy:y-cg, tone, own:isChip?OWN.chip:OWN.body,
-        u1,u2,u3,
-        dsp:.16+u4*.42, dph:u1*6.283, dr:.5+u2*.9,
-        st:(u3*.3), sp:.55+u3*1.6});
-    }
-    for(let i=vox.length-1;i>0;i--){
-      const j=Math.floor((Math.sin(i*12.9898)*43758.5453%1+1)%1*(i+1));
-      const t=vox[i];vox[i]=vox[j];vox[j]=t;
-    }
-    const cols=Math.max(1,Math.round(Math.sqrt(vox.length*1.7)));
-    const rows=Math.ceil(vox.length/cols);
-    vox.forEach((v,i)=>{
-      const cxi=i%cols, cyi=(i/cols)|0;
-      v.sx=((cxi+.5+(v.u1-.5)*.85)/cols)*2-1;
-      v.sy=((cyi+.5+(v.u2-.5)*.85)/rows)*2-1;
-      v.sz=(v.u3-.5)*1.5;
-    });
-  }
-  const FOV=780;
-  let cy_=1,sy_=0,cp_=1,sp_=0,AX=[1,0,0],AY=[0,1,0],AZ=[0,0,1],VIS=[],queue=[];
-  const FACES=[
-    [[0,0,1],[[-1,-1,1],[1,-1,1],[1,1,1],[-1,1,1]]],
-    [[0,0,-1],[[1,-1,-1],[-1,-1,-1],[-1,1,-1],[1,1,-1]]],
-    [[1,0,0],[[1,-1,1],[1,-1,-1],[1,1,-1],[1,1,1]]],
-    [[-1,0,0],[[-1,-1,-1],[-1,-1,1],[-1,1,1],[-1,1,-1]]],
-    [[0,-1,0],[[-1,-1,-1],[1,-1,-1],[1,-1,1],[-1,-1,1]]],
-    [[0,1,0],[[-1,1,1],[1,1,1],[1,1,-1],[-1,1,-1]]]];
-  const LIGHT=[.34,-.42,-.84];
-  const cstr=(h,sa,l,a)=>'hsla('+(h|0)+','+(sa|0)+'%,'+l.toFixed(1)+'%,'+a.toFixed(2)+')';
-  function vrot(x,y,z){
-    const x1=x*cy_+z*sy_, z1=-x*sy_+z*cy_;
-    return [x1, y*cp_-z1*sp_, y*sp_+z1*cp_];
-  }
-  function vprep(yaw,pitch){
-    cy_=Math.cos(yaw);sy_=Math.sin(yaw);cp_=Math.cos(pitch);sp_=Math.sin(pitch);
-    AX=vrot(1,0,0);AY=vrot(0,1,0);AZ=vrot(0,0,1);
-    VIS=[];
-    for(const [nrm,pts] of FACES){
-      const n=[nrm[0]*AX[0]+nrm[1]*AY[0]+nrm[2]*AZ[0],
-               nrm[0]*AX[1]+nrm[1]*AY[1]+nrm[2]*AZ[1],
-               nrm[0]*AX[2]+nrm[1]*AY[2]+nrm[2]*AZ[2]];
-      if(n[2]>=0)continue;
-      const lam=clm(n[0]*LIGHT[0]+n[1]*LIGHT[1]+n[2]*LIGHT[2]);
-      VIS.push({pts,lit:.24+lam*.88});
+
+  function orla(a, huecos){
+    /* Se dibuja viva porque cambia de estado y porque va PARTIDA en las
+       muescas mientras falte un cupon: una orla rota es exactamente lo que
+       dice «este documento no esta completo». */
+    ctx.lineWidth=1; ctx.strokeStyle=BL+Math.min(1,a).toFixed(3)+')';
+    var o=Math.round(10*ESC), n=Math.round(18*ESC);
+    ctx.strokeRect(DX+o+.5, DY+o+.5, DW-o*2-1, DH-o*2-1);
+    ctx.strokeRect(DX+n+.5, DY+n+.5, DW-n*2-1, DH-n*2-1);
+    /* las muescas del canto derecho, tapadas con el fondo cuando faltan */
+    var cw=Math.round(150*ESC), ch=Math.round(100*ESC);
+    var px=DX+DW-cw-Math.round(10*ESC);
+    for(var i=0;i<4;i++){
+      if(!huecos[i]) continue;
+      ctx.fillStyle=FON;
+      ctx.fillRect(px-2, DY+i*ch+2, DW-(px-DX)+2, ch-4);
+      ctx.setLineDash([3,3]); ctx.strokeStyle=BL+'.18)';
+      ctx.strokeRect(px+.5, DY+i*ch+.5, cw-1, ch-1);
+      ctx.setLineDash([]);
     }
   }
-  function vcube(x,y,z,sz,tone,a,cxp,cyp,flat){
-    const c=vrot(x,y,z);
-    const f=FOV/Math.max(FOV*.42,FOV+c[2]);
-    let px=cxp+c[0]*f, py=cyp+c[1]*f;
-    const r=sz*f*1.3+4;
-    let cx=c[0], cy=c[1];
-    if(px<r)      cx+=(r-px)/f;
-    else if(px>W-r) cx-=(px-(W-r))/f;
-    if(py<r)      cy+=(r-py)/f;
-    else if(py>H-r) cy-=(py-(H-r))/f;
-    queue.push({z:c[2],cx,cy,cz:c[2],s:sz,tone,a,cxp,cyp,r:r,fl:flat||0});
-  }
-  function vflush(){
-    queue.sort((a,b)=>b.z-a.z);
-    const FLAT=VIS.length?VIS[0].lit:1;
-    for(const q of queue){
-      if(q.r<5){
-        const f=FOV/Math.max(FOV*.42,FOV+q.cz);
-        const px=q.cxp+q.cx*f, py=q.cyp+q.cy*f, sz=q.s*f*.9;
-        let L=clm(q.tone.l*(.46+FLAT*.74),3,100);
-        L+=(q.tone.l-L)*q.fl;
-        ctx.fillStyle=cstr(q.tone.h,q.tone.s,clm(L,3,100),q.a);
-        ctx.fillRect(px-sz/2,py-sz/2,sz,sz);
-        continue;
-      }
-      const h=q.s/2;
-      for(const F of VIS){
-        ctx.beginPath();
-        for(let i=0;i<4;i++){
-          const v=F.pts[i];
-          const wx=q.cx+v[0]*h*AX[0]+v[1]*h*AY[0]+v[2]*h*AZ[0];
-          const wy=q.cy+v[0]*h*AX[1]+v[1]*h*AY[1]+v[2]*h*AZ[1];
-          const wz=q.cz+v[0]*h*AX[2]+v[1]*h*AY[2]+v[2]*h*AZ[2];
-          const f=FOV/Math.max(FOV*.42,FOV+wz);
-          const sxp=q.cxp+wx*f, syp=q.cyp+wy*f;
-          i?ctx.lineTo(sxp,syp):ctx.moveTo(sxp,syp);
-        }
-        ctx.closePath();
-        let L=clm(q.tone.l*(.46+F.lit*.74),3,100);
-        L+=(q.tone.l-L)*q.fl;
-        ctx.fillStyle=cstr(q.tone.h,q.tone.s,clm(L,3,100),q.a);
-        ctx.fill();
-      }
-      if(q.r>5&&q.fl<.9){ctx.strokeStyle='rgba(255,255,255,'+(.10*(1-q.fl)).toFixed(3)+')';ctx.lineWidth=1;ctx.stroke()}
-    }
-    queue.length=0;
-  }
+
   function draw(p){
     ctx.clearRect(0,0,W,H);
-    if(!vox)bakeVox();
-    const bar=parseFloat(getComputedStyle(document.documentElement)
-                .getPropertyValue('--bar'))||56;
-    const bandTop=bar+26;
-    const copyEl=cv.parentElement.querySelector('.stk-copy');
-    const cvTop=cv.getBoundingClientRect().top;
-    const copyTop=copyEl?copyEl.getBoundingClientRect().top-cvTop:H*.62;
-    const bandBot=Math.max(bandTop+140, copyTop-16);
-    /* El divisor reparte la franja entre la marca y su aire. Estaba en 1,72
-       -la marca ocupaba el 58 % de lo que tiene- y con el texto centrado y
-       pegado abajo la franja es ancha, asi que sobra sitio: a 1,45 la marca
-       usa el 69 % y deja noventa pixeles por arriba y por abajo. En el
-       telefono no cambia nada porque ahi manda el tope de ancho, no el de
-       alto. */
-    const S=Math.min(W*(W<760?.60:.30), (bandBot-bandTop)/1.45);
-    const U=S/NV;
-    const cxp=W*.5, cyp=(bandTop+bandBot)*.5;
-    const k=1-ease(clm(p));            /* 1 disperso → 0 en su sitio */
-    vprep(.20-p*.30, -.30+p*.14);
-    const T=performance.now()/1000;
-    const FREE=Math.max(U*1.25, Math.min(W,H)*.038);
-    const BIG=FREE, RZ=S*.75;
-    const WOB=S*.16*1.4;
-    const inset=BIG*.30;
-    const RX=Math.max(40,W*.5-inset), RY=Math.max(40,H*.5-inset);
-    for(const v of vox){
-      const own=clm(k*1.3-v.st);
-      const e=own*own;
-      const wob=own*S*.16;
-      const dx=v.sx*RX + Math.cos(T*v.dsp+v.dph)*wob*v.dr;
-      const dy=v.sy*RY + Math.sin(T*v.dsp*1.31+v.dph)*wob*v.dr;
-      const dz=v.sz*RZ + Math.cos(T*v.dsp*.83+v.dph*1.7)*wob*v.dr;
-      const col=mixTone(v.own, v.tone, clm(own*2.2));
-      vcube(v.gx*U*(1-e)+dx*e, v.gy*U*(1-e)+dy*e, dz*e,
-            U*.92+own*(FREE-U*.92), col, clm(1.05-own*.15), cxp, cyp,
-            1-clm(own*2.4));
+    if(!spInt) return;
+    var cw=Math.round(150*ESC), ch=Math.round(100*ESC);
+    var colX = DX+DW-cw;                       /* columna de cupones */
+    var perfX = colX - Math.round(10*ESC);
+
+    /* ── reloj ──
+       0,00-0,34  sostenido: el documento roto y sus cuatro piezas
+       0,34-0,68  los cuatro cupones encajan, uno detras de otro
+       0,68-0,86  titulo valido
+       0,86-0,94  se arranca el 02: VOID
+       0,94-1,00  vuelve                                                  */
+    var asiento=[0,0,0,0], nVivo=-1;
+    for(var i=0;i<4;i++){
+      var a=0.34+i*0.085, b=a+0.075;
+      asiento[i]=suave(clm((p-a)/(b-a)));
+      if(asiento[i]>0 && asiento[i]<1) nVivo=i;
     }
-    if(k<.24){
-      const a=(1-k/.24);
-      const g=ctx.createRadialGradient(cxp,cyp,0,cxp,cyp,S*1.25);
-      g.addColorStop(0,'rgba(195,198,204,'+(a*.22).toFixed(3)+')');
-      g.addColorStop(.55,'rgba(195,198,204,'+(a*.07).toFixed(3)+')');
-      g.addColorStop(1,'rgba(195,198,204,0)');
-      ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+    var anulado = clm((p-0.86)/0.02) * (1-clm((p-0.92)/0.02));
+    if(anulado>0.02) asiento[1]=1-anulado;
+    var completo = asiento[0]*asiento[1]*asiento[2]*asiento[3];
+
+    var huecos=[asiento[0]<.99,asiento[1]<.99,asiento[2]<.99,asiento[3]<.99];
+
+    /* el cuerpo */
+    ctx.drawImage(spInt.c, DX, DY, DW, DH);
+    orla(0.70+completo*0.24, huecos);
+
+    /* el perforado, cuatro tramos */
+    for(i=0;i<4;i++){
+      ctx.globalAlpha=1;
+      ctx.drawImage(spPerf.c, 0, i*ch*spPerf.c.height/DH, spPerf.c.width, ch*spPerf.c.height/DH,
+                    perfX, DY+i*ch, 3, ch);
+      if(asiento[i]>0.5){
+        ctx.fillStyle='rgba(26,122,255,'+(0.90*asiento[i]).toFixed(2)+')';
+        for(var y=3;y<ch-2;y+=5) ctx.fillRect(perfX+1, DY+i*ch+y, 1, 1);
+        /* el hilo que entra en el cuerpo: la capa ya cose con el documento */
+        ctx.fillRect(perfX-Math.round(60*ESC)*asiento[i], DY+i*ch+ch/2, Math.round(60*ESC)*asiento[i], 1);
+      }
     }
-    vflush();
+
+    /* los cupones */
+    ctx.textBaseline='top'; ctx.font=mono;
+    for(i=0;i<4;i++){
+      var k=asiento[i], S=SUELTO[i];
+      var hx, hy, rot;
+      if(vertical){
+        /* sueltos, en fila por debajo del documento */
+        var fx = DX + i*(DW/4), fy = DY+DH+Math.round(26*ESC);
+        hx = fx + (colX - fx)*k;
+        hy = fy + (DY+i*ch - fy)*k;
+        rot = (S.r*Math.PI/180)*(1-k);
+      }else{
+        /* Los cupones sueltos se quedan DENTRO de la caja segura: con los
+           desvios a escala completa, el 03 y el 04 caian por debajo del
+           documento y se metian encima del titular de la seccion. */
+        hx = colX + S.dx*ESC*(1-k);
+        hy = DY + i*ch + S.dy*ESC*(1-k);
+        var suelo = DY + DH - ch + Math.round(6*ESC);
+        var techo = DY - Math.round(58*ESC);
+        if(hy > suelo) hy = suelo;
+        if(hy < techo) hy = techo;
+        rot = (S.r*Math.PI/180)*(1-k);
+      }
+      ctx.save();
+      ctx.translate(hx+cw/2, hy+ch/2); ctx.rotate(rot); ctx.translate(-cw/2,-ch/2);
+      ctx.drawImage(spCup[i].c, 0,0, cw, ch);
+      /* la linea de auditoria: blanca suelta, azul asentada. Asi se cuenta de
+         un vistazo cuantas capas han entrado, en una imagen fija. */
+      ctx.font=mono;
+      ctx.fillStyle = k>0.9 ? 'rgba(112,170,255,.95)' : BL+'.48)';
+      ctx.fillText(AUDIT[i], 8, ch-16);
+      if(k>0 && k<1){
+        ctx.fillStyle=BL+'.45)';
+        ctx.fillText('OFFSET '+(12.4*(1-k)).toFixed(1)+' mm', 8, -14);
+      }
+      ctx.restore();
+    }
+
+    /* el panel de denominacion: la UNICA masa de color, y aparece de golpe.
+       Nada de barras que se llenan: una barra azul llenandose es exactamente
+       el 85 % que viene detras. */
+    var pw=Math.round(150*ESC), ph=Math.round(90*ESC);
+    var pxp=DX+Math.round(26*ESC), pyp=DY+Math.round(26*ESC);
+    if(completo>0.995){
+      ctx.fillStyle=AZM; ctx.fillRect(pxp,pyp,pw,ph);
+      ctx.fillStyle='#fff'; ctx.font=Math.round(13*ESC*1.1)+"px ui-monospace,'DM Mono',monospace";
+      ctx.fillText('VALID', pxp+10, pyp+14);
+      ctx.fillText('BEARER', pxp+10, pyp+14+Math.round(17*ESC));
+      ctx.font=mono; ctx.fillStyle='rgba(255,255,255,.72)';
+      ctx.fillText('NR-118-0001', pxp+10, ph+pyp-18);
+    }else{
+      ctx.strokeStyle=AZ; ctx.lineWidth=1;
+      ctx.strokeRect(pxp+.5,pyp+.5,pw-1,ph-1);
+      ctx.fillStyle='rgba(26,122,255,.55)';
+      ctx.fillRect(pxp+10, pyp+ph/2, pw-20, 1);
+    }
+
+    /* el sello seco: se estampa, no se funde */
+    if(completo>0.995){
+      var sd=spSello.w;
+      ctx.drawImage(spSello.c, DX+Math.round(24*ESC), DY+DH-sd-Math.round(22*ESC), sd, sd);
+    }
+
+    /* el tiempo de anulacion */
+    if(anulado>0.02){
+      ctx.save();
+      ctx.strokeStyle='rgba(232,182,122,'+(anulado*0.9).toFixed(2)+')';
+      ctx.lineWidth=Math.max(1,2*ESC);
+      ctx.beginPath(); ctx.moveTo(DX+DW*0.08, DY+DH*0.86);
+      ctx.lineTo(DX+DW*0.72, DY+DH*0.14); ctx.stroke();
+      ctx.font=Math.round(26*ESC)+"px ui-monospace,'DM Mono',monospace";
+      ctx.fillStyle='rgba(232,182,122,'+(anulado*0.95).toFixed(2)+')';
+      ctx.fillText('VOID', DX+DW*0.30, DY+DH*0.42);
+      ctx.restore();
+    }
   }
+
+  size();
+  addEventListener('resize',size,{passive:true});
+  addEventListener('load',function(){setTimeout(size,600)});
+  new IntersectionObserver(function(es){ if(es[0].isIntersecting){ size() } },
+    {rootMargin:'40% 0px'}).observe(hold);
+
   (function tick(){
-    const run=Math.max(1,hh-vh);
-    const p=clm((scrollY-top)/run);
-    const moving=p<.80;
-    const now=performance.now();
-    const due=moving && now-lastT>24;
-    if(dirty||due||Math.abs(p-last)>.0015){
-      dirty=false; last=p; lastT=now;
+    var run=Math.max(1,hh-vh);
+    var p=clm((scrollY-top)/run);
+    if(sucio || Math.abs(p-last)>0.0012){
+      sucio=false; last=p;
       draw(p);
-      const step=p<.34?0:p<.68?1:2;
-      titles.forEach((t,i)=>t.classList.toggle('on',i===step));
-      subs.forEach((t,i)=>t.classList.toggle('on',i===step));
-      bars.forEach((b,i)=>{
-        const seg=clm((p-i*.34)/.34);
+      var paso = p<.34?0 : p<.68?1 : 2;
+      titles.forEach(function(t,i){ t.classList.toggle('on',i===paso) });
+      subs.forEach(function(t,i){ t.classList.toggle('on',i===paso) });
+      bars.forEach(function(b,i){
+        var seg=clm((p-i*.34)/.34);
         b.style.width=(seg*100).toFixed(1)+'%';
       });
     }
