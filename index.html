@@ -6553,7 +6553,25 @@ const CALM=matchMedia('(prefers-reduced-motion: reduce)').matches;
       pinta=null;
     };
     measure();
-    const SUELO=[228,234,244];   /* var(--suelo), el suelo claro de la pagina */
+    /* LA LUZ BLANCA DE LA ESQUINA SALIA DE AQUI, Y ERAN DOS FALLOS DEL MISMO
+       NUMERO ESCRITO A MANO. Esta constante decia «var(--suelo), el suelo
+       claro de la pagina» y valia [228,234,244], o sea casi blanco. Pero
+       «--suelo» es «#0C0E12» desde que la pagina paso a negro: la constante se
+       quedo con el valor de hace tres rediseños y nadie la volvio a mirar.
+       Con ella, mientras sube el telon el lavado se mezcla hacia el BLANCO, y
+       ademas la bandera de tono da «claro» —y en claro el velo del rincon del
+       HUD es un radial casi blanco pegado a la esquina inferior derecha—.
+       Medido: forzando esa bandera el brillo de ese rincon pasa de 46 a 227 y
+       aparecen 8.245 pixeles claros. Eso es exactamente la mancha.
+       Se lee de la pagina en vez de escribirse a mano, que es lo unico que
+       impide que vuelva a quedarse vieja. */
+    const SUELO=(()=>{
+      const v=getComputedStyle(document.documentElement).getPropertyValue('--suelo').trim();
+      const m=/^#?([0-9a-f]{6})$/i.exec(v);
+      if(m){const n=parseInt(m[1],16);return [n>>16&255,n>>8&255,n&255]}
+      const r=(v.match(/[\d.]+/g)||[]).map(Number);
+      return r.length>=3 ? [r[0],r[1],r[2]] : [12,14,18];
+    })();
     let cur=[0,0,0],ca=[0,0,0],first=true,lastBg='',lastAcc='',puesto='',ap=[0,0,0];
     jobs.push({measure,run(){
       const anchor=S.y+S.vh*0.92;
@@ -6856,7 +6874,18 @@ const CALM=matchMedia('(prefers-reduced-motion: reduce)').matches;
        pero la cortina la deja CLARA al final. Sin esto el HUD se queda oscuro
        sobre el suelo claro con el que la portada termina. */
     let q;
-    if(b) q = (b.hero && window.__cortina>0.5) ? true : lumHex(b.bg)>.35;
+    /* Y el atajo de aqui decia «si es la portada y el telon esta subido,
+       CLARO», sin mirar nada. Se escribio cuando el telon era blanco. Ahora es
+       negro, asi que hay que preguntar por la luz de lo que se esta pintando
+       de verdad —el color de la banda mezclado hacia el suelo— en vez de
+       darlo por supuesto. */
+    if(b){
+      if(b.hero && window.__cortina>0){
+        const c=hex(b.bg), k=Math.min(1,window.__cortina);
+        const m=[0,1,2].map(i=>c[i]+(SUELO[i]-c[i])*k);
+        q = (.2126*f8(m[0])+.7152*f8(m[1])+.0722*f8(m[2])) > .35;
+      } else q = lumHex(b.bg)>.35;
+    }
     else  q = lum(sitio?sitio.style.getPropertyValue('--wash'):'')>.35;
     if(q!==claro){claro=q;document.body.classList.toggle('light',q)}
   })();
@@ -10679,10 +10708,11 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
     m.className='malla';m.setAttribute('aria-hidden','true');
     s.insertBefore(m,s.firstChild);
   }
-  /* 3 · la capa del barrido */
-  let capa=document.getElementById('barrido');
-  if(!capa){capa=document.createElement('div');capa.id='barrido';
-    capa.setAttribute('aria-hidden','true');document.body.appendChild(capa)}
+  /* 3 · EL BARRIDO SE RETIRA. Se pidio quitarlo de toda la seccion. La capa
+         no se crea, el observador de cruce no se monta y el CSS que quedaba
+         deja de tener a quien aplicarse. Un efecto que molesta es un efecto
+         que sobra, y este ya costo una ronda entera de rendimiento. */
+  const capa=null;
 
   const oi=new IntersectionObserver(es=>{
     for(const e of es){
@@ -10699,22 +10729,8 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
      donde el ojo esta. Una vez por cruce y con un candado de un segundo,
      porque si no al arrastrar rapido salen tres seguidos y eso ya no es un
      corte, es un parpadeo. */
-  let ultimo=0, dentro=new WeakMap();
-  const cruce=new IntersectionObserver(es=>{
-    if(quieto)return;
-    const t=performance.now();
-    for(const e of es){
-      const antes=dentro.get(e.target)||false;
-      dentro.set(e.target,e.isIntersecting);
-      if(antes===e.isIntersecting)continue;
-      if(t-ultimo<1900)continue;   /* el candado acompaña a la duracion: 1,6 s + aire */
-      ultimo=t;
-      capa.classList.toggle('oscuro',e.isIntersecting);
-      capa.classList.remove('va');void capa.offsetWidth;
-      capa.classList.add('va');
-    }
-  },{rootMargin:'-34% 0px -34% 0px',threshold:0});
-  for(const s of claras)cruce.observe(s);
+  /* el observador del cruce se va con la capa: sin barrido no hay nada que
+     disparar, y un observador que no hace nada es un observador que sobra */
 
   /* 4 · la reticula se mueve mas despacio que el scroll */
   if(!quieto){
