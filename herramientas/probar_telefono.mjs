@@ -133,8 +133,21 @@ const f = await pg.evaluate(() => {
   const sec2 = await pg.$('.secure');
   const caja2 = sec2 ? await sec2.boundingBox() : null;
   if (caja2) {
-    await pg.evaluate(y => scrollTo(0, y), Math.round(caja2.y + 60));
-    await pg.waitForTimeout(700);
+    /* EL SCROLL SE CONVERGE, NO SE PIDE Y YA. «caja2.y» se mide ANTES de
+       moverse, y entre medias hay una seccion anclada de 3.060 px: pedir ese
+       desplazamiento dejaba la pantalla en mitad de la PILA, no en el papel.
+       Bisecado: la prueba llevaba en rojo desde que el documento cambio de
+       alto, fotografiando un fondo negro y cantando «el suelo es un color
+       plano» —0,0014 de recorrido— sin que el suelo tuviera nada que ver.
+       Se repite hasta que la banda de papel ocupa de verdad la pantalla. */
+    for (let i = 0; i < 14; i++) {
+      const t = await pg.evaluate(() => Math.round(
+        document.querySelector('.secure').getBoundingClientRect().top));
+      if (t > 40 && t < 120) break;
+      await pg.evaluate(v => scrollBy(0, v), t - 80);
+      await pg.waitForTimeout(140);
+    }
+    await pg.waitForTimeout(800);
     const b64 = (await pg.screenshot()).toString('base64');
     const suelo = await pg.evaluate(async s => {
       const im = new Image();

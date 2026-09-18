@@ -457,7 +457,17 @@ for (let y = 0; y < alto; y += 450) { await pg.evaluate(v => scrollTo(0, v), y);
 
      Asi que se miden los rectangulos del TEXTO, con «Range» y uno a uno: lo
      que no esta debajo de una letra no cuenta. */
-  const zonas = await p4.evaluate(() => {
+  /* Y SI EN ESE PUNTO EXACTO NO HAY RENGLONES QUE MEDIR, SE BUSCA OTRO.
+     Centrar la seccion no garantiza que algun parrafo caiga ENTERO dentro de
+     la franja medible: los parrafos se mueven con el paralaje y con la
+     entrada, y la seccion mide 1.387 px contra 900 de pantalla, asi que una
+     tirada de cada tres se quedaba con cero renglones y la prueba fallaba por
+     no encontrar que medir, no por encontrar algo mal. Medido: dos pasadas
+     seguidas dan 111/112 y 112/112 sin tocar la pagina.
+     Se prueban seis alturas alrededor del centro y se mide en la primera que
+     tenga renglones. Si NINGUNA los tiene, entonces si es un fallo de verdad y
+     la comprobacion de abajo lo canta igual. */
+  const mideZonas = () => p4.evaluate(() => {
     const sec = document.getElementById('ruta').getBoundingClientRect();
     /* Y ademas: solo la franja CENTRAL de la pantalla, dejando 110 px arriba y
        abajo. Ahi es donde vive el cromo fijo —la barra de arriba, el boton de
@@ -506,6 +516,12 @@ for (let y = 0; y < alto; y += 450) { await pg.evaluate(v => scrollTo(0, v), y);
     document.querySelectorAll('.ruta-p').forEach((e, i) => mete(e, 'p' + i));
     return fuera;
   });
+  let zonas = await mideZonas();
+  for (const nudge of [0, -90, 90, -180, 180, -270]) {
+    if (zonas.length >= 2) break;
+    if (nudge) { await p4.evaluate(v => scrollBy(0, v), nudge); await p4.waitForTimeout(420); }
+    zonas = await mideZonas();
+  }
   di(zonas.length >= 2, 'hay parrafos de la ruta en pantalla para medir lo que tienen detras (' +
      zonas.length + ' renglones)');
 

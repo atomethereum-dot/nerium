@@ -5534,35 +5534,41 @@ footer .fmark-logo{filter:none}
 
 
 /* ══════════════════════════════════════════════════════════════════════════
-   EL CIFRON: el numero de seccion, a sangre
+   EL CIFRON: el numero de seccion, entero
    ══════════════════════════════════════════════════════════════════════════
    El mejor material grafico que tiene la pagina —los numerales 01 a 10— vivia
-   en un cintillo de 10 px. Ahora es la pieza mas grande de cada seccion y
-   entra por el borde izquierdo cortado: se ve el numero entero y medio cero.
-   Sobre negro va en hueco, solo el contorno. Sobre papel va macizo y palido,
-   como una marca de agua de imprenta. En ninguno de los dos casos compite con
-   el texto: esta por debajo en la pila y muy por debajo en contraste.
-   Se recorta con su propia caja, no con la seccion: poner «overflow:hidden»
+   en un cintillo de 10 px.
+   ENTRABA CORTADO POR EL BORDE IZQUIERDO y de eso no se veia un numero: se
+   veian dos curvas sueltas detras del cintillo, en telefono y en escritorio y
+   en todas las secciones. Un numeral a medias no es un numeral. Ahora se ve
+   ENTERO: arranca en el margen y su caja mide lo que mide el glifo, asi que
+   no lo recorta nada. Baja de 384 a 240 porque entero a 384 se comeria el
+   titular, y sube un punto de contraste porque a 11 % y cortado no era nada.
+   Sobre negro va en hueco, solo el contorno; sobre papel, macizo y palido. En
+   los dos casos por debajo del texto en la pila y muy por debajo en contraste:
+   es una filigrana de imprenta, no un rotulo.
+   Se recorta con su propia caja y no con la seccion: poner «overflow:hidden»
    en la seccion habria matado todos los «position:sticky» que cuelgan de
    ella, que es exactamente el error que ya costo una pantalla en blanco. */
-.cifron{position:absolute;left:0;top:clamp(4px,.8vw,16px);
-  width:min(52vw,660px);height:clamp(150px,22vw,360px);
+.cifron{--cf:clamp(92px,15.6vw,240px);
+  position:absolute;left:0;top:calc(var(--cf) * -.06);
+  width:min(64vw,760px);height:calc(var(--cf) * 1.06);
   overflow:hidden;pointer-events:none;z-index:0;
   contain:paint}
-.cifron>b{position:absolute;top:-.30em;left:clamp(-128px,-8.4vw,-46px);
+.cifron>b{position:absolute;top:0;left:0;
   display:block;font-family:var(--f);font-weight:200;
-  font-size:clamp(170px,24.5vw,384px);
-  line-height:.78;letter-spacing:-.062em;
+  font-size:var(--cf);
+  line-height:1.02;letter-spacing:-.055em;
   font-variant-numeric:tabular-nums lining-nums;
-  color:transparent;-webkit-text-stroke:1.3px rgba(233,238,247,.115)}
+  color:transparent;-webkit-text-stroke:1.2px rgba(233,238,247,.16)}
 /* En papel va macizo, pero MUY palido: es filigrana de imprenta, no texto.
    Hace falta ganarle a «.claro :is(h1,h2,h3,h4,b,strong,…)», que pinta de
    tinta cualquier «b» que caiga dentro de una banda clara —y el numeral
    ES un «b»—: por eso la regla lleva el nombre de la clase dos veces. */
 .claro .cifron>b,.claro .cifron.cifron>b{
   -webkit-text-stroke:0 !important;
-  color:rgba(10,12,17,.048) !important;
-  -webkit-text-fill-color:rgba(10,12,17,.048) !important}
+  color:rgba(10,12,17,.060) !important;
+  -webkit-text-fill-color:rgba(10,12,17,.060) !important}
 /* el contenido de la cabecera va por encima del numeral, siempre */
 /* El contenido de la cabecera va por encima del numeral. El «:not(.cifron)»
    no es cosmetico: sin el, «.sec-head>*» (0,1,1) le gana a «.cifron» (0,1,0)
@@ -5575,8 +5581,7 @@ footer .fmark-logo{filter:none}
 .sale-top>*:not(.cifron){position:relative;z-index:1}
 
 @media(max-width:899px){
-  .cifron{width:74vw;height:clamp(104px,31vw,150px);top:2px}
-  .cifron>b{font-size:clamp(116px,34vw,170px);left:-7vw}
+  .cifron{--cf:clamp(74px,21vw,104px);width:86vw}
 }
 
 
@@ -5618,18 +5623,18 @@ main>section#presale{
 #presale .sk::after,#presale .sk i:last-child{background:rgba(255,255,255,.28)}
 #presale .cifron>b{-webkit-text-stroke-color:rgba(255,255,255,.22)}
 
-/* ── la ficha de precios sale de la media columna ──
-   Estaba encerrada en la columna izquierda, o sea en 560 px: por eso el
-   precio no podia ser grande. Pasa a cruzar la pagina entera. */
+/* ── la ficha de precios, en su columna ──
+   Se saco a cruzar la pagina entera para poder agrandar el precio y fue un
+   error por partida doble: el cuerpo no era lo que hacia falta, y sacarla de
+   ahi la separaba del panel de compra, con el que se lee en pareja. Vuelve a
+   su sitio y a su tamaño. */
 #presale .prices{
-  grid-column:1 / -1;
-  margin-top:clamp(34px,4.2vw,58px);
   background:#FFFDF9;
   border:0;border-radius:4px;
   box-shadow:0 2px 2px rgba(6,16,54,.16),
              0 26px 48px -22px rgba(4,12,44,.46),
              0 70px 120px -60px rgba(3,9,36,.55)}
-#presale .pr{padding:clamp(22px,2.6vw,38px) clamp(24px,3vw,44px) clamp(26px,3vw,42px)}
+
 #presale .pr-k{color:rgba(10,14,24,.52)}
 #presale .pr-n{color:rgba(10,14,24,.44)}
 #presale .pr-v{color:#0A0D14 !important}
@@ -10730,7 +10735,46 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
      iban en cuatro azules puros mientras el campo de arriba tiene azul,
      indigo y lila: dos mundos distintos a treinta segundos de scroll. Es la
      misma familia o no es nada. */
-  var TONOS=['#0C33B4','#1244DC','#1A5BF0','#4A82D8','#2E62C8'];
+  /* LA MISMA FAMILIA QUE LA PILA. Iban en cinco azules planos y el resultado
+     era una cifra hecha de cuadraditos: un mosaico, no una pieza. Entran los
+     dos blancos y el electrico de los cubos, y con ellos el mismo material:
+     tres caras, luz por cara y filete en el canto. */
+  var TONOS=['#0C33B4','#1244DC','#1A5BF0','#3E7BFF','#2E62C8'];
+  var BLANCOS=['#E9EDF6','#C3CCDD'];
+  var _rgb={};
+  function tri(hex){
+    var v=_rgb[hex];
+    if(!v){ v=[parseInt(hex.slice(1,3),16),parseInt(hex.slice(3,5),16),parseInt(hex.slice(5,7),16)];
+            _rgb[hex]=v }
+    return v;
+  }
+  /* LA PIEZA. Tres caras visibles en isometrica, con la misma direccion de luz
+     que la pila: la de arriba entera, la izquierda a 0,60 y la derecha a 0,38.
+     «pl» aplana el volumen de 1 a 0 conforme se cierra la junta, para que la
+     entrega a la cifra limpia no tenga costura. */
+  function cubo(c,cx,cy,lado,hex,alfa,pl){
+    var ax=lado*0.50, ay=lado*0.29*pl, az=lado*0.44*pl;
+    var P=[[cx,cy-az],[cx+ax,cy-az+ay],[cx-ax,cy-az+ay],[cx,cy-az+ay*2],
+           null,[cx+ax,cy+ay],[cx-ax,cy+ay],[cx,cy+ay*2]];
+    var C=tri(hex), F=[[0,1,3,2],[2,3,7,6],[1,5,7,3]], L=[1.0,0.60,0.38];
+    for(var f=0;f<3;f++){
+      var q=F[f], l=L[f];
+      c.beginPath(); c.moveTo(P[q[0]][0],P[q[0]][1]);
+      for(var j=1;j<4;j++) c.lineTo(P[q[j]][0],P[q[j]][1]);
+      c.closePath();
+      c.fillStyle='rgba('+Math.round(C[0]*l)+','+Math.round(C[1]*l)+','+
+                  Math.round(C[2]*l)+','+alfa.toFixed(3)+')';
+      c.fill();
+    }
+    if(lado>5){
+      c.strokeStyle='rgba(232,240,255,'+(alfa*0.26*(0.5+C[0]/430)).toFixed(3)+')';
+      c.lineWidth=1;
+      c.beginPath();
+      c.moveTo(P[2][0],P[2][1]); c.lineTo(P[0][0],P[0][1]); c.lineTo(P[1][0],P[1][1]);
+      c.moveTo(P[0][0],P[0][1]); c.lineTo(P[3][0],P[3][1]);
+      c.stroke();
+    }
+  }
 
   function teselas(txt,tam){
     TLADO=Math.max(6,Math.round(tam/58));
@@ -10809,6 +10853,14 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
          Recorre la rampa de izquierda a derecha con un punto de mezcla. */
       var g=(t.x-x0)/anc*(TONOS.length-1)+ (hh-0.5)*0.7;
       t.c=TONOS[Math.max(0,Math.min(TONOS.length-1,Math.round(g)))];
+      /* Uno de cada seis en blanco, repartido por ruido y no al azar puro: el
+         blanco cae disperso por toda la cifra y es lo que le da chispa. Y cada
+         pieza lleva su propia profundidad —entre 0,74 y 1,42— para que en
+         vuelo unas vengan de delante y otras del fondo. Al posarse vuelve a 1
+         y la cifra queda exacta. */
+      var hn=Math.sin(t.x*57.13+t.y*91.7)*43758.5453; hn-=Math.floor(hn);
+      if(hn>0.84) t.c=BLANCOS[hn>0.93?1:0];
+      t.z=0.74+hn*0.68;
     }
   }
 
@@ -10879,23 +10931,21 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
       var x=t.ox+(t.x-t.ox)*k, y=t.oy+(t.y-t.oy)*k;
       cc.globalAlpha=k<1?0.30+k*0.70:1;
       if(k<1){
+        /* En vuelo es un SOLIDO: tres caras, luz por cara, filete en el canto
+           y su propia profundidad. Era un cuadrado plano de color, que es lo
+           que hacia que la cifra pareciera un mosaico de pixeles. */
+        var esc=1+(t.z-1)*(1-k);
         cc.save();
         cc.translate(x+lado/2,y+lado/2);
         cc.rotate(t.giro*(1-k));
-        cc.fillStyle=t.c; cc.fillRect(-lado/2,-lado/2,lado,lado);
-        cc.fillStyle='rgba(226,238,255,.55)';
-        cc.fillRect(-lado/2,-lado/2,lado,Math.max(1,lado*0.16));
+        cubo(cc,0,0,lado*esc,t.c,1,1);
         cc.restore();
       }else{
-        cc.fillStyle=fu>0?mezcla(t.c,fu):t.c; cc.fillRect(x,y,lado,lado);
-        if(fu<1){
-          /* el canto de luz se va con la junta: en una pieza maciza no pinta
-             nada, y dejarlo la volvia a partir en cuadros */
-          cc.globalAlpha=(1-fu);
-          cc.fillStyle='rgba(226,238,255,.55)';
-          cc.fillRect(x,y,lado,Math.max(1,lado*0.16));
-          cc.globalAlpha=1;
-        }
+        /* Posada, el volumen se aplana con la junta: a junta cerrada la pieza
+           ya es plana y la entrega a la cifra limpia no tiene costura. */
+        var col=fu>0?mezcla(t.c,fu):t.c;
+        if(fu<0.98) cubo(cc,x+lado/2,y+lado/2,lado,col,1,1-fu);
+        else { cc.fillStyle=col; cc.fillRect(x,y,lado,lado) }
       }
     }
     /* Y cuando la fusion termina, encima va la LETRA. Las teselas pegadas dejan
@@ -10995,12 +11045,26 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
     return cifraDer-cifraIzq>40?cifraIzq:(W-a)/2;
   }
   function barraY(){
+    /* EL AIRE SE MIDE CONTRA LA PANTALLA, NO EN PIXELES FIJOS. El derrame de
+       la barra son 138 px de resplandor, pensados para una pantalla de 900:
+       ahi son el 15 % del alto y se leen como un respiro. En un telefono de
+       844 con la cifra mas arriba, esos mismos 138 mas los 20 de guarda dejan
+       la barra flotando lejos de la cifra —medido, 518 px de aire— y deja de
+       leerse como la barra DE esa cifra. El aire se acota al 9 % del alto. */
+    var aire=Math.min(DERRAME, Math.round(H*0.09));
     var tope=cifraBajo+20;
-    var y=Math.max(tope+DERRAME, H*0.58);
+    /* Y EL SUELO DE «0,58 DEL ALTO» SE VA EN PANTALLA ESTRECHA. Ese suelo
+       existe para que en escritorio la barra no se suba a media pantalla; en
+       un telefono, con la cifra arriba, es el que MANDA y planta la barra en
+       el 58 % del alto pase lo que pase: de ahi los 440 px de aire que
+       quedaban aun despues de acotar el derrame. La barra va donde acaba la
+       cifra, y en estrecho eso es todo lo que hay que decir. */
+    var suelo = W<700 ? 0 : H*0.58;
+    var y=Math.max(tope+aire, suelo);
     return y>H-86?H-86:y;
   }
   function barraDerrame(){
-    return Math.max(40,Math.min(DERRAME,barraY()-(cifraBajo+20)));
+    return Math.max(34,Math.min(DERRAME,barraY()-(cifraBajo+20)));
   }
   function barra(dx,p){
     var an=barraAncho(), x0=barraX()+dx;
@@ -11608,16 +11672,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
   });
 })();
 </script>
-<script>
-/* La ficha de precios vivia dentro de la columna izquierda, o sea dentro de
-   560 px, y por eso el precio —lo unico que un comprador mira— no podia ser
-   grande. Pasa a ser hija directa de la rejilla y a cruzarla entera. */
-(function(){
-  var g=document.querySelector('#presale .sale-grid');
-  var p=document.querySelector('#presale .prices');
-  if(g&&p&&p.parentElement!==g) g.appendChild(p);
-})();
-</script>
+
 <script>
 /* ── promocionar solo lo que esta cerca ────────────────────────────────
    Un margen de un 60 % de pantalla por arriba y por abajo: cuando la pieza
@@ -11664,11 +11719,27 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
      arregla —la pestaña muerta— es de telefono. Asi que de telefono es. */
   var movil=matchMedia('(max-width:899px)').matches;
   if(!movil) return;
-  var LEJOS='120%';
+  /* 120 % dejaba el despertar demasiado justo: la escena entraba en cuadro
+     casi a la vez que se le devolvia el tamaño. A 200 % se despierta a dos
+     pantallas de distancia y llega pintada. Sigue durmiendo todo lo que esta
+     mas alla, que es de donde salian los 268 MB. */
+  var LEJOS='200%';
   var dormidos=[], pendiente=0;
 
   function duerme(c){
     if(c.__zzz || c.width<2) return;
+    /* SE LE CLAVA LA CAJA ANTES DE VACIARLO. Un <canvas> sin medida en CSS
+       toma su tamaño de los atributos «width»/«height», asi que ponerlos a
+       cero LO COLAPSA: la seccion de la banda perdia sus 520 px de alto y el
+       documento entero se acortaba. Todo lo que hubiera medido una posicion
+       antes se quedaba apuntando a otro sitio —la bateria del telefono acabo
+       fotografiando una seccion negra donde esperaba papel y canto «el suelo
+       es un color plano»—. Con la caja fijada en pixeles, dormir no mueve ni
+       una linea de la maquetacion. */
+    var r=c.getBoundingClientRect();
+    if(r.width>0 && r.height>0 && !c.style.width){
+      c.__caja=1; c.style.width=r.width+'px'; c.style.height=r.height+'px';
+    }
     c.__zzz={w:c.width,h:c.height};
     c.width=0; c.height=0;
     if(dormidos.indexOf(c)<0) dormidos.push(c);
@@ -11676,6 +11747,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
   function despierta(c){
     if(!c.__zzz) return false;
     c.width=c.__zzz.w; c.height=c.__zzz.h; c.__zzz=null;
+    if(c.__caja){ c.__caja=0; c.style.width=''; c.style.height='' }
     var i=dormidos.indexOf(c); if(i>=0) dormidos.splice(i,1);
     return true;
   }
@@ -11683,17 +11755,23 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
      tamaño a los que estan dormidos. Se les vuelve a quitar en el cuadro
      siguiente, cuando la reconstruccion ya ha pasado. */
   function reavisa(){
+    /* EL AVISO VA YA, NO EN EL CUADRO SIGUIENTE. Esperando un rAF para lanzar
+       el «resize», la escena tardaba dos cuadros mas su propia reconstruccion
+       en volver a pintar, y en ese hueco el lienzo esta VACIO. Con un dedo
+       rapido eso es una escena en blanco durante un instante; medido, la
+       bateria del telefono lo cazo como «el suelo no es un color plano:
+       0,0014 de recorrido de luz», que es exactamente un lienzo sin pintar.
+       Se avisa en el acto y lo unico que se aplaza es volver a dormir a los
+       que siguen lejos, que eso si puede esperar al cuadro siguiente. */
+    dispatchEvent(new Event('resize'));
     if(pendiente) return;
     pendiente=1;
     requestAnimationFrame(function(){
       pendiente=0;
-      dispatchEvent(new Event('resize'));
-      requestAnimationFrame(function(){
-        for(var i=dormidos.length-1;i>=0;i--){
-          var c=dormidos[i];
-          if(c.width>1){ c.__zzz={w:c.width,h:c.height}; c.width=0; c.height=0 }
-        }
-      });
+      for(var i=dormidos.length-1;i>=0;i--){
+        var c=dormidos[i];
+        if(c.width>1){ c.__zzz={w:c.width,h:c.height}; c.width=0; c.height=0 }
+      }
     });
   }
   var io=new IntersectionObserver(function(es){
