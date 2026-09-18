@@ -1178,9 +1178,18 @@ body.sm{overscroll-behavior-y:none}
 .rv.sp{opacity:1;transform:none}
 @media(prefers-reduced-motion:reduce){.ws>.wi{transform:none}}
 main>section{position:relative;z-index:1}
-.hero-hold{position:relative;height:calc(100lvh + 42dvh);z-index:0;background:var(--suelo)}
+/* «svh», NO «dvh». Este contenedor esta en el flujo normal y su alto es la
+   LONGITUD DE SCROLL de la portada. En el movil, «dvh» sigue en vivo a la
+   barra de direcciones del navegador, que se esconde al desplazarse y
+   devuelve unos 78 px de ventana: con 125dvh eso son 97 px que el
+   documento crece de golpe MIENTRAS el dedo se desliza, y todo lo que hay
+   debajo se mueve solo. «svh» es el alto de la ventana con la barra puesta
+   y no cambia nunca. Las etapas «sticky» de aqui abajo si pueden seguir en
+   «dvh»: no estan en el flujo y llenar la ventana visible es justo lo que
+   tienen que hacer. */
+.hero-hold{position:relative;height:calc(100svh + 42svh);z-index:0;background:var(--suelo)}
 @media(max-width:900px){
-  .hero-hold{height:calc(100lvh + 125dvh)}
+  .hero-hold{height:calc(100svh + 125svh)}
 }
 .hero{position:sticky;top:0;z-index:0}
 main>section+section{margin-top:clamp(-36px,-3.4vw,-64px);
@@ -12116,24 +12125,132 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
    navegador cuanto necesita la mas alta y se le da eso. Se recalcula al
    cambiar de tamaño y al cambiar de idioma, que es cuando el texto cambia. */
 (function(){
+  /* De donde se saca el hueco cuando la tarjeta mas alta no cabe: de los
+     margenes de lo que tiene encima, y en este orden. El segundo numero es lo
+     minimo que se les deja, para que apretar no se convierta en amontonar.
+     NO se toca ningun tamano de letra: el encargo fue expreso. */
+  var PIEZAS = [['.sec-head', 12], ['.sec-cue', 4], ['.sec-dots', 8]];
+
+  /* Y si aun apretando por arriba la tarjeta no cabe —en pantallas cortas le
+     faltaban hasta 40 px—, se aprieta POR DENTRO, en el mismo orden y con el
+     mismo criterio: primero el aire entre bloques, al final el relleno de la
+     propia tarjeta. Tampoco aqui se toca ningun tamano de letra. */
+  var DENTRO = [['.sec-fields', 'marginTop', 5], ['.sec-p', 'marginTop', 4],
+                ['.sec-go', 'paddingTop', 3],
+                ['.sec-fields > *', 'paddingTop', 1], ['.sec-fields > *', 'paddingBottom', 1],
+                ['.sec-t', 'marginTop', 6], ['.sec-k', 'marginTop', 1],
+                ['', 'paddingTop', 8], ['', 'paddingBottom', 6]];
+
   function ajusta(){
     var g=document.querySelector('#security .sec-grid'); if(!g) return;
-    if(innerWidth>=900){ g.style.minHeight=''; return }
-    var max=0;
-    g.querySelectorAll('.sec-card').forEach(function(c){
-      var alto=c.scrollHeight;
-      /* «scrollHeight» redondea a entero y no cuenta el relleno de abajo en
-         todos los navegadores: se mide tambien pieza a pieza y se coge el
-         mayor de los dos. Mas vale dos pixeles de aire que un renglon roto. */
-      var ult=c.lastElementChild;
-      if(ult){
-        var rc=c.getBoundingClientRect(), ru=ult.getBoundingClientRect();
-        var pad=parseFloat(getComputedStyle(c).paddingBottom)||0;
-        alto=Math.max(alto, Math.ceil(ru.bottom-rc.top+pad));
+    var st=document.querySelector('#security .sec-stage');
+    var sueltas=function(){
+      for(var i=0;i<PIEZAS.length;i++){
+        var e=document.querySelector('#security '+PIEZAS[i][0]);
+        if(e) e.style.marginBottom='';
       }
-      if(alto>max) max=alto;
-    });
-    if(max>0) g.style.minHeight=(max+2)+'px';
+      g.querySelectorAll('.sec-card').forEach(function(c){
+        for(var j=0;j<DENTRO.length;j++){
+          var d=DENTRO[j], e2=d[0]?c.querySelector(d[0]):c;
+          if(e2) e2.style[d[1]]='';
+        }
+      });
+    };
+    /* Lo que pide la tarjeta mas alta, con el apriete que tenga puesto. */
+    var pide=function(){
+      var m=0;
+      g.querySelectorAll('.sec-card').forEach(function(c){
+        var alto=c.scrollHeight;
+        /* «scrollHeight» redondea a entero y no cuenta el relleno de abajo en
+           todos los navegadores: se mide tambien pieza a pieza y se coge el
+           mayor de los dos. Mas vale dos pixeles de aire que un renglon roto. */
+        var ult=c.lastElementChild;
+        if(ult){
+          var rc=c.getBoundingClientRect(), ru=ult.getBoundingClientRect();
+          var pad=parseFloat(getComputedStyle(c).paddingBottom)||0;
+          alto=Math.max(alto, Math.ceil(ru.bottom-rc.top+pad));
+        }
+        if(alto>m) m=alto;
+      });
+      return m;
+    };
+    if(innerWidth>=900){ g.style.minHeight=''; sueltas(); return }
+    sueltas();
+    var max=pide();
+    if(!max) return;
+    var necesita = max + 2;
+    if(!st){ g.style.minHeight=necesita+'px'; return }
+
+    /* Y AQUI ESTABA EL FALLO. Dar a la rejilla el alto de la tarjeta mas alta
+       y ya esta hacia que se saliera por abajo de la etapa: 515 px pedidos
+       contra 466 px de sitio, 49 px que aterrizaban justo encima del boton de
+       subir y del selector de idioma, que van fijos en el canto. La bateria de
+       tarjetas lo canto en las siete pantallas altas. El carril de abajo no es
+       aire sobrante: es el sitio de esos mandos, y no se le puede quitar.
+
+       Asi que primero se mide CUANTO SITIO HAY de verdad —desde donde empieza
+       la rejilla hasta el fondo util de la etapa— y, si no llega, el hueco se
+       le pide a los margenes de lo que hay encima, nunca al carril de abajo. */
+    g.style.minHeight='0px';
+    void st.offsetHeight;
+    var sitio=function(){
+      var rs=st.getBoundingClientRect();
+      var pb=parseFloat(getComputedStyle(st).paddingBottom)||0;
+      return Math.floor(rs.bottom - pb - g.getBoundingClientRect().top);
+    };
+    var hay=sitio(), falta=necesita-hay;
+    for(var i=0;i<PIEZAS.length && falta>0;i++){
+      var e=document.querySelector('#security '+PIEZAS[i][0]);
+      if(!e) continue;
+      var mb=parseFloat(getComputedStyle(e).marginBottom)||0;
+      var puede=Math.max(0, mb-PIEZAS[i][1]);
+      if(puede<1) continue;
+      var quita=Math.min(puede, falta);
+      e.style.marginBottom=(mb-quita)+'px';
+      falta-=quita;
+    }
+    void st.offsetHeight;
+    hay=sitio();
+
+    /* Segunda vuelta: si sigue sin caber, el hueco sale del aire de dentro de
+       la tarjeta. Se aprieta igual en las tres —son la misma caja y se turnan—
+       y se vuelve a preguntar cuanto piden, porque apretar cambia la respuesta:
+       un parrafo con menos margen puede seguir ocupando los mismos renglones. */
+    falta = necesita - hay;
+    if(falta > 0){
+      var tarjetas=[].slice.call(g.querySelectorAll('.sec-card'));
+      for(var k=0;k<DENTRO.length && falta>0;k++){
+        var d=DENTRO[k];
+        /* Una pieza puede ser varias —las cuatro filas del expediente— y
+           entonces cada pixel que se le quita a cada una vale por cuatro. Se
+           cuenta cuantas son y cuanto margen de maniobra tiene la mas justa,
+           se da UN paso proporcional y se vuelve a medir de verdad: apretar no
+           siempre devuelve lo que promete, porque un parrafo con menos aire
+           puede seguir ocupando los mismos renglones. */
+        var cuantas=0, margen=Infinity;
+        var enUna=d[0]?tarjetas[0].querySelectorAll(d[0]):[tarjetas[0]];
+        for(var t=0;t<enUna.length;t++){
+          var v0=parseFloat(getComputedStyle(enUna[t])[d[1]])||0;
+          margen=Math.min(margen, Math.max(0, v0-d[2]));
+          cuantas++;
+        }
+        if(!cuantas || margen<1) continue;
+        var paso=Math.min(margen, Math.ceil(falta/cuantas));
+        if(paso<1) continue;
+        for(var u=0;u<tarjetas.length;u++){
+          var els=d[0]?tarjetas[u].querySelectorAll(d[0]):[tarjetas[u]];
+          for(var w=0;w<els.length;w++){
+            var vv=parseFloat(getComputedStyle(els[w])[d[1]])||0;
+            els[w].style[d[1]]=Math.max(d[2], vv-paso)+'px';
+          }
+        }
+        void st.offsetHeight;
+        falta = pide()+2-hay;
+      }
+      void st.offsetHeight;
+      necesita = pide()+2;
+    }
+    g.style.minHeight=Math.min(necesita, hay)+'px';
   }
   var pend=0;
   function pide(){ if(pend) return; pend=1; setTimeout(function(){ pend=0; ajusta() },160) }
