@@ -374,8 +374,25 @@ di(cuadros[0].oscuro >= 0.50,
      0,62-0,92  la cifra se abre y entrega la ronda, que ya esta detras
      0,92-1,00  entregada                                                 */
 const CAJA = { x: 180, y: 150, width: 1110, height: 460 };
+/* SE CONVERGE. «caja.top» se midio antes de moverse y esta pagina cambia de
+   alto mientras te desplazas —secciones ancladas y «content-visibility»—, asi
+   que el desplazamiento pedido podia caer ANTES del umbral: la escena sin
+   empezar y la medida a cero con todo funcionando. Se busca la fase mirando
+   el umbral DESPUES de cada paso. */
 const enP = async (v) => {
   await pg.evaluate(y => scrollTo(0, y), Math.round(caja.top + v * (caja.alto - caja.vh)));
+  await pg.waitForTimeout(160);
+  for (let i = 0; i < 16; i++) {
+    const m = await pg.evaluate(() => {
+      const r = document.querySelector('.umb').getBoundingClientRect();
+      const tot = r.height - innerHeight;
+      return { p: tot > 0 ? Math.min(1, Math.max(0, -r.top / tot)) : 1, tot };
+    });
+    const d = (v - m.p) * m.tot;
+    if (Math.abs(d) < 5) break;
+    await pg.evaluate(y => scrollBy(0, y), Math.round(d));
+    await pg.waitForTimeout(110);
+  }
   await pg.waitForTimeout(420);
   return franja(pg, CAJA);
 };

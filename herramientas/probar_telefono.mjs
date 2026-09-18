@@ -143,13 +143,20 @@ const f = await pg.evaluate(() => {
     for (let i = 0; i < 14; i++) {
       const t = await pg.evaluate(() => Math.round(
         document.querySelector('.secure').getBoundingClientRect().top));
-      if (t > 40 && t < 120) break;
-      await pg.evaluate(v => scrollBy(0, v), t - 80);
+      /* Y la banda tiene que LLENAR la pantalla, no solo asomar: dejandola
+         empezar en 40-120 px, dos tercios de lo que se fotografia son la
+         seccion de arriba, que es negra, y las dos franjas medidas salen a
+         0,006 —oscuro— en vez de a 0,9 —papel—. Se entra dentro de la banda. */
+      if (t < -120 && t > -320) break;
+      await pg.evaluate(v => scrollBy(0, v), t + 220);
       await pg.waitForTimeout(140);
     }
     await pg.waitForTimeout(800);
+    const bandaTop = await pg.evaluate(() => Math.round(
+      document.querySelector('.secure').getBoundingClientRect().top));
+    const vhCSS = await pg.evaluate(() => innerHeight);
     const b64 = (await pg.screenshot()).toString('base64');
-    const suelo = await pg.evaluate(async s => {
+    const suelo = await pg.evaluate(async ({ s, bandaTop, vhCSS }) => {
       const im = new Image();
       await new Promise(z => { im.onload = z; im.src = 'data:image/png;base64,' + s });
       const c = document.createElement('canvas'); c.width = im.width; c.height = im.height;
@@ -166,9 +173,17 @@ const f = await pg.evaluate(() => {
          la franja de LEER -donde va el titular- sea mas clara que el cuerpo
          de la seccion, y eso se mide entre el tercio de arriba y el de en
          medio, que es suelo limpio por los dos lados. */
-      const cA = c.height * 0.30, cB = c.height * 0.62;
+      /* LAS DOS FRANJAS SE MIDEN DENTRO DE LA BANDA, NO DE LA PANTALLA.
+         La foto coge el canto: arriba queda la seccion anterior —negra— y
+         abajo el papel. Partiendo la PANTALLA en 30 % y 62 % se comparaba
+         «negro de la pila» contra «negro de la pila», y de ahi salia 0,0060
+         contra 0,0252 con el papel perfectamente bien. El recorrido de luz de
+         la foto entera —0,95— es justo la prueba de que ahi habia dos
+         secciones, no una. Se parte la BANDA. */
+      const y0 = Math.max(0, bandaTop * (c.height / vhCSS));
+      const cA = y0 + (c.height - y0) * 0.30, cB = y0 + (c.height - y0) * 0.62;
       let lo = 1, hi = 0, sA = 0, nA = 0, sB = 0, nB = 0;
-      for (let y = 0; y < c.height; y++) {
+      for (let y = Math.round(y0); y < c.height; y++) {
         for (const px of [Math.round(m*0.4), c.width - Math.round(m*0.4) - 1]) {
           const i = (y*c.width + px) * 4;
           const l = .2126*f(d[i]) + .7152*f(d[i+1]) + .0722*f(d[i+2]);
@@ -177,7 +192,7 @@ const f = await pg.evaluate(() => {
         }
       }
       return { rango: hi - lo, arriba: sA/nA, abajo: sB/nB };
-    }, b64);
+    }, { s: b64, bandaTop: Math.max(0, bandaTop), vhCSS });
     /* Los limites bajan con la paleta: el recorrido de luz posible en un suelo
        de grafito es una fraccion del que habia en papel. Lo que se sigue
        cazando es lo mismo -un suelo plano da 0,000- y la direccion de la luz. */
@@ -222,8 +237,25 @@ const f = await pg.evaluate(() => {
     // quieta hasta 0,62-, asi que el momento en que la cifra esta blanca,
     // entera y con su barra se movio. En 0,38 esto media la fusion a medias y
     // cantaba un choque que no existe.
-    await pg.evaluate(v => scrollTo(0, v), Math.round(u.top + 0.57 * (u.alto - u.vh)));
-    await pg.waitForTimeout(700);
+    /* SE CONVERGE, NO SE PIDE Y YA. «u.top» se mide antes de moverse y esta
+       pagina cambia de alto mientras te desplazas —secciones ancladas y
+       «content-visibility»—, asi que el desplazamiento pedido caia ANTES del
+       umbral: la escena estaba sin empezar y lo que se fotografiaba era la
+       escala vacia, sin cifra. De ahi el «no encuentro la cifra» disfrazado de
+       «410 px de aire». Se busca la fase midiendo el umbral DESPUES de cada
+       paso, que es lo unico que no miente. */
+    for (let i = 0; i < 16; i++) {
+      const p57 = await pg.evaluate(() => {
+        const r = document.querySelector('.umb').getBoundingClientRect();
+        const tot = r.height - innerHeight;
+        return { p: tot > 0 ? Math.min(1, Math.max(0, -r.top / tot)) : 1, tot };
+      });
+      const d = (0.57 - p57.p) * p57.tot;
+      if (Math.abs(d) < 6) break;
+      await pg.evaluate(v => scrollBy(0, v), Math.round(d));
+      await pg.waitForTimeout(120);
+    }
+    await pg.waitForTimeout(800);
     const m = await pg.evaluate(() => {
       const cv = document.getElementById('umbLz');
       const c = document.createElement('canvas'); c.width = cv.width; c.height = cv.height;
