@@ -5335,6 +5335,39 @@ h1,.sec-h,.press-h,.builds-h,.tkp-h,.sale-h,.ruta-h,.join-h{max-width:22ch}
    que ya esta resuelto por otro lado es una capa que sobra. Fuera las dos
    versiones, la clara y la oscura. */
 .hud::after{display:none !important}
+
+/* ══ LAS TARJETAS DE PRENSA NO ENTRABAN ═══════════════════════════════════
+   Hay un escalonado completo escrito —«.pcd:nth-child(1..5){--d:0s/.13s/.26s
+   /.39s/.52s}»— y debajo, dos lineas mas abajo, esto:
+
+       .pcd{opacity:1;transform:none}
+
+   O sea que el estado de REPOSO de la tarjeta ya es su estado FINAL. El
+   escalonado existe, las variables estan puestas, el observador añade «.in» al
+   carril… y no pasa nada, porque no hay de donde venir. Cuatro tarjetas que
+   aparecen de golpe con el resto de la seccion.
+
+   Se les devuelve la entrada: suben 30 px desde detras de una mascara, una
+   detras de otra, con el escalonado que ya estaba escrito. La lamina de dentro
+   conserva su propio barrido —eso no se toca— asi que la tarjeta entra y su
+   contenido se descubre despues: dos tiempos, que es lo que hace que parezca
+   una escena y no un fundido. */
+.press-rail .pcd{
+  opacity:0;
+  transform:translate3d(0,30px,0);
+  clip-path:inset(0 0 100% 0);
+  transition:opacity .5s ease var(--d,0s),
+             transform .8s var(--sal) var(--d,0s),
+             clip-path .8s var(--sal) var(--d,0s),
+             box-shadow .45s ease, border-color .35s ease}
+.press-rail.in .pcd{
+  opacity:1;transform:none;clip-path:inset(0 0 -6% 0)}
+/* al pasar el raton el escalonado ya no pinta: la tarjeta responde al instante */
+.press-rail.in .pcd:hover{transform:translateY(-5px);transition-delay:0s}
+
+@media(prefers-reduced-motion:reduce){
+  .press-rail .pcd{opacity:1;transform:none;clip-path:none}
+}
 </style>
 </head>
 <body class="ann-fuera">
@@ -6463,8 +6496,40 @@ const CALM=matchMedia('(prefers-reduced-motion: reduce)').matches;
       [...h.querySelectorAll('.ws>.wi')].forEach((i,k)=>i.style.setProperty('--wd',(k*step).toFixed(3)+'s'));
       h.classList.add('sp');
     });
+    /* ══ LA MEJOR ANIMACION DE LA PAGINA SE REPRODUCIA DETRAS DEL TELON ══
+       Medido con un muestreo cada 60 ms desde la carga:
+
+         841 ms  el titular de portada YA esta entrando (transform 32,7 px)
+        1290 ms  la entrada ha TERMINADO (transform: none)
+        1655 ms  el preloader empieza a irse
+        1961 ms  llega «body.ready»
+
+       O sea que la entrada letra a letra del titular —lo mejor que tiene esta
+       pagina— acaba 365 ms antes de que la pantalla negra empiece a moverse y
+       670 ms antes de que la pagina se de por lista. Nadie la ha visto nunca.
+       Ni una sola visita. Y explica una parte grande de «no veo ninguna
+       animacion»: la primera y mas vistosa no llega a la pantalla.
+
+       La causa es que el disparador es un IntersectionObserver, y el titular
+       de portada esta DENTRO de la pantalla desde el milisegundo cero: dispara
+       al instante, sin esperar a nada. El resto de piezas de la portada —los
+       botones, la fila de datos— si esperan, porque cuelgan de «.ready».
+       El titular no, y era el unico.
+
+       Ahora espera a «.ready» como sus vecinos, con 90 ms de aire para que el
+       telon haya empezado a abrirse y la entrada ocurra A LA VISTA. */
+    const enciende=el=>{
+      if(el.closest('.hero')&&!document.body.classList.contains('ready')){
+        const espera=()=>{
+          if(document.body.classList.contains('ready')) setTimeout(()=>el.classList.add('in'),90);
+          else requestAnimationFrame(espera);
+        };
+        return espera();
+      }
+      el.classList.add('in');
+    };
     const io=new IntersectionObserver(es=>es.forEach(e=>{
-      if(!e.isIntersecting)return;io.unobserve(e.target);e.target.classList.add('in');
+      if(!e.isIntersecting)return;io.unobserve(e.target);enciende(e.target);
     }),{threshold:.1,rootMargin:'0px 0px -14% 0px'});
     heads.forEach(h=>io.observe(h));
   })();
