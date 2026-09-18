@@ -40,6 +40,16 @@ async function franja(pg, caja) {
       v.push(L); su += L; n++;
     }
     const m = su / n;
+    /* CUANTO DE LA RONDA SE VE POR EL HUECO. La ronda dejo de ser negra y paso
+       a ser un campo azul saturado, asi que ahora se reconoce por su propio
+       color: azul muy dominante y luz media. Ni las teselas -que a esta altura
+       del reloj ya han fundido a blanco, o sea neutras y muy claras- ni el
+       suelo -negro, sin luz- entran en esa horquilla. */
+    let ronda = 0;
+    for (let i = 0; i < d.length; i += 4) {
+      const L2 = (0.2126*d[i] + 0.7152*d[i+1] + 0.0722*d[i+2]) / 255;
+      if (d[i+2] - d[i] > 60 && L2 > 0.10 && L2 < 0.45) ronda++;
+    }
     let s2 = 0, oscuro = 0, claro = 0;
     for (const L of v) { s2 += (L - m) * (L - m); if (L < 0.15) oscuro++; if (L > 0.60) claro++ }
     /* La cifra dejo de ser un hueco claro y paso a ser teselas AZULES, asi que
@@ -88,7 +98,7 @@ async function franja(pg, caja) {
       const M = Math.max(d[i], d[i+1], d[i+2]), mn = Math.min(d[i], d[i+1], d[i+2]);
       if (M > 205 && M - mn < 20) bl++;
     }
-    return { medio: m, desv: Math.sqrt(s2 / n), oscuro: oscuro / n, claro: claro / n,
+    return { medio: m, ronda: ronda / n, desv: Math.sqrt(s2 / n), oscuro: oscuro / n, claro: claro / n,
              tesela: tes / n, blanco: bl / n, saltos: filas ? saltos / filas : 0 };
   }, b64);
 }
@@ -538,12 +548,32 @@ di(fundida.blanco > 0.05 && fundida.blanco > arma[3] * 0.6,
    Lo que la prueba quiere saber es si el hueco CRECE, y eso es una razon.
    Comprobado inyectando el fallo: congelando la escala de la apertura los
    tres instantes dan la misma luz y la razon cae a 1,00. */
+/* ESTO MEDIA LA LUZ MEDIA DEL RECUADRO, NO EL HUECO. Servia mientras detras
+   habia un suelo casi negro y uniforme: mas hueco = mas luz. Desde que la
+   ronda es un campo azul con su propia luz —clara arriba, honda abajo— la luz
+   media del recuadro sube y BAJA segun por que parte del campo se este
+   mirando, y el hueco puede estar creciendo perfectamente mientras el numero
+   cae. Medido: 0,061 → 0,227 → 0,192 con la apertura funcionando bien.
+   Lo que la prueba dice querer saber —«la ronda va ganando pantalla»— se mide
+   ahora contando la ronda MISMA, por su color, que es lo unico que no depende
+   de como este iluminada. */
+/* Y LOS PUNTOS DE MUESTREO TAMBIEN ESTABAN MAL. Trazada la curva entera —el
+   porcentaje de ventana que ocupa la ronda en 0,62 · 0,66 · 0,70 · 0,74 ·
+   0,78 · 0,82 · 0,86 · 0,90— sale asi:
+       0,0 → 10,6 → 45,3 → 85,6 → 85,3 → 81,1 → 76,3 → 71,5
+   O sea: la puerta termina de abrirse en 0,74, no en 0,92. A partir de ahi la
+   ronda ya esta entregada y lo que pasa es que su propio contenido -la ficha
+   de precios, que es papel, y el panel de compra, que es casi negro- entra en
+   la ventana y tapa campo azul. La cuenta baja con la apertura terminada y
+   funcionando bien. Medir en 0,88 era medir DESPUES del suceso.
+   Se mide dentro de la apertura, y se pide lo que la apertura promete: que
+   empiece casi cerrada, que crezca de verdad en los dos tramos, y que acabe
+   entregando la mayor parte de la ventana. */
 const abre = [];
-for (const v of [0.66, 0.76, 0.88]) abre.push((await enP(v)).medio);
-const razon = abre[0] > 0 ? abre[1] / abre[0] : 0;
-di(razon >= 1.35 && abre[2] > abre[1] * 1.02,
+for (const v of [0.64, 0.70, 0.76]) abre.push((await enP(v)).ronda);
+di(abre[0] < 0.20 && abre[1] > abre[0] * 1.6 && abre[2] > abre[1] * 1.4 && abre[2] > 0.70,
    'y al abrirse va entregando la ronda, no crece sobre si misma (' +
-   abre.map(v => v.toFixed(3)).join(' → ') + ', x' + razon.toFixed(2) + ', limite 1,35)');
+   abre.map(v => (v*100).toFixed(1) + '%').join(' → ') + ' de la ventana)');
 /* El suelo de la ronda ya no es papel: es grafito. El limite pasa de 0,70 a
    0,05, que sigue estando muy por encima del negro de la escena -0,00- y por
    tanto sigue cazando lo que cazaba: que la puerta no acabe entregando negro

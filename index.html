@@ -5526,6 +5526,383 @@ footer .fmark-logo{filter:none}
   .press-rail .pcd,.builds-rail .bcd,.sec-grid>.sec-card{transform:none !important}
 }
 
+
+/* ══════════════════════════════════════════════════════════════════════════
+   LA VOZ: la pagina dejaba de tener escala
+   ══════════════════════════════════════════════════════════════════════════
+   Medido, no opinado: once titulares a 76 px, peso 300, alineados todos en
+   x=100. Exactamente el mismo cuerpo once veces. Una pagina cantada en una
+   sola nota no tiene jerarquia: tiene formulario. Y el elemento tipografico
+   mas grande de toda la portada medía 6,6 vw cuando en una pagina cara lo
+   normal es 12-26 vw saliendose del encuadre.
+   Se parte en dos registros. Tres secciones GRITAN —las tres que cargan con
+   el argumento: las garantias, el precio y el cierre— y las demas se callan
+   para que se oiga el grito. Ocho titulares mas pequeños no son ocho
+   titulares peores: son el silencio que hace falta. */
+
+/* ── el registro alto ── */
+#solutions .sec-h,
+#join     .join-h{
+  font-size:clamp(50px,11.6vw,168px) !important;
+  line-height:.855;
+  letter-spacing:-.052em;
+  font-weight:300;
+  max-width:13ch !important;
+  /* el asta de la primera letra se alinea con el margen optico, no con la
+     caja: a 168 px la barra de la «F» deja 9 px de aire que no deja nadie */
+  margin-left:-.048em}
+
+/* ── el registro bajo ── */
+#press   .press-h,
+#security .sec-h,
+#token   .tkp-h,
+#builds  .builds-h,
+#team    .tm-h,
+#network .lane-k{
+  font-size:clamp(26px,3.9vw,54px) !important;
+  line-height:1.05;
+  letter-spacing:-.034em;
+  max-width:26ch !important}
+
+@media(max-width:899px){
+  /* En movil la escala NO se rinde: el titular alto baja a 13,6 vw —no a los
+     31 px del suelo de antes, que lo dejaban a la altura de un parrafo en
+     negrita— y el bajo se queda en 30. La relacion entre uno y otro se
+     mantiene; si se pierde ahi, se pierde donde mas se mira. */
+  #solutions .sec-h,#join .join-h{
+    font-size:clamp(40px,13.6vw,72px) !important;line-height:.9;
+    max-width:11ch !important;margin-left:-.04em}
+  #press .press-h,#security .sec-h,#token .tkp-h,
+  #builds .builds-h,#team .tm-h,#network .lane-k{
+    font-size:clamp(24px,7.4vw,32px) !important;max-width:20ch !important}
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   EL CIFRON: el numero de seccion, a sangre
+   ══════════════════════════════════════════════════════════════════════════
+   El mejor material grafico que tiene la pagina —los numerales 01 a 10— vivia
+   en un cintillo de 10 px. Ahora es la pieza mas grande de cada seccion y
+   entra por el borde izquierdo cortado: se ve el numero entero y medio cero.
+   Sobre negro va en hueco, solo el contorno. Sobre papel va macizo y palido,
+   como una marca de agua de imprenta. En ninguno de los dos casos compite con
+   el texto: esta por debajo en la pila y muy por debajo en contraste.
+   Se recorta con su propia caja, no con la seccion: poner «overflow:hidden»
+   en la seccion habria matado todos los «position:sticky» que cuelgan de
+   ella, que es exactamente el error que ya costo una pantalla en blanco. */
+.cifron{position:absolute;left:0;top:clamp(4px,.8vw,16px);
+  width:min(52vw,660px);height:clamp(150px,22vw,360px);
+  overflow:hidden;pointer-events:none;z-index:0;
+  contain:paint}
+.cifron>b{position:absolute;top:-.30em;left:clamp(-128px,-8.4vw,-46px);
+  display:block;font-family:var(--f);font-weight:200;
+  font-size:clamp(170px,24.5vw,384px);
+  line-height:.78;letter-spacing:-.062em;
+  font-variant-numeric:tabular-nums lining-nums;
+  color:transparent;-webkit-text-stroke:1.3px rgba(233,238,247,.115)}
+/* En papel va macizo, pero MUY palido: es filigrana de imprenta, no texto.
+   Hace falta ganarle a «.claro :is(h1,h2,h3,h4,b,strong,…)», que pinta de
+   tinta cualquier «b» que caiga dentro de una banda clara —y el numeral
+   ES un «b»—: por eso la regla lleva el nombre de la clase dos veces. */
+.claro .cifron>b,.claro .cifron.cifron>b{
+  -webkit-text-stroke:0 !important;
+  color:rgba(10,12,17,.048) !important;
+  -webkit-text-fill-color:rgba(10,12,17,.048) !important}
+/* el contenido de la cabecera va por encima del numeral, siempre */
+/* El contenido de la cabecera va por encima del numeral. El «:not(.cifron)»
+   no es cosmetico: sin el, «.sec-head>*» (0,1,1) le gana a «.cifron» (0,1,0)
+   y le devuelve el «position:relative», con lo que el numeral vuelve al flujo
+   —660 px de ancho— y empuja de sitio a todo lo que tenga al lado. En
+   «.sale-top», que es una fila flex, eso mandaba el cintillo al centro. */
+.sec-head>*:not(.cifron),.press-head>*:not(.cifron),
+.tkp-head>*:not(.cifron),.builds-head>*:not(.cifron),
+.join-head>*:not(.cifron),.tm-head>*:not(.cifron),
+.sale-top>*:not(.cifron){position:relative;z-index:1}
+
+@media(max-width:899px){
+  .cifron{width:74vw;height:clamp(104px,31vw,150px);top:2px}
+  .cifron>b{font-size:clamp(116px,34vw,170px);left:-7vw}
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   LAS CIFRAS MANDAN
+   ══════════════════════════════════════════════════════════════════════════
+   El par de precios —lo unico que un comprador mira— estaba a 92 px, es
+   decir MAS PEQUEÑO que el titular que lo presenta. En una pagina que vende
+   un precio, el precio es la tipografia mayor que existe en ella, y el de
+   salida es mayor que el de entrada porque esa es toda la historia. */
+.prices .pr-v{font-size:clamp(54px,12.4vw,182px) !important;
+  line-height:.84;letter-spacing:-.055em;font-weight:200}
+.prices .pr.up .pr-v{font-size:clamp(66px,15.6vw,232px) !important}
+@media(max-width:899px){
+  .prices .pr-v{font-size:clamp(44px,15vw,64px) !important}
+  .prices .pr.up .pr-v{font-size:clamp(54px,19vw,80px) !important}
+}
+
+
+/* ══════════════════════════════════════════════════════════════════════════
+   EL CAMPO AZUL
+   ══════════════════════════════════════════════════════════════════════════
+   El azul de marca ocupaba menos del 3 % de los pixeles de la portada: seis
+   iconos, dos numeros y un boton. Era un adorno, no un color. Una pagina que
+   se recuerda tiene un momento en que el color ES la pantalla.
+   La seccion 06 —el precio, que es de lo que va todo— deja de ser negra y
+   pasa a ser un campo azul a sangre completa. El recorrido del documento
+   cambia de "negro, negro, papel, negro, papel, negro" a "negro · PAPEL ·
+   negro · AZUL · negro · papel": tres materiales, no dos.
+   La ficha de precios se queda blanca, que sobre azul saturado es lo que la
+   convierte en el objeto mas importante de la pagina. */
+
+main>section#presale{
+  background-color:#0E3AC4 !important;
+  background-image:
+    radial-gradient(118% 92% at 16% -14%, #1E52EC 0%, rgba(30,82,236,0) 58%),
+    radial-gradient(90% 70% at 92% 108%, #0A2478 0%, rgba(10,36,120,0) 62%),
+    var(--grano-claro) !important;
+  background-repeat:no-repeat,no-repeat,repeat !important;
+  background-position:center,center,0 0 !important;
+  /* El grano no es adorno: un azul saturado y liso a pantalla completa se
+     bandea al degradar —se ven los escalones— y ademas es lo unico de la
+     pagina que se veria como un color de relleno. La bateria lo pide para
+     TODOS los suelos y tiene razon: tambien para este. */
+  color:#FFFFFF}
+
+/* el campo de rectangulos que decoraba el negro no funciona sobre saturado:
+   se vuelve suciedad. Se apaga y el color queda limpio. */
+#presale .sale-field{opacity:.30;mix-blend-mode:normal;filter:saturate(0) brightness(1.9) opacity(.5)}
+
+#presale .sale-h{color:#FFFFFF !important;
+  font-size:clamp(38px,6.7vw,96px) !important;
+  line-height:.94;letter-spacing:-.046em;max-width:15ch !important;margin-left:-.035em}
+#presale .sale-sub{color:rgba(255,255,255,.80);max-width:46ch}
+#presale .sale-live,#presale .sale-live .sk-n{color:#FFFFFF !important}
+#presale .sale-net{color:rgba(255,255,255,.72)}
+#presale .sk::after,#presale .sk i:last-child{background:rgba(255,255,255,.28)}
+#presale .cifron>b{-webkit-text-stroke-color:rgba(255,255,255,.22)}
+
+/* ── la ficha de precios sale de la media columna ──
+   Estaba encerrada en la columna izquierda, o sea en 560 px: por eso el
+   precio no podia ser grande. Pasa a cruzar la pagina entera. */
+#presale .prices{
+  grid-column:1 / -1;
+  margin-top:clamp(34px,4.2vw,58px);
+  background:#FFFDF9;
+  border:0;border-radius:4px;
+  box-shadow:0 2px 2px rgba(6,16,54,.16),
+             0 26px 48px -22px rgba(4,12,44,.46),
+             0 70px 120px -60px rgba(3,9,36,.55)}
+#presale .pr{padding:clamp(22px,2.6vw,38px) clamp(24px,3vw,44px) clamp(26px,3vw,42px)}
+#presale .pr-k{color:rgba(10,14,24,.52)}
+#presale .pr-n{color:rgba(10,14,24,.44)}
+#presale .pr-v{color:#0A0D14 !important;
+  font-size:clamp(52px,11.4vw,168px) !important;line-height:.82;
+  letter-spacing:-.058em;font-weight:200}
+#presale .pr.up{background:#070A10}
+#presale .pr.up .pr-k{color:rgba(255,255,255,.52)}
+#presale .pr.up .pr-n{color:rgba(255,255,255,.44)}
+#presale .pr.up .pr-v{color:#8FBBFF !important;
+  font-size:clamp(60px,13.4vw,198px) !important}
+#presale .pr-arrow{border-inline-color:rgba(10,14,24,.12)}
+#presale .pr-mult{color:#0B3AC2}
+
+/* ── el resto del aparato, sobre azul ──
+   OJO CON EL «!important»: la ronda «tier 1 dark» dejo un bloque que pinta de
+   #0A0C12 —con !important— a «.pcd,.sec-card,…,.pr,.panel,.widget,.prices,…»
+   y de #8E99AD a «p.sale-sub, .pr-k, .mono…». Sin repetir el !important aqui,
+   un selector con id pierde igual: en la cascada, «!important» gana ANTES de
+   que se mire la especificidad. Medido: la ficha de precios se quedaba negra
+   sobre el campo azul y el precio daba 1,01 de contraste. Invisible. */
+#presale .prices{
+  background-color:#FFFDF9 !important;
+  background-image:none !important;
+  border:0 !important;border-color:transparent !important}
+#presale .pr{background-color:transparent !important;background-image:none !important}
+#presale .pr.up{background-color:#070A10 !important;background-image:none !important}
+#presale .pr-k{color:rgba(10,14,24,.60) !important}
+#presale .pr-n{color:rgba(10,14,24,.52) !important}
+#presale .pr.up .pr-k{color:rgba(255,255,255,.62) !important}
+#presale .pr.up .pr-n{color:rgba(255,255,255,.52) !important}
+#presale .pr-arrow{border-inline-color:rgba(10,14,24,.14) !important}
+#presale .pr-mult{color:#0B3AC2 !important;background:transparent !important;
+  background-image:none !important}
+#presale .pr-mult *{color:rgba(10,14,24,.62) !important}
+#presale .pr-mult b,#presale .pr-mult .o{color:#0B3AC2 !important}
+
+#presale .sale-sub,#presale p.sale-sub{color:rgba(255,255,255,.88) !important}
+#presale .sale-net,#presale .sale-net.mono{color:rgba(255,255,255,.84) !important}
+#presale .sale-live,#presale .sale-live .sk-n,
+#presale .sk,#presale .k{color:#FFFFFF !important}
+/* El «.mono» blanco es para lo que va SOBRE el azul. Dentro de la ficha de
+   precios —que es papel— hay tres «.mono» mas: la clave, la unidad y el
+   multiplicador. Blanco sobre papel da 1,01: invisible. Van excluidos. */
+#presale :is(.mono,.raise-head,.raise-foot,.raise-foot span,.raise-foot em):not(.prices *){
+  color:rgba(255,255,255,.86) !important}
+#presale .prices .mono,#presale .prices :is(.pr-k,.pr-n){
+  color:rgba(10,14,24,.62) !important}
+#presale .prices .pr.up :is(.pr-k,.pr-n,.mono){
+  color:rgba(255,255,255,.62) !important}
+#presale .raise-bar{background:rgba(255,255,255,.24) !important}
+#presale .raise-bar>i,#presale .raise-bar b,#presale .lk-bar{
+  background:#FFFFFF !important;background-image:none !important}
+#presale .raise-bar .raise-tip{background:#061436 !important;
+  border-color:rgba(255,255,255,.4) !important}
+#presale .raise-bar .raise-tip,#presale .raise-bar .raise-tip *{
+  color:#FFFFFF !important}
+
+#presale .widget{background-color:#060C22 !important;
+  background-image:none !important;
+  border-color:rgba(255,255,255,.22) !important;
+  box-shadow:0 30px 64px -28px rgba(2,6,28,.7) !important}
+#presale .w-lab,#presale .w-note,#presale .w-rate,
+#presale .w-top,#presale .w-top *{color:rgba(255,255,255,.78) !important}
+/* «button:not(.on)» tambien caza al boton de accion, y con (1,2,1) le gana a
+   «#presale .w-cta» (1,1,0): el boton blanco se quedaba negro con tinta azul
+   marino encima. 1,51 de contraste. Se excluye. */
+#presale .w-field,#presale .w-out,#presale .w-out div,
+#presale .widget button:not(.on):not(.w-cta){
+  background-color:#0A1330 !important;background-image:none !important;
+  border-color:rgba(255,255,255,.18) !important}
+#presale .w-out,#presale .w-out *{color:rgba(255,255,255,.76) !important}
+#presale .w-out dd,#presale .w-out .up,#presale .w-out em,
+#presale .w-out b,#presale .w-out strong{color:#FFFFFF !important}
+#presale .w-chips button{border-color:rgba(255,255,255,.26) !important;
+  color:rgba(255,255,255,.86) !important}
+#presale .w-chips button.on{background-color:#FFFFFF !important;
+  background-image:none !important;color:#0B2A8E !important;
+  border-color:#FFFFFF !important}
+#presale .w-cta{background-color:#FFFFFF !important;background-image:none !important;
+  color:#0B2A8E !important;border-color:#FFFFFF !important;
+  box-shadow:0 14px 30px -14px rgba(2,8,34,.7) !important}
+#presale .w-cta:hover{background-color:#E9F0FF !important;color:#08206E !important}
+
+@media(max-width:1019px){
+  #presale .pr-v{font-size:clamp(44px,15vw,72px) !important}
+  #presale .pr.up .pr-v{font-size:clamp(50px,17vw,84px) !important}
+  #presale .sale-h{font-size:clamp(34px,10.6vw,56px) !important;max-width:13ch !important}
+}
+
+
+/* ══════════════════════════════════════════════════════════════════════════
+   LA MATERIA: papel de verdad, y que las cosas PESEN
+   ══════════════════════════════════════════════════════════════════════════
+   Dos cosas medidas, no opinadas:
+   (a) El papel era #F1F2F5 con una retícula de 124 px encima. Eso no es
+       papel: es el lienzo de Figma con la cuadricula puesta. De ahi sale
+       literalmente lo de «hecha en paint». El papel de imprenta nunca es gris
+       neutro ni azulado: tira a calido. Y no lleva cuadricula.
+   (b) En treinta y dos capturas de la pagina no habia UNA sombra. Ni una.
+       Ninguna tarjeta pesaba, ninguna se levantaba del suelo, ningun canto
+       recibia luz. Una pagina sin sombra es un dibujo; una pagina cara es un
+       objeto. */
+
+:root{
+  --c-piso:#F4F2ED;      /* papel, calido, no el gris de lienzo */
+  --c-papel:#FFFEFA;     /* la tarjeta: blanco calido, nunca #FFF puro */
+  --c-hondo:#EAE6DE;     /* las calles entre tarjetas */
+  --c-linea:rgba(22,18,12,.13);
+  --c-linea2:rgba(22,18,12,.24);
+}
+
+main>section.claro.claro{
+  background-image:
+    radial-gradient(90% 60% at 50% -14%, #FFFDF8 0%, rgba(255,253,248,0) 62%),
+    radial-gradient(70% 50% at 92% 106%, rgba(14,58,196,.040) 0%, rgba(14,58,196,0) 60%),
+    linear-gradient(180deg,#FBF9F5 0%,#F4F2ED 46%,#EBE7DF 100%),
+    var(--grano-claro) !important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.95),
+             inset 0 -1px 0 rgba(22,18,12,.09) !important}
+
+/* la cuadricula, fuera */
+.claro>.malla{display:none !important}
+
+/* ── la sombra de verdad, en tres capas ──
+   Una sola sombra difusa es una mancha. Tres capas —contacto, cuerpo y
+   ambiente— son un objeto apoyado en una mesa. Y el canto de arriba recibe
+   luz: 1 px de blanco por dentro es lo que separa «rectangulo con borde» de
+   «cosa con grosor». */
+.claro :is(.sec-card,.bcd,.bcd-plate,.pcd){
+  background-color:var(--c-papel) !important;
+  border:1px solid rgba(22,18,12,.10) !important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.9),
+             0 1px 1.5px rgba(26,20,12,.06),
+             0 10px 18px -8px rgba(26,20,12,.10),
+             0 34px 52px -28px rgba(26,20,12,.20) !important}
+.claro :is(.sec-card,.bcd):hover{
+  border-color:rgba(22,18,12,.16) !important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.95),
+             0 2px 3px rgba(26,20,12,.07),
+             0 18px 28px -10px rgba(26,20,12,.13),
+             0 54px 80px -34px rgba(26,20,12,.26) !important}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   LA FAMILIA DE NEGROS
+   ══════════════════════════════════════════════════════════════════════════
+   La pagina declaraba seis negros y todos estaban a tres o cuatro puntos de
+   luminancia unos de otros: el ojo los funde en una sola plancha muerta. Una
+   superficie elevada tiene que estar VISIBLEMENTE mas clara que su suelo, no
+   un 2 % mas clara, y tiene que arrojar sombra sobre el. Diez puntos de salto
+   y sombra de tres capas, la misma ley que en papel pero del otro lado. */
+:root{
+  --n-suelo:#06070A;   /* el suelo de seccion */
+  --n-placa:#101319;   /* la superficie elevada: +10 puntos, se ve */
+  --n-placa2:#171B23;  /* la de encima de esa */
+  --n-canto:rgba(255,255,255,.085);
+}
+main>section:not(.claro):not(#presale) :is(.sec-card,.bcd,.pcd){
+  background-color:var(--n-placa);
+  border:1px solid var(--n-canto);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.055),
+             0 2px 3px rgba(0,0,0,.5),
+             0 18px 30px -12px rgba(0,0,0,.62),
+             0 52px 80px -34px rgba(0,0,0,.72)}
+main>section:not(.claro):not(#presale) :is(.sec-card,.bcd):hover{
+  background-color:var(--n-placa2);
+  border-color:rgba(255,255,255,.15);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.08),
+             0 3px 5px rgba(0,0,0,.52),
+             0 28px 44px -14px rgba(0,0,0,.66),
+             0 74px 110px -40px rgba(0,0,0,.78)}
+
+
+/* ══════════════════════════════════════════════════════════════════════════
+   LA PORTADA: lo primero que se ve era lo mas pequeño de la pagina
+   ══════════════════════════════════════════════════════════════════════════
+   «A chain for real assets» estaba a 92 px en el centro de una pantalla de
+   1440 x 900 practicamente vacia: el titular ocupaba el 6,4 % del alto. En
+   una portada que quiere decir algo, el titular es el 35-45 % del alto y
+   llega a los margenes. A 184 px y once caracteres de medida, la frase parte
+   en dos lineas y ocupa la pantalla, que es lo unico que tenia que hacer
+   desde el principio. */
+.hero h1{
+  font-size:clamp(46px,12.9vw,184px) !important;
+  line-height:.875 !important;
+  letter-spacing:-.055em !important;
+  font-weight:300;
+  max-width:11ch;
+  margin-inline:auto;
+  text-wrap:balance}
+@media(max-width:899px){
+  .hero h1{font-size:clamp(42px,15.2vw,74px) !important;
+    line-height:.92 !important;max-width:10ch}
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   EL CIERRE: NEREUM deja de pedir perdon
+   ══════════════════════════════════════════════════════════════════════════
+   La unica pieza de la portada con escala de verdad —la palabra del pie—
+   estaba al final, en gris, al 20 % y cabiendo justita dentro del margen.
+   Pasa a ser la imagen final: cruza el ancho entero y los dos extremos se
+   salen del encuadre, de modo que la pagina no termina, se corta. Y sube de
+   contraste lo justo para que se lea como firma y no como mancha. */
+footer .fmark{width:105vw;max-width:none;margin-left:calc(50% - 52.5vw);
+  margin-top:clamp(52px,6vw,96px)}
+footer .fmark span{
+  background-image:linear-gradient(180deg,
+    rgba(222,231,248,.36) 0%, rgba(150,166,198,.14) 60%, rgba(116,132,166,.045) 100%) !important}
+/* El sello se queda por debajo de la palabra: a .30 era una plancha palida
+   que competia con ella, y encima cortada por el canto, que en un cubo se lee
+   como fallo y en una letra se lee como decision. */
+footer .fmark-logo{--fmg-a:.15;--fmg-b:.025}
+
 </style>
 </head>
 <body class="ann-fuera">
@@ -5824,7 +6201,7 @@ footer .fmark-logo{filter:none}
 </section>
 
 
-<section class="paper2 pad claro" id="solutions" data-bg="#F1F2F5" data-acc="#0861F1"><i class="via" aria-hidden="true"></i>
+<section class="paper2 pad claro" id="solutions" data-bg="#F4F2ED" data-acc="#0861F1"><i class="via" aria-hidden="true"></i>
   <div class="wrap">
     <div class="k sk rv"><i class="sk-n">03</i>Guarantees</div>
     <h2 class="sec-h rows-h rv">Four guarantees, written into the protocol.</h2>
@@ -5860,7 +6237,7 @@ footer .fmark-logo{filter:none}
 </section>
 
 
-<section class="secure claro" id="security" data-bg="#F1F2F5" data-acc="#0A5CF5"><i class="via" aria-hidden="true"></i>
+<section class="secure claro" id="security" data-bg="#F4F2ED" data-acc="#0A5CF5"><i class="via" aria-hidden="true"></i>
  <div class="sec-stage">
   <div class="wrap">
     <div class="sec-head">
@@ -5925,7 +6302,7 @@ footer .fmark-logo{filter:none}
     <span class="umb-cifra" id="umbPct">85</span>
   </div>
 </div>
-<section class="sale" id="presale" data-bg="#06070A" data-acc="#0A5CF5"><i class="via" aria-hidden="true"></i>
+<section class="sale" id="presale" data-bg="#0E3AC4" data-acc="#7FB0FF"><i class="via" aria-hidden="true"></i>
   <div class="sale-field" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
   <div class="wrap">
     <div class="sale-top rv">
@@ -6096,7 +6473,7 @@ footer .fmark-logo{filter:none}
 </section>
 
 
-<section class="builds claro" id="builds" data-bg="#F1F2F5" data-acc="#63A9FF"><i class="via" aria-hidden="true"></i>
+<section class="builds claro" id="builds" data-bg="#F4F2ED" data-acc="#63A9FF"><i class="via" aria-hidden="true"></i>
   <div class="wrap builds-head">
     <div class="k sk rv"><i class="sk-n">08</i>What we are building</div>
     <h2 class="builds-h">Two pieces, both already running.</h2>
@@ -8622,8 +8999,12 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
   const GAP=.17, LOGO=.685;
   let k=0;
   function fit(){
-    const box=fmark.parentElement;
-    const avail=box.getBoundingClientRect().width;
+    /* Se mide la propia firma, no la caja que la contiene: desde que la firma
+       se sale del margen —cruza el ancho entero y se corta por los dos
+       lados— el ancho del «.wrap» ya no es el ancho disponible, y midiendo
+       ese quedaba un cuerpo ajustado a 1240 dentro de una caja de 1500. */
+    const avail=fmark.getBoundingClientRect().width
+              || fmark.parentElement.getBoundingClientRect().width;
     if(!avail)return;
     if(!k){
       fmark.style.setProperty('--fs','200px');
@@ -11221,5 +11602,35 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
 })();
 </script>
 
+<script>
+/* ── el cifron: un numeral gigante por seccion ─────────────────────────
+   El numero sale del cintillo que ya existe («.sk-n»), asi que no hay dato
+   nuevo que mantener ni nada que se desincronice si manana cambia el orden
+   de las secciones. */
+(function(){
+  document.querySelectorAll('main>section').forEach(function(s){
+    var sk=s.querySelector('.sk-n'); if(!sk) return;
+    var n=(sk.textContent||'').trim();
+    if(!/^[0-9]{1,2}$/.test(n)) return;
+    var cabeza=sk.closest('.sec-head,.press-head,.tkp-head,.builds-head,.join-head,.tm-head,.sale-top,.wrap');
+    if(!cabeza || cabeza.querySelector(':scope>.cifron')) return;
+    if(getComputedStyle(cabeza).position==='static') cabeza.style.position='relative';
+    var c=document.createElement('i');
+    c.className='cifron'; c.setAttribute('aria-hidden','true');
+    var b=document.createElement('b'); b.textContent=n;
+    c.appendChild(b); cabeza.insertBefore(c,cabeza.firstChild);
+  });
+})();
+</script>
+<script>
+/* La ficha de precios vivia dentro de la columna izquierda, o sea dentro de
+   560 px, y por eso el precio —lo unico que un comprador mira— no podia ser
+   grande. Pasa a ser hija directa de la rejilla y a cruzarla entera. */
+(function(){
+  var g=document.querySelector('#presale .sale-grid');
+  var p=document.querySelector('#presale .prices');
+  if(g&&p&&p.parentElement!==g) g.appendChild(p);
+})();
+</script>
 </body>
 </html>

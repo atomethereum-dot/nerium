@@ -98,8 +98,13 @@ for (const [W, H] of [[1440,900],[1280,900],[768,1024],[390,844]]) {
          como las demas y se revirtio. Asi que lo que las tres piezas tienen
          que compartir en ella no es el borde: es el CENTRO. */
       const centrada = i === 'stack';
+      /* Se devuelve tambien el cuerpo de cada pieza: la holgura que se le
+         permite a la izquierda NO es un numero fijo de pixeles, sino una
+         fraccion del tamaño de la propia letra. Ver abajo. */
       const iz = e => { if (!e) return null; const b = e.getBoundingClientRect();
-        return b.width ? (centrada ? b.left + b.width / 2 : b.left) : null; };
+        if (!b.width) return null;
+        return { x: centrada ? b.left + b.width / 2 : b.left,
+                 px: parseFloat(getComputedStyle(e).fontSize) || 16 }; };
       // La pila no escribe su titular en un «h2» ni su entradilla en un «p»:
       // son tres «b» y tres «s» que se van relevando, y solo el que lleva
       // «.on» esta a la vista. Los demas miden cero y «iz» ya los descarta.
@@ -108,9 +113,26 @@ for (const [W, H] of [[1440,900],[1280,900],[768,1024],[390,844]]) {
                ti:iz(sec.querySelector('h2, .stk-t b.on')),
                su:iz(sec.querySelector('.sec-sub,.join-note,.lane-sub,.sale-sub,.sub,.stk-sub s.on')) };
     }, s);
+    const centradaSec = i => i === 'stack';
     if (!f || f.base === null) { di(false, W + 'px · ' + s + ': no se pudo medir la caja'); continue; }
     const partes = [['epigrafe',f.ep],['titular',f.ti],['entradilla',f.su]].filter(p => p[1] !== null);
-    const fuera = partes.filter(p => Math.abs(p[1] - f.base) > 2);
+    /* LA HOLGURA DEJA DE SER DOS PIXELES FIJOS. Eran dos porque los once
+       titulares median 76 px; con el titular de «solutions» a 168, dos
+       pixeles dejan de describir nada.
+       A ese cuerpo, el asta vertical de una «F» o una «E» alineada a la CAJA
+       se ve metida hacia dentro: hay que sacarla. Es la correccion optica de
+       margen, se hace en toda la tipografia bien compuesta y vale unos 0,05
+       del cuerpo —8 px a 168, 3 a 96, 2 en el telefono—. Prohibirla es
+       prohibir componer.
+       Lo que NO es correccion optica es meter el titular hacia dentro, ni
+       sacarlo mas de lo que el asta pide, ni centrarlo. Asi que la holgura
+       queda asimetrica y atada al cuerpo: hasta 0,055 em hacia AFUERA, y los
+       dos pixeles de siempre hacia adentro. */
+    const fuera = partes.filter(p => {
+      const d = p[1].x - f.base;
+      const optica = Math.max(2, p[1].px * 0.055);
+      return centradaSec(s) ? Math.abs(d) > 2 : (d > 2 || d < -optica);
+    });
     // Se compara con la caja, no con un numero fijo: varias secciones llevan
     // un «scale» de 0.95-0.97 que las encoge al entrar, asi que su borde
     // absoluto cambia a cada cuadro. Lo que no puede cambiar es que las tres
@@ -118,7 +140,8 @@ for (const [W, H] of [[1440,900],[1280,900],[768,1024],[390,844]]) {
     di(fuera.length === 0,
        W + 'px · ' + s.padEnd(10) + ' las ' + partes.length + ' piezas comparten el ' +
        (s === 'stack' ? 'centro' : 'borde') + ' de su caja' +
-       (fuera.length ? ' — fuera: ' + fuera.map(p => p[0] + ' a ' + Math.round(p[1] - f.base) + ' px') .join(', ') : ''));
+       (fuera.length ? ' — fuera: ' + fuera.map(p => p[0] + ' a ' + Math.round(p[1].x - f.base) +
+          ' px (le tocan ' + Math.round(Math.max(2, p[1].px * 0.055)) + ')').join(', ') : ''));
   }
   await ctx.close();
 }

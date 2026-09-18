@@ -119,7 +119,7 @@ const suelo = await (async () => {
     const x = c.getContext('2d'); x.drawImage(im, 0, 0);
     const d = x.getImageData(0, 0, c.width, c.height).data;
     const f = v => { v /= 255; return v <= .03928 ? v/12.92 : Math.pow((v+.055)/1.055, 2.4) };
-    let lo = 1, hi = 0, sRin = 0, nRin = 0, sRes = 0, nRes = 0, frios = 0, tot = 0;
+    let lo = 1, hi = 0, sRin = 0, nRin = 0, sRes = 0, nRes = 0, frios = 0, tot = 0, croma = 0;
     const brillos = [];
     for (let y = 0; y < c.height; y += 2) {
       for (let px = 0; px < c.width; px += 2) {
@@ -128,6 +128,7 @@ const suelo = await (async () => {
         if (l < lo) lo = l; if (l > hi) hi = l;
         tot++;
         if (d[i+2] >= d[i]) frios++;
+        croma += Math.abs(d[i+2] - d[i]);
         // el rincon del titular: arriba a la izquierda, donde arranca el texto
         if (y < c.height*0.34 && px < c.width*0.48) { sRin += l; nRin++ }
         else { sRes += l; nRes++ }
@@ -144,7 +145,8 @@ const suelo = await (async () => {
     const top = brillos.slice(0, Math.max(1, Math.round(brillos.length * 0.04)));
     const fx = top.reduce((s, v) => s + v[1], 0) / top.length;
     const fy = top.reduce((s, v) => s + v[2], 0) / top.length;
-    return { rango: hi - lo, rincon: sRin/nRin, resto: sRes/nRes, frio: frios/tot, fx, fy };
+    return { rango: hi - lo, rincon: sRin/nRin, resto: sRes/nRes,
+             frio: frios/tot, croma: croma/tot, fx, fy };
   }, b64);
 })();
 
@@ -161,13 +163,20 @@ di(!(suelo.fx < 0.48 && suelo.fy < 0.34),
    'y el foco del suelo NO cae en el rincon del titular, que es donde va la ' +
    'tinta de plata (el foco, en x=' + (suelo.fx*100).toFixed(0) + ' % y=' +
    (suelo.fy*100).toFixed(0) + ' %)');
-/* El «frio» era la prueba de que el suelo llevaba azul dentro y no era el
-   gris de una plantilla sin terminar. Ahora el suelo es plata a proposito, y
-   lo que distingue la plata del gris muerto es justo ese frio leve: sigue
-   siendo la medida correcta, con el limite donde separa las dos cosas. */
-di(suelo.frio > 0.5,
-   'y el suelo es plata y no gris muerto: tira a frio en el ' +
-   (suelo.frio * 100).toFixed(0) + ' % de la pantalla (limite 50)');
+/* ESTO MEDIA MAL EL FALLO QUE DICE CAZAR, Y LLEVABA ASI DESDE QUE SE ESCRIBIO.
+   El fallo es «gris de plantilla»: un suelo neutro, sin color dentro. La
+   medida contaba pixeles con azul >= rojo y pedia mas de la mitad. Pero en un
+   gris neutro azul ES IGUAL a rojo, asi que un gris muerto puntuaba 100 % y
+   pasaba la prueba tan campante. Cazaba lo contrario de lo que promete.
+   Lo que de verdad separa un suelo con color de uno muerto es el CROMA: la
+   distancia media entre el canal rojo y el azul. Un neutro da ~0. La plata
+   fria da unos pocos puntos por el lado del azul; el papel calido, los mismos
+   por el lado del rojo. Las dos son direcciones de arte legitimas; el neutro
+   no es ninguna. Se mide la distancia y se informa del signo. */
+di(suelo.croma > 1.6,
+   'y el suelo tiene color dentro, no es el gris de una plantilla: ' +
+   suelo.croma.toFixed(2) + ' de croma medio (limite 1,6), y tira a ' +
+   (suelo.frio > 0.5 ? 'frio' : 'calido'));
 
 // ── «Compatible with» ──
 const comp = await pg.evaluate(() => {
@@ -260,9 +269,27 @@ const tipo = await pg.evaluate(() => {
 const titulares = ['sec','press','sale','join'].map(k => tipo[k]).filter(Boolean);
 di(tipo.h1 && tipo.h1.px >= 90,
    'con 1440 de ancho el titular de portada pide sitio: ' + (tipo.h1 || {}).px + 'px');
-di(tipo.h1 && tipo.h1.lineas === 1, 'y cabe en un renglon');
-di(titulares.every(t => t.px >= 70),
-   'los titulares de seccion tambien: ' + titulares.map(t => t.px).join('/') + 'px');
+/* ANTES SE PEDIA UN SOLO RENGLON, Y ESO ERA UN TOPE AL TAMAÑO DISFRAZADO DE
+   REGLA DE COMPOSICION. Con la portada a 184 px la frase ocupa dos renglones
+   y llena la pantalla, que es justo lo que tiene que hacer. Lo que si sigue
+   siendo un fallo es que se desmigue: tres o mas renglones, o un ultimo
+   renglon huerfano de una palabra suelta. Eso es lo que se mide ahora. */
+di(tipo.h1 && tipo.h1.lineas <= 2,
+   'y no se desmiga: ' + (tipo.h1||{}).lineas + ' renglon(es)');
+/* Y ESTO ERA, LITERALMENTE, LA MONOTONIA ESCRITA COMO PRUEBA. Pedia que los
+   CUATRO titulares de seccion midieran 70 px o mas, que con el tope de la
+   variable en 76 queria decir «que midan todos lo mismo». La pagina tenia
+   once titulares identicos y esta bateria los defendia.
+   Lo que una portada cara necesita no es que todos sean grandes: es que haya
+   ESCALA —unos gritan y otros se callan—. Se mide eso: que existan al menos
+   dos registros separados de verdad, que el mayor llene (>=120 px a 1440) y
+   que el menor siga siendo un titular y no un parrafo (>=40 px). */
+const cuerpos = titulares.map(t => t.px);
+const mayor = Math.max(...cuerpos), menor = Math.min(...cuerpos);
+di(mayor >= 120 && menor >= 40 && mayor >= menor * 1.8,
+   'y los titulares de seccion tienen escala, no una sola nota: ' +
+   cuerpos.join('/') + 'px (mayor ' + mayor + ', menor ' + menor +
+   ', razon x' + (mayor/menor).toFixed(2) + '; se pide >=120, >=40 y x1,8)');
 /* El de «Security» estaba encerrado en una columna de 484 px teniendo 1360 de
    seccion, porque la caja llevaba la medida de LEER —56ch— y ahogaba al
    titular. La medida va en cada pieza, no en la caja. */
