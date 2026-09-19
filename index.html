@@ -7973,8 +7973,35 @@ const CALM=matchMedia('(prefers-reduced-motion: reduce)').matches;
    Lo mantiene herramientas/fondo.py. */
 function campoGL(){
   const cv=document.getElementById('burst'); if(!cv)return false;
+  /* ── EN EL TELEFONO NO SE ABRE CONTEXTO DE VIDEO ────────────────────────
+     Los dos caminos pintan lo mismo; el de video solo existe porque en un
+     escritorio con miles de bloques sale mas barato. En un telefono el trato
+     es al reves: un contexto WebGL vive en el proceso de la GPU, lo comparte
+     con el resto de pestañas y depende del controlador del aparato, y cuando
+     ese proceso se cae el navegador no recarga la pestaña, la MATA —que es la
+     pantalla de «no se puede abrir esta pagina»—. No es una suposicion comoda:
+     el camino de lienzo ya estaba escrito, ya se usa cuando el video va lento,
+     y pinta exactamente la misma escena. En el telefono se coge ese y se
+     acaba una familia entera de caidas.
+     ─────────────────────────────────────────────────────────────────────── */
+  if(innerWidth < 900) return false;
   const gl=cv.getContext('webgl2',{alpha:false,antialias:false,powerPreference:'high-performance'});
   if(!gl)return false;
+  /* Y si aun asi se pierde el contexto —el sistema lo hace cuando le aprieta—,
+     no se deja la escena a medias ni llamando a un contexto muerto: se pasa al
+     lienzo, que no depende de la GPU. */
+  cv.addEventListener('webglcontextlost', function(e){
+    e.preventDefault();
+    /* Si el aviso viene de que nos hemos rendido nosotros —el vigilante de
+       cuadros suelta el contexto a proposito cuando la tarjeta va lenta— no
+       hay nada que hacer aqui: aquel camino ya esta andando y esto solo le
+       pisaria la etiqueta. */
+    if(muerto) return;
+    /* Y si lo ha soltado el sistema, se sale por la misma puerta que ya
+       existe: cambia el lienzo por uno nuevo, porque un lienzo que tuvo
+       contexto de video ya no puede dar uno de dos dimensiones. */
+    try{ rendirse(); window.__campo='canvas (se perdio el contexto)' }catch(err){}
+  }, {once:true});
   const VS=`#version 300 es
   layout(location=0) in vec2 esquina;
   layout(location=1) in vec4 A;   // columna, ancho, tono, fase
@@ -12581,6 +12608,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
   addEventListener('resize', avisa, {passive:true});
 })();
 </script>
+
 
 <script>
 /* ── salud de la sesion ──────────────────────────────────────────────────
