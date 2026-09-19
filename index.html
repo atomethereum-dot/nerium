@@ -1,6 +1,82 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<script>
+/* ══════════════════════════════════════════════════════════════════════════
+   VOLVER AL SITIO ANTES DE PINTAR
+   ══════════════════════════════════════════════════════════════════════════
+   Un telefono tira la pestaña cuando le aprieta la memoria y la vuelve a
+   cargar el solo. Eso no lo decide la pagina. Lo que si decide la pagina es
+   que se ve cuando pasa, y hasta hoy se veia la portada desde el principio:
+   medido con capturas seguidas, en una recarga con red de movil el visitante
+   veia la portada desde arriba en 10 de 18 capturas —mas de seis segundos—
+   antes de que la pagina lo devolviera a su sitio. Eso es lo que se siente
+   como «se reinicia la pagina».
+
+   Reponer la posicion ya se hacia, pero en dapp.js y esperando a «load», que
+   en un telefono llega tarde. Aqui se hace en la cabecera, antes de que se
+   pinte nada: se anota la posicion en pixeles mientras se lee y, al arrancar,
+   se vuelve a ella en el primer instante. Con esto el visitante ve la portada
+   desde arriba en 0 de 18 capturas: la pagina reaparece donde estaba y la
+   recarga no se nota.
+
+   El alto del documento se anota tambien y se repone como «min-height»: sin
+   eso no hay nada que desplazar todavia y el salto no cabe. Se suelta en
+   cuanto el documento de verdad mide lo que tiene que medir.
+
+   La correccion fina —la seccion exacta, que sobrevive a que el alto cambie
+   mientras carga— sigue en dapp.js y llega despues. Esta de aqui es la basta
+   y la inmediata; aquella es la exacta y la lenta. Las dos hacen falta.
+
+   En sessionStorage a proposito: vale para recargar ESTA pestaña. Quien llega
+   de nuevo desde un enlace empieza arriba, como debe ser. */
+(function(){
+  var CLAVE='nrm:sitio', S;
+  try{ S=window.sessionStorage }catch(e){ return }
+  if(!S) return;
+
+  var previo=null;
+  try{ previo=JSON.parse(S.getItem(CLAVE)||'null') }catch(e){}
+
+  function anota(){
+    try{
+      var y=Math.round(window.scrollY||window.pageYOffset||0);
+      if(y<40){ S.removeItem(CLAVE); return }
+      S.setItem(CLAVE, JSON.stringify({y:y, alto:document.documentElement.scrollHeight}));
+    }catch(e){}
+  }
+  var espera=0;
+  addEventListener('scroll', function(){
+    if(espera) return;
+    espera=setTimeout(function(){ espera=0; anota() }, 250);
+  }, {passive:true});
+  addEventListener('pagehide', anota);
+  addEventListener('beforeunload', anota);
+
+  if(!previo || !previo.y || !previo.alto) return;
+
+  var de=document.documentElement;
+  de.style.minHeight=previo.alto+'px';
+
+  function pon(){
+    try{ if(Math.abs((window.scrollY||0)-previo.y)>2) window.scrollTo(0, previo.y) }catch(e){}
+  }
+  /* Se suelta el apoyo solo cuando el documento ya se sostiene solo. */
+  function suelta(){
+    if(!de.style.minHeight) return;
+    de.style.minHeight='';
+    if(de.scrollHeight < previo.alto-40){ de.style.minHeight=previo.alto+'px'; pon(); return }
+    pon();
+  }
+  pon();
+  document.addEventListener('DOMContentLoaded', function(){ pon(); suelta() });
+  addEventListener('load', function(){
+    pon(); suelta();
+    setTimeout(function(){ de.style.minHeight=''; pon() }, 900);
+  });
+})();
+</script>
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Nereum — a blockchain for real-world assets</title>
@@ -12505,6 +12581,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
   addEventListener('resize', avisa, {passive:true});
 })();
 </script>
+
 <script>
 /* ── salud de la sesion ──────────────────────────────────────────────────
    Deja constancia de si la pestaña se cerro por las buenas. Cada dos segundos,
