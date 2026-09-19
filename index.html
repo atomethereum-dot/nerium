@@ -6320,7 +6320,7 @@ window.__mide = function(cv, w, h){
   if(!raf) return;
   var CALLADO = 900;      /* ms sin actividad para entrar en ralenti */
   var PASO    = 50;       /* 20 cuadros por segundo, quieta */
-  var PASO_ACTIVO = 34;   /* 30 cuadros por segundo, con el dedo encima */
+  var PASO_ACTIVO = 22;   /* 30 cuadros por segundo, con el dedo encima */
   var activo = 0;
   function toca(){ activo = Date.now() }
   ['scroll','wheel','pointerdown','pointermove','pointerup','touchstart','touchmove',

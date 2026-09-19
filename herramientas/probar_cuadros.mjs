@@ -9,13 +9,23 @@
    pagina se moria tres veces de tres, la primera en y=9994, dentro de la
    seccion de compra: justo donde se cae en el telefono de verdad.
 
-   Bajando el reloj a 30 cuadros por segundo el pico queda en 660 MB y
-   sobrevive tres de tres. Este es el invariante que hay que no perder, y se
-   comprueba contando los cuadros que el navegador entrega de verdad, sin
-   depender de que haya cgroups donde corra la bateria.
+   Por eso hay un techo. Pero el techo no es un numero sagrado: es «lo que
+   haga falta para que el pico no llegue al precipicio». Cuando cada cuadro
+   cuesta menos, caben mas cuadros por el mismo dinero. Al quitar las lecturas
+   de geometria del camino del scroll y sacar «--vel» de la raiz, el mismo
+   numero de cuadros paso a costar bastante menos:
+
+       tandas/s   pico     antes de aquellos dos arreglos
+          19      616 MB      (a este ritmo, 660 MB)
+          27      648 MB
+          31      667 MB
+
+   O sea que 27 por segundo salen hoy mas baratos que 19 entonces. Se sube a
+   27 —se ve bastante mas fluido— y se comprueba: con el limite en 500 MB,
+   sobrevive tres de tres.
 
    Lo importante es el techo MIENTRAS SE HACE SCROLL, que es cuando se cae:
-   antes solo frenaba con la pagina quieta.
+   al principio solo frenaba con la pagina quieta.
    ══════════════════════════════════════════════════════════════════════════ */
 import { chromium } from 'playwright';
 import http from 'node:http'; import fs from 'node:fs'; import path from 'node:path';
@@ -73,15 +83,15 @@ async function cuenta(ancho, alto, segundos, moviendo){
    alli el numero sale multiplicado por el numero de escenas. Por eso los dos
    limites no se comparan entre si: cada uno vigila lo suyo. */
 const conDedo = await cuenta(390,844,4,true);
-if(conDedo <= 26) ok('en telefono, haciendo scroll: '+conDedo.toFixed(0)+' tandas/s (techo 26)');
-else no('en telefono, haciendo scroll: '+conDedo.toFixed(0)+' tandas/s — pasa del techo de 26, que es justo cuando se cae');
+if(conDedo <= 34) ok('en telefono, haciendo scroll: '+conDedo.toFixed(0)+' tandas/s (techo 34)');
+else no('en telefono, haciendo scroll: '+conDedo.toFixed(0)+' tandas/s — pasa del techo de 34, y por ahi es por donde se cae');
 
 const quieta = await cuenta(390,844,4,false);
 if(quieta <= 22) ok('en telefono, quieta: '+quieta.toFixed(0)+' tandas/s (techo 22)');
 else no('en telefono, quieta: '+quieta.toFixed(0)+' tandas/s — pasa del techo de 22');
 
-if(conDedo >= 12) ok('y sigue moviendose: no se ha quedado en una foto');
-else no('demasiado lento: '+conDedo.toFixed(0)+' tandas/s, la pagina parece congelada');
+if(conDedo >= 20) ok('y va fluida: '+conDedo.toFixed(0)+' tandas/s, no es un pase de diapositivas');
+else no('demasiado lento: '+conDedo.toFixed(0)+' tandas/s, se ve a tirones');
 
 /* En escritorio no hay problema que resolver y no debe haber techo. */
 const escritorio = await cuenta(1280,900,4,true);
