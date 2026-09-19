@@ -8441,6 +8441,9 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
   measure();
   addEventListener('resize',measure,{passive:true});
   addEventListener('load',()=>setTimeout(measure,500));
+  /* «o.top» es un sitio absoluto de documento: si algo de arriba cambia de
+     alto, caduca. Ver el vigilante al final del fichero. */
+  addEventListener('nrm:remide',measure,{passive:true});
   let last=-1,busy=false;
   (function paint(){
     const y=scrollY;
@@ -8883,6 +8886,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
   measure();
   addEventListener('resize',measure,{passive:true});
   addEventListener('load',()=>setTimeout(measure,600));
+  addEventListener('nrm:remide',measure,{passive:true});
   (function tick(){
     const a=scrollY+innerHeight*.45;
     let i=0;for(let k=0;k<tops.length;k++)if(tops[k]<=a)i=k;
@@ -9754,6 +9758,27 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
   medir();
   addEventListener('resize',()=>{check();medir()},{passive:true});
   addEventListener('load',()=>setTimeout(medir,600));
+  /* Y UNA RED POR SI EL DOCUMENTO CAMBIA DE ALTO POR ENCIMA.
+     «_top» es una posicion ABSOLUTA de documento, no una distancia a la
+     pantalla. Se medía en «resize» y en «load + 600 ms» y nada mas, y esta es
+     la UNICA escena de fases sin nadie que la vuelva a medir cuando algo de
+     arriba se mueve. El ajuste de alturas de dapp.js corre con
+     «requestIdleCallback(…, {timeout:2000})», o sea que puede llegar DESPUES de
+     esos 600 ms: fija el alto supuesto de las secciones de encima —que van con
+     «content-visibility:auto»— y con eso «#security» cambia de sitio sin que
+     aqui se entere nadie. Con «_top» caducado, «p» sale saturado y el paso de
+     tarjetas se planta en la ultima: es la otra via, independiente de la del
+     «!important», a «en movil solo sale Team KYC».
+     Se vuelve a medir cuando la seccion se acerca —igual que hace la escena de
+     los cubos— y dos veces mas pasada la ventana del «requestIdleCallback»,
+     por si cuando llega ya estaba dentro y el observador no dispara. */
+  if(window.IntersectionObserver){
+    new IntersectionObserver(function(es){
+      for(var i=0;i<es.length;i++) if(es[i].isIntersecting){ medir(); return }
+    },{rootMargin:'60% 0px'}).observe(sec);
+  }
+  addEventListener('load',()=>{ setTimeout(medir,1400); setTimeout(medir,2800) });
+  addEventListener('nrm:remide',medir,{passive:true});
   (function tick(){
     if(pinned){
       const top=_top, run=_run;
@@ -10511,6 +10536,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
     situar();
     addEventListener('resize', situar, {passive:true});
     addEventListener('load', function(){ setTimeout(situar, 600) });
+    addEventListener('nrm:remide', situar, {passive:true});
   }
   (function paso(t){
     requestAnimationFrame(paso);
@@ -10714,6 +10740,10 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
      se despliegan: sin esto el rail se queda con la medida del primer cuadro. */
   if(window.ResizeObserver) new ResizeObserver(function(){ medir(); pedir(); }).observe(lista);
   addEventListener('load', function(){ medir(); pedir(); });
+  /* El observador de arriba mira SU PROPIA lista, no el documento: si lo que
+     cambia de alto esta por ENCIMA, «docY» —que guarda sitios absolutos— queda
+     caducado y no se entera. */
+  addEventListener('nrm:remide', function(){ medir(); pedir(); }, {passive:true});
 })();
 </script>
 
@@ -12264,6 +12294,51 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
     var g0=document.querySelector('#security .sec-grid');
     if(g0) new MutationObserver(pide).observe(g0,{subtree:true,characterData:true,childList:true});
   }
+})();
+</script>
+<script>
+/* ═════════ UN SOLO VIGILANTE DEL ALTO DEL DOCUMENTO ═════════
+   Varias escenas guardan posiciones ABSOLUTAS de documento —«dTop(...)», que
+   sube por la cadena de «offsetParent»— y las miden al arrancar, en «resize» y
+   en «load + medio segundo». Eso cubre el caso normal y deja fuera el que de
+   verdad pasa en esta pagina: que el alto cambie SIN que nadie toque la
+   ventana. Entran las fuentes; se despliegan las secciones que van con
+   «content-visibility:auto»; y el ajuste de alturas de dapp.js corre con
+   «requestIdleCallback(…, {timeout:2000})», o sea que puede llegar DESPUES de
+   ese medio segundo. Cuando cualquiera de las tres ocurre, todo lo que hay por
+   debajo se mueve y esas posiciones quedan caducadas: la escena calcula su
+   avance contra un sitio que ya no existe y se planta en una fase que no toca.
+   En «#security» eso se veia como «solo sale la ultima tarjeta».
+
+   En vez de repetir el mismo parche en cada escena, esto avisa UNA vez por
+   cambio real de alto —dos pixeles de umbral, para no gritar por un redondeo—
+   y cada escena vuelve a medir lo suyo escuchando «nrm:remide». Es una lectura
+   de «scrollHeight» por aviso, no por cuadro: despues de cargar, esto no se
+   despierta casi nunca. */
+(function(){
+  var alto = -1, pide = 0;
+  function mira(){
+    pide = 0;
+    var h = document.documentElement.scrollHeight;
+    if (Math.abs(h - alto) < 2) return;
+    var primera = alto < 0;
+    alto = h;
+    if (!primera) dispatchEvent(new Event('nrm:remide'));
+  }
+  function avisa(){ if (pide) return; pide = 1; requestAnimationFrame(mira) }
+  mira();
+  if (window.ResizeObserver){
+    var caja = document.getElementById('scroll') || document.body;
+    if (caja) new ResizeObserver(avisa).observe(caja);
+  }
+  /* Y unos cuantos vistazos despues de cargar, porque el que llega tarde
+     —el «requestIdleCallback»— puede cambiar el alto sin cambiar la caja que
+     el observador vigila: fija «contain-intrinsic-size» en secciones que ahora
+     mismo no estan pintadas. */
+  addEventListener('load', function(){
+    [0, 400, 900, 1600, 2600, 3600].forEach(function(t){ setTimeout(mira, t) });
+  });
+  addEventListener('resize', avisa, {passive:true});
 })();
 </script>
 </body>

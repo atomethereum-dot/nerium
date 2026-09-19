@@ -167,6 +167,42 @@ for (const [W, H] of [[440,956],[430,932],[414,896],[390,844],[375,667]]) {
   await ctx.close();
 }
 
+// ── LAS TRES TIENEN QUE TURNARSE, Y BAJANDO COMO SE BAJA ────────────────────
+// El visitante reporto «en movil solo sale Team KYC» y ninguna bateria miraba
+// esto: se comprobaba que las tres CABEN, no que las tres SALGAN. Y hay dos
+// caminos distintos al mismo sintoma, los dos vistos en esta pagina:
+//   · un «!important» que le ganaba al «opacity:0» de las que no tocan;
+//   · «_top» caducado -la escena guarda una posicion ABSOLUTA de documento y
+//     algo de arriba cambio de alto despues-, que satura el avance y planta el
+//     paso en la ultima tarjeta.
+// Se baja en pasos, como se baja de verdad. Nada de «scrollIntoView»: eso
+// coloca la pagina donde ninguna mano la coloca y se salta justo el tramo
+// donde el paso de tarjetas tiene que ocurrir.
+{
+  const ctx = await nav.newContext({ viewport:{ width:390, height:844 }, isMobile:true, hasTouch:true });
+  const pg = await ctx.newPage();
+  await pg.goto('http://127.0.0.1:9159/', { waitUntil:'load' });
+  await pg.waitForTimeout(1800);
+  const vistas = new Set();
+  const alto = await pg.evaluate(() => document.documentElement.scrollHeight);
+  for (let y = 0; y < alto; y += 170) {
+    await pg.evaluate(v => scrollTo(0, v), y);
+    await pg.waitForTimeout(45);
+    const i = await pg.evaluate(() => {
+      const sec = document.querySelector('#security');
+      const r = sec.getBoundingClientRect();
+      if (!(r.top < innerHeight && r.bottom > 0)) return -1;
+      const cs = [].slice.call(sec.querySelectorAll('.sec-card'));
+      return cs.findIndex(c => c.classList.contains('on'));
+    });
+    if (i >= 0) vistas.add(i);
+  }
+  const salieron = [...vistas].sort((a, b) => a - b);
+  di(vistas.has(0) && vistas.has(1) && vistas.has(2),
+     'las tres tarjetas se turnan al bajar — salieron: ' + (salieron.join(', ') || 'ninguna'));
+  await ctx.close();
+}
+
 console.log('\n' + ok + '/' + (ok + mal) + ' correctas');
 await nav.close(); srv.close();
 process.exit(mal ? 1 : 0);
