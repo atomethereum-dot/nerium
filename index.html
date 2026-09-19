@@ -12339,26 +12339,19 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
 })();
 </script>
 <script>
-/* ══════════════════════════════════════════════════════════════════════════
-   LA CAJA NEGRA
-   ══════════════════════════════════════════════════════════════════════════
-   Se reporto tres veces desde un iPhone que la pagina «se reinicia» y que a
-   veces sale «servidor no encontrado». Lo segundo no es un tiron de scroll: es
-   una RECARGA, el navegador volviendo a pedir la pagina, y Safari solo hace eso
-   cuando ha matado la pestaña. Desde aqui no puedo reproducirlo -el proxy de
-   este entorno bloquea el dominio y no hay un iPhone detras-, asi que lo que
-   hace falta es que la pagina lo cuente ella.
+/* ── salud de la sesion ──────────────────────────────────────────────────
+   Deja constancia de si la pestaña se cerro por las buenas. Cada dos segundos,
+   y solo con la pestaña visible, anota en «sessionStorage» la posicion, el
+   tiempo de sesion y el tamaño del documento; al salir —«pagehide»— borra la
+   anotacion. Si al arrancar hay una anotacion sin borrar, la pestaña no se
+   cerro: se fue de golpe. Es la unica forma de distinguir eso de una recarga
+   normal, porque el navegador no lo cuenta.
 
-   Como se sabe que la pestaña MURIO y no que alguien recargo: al salir bien
-   -«pagehide»- se deja una marca de despedida. Si al arrancar hay un registro
-   anterior SIN esa marca, nadie se despidio: la pestaña se fue de golpe.
-
-   Cuesta un «sessionStorage.setItem» cada dos segundos y solo mientras la
-   pestaña esta visible. No pinta nada ni estorba a nadie: el informe solo se
-   enseña si la direccion lleva «?diag=1», y quien no lo pida no vera jamas que
-   esto existe. */
+   Cuesta un «setItem» cada dos segundos y nada mas. No toca la pagina: el
+   resumen solo se dibuja si la direccion lleva «?diag=1».
+   ──────────────────────────────────────────────────────────────────────── */
 (function(){
-  var CLAVE='nrm:cajanegra', S;
+  var CLAVE='nrm:ses', S;
   try{ S=window.sessionStorage; if(!S) return }catch(e){ return }
 
   var t0=Date.now();
@@ -12409,11 +12402,11 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
       'padding:10px 12px;font:12px/1.45 ui-monospace,Menlo,monospace;'+
       'white-space:pre-wrap;max-height:42vh;overflow:auto;box-shadow:0 8px 30px rgba(0,0,0,.6)';
     function pinta(){
-      var t='CAJA NEGRA · muertes de pestaña: '+(reg.muertes||0)+'\n';
+      var t='sesion · cierres de golpe: '+(reg.muertes||0)+'\n';
       var l=reg.sucesos||[];
-      if(!l.length) t+='(sin ninguna todavia — sigue bajando)';
+      if(!l.length) t+='(ninguno)';
       else for(var i=l.length-1;i>=0;i--)
-        t+='· murio a los '+l[i].seg+' s, en y='+l[i].y+' de '+l[i].alto+
+        t+='· a los '+l[i].seg+' s, en y='+l[i].y+' de '+l[i].alto+
            ', '+l[i].lienzos+' lienzos vivos ['+l[i].tipo+']\n';
       d.textContent=t;
     }
