@@ -10843,16 +10843,39 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
   var pend = [].slice.call(document.querySelectorAll('.rv:not(.in)'))
                .map(function(el){ return {el:el, c:'in'} })
              .concat(tits.map(function(el){ return {el:el, c:'vis'} }));
+
+  /* NI UNA LECTURA DE GEOMETRIA POR REPASO.
+     Esto preguntaba «getBoundingClientRect» de CADA pieza pendiente, y hay mas
+     de cien. Medido con el perfilador bajando la pagina: 854 llamadas en cuatro
+     segundos solo desde aqui, y cada una obliga al navegador a rehacer la
+     maquetacion antes de contestar. Eso es el tiron.
+     La posicion de una pieza dentro del DOCUMENTO no cambia mientras se baja:
+     solo cambia cuando cambia el alto, y de eso ya avisa «nrm:remide». Asi que
+     se mide una vez, se guarda, y el repaso pasa a ser una resta. */
+  function sitio(el){
+    var r = el.getBoundingClientRect();
+    return { y: r.top + (window.scrollY || window.pageYOffset || 0), h: r.height };
+  }
+  function medirPend(){
+    for(var i = 0; i < pend.length; i++){
+      var s = sitio(pend[i].el);
+      pend[i].y = s.y; pend[i].h = s.h;
+    }
+  }
+  medirPend();
+  addEventListener('nrm:remide', medirPend, {passive:true});
+  addEventListener('resize', medirPend, {passive:true});
+
   var ultimo = 0;
   function repaso(t){
     if(t - ultimo < 160) return;
     ultimo = t;
-    var h = innerHeight, quedan = [];
+    var h = innerHeight, y = window.scrollY || window.pageYOffset || 0, quedan = [];
     for(var i = 0; i < pend.length; i++){
       var q = pend[i];
       if(q.el.classList.contains(q.c)) continue;
-      var r = q.el.getBoundingClientRect();
-      if(r.top < h * 0.94 && r.bottom > 0 && r.height >= 0) q.el.classList.add(q.c);
+      var arriba = q.y - y, abajo = arriba + q.h;
+      if(arriba < h * 0.94 && abajo > 0) q.el.classList.add(q.c);
       else quedan.push(q);
     }
     pend = quedan;
@@ -11238,11 +11261,36 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
      getBoundingClientRect por cuadro con el layout ya limpio no se notan, y
      la clase solo se escribe cuando cambia. */
   var puestoB=null;
+
+  /* NI UNA LECTURA DE GEOMETRIA POR CUADRO, TAMPOCO AQUI.
+     La nota de arriba decia que quince «getBoundingClientRect» con el layout
+     limpio no se notan. Se notan: medido bajando la pagina, esta funcion sola
+     hacia 555 llamadas en cuatro segundos —el carril mas diecisiete secciones,
+     cada vez que el scroll se mueve— y cada una obliga al navegador a rehacer
+     la maquetacion antes de contestar.
+     Lo que se mira no necesita ninguna de esas lecturas. La posicion de una
+     seccion dentro del DOCUMENTO no cambia al bajar, y el carril va fijo, o
+     sea que su caja en pantalla tampoco. Las dos cosas se miden una vez y se
+     vuelven a medir cuando cambia el alto —«nrm:remide»— o la ventana. El
+     resto del tiempo esto es una resta. */
+  var cajaRail=null, sitioSec=[];
+  function medirCajas(){
+    cajaRail = rail.getBoundingClientRect();
+    var y = window.scrollY || window.pageYOffset || 0;
+    sitioSec = secs.map(function(e){
+      var r = e.getBoundingClientRect();
+      return { y: r.top + y, h: r.height };
+    });
+  }
+  addEventListener('nrm:remide', medirCajas, {passive:true});
+
   function pintar(){
-    var r=rail.getBoundingClientRect(), tapa=false;
+    if(!cajaRail || sitioSec.length!==secs.length) medirCajas();
+    var r=cajaRail, y=window.scrollY||window.pageYOffset||0, tapa=false;
     for(var i=0;i<secs.length;i++){
-      var q=secs[i].getBoundingClientRect();
-      if(q.bottom<=r.top||q.top>=r.bottom) continue;
+      var s=sitioSec[i]; if(!s) continue;
+      var arriba=s.y-y, abajo=arriba+s.h;
+      if(abajo<=r.top||arriba>=r.bottom) continue;
       if(llenas[i]!==false){ tapa=true; break }
     }
     if(tapa!==puesto){ puesto=tapa; rail.classList.toggle('tapa',tapa) }
@@ -11267,6 +11315,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
     llenas=secs.map(function(){return undefined});
     puesto=null;
     lim=rail.getBoundingClientRect().left;
+    medirCajas();
     for(var i=0;i<secs.length;i++) ojoMedir.observe(secs[i]);
   }
 
