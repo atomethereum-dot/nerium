@@ -266,21 +266,20 @@ td b{color:var(--ink)}
    pagina. En gris se leen como un mismo juego. El recuadro es cuadrado y la
    foto se recorta al centro, asi que da igual con que proporcion llegue la
    siguiente. */
-.eq{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));
-  margin:20px 0 28px}
-.eq figure{margin:0;border:1px solid var(--linea);border-radius:10px;overflow:hidden;
-  background:var(--paper)}
-.eq img{display:block;width:100%;height:auto;aspect-ratio:1/1;object-fit:cover;
-  /* «height:auto» hace falta: el atributo height del HTML entra como altura
-     fija y, con una altura que no es auto, el navegador se salta la
-     proporcion. Los atributos siguen puestos para que no haya salto
-     mientras carga. */
+.eq{display:flex;flex-wrap:wrap;gap:14px;margin:20px 0 28px}
+.eq figure{margin:0;width:188px;border:1px solid var(--linea);border-radius:10px;
+  overflow:hidden;background:var(--paper)}
+/* La foto entera, sin recortar: el alto lo pone ella. «height:auto» hace
+   falta porque el atributo height del HTML entra como altura fija, y con una
+   altura que no es auto el navegador deforma la imagen; los atributos siguen
+   puestos para que no haya salto mientras carga. */
+.eq img{display:block;width:100%;height:auto;
   filter:grayscale(1) contrast(1.04);background:var(--linea-2)}
-.eq figcaption{padding:12px 14px 14px}
+.eq figcaption{padding:10px 12px 12px}
 .eq .eq-n{font-weight:600;color:var(--ink);font-size:15px;line-height:1.3}
-.eq .eq-c{font-family:var(--m);font-size:11px;letter-spacing:.06em;text-transform:uppercase;
-  color:var(--blue-d);margin-top:3px}
-.eq .eq-d{color:var(--ink-3);font-size:13px;line-height:1.5;margin-top:7px}
+.eq .eq-c{font-family:var(--m);font-size:10px;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--blue-d)}
+.eq .eq-d{color:var(--ink-3);font-size:12px;line-height:1.5;margin-top:6px}
 @media(prefers-color-scheme:dark){ .eq img{filter:grayscale(1) contrast(1.04) brightness(.92)} }
 
 .caja{width:min(560px,100%);background:var(--paper);border:1px solid var(--linea);
@@ -2212,7 +2211,7 @@ sobre ellos.</p>
 <h2 id="quienes">Equipo fundador</h2>
 <div class="eq">
   <figure>
-    <img src="../img/equipo/ceo.webp" width="900" height="900" loading="lazy" decoding="async"
+    <img src="../img/equipo/ceo.webp" width="520" height="569" loading="lazy" decoding="async"
          alt="Fundador y consejero delegado de Nereum Labs">
     <figcaption>
       <div class="eq-c">Fundador y CEO</div>
@@ -2221,7 +2220,7 @@ sobre ellos.</p>
     </figcaption>
   </figure>
   <figure>
-    <img src="../img/equipo/cofundador.webp" width="900" height="900" loading="lazy" decoding="async"
+    <img src="../img/equipo/cofundador.webp" width="520" height="642" loading="lazy" decoding="async"
          alt="Cofundador de Nereum Labs">
     <figcaption>
       <div class="eq-c">Cofundador</div>
@@ -3392,7 +3391,7 @@ verify about them.</p>
 <h2 id="quienes">Core team</h2>
 <div class="eq">
   <figure>
-    <img src="../img/equipo/ceo.webp" width="900" height="900" loading="lazy" decoding="async"
+    <img src="../img/equipo/ceo.webp" width="520" height="569" loading="lazy" decoding="async"
          alt="Founder and chief executive of Nereum Labs">
     <figcaption>
       <div class="eq-c">Founder &amp; CEO</div>
@@ -3401,7 +3400,7 @@ verify about them.</p>
     </figcaption>
   </figure>
   <figure>
-    <img src="../img/equipo/cofundador.webp" width="900" height="900" loading="lazy" decoding="async"
+    <img src="../img/equipo/cofundador.webp" width="520" height="642" loading="lazy" decoding="async"
          alt="Co-founder of Nereum Labs">
     <figcaption>
       <div class="eq-c">Co-founder</div>
