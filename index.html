@@ -9295,20 +9295,28 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
   const dTop=nn=>{let y=0;while(nn){y+=nn.offsetTop;nn=nn.offsetParent}return y};
   const eOut=t=>1-Math.pow(1-t,3);
   const PAL=[[24,59,246],[8,28,196],[28,46,140],[48,53,128],[26,25,60],[4,13,104]];
+  /* La escena mas oscura de las tres: seis azules hondos, ninguno claro, y
+     encima sobre suelo negro. Entran los mismos dos claros que en las otras
+     —es la misma lengua o no es nada—, pero con MENOS opacidad que alli: aqui
+     se pinta en modo «lighter», donde los colores se suman, y un blanco a
+     opacidad normal no seria un cubo sino una lampara. */
+  const CLAROS=[[228,234,246],[176,187,208]];
   let vuelo=null, vt=0, vlast=0;
   const HONDO=9;          /* profundidad del corredor */
   function haceVuelo(){
     vuelo=[];
     const cuantos=W<760?100:186;
     for(let i=0;i<cuantos;i++){
+      const cl=Math.random()<0.16;
       vuelo.push({
         x:(Math.random()*2-1)*1.5, y:(Math.random()*2-1)*1.5,
         z:Math.random()*HONDO+0.35,
         giro:Math.random()*Math.PI,
         vg:(Math.random()*2-1)*0.5,
         lado:0.12+Math.random()*0.30,
-        c:PAL[(Math.random()*PAL.length)|0],
-        a:0.30+Math.random()*0.7
+        claro:cl,
+        c:cl?CLAROS[(Math.random()*CLAROS.length)|0]:PAL[(Math.random()*PAL.length)|0],
+        a:cl?0.20+Math.random()*0.30 : 0.30+Math.random()*0.7
       });
     }
   }
@@ -9432,20 +9440,32 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
      hacia el cian, y meter uno de entrada es lo que reventaba la paleta- y su
      hueco lo ocupa el azul claro. */
   const NEGRO=[5,6,10], AZUL=[22,80,240], AZULP=[12,48,190],
-        AZULC=[46,92,180], CIAN=[80,110,164], ACERO=[26,34,56];
+        AZULC=[46,92,180], CIAN=[80,110,164], ACERO=[26,34,56],
+        /* Y LOS BLANCOS DE VERDAD. El comentario de arriba dice que lo pedido
+           era «cubos azules y blancos» y en la tabla no habia ni uno: el tono
+           mas claro era el acero 80,110,164, que sobre negro lee gris azulado,
+           no blanco. Con un tercio de la nube en negro puro y ningun claro, la
+           escena entera se leia apagada. Entran dos: uno blanco y una perla
+           para que no sean todos el mismo punto de luz. */
+        BLANCO=[228,234,246], PERLA=[176,187,208];
   let piezas=null, pt=0, pl=0;
   function hacePiezas(){
     piezas=[];
     const base=Math.max(16,Math.round(Math.min(W,H)/22));
     const cuantas=W<760?54:96;
     for(let i=0;i<cuantas;i++){
+      /* El negro baja de 34 % a 22 %: sigue habiendo cubos que se pierden en
+         el fondo —hacen la profundidad— pero ya no son un tercio de todo. Lo
+         que sueltan se reparte entre los dos claros, que suman 16 %. */
       const r=Math.random();
-      const tono = r<0.34 ? NEGRO
-                 : r<0.54 ? AZUL
-                 : r<0.68 ? AZULP
-                 : r<0.80 ? AZULC
-                 : r<0.90 ? CIAN
-                 : ACERO;
+      const tono = r<0.22 ? NEGRO
+                 : r<0.42 ? AZUL
+                 : r<0.56 ? AZULP
+                 : r<0.68 ? AZULC
+                 : r<0.76 ? CIAN
+                 : r<0.84 ? ACERO
+                 : r<0.94 ? BLANCO
+                 : PERLA;
       piezas.push({
         x:Math.random(),
         y:-0.2+Math.random()*1.7,
@@ -9455,7 +9475,11 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
         giro:(Math.random()*2-1)*0.28,
         vg:(Math.random()*2-1)*0.16,
         c: tono,
-        a: tono===NEGRO?0.92 : tono===AZULC?0.95 : tono===ACERO?0.55 : 0.90,
+        /* El blanco, un punto por debajo: a opacidad plena sobre negro es un
+           recorte de papel, no un cubo. A 0,86 conserva el filete de luz del
+           canto, que es lo que le da volumen. */
+        a: tono===NEGRO?0.92 : tono===AZULC?0.95 : tono===ACERO?0.55
+         : tono===BLANCO?0.86 : tono===PERLA?0.80 : 0.90,
         deriva:(Math.random()*2-1)*0.035
       });
     }
@@ -9487,6 +9511,12 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
     }
   }
   const SPAL=[[24,59,246],[8,28,196],[28,46,140],[46,50,122],[26,25,60],[4,13,104]];
+  /* El suelo iba en los mismos seis azules hondos y ni un claro: un campo
+     entero sin un punto donde descansar la vista. Uno de cada siete pasa a
+     claro, con menos opacidad porque aqui las piezas se solapan y un blanco
+     opaco encima de otro se convierte en una mancha. */
+  const SCLAROS=[[226,232,244],[168,180,202]];
+  const sclaro=()=>Math.random()<0.14;
   let SU=null, suL=0, suVelo=null, suVeloH=0, suFil=null, suFilW=0, suCol=null, suColH=0;
   const srnd=(a,b)=>a+Math.random()*(b-a);
   const scv=document.createElement('canvas');
@@ -9497,7 +9527,8 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
     const cuantos=W<760?170:272;
     for(let i=0;i<cuantos;i++)SU.push({
       u:srnd(-2.3,2.3), z:srnd(.05,1),
-      c:SPAL[(Math.random()*SPAL.length)|0],
+      c:sclaro()?SCLAROS[(Math.random()*SCLAROS.length)|0]
+                :SPAL[(Math.random()*SPAL.length)|0],
       a:srnd(.55,1), w:Math.random()<.3?2:1});
   }
   function pintaSuelo(fuerza){
@@ -9518,7 +9549,9 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
     for(const b of lista){
       b.z -= dt*(0.55+fuerza*0.55);
       if(b.z<.05){ b.z=1; b.u=srnd(-2.3,2.3);
-        b.c=SPAL[(Math.random()*SPAL.length)|0]; b.a=srnd(.55,1);
+        b.c=sclaro()?SCLAROS[(Math.random()*SCLAROS.length)|0]
+                    :SPAL[(Math.random()*SPAL.length)|0];
+        b.a=srnd(.55,1);
         b.w=Math.random()<.3?2:1; }
       const k=1/(.16+b.z*1.5);
       const y=hor+(H*.62)*k*.30;
