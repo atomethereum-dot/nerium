@@ -269,12 +269,16 @@ td b{color:var(--ink)}
 .eq{display:flex;flex-wrap:wrap;gap:14px;margin:20px 0 28px}
 .eq figure{margin:0;width:188px;border:1px solid var(--linea);border-radius:10px;
   overflow:hidden;background:var(--paper)}
-/* La foto entera, sin recortar: el alto lo pone ella. «height:auto» hace
-   falta porque el atributo height del HTML entra como altura fija, y con una
-   altura que no es auto el navegador deforma la imagen; los atributos siguen
-   puestos para que no haya salto mientras carga. */
-.eq img{display:block;width:100%;height:auto;
-  filter:grayscale(1) contrast(1.04);background:var(--linea-2)}
+/* Todas las fichas miden lo mismo y ninguna foto se recorta: la caja es fija
+   —4 de ancho por 5 de alto, un pelo mas alta que la mas alargada que hay— y
+   la foto se mete dentro entera con «contain». La que sobra por arriba y por
+   abajo se rellena con el papel de la ficha, asi que no se ve una banda: se
+   ve aire. La proxima foto que llegue, venga como venga, encaja sola.
+   «height:auto» hace falta porque el atributo height del HTML entra como
+   altura fija y se salta la proporcion; los atributos siguen puestos para que
+   no haya salto mientras carga. */
+.eq img{display:block;width:100%;height:auto;aspect-ratio:4/5;object-fit:contain;
+  filter:grayscale(1) contrast(1.04);background:var(--paper-2)}
 .eq figcaption{padding:10px 12px 12px}
 .eq .eq-n{font-weight:600;color:var(--ink);font-size:15px;line-height:1.3}
 .eq .eq-c{font-family:var(--m);font-size:10px;letter-spacing:.06em;text-transform:uppercase;
