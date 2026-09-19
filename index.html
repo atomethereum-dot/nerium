@@ -6270,11 +6270,36 @@ window.__mide = function(cv, w, h){
    siendo el sistema matando la pestaña, que es exactamente el «se reinicia al
    llegar a algunas secciones».
    Doce escenas con doce bucles propios no se arreglan una a una sin tocar
-   doce sitios. Se arregla el reloj que las mueve a todas: mientras nadie toca
-   nada, «requestAnimationFrame» entrega a 20 cuadros por segundo en vez de a
-   60. Lo que se mueve solo —la corriente de cubos, el campo de la portada—
-   sigue moviendose, y a 20 cuadros una deriva lenta no se distingue; lo que
-   se mueve con el dedo vuelve a 60 en cuanto hay dedo, que es cuando importa.
+   doce sitios. Se arregla el reloj que las mueve a todas.
+
+   QUE CUESTAN ESOS CUADROS, medido de verdad. Con el navegador metido en un
+   grupo con la memoria limitada —que es lo que hace un telefono— y recorriendo
+   la pagina dos veces arriba y abajo, el pico de memoria del navegador entero:
+
+       pagina en blanco .......................  206 MB
+       pagina larga sin adornos ...............  225 MB
+       pagina larga CON adornos (degradados,
+         sombras, desenfoques, tarjetas) ......  316 MB
+       Nereum .................................  758 MB
+       Nereum con los bucles de JS apagados ...  425 MB
+
+   Es decir: los bucles de animacion son 333 MB de pico. No es lo que dibujan
+   —tapar las llamadas de dibujo no cambia nada— sino CUANTAS VECES por
+   segundo se despierta todo el aparato de pintado. Y a 500 MB de limite la
+   pagina se moria en tres intentos de tres, la primera vez en y=9994, que es
+   dentro de la seccion de compra: exactamente donde se cae en el telefono
+   de verdad.
+
+   Bajando el reloj a 30 cuadros por segundo el pico baja a 648 MB (medido dos
+   veces: 640 y 655) y de tres intentos a 500 MB sobrevive dos. No es gratis
+   del todo y no es magia, pero son 110 MB y estan donde hacen falta.
+
+   Antes esto solo frenaba con la pagina QUIETA: en cuanto habia dedo volvia a
+   60, o sea que corria a 60 justo mientras se hace scroll, que es cuando se
+   cae. Ahora el techo esta siempre puesto en el telefono: 30 cuadros mientras
+   se toca, 20 cuando nadie toca nada. Lo que se mueve solo es deriva lenta y
+   no se distingue; lo que se mueve con el dedo lo lleva el compositor, no
+   estos bucles.
    Va en la cabecera a proposito: tiene que estar puesto antes de que arranque
    la primera escena. */
 (function(){
@@ -6282,7 +6307,8 @@ window.__mide = function(cv, w, h){
   var raf = window.requestAnimationFrame && window.requestAnimationFrame.bind(window);
   if(!raf) return;
   var CALLADO = 900;      /* ms sin actividad para entrar en ralenti */
-  var PASO    = 50;       /* 20 cuadros por segundo */
+  var PASO    = 50;       /* 20 cuadros por segundo, quieta */
+  var PASO_ACTIVO = 34;   /* 30 cuadros por segundo, con el dedo encima */
   var activo = 0;
   function toca(){ activo = Date.now() }
   ['scroll','wheel','pointerdown','pointermove','pointerup','touchstart','touchmove',
@@ -6296,7 +6322,7 @@ window.__mide = function(cv, w, h){
 
   window.requestAnimationFrame = function(cb){
     if(document.hidden) { /* pestaña de fondo: el navegador ya lo para */ }
-    if(Date.now() - activo < CALLADO) return raf(cb);
+    var paso = (Date.now() - activo < CALLADO) ? PASO_ACTIVO : PASO;
     var mio = id++;
     cola.push([mio, cb]);
     if(!prog){
@@ -6311,7 +6337,7 @@ window.__mide = function(cv, w, h){
           }
           if(muertos) muertos.clear();
         });
-      }, PASO);
+      }, paso);
     }
     return mio;
   };
