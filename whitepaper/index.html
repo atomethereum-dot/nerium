@@ -260,6 +260,29 @@ td b{color:var(--ink)}
   backdrop-filter:blur(3px);display:none;align-items:flex-start;justify-content:center;
   padding:12vh 20px 20px}
 .velo.on{display:flex}
+/* ── el equipo ──────────────────────────────────────────────────────────────
+   Retratos en blanco y negro a proposito: son fotos hechas en sitios y con
+   luces distintas, y en color se ven como dos fotos sueltas pegadas en una
+   pagina. En gris se leen como un mismo juego. El recuadro es cuadrado y la
+   foto se recorta al centro, asi que da igual con que proporcion llegue la
+   siguiente. */
+.eq{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));
+  margin:20px 0 28px}
+.eq figure{margin:0;border:1px solid var(--linea);border-radius:10px;overflow:hidden;
+  background:var(--paper)}
+.eq img{display:block;width:100%;height:auto;aspect-ratio:1/1;object-fit:cover;
+  /* «height:auto» hace falta: el atributo height del HTML entra como altura
+     fija y, con una altura que no es auto, el navegador se salta la
+     proporcion. Los atributos siguen puestos para que no haya salto
+     mientras carga. */
+  filter:grayscale(1) contrast(1.04);background:var(--linea-2)}
+.eq figcaption{padding:12px 14px 14px}
+.eq .eq-n{font-weight:600;color:var(--ink);font-size:15px;line-height:1.3}
+.eq .eq-c{font-family:var(--m);font-size:11px;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--blue-d);margin-top:3px}
+.eq .eq-d{color:var(--ink-3);font-size:13px;line-height:1.5;margin-top:7px}
+@media(prefers-color-scheme:dark){ .eq img{filter:grayscale(1) contrast(1.04) brightness(.92)} }
+
 .caja{width:min(560px,100%);background:var(--paper);border:1px solid var(--linea);
   border-radius:10px;overflow:hidden;box-shadow:0 24px 70px -20px rgba(10,12,16,.28)}
 .caja input{width:100%;border:0;padding:16px 18px;font:inherit;font-size:16px;
@@ -2186,6 +2209,28 @@ team:{grupo:'La empresa', titulo:'Equipo', html:`
 <p>Quién construye Nereum, qué ha construido antes y qué puede verificar un lector
 sobre ellos.</p>
 
+<h2 id="quienes">Equipo fundador</h2>
+<div class="eq">
+  <figure>
+    <img src="../img/equipo/ceo.webp" width="900" height="900" loading="lazy" decoding="async"
+         alt="Fundador y consejero delegado de Nereum Labs">
+    <figcaption>
+      <div class="eq-c">Fundador y CEO</div>
+      <p class="eq-d">Estrategia, capital y relación con reguladores. Firma en la
+      tesorería y responde de la entidad registrada en Miami.</p>
+    </figcaption>
+  </figure>
+  <figure>
+    <img src="../img/equipo/cofundador.webp" width="900" height="900" loading="lazy" decoding="async"
+         alt="Cofundador de Nereum Labs">
+    <figcaption>
+      <div class="eq-c">Cofundador</div>
+      <p class="eq-d">Arquitectura del protocolo y el motor de liquidación. Segunda
+      firma en la tesorería.</p>
+    </figcaption>
+  </figure>
+</div>
+
 <h2 id="kyc">Verificación de identidad</h2>
 <p>El KYC realizado por un tercero significa que alguien independiente ha visto la
 documentación oficial de las personas nombradas y la conserva en archivo. Eleva
@@ -3345,9 +3390,26 @@ says, how convincing the chart looks or who sent you the link.</p>
 verify about them.</p>
 
 <h2 id="quienes">Core team</h2>
-<p>For each person this should say what they do on this project, what they did
-before, and where that can be checked — a company, a repository, a paper. A list
-of first names and job titles is not information.</p>
+<div class="eq">
+  <figure>
+    <img src="../img/equipo/ceo.webp" width="900" height="900" loading="lazy" decoding="async"
+         alt="Founder and chief executive of Nereum Labs">
+    <figcaption>
+      <div class="eq-c">Founder &amp; CEO</div>
+      <p class="eq-d">Strategy, capital and regulatory relationships. Signs on the
+      treasury and answers for the entity registered in Miami.</p>
+    </figcaption>
+  </figure>
+  <figure>
+    <img src="../img/equipo/cofundador.webp" width="900" height="900" loading="lazy" decoding="async"
+         alt="Co-founder of Nereum Labs">
+    <figcaption>
+      <div class="eq-c">Co-founder</div>
+      <p class="eq-d">Protocol architecture and the settlement engine. Second
+      signer on the treasury.</p>
+    </figcaption>
+  </figure>
+</div>
 
 <h2 id="kyc">Identity verification</h2>
 <p>KYC by a third party means someone independent has seen government
