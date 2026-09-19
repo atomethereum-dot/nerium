@@ -408,7 +408,13 @@ main>section.logos::after{display:none}
 .hero h1 .ws>.wi{filter:blur(9px);
   transition:transform 1.05s cubic-bezier(.16,.84,.26,1) var(--wd,0s),
              filter .85s ease var(--wd,0s)}
-.hero h1.sp.in .ws>.wi{filter:blur(0)}
+/* «none», NO «blur(0)». Un desenfoque de cero no es «sin filtro»: obliga al
+   navegador a montar una superficie de render y su textura igual que uno de
+   nueve pixeles, y aqui son treinta trozos de palabra del titular. Medido
+   con el arbol de capas: treinta capas que no pintan nada. «none» interpola
+   igual de bien contra «blur(9px)» -es el valor identidad- asi que la
+   entrada se ve igual y al terminar la superficie se suelta. */
+.hero h1.sp.in .ws>.wi{filter:none}
 .lnwrap{display:block;overflow:hidden}
 .lnwrap>i{display:block;font-style:normal;transform:translateY(105%);
   transition:transform .9s cubic-bezier(.16,.84,.26,1) var(--ld,0s)}
@@ -12330,6 +12336,91 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
     [0, 400, 900, 1600, 2600, 3600].forEach(function(t){ setTimeout(mira, t) });
   });
   addEventListener('resize', avisa, {passive:true});
+})();
+</script>
+<script>
+/* ══════════════════════════════════════════════════════════════════════════
+   LA CAJA NEGRA
+   ══════════════════════════════════════════════════════════════════════════
+   Se reporto tres veces desde un iPhone que la pagina «se reinicia» y que a
+   veces sale «servidor no encontrado». Lo segundo no es un tiron de scroll: es
+   una RECARGA, el navegador volviendo a pedir la pagina, y Safari solo hace eso
+   cuando ha matado la pestaña. Desde aqui no puedo reproducirlo -el proxy de
+   este entorno bloquea el dominio y no hay un iPhone detras-, asi que lo que
+   hace falta es que la pagina lo cuente ella.
+
+   Como se sabe que la pestaña MURIO y no que alguien recargo: al salir bien
+   -«pagehide»- se deja una marca de despedida. Si al arrancar hay un registro
+   anterior SIN esa marca, nadie se despidio: la pestaña se fue de golpe.
+
+   Cuesta un «sessionStorage.setItem» cada dos segundos y solo mientras la
+   pestaña esta visible. No pinta nada ni estorba a nadie: el informe solo se
+   enseña si la direccion lleva «?diag=1», y quien no lo pida no vera jamas que
+   esto existe. */
+(function(){
+  var CLAVE='nrm:cajanegra', S;
+  try{ S=window.sessionStorage; if(!S) return }catch(e){ return }
+
+  var t0=Date.now();
+  var reg={muertes:0, sucesos:[]};
+  try{ var v=JSON.parse(S.getItem(CLAVE)||'null'); if(v) reg=v }catch(e){}
+
+  var nav={};
+  try{ nav=(performance.getEntriesByType('navigation')||[])[0]||{} }catch(e){}
+
+  /* El registro anterior existe y nadie se despidio: se fue de golpe. */
+  if(reg.vivo){
+    reg.muertes=(reg.muertes||0)+1;
+    reg.sucesos=(reg.sucesos||[]).concat([{
+      y: reg.vivo.y, seg: reg.vivo.seg, alto: reg.vivo.alto,
+      lienzos: reg.vivo.lienzos, tipo: nav.type||'?'
+    }]).slice(-8);
+  }
+  reg.vivo=null;
+
+  function lienzosVivos(){
+    var n=0; try{
+      document.querySelectorAll('canvas').forEach(function(c){ if(c.width>1) n++ });
+    }catch(e){}
+    return n;
+  }
+  function guarda(vivo){
+    reg.vivo = vivo;
+    try{ S.setItem(CLAVE, JSON.stringify(reg)) }catch(e){}
+  }
+  function late(){
+    if(document.hidden) return;
+    guarda({ y: Math.round(scrollY),
+             seg: Math.round((Date.now()-t0)/1000),
+             alto: document.documentElement.scrollHeight,
+             lienzos: lienzosVivos() });
+  }
+  guarda(null);
+  setInterval(late, 2000);
+  /* La despedida. «pagehide» es el que Safari de iOS dispara de verdad. */
+  addEventListener('pagehide', function(){ guarda(null) });
+  addEventListener('beforeunload', function(){ guarda(null) });
+
+  if(location.search.indexOf('diag=1')<0) return;
+  addEventListener('load', function(){
+    var d=document.createElement('div');
+    d.style.cssText='position:fixed;left:8px;right:8px;bottom:8px;z-index:99999;'+
+      'background:#0B0E14;color:#CFE0FF;border:1px solid #2A62E8;border-radius:8px;'+
+      'padding:10px 12px;font:12px/1.45 ui-monospace,Menlo,monospace;'+
+      'white-space:pre-wrap;max-height:42vh;overflow:auto;box-shadow:0 8px 30px rgba(0,0,0,.6)';
+    function pinta(){
+      var t='CAJA NEGRA · muertes de pestaña: '+(reg.muertes||0)+'\n';
+      var l=reg.sucesos||[];
+      if(!l.length) t+='(sin ninguna todavia — sigue bajando)';
+      else for(var i=l.length-1;i>=0;i--)
+        t+='· murio a los '+l[i].seg+' s, en y='+l[i].y+' de '+l[i].alto+
+           ', '+l[i].lienzos+' lienzos vivos ['+l[i].tipo+']\n';
+      d.textContent=t;
+    }
+    pinta(); setInterval(pinta, 2000);
+    d.addEventListener('click', function(){ d.style.display='none' });
+    document.body.appendChild(d);
+  });
 })();
 </script>
 </body>
