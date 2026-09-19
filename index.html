@@ -6020,6 +6020,37 @@ p.sec-sub,p.sale-sub,p.join-note,span.rd,.rd,.jbtn-sub,.lane-sub,.stk-sub s,
 #presale .w-field,#presale .w-out,#presale .w-out div,
 #presale .widget button:not(.on):not(.w-cta){border-color:rgba(255,255,255,.20) !important}
 
+/* ══ EL PANEL DE COMPRA, SOBRE EL CAMPO AZUL ══
+   Medido en el sitio, antes de tocarlo:
+
+     el campo azul de la ronda   rgb(14,58,196)
+     el panel                    rgb(6,12,34)    <- casi negro puro
+     la fila «you pay»           rgb(10,19,48)
+     el campo de entrada         rgb(20,25,34)   <- GRIS, no azul
+
+   Dos cosas, no una. El panel era un agujero negro recortado sobre un azul
+   fuerte, sin escalones entre sus superficies. Y el campo de entrada se habia
+   quedado con el gris generico de las superficies de la pagina —otra familia
+   de color— y ademas pintaba SU PROPIO fondo dentro de una fila que ya tenia
+   el suyo: de ahi la franja. Un campo de texto dentro de una caja no necesita
+   fondo; la caja ya es la superficie.
+
+   Ahora hay tres escalones, los tres en la misma familia azul que el campo de
+   la ronda, y la entrada no pinta nada. */
+#presale .widget{background-color:#17244E !important}
+#presale .w-field,#presale .w-out,#presale .prices,#presale .pr,
+#presale .pr-mult,#presale .widget button:not(.on):not(.w-cta){
+  background-color:#213163 !important}
+#presale .w-out div,#presale .prices>div,#presale .pr-mult>div{
+  background-color:#293A70 !important}
+#presale .w-field input,#presale .widget input,#presale .widget select{
+  background-color:transparent !important;
+  background-image:none !important;
+  border-color:transparent !important}
+#presale .prices,#presale .pr,#presale .pr.up,#presale .widget,
+#presale .w-field,#presale .w-out,#presale .w-out div,
+#presale .widget button:not(.on):not(.w-cta){border-color:rgba(255,255,255,.26) !important}
+
 </style>
 <script>
 /* ══════════════════════════════════════════════════════════════════════════
