@@ -8452,6 +8452,14 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
   function rAlt(x,z){
     var zona=rc(x,z,7)*0.55 + rc(x+5,z+13,17)*0.45;
     var h=zona*0.66 + rh(env(x),z)*0.34;
+    /* UNA CRESTA ANCHA POR ENCIMA DEL RUIDO. Con densidad uniforme de canto a
+       canto no hay donde mirar: es papel pintado, y un rectangulo de papel
+       pintado es un banner. Dos ondas largas y desiguales -para que no se lea
+       el periodo- levantan unas zonas y hunden otras, y aparece una
+       composicion: crestas, valles y mesetas. */
+    var cx=env(x)/CICLO*Math.PI*2;
+    var onda=0.5+0.5*(Math.sin(cx*1)*0.62+Math.sin(cx*2.7+1.1)*0.38);
+    h=h*0.58 + onda*0.42;
     h=Math.pow(h,1.75);
     return Math.round(h*8)/8;          /* en escalones: metal, no dunas */
   }
@@ -8496,21 +8504,21 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
           var y=Math.round(yTop), alt=Math.round(techo-y);
           if(alt<1){ techo=y; hAnt=h; continue }
           var cerca=1-(z-0.95)/(5.0-0.95), rel=h/ALTO;
-          var L=14+rel*30+cerca*16;
+          var L=17+rel*36+cerca*22;
           g.fillStyle='rgb('+(L*0.90|0)+','+(L*0.96|0)+','+(L*1.14|0)+')';
           g.fillRect(sx,y,cw+0.7,alt);
           /* la primera de la columna no tiene con que compararse: sin canto,
              o sale una raya de ancho completo en el borde de abajo */
           var paso = hAnt<0 ? 0 : (h-hAnt)/ALTO;
           if(paso>0.04){
-            var fl=(0.20+cerca*0.70)*Math.min(1,0.30+paso*2.2);
+            var fl=(0.24+cerca*0.76)*Math.min(1,0.34+paso*2.4);
             g.fillStyle='rgba(226,233,246,'+Math.min(0.92,fl).toFixed(3)+')';
             g.fillRect(sx,y,cw+0.7,Math.max(0.8,cerca*1.7));
           }
           hAnt=h; techo=y;
         }
       }
-      tiras.push({cv:t, ancho:anchoTira, vel:0.22/((z0+z1)/2)});
+      tiras.push({cv:t, ancho:anchoTira, vel:0.085/((z0+z1)/2)});
     }
   }
 
@@ -8534,10 +8542,34 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
       ctx.drawImage(t.cv, -off, 0, t.ancho, H);
       ctx.drawImage(t.cv, t.ancho-off, 0, t.ancho, H);
     }
-    /* el canto de arriba se funde: la banda entra y sale de la nada */
-    var g=ctx.createLinearGradient(0,0,0,H*0.42);
+    /* ── LA LUZ QUE RECORRE EL MATERIAL ──
+       Esto es lo que separa «superficie de metal» de «patron impreso», y es lo
+       que hace cara la referencia: no se mueve la textura, se mueve la LUZ
+       sobre ella. Un reflejo largo y suave cruza a su propio ritmo -distinto
+       del de las laminas, o se leeria como una sola cosa deslizandose- en modo
+       «overlay», que aclara lo claro y oscurece lo oscuro: levanta los cantos
+       que toca y hunde las caras, que es justo lo que hace un reflejo sobre
+       una superficie mecanizada. Un relleno de degradado por cuadro. */
+    var anchoLuz=W*1.35;
+    var lx=((T*0.085*W)%(W+anchoLuz))-anchoLuz*0.5;
+    var lg=ctx.createLinearGradient(lx,H,lx+anchoLuz,0);
+    lg.addColorStop(0,'rgba(255,255,255,0)');
+    lg.addColorStop(0.42,'rgba(228,238,255,0.24)');
+    lg.addColorStop(0.58,'rgba(228,238,255,0.24)');
+    lg.addColorStop(1,'rgba(255,255,255,0)');
+    ctx.globalCompositeOperation='overlay';
+    ctx.fillStyle=lg; ctx.fillRect(0,0,W,H);
+    ctx.globalCompositeOperation='source-over';
+
+    /* LOS DOS CANTOS SE FUNDEN, no solo el de arriba. Cortada en seco por
+       abajo, la banda es un rectangulo de textura: un banner. Fundida por los
+       dos lados, es una superficie que aparece y desaparece. */
+    var g=ctx.createLinearGradient(0,0,0,H*0.52);
     g.addColorStop(0,'rgba(5,7,12,1)'); g.addColorStop(1,'rgba(5,7,12,0)');
-    ctx.fillStyle=g; ctx.fillRect(0,0,W,H*0.42);
+    ctx.fillStyle=g; ctx.fillRect(0,0,W,H*0.52);
+    var g2=ctx.createLinearGradient(0,H,0,H*0.78);
+    g2.addColorStop(0,'rgba(5,7,12,1)'); g2.addColorStop(1,'rgba(5,7,12,0)');
+    ctx.fillStyle=g2; ctx.fillRect(0,H*0.78,W,H*0.22);
     requestAnimationFrame(pinta);
   }
 
