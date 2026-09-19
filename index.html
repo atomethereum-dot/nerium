@@ -9472,85 +9472,195 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
     }
     last=-1;
   }
-  /* ══════════════════════════════════════════════════════════════════════
-     EL RELIEVE
-     ══════════════════════════════════════════════════════════════════════
-     Aqui habia dos cosas: una nube de cubos subiendo y un suelo de barras.
-     Las sustituye una sola superficie: una rejilla fina donde cada celda sube
-     una altura distinta, vista casi a ras del suelo, con la camara avanzando
-     segun se baja. Toda la profundidad la llevan los filetes de luz en los
-     cantos; el material es grafito y no hay una gota de color.
-
-     SE PINTA POR COLUMNAS DE PANTALLA, DE CERCA HACIA EL FONDO. De cada celda
-     solo se dibuja lo que asoma por encima de la silueta ya pintada en esa
-     columna, asi que la oclusion sale sola y no hay nada que ordenar. Cuesta
-     dos «fillRect» por tramo visible, y la mayoria de los tramos ni se miran
-     porque quedan tapados. La nube de cubos costaba tres caras por cubo, en
-     orden de profundidad, para noventa y seis cubos.
-
-     Recorrerlo del fondo hacia delante con esta misma regla es el error que
-     hay que no cometer: la primera fila del fondo pinta la pantalla entera y
-     todas las cercanas se descartan. Sale un campo plano. */
-  const R_COLS=132, R_PASOS=74, R_Z0=1.18, R_Z1=19, R_CAMY=1.0, R_ALTO=0.62, R_CEL=28;
-  function rHash(x,z){
-    let n=x*374761393+z*668265263;
-    n=(n^(n>>13))*1274126177;
-    return ((n^(n>>16))>>>0)/4294967296;
-  }
-  function rCelda(x,z,e){ return rHash(Math.floor(x/e),Math.floor(z/e)) }
-  function rAltura(x,z){
-    /* Dos escalas. La gruesa agrupa en mesetas y la fina pica celda a celda:
-       sin la gruesa sale confeti, sin la fina salen escalones de juguete. */
-    const zona=rCelda(x,z,11)*0.55 + rCelda(x+5,z+13,27)*0.45;
-    const pico=rHash(x,z);
-    let h=zona*0.66 + pico*0.34;
-    h=Math.pow(h,1.75);
-    /* EN ESCALONES, no continuo: una altura continua da dunas y lo que se
-       busca es metal mecanizado, que son cotas discretas. */
-    return Math.round(h*8)/8;
-  }
-  function pintaRelieve(fuerza, p){
-    const cw=W/R_COLS, f=W*1.30, cx=W*0.5, hor=H*0.38;
-    const avance=p*40;
-    ctx.save();
-    ctx.globalAlpha=fuerza;
-    for(let i=0;i<R_COLS;i++){
-      const sx=i*cw, xm=sx+cw*0.5-cx;
-      let techo=H+2;
-      for(let r=0;r<R_PASOS;r++){
-        const t=r/(R_PASOS-1);
-        const z=R_Z0+(R_Z1-R_Z0)*Math.pow(t,1.9);
-        const k=f/z;
-        const wx=xm*z/f;
-        const h=rAltura(Math.round(wx*R_CEL), Math.round(z*R_CEL+avance))*R_ALTO;
-        const yTop=hor+(R_CAMY-h)*k;
-        if(yTop>=techo) continue;
-        const y=Math.round(yTop), alt=Math.round(techo-y);
-        if(alt<1) continue;
-        const cerca=1-t, rel=h/R_ALTO;
-        const L=10+rel*26+cerca*14;
-        ctx.fillStyle='rgb('+(L*0.90|0)+','+(L*0.96|0)+','+(L*1.14|0)+')';
-        ctx.fillRect(sx,y,cw+0.7,alt);
-        const fl=(0.16+cerca*0.74)*(0.30+rel*1.05);
-        ctx.fillStyle='rgba(226,233,246,'+Math.min(0.92,fl).toFixed(3)+')';
-        ctx.fillRect(sx,y,cw+0.7,Math.max(0.8,cerca*1.6));
-        techo=y;
-      }
+  /* Los cubos del fundido tambien vuelven a AZUL Y BLANCO. El conversor a
+     plata se los llevo por delante como a los demas, pero estos no son
+     superficie de metal: son cubos, y lo que se pidio es que los cubos sean
+     azules y blancos. El cian se queda fuera -en «screen» dos azules ya suman
+     hacia el cian, y meter uno de entrada es lo que reventaba la paleta- y su
+     hueco lo ocupa el azul claro. */
+  const NEGRO=[5,6,10], AZUL=[22,80,240], AZULP=[12,48,190],
+        AZULC=[46,92,180], CIAN=[80,110,164], ACERO=[26,34,56],
+        /* Y LOS BLANCOS DE VERDAD. El comentario de arriba dice que lo pedido
+           era «cubos azules y blancos» y en la tabla no habia ni uno: el tono
+           mas claro era el acero 80,110,164, que sobre negro lee gris azulado,
+           no blanco. Con un tercio de la nube en negro puro y ningun claro, la
+           escena entera se leia apagada. Entran dos: uno blanco y una perla
+           para que no sean todos el mismo punto de luz. */
+        BLANCO=[228,234,246], PERLA=[176,187,208];
+  let piezas=null, pt=0, pl=0;
+  function hacePiezas(){
+    piezas=[];
+    const base=Math.max(16,Math.round(Math.min(W,H)/22));
+    const cuantas=W<760?54:96;
+    for(let i=0;i<cuantas;i++){
+      /* El negro baja de 34 % a 22 %: sigue habiendo cubos que se pierden en
+         el fondo —hacen la profundidad— pero ya no son un tercio de todo. Lo
+         que sueltan se reparte entre los dos claros, que suman 16 %. */
+      const r=Math.random();
+      const tono = r<0.22 ? NEGRO
+                 : r<0.42 ? AZUL
+                 : r<0.56 ? AZULP
+                 : r<0.68 ? AZULC
+                 : r<0.76 ? CIAN
+                 : r<0.84 ? ACERO
+                 : r<0.94 ? BLANCO
+                 : PERLA;
+      piezas.push({
+        x:Math.random(),
+        y:-0.2+Math.random()*1.7,
+        lado:base*(Math.random()<.55 ? 0.28+Math.random()*0.5
+                                     : 0.9+Math.random()*1.7),
+        v:0.055+Math.random()*0.16,        /* pantallas por segundo */
+        giro:(Math.random()*2-1)*0.28,
+        vg:(Math.random()*2-1)*0.16,
+        c: tono,
+        /* El blanco, un punto por debajo: a opacidad plena sobre negro es un
+           recorte de papel, no un cubo. A 0,86 conserva el filete de luz del
+           canto, que es lo que le da volumen. */
+        a: tono===NEGRO?0.92 : tono===AZULC?0.95 : tono===ACERO?0.55
+         : tono===BLANCO?0.86 : tono===PERLA?0.80 : 0.90,
+        deriva:(Math.random()*2-1)*0.035
+      });
     }
-    /* El horizonte se funde, pero suave: si tapa, mata el relieve. */
-    const n=ctx.createLinearGradient(0,hor-10,0,hor+H*0.16);
-    n.addColorStop(0,'rgba(5,6,10,0.92)');
-    n.addColorStop(1,'rgba(5,6,10,0)');
-    ctx.fillStyle=n; ctx.fillRect(0,hor-10,W,H*0.16+10);
-    ctx.restore();
+  }
+  function pintaSubida(fuerza){
+    if(!piezas)hacePiezas();
+    const ahora=performance.now()/1000;
+    const dt=Math.min(.05,(ahora-pl)||.016); pl=ahora; pt+=dt;
+    for(const q of piezas){
+      q.y-=q.v*dt*(0.6+fuerza*1.5);
+      q.x+=q.deriva*dt*0.4;
+      q.giro+=q.vg*dt;
+      if(q.y<-0.35){ q.y=1.08+Math.random()*0.55; q.x=Math.random(); }
+      const px=q.x*W, py=q.y*H, L=q.lado;
+      if(py<-L*2||py>H+L*2)continue;
+      const borde=Math.min(1, Math.max(0, (q.y+0.12)/0.28));
+      const a=q.a*fuerza*borde;
+      if(a<0.02)continue;
+      ctx.save();
+      ctx.translate(px,py);
+      ctx.rotate(q.giro);
+      ctx.fillStyle='rgba(10,12,16,'+(a*0.16).toFixed(3)+')';
+      ctx.fillRect(-L/2+L*0.10, -L/2+L*0.13, L, L);
+      ctx.fillStyle='rgba('+q.c.join(',')+','+a.toFixed(3)+')';
+      ctx.fillRect(-L/2,-L/2,L,L);
+      ctx.fillStyle='rgba(255,255,255,'+(a*0.22).toFixed(3)+')';
+      ctx.fillRect(-L/2,-L/2,L,Math.max(1,L*0.08));
+      ctx.restore();
+    }
+  }
+  const SPAL=[[24,59,246],[8,28,196],[28,46,140],[46,50,122],[26,25,60],[4,13,104]];
+  /* El suelo iba en los mismos seis azules hondos y ni un claro: un campo
+     entero sin un punto donde descansar la vista. Uno de cada siete pasa a
+     claro, con menos opacidad porque aqui las piezas se solapan y un blanco
+     opaco encima de otro se convierte en una mancha. */
+  const SCLAROS=[[226,232,244],[168,180,202]];
+  const sclaro=()=>Math.random()<0.14;
+  let SU=null, suL=0, suVelo=null, suVeloH=0, suFil=null, suFilW=0, suCol=null, suColH=0;
+  const srnd=(a,b)=>a+Math.random()*(b-a);
+  const scv=document.createElement('canvas');
+  const sctx=scv.getContext('2d');
+  let scvW=0, scvH=0;
+  function haceSuelo(){
+    SU=[];
+    const cuantos=W<760?170:272;
+    for(let i=0;i<cuantos;i++)SU.push({
+      u:srnd(-2.3,2.3), z:srnd(.05,1),
+      c:sclaro()?SCLAROS[(Math.random()*SCLAROS.length)|0]
+                :SPAL[(Math.random()*SPAL.length)|0],
+      a:srnd(.55,1), w:Math.random()<.3?2:1});
+  }
+  function pintaSuelo(fuerza){
+    if(!SU)haceSuelo();
+    const ahora=performance.now()/1000;
+    const dt=Math.min(.05,(ahora-suL)||.016); suL=ahora;
+    const d=__dens();
+    if(scvW!==Math.round(W*d)||scvH!==Math.round(H*d)){
+      scvW=scv.width=Math.round(W*d); scvH=scv.height=Math.round(H*d);
+      sctx.setTransform(d,0,0,d,0,0);
+      sctx.fillStyle='#000000'; sctx.fillRect(0,0,W,H);
+    }
+    sctx.fillStyle='rgba(0,0,0,.26)';
+    sctx.fillRect(0,0,W,H);
+    const cx=W/2, hor=H*.30;
+    const U=Math.max(16,Math.round(Math.min(W,H)/22));
+    const lista=SU.slice().sort((A,B)=>A.z-B.z);
+    for(const b of lista){
+      b.z -= dt*(0.55+fuerza*0.55);
+      if(b.z<.05){ b.z=1; b.u=srnd(-2.3,2.3);
+        b.c=sclaro()?SCLAROS[(Math.random()*SCLAROS.length)|0]
+                    :SPAL[(Math.random()*SPAL.length)|0];
+        b.a=srnd(.55,1);
+        b.w=Math.random()<.3?2:1; }
+      const k=1/(.16+b.z*1.5);
+      const y=hor+(H*.62)*k*.30;
+      const x=cx+b.u*W*.55*k;
+      const lado=Math.max(2.2,U*k*.52);
+      if(y>H+lado||x<-lado*3||x>W+lado*3)continue;
+      const cerca=Math.min(1,(1-b.z)*2.2);
+      const al=b.a*cerca*.95*fuerza;
+      if(al<.015)continue;
+      sctx.fillStyle='rgba('+b.c[0]+','+b.c[1]+','+b.c[2]+','+al.toFixed(3)+')';
+      sctx.fillRect(x,y,lado*b.w,lado*.62);
+      sctx.fillStyle='rgba(255,255,255,'+(b.a*cerca*cerca*.22*fuerza).toFixed(3)+')';
+      sctx.fillRect(x,y,lado*b.w,Math.max(1,lado*.1));
+    }
+    if(!suVelo||suVeloH!==H){
+      suVelo=sctx.createLinearGradient(0,hor-H*.1,0,hor+H*.16);
+      suVelo.addColorStop(0,'rgba(0,0,0,.95)');
+      suVelo.addColorStop(1,'rgba(0,0,0,0)');
+      suVeloH=H;
+    }
+    sctx.fillStyle=suVelo;
+    sctx.fillRect(0,0,W,hor+H*.16);
+    const rot='IN THE OPEN';
+    const cuerpo=Math.max(10, Math.min(W,H)*0.0165);
+    const esp=cuerpo*0.62;
+    sctx.font='400 '+cuerpo.toFixed(1)+"px 'DM Mono',ui-monospace,monospace";
+    let ancho=0;
+    for(const ch of rot) ancho+=sctx.measureText(ch).width+esp;
+    ancho-=esp;
+    const rx=W/2-ancho/2, ry=H*0.155;
+    const aRot=fuerza*0.85;
+    sctx.fillStyle='rgba(219,222,229,'+(aRot*0.55).toFixed(3)+')';
+    let cxr=rx;
+    for(const ch of rot){
+      sctx.fillText(ch,cxr,ry);
+      cxr+=sctx.measureText(ch).width+esp;
+    }
+    const fw=Math.min(W*0.30, 220);
+    if(!suFil||suFilW!==W){
+      suFil=sctx.createLinearGradient(W/2-fw/2,0,W/2+fw/2,0);
+      suFil.addColorStop(0,'rgba(196,198,204,0)');
+      suFil.addColorStop(.5,'rgba(196,198,204,.42)');
+      suFil.addColorStop(1,'rgba(196,198,204,0)');
+      suFilW=W;
+    }
+    sctx.globalAlpha=aRot;
+    sctx.fillStyle=suFil;
+    sctx.fillRect(W/2-fw/2, ry-cuerpo*2.1, fw, 1);
+    sctx.globalAlpha=1;
+    if(!suCol||suColH!==H){
+      suCol=sctx.createLinearGradient(0,ry+cuerpo,0,H*0.30);
+      suCol.addColorStop(0,'rgba(157,159,164,.10)');
+      suCol.addColorStop(1,'rgba(157,159,164,0)');
+      suColH=H;
+    }
+    sctx.globalAlpha=fuerza;
+    sctx.fillStyle=suCol;
+    sctx.fillRect(W/2-Math.min(W*0.22,260)/2, ry+cuerpo, Math.min(W*0.22,260), H*0.30-(ry+cuerpo));
+    sctx.globalAlpha=1;
+    ctx.globalCompositeOperation='lighter';
+    ctx.globalAlpha=fuerza;
+    ctx.drawImage(scv,0,0,W,H);
+    ctx.globalAlpha=1;
+    ctx.globalCompositeOperation='source-over';
   }
   function draw(p){
     const flood=eOut(clm(p/.46));
     const bg=Math.round(PAPER[0]*flood);
     ctx.fillStyle='rgb('+bg+','+Math.round(PAPER[1]*flood)+','+Math.round(PAPER[2]*flood)+')';
     ctx.fillRect(0,0,W,H);
-    const vivoLecho=clm((p-.02)/.14)*clm((.86-p)/.14);
-    if(vivoLecho>.01)pintaRelieve(vivoLecho,p);
     const fx=W*.5, fy=H*1.02;
     for(const q of cells){
       const k=eIn(clm((p-q.t)/.30));
@@ -9585,9 +9695,10 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
       ctx.fillStyle='rgba('+PAPER.join(',')+','+end.toFixed(3)+')';
       ctx.fillRect(0,0,W,H);
     }
-    /* El relieve es el LECHO de la escena y se pinta arriba del todo, debajo
-       de la rejilla que se deshace: un solo cuerpo continuo en vez de dos
-       cosas -suelo de barras y nube de cubos- que se relevaban a mitad. */
+    const antes=clm((.30-p)/.22);
+    if(antes>.01)pintaSuelo(antes);
+    const abierto=clm((p-.40)/.20);
+    if(abierto>.01)pintaSubida(abierto);
     stage.classList.toggle('lit', p>.66);
     stage.classList.toggle('go', p<.7);
   }
