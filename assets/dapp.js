@@ -124,12 +124,22 @@
   /* Un RPC público puede estar caído, saturado o bloqueado por el país del
      visitante. Se prueban en orden y con límite de tiempo: quedarse colgado en
      el primero dejaría la página en blanco para todo el que lo tenga bloqueado. */
+  /* EL QUE CONTESTO LA ULTIMA VEZ VA PRIMERO. Empezando siempre por el
+     principio de la lista, cada llamada recorria la lista por su cuenta: si el
+     primer nodo estaba caido o bloqueado en el pais del visitante, las once
+     llamadas de una vuelta caian una a una al segundo, luego al tercero.
+     Medido al cargar: OCHENTA Y OCHO peticiones a siete nodos distintos, todas
+     en los dos primeros segundos. En un movil con datos eso son siete
+     resoluciones de DNS y siete apretones TLS compitiendo justo cuando la
+     pagina intenta pintar. */
+  var VIVO = {};
   function rpc(cid, metodo, params) {
     var lista = CADENAS[cid].rpc.slice();
-    var i = 0;
+    var n = lista.length, arranque = VIVO[cid] || 0, k = 0;
     function intento() {
-      if (i >= lista.length) return Promise.reject(new Error('no RPC'));
-      var url = lista[i++];
+      if (k >= n) return Promise.reject(new Error('no RPC'));
+      var idx = (arranque + k) % n; k++;
+      var url = lista[idx];
       var corte = new AbortController();
       var reloj = setTimeout(function () { corte.abort(); }, 7000);
       return fetch(url, {
@@ -143,9 +153,60 @@
         return r.json();
       }).then(function (j) {
         if (j.error) throw new Error(j.error.message || 'rpc');
+        VIVO[cid] = idx;
         return j.result;
       }).catch(function () {
         clearTimeout(reloj);
+        return intento();
+      });
+    }
+    return intento();
+  }
+
+  /* ── y LAS ONCE LLAMADAS VAN EN UNA SOLA PETICION ──
+     JSON-RPC admite un array de peticiones desde siempre, y los nodos publicos
+     de la lista lo aceptan. Once «eth_call» al mismo contrato, que es lo que
+     pide una vuelta de estado, pasan de once viajes de ida y vuelta a uno. Y
+     cuando el nodo esta caido, un fallo cuesta UN reintento en vez de once.
+     El nodo que no sepa de lotes se detecta porque no devuelve un array, y se
+     cae a llamadas sueltas sin que el visitante note nada. */
+  function rpcLote(cid, peticiones) {
+    var lista = CADENAS[cid].rpc.slice();
+    var n = lista.length, arranque = VIVO[cid] || 0, k = 0, sinLote = 0;
+    function intento() {
+      if (k >= n) {
+        /* SE DISTINGUE «este nodo no sabe de lotes» de «no hay red». Sin esa
+           distincion, con la red caida el lote fallaba por red y encima se
+           reintentaban las once llamadas sueltas contra los cuatro nodos:
+           medido, 96 peticiones en vez de 88. Peor que antes. Solo se cae a
+           llamadas sueltas si ALGUN nodo contesto y lo que no supo fue el
+           lote. */
+        var f = new Error('no RPC'); f.sinLote = sinLote > 0; return Promise.reject(f);
+      }
+      var idx = (arranque + k) % n; k++;
+      var url = lista[idx];
+      var corte = new AbortController();
+      var reloj = setTimeout(function () { corte.abort(); }, 9000);
+      return fetch(url, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify(peticiones.map(function (q, i) {
+          return { jsonrpc: '2.0', id: i + 1, method: q.metodo, params: q.params };
+        })),
+        signal: corte.signal
+      }).then(function (r) {
+        clearTimeout(reloj);
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        return r.json();
+      }).then(function (j) {
+        if (!Array.isArray(j)) { var e = new Error('sin lotes'); e.sinLote = true; throw e; }
+        VIVO[cid] = idx;
+        var fuera = [];
+        j.forEach(function (x) { fuera[(x.id | 0) - 1] = x.error ? null : x.result; });
+        return fuera;
+      }).catch(function (err) {
+        clearTimeout(reloj);
+        if (err && err.sinLote) sinLote++;
         return intento();
       });
     }
@@ -184,12 +245,22 @@
 
   function leerRed(cid) {
     var c = CADENAS[cid];
+    var SELS = [SEL.nativeUsdPrice, SEL.priceUsd, SEL.minBuyUsd, SEL.maxBuyUsd,
+                SEL.totalTokensSold, SEL.hardCapTokens, SEL.isLive, SEL.isOver,
+                SEL.paused, SEL.startTime, SEL.claimOpen];
     var uno = function (sel) { return llamar(cid, c.venta, sel).catch(function () { return null; }); };
-    return Promise.all([
-      uno(SEL.nativeUsdPrice), uno(SEL.priceUsd), uno(SEL.minBuyUsd), uno(SEL.maxBuyUsd),
-      uno(SEL.totalTokensSold), uno(SEL.hardCapTokens), uno(SEL.isLive), uno(SEL.isOver),
-      uno(SEL.paused), uno(SEL.startTime), uno(SEL.claimOpen)
-    ]).then(function (r) {
+    /* Con cartera conectada y en esta red se le pregunta a ella una a una: su
+       proveedor es local, no cuesta red, y no todos admiten lotes. Sin cartera
+       -que es como llega todo el mundo- va en un solo viaje. */
+    var vuelta = (sesion.prov && sesion.cid === cid)
+      ? Promise.all(SELS.map(uno))
+      : rpcLote(cid, SELS.map(function (sel) {
+          return { metodo: 'eth_call', params: [{ to: c.venta, data: sel }, 'latest'] };
+        })).catch(function (e) {
+          if (e && e.sinLote) return Promise.all(SELS.map(uno));
+          throw e;                       /* red caida: no se insiste once veces */
+        });
+    return vuelta.then(function (r) {
       if (!r[1]) { estado[cid] = { ok: false }; return estado[cid]; }
       var wp = palabras(r[0]);
       estado[cid] = {

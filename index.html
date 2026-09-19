@@ -8338,13 +8338,21 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
 
   function haceTiras(){
     tiras=[];
-    var anchoTira=W*2;
+    /* EL ANCHO DE LA TIRA TIENE TECHO. A «W*2» y densidad 2, en un escritorio
+       de 1440 con la banda a 520 px de alto, cada tira son 5760x1040 pixeles:
+       24 MB de mapa de bits, y son cuatro. Noventa y seis megas de memoria de
+       GPU por una banda decorativa. Para que el deslizamiento cierre basta con
+       que la tira sea al menos tan ancha como la ventana; lo demas es regalo.
+       Y la densidad de estas tiras no necesita ser la de la pantalla: son
+       relieve, no texto. */
+    var anchoTira=Math.max(W, Math.min(W*2, 1200));
+    var dTira=Math.min(dpr, 1.5);
     for(var s=0;s<LAMINAS.length;s++){
       var z0=LAMINAS[s][0], z1=LAMINAS[s][1];
       var t=document.createElement('canvas');
-      t.width=Math.round(anchoTira*dpr); t.height=Math.round(H*dpr);
+      t.width=Math.round(anchoTira*dTira); t.height=Math.round(H*dTira);
       var g=t.getContext('2d');
-      g.setTransform(dpr,0,0,dpr,0,0);
+      g.setTransform(dTira,0,0,dTira,0,0);
       var COLS=Math.max(8,Math.round(anchoTira/4)), PASOS=34;
       var cw=anchoTira/COLS, f=W*1.30, cx=anchoTira*0.5;
       for(var i=0;i<COLS;i++){
