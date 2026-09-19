@@ -6058,11 +6058,10 @@ p.sec-sub,p.sale-sub,p.join-note,span.rd,.rd,.jbtn-sub,.lane-sub,.stk-sub s,
    Ahora hay tres escalones, los tres en la misma familia azul que el campo de
    la ronda, y la entrada no pinta nada. */
 #presale .widget{background-color:#17244E !important}
-#presale .w-field,#presale .w-out,#presale .prices,#presale .pr,
-#presale .pr-mult,#presale .widget button:not(.on):not(.w-cta){
+#presale .w-field,#presale .w-out,
+#presale .widget button:not(.on):not(.w-cta){
   background-color:#213163 !important}
-#presale .w-out div,#presale .prices>div,#presale .pr-mult>div{
-  background-color:#293A70 !important}
+#presale .w-out div{background-color:#293A70 !important}
 #presale .w-field input,#presale .widget input,#presale .widget select{
   background-color:transparent !important;
   background-image:none !important;
@@ -6094,6 +6093,38 @@ p.sec-sub,p.sale-sub,p.join-note,span.rd,.rd,.jbtn-sub,.lane-sub,.stk-sub s,
   background:radial-gradient(54% 74% at 78% 14%,rgba(255,206,122,.22),transparent 64%) !important}
 .bcd-sol .bcd-mark{letter-spacing:-.02em;color:#EEF2FB}
 .bcd-sol .bcd-mark svg{color:#FFCE7A;opacity:.92}
+/* ══ LA TARJETA DE PRECIOS ══
+   Es un CARTEL BLANCO con un bloque oscuro dentro: el clasico «antes y
+   despues». El bloque de superficies de anoche la volvio azul marino y le dejo
+   el texto oscuro encima, que estaba puesto para placa clara. Medido en el
+   sitio, antes de arreglarlo:
+
+     «$0.20»                        contraste 1.08
+     «Seed Round price»                        1.09
+     «5x»                                      2.40
+     «from Seed Round to listing»              1.09
+
+   El minimo legible son 4,5. Eso no era «oscuro»: era invisible, y lo causo el
+   cambio de anoche. Aqui se fija la tarjeta ENTERA -placa y tinta juntas- para
+   que no vuelva a quedarse media convertida. */
+#presale .prices{
+  background-color:#F7F8FB !important;
+  border-color:rgba(10,16,32,.14) !important;
+  box-shadow:0 26px 60px -34px rgba(6,14,40,.55) !important}
+#presale .pr{background-color:transparent !important}
+#presale .pr .pr-k{color:#59637A !important}
+#presale .pr .pr-v{color:#0B1020 !important}
+#presale .pr .pr-n{color:#636D81 !important}   /* 4,43 se queda corto: el minimo son 4,5 */
+#presale .pr-arrow{border-color:rgba(10,16,32,.12) !important}
+#presale .pr.up{background-color:#0B1020 !important}
+#presale .pr.up .pr-k{color:rgba(233,238,247,.62) !important}
+#presale .pr.up .pr-v{color:#7FB0FF !important}
+#presale .pr.up .pr-n{color:rgba(233,238,247,.52) !important}
+#presale .pr-mult{
+  background-color:#EAF2EC !important;
+  border-color:rgba(10,16,32,.10) !important}
+#presale .pr-mult b{color:#0A4BD0 !important}
+#presale .pr-mult .mono{color:#4B5568 !important}
 </style>
 <script>
 /* ══════════════════════════════════════════════════════════════════════════
