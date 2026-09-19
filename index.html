@@ -5552,6 +5552,18 @@ h1,.sec-h,.press-h,.builds-h,.tkp-h,.sale-h,.ruta-h,.join-h{max-width:22ch}
    la bateria de garantias lo cazo a 1280. En una tira de tarjetas la
    inclinacion se lee como peso; en cuatro renglones de texto no aporta nada y
    descuadra la linea. */
+/* «--vel» se declara, y se declara SIN HERENCIA a proposito.
+   Una variable sin declarar que cambia en un elemento obliga al navegador a
+   revisar el estilo de todo lo que cuelga de el, por si alguien la usa. Esta
+   se escribia en la raiz del documento y en cada cuadro de scroll, asi que
+   revisaba el documento entero —mil setecientos elementos— sesenta veces por
+   segundo. Medido con la traza del navegador bajando la pagina: el 25 % del
+   tiempo se iba en recalcular estilos.
+   Declarandola «inherits:false» el cambio no baja a los hijos, y escribiendola
+   en los cuatro elementos que de verdad la usan en vez de en la raiz, cada
+   cuadro toca cuatro elementos en lugar de mil setecientos. El angulo que se
+   ve es exactamente el mismo. */
+@property --vel{ syntax:'<number>'; inherits:false; initial-value:0 }
 .press-rail,.builds-rail,.sec-grid,.join-grid{
   transform:skewY(calc(var(--vel) * .9deg));
   transform-origin:50% 50%;
@@ -12252,6 +12264,16 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
 (function(){
   if(matchMedia('(prefers-reduced-motion:reduce)').matches) return;
   var raiz=document.documentElement, ant=scrollY, v=0, corre=false, ultimo=0;
+  /* Los cuatro que llevan la inclinacion. Se buscan una vez; si alguno entra
+     despues, se vuelve a buscar cuando cambia el alto del documento. */
+  var TORCIDOS='.press-rail,.builds-rail,.sec-grid,.join-grid';
+  var torcidos=[].slice.call(document.querySelectorAll(TORCIDOS));
+  addEventListener('nrm:remide', function(){
+    torcidos=[].slice.call(document.querySelectorAll(TORCIDOS));
+  }, {passive:true});
+  function inclina(n){
+    for(var i=0;i<torcidos.length;i++) torcidos[i].style.setProperty('--vel', n);
+  }
 
   /* Las bandas de papel. El color de la cuña es el de la seccion que tienen
      justo encima, leido del marcado: asi la hoja tapa con el negro que ya
@@ -12305,7 +12327,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
     /* 62 px por cuadro es un tiron fuerte de rueda; con 32 saturaba a tope
        con un solo clic y la inclinacion era siempre la maxima. */
     var n=Math.max(-1,Math.min(1, v/62));
-    raiz.style.setProperty('--vel', n.toFixed(4));
+    inclina(n.toFixed(4));
     if(performance.now()-ultimo > 140){
       /* nadie toca la rueda: se frena deprisa y se apaga. La condicion de
          antes miraba solo la velocidad suavizada, que desde un tiron fuerte
@@ -12313,7 +12335,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
          del navegador sigue emitiendo eventos mientras tanto—, asi que el
          bucle se quedaba vivo con un resto de inclinacion puesto. */
       v *= .62;
-      if(Math.abs(v) < .25){ corre=false; raiz.style.setProperty('--vel','0'); return }
+      if(Math.abs(v) < .25){ corre=false; inclina('0'); return }
     }
     requestAnimationFrame(paso);
   }
