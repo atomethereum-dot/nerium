@@ -8421,105 +8421,107 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
 
   /* la paleta de la pila, misma tabla: dos blancos, cuatro azules, dos hondos */
   /* ══════════════════════════════════════════════════════════════════════
-     EL RELIEVE, EN CUATRO LAMINAS
+     CAJAS DE VERDAD, Y LAS MUEVE EL SCROLL
      ══════════════════════════════════════════════════════════════════════
-     Aqui cruzaban cubos isometricos. Ahora cruza una superficie mecanizada:
-     una rejilla fina donde cada celda sube una altura distinta, vista a ras
-     del suelo, con la profundidad entera en los filetes de luz de los cantos.
+     Lo que habia antes no era 3D: eran rectangulos alineados con los ejes que
+     insinuaban relieve. Sin perspectiva en los costados, sin caras con
+     orientacion y sin modelo de luz, por mucho brillo que se le suba lee como
+     dibujo. Aqui se proyectan los OCHO VERTICES de cada bloque con una camara
+     con foco y se pintan sus TRES caras visibles como poligonos: la de arriba,
+     la que mira a la camara y el costado —el izquierdo o el derecho segun de
+     que lado del eje caiga el bloque—. Cada cara con su luz segun hacia donde
+     mira, y de fondo a frente, que resuelve la oclusion sin ordenar nada.
 
-     Y AQUI NO SE PINTA EN CADA CUADRO. Esta banda corre suelta -no la mueve el
-     scroll-, asi que rehacer el relieve sesenta veces por segundo seria caro
-     para algo que esta siempre encendido. Se dibuja UNA VEZ en cuatro tiras
-     sin costura, una por lamina de profundidad, y por cuadro solo se deslizan:
-     las de delante mas rapido que las del fondo, que es de donde sale el
-     paralaje. Ocho «drawImage» por cuadro y se acabo.
+     Y LA MUEVE EL SCROLL, no un reloj. Dos motivos, y el segundo es el que
+     manda:
 
-     Que cierren sin costura es la unica condicion: el mundo se repite cada
-     CICLO celdas, asi que el borde derecho de una tira encaja con su izquierdo.
+       · el primero, que es lo que hace la referencia: la camara avanza SOBRE
+         la superficie. Un deslizamiento lateral uniforme es una marquesina, y
+         una marquesina es lo que hacia que esto pareciera un banner.
 
-     SIN HORIZONTE. Metiendolo dentro de la tira, media tira es fondo, y el
-     fondo a esta escala es una pared de rayas. Se corta el campo en z=5 y
-     queda lo unico que tiene volumen: la superficie cercana pasando.
+       · el segundo, el coste. Pintar mil quinientas cajas sesenta veces por
+         segundo, para siempre, en un telefono, no se puede. Movido por el
+         scroll solo se redibuja cuando el visitante se mueve, y solo si el
+         avance cambio de verdad.
 
-     EL FILETE MARCA UN ESCALON, NO UNA CELDA. Pintandolo en cada celda
-     visible, las que estan a la misma cota que la de delante tambien llevaban
-     linea y el relieve desaparecia debajo. Solo brilla el canto que SUBE, y en
-     proporcion a lo que sube. */
-  var CICLO=512;
-  function env(x){ return ((x%CICLO)+CICLO)%CICLO }
+     Las tiras pre-dibujadas que habia antes no valen con perspectiva real: un
+     periodo del mundo se proyecta a anchos distintos segun la profundidad, asi
+     que al repetirlas sale costura. */
+  /* El lado de celda gobierna el coste. Se midio en A/B —el mismo recorrido
+     con la banda y sin ella— y la escena no cuesta nada medible: la diferencia
+     sale dentro del ruido. El 0,20 es calidad, no ahorro; si algun dia hay que
+     apretar, este es el numero. */
+  var CEL=0.20;
+  var vivo=true, W=0, H=0, dpr=1, ultimo=-9;
+
   function rh(x,z){ var n=x*374761393+z*668265263; n=(n^(n>>13))*1274126177; return ((n^(n>>16))>>>0)/4294967296 }
-  function rc(x,z,e){ return rh(Math.floor(env(x)/e),Math.floor(z/e)) }
-  function rAlt(x,z){
-    var zona=rc(x,z,7)*0.55 + rc(x+5,z+13,17)*0.45;
-    var h=zona*0.66 + rh(env(x),z)*0.34;
-    /* UNA CRESTA ANCHA POR ENCIMA DEL RUIDO. Con densidad uniforme de canto a
-       canto no hay donde mirar: es papel pintado, y un rectangulo de papel
-       pintado es un banner. Dos ondas largas y desiguales -para que no se lea
-       el periodo- levantan unas zonas y hunden otras, y aparece una
-       composicion: crestas, valles y mesetas. */
-    var cx=env(x)/CICLO*Math.PI*2;
-    var onda=0.5+0.5*(Math.sin(cx*1)*0.62+Math.sin(cx*2.7+1.1)*0.38);
-    h=h*0.58 + onda*0.42;
-    h=Math.pow(h,1.75);
-    return Math.round(h*8)/8;          /* en escalones: metal, no dunas */
+  function rc(x,z,e){ return rh(Math.floor(x/e),Math.floor(z/e)) }
+  function altura(i,j){
+    var zona=rc(i,j,7)*0.55+rc(i+5,j+13,17)*0.45;
+    var h=zona*0.62+rh(i,j)*0.38;
+    /* una cresta ancha por encima del ruido: sin ella la densidad es uniforme
+       de canto a canto y no hay donde mirar */
+    var onda=0.5+0.5*(Math.sin(i*0.055)*0.62+Math.sin(i*0.148+1.1)*0.38);
+    h=h*0.55+onda*0.45;
+    h=Math.min(1,Math.max(0,0.5+(h-0.5)*1.9));
+    return Math.round(Math.pow(h,1.35)*7)/7;
   }
-  /* La extrusion queda POR DEBAJO de la altura del ojo a proposito: si la
-     pasa, la pieza se proyecta por encima del horizonte y la perspectiva se
-     da la vuelta. */
-  var LAMINAS=[[3.2,5.0],[2.1,3.2],[1.4,2.1],[0.95,1.4]];
-  var CAMY=0.445, ALTO=0.30, CEL=19;
 
-  var W=0,H=0,dpr=1,tiras=[],vivo=true,t0=0;
+  function draw(p){
+    var ZN=2.0, ZF=9.0;
+    var f=W*1.20;
+    var camY=(H/f)/(1/ZN-1/ZF);          /* el suelo cae justo en los cantos */
+    var HOR=-camY*f/ZF;
+    var ALTO=camY*0.42;                  /* por debajo del ojo: si lo pasa, la
+                                            perspectiva se da la vuelta */
+    var cx=W/2;
+    /* EL AVANCE ES CONTINUO. Desplazando solo el indice del ruido, el campo
+       saltaba de celda en celda; desplazando ademas la Z una fraccion de
+       celda, las cajas se acercan de verdad. */
+    var avance=p*22;
+    var desp=avance%CEL, salto=Math.round((avance-desp)/CEL);
 
-  function haceTiras(){
-    tiras=[];
-    /* EL ANCHO DE LA TIRA TIENE TECHO. A «W*2» y densidad 2, en un escritorio
-       de 1440 con la banda a 520 px de alto, cada tira son 5760x1040 pixeles:
-       24 MB de mapa de bits, y son cuatro. Noventa y seis megas de memoria de
-       GPU por una banda decorativa. Para que el deslizamiento cierre basta con
-       que la tira sea al menos tan ancha como la ventana; lo demas es regalo.
-       Y la densidad de estas tiras no necesita ser la de la pantalla: son
-       relieve, no texto. */
-    var anchoTira=Math.max(W, Math.min(W*2, 1200));
-    var dTira=Math.min(dpr, 1.5);
-    for(var s=0;s<LAMINAS.length;s++){
-      var z0=LAMINAS[s][0], z1=LAMINAS[s][1];
-      var t=document.createElement('canvas');
-      t.width=Math.round(anchoTira*dTira); t.height=Math.round(H*dTira);
-      var g=t.getContext('2d');
-      g.setTransform(dTira,0,0,dTira,0,0);
-      var COLS=Math.max(8,Math.round(anchoTira/4)), PASOS=34;
-      var cw=anchoTira/COLS, f=W*1.30, cx=anchoTira*0.5;
-      for(var i=0;i<COLS;i++){
-        var sx=i*cw, xm=sx+cw*0.5-cx;
-        var techo=H+2, hAnt=-1;
-        for(var r=0;r<PASOS;r++){
-          var tt=r/(PASOS-1);
-          var z=z0+(z1-z0)*Math.pow(tt,1.6);
-          var k=f/z;
-          var wx=xm*z/f;
-          var h=rAlt(Math.round(wx*CEL), Math.round(z*CEL))*ALTO;
-          var yTop=(CAMY-h)*k;
-          if(yTop>=techo){ hAnt=h; continue }
-          var y=Math.round(yTop), alt=Math.round(techo-y);
-          if(alt<1){ techo=y; hAnt=h; continue }
-          var cerca=1-(z-0.95)/(5.0-0.95), rel=h/ALTO;
-          var L=17+rel*36+cerca*22;
-          g.fillStyle='rgb('+(L*0.90|0)+','+(L*0.96|0)+','+(L*1.14|0)+')';
-          g.fillRect(sx,y,cw+0.7,alt);
-          /* la primera de la columna no tiene con que compararse: sin canto,
-             o sale una raya de ancho completo en el borde de abajo */
-          var paso = hAnt<0 ? 0 : (h-hAnt)/ALTO;
-          if(paso>0.04){
-            var fl=(0.24+cerca*0.76)*Math.min(1,0.34+paso*2.4);
-            g.fillStyle='rgba(226,233,246,'+Math.min(0.92,fl).toFixed(3)+')';
-            g.fillRect(sx,y,cw+0.7,Math.max(0.8,cerca*1.7));
-          }
-          hAnt=h; techo=y;
-        }
-      }
-      tiras.push({cv:t, ancho:anchoTira, vel:0.085/((z0+z1)/2)});
+    ctx.fillStyle='#05070C'; ctx.fillRect(0,0,W,H);
+    var Px=function(x,y,z){ var k=f/z; return [cx+x*k, HOR+(camY-y)*k] };
+    function cara(q,col){
+      ctx.beginPath(); ctx.moveTo(q[0][0],q[0][1]);
+      for(var i=1;i<q.length;i++) ctx.lineTo(q[i][0],q[i][1]);
+      ctx.closePath(); ctx.fillStyle=col; ctx.fill();
     }
+    var iMin=Math.floor(-(W/2)*ZF/f/CEL)-1, iMax=Math.ceil((W/2)*ZF/f/CEL)+1;
+    var jMin=Math.floor(ZN/CEL), jMax=Math.ceil(ZF/CEL);
+    for(var j=jMax;j>=jMin;j--){
+      var z0=j*CEL-desp, z1=z0+CEL;
+      if(z1<=ZN) continue;
+      if(CEL*(f/z0)<1.2) continue;       /* mas fino que un pixel y pico: fuera */
+      var lejos=(z0-ZN)/(ZF-ZN), cerca=1-lejos;
+      var nie=Math.pow(cerca,1.25);      /* lo de atras se va al fondo */
+      for(var i=iMin;i<=iMax;i++){
+        var x0=i*CEL, x1=x0+CEL;
+        var sxA=cx+x0*(f/z0), sxB=cx+x1*(f/z0);
+        if(sxB<-6||sxA>W+6) continue;
+        var h=altura(i, j+salto)*ALTO;
+        var rel=h/ALTO;
+        var tono=function(L){ var v=Math.round(5+(L-5)*nie);
+          return 'rgb('+Math.round(v*0.86)+','+Math.round(v*0.95)+','+Math.round(v*1.20)+')' };
+        var a=Px(x0,h,z0), b=Px(x1,h,z0), c=Px(x1,h,z1), d=Px(x0,h,z1);
+        var e=Px(x0,0,z0), fq=Px(x1,0,z0);
+        /* de lejos, los costados no llegan a un pixel: solo la de arriba */
+        if(h>0.0005 && (a[1]-e[1])<-1.1){
+          cara([a,b,fq,e], tono(13+rel*10));                 /* la que mira aqui */
+          if(x1<0)      cara([b,c,Px(x1,0,z1),fq], tono(21+rel*15));
+          else if(x0>0) cara([d,a,e,Px(x0,0,z1)], tono(21+rel*15));
+        }
+        cara([a,b,c,d], tono(31+rel*31));                    /* la de arriba */
+      }
+    }
+    /* los dos cantos se funden: cortada en seco es un rectangulo de textura */
+    var g=ctx.createLinearGradient(0,0,0,H*0.44);
+    g.addColorStop(0,'rgba(5,7,12,1)'); g.addColorStop(1,'rgba(5,7,12,0)');
+    ctx.fillStyle=g; ctx.fillRect(0,0,W,H*0.44);
+    var g2=ctx.createLinearGradient(0,H,0,H*0.82);
+    g2.addColorStop(0,'rgba(5,7,12,1)'); g2.addColorStop(1,'rgba(5,7,12,0)');
+    ctx.fillStyle=g2; ctx.fillRect(0,H*0.82,W,H*0.18);
   }
 
   function mide(){
@@ -8528,51 +8530,21 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
     W=Math.max(1,Math.round(r.width)); H=Math.max(1,Math.round(r.height));
     __mide(cv, W*dpr, H*dpr);
     ctx.setTransform(dpr,0,0,dpr,0,0);
-    haceTiras();
+    ultimo=-9;
   }
 
-  function pinta(ts){
-    if(!vivo || !W || !cv.width || !tiras.length){ requestAnimationFrame(pinta); return }
-    if(!t0) t0=ts;
-    var T=CALMA ? 0 : (ts-t0)/1000;
-    ctx.fillStyle='#05070C'; ctx.fillRect(0,0,W,H);
-    for(var s=0;s<tiras.length;s++){
-      var t=tiras[s];
-      var off=((T*t.vel*W)%t.ancho+t.ancho)%t.ancho;
-      ctx.drawImage(t.cv, -off, 0, t.ancho, H);
-      ctx.drawImage(t.cv, t.ancho-off, 0, t.ancho, H);
+  function pinta(){
+    if(vivo && W){
+      /* el avance va de que la banda entra por abajo a que sale por arriba */
+      var r=cv.getBoundingClientRect();
+      var p=(innerHeight-r.top)/(innerHeight+r.height);
+      p=Math.min(1,Math.max(0,p));
+      /* Un redibujo cada ~3 px de scroll. Mas fino no se ve: entre uno y otro
+         la propia pagina ya se movio esos tres pixeles. */
+      if(Math.abs(p-ultimo)>0.0035){ ultimo=p; draw(p) }
     }
-    /* ── LA LUZ QUE RECORRE EL MATERIAL ──
-       Esto es lo que separa «superficie de metal» de «patron impreso», y es lo
-       que hace cara la referencia: no se mueve la textura, se mueve la LUZ
-       sobre ella. Un reflejo largo y suave cruza a su propio ritmo -distinto
-       del de las laminas, o se leeria como una sola cosa deslizandose- en modo
-       «overlay», que aclara lo claro y oscurece lo oscuro: levanta los cantos
-       que toca y hunde las caras, que es justo lo que hace un reflejo sobre
-       una superficie mecanizada. Un relleno de degradado por cuadro. */
-    var anchoLuz=W*1.35;
-    var lx=((T*0.085*W)%(W+anchoLuz))-anchoLuz*0.5;
-    var lg=ctx.createLinearGradient(lx,H,lx+anchoLuz,0);
-    lg.addColorStop(0,'rgba(255,255,255,0)');
-    lg.addColorStop(0.42,'rgba(228,238,255,0.24)');
-    lg.addColorStop(0.58,'rgba(228,238,255,0.24)');
-    lg.addColorStop(1,'rgba(255,255,255,0)');
-    ctx.globalCompositeOperation='overlay';
-    ctx.fillStyle=lg; ctx.fillRect(0,0,W,H);
-    ctx.globalCompositeOperation='source-over';
-
-    /* LOS DOS CANTOS SE FUNDEN, no solo el de arriba. Cortada en seco por
-       abajo, la banda es un rectangulo de textura: un banner. Fundida por los
-       dos lados, es una superficie que aparece y desaparece. */
-    var g=ctx.createLinearGradient(0,0,0,H*0.52);
-    g.addColorStop(0,'rgba(5,7,12,1)'); g.addColorStop(1,'rgba(5,7,12,0)');
-    ctx.fillStyle=g; ctx.fillRect(0,0,W,H*0.52);
-    var g2=ctx.createLinearGradient(0,H,0,H*0.78);
-    g2.addColorStop(0,'rgba(5,7,12,1)'); g2.addColorStop(1,'rgba(5,7,12,0)');
-    ctx.fillStyle=g2; ctx.fillRect(0,H*0.78,W,H*0.22);
     requestAnimationFrame(pinta);
   }
-
   mide();
   addEventListener('resize', mide, {passive:true});
   new IntersectionObserver(function(e){ vivo=e[0].isIntersecting },
