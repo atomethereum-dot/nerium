@@ -33,6 +33,23 @@ let ok = 0, mal = 0;
 const di = (b, t) => { if (b) { ok++; console.log('  ok  ' + t) } else { mal++; console.log('  MAL ' + t) } };
 
 const ctx = await nav.newContext({ ...devices['iPhone 13'], isMobile: true, hasTouch: true });
+/* Se cuenta cada vez que un lienzo rehace su mapa de bits. Asignar
+   «canvas.width» libera la memoria de la GPU y vuelve a reservarla AUNQUE EL
+   VALOR NO CAMBIE, y eso es lo que manda la norma, no un detalle de un motor.
+   Medido antes de arreglarlo: 105 reasignaciones y 37 MB reservados y tirados
+   en un solo recorrido de la pagina, de los cuales 80 eran del sistema que
+   dormia los lienzos lejanos. En Safari de iOS, donde esa memoria es de la
+   GPU y va contra un presupuesto por pestaña, ese vaiven mata la pestaña —y
+   una pestaña muerta se recarga sola: es el «se reinicia» y el «servidor no
+   encontrado» que se reportaron desde el movil—. */
+await ctx.addInitScript(() => {
+  window.__re = 0; window.__bytes = 0;
+  const d = Object.getOwnPropertyDescriptor(HTMLCanvasElement.prototype, 'width');
+  Object.defineProperty(HTMLCanvasElement.prototype, 'width', { configurable: true,
+    get(){ return d.get.call(this) },
+    set(v){ if (window.__cuenta) { window.__re++; window.__bytes += v * this.height * 4 }
+            return d.set.call(this, v) } });
+});
 const pg = await ctx.newPage();
 await pg.goto('http://127.0.0.1:' + P + '/', { waitUntil: 'load' });
 await pg.waitForTimeout(2600);
@@ -124,6 +141,23 @@ di(pegadas.length === etapas.length && etapas.length >= 4,
    'las etapas a pantalla completa siguen pegadas y fuera del flujo (' + pegadas.length + '/' + etapas.length + ')');
 di(etapas.every(e => Math.abs(e.alto - e.vh) <= 2),
    'y siguen llenando la ventana (' + etapas.map(e => e.s + ' ' + e.alto + '/' + e.vh).join(', ') + ')');
+
+/* Y el recorrido entero, con la cuenta puesta. El limite es generoso a
+   proposito: doce lienzos tienen derecho a construirse UNA vez cada uno, y
+   sobran cuatro para un giro de pantalla o un caso raro. Lo que no cabe ahi
+   es un sistema que duerma y despierte lienzos mientras se lee. */
+await pg.evaluate(() => { window.__cuenta = 1 });
+{
+  const h = await pg.evaluate(() => document.documentElement.scrollHeight);
+  for (let y = 0; y < h; y += 300) {
+    await pg.evaluate(v => scrollTo(0, v), y);
+    await pg.waitForTimeout(70);
+  }
+  const r = await pg.evaluate(() => ({ re: window.__re, mb: window.__bytes / 1048576 }));
+  di(r.re <= 16,
+     'recorrer la pagina no rehace los mapas de bits una y otra vez (' + r.re +
+     ' reasignaciones, ' + r.mb.toFixed(1) + ' MB, limite 16)');
+}
 
 await ctx.close(); await nav.close(); srv.close();
 console.log(mal ? '\n' + ok + ' bien, ' + mal + ' MAL' : '\n' + ok + '/' + ok + ' correctas');

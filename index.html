@@ -6035,6 +6035,39 @@ window.__dens = function(){
   var techo = (innerWidth < 900) ? 1.25 : 2;
   return Math.min(d, techo);
 };
+
+/* ═══════════ NO REHACER UN MAPA DE BITS QUE YA MIDE LO QUE TOCA ═══════════
+   Asignar «canvas.width» REHACE el mapa de bits aunque el valor no cambie:
+   libera la memoria de la GPU y vuelve a reservarla. No es una opinion, es lo
+   que manda la norma.
+
+   Medido en un recorrido entero de la pagina, en un telefono:
+
+     lienzos en el documento                         12
+     «resize» que la pagina se manda a si misma       6
+     reasignaciones de mapa de bits                 105   (37 MB)
+
+   Seis avisos y ciento cinco reasignaciones, porque cada aviso hacia que se
+   reconstruyeran LOS DOCE lienzos y no solo el que despertaba. Los avisos son
+   de la propia pagina: el despertador de los lienzos que duermen fuera de
+   pantalla se manda un «resize» para que las escenas se reconstruyan.
+
+   Treinta y siete megas reservados y tirados por pasada, y el visitante sube y
+   baja. En Chrome de escritorio eso se absorbe; en Safari de iOS, donde la
+   memoria de lienzo es de la GPU y va contra un presupuesto por pestaña, ese
+   vaiven es de las formas mas rapidas de que el sistema MATE la pestaña. Y una
+   pestaña muerta se recarga sola: es el «se reinicia» y el «servidor no
+   encontrado» que se reportaron desde el movil.
+
+   Esto toca el mapa de bits solo cuando de verdad cambia de tamaño. Devuelve
+   si lo ha tocado, por si quien llama quiere ahorrarse tambien su parte. */
+window.__mide = function(cv, w, h){
+  w = Math.round(w); h = Math.round(h);
+  if (w < 1) w = 1; if (h < 1) h = 1;
+  if (cv.width === w && cv.height === h) return false;
+  cv.width = w; cv.height = h;
+  return true;
+};
 </script>
 <script>
 /* ══════════════════════════════════════════════════════════════════════════
@@ -7920,7 +7953,7 @@ function campoGL(){
   function size(){
     dpr=Math.min(devicePixelRatio||1,1.5);
     W=cv.clientWidth;H=cv.clientHeight;
-    cv.width=Math.round(W*dpr);cv.height=Math.round(H*dpr);
+    __mide(cv, W*dpr, H*dpr);
     gl.viewport(0,0,cv.width,cv.height);
     U=Math.max(15,Math.round(Math.min(cv.width,cv.height)/26));
     N=cv.width<1200?92:cv.width<2000?150:196;
@@ -8074,7 +8107,7 @@ function campo2D(){
   function size(){
     dpr=Math.min(devicePixelRatio||1,1.5);
     W=cv.clientWidth;H=cv.clientHeight;
-    cv.width=W*dpr;cv.height=H*dpr;ctx.setTransform(dpr,0,0,dpr,0,0);
+    __mide(cv, W*dpr, H*dpr); ctx.setTransform(dpr,0,0,dpr,0,0);
     ctx.fillStyle='#000';ctx.fillRect(0,0,W,H);
     U=Math.max(15,Math.round(Math.min(W,H)/26));
     const quiere=W<760?62:W<1300?94:122;
@@ -8290,7 +8323,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
     var r=cv.getBoundingClientRect();
     dpr=__dens();
     W=Math.max(1,Math.round(r.width)); H=Math.max(1,Math.round(r.height));
-    cv.width=Math.round(W*dpr); cv.height=Math.round(H*dpr);
+    __mide(cv, W*dpr, H*dpr);
     ctx.setTransform(dpr,0,0,dpr,0,0);
     arma();
   }
@@ -8361,7 +8394,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
     const ctx=cv.getContext('2d');
     const r=cv.getBoundingClientRect();
     const dpr=__dens();
-    cv.width=Math.max(1,r.width*dpr);cv.height=Math.max(1,r.height*dpr);
+    __mide(cv, r.width*dpr, r.height*dpr);
     ctx.setTransform(dpr,0,0,dpr,0,0);
     const seed=+cv.dataset.seed||1;
     let n=seed*9301;
@@ -8538,7 +8571,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
     const draw=()=>{
       const r=cv.getBoundingClientRect();if(!r.width)return;
       const dpr=__dens();
-      cv.width=r.width*dpr;cv.height=r.height*dpr;
+      __mide(cv, r.width*dpr, r.height*dpr);
       const c=cv.getContext('2d');c.setTransform(dpr,0,0,dpr,0,0);
       c.fillStyle='#0A1024';c.fillRect(0,0,r.width,r.height);
       const g=c.createLinearGradient(r.width*.12,r.height,r.width*.92,0);
@@ -8648,7 +8681,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
     dpr=__dens();
     W=r.width;H=r.height;narrow=innerWidth<880;
     sc=narrow?H/(DX*0.72):W/DX;
-    cv.width=W*dpr;cv.height=H*dpr;
+    __mide(cv, W*dpr, H*dpr);
     ctx.setTransform(dpr,0,0,dpr,0,0);
     const R=(a,b)=>a+Math.random()*(b-a);
     const U = W<640 ? 17 : W<1100 ? 14 : 12;   /* lado del cuadrado, en unidades del anillo */
@@ -8978,7 +9011,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
   function size(){
     const d=__dens();
     W=cv.clientWidth;H=cv.clientHeight;
-    cv.width=W*d;cv.height=H*d;ctx.setTransform(d,0,0,d,0,0);
+    __mide(cv, W*d, H*d); ctx.setTransform(d,0,0,d,0,0);
     top=dTop(hold);hh=hold.offsetHeight;vh=innerHeight;
     dirty=true;
   }
@@ -9286,7 +9319,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
   function build(){
     const d=__dens();
     W=cv.clientWidth;H=cv.clientHeight;
-    cv.width=W*d;cv.height=H*d;ctx.setTransform(d,0,0,d,0,0);
+    __mide(cv, W*d, H*d); ctx.setTransform(d,0,0,d,0,0);
     st.n=Math.max(6,Math.round(W/108));
     last=-1;
   }
@@ -9417,7 +9450,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
   function build(){
     const d=__dens();
     W=cv.clientWidth;H=cv.clientHeight;
-    cv.width=W*d;cv.height=H*d;ctx.setTransform(d,0,0,d,0,0);
+    __mide(cv, W*d, H*d); ctx.setTransform(d,0,0,d,0,0);
     U=Math.max(34,Math.round(Math.min(W,H)/13));
     cols=Math.ceil(W/U)+1;rows=Math.ceil(H/U)+1;
     const fx=W*.5, fy=H*1.02, maxd=Math.hypot(Math.max(fx,W-fx),fy);
@@ -9685,7 +9718,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
     DPR=d;
     const r=cv.getBoundingClientRect();
     W=r.width||innerWidth; H=r.height||innerHeight;
-    cv.width=Math.round(W*d); cv.height=Math.round(H*d);
+    __mide(cv, W*d, H*d);
     ctx.setTransform(d,0,0,d,0,0);
   }
   const aPixel=v=>(Math.round(v*DPR)+0.5)/DPR;
@@ -10131,7 +10164,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
       const d=__dens();
       const r=cv.getBoundingClientRect();
       W=r.width; H=r.height;
-      cv.width=W*d; cv.height=H*d; ctx.setTransform(d,0,0,d,0,0);
+      __mide(cv, W*d, H*d); ctx.setTransform(d,0,0,d,0,0);
       sello=null;
     }
     let sello=null, R=0;
@@ -11315,7 +11348,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
     DPR=__dens();
     var r=lz.getBoundingClientRect();
     W=Math.max(1,r.width); H=Math.max(1,r.height);
-    lz.width=Math.round(W*DPR); lz.height=Math.round(H*DPR);
+    __mide(lz, W*DPR, H*DPR);
     cx.setTransform(DPR,0,0,DPR,0,0);
     cara=tipo(); mono=tipoMono(); rot=rotulos(); plancha();
   }
@@ -12026,111 +12059,36 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
   document.querySelectorAll(SEL).forEach(function(n){ io.observe(n) });
 })();
 </script>
-<script>
-/* ══════════════════════════════════════════════════════════════════════════
-   LOS LIENZOS HIBERNAN
-   ══════════════════════════════════════════════════════════════════════════
-   Medido en 390x844 a DPR 3, sumando el RSS de todos los procesos del
-   navegador: la pagina arranca en 951 MB y al recorrerla entera sube a 1.167,
-   y NO BAJA. Doscientos dieciseis megas que se quedan puestos. Desactivando
-   los lienzos uno a uno, la mitad de esa subida es suya: quitar «tkpCv» deja
-   la subida en 108, quitar «burst» en 114, quitar «chroma» en 141.
-   El motivo no es que ninguno tenga una fuga, es que hay doce y todos
-   mantienen su memoria reservada estando a cinco pantallas de distancia. Un
-   navegador de telefono mata la pestaña por ahi, y como la pagina retoma
-   donde estabas, la recarga te devolvia AL FINAL del documento.
-   Poner «width = 0» libera el lienzo de verdad -es la unica forma de soltarlo
-   sin quitar el elemento- y devolverle su tamaño lo resucita. Las escenas ya
-   saben reconstruirse solas: todas escuchan «resize». */
-(function(){
-  if(!('IntersectionObserver' in window)) return;
-  /* SOLO EN TELEFONO. Resucitar un lienzo obliga a lanzar un «resize», y ese
-     «resize» tambien lo oye el sistema de paralaje, que vuelve a medir las
-     posiciones de todo. Si eso pasa a mitad de un desplazamiento, las
-     secciones que aun estan saltadas por «content-visibility» miden su alto
-     de reserva y no el real, asi que las posiciones que cachea salen mal y
-     las cabeceras dejan de flotar: la bateria del detalle lo caza.
-     En escritorio sobra memoria y no hay nada que ganar; el problema que esto
-     arregla —la pestaña muerta— es de telefono. Asi que de telefono es. */
-  var movil=matchMedia('(max-width:899px)').matches;
-  if(!movil) return;
-  /* 120 % dejaba el despertar demasiado justo: la escena entraba en cuadro
-     casi a la vez que se le devolvia el tamaño. A 200 % se despierta a dos
-     pantallas de distancia y llega pintada. Sigue durmiendo todo lo que esta
-     mas alla, que es de donde salian los 268 MB. */
-  var LEJOS='200%';
-  var dormidos=[], pendiente=0;
+<!-- ══════════════════════════════════════════════════════════════════════
+     AQUI HIBERNABAN LOS LIENZOS, Y SE QUITO. QUE NO VUELVA.
 
-  function duerme(c){
-    if(c.__zzz || c.width<2) return;
-    /* SE LE CLAVA LA CAJA ANTES DE VACIARLO. Un <canvas> sin medida en CSS
-       toma su tamaño de los atributos «width»/«height», asi que ponerlos a
-       cero LO COLAPSA: la seccion de la banda perdia sus 520 px de alto y el
-       documento entero se acortaba. Todo lo que hubiera medido una posicion
-       antes se quedaba apuntando a otro sitio —la bateria del telefono acabo
-       fotografiando una seccion negra donde esperaba papel y canto «el suelo
-       es un color plano»—. Con la caja fijada en pixeles, dormir no mueve ni
-       una linea de la maquetacion. */
-    var r=c.getBoundingClientRect();
-    if(r.width>0 && r.height>0 && !c.style.width){
-      c.__caja=1; c.style.width=r.width+'px'; c.style.height=r.height+'px';
-    }
-    c.__zzz={w:c.width,h:c.height};
-    c.width=0; c.height=0;
-    if(dormidos.indexOf(c)<0) dormidos.push(c);
-  }
-  function despierta(c){
-    if(!c.__zzz) return false;
-    c.width=c.__zzz.w; c.height=c.__zzz.h; c.__zzz=null;
-    if(c.__caja){ c.__caja=0; c.style.width=''; c.style.height='' }
-    var i=dormidos.indexOf(c); if(i>=0) dormidos.splice(i,1);
-    return true;
-  }
-  /* El «resize» que resucita a uno reconstruye a TODOS, y eso le devolveria el
-     tamaño a los que estan dormidos. Se les vuelve a quitar en el cuadro
-     siguiente, cuando la reconstruccion ya ha pasado. */
-  function reavisa(){
-    /* EL AVISO VA YA, NO EN EL CUADRO SIGUIENTE. Esperando un rAF para lanzar
-       el «resize», la escena tardaba dos cuadros mas su propia reconstruccion
-       en volver a pintar, y en ese hueco el lienzo esta VACIO. Con un dedo
-       rapido eso es una escena en blanco durante un instante; medido, la
-       bateria del telefono lo cazo como «el suelo no es un color plano:
-       0,0014 de recorrido de luz», que es exactamente un lienzo sin pintar.
-       Se avisa en el acto y lo unico que se aplaza es volver a dormir a los
-       que siguen lejos, que eso si puede esperar al cuadro siguiente. */
-    dispatchEvent(new Event('resize'));
-    if(pendiente) return;
-    pendiente=1;
-    requestAnimationFrame(function(){
-      pendiente=0;
-      for(var i=dormidos.length-1;i>=0;i--){
-        var c=dormidos[i];
-        if(c.width>1){ c.__zzz={w:c.width,h:c.height}; c.width=0; c.height=0 }
-      }
-    });
-  }
-  var io=new IntersectionObserver(function(es){
-    var hay=false;
-    for(var i=0;i<es.length;i++){
-      var c=es[i].target;
-      if(es[i].isIntersecting){ if(despierta(c)) hay=true }
-      else duerme(c);
-    }
-    if(hay) reavisa();
-  },{rootMargin:LEJOS+' 0px '+LEJOS+' 0px'});
+     La idea era soltar la memoria de los lienzos que quedan lejos poniendoles
+     «width = 0», y devolversela al acercarse. La medicion que la justifico
+     —951 MB al arrancar, 1.167 al recorrer la pagina— sumaba el RSS de TODOS
+     los procesos del navegador dentro de un contenedor. Eso no es la memoria
+     de los lienzos: es el navegador entero, y con el guion desactivado ya
+     marcaba 235 MB. Se estaba midiendo el suelo, no la habitacion.
 
-  function alta(){
-    document.querySelectorAll('canvas').forEach(function(c){
-      if(c.__vigilado) return;
-      /* el cursor y las miniaturas perezosas no entran: uno es fijo y las
-         otras miden 1x1 hasta que alguien las usa */
-      if(c.id==='cur') return;
-      c.__vigilado=1; io.observe(c);
-    });
-  }
-  addEventListener('load', function(){ setTimeout(alta, 1200) });
-})();
-</script>
+     Medida la memoria de lienzo de verdad -la suma de ancho x alto x 4 de los
+     que estan vivos en cada parada de un recorrido completo, en 390x844-:
+
+                        pico vivo   medio    reasignaciones   MB tirados
+       con hibernacion    10,0 MB   2,6 MB        83              13
+       sin hibernacion    10,0 MB  10,0 MB         3               2
+
+     EL PICO ES EL MISMO. Los doce lienzos juntos nunca pasan de diez megas,
+     porque quien de verdad bajo esa cifra fue el tope de densidad -«__dens»,
+     1,25 en telefono- que entro en el mismo commit y se lleva el merito. Diez
+     megas no matan ninguna pestaña.
+
+     Lo que si la mata es lo que costaba: ochenta reasignaciones de mapa de
+     bits por pasada, cada una una liberacion y una reserva de memoria de GPU,
+     porque dormir y despertar son dos reasignaciones y el visitante sube y
+     baja. Y ademas cada despertar se mandaba un «resize» global, que es de
+     donde salia el tiron de 781 px hacia atras que se arreglo en 7da1b75.
+
+     Ahorraba siete megas y cobraba por ellos el fallo que iba a arreglar.
+     ══════════════════════════════════════════════════════════════════════ -->
 <script>
 /* ══════════════════════════════════════════════════════════════════════════
    EL FRENO DE LAS ANIMACIONES
