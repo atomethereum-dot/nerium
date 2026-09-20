@@ -223,5 +223,22 @@
  "$10M Seed Round": "Seed Round 10 triệu USD",
  "Pre-listing on DexScreener at $1": "Pre-listing trên DexScreener ở mức 1 USD",
  "Development of the online BTC mining interface": "Phát triển giao diện đào BTC trực tuyến",
- "Completed": "Hoàn thành"
+ "Completed": "Hoàn thành",
+ "Build": "Xây dựng",
+ "complete": "hoàn thành",
+ "Press": "Báo chí",
+ "Thesis": "Luận điểm",
+ "Every leg settles, or none does.": "Hoặc tất cả các chân đều tất toán, hoặc không chân nào.",
+ "A public register; the policy travels with the asset.": "Sổ cái công khai; quy tắc đi cùng tài sản.",
+ "Checked before anything is written, not after.": "Kiểm tra trước khi ghi, không phải sau.",
+ "Seconds, not days, and no manual checks to scale.": "Vài giây chứ không phải vài ngày, không cần kiểm tra thủ công.",
+ "The chains it settles on and the wallets it already works with. Nothing to install, nothing to migrate.": "Các chuỗi nơi nó tất toán và các ví đã hoạt động. Không cần cài đặt, không cần di chuyển.",
+ "Four guarantees, written into the protocol.": "Bốn bảo đảm, được ghi trong giao thức.",
+ "Planned": "Dự kiến",
+ "Foundation": "Nền móng",
+ "Expansion": "Mở rộng",
+ "Integration": "Tích hợp",
+ "The company registered, the contract deployed and verified, and the first raise closed. Every one of them checkable by someone who is not us.": "Công ty đã đăng ký, hợp đồng đã triển khai và được xác minh, vòng gọi vốn đầu tiên đã đóng. Từng mục đều có thể kiểm chứng ở bên thứ ba.",
+ "The chain and the interfaces that sit on top of it, built and out in the open, with a price anyone can look up.": "Chuỗi và các giao diện nằm trên nó, đã dựng xong và công khai, với mức giá ai cũng tra được.",
+ "The infrastructure ceases to be a decision factor for the issuer, in the same way interbank payment rails are not one today.": "Hạ tầng thôi là yếu tố cân nhắc của bên phát hành, đúng như các mạng thanh toán liên ngân hàng ngày nay."
 }

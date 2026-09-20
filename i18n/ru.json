@@ -223,5 +223,22 @@
  "$10M Seed Round": "Seed Round на 10 млн $",
  "Pre-listing on DexScreener at $1": "Пре-листинг на DexScreener по 1 $",
  "Development of the online BTC mining interface": "Разработка интерфейса онлайн-майнинга BTC",
- "Completed": "Выполнено"
+ "Completed": "Выполнено",
+ "Build": "Разработка",
+ "complete": "завершено",
+ "Press": "Пресса",
+ "Thesis": "Тезис",
+ "Every leg settles, or none does.": "Либо расчёт проходит целиком, либо не проходит вовсе.",
+ "A public register; the policy travels with the asset.": "Открытый реестр; правило едет вместе с активом.",
+ "Checked before anything is written, not after.": "Проверка до записи, а не после.",
+ "Seconds, not days, and no manual checks to scale.": "Секунды, а не дни, и без ручных проверок.",
+ "The chains it settles on and the wallets it already works with. Nothing to install, nothing to migrate.": "Сети, в которых идёт расчёт, и кошельки, которые уже работают. Ничего не нужно ставить и переносить.",
+ "Four guarantees, written into the protocol.": "Четыре гарантии, записанные в протоколе.",
+ "Planned": "Запланировано",
+ "Foundation": "Фундамент",
+ "Expansion": "Расширение",
+ "Integration": "Интеграция",
+ "The company registered, the contract deployed and verified, and the first raise closed. Every one of them checkable by someone who is not us.": "Компания зарегистрирована, контракт развёрнут и верифицирован, первый раунд закрыт. Каждый пункт можно проверить не у нас.",
+ "The chain and the interfaces that sit on top of it, built and out in the open, with a price anyone can look up.": "Сеть и интерфейсы поверх неё — построены и открыты, с ценой, которую может посмотреть любой.",
+ "The infrastructure ceases to be a decision factor for the issuer, in the same way interbank payment rails are not one today.": "Инфраструктура перестаёт быть фактором выбора для эмитента — так же, как сегодня им не являются межбанковские платёжные сети."
 }

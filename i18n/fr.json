@@ -223,5 +223,22 @@
  "$10M Seed Round": "Seed Round de 10 M$",
  "Pre-listing on DexScreener at $1": "Pré-listing sur DexScreener à 1 $",
  "Development of the online BTC mining interface": "Développement de l'interface de minage de BTC en ligne",
- "Completed": "Terminé"
+ "Completed": "Terminé",
+ "Build": "Développer",
+ "complete": "complété",
+ "Press": "Presse",
+ "Thesis": "Thèse",
+ "Every leg settles, or none does.": "Toutes les jambes sont reglees, ou aucune.",
+ "A public register; the policy travels with the asset.": "Registre public ; la regle voyage avec l’actif.",
+ "Checked before anything is written, not after.": "On verifie avant d’ecrire, pas apres.",
+ "Seconds, not days, and no manual checks to scale.": "Des secondes, pas des jours, et aucun controle manuel a passer a l’echelle.",
+ "The chains it settles on and the wallets it already works with. Nothing to install, nothing to migrate.": "Les chaines ou il regle et les portefeuilles avec lesquels il fonctionne deja. Rien a installer, rien a migrer.",
+ "Four guarantees, written into the protocol.": "Quatre garanties, inscrites dans le protocole.",
+ "Planned": "Prévu",
+ "Foundation": "Fondations",
+ "Expansion": "Expansion",
+ "Integration": "Intégration",
+ "The company registered, the contract deployed and verified, and the first raise closed. Every one of them checkable by someone who is not us.": "La société immatriculée, le contrat déployé et vérifié, et le premier tour bouclé. Chacun de ces points est vérifiable par quelqu'un d'autre que nous.",
+ "The chain and the interfaces that sit on top of it, built and out in the open, with a price anyone can look up.": "La chaîne et les interfaces qui reposent dessus, construites et visibles, avec un prix que n'importe qui peut consulter.",
+ "The infrastructure ceases to be a decision factor for the issuer, in the same way interbank payment rails are not one today.": "L'infrastructure cesse d'être un critère de décision pour l'émetteur, comme ne le sont plus aujourd'hui les réseaux de paiement interbancaires."
 }

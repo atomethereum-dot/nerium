@@ -223,5 +223,22 @@
  "$10M Seed Round": "10 M$'lık Seed Round",
  "Pre-listing on DexScreener at $1": "DexScreener'da 1 $ ön listeleme",
  "Development of the online BTC mining interface": "Çevrim içi BTC madenciliği arayüzünün geliştirilmesi",
- "Completed": "Tamamlandı"
+ "Completed": "Tamamlandı",
+ "Build": "Geliştir",
+ "complete": "tamamlandı",
+ "Press": "Basın",
+ "Thesis": "Tez",
+ "Every leg settles, or none does.": "Ya tum bacaklar takas olur ya da hicbiri.",
+ "A public register; the policy travels with the asset.": "Acik kayit; kural varlikla birlikte yolculuk eder.",
+ "Checked before anything is written, not after.": "Yazmadan once dogrulanir, sonra degil.",
+ "Seconds, not days, and no manual checks to scale.": "Gunler degil saniyeler, elle kontrol buyutmeden.",
+ "The chains it settles on and the wallets it already works with. Nothing to install, nothing to migrate.": "Takasin yapildigi aglar ve halihazirda calisan cuzdanlar. Kurulum yok, gecis yok.",
+ "Four guarantees, written into the protocol.": "Protokole yazılmış dört garanti.",
+ "Planned": "Planlandı",
+ "Foundation": "Temel",
+ "Expansion": "Genişleme",
+ "Integration": "Entegrasyon",
+ "The company registered, the contract deployed and verified, and the first raise closed. Every one of them checkable by someone who is not us.": "Şirket tescilli, sözleşme yayında ve doğrulanmış, ilk tur kapandı. Her biri bizim dışımızda birinden teyit edilebilir.",
+ "The chain and the interfaces that sit on top of it, built and out in the open, with a price anyone can look up.": "Zincir ve üzerine oturan arayüzler, kurulmuş ve açıkta; fiyatı herkes sorgulayabilir.",
+ "The infrastructure ceases to be a decision factor for the issuer, in the same way interbank payment rails are not one today.": "Altyapı, ihraççı için bir karar unsuru olmaktan çıkar; tıpkı bugün bankalar arası ödeme ağlarının olmadığı gibi."
 }

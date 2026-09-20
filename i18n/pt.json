@@ -223,5 +223,22 @@
  "$10M Seed Round": "Seed Round de 10 M$",
  "Pre-listing on DexScreener at $1": "Pré-listagem na DexScreener a 1 $",
  "Development of the online BTC mining interface": "Desenvolvimento da interface de mineração de BTC online",
- "Completed": "Concluído"
+ "Completed": "Concluído",
+ "Build": "Construir",
+ "complete": "concluído",
+ "Press": "Imprensa",
+ "Thesis": "Tese",
+ "Every leg settles, or none does.": "Ou liquidam todas as pernas, ou nenhuma.",
+ "A public register; the policy travels with the asset.": "Registo publico; a politica viaja com o ativo.",
+ "Checked before anything is written, not after.": "Verifica-se antes de escrever, nao depois.",
+ "Seconds, not days, and no manual checks to scale.": "Segundos, nao dias, e sem verificacoes manuais a escalar.",
+ "The chains it settles on and the wallets it already works with. Nothing to install, nothing to migrate.": "As redes onde liquida e as carteiras com que ja funciona. Nada para instalar, nada para migrar.",
+ "Four guarantees, written into the protocol.": "Quatro garantias, escritas no protocolo.",
+ "Planned": "Previsto",
+ "Foundation": "Alicerces",
+ "Expansion": "Expansão",
+ "Integration": "Integração",
+ "The company registered, the contract deployed and verified, and the first raise closed. Every one of them checkable by someone who is not us.": "A empresa registada, o contrato implantado e verificado, e a primeira ronda fechada. Qualquer uma delas pode ser confirmada por alguém que não somos nós.",
+ "The chain and the interfaces that sit on top of it, built and out in the open, with a price anyone can look up.": "A cadeia e as interfaces que assentam sobre ela, construídas e à vista, com um preço que qualquer pessoa pode consultar.",
+ "The infrastructure ceases to be a decision factor for the issuer, in the same way interbank payment rails are not one today.": "A infraestrutura deixa de ser um fator de decisão para o emissor, tal como hoje não o são as redes de pagamentos interbancários."
 }

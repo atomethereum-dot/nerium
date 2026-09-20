@@ -223,5 +223,22 @@
  "$10M Seed Round": "Seed Round de 10 M$",
  "Pre-listing on DexScreener at $1": "Pre-listing en DexScreener a 1 $",
  "Development of the online BTC mining interface": "Desarrollo de la interfaz de minería de BTC en línea",
- "Completed": "Completado"
+ "Completed": "Completado",
+ "Build": "Construir",
+ "complete": "completado",
+ "Press": "Prensa",
+ "Thesis": "Tesis",
+ "Every leg settles, or none does.": "Se liquidan todas las patas o ninguna.",
+ "A public register; the policy travels with the asset.": "Registro publico; la politica viaja con el activo.",
+ "Checked before anything is written, not after.": "Se comprueba antes de escribir nada, no despues.",
+ "Seconds, not days, and no manual checks to scale.": "Segundos, no dias, y sin revisiones manuales que escalar.",
+ "The chains it settles on and the wallets it already works with. Nothing to install, nothing to migrate.": "Las cadenas en las que liquida y las carteras con las que ya funciona. Nada que instalar, nada que migrar.",
+ "Four guarantees, written into the protocol.": "Cuatro garantías, escritas en el protocolo.",
+ "Planned": "Previsto",
+ "Foundation": "Cimientos",
+ "Expansion": "Expansión",
+ "Integration": "Integración",
+ "The company registered, the contract deployed and verified, and the first raise closed. Every one of them checkable by someone who is not us.": "La empresa registrada, el contrato desplegado y verificado, y la primera ronda cerrada. Cada una de las tres se puede comprobar con alguien que no somos nosotros.",
+ "The chain and the interfaces that sit on top of it, built and out in the open, with a price anyone can look up.": "La cadena y las interfaces que van encima, construidas y a la vista, con un precio que cualquiera puede consultar.",
+ "The infrastructure ceases to be a decision factor for the issuer, in the same way interbank payment rails are not one today.": "La infraestructura deja de ser un factor de decisión para el emisor, igual que hoy no lo son las redes de pagos interbancarios."
 }

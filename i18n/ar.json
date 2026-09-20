@@ -223,5 +223,22 @@
  "$10M Seed Round": "Seed Round بقيمة 10 ملايين دولار",
  "Pre-listing on DexScreener at $1": "إدراج مسبق على DexScreener بسعر 1 دولار",
  "Development of the online BTC mining interface": "تطوير واجهة تعدين BTC عبر الإنترنت",
- "Completed": "مكتمل"
+ "Completed": "مكتمل",
+ "Build": "التطوير",
+ "complete": "مكتمل",
+ "Press": "الصحافة",
+ "Thesis": "الأطروحة",
+ "Every leg settles, or none does.": "إمّا أن تُسوّى كلّ الأطراف أو لا يُسوّى أيّ منها.",
+ "A public register; the policy travels with the asset.": "سجلّ علنيّ؛ والقاعدة ترافق الأصل.",
+ "Checked before anything is written, not after.": "يُتحقّق قبل الكتابة لا بعدها.",
+ "Seconds, not days, and no manual checks to scale.": "ثوانٍ لا أيّام، وبلا مراجعات يدوية.",
+ "The chains it settles on and the wallets it already works with. Nothing to install, nothing to migrate.": "الشبكات التي تُسوّى عليها والمحافظ التي تعمل معها بالفعل. لا شيء تُثبّته ولا شيء تنقله.",
+ "Four guarantees, written into the protocol.": "أربع ضمانات، مكتوبة في البروتوكول.",
+ "Planned": "مخطط له",
+ "Foundation": "الأساس",
+ "Expansion": "التوسّع",
+ "Integration": "التكامل",
+ "The company registered, the contract deployed and verified, and the first raise closed. Every one of them checkable by someone who is not us.": "الشركة مسجّلة، والعقد منشور ومُتحقَّق منه، والجولة الأولى مغلقة. كل واحدة منها يمكن التحقق منها لدى طرف غيرنا.",
+ "The chain and the interfaces that sit on top of it, built and out in the open, with a price anyone can look up.": "السلسلة والواجهات التي تعمل فوقها، مبنية وظاهرة للجميع، بسعر يستطيع أي شخص الاطلاع عليه.",
+ "The infrastructure ceases to be a decision factor for the issuer, in the same way interbank payment rails are not one today.": "لم تعد البنية التحتية عاملاً في قرار المُصدِر، تمامًا كما لم تعد شبكات المدفوعات بين البنوك كذلك اليوم."
 }

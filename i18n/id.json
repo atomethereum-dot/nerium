@@ -223,5 +223,22 @@
  "$10M Seed Round": "Seed Round $10 juta",
  "Pre-listing on DexScreener at $1": "Pra-listing di DexScreener seharga $1",
  "Development of the online BTC mining interface": "Pengembangan antarmuka penambangan BTC daring",
- "Completed": "Selesai"
+ "Completed": "Selesai",
+ "Build": "Bangun",
+ "complete": "selesai",
+ "Press": "Pers",
+ "Thesis": "Tesis",
+ "Every leg settles, or none does.": "Semua kaki selesai, atau tidak satu pun.",
+ "A public register; the policy travels with the asset.": "Catatan publik; aturannya ikut bersama asetnya.",
+ "Checked before anything is written, not after.": "Diperiksa sebelum ditulis, bukan sesudahnya.",
+ "Seconds, not days, and no manual checks to scale.": "Hitungan detik, bukan hari, tanpa pemeriksaan manual.",
+ "The chains it settles on and the wallets it already works with. Nothing to install, nothing to migrate.": "Rantai tempat ia menyelesaikan dan dompet yang sudah berfungsi. Tidak ada yang dipasang, tidak ada yang dipindah.",
+ "Four guarantees, written into the protocol.": "Empat jaminan, tertulis dalam protokol.",
+ "Planned": "Direncanakan",
+ "Foundation": "Fondasi",
+ "Expansion": "Ekspansi",
+ "Integration": "Integrasi",
+ "The company registered, the contract deployed and verified, and the first raise closed. Every one of them checkable by someone who is not us.": "Perusahaan terdaftar, kontrak sudah di-deploy dan terverifikasi, dan putaran pertama ditutup. Semuanya bisa dicek pada pihak selain kami.",
+ "The chain and the interfaces that sit on top of it, built and out in the open, with a price anyone can look up.": "Rantainya dan antarmuka di atasnya, sudah dibangun dan terbuka, dengan harga yang bisa dicek siapa saja.",
+ "The infrastructure ceases to be a decision factor for the issuer, in the same way interbank payment rails are not one today.": "Infrastruktur berhenti menjadi faktor keputusan bagi penerbit, sama seperti jaringan pembayaran antarbank hari ini."
 }

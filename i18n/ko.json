@@ -223,5 +223,22 @@
  "$10M Seed Round": "1,000만 달러 규모 Seed Round",
  "Pre-listing on DexScreener at $1": "DexScreener 1달러 사전 상장",
  "Development of the online BTC mining interface": "온라인 BTC 채굴 인터페이스 개발",
- "Completed": "완료"
+ "Completed": "완료",
+ "Build": "빌드",
+ "complete": "완료",
+ "Press": "미디어",
+ "Thesis": "논지",
+ "Every leg settles, or none does.": "전부 결제되거나, 하나도 결제되지 않습니다.",
+ "A public register; the policy travels with the asset.": "공개 원장이며, 정책이 자산과 함께 이동합니다.",
+ "Checked before anything is written, not after.": "기록한 뒤가 아니라 기록하기 전에 확인합니다.",
+ "Seconds, not days, and no manual checks to scale.": "며칠이 아닌 몇 초, 수작업 검토 없이.",
+ "The chains it settles on and the wallets it already works with. Nothing to install, nothing to migrate.": "결제가 이루어지는 체인과 이미 연동되는 지갑들. 설치도, 이전도 필요 없습니다.",
+ "Four guarantees, written into the protocol.": "프로토콜에 새겨진 네 가지 보장.",
+ "Planned": "예정",
+ "Foundation": "기반",
+ "Expansion": "확장",
+ "Integration": "통합",
+ "The company registered, the contract deployed and verified, and the first raise closed. Every one of them checkable by someone who is not us.": "법인 등록, 컨트랙트 배포와 검증, 첫 라운드 마감. 모두 저희가 아닌 곳에서 확인할 수 있습니다.",
+ "The chain and the interfaces that sit on top of it, built and out in the open, with a price anyone can look up.": "체인과 그 위에 올라가는 인터페이스, 모두 완성되어 공개되었고 가격은 누구나 조회할 수 있습니다.",
+ "The infrastructure ceases to be a decision factor for the issuer, in the same way interbank payment rails are not one today.": "발행자에게 인프라는 더 이상 선택의 기준이 아닙니다. 오늘날 은행 간 결제망이 그렇지 않은 것과 같습니다."
 }
