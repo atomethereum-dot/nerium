@@ -3943,21 +3943,6 @@ footer .fgrid h4,footer .tec-real{color:#9EA2AB}
   stroke-linecap:round;stroke-linejoin:round;
   transition:stroke .55s var(--ease,ease)}
 .ruta-f.on .ruta-hecho svg{stroke:#63A9FF}
-/* La pildora de «completado».
-   Va DENTRO del renglon, detras del texto, y no como tercera columna de la
-   fila: asi cuando el texto ocupa dos lineas la pildora se queda pegada a la
-   ultima palabra en vez de irse sola al fondo del renglon.
-   El azul es #1A54F0, que ya esta en la pagina. Se eligio por contraste, no
-   por gusto: con letra blanca da 5,9:1, mientras que el azul de marca —el
-   #2F6BFF— se queda en 4,50 clavado, justo en el minimo, y un texto de once
-   pixeles no puede ir al filo.
-   La separacion va por margen y no por un espacio en el texto: el traductor
-   reescribe el nodo de texto entero y un espacio del final se pierde. */
-.ruta-ok{display:inline-block;margin-left:.6em;vertical-align:.08em;
-  padding:2px 8px 2.5px;border-radius:999px;
-  background:#1A54F0;color:#fff;font-style:normal;font-weight:500;
-  font-family:var(--m);font-size:10px;line-height:1.35;
-  letter-spacing:.12em;text-transform:uppercase;white-space:nowrap}
 @media(prefers-reduced-motion:reduce){
   .ruta-hecho li,.ruta-hecho svg{transition:none}
 }
@@ -7055,13 +7040,13 @@ window.__mide = function(cv, w, h){
         <h3 class="ruta-t">Foundation</h3>
         <p class="ruta-p">The company registered, the contract deployed and verified, and the first raise closed. Every one of them checkable by someone who is not us.</p>
         <ul class="ruta-hecho">
-          <li><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20 6 9 17l-5-5"/></svg><span>Development of the entire NRM ecosystem<i class="ruta-ok">Completed</i></span></li>
-          <li><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20 6 9 17l-5-5"/></svg><span>Contract deployed<i class="ruta-ok">Completed</i></span></li>
-          <li><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20 6 9 17l-5-5"/></svg><span>Code verified on Etherscan<i class="ruta-ok">Completed</i></span></li>
-          <li><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20 6 9 17l-5-5"/></svg><span>Audit passed<i class="ruta-ok">Completed</i></span></li>
-          <li><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20 6 9 17l-5-5"/></svg><span>Team KYC passed<i class="ruta-ok">Completed</i></span></li>
-          <li><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20 6 9 17l-5-5"/></svg><span>Legal registration in the United States<i class="ruta-ok">Completed</i></span></li>
-          <li><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20 6 9 17l-5-5"/></svg><span>$5M Seed Round<i class="ruta-ok">Completed</i></span></li>
+          <li><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20 6 9 17l-5-5"/></svg><span>Development of the entire NRM ecosystem</span></li>
+          <li><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20 6 9 17l-5-5"/></svg><span>Contract deployed</span></li>
+          <li><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20 6 9 17l-5-5"/></svg><span>Code verified on Etherscan</span></li>
+          <li><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20 6 9 17l-5-5"/></svg><span>Audit passed</span></li>
+          <li><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20 6 9 17l-5-5"/></svg><span>Team KYC passed</span></li>
+          <li><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20 6 9 17l-5-5"/></svg><span>Legal registration in the United States</span></li>
+          <li><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20 6 9 17l-5-5"/></svg><span>$5M Seed Round</span></li>
         </ul>
       </li>
       <li class="ruta-f" data-i="1">
@@ -7069,12 +7054,12 @@ window.__mide = function(cv, w, h){
         <h3 class="ruta-t">Expansion</h3>
         <p class="ruta-p">The chain and the interfaces that sit on top of it, built and out in the open, with a price anyone can look up.</p>
         <ul class="ruta-hecho">
-          <li><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20 6 9 17l-5-5"/></svg><span>Development of the Nereum Blockchain infrastructure<i class="ruta-ok">Completed</i></span></li>
-          <li><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20 6 9 17l-5-5"/></svg><span>Development of the Assets Tokenization interface<i class="ruta-ok">Completed</i></span></li>
-          <li><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20 6 9 17l-5-5"/></svg><span>Development of the online BTC mining interface<i class="ruta-ok">Completed</i></span></li>
-          <li><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20 6 9 17l-5-5"/></svg><span>Coverage in the main crypto and web3 outlets<i class="ruta-ok">Completed</i></span></li>
-          <li><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20 6 9 17l-5-5"/></svg><span>Pre-listing on DexScreener at $1<i class="ruta-ok">Completed</i></span></li>
-          <li><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20 6 9 17l-5-5"/></svg><span>$10M Seed Round<i class="ruta-ok">Completed</i></span></li>
+          <li><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20 6 9 17l-5-5"/></svg><span>Development of the Nereum Blockchain infrastructure</span></li>
+          <li><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20 6 9 17l-5-5"/></svg><span>Development of the Assets Tokenization interface</span></li>
+          <li><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20 6 9 17l-5-5"/></svg><span>Development of the online BTC mining interface</span></li>
+          <li><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20 6 9 17l-5-5"/></svg><span>Coverage in the main crypto and web3 outlets</span></li>
+          <li><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20 6 9 17l-5-5"/></svg><span>Pre-listing on DexScreener at $1</span></li>
+          <li><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20 6 9 17l-5-5"/></svg><span>$10M Seed Round</span></li>
         </ul>
       </li>
       <li class="ruta-f" data-i="2">
