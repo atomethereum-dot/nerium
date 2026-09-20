@@ -260,6 +260,19 @@ td b{color:var(--ink)}
   backdrop-filter:blur(3px);display:none;align-items:flex-start;justify-content:center;
   padding:12vh 20px 20px}
 .velo.on{display:flex}
+/* ── los hitos de cada fase ─────────────────────────────────────────────────
+   Lista de verdad y no parrafos con un simbolo delante: quien navegue con
+   lector de pantalla oye «lista de siete elementos». La marca es un SVG y no
+   una palomita de texto, que se cae a cualquier fuente y cambia de tamaño en
+   cada aparato. El azul es el mismo de los enlaces del documento. */
+.hitos{list-style:none;margin:14px 0 22px;padding:0;display:grid;gap:8px}
+.hitos li{display:flex;align-items:flex-start;gap:9px;line-height:1.5;color:var(--ink-2)}
+.hitos svg{flex:0 0 auto;width:15px;height:15px;margin-top:.22em;
+  stroke:var(--blue-d);stroke-width:2.1;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.fase-t{margin:22px 0 0;font-size:15px;font-weight:600;color:var(--ink)}
+.fase-t .est{margin-left:9px;font-family:var(--m);font-size:10px;font-weight:500;
+  letter-spacing:.12em;text-transform:uppercase;color:var(--blue-d);vertical-align:.1em}
+
 /* ── el equipo ──────────────────────────────────────────────────────────────
    Retratos en blanco y negro a proposito: son fotos hechas en sitios y con
    luces distintas, y en color se ven como dos fotos sueltas pegadas en una
@@ -1446,14 +1459,47 @@ red no resulta utilizable de extremo a extremo.</p>
 
 <h2 id="horizontes">Fases de adopción</h2>
 <table>
-  <tr><th>Fase</th><th>Objetivo</th></tr>
-  <tr><td><b>Validación</b></td>
-      <td>Una clase de activo emitida íntegramente en Nereum y transmitida entre titulares cualificados sin intervención humana en la ruta de liquidación.</td></tr>
-  <tr><td><b>Utilidad</b></td>
-      <td>Aceptación de activos tokenizados como colateral. Un activo alcanza liquidez real cuando existe crédito disponible contra él.</td></tr>
+  <tr><th>Fase</th><th>Qué abarca</th></tr>
+  <tr><td><b>Cimientos</b></td>
+      <td>La empresa registrada, el contrato desplegado y verificado, y la primera ronda cerrada. Cada una de las tres se puede comprobar con alguien que no somos nosotros.</td></tr>
+  <tr><td><b>Expansión</b></td>
+      <td>La cadena y las interfaces que van encima, construidas y a la vista, con un precio que cualquiera puede consultar.</td></tr>
   <tr><td><b>Integración</b></td>
       <td>La infraestructura deja de ser un factor de decisión para el emisor, del mismo modo que hoy no lo son las vías de pago interbancarias.</td></tr>
 </table>
+
+<h3 class="fase-t">Cimientos <span class="est">Completado</span></h3>
+<ul class="hitos">
+  <li><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20 6 9 17l-5-5"/></svg><span>Desarrollo de todo el ecosistema NRM</span></li>
+  <li><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20 6 9 17l-5-5"/></svg><span>Contrato desplegado</span></li>
+  <li><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20 6 9 17l-5-5"/></svg><span>Código verificado en Etherscan</span></li>
+  <li><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20 6 9 17l-5-5"/></svg><span>Auditoría aprobada</span></li>
+  <li><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20 6 9 17l-5-5"/></svg><span>KYC del equipo aprobado</span></li>
+  <li><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20 6 9 17l-5-5"/></svg><span>Registro legal en EE. UU.</span></li>
+  <li><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20 6 9 17l-5-5"/></svg><span>Seed Round de 5 M$</span></li>
+</ul>
+
+<h3 class="fase-t">Expansión <span class="est">Completado</span></h3>
+<ul class="hitos">
+  <li><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20 6 9 17l-5-5"/></svg><span>Desarrollo de la infraestructura Nereum Blockchain</span></li>
+  <li><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20 6 9 17l-5-5"/></svg><span>Desarrollo de la interfaz de Assets Tokenization</span></li>
+  <li><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20 6 9 17l-5-5"/></svg><span>Desarrollo de la interfaz de minería de BTC en línea</span></li>
+  <li><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20 6 9 17l-5-5"/></svg><span>Presencia en los principales medios cripto y web3</span></li>
+  <li><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20 6 9 17l-5-5"/></svg><span>Pre-listing en DexScreener a 1 $</span></li>
+  <li><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20 6 9 17l-5-5"/></svg><span>Seed Round de 10 M$</span></li>
+</ul>
+
+<p>Esas son las fases por lo que se construye en cada una. Lo que cada una
+tiene que <em>demostrar</em> para la adopción es otra pregunta, y la respuesta
+no cambia con el calendario:</p>
+<ul>
+  <li>Una clase de activo emitida íntegramente en Nereum y transmitida entre
+      titulares cualificados sin intervención humana en la ruta de liquidación.</li>
+  <li>Aceptación de activos tokenizados como colateral. Un activo alcanza
+      liquidez real cuando existe crédito disponible contra él.</li>
+  <li>La infraestructura deja de ser un factor de decisión para el emisor, del
+      mismo modo que hoy no lo son las vías de pago interbancarias.</li>
+</ul>
 
 <h2 id="cambia">Impacto por perfil</h2>
 
@@ -2521,6 +2567,27 @@ the network is not usable end to end.</p>
   <tr><td><b>Integration</b></td>
       <td>The infrastructure ceases to be a decision factor for the issuer, in the same way interbank payment rails are not one today.</td></tr>
 </table>
+
+<h3 class="fase-t">Foundation <span class="est">Completed</span></h3>
+<ul class="hitos">
+  <li><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20 6 9 17l-5-5"/></svg><span>Development of the entire NRM ecosystem</span></li>
+  <li><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20 6 9 17l-5-5"/></svg><span>Contract deployed</span></li>
+  <li><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20 6 9 17l-5-5"/></svg><span>Code verified on Etherscan</span></li>
+  <li><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20 6 9 17l-5-5"/></svg><span>Audit passed</span></li>
+  <li><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20 6 9 17l-5-5"/></svg><span>Team KYC passed</span></li>
+  <li><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20 6 9 17l-5-5"/></svg><span>Legal registration in the United States</span></li>
+  <li><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20 6 9 17l-5-5"/></svg><span>$5M Seed Round</span></li>
+</ul>
+
+<h3 class="fase-t">Expansion <span class="est">Completed</span></h3>
+<ul class="hitos">
+  <li><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20 6 9 17l-5-5"/></svg><span>Development of the Nereum Blockchain infrastructure</span></li>
+  <li><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20 6 9 17l-5-5"/></svg><span>Development of the Assets Tokenization interface</span></li>
+  <li><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20 6 9 17l-5-5"/></svg><span>Development of the online BTC mining interface</span></li>
+  <li><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20 6 9 17l-5-5"/></svg><span>Coverage in the main crypto and web3 outlets</span></li>
+  <li><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20 6 9 17l-5-5"/></svg><span>Pre-listing on DexScreener at $1</span></li>
+  <li><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20 6 9 17l-5-5"/></svg><span>$10M Seed Round</span></li>
+</ul>
 
 <p>Those are the phases by what is built in each. What each one has to
 <em>prove</em> for adoption is a separate question, and the answer does not
