@@ -38,10 +38,16 @@ const di = (b, t) => { if (b) { ok++; console.log('  ok  ' + t) } else { mal++; 
   const home = fs.readFileSync(path.join(RAIZ, 'index.html'), 'utf8');
   const limpio = s => s.replace(/&#8201;/g, ' ').replace(/&middot;/g, '·')
                        .replace(/&nbsp;/g, ' ').replace(/\s+/g, ' ').trim();
-  const FASES = ['Validation', 'Utility', 'Integration'];
+  // Los nombres y los textos cambiaron cuando la ruta paso de ser tres
+  // enunciados a ser una lista de hitos: «Validation» encabezaba el registro
+  // de la empresa y la auditoria, que no es validar, son cimientos. Lo que NO
+  // cambia es lo que esta prueba vigila: que la portada y el whitepaper digan
+  // lo mismo. Cambiar solo uno de los dos es justamente el fallo que esto
+  // cazo cuando se movio la portada y no la tabla del whitepaper.
+  const FASES = ['Foundation', 'Expansion', 'Integration'];
   const OBJ = [
-    'One asset class issued entirely on Nereum and transferred between qualified holders with no human intervention in the settlement path.',
-    'Tokenized assets accepted as collateral. An asset reaches genuine liquidity when credit is available against it.',
+    'The company registered, the contract deployed and verified, and the first raise closed. Every one of them checkable by someone who is not us.',
+    'The chain and the interfaces that sit on top of it, built and out in the open, with a price anyone can look up.',
     'The infrastructure ceases to be a decision factor for the issuer, in the same way interbank payment rails are not one today.',
   ];
   for (let i = 0; i < 3; i++) {
