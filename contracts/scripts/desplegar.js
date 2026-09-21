@@ -55,6 +55,30 @@ const REDES = {
     ],
     minUsd: 50, maxUsd: 5000,
   },
+  /* Robinhood Chain (4663). El gas es ether, asi que el par es ETH/USD y la
+     banda de cordura es la misma que en Ethereum.
+
+     Las dos direcciones vienen del .env y NO estan escritas aqui, al reves
+     que en las otras dos redes. El motivo no es pereza: las de Ethereum y BNB
+     llevan anos publicadas y cualquiera las reconoce de un vistazo; las de
+     esta cadena no las he podido comprobar contra la cadena desde donde se
+     escribio esto, y una direccion de oraculo equivocada no se ve a ojo y
+     arruina la ronda entera. Dejarlas en el codigo sin comprobar seria
+     prestarles la credibilidad de las otras dos.
+
+     Salen de la pagina de feeds de Chainlink para Robinhood Chain y del
+     explorador de la red. El script las interroga igualmente antes de gastar
+     un gas: si el par no es ETH/USD, si el precio se sale de la banda o si el
+     USDT no responde, aborta. */
+  robinhood: {
+    nombre: "Robinhood Chain",
+    par: "ETH / USD",
+    usdt: (process.env.USDT_ROBINHOOD || "").trim(),
+    oraculos: [
+      (process.env.ORACULO_ETH_USD_ROBINHOOD || "").trim(),   // Chainlink ETH/USD
+    ].filter(Boolean),
+    minUsd: 200, maxUsd: 50000,
+  },
 };
 
 /* ── parámetros de la venta ──
@@ -80,7 +104,26 @@ async function main() {
   const cfg = REDES[network.name];
   if (!cfg) {
     throw new Error(
-      `Red "${network.name}" sin configurar. Usa --network ethereum o --network bsc`
+      `Red "${network.name}" sin configurar. Usa --network ethereum, bsc o robinhood`
+    );
+  }
+
+  /* Una red puede traer sus direcciones del entorno —Robinhood Chain lo hace—
+     y entonces faltar. Se dice aqui, con nombre y apellidos, en vez de dejar
+     que reviente doscientas lineas mas abajo con un revert sin explicacion. */
+  const falta = [];
+  if (!cfg.usdt) falta.push("el USDT de la red");
+  if (!cfg.oraculos.length) falta.push("el oraculo " + cfg.par);
+  if (falta.length) {
+    throw new Error(
+      `Faltan ${falta.join(" y ")} para ${cfg.nombre}.\n\n` +
+      `Ponlos en .env y vuelve a lanzar:\n` +
+      `  USDT_ROBINHOOD=0x...\n` +
+      `  ORACULO_ETH_USD_ROBINHOOD=0x...\n\n` +
+      `El oraculo sale de la pagina de Chainlink para Robinhood Chain; el USDT,\n` +
+      `del explorador de la red. No los pongas de oido: este script los\n` +
+      `interroga en cadena antes de gastar gas, pero solo puede cazar lo que\n` +
+      `esta mal, no lo que esta mal Y se le parece.`
     );
   }
 
