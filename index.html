@@ -1933,16 +1933,15 @@ html[dir="rtl"] .subir{left:16px !important;right:auto !important}
    no de la tabla—, así que el medio de la caja de mayúsculas cae 0,0334 em
    por debajo del centro. Centrarla ahí exacto la deja ALTA: la palabra es
    una N y cinco letras bajas, y el ojo no lee la caja de mayúsculas, lee
-   dónde está la tinta. Se bajan 0,2134 em sobre ese cero —0,18 em de
-   translateY—, que a 15 px son 3,2.
+   dónde está la tinta. Se bajan 0,2534 em sobre ese cero —0,22 em de
+   translateY—, que a 15 px son 3,8.
 
-   El recorrido fue 0 → 0,06 → 0,14 → 0,18, mirando la barra de verdad a
-   seis aumentos en cada paso. Aquí la línea de base de la palabra cae ya
-   a la altura del canto blanco del rombo, no de su eje. Queda anotado
-   porque es el sitio elegido a ojo sobre la pantalla, no el que sale de
-   las métricas: si algún día se rehace la cabecera, el cero de la cuenta
-   está 0,2134 em más arriba. */
-.hd .brand .bw{line-height:1;transform:translateY(0.18em)}
+   El recorrido fue 0 → 0,06 → 0,14 → 0,18 → 0,22, mirando la barra de
+   verdad a seis aumentos en cada paso. Queda anotado porque es el sitio
+   elegido a ojo sobre la pantalla, no el que sale de las métricas: si
+   algún día se rehace la cabecera, el cero de la cuenta está 0,2534 em
+   más arriba, y sin ese número hay que volver a medirlo todo. */
+.hd .brand .bw{line-height:1;transform:translateY(0.22em)}
 /* ── el boton de whitepaper, al extremo derecho ─────────────────────────────
    Quien lo empujaba a la derecha era el nav del centro (margin-inline:auto).
    Al ocultar esos enlaces en escritorio, la regla de 1000px que anula el
