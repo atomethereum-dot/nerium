@@ -9459,15 +9459,21 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
     ctx.strokeStyle='rgba(208,211,217,'+(.34*a*(.4+lit*.6)).toFixed(3)+')';
     ctx.lineWidth=1.2;ctx.stroke();
   }
-  /* La pila de cubos monta LA MARCA, asi que cuando la marca giro a rombo
-     esto tenia que girar con ella: seguia armando el logotipo anterior, el
-     del cuarto de circulo con sus dos fichas. Ahora arma el rombo, y la
-     «ficha» pasa a ser la banda blanca del canto de abajo, que es lo que
-     distingue a esta marca de un rombo cualquiera.
-     Las dos rutas son las mismas que viven en el <symbol> de arriba, no una
-     copia parecida: si la marca cambia otra vez, se copian de alli. */
-  const LOGO='M53.16 336.00 L336.00 53.16 L618.84 336.00 L336.00 618.84 Z';
-  const LBANDA='M283.67 566.52 L566.52 283.67 L618.84 336.00 L336.00 618.84 Z';
+  /* LAS PUNTAS. El rombo se armaba rasterizando su ruta sobre una rejilla
+     recta, y eso deja los cantos en escalera y las puntas deshilachadas: la
+     rejilla y la figura no comparten ejes, asi que cada fila muerde el filo
+     por un sitio distinto.
+
+     Se da la vuelta al problema. El rombo ES un cuadrado girado 45 grados,
+     asi que se tesela el CUADRADO —donde cada celda cae entera dentro o
+     entera fuera, sin umbral ni medias tintas— y se gira la rejilla al
+     colocarla. Los cantos salen rectos y las cuatro puntas, cuadradas.
+
+     Tampoco hace falta rasterizar nada: el cuadrado llena la rejilla entera y
+     la banda blanca es su 18,5 % de abajo, la misma fraccion que usa
+     herramientas/logo/logo.py para dibujar el vector. Aritmetica, no pixeles. */
+  const BANDA=0.185;
+  const GIRO=-Math.PI/4, GC=Math.cos(GIRO), GS=Math.sin(GIRO);
   /* La paleta de la pila va en HSL y por eso el paso a plata no la alcanzo:
      el conversor buscaba azules en RGB. Se desatura -de 100 a 8-14 de
      saturacion, lo justo para que el metal no sea gris muerto sino que
@@ -9489,32 +9495,23 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
                {h:210,s:10,l:92},{h:213,s:13,l:76},{h:218,s:100,l:62}];
   /* El color de la marca ya montada. Era blanco con fichas azules, que es el
      logotipo viejo. El rombo es PLATA con la banda casi blanca: 71 de luz
-     para la cara —el punto medio entre los dos extremos del degradado,
-     #C6CAD7 y #9498A1— y 98 para la banda. La banda se lee por contraste con
-     la cara, igual que en la marca de verdad, y no por ser de otro color. */
-  const OWN={body:{h:224,s:12,l:71}, chip:{h:220,s:6,l:98}};
+     para la cara y 99 para la banda. Se subio de 71 a 82: a 71 la plata
+     quedaba apagada sobre el negro de la seccion, y esta marca es metal, no
+     hormigon. La banda se lee por contraste con la cara, igual que en la
+     marca de verdad, y no por ser de otro color. */
+  const OWN={body:{h:224,s:12,l:82}, chip:{h:210,s:8,l:99}};
   const mixTone=(a,b,k)=>({h:a.h+(b.h-a.h)*k, s:a.s+(b.s-a.s)*k, l:a.l+(b.l-a.l)*k});
-  /* 24 y no 18. El rombo ocupa la mitad del cuadro que ocupaba el logotipo
-     anterior, asi que a la misma rejilla se quedaba en 112 cubos contra 218:
-     la mitad del campo. A 24 salen 220, que es el mismo puñado de piezas de
-     antes repartido por una silueta mas estrecha. */
-  const NV=24;
+  /* 16 por lado. Teselando el cuadrado ya no se pierde ninguna celda —antes
+     el rombo tiraba la mitad de la rejilla—, asi que 16 dan 256 cubos: los
+     218 de la marca anterior con algo de holgura. */
+  const NV=16;
   let vox=null;
   function bakeVox(){
-    const off=document.createElement('canvas');off.width=off.height=NV;
-    const o=off.getContext('2d');
-    o.setTransform(NV/672,0,0,NV/672,0,0);
-    o.fillStyle='#fff';o.fill(new Path2D(LOGO));
-    const body=o.getImageData(0,0,NV,NV).data;
-    o.clearRect(0,0,672,672);
-    o.fill(new Path2D(LBANDA));
-    const chip=o.getImageData(0,0,NV,NV).data;
     vox=[];
     const cg=(NV-1)/2;
     for(let y=0;y<NV;y++)for(let x=0;x<NV;x++){
-      const k=(y*NV+x)*4;
-      const isChip=chip[k+3]>110, isBody=body[k+3]>110;
-      if(!isChip&&!isBody)continue;
+      /* Todas las celdas son cuerpo; las de abajo, banda. */
+      const isChip = y >= NV*(1-BANDA);
       let tone;
       if(isChip){ tone=((x+y)%2)?TONES[0]:TONES[1] }
       else{
@@ -9529,7 +9526,10 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
       const h2=Math.sin(x*13.7+y*217.3)*24634.6345,  u2=h2-Math.floor(h2);
       const h3=Math.sin(x*39.7+y*74.3)*13571.2468,   u3=h3-Math.floor(h3);
       const h4=Math.sin(x*91.1+y*33.9)*57231.7531,   u4=h4-Math.floor(h4);
-      vox.push({gx:x-cg, gy:y-cg, tone, own:isChip?OWN.chip:OWN.body,
+      /* La rejilla se gira aqui, una vez, al hornearla: colocar cada cubo ya
+         girado sale gratis y deja el resto del dibujo sin enterarse. */
+      const rx=x-cg, ry=y-cg;
+      vox.push({gx:rx*GC-ry*GS, gy:rx*GS+ry*GC, tone, own:isChip?OWN.chip:OWN.body,
         u1,u2,u3,
         dsp:.16+u4*.42, dph:u1*6.283, dr:.5+u2*.9,
         st:(u3*.3), sp:.55+u3*1.6});
@@ -9647,8 +9647,20 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
        usa el 69 % y deja noventa pixeles por arriba y por abajo. En el
        telefono no cambia nada porque ahi manda el tope de ancho, no el de
        alto. */
-    const S=Math.min(W*(W<760?.60:.30), (bandBot-bandTop)/1.45);
-    const U=S/NV;
+    /* Mas grande: la marca pasa de usar el 30 % del ancho al 36, y de dejar
+       el 45 % de la franja en aire a dejar el 25. */
+    const S=Math.min(W*(W<760?.68:.36), (bandBot-bandTop)/1.25);
+    /* Girada 45 grados, la rejilla mide NV·raiz(2) celdas de punta a punta:
+       si U siguiera siendo S/NV, el rombo se saldria por los cuatro lados.
+       Asi que U —la SEPARACION entre cubos— encoge en raiz de dos.
+
+       Pero el TAMAÑO del cubo no puede encoger con ella. Los cubos siguen
+       rectos mientras la rejilla va girada, asi que sus vecinos ya no caen a
+       un lado sino en diagonal, y un cubo de lado U deja un agujero entre
+       cada cuatro: la marca se lee como una rejilla de mosquitera y no como
+       una pieza. Con el lado en U·raiz(2) las caras vuelven a taparse unas
+       con otras y solo queda la junta. */
+    const U=S/(NV*Math.SQRT2), UC=U*Math.SQRT2;
     const cxp=W*.5, cyp=(bandTop+bandBot)*.5;
     const k=1-ease(clm(p));            /* 1 disperso → 0 en su sitio */
     /* EL TROMPO. Montada la marca, el ultimo tramo de scroll la hace girar
@@ -9667,7 +9679,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
     const trompo = ease(clm((p-.70)/.30)) * Math.PI*4;
     vprep(.20-p*.30+trompo, -.30+p*.14);
     const T=performance.now()/1000;
-    const FREE=Math.max(U*1.25, Math.min(W,H)*.038);
+    const FREE=Math.max(UC*1.25, Math.min(W,H)*.038);
     const BIG=FREE, RZ=S*.75;
     const WOB=S*.16*1.4;
     const inset=BIG*.30;
@@ -9688,17 +9700,13 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
          va a 1 con «own», asi que la rejilla final sigue siendo exacta. */
       const mul = 1 + (0.66 + v.u2*0.96 - 1)*own;
       vcube(v.gx*U*(1-e)+dx*e, v.gy*U*(1-e)+dy*e, dz*e,
-            (U*.92+own*(FREE-U*.92))*mul, col, clm(1.05-own*.15), cxp, cyp,
+            (UC*.92+own*(FREE-UC*.92))*mul, col, clm(1.05-own*.15), cxp, cyp,
             1-clm(own*2.4));
     }
-    if(k<.24){
-      const a=(1-k/.24);
-      const g=ctx.createRadialGradient(cxp,cyp,0,cxp,cyp,S*1.25);
-      g.addColorStop(0,'rgba(195,198,204,'+(a*.22).toFixed(3)+')');
-      g.addColorStop(.55,'rgba(195,198,204,'+(a*.07).toFixed(3)+')');
-      g.addColorStop(1,'rgba(195,198,204,0)');
-      ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
-    }
+    /* El resplandor de detras, fuera. Era un degradado radial que se encendia
+       al montarse la marca y le ponia un halo blanco al fondo. Con la marca
+       ya en plata clara no suma luz: suma niebla, y le come el canto a los
+       cubos de los bordes, que es justo donde se ven las puntas. */
     vflush();
   }
   (function tick(){
