@@ -192,7 +192,7 @@ await pg2.evaluate(()=>document.getElementById('wCta').click()); await pg2.waitF
 await pg2.locator('.nrm-w', {hasText:'MetaMask'}).first().click(); await pg2.waitForTimeout(700);
 await pg2.evaluate(()=>window.__aprobar()); await pg2.waitForTimeout(1800);
 await pg2.evaluate(()=>{ window.__txs=[];
-  document.querySelectorAll('#presale .w-pay button')[2].click(); });
+  document.querySelectorAll('#presale .w-pay button')[3].click(); });   // USDT ERC-20
 await pg2.waitForTimeout(900);
 await pg2.locator('#wUsd').fill('1');
 await pg2.waitForTimeout(600);

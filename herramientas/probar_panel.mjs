@@ -123,9 +123,9 @@ async function abrir(eth, bsc, cerrarPanel=false){
  chk('ETH',            await pg.locator('.nrm-saldo').textContent(), 'Balance 0.2 ETH');
  await pg.locator('#wPay button').nth(1).click(); await pg.waitForTimeout(400);
  chk('BNB',            await pg.locator('.nrm-saldo').textContent(), 'Balance 1.5 BNB');
- await pg.locator('#wPay button').nth(2).click(); await pg.waitForTimeout(400);
- chk('USDT de Ethereum',  await pg.locator('.nrm-saldo').textContent(), 'Balance 1234.56 USDT on Ethereum');
  await pg.locator('#wPay button').nth(3).click(); await pg.waitForTimeout(400);
+ chk('USDT de Ethereum',  await pg.locator('.nrm-saldo').textContent(), 'Balance 1234.56 USDT on Ethereum');
+ await pg.locator('#wPay button').nth(4).click(); await pg.waitForTimeout(400);
  chk('USDT de BNB Chain', await pg.locator('.nrm-saldo').textContent(), 'Balance 50 USDT on BNB Chain');
  chk('y el panel ya no repite los saldos', await pg.locator('.pos-saldos').count(), 0);
  await pg.locator('#presale .widget').screenshot({path:'/tmp/saldos.png'});

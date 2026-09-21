@@ -47,8 +47,36 @@
         'https://bsc-dataseed1.defibit.io',
         'https://rpc.ankr.com/bsc'
       ]
+    },
+    /* Robinhood Chain. Su moneda de gas es ETH, igual que en Ethereum, asi que
+       el simbolo se repite: lo que cambia es la RED, y por eso esta cadena
+       lleva su propia insignia («marca») en vez de heredar la del simbolo.
+       Sin eso, «USDT en Ethereum» y «USDT en Robinhood» llevarian el mismo
+       distintivo, que es justo lo que la insignia existe para evitar.
+
+       usdt va en null A PROPOSITO: no hay direccion confirmada del USDT en
+       esta cadena. Inventarla seria mandar a alguien a aprobar gasto sobre un
+       contrato que no se ha comprobado. Mientras siga en null, ese medio se
+       anuncia como no disponible en vez de fallar por dentro, y
+       probar_seed lo caza para que no se olvide. */
+    4663: {
+      id: 4663, hex: '0x1237', nombre: 'Robinhood Chain', simbolo: 'ETH', moneda: 'Ether',
+      marca: 'ROBINHOOD',
+      venta: VENTA,
+      usdt: null, usdtDec: null,
+      explorador: 'https://robinhoodchain.blockscout.com',
+      rpc: ['https://rpc.mainnet.chain.robinhood.com']
     }
   };
+
+  /* Las redes se leen de CADENAS y no se escriben a mano en veinte sitios:
+     antes, anadir una cadena era acordarse de [1, 56] en catorce lineas. */
+  var REDES = Object.keys(CADENAS).map(Number);
+  function porRed(v) {
+    var o = {};
+    REDES.forEach(function (k) { o[k] = (typeof v === 'function') ? v(k) : v; });
+    return o;
+  }
 
   /* Tolerancia de precio entre que el comprador firma y se mina su transacción.
      Va como minTokensOut: si el oráculo se mueve más que esto, la compra
@@ -238,10 +266,7 @@
 
   /* Lo que la cadena dice de cada red. Se refresca solo mientras la sección
      está a la vista; fuera de ella no tiene sentido gastar peticiones. */
-  var estado = {
-    1:  { ok: false },
-    56: { ok: false }
-  };
+  var estado = porRed(function () { return { ok: false }; });
 
   function leerRed(cid) {
     var c = CADENAS[cid];
@@ -282,12 +307,12 @@
     }).catch(function () { estado[cid] = { ok: false }; return estado[cid]; });
   }
 
-  function leerTodo() { return Promise.all([leerRed(1), leerRed(56)]); }
+  function leerTodo() { return Promise.all(REDES.map(leerRed)); }
 
   /* Lo que lleva comprado esta cartera, por red. Son cuatro lecturas más por
      cadena, así que solo se piden con una cartera conectada. */
-  var posicion = { 1: null, 56: null };
-  var saldos   = { 1: null, 56: null };
+  var posicion = porRed(null);
+  var saldos   = porRed(null);
 
   /* Estado de la venta y posición del comprador se piden juntos: si se pintaran
      con lecturas de momentos distintos, el panel podría enseñar una compra que
@@ -297,11 +322,11 @@
   function leerPosicion() {
     var quien = sesion.cuenta;
     if (!quien) {
-      posicion = { 1: null, 56: null };
-      saldos = { 1: null, 56: null };
+      posicion = porRed(null);
+      saldos = porRed(null);
       return Promise.resolve();
     }
-    return Promise.all([1, 56].map(function (cid) {
+    return Promise.all(REDES.map(function (cid) {
       var c = CADENAS[cid];
       var uno = function (sel) {
         return llamar(cid, c.venta, sel + encA(quien)).catch(function () { return null; });
@@ -311,9 +336,14 @@
       var nativo = pedir(cid, 'eth_getBalance', [quien, 'latest'])
         .then(function (h) { return h ? BigInt(h) : null; })
         .catch(function () { return null; });
-      var enUsdt = llamar(cid, c.usdt, SEL.balanceOf + encA(quien))
-        .then(function (r) { return decU(palabras(r)[0]); })
-        .catch(function () { return null; });
+      /* Sin direccion de USDT en esa cadena no hay saldo que leer: se
+         devuelve null, que es lo mismo que dice una lectura fallida, y el
+         panel ya sabe pintar eso. */
+      var enUsdt = c.usdt
+        ? llamar(cid, c.usdt, SEL.balanceOf + encA(quien))
+            .then(function (r) { return decU(palabras(r)[0]); })
+            .catch(function () { return null; })
+        : Promise.resolve(null);
       Promise.all([nativo, enUsdt]).then(function (b) {
         saldos[cid] = (b[0] === null && b[1] === null) ? null
                     : { nativo: b[0], usdt: b[1] };
@@ -333,8 +363,8 @@
     })).then(function () {
       /* Si la cuenta cambió mientras se leía, lo leído ya no es de nadie. */
       if (sesion.cuenta !== quien) {
-        posicion = { 1: null, 56: null };
-        saldos = { 1: null, 56: null };
+        posicion = porRed(null);
+        saldos = porRed(null);
       }
     });
   }
@@ -415,13 +445,13 @@
           prov.on('accountsChanged', function (a) {
             sesion.cuenta = (a && a[0]) || null;
             if (!sesion.cuenta) { sesion.prov = null; olvidar(); }
-            posicion = { 1: null, 56: null };
+            posicion = porRed(null);
             refrescar().then(function () { pintar(); });
           });
           prov.on('disconnect', function () {
             sesion = { prov: null, cuenta: null, cid: null, nombre: '' };
             olvidar();
-            posicion = { 1: null, 56: null };
+            posicion = porRed(null);
             refrescar().then(function () { pintar(); });
           });
           prov.on('chainChanged', function (h2) {
@@ -557,13 +587,13 @@
              Ethereum, y entonces la primera compra en Ethereum obliga a
              pedirla aparte. Ofrecerla por las dos vías la deja habilitada
              desde el principio en más carteras. */
-          optionalChains: [1, 56],
+          optionalChains: REDES,
           showQrModal: false,
           /* Sin rpcMap, las lecturas viajan por el relay hasta el móvil y
              vuelven: lentas y a merced de que la app esté despierta. Con él,
              eth_call sale por estos nodos y solo se molesta a la cartera para
              firmar, que es lo único que solo ella puede hacer. */
-          rpcMap: { 1: CADENAS[1].rpc[0], 56: CADENAS[56].rpc[0] },
+          rpcMap: porRed(function (k) { return CADENAS[k].rpc[0]; }),
           metadata: {
             name: 'Nereum',
             description: 'Nereum Seed Round',
@@ -998,9 +1028,12 @@
       campo  = usdIn.closest('.w-field');
 
   /* Cada botón de pago es una red y un medio. */
+  /* El orden es el del marcado y no al reves: primero las tres monedas de red
+     y debajo los tres USDT. Agrupar por tipo y no por cadena es lo que deja
+     cada fila leyendose sola. */
   var BOTONES = [
-    { cid: 1,  usdt: false }, { cid: 56, usdt: false },
-    { cid: 1,  usdt: true  }, { cid: 56, usdt: true  }
+    { cid: 1, usdt: false }, { cid: 56, usdt: false }, { cid: 4663, usdt: false },
+    { cid: 1, usdt: true  }, { cid: 56, usdt: true  }, { cid: 4663, usdt: true  }
   ];
   var botones = [].slice.call(pay.querySelectorAll('button'));
   var elegido = 0;
@@ -1046,6 +1079,12 @@
        'c4.3-.2 7.6-1 7.6-2.1s-3.3-1.9-7.6-2.1m0 3.6c-.1 0-.7.1-1.9.1-1 0-1.7 0-1.9-.1' +
        'c-3.7-.2-6.5-.8-6.5-1.6s2.8-1.4 6.5-1.6v2.6c.2 0 1 .1 2 .1 1.2 0 1.8-.1 1.9-.1v-2.6' +
        'c3.6.2 6.5.8 6.5 1.6s-2.9 1.4-6.6 1.6', 1] ] }
+    ,
+    /* Robinhood Chain no lleva aqui su logotipo: va una inicial sobre su
+       verde, que es lo que hacen las carteras con una red cuya marca no
+       tienen. Cumple lo unico que se le pide a una insignia de 11 px:
+       distinguirse de la de al lado. */
+    ROBINHOOD: { fondo: '#00C805', letra: 'R' }
   };
 
   function moneda(clave, tam) {
@@ -1063,6 +1102,18 @@
       dentro = document.createElementNS(NS, 'g');
       dentro.setAttribute('transform', m.caja);
       svg.appendChild(dentro);
+    }
+    if (m.letra) {
+      var t = document.createElementNS(NS, 'text');
+      t.setAttribute('x', '16'); t.setAttribute('y', '16');
+      t.setAttribute('text-anchor', 'middle');
+      t.setAttribute('dominant-baseline', 'central');
+      t.setAttribute('font-family', 'system-ui, sans-serif');
+      t.setAttribute('font-size', '21'); t.setAttribute('font-weight', '700');
+      t.setAttribute('fill', '#fff');
+      t.textContent = m.letra;
+      svg.appendChild(t);
+      return svg;
     }
     m.partes.forEach(function (par) {
       var p = document.createElementNS(NS, 'path');
@@ -1100,10 +1151,15 @@
       var caja = document.createElement('span');
       caja.className = 'nrm-mon';
       caja.appendChild(moneda(m.usdt ? 'USDT' : c.simbolo, 24));
-      if (m.usdt) {
+      /* La insignia de red la lleva el boton que NO se explica con su moneda.
+         Antes eran «los USDT»; con Robinhood Chain ya no vale, porque alli la
+         moneda de red tambien es ETH y sin insignia el boton seria identico al
+         de Ethereum. La regla pasa a ser: si la cadena tiene marca propia, se
+         pone siempre; si no, solo cuando la moneda no es la de la red. */
+      if (m.usdt || c.marca) {
         var badge = document.createElement('span');
         badge.className = 'red';
-        badge.appendChild(moneda(c.simbolo, 11));
+        badge.appendChild(moneda(c.marca || c.simbolo, 11));
         caja.appendChild(badge);
       }
       b.insertBefore(caja, b.firstChild);
@@ -1361,7 +1417,7 @@
 
   function enCadenaUsd() {
     var t = 0;
-    [1, 56].forEach(function (k) {
+    REDES.forEach(function (k) {
       var e = estado[k];
       if (e && e.ok && e.precioUsd) {
         t += Number(e.vendidos * e.precioUsd / 1000000000000000000n) / 1e8;
@@ -1372,7 +1428,7 @@
 
   function objetivoUsd() {
     var t = 0, hay = false;
-    [1, 56].forEach(function (k) {
+    REDES.forEach(function (k) {
       var e = estado[k];
       if (e && e.ok && e.tope && e.precioUsd) {
         hay = true;
@@ -1594,8 +1650,8 @@
   function desconectar() {
     try { if (sesion.prov && sesion.prov.disconnect) sesion.prov.disconnect(); } catch (e) {}
     sesion = { prov: null, cuenta: null, cid: null, nombre: '' };
-    posicion = { 1: null, 56: null };
-    saldos = { 1: null, 56: null };
+    posicion = porRed(null);
+    saldos = porRed(null);
     wcUri = null; wcEstado = 'nada'; wcFallo = null; wcEspera = null; wcProv = null;
     pintar();
   }
@@ -1639,7 +1695,7 @@
     catch (e) {}
     wcProv = null; wcUri = null; wcEstado = 'nada';
     sesion = { prov: null, cuenta: null, cid: null, nombre: '' };
-    posicion = { 1: null, 56: null };
+    posicion = porRed(null);
     olvidar();
   }
 
@@ -1748,6 +1804,14 @@
     var e = est(), c = red();
     cta.disabled = false;
     cta.classList.remove('espera');
+
+    /* Un medio en USDT sobre una cadena cuya direccion de USDT todavia no esta
+       confirmada no se puede comprar. Se dice aqui, delante, en vez de dejar
+       que reviente al pedir el permiso de gasto. */
+    if (medio().usdt && !c.usdt) {
+      cta.textContent = 'USDT on ' + c.nombre + ' coming soon';
+      cta.disabled = true; return;
+    }
 
     if (!e.ok) {
       /* Sin datos de la cadena no se sabe ni el precio ni si la ronda está

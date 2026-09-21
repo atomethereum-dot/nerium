@@ -164,7 +164,7 @@ chk('cadena tras el cambio', await pg.evaluate(()=>window.__prov._cid), '0x38');
 
 // ── 6 · compra con USDT (aprobación + compra) ────────────────────────────────
 await pg.evaluate(()=>{ window.__prov._cid='0x1'; window.__prov._emitir('chainChanged','0x1'); });
-await pg.locator('#wPay button').nth(2).click();   // USDT ERC-20
+await pg.locator('#wPay button').nth(3).click();   // USDT ERC-20
 await pg.waitForTimeout(400);
 chk('la unidad cambia a USDT', await pg.locator('#presale .w-field em').first().textContent(), 'USDT');
 await pg.locator('#wUsd').fill('500');

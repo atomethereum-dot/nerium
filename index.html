@@ -880,8 +880,11 @@ body.light .hud-band{color:rgba(232,236,244,.6)}
 .w-rate{font-size:10.5px;letter-spacing:.14em;color:rgba(232,236,244,.5)}
 .w-lab{font-size:9.5px;letter-spacing:.22em;text-transform:uppercase;color:rgba(232,236,244,.42);
   margin-bottom:9px}
+/* Seis medios: tres monedas de red arriba y tres USDT abajo. Con cuatro
+   columnas la segunda fila quedaba a medias, asi que van de tres en tres y
+   cada fila dice una cosa. */
 .w-pay{display:grid;grid-template-columns:repeat(2,1fr);gap:7px;margin-bottom:18px}
-@media(min-width:480px){.w-pay{grid-template-columns:repeat(4,1fr)}}
+@media(min-width:480px){.w-pay{grid-template-columns:repeat(3,1fr)}}
 .w-pay button{display:grid;gap:3px;padding:10px 6px;border-radius:5px;
   border:1px solid rgba(232,236,244,.13);background:#fff;color:rgba(232,236,244,.62);
   font-family:var(--m);font-size:11.5px;letter-spacing:.08em;
@@ -6884,10 +6887,12 @@ window.__mide = function(cv, w, h){
 
         <div class="w-lab mono">Pay with</div>
         <div class="w-pay" id="wPay">
-          <button class="on" data-sym="ETH"  data-net="Ethereum"  data-rate="3420">ETH</button>
-          <button data-sym="BNB"  data-net="BNB Chain" data-rate="610">BNB</button>
+          <button class="on" data-sym="ETH"  data-net="Ethereum"  data-rate="3420">ETH<em>Ethereum</em></button>
+          <button data-sym="BNB"  data-net="BNB Chain" data-rate="610">BNB<em>BNB Chain</em></button>
+          <button data-sym="ETH"  data-net="Robinhood Chain" data-rate="3420">ETH<em>Robinhood</em></button>
           <button data-sym="USDT" data-net="Ethereum"  data-rate="1">USDT<em>ERC-20</em></button>
           <button data-sym="USDT" data-net="BNB Chain" data-rate="1">USDT<em>BEP-20</em></button>
+          <button data-sym="USDT" data-net="Robinhood Chain" data-rate="1">USDT<em>Robinhood</em></button>
         </div>
 
         <label class="w-field">
