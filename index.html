@@ -9631,6 +9631,88 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
     }
     queue.length=0;
   }
+  /* LA PLACA. Los cubos sirven para VENIR; no para quedarse. Amontonados
+     dejan la marca en escalera —una tesela es una tesela, por pequeña que
+     sea— y lo que tiene que quedar al final es el logotipo, liso.
+
+     Asi que al cerrarse la formacion los cubos se apagan y debajo aparece
+     esto: la marca dibujada con sus rutas, no con celdas. Y en volumen de
+     verdad, no pintado: una lamina con seis caras que se proyecta con la
+     MISMA camara que los cubos —el mismo vrot, la misma distancia focal—,
+     asi que hereda el trompo sin que haya que girarla aparte.
+
+     Las medidas salen de las mismas constantes que el vector: la banda es el
+     18,5 % de abajo y el grosor, el 6 % del lado. */
+  const PLATA_A='#C6CAD7', PLATA_B='#9498A1', BANDA_COL='#FCFCFC', CANTO_COL='#57595E';
+  const GRUESO=0.06;
+  function mezcla(hex,k){                      /* hacia negro (k<1) o blanco */
+    const n=parseInt(hex.slice(1),16);
+    let r=(n>>16)&255, g=(n>>8)&255, b=n&255;
+    if(k<=1){ r*=k; g*=k; b*=k }
+    else { r+=(255-r)*(k-1); g+=(255-g)*(k-1); b+=(255-b)*(k-1) }
+    return 'rgb('+(r|0)+','+(g|0)+','+(b|0)+')';
+  }
+  function placa(cxp,cyp,A,a){
+    if(a<=0.002)return;
+    const h=A/2, t=A*GRUESO/2;
+    /* las cuatro esquinas del cuadrado, ya giradas a rombo */
+    const gira=(x,y)=>[x*GC-y*GS, x*GS+y*GC];
+    const ESQ=[gira(-h,-h),gira(h,-h),gira(h,h),gira(-h,h)];
+    const yB=h-A*BANDA;                        /* donde empieza la banda */
+    const BND=[gira(-h,yB),gira(h,yB),gira(h,h),gira(-h,h)];
+    const P=(q,z)=>{
+      const c=vrot(q[0],q[1],z);
+      const f=FOV/Math.max(FOV*.42,FOV+c[2]);
+      return [cxp+c[0]*f, cyp+c[1]*f, c[2]];
+    };
+    const ruta=pts=>{ ctx.beginPath();
+      pts.forEach((q,i)=>i?ctx.lineTo(q[0],q[1]):ctx.moveTo(q[0],q[1]));
+      ctx.closePath(); };
+    const zMed=pts=>pts.reduce((s,q)=>s+q[2],0)/pts.length;
+    /* Cada cara con SU luz, no todas con la del frente. Con una sola, al
+       girar la lamina y verse por detras salia una losa gris plana: el dorso
+       de esta marca es el mismo metal, y tiene que comportarse como tal. */
+    const ilum=(nx,ny,nz)=>{
+      const n=[nx*AX[0]+ny*AY[0]+nz*AZ[0],
+               nx*AX[1]+ny*AY[1]+nz*AZ[1],
+               nx*AX[2]+ny*AY[2]+nz*AZ[2]];
+      return clm(n[0]*LIGHT[0]+n[1]*LIGHT[1]+n[2]*LIGHT[2]);
+    };
+    const caras=[];
+    const frente=ESQ.map(q=>P(q,-t)), detras=ESQ.map(q=>P(q,t));
+    caras.push({z:zMed(detras), pts:detras, tipo:'atras', luz:0.52+ilum(0,0,1)*0.58});
+    for(let i=0;i<4;i++){
+      const j=(i+1)%4;
+      /* la normal del canto: la perpendicular al lado, hacia afuera */
+      let nx=ESQ[j][1]-ESQ[i][1], ny=-(ESQ[j][0]-ESQ[i][0]);
+      const mx=(ESQ[i][0]+ESQ[j][0])/2, my=(ESQ[i][1]+ESQ[j][1])/2;
+      if(nx*mx+ny*my<0){ nx=-nx; ny=-ny }
+      const m=Math.hypot(nx,ny)||1;
+      caras.push({z:zMed([frente[i],frente[j],detras[j],detras[i]]),
+                  pts:[frente[i],frente[j],detras[j],detras[i]], tipo:'canto',
+                  luz:0.80+ilum(nx/m,ny/m,0)*0.70});
+    }
+    caras.push({z:zMed(frente), pts:frente, tipo:'frente', luz:0.62+ilum(0,0,-1)*0.62});
+    caras.sort((x,y)=>y.z-x.z);
+    ctx.save(); ctx.globalAlpha=a;
+    for(const c of caras){
+      ruta(c.pts);
+      if(c.tipo==='canto'){ ctx.fillStyle=mezcla(CANTO_COL,c.luz); ctx.fill(); continue }
+      const g=ctx.createLinearGradient(c.pts[0][0],c.pts[0][1],c.pts[2][0],c.pts[2][1]);
+      g.addColorStop(0,mezcla(PLATA_A,c.luz)); g.addColorStop(1,mezcla(PLATA_B,c.luz));
+      ctx.fillStyle=g; ctx.fill();
+      /* La banda va SOLO en la cara buena. El dorso de una lamina no lleva lo
+         que lleva el frente, y ponerselo delata que no hay volumen. */
+      if(c.tipo==='frente'){
+        ctx.save(); ctx.clip();
+        ruta(BND.map(q=>P(q,-t)));
+        ctx.fillStyle=mezcla(BANDA_COL,Math.min(1,c.luz)); ctx.fill();
+        ctx.restore();
+      }
+    }
+    ctx.restore();
+  }
+
   function draw(p){
     ctx.clearRect(0,0,W,H);
     if(!vox)bakeVox();
@@ -9684,6 +9766,10 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
     const WOB=S*.16*1.4;
     const inset=BIG*.30;
     const RX=Math.max(40,W*.5-inset), RY=Math.max(40,H*.5-inset);
+    /* El relevo. La placa entra mientras los ultimos cubos se cierran y esta
+       entera justo antes de que empiece el giro: lo que da la vuelta es el
+       logotipo liso, no un monton de teselas. */
+    const placaA=clm((0.32-k)/0.212);
     for(const v of vox){
       const own=clm(k*1.3-v.st);
       const e=own*own;
@@ -9700,7 +9786,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
          va a 1 con «own», asi que la rejilla final sigue siendo exacta. */
       const mul = 1 + (0.66 + v.u2*0.96 - 1)*own;
       vcube(v.gx*U*(1-e)+dx*e, v.gy*U*(1-e)+dy*e, dz*e,
-            (UC*.92+own*(FREE-UC*.92))*mul, col, clm(1.05-own*.15), cxp, cyp,
+            (UC*.92+own*(FREE-UC*.92))*mul, col, clm(1.05-own*.15)*(1-placaA), cxp, cyp,
             1-clm(own*2.4));
     }
     /* El resplandor de detras, fuera. Era un degradado radial que se encendia
@@ -9708,6 +9794,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
        ya en plata clara no suma luz: suma niebla, y le come el canto a los
        cubos de los bordes, que es justo donde se ven las puntas. */
     vflush();
+    placa(cxp, cyp, NV*U, placaA);
   }
   (function tick(){
     const run=Math.max(1,hh-vh);

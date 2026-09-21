@@ -188,6 +188,50 @@ di(canto.ancho < quieta.ancho * 0.6,
 const final = await caja(1.00);
 di(final.ancho >= quieta.ancho * 0.9,
    'y acaba de frente otra vez, no de perfil (' + final.ancho + ' px)');
+
+// ── y que lo que queda NO este pixelado ──
+// Los cubos sirven para venir; lo que se queda es el logotipo liso. La
+// diferencia se mide en el CANTO: una escalera de teselas se separa de la
+// recta en media tesela, un filo vectorial no se separa de nada. Se recorre
+// el borde de arriba a la izquierda, se le ajusta una recta por minimos
+// cuadrados y se mira cuanto se aparta el punto que mas se aparta.
+const filo = await w.evaluate(async () => {
+  const sec = document.querySelector('.stack');
+  const r = sec.getBoundingClientRect();
+  scrollTo(0, Math.round(r.top + scrollY + 0.75 * (r.height - innerHeight)));
+  await new Promise(s => setTimeout(s, 900));
+  const cv = document.getElementById('stkCv');
+  const c = document.createElement('canvas'); c.width = cv.width; c.height = cv.height;
+  c.getContext('2d').drawImage(cv, 0, 0);
+  const d = c.getContext('2d').getImageData(0, 0, c.width, c.height).data;
+  const pinta = (x, y) => {
+    const i = (y * c.width + x) * 4;
+    if (d[i+3] < 150) return false;
+    return (0.2126*d[i] + 0.7152*d[i+1] + 0.0722*d[i+2]) / 255 >= 0.30;
+  };
+  let y0 = 1e9, y1 = -1;
+  for (let y = 0; y < c.height; y++) for (let x = 0; x < c.width; x++)
+    if (pinta(x, y)) { if (y < y0) y0 = y; if (y > y1) y1 = y; break; }
+  if (y1 < 0) return { n: 0, desvio: 1e9 };
+  // solo el tramo recto de arriba a la izquierda, lejos de las dos puntas
+  const ini = Math.round(y0 + (y1 - y0) * 0.18), fin = Math.round(y0 + (y1 - y0) * 0.42);
+  const P = [];
+  for (let y = ini; y <= fin; y++)
+    for (let x = 0; x < c.width; x++) if (pinta(x, y)) { P.push([x, y]); break; }
+  if (P.length < 8) return { n: P.length, desvio: 1e9 };
+  const n = P.length;
+  const sy = P.reduce((s, q) => s + q[1], 0) / n, sx = P.reduce((s, q) => s + q[0], 0) / n;
+  let num = 0, den = 0;
+  for (const q of P) { num += (q[1]-sy)*(q[0]-sx); den += (q[1]-sy)*(q[1]-sy); }
+  const m = den ? num/den : 0;
+  let peor = 0;
+  for (const q of P) peor = Math.max(peor, Math.abs(q[0] - (sx + m*(q[1]-sy))));
+  const esc = c.height / cv.getBoundingClientRect().height;
+  return { n, desvio: +(peor/esc).toFixed(2) };
+});
+di(filo.n >= 8, 'el canto de la marca se puede medir (' + filo.n + ' filas)');
+di(filo.desvio <= 3, 'y es una recta, no una escalera de teselas (se aparta ' +
+   filo.desvio + ' px, limite 3)');
 await ctx3.close();
 
 console.log(mal ? `\n${ok} bien, ${mal} MAL` : `\n${ok}/${ok} correctas`);
