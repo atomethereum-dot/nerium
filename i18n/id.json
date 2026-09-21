@@ -212,7 +212,7 @@
  "Identity documents held in escrow · disclosed to regulators and exchanges on request": "Dokumen identitas disimpan di escrow · diserahkan kepada regulator dan bursa bila diminta",
  "Development of the entire NRM ecosystem": "Pengembangan seluruh ekosistem NRM",
  "Contract deployed": "Kontrak sudah di-deploy",
- "Code verified on Etherscan": "Kode terverifikasi di Etherscan",
+ "Code verified on Robinscan": "Kode terverifikasi di Robinscan",
  "Audit passed": "Audit lulus",
  "Team KYC passed": "KYC tim lulus",
  "Legal registration in the United States": "Pendaftaran legal di Amerika Serikat",
@@ -240,5 +240,6 @@
  "Integration": "Integrasi",
  "The company registered, the contract deployed and verified, and the first raise closed. Every one of them checkable by someone who is not us.": "Perusahaan terdaftar, kontrak sudah di-deploy dan terverifikasi, dan putaran pertama ditutup. Semuanya bisa dicek pada pihak selain kami.",
  "The chain and the interfaces that sit on top of it, built and out in the open, with a price anyone can look up.": "Rantainya dan antarmuka di atasnya, sudah dibangun dan terbuka, dengan harga yang bisa dicek siapa saja.",
- "The infrastructure ceases to be a decision factor for the issuer, in the same way interbank payment rails are not one today.": "Infrastruktur berhenti menjadi faktor keputusan bagi penerbit, sama seperti jaringan pembayaran antarbank hari ini."
+ "The infrastructure ceases to be a decision factor for the issuer, in the same way interbank payment rails are not one today.": "Infrastruktur berhenti menjadi faktor keputusan bagi penerbit, sama seperti jaringan pembayaran antarbank hari ini.",
+ "Contract": "Kontrak"
 }

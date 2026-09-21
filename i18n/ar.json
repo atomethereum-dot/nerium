@@ -212,7 +212,7 @@
  "Identity documents held in escrow · disclosed to regulators and exchanges on request": "وثائق الهوية محفوظة لدى جهة ضمان · تُقدَّم للجهات التنظيمية والمنصات عند الطلب",
  "Development of the entire NRM ecosystem": "تطوير منظومة NRM بالكامل",
  "Contract deployed": "تم نشر العقد",
- "Code verified on Etherscan": "تم التحقق من الكود على Etherscan",
+ "Code verified on Robinscan": "تم التحقق من الكود على Robinscan",
  "Audit passed": "اجتياز التدقيق",
  "Team KYC passed": "اجتياز التحقق من هوية الفريق",
  "Legal registration in the United States": "تسجيل قانوني في الولايات المتحدة",
@@ -240,5 +240,6 @@
  "Integration": "التكامل",
  "The company registered, the contract deployed and verified, and the first raise closed. Every one of them checkable by someone who is not us.": "الشركة مسجّلة، والعقد منشور ومُتحقَّق منه، والجولة الأولى مغلقة. كل واحدة منها يمكن التحقق منها لدى طرف غيرنا.",
  "The chain and the interfaces that sit on top of it, built and out in the open, with a price anyone can look up.": "السلسلة والواجهات التي تعمل فوقها، مبنية وظاهرة للجميع، بسعر يستطيع أي شخص الاطلاع عليه.",
- "The infrastructure ceases to be a decision factor for the issuer, in the same way interbank payment rails are not one today.": "لم تعد البنية التحتية عاملاً في قرار المُصدِر، تمامًا كما لم تعد شبكات المدفوعات بين البنوك كذلك اليوم."
+ "The infrastructure ceases to be a decision factor for the issuer, in the same way interbank payment rails are not one today.": "لم تعد البنية التحتية عاملاً في قرار المُصدِر، تمامًا كما لم تعد شبكات المدفوعات بين البنوك كذلك اليوم.",
+ "Contract": "العقد"
 }

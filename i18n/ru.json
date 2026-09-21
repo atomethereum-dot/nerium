@@ -212,7 +212,7 @@
  "Identity documents held in escrow · disclosed to regulators and exchanges on request": "Документы хранятся у эскроу-агента · предоставляются регуляторам и биржам по запросу",
  "Development of the entire NRM ecosystem": "Разработка всей экосистемы NRM",
  "Contract deployed": "Контракт развёрнут",
- "Code verified on Etherscan": "Код верифицирован на Etherscan",
+ "Code verified on Robinscan": "Код верифицирован на Robinscan",
  "Audit passed": "Аудит пройден",
  "Team KYC passed": "KYC команды пройден",
  "Legal registration in the United States": "Юридическая регистрация в США",
@@ -240,5 +240,6 @@
  "Integration": "Интеграция",
  "The company registered, the contract deployed and verified, and the first raise closed. Every one of them checkable by someone who is not us.": "Компания зарегистрирована, контракт развёрнут и верифицирован, первый раунд закрыт. Каждый пункт можно проверить не у нас.",
  "The chain and the interfaces that sit on top of it, built and out in the open, with a price anyone can look up.": "Сеть и интерфейсы поверх неё — построены и открыты, с ценой, которую может посмотреть любой.",
- "The infrastructure ceases to be a decision factor for the issuer, in the same way interbank payment rails are not one today.": "Инфраструктура перестаёт быть фактором выбора для эмитента — так же, как сегодня им не являются межбанковские платёжные сети."
+ "The infrastructure ceases to be a decision factor for the issuer, in the same way interbank payment rails are not one today.": "Инфраструктура перестаёт быть фактором выбора для эмитента — так же, как сегодня им не являются межбанковские платёжные сети.",
+ "Contract": "Контракт"
 }

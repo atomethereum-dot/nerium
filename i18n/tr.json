@@ -212,7 +212,7 @@
  "Identity documents held in escrow · disclosed to regulators and exchanges on request": "Kimlik belgeleri emanette · talep hâlinde düzenleyicilere ve borsalara sunulur",
  "Development of the entire NRM ecosystem": "NRM ekosisteminin tamamının geliştirilmesi",
  "Contract deployed": "Sözleşme yayına alındı",
- "Code verified on Etherscan": "Kod Etherscan'de doğrulandı",
+ "Code verified on Robinscan": "Kod Robinscan'de doğrulandı",
  "Audit passed": "Denetim geçildi",
  "Team KYC passed": "Ekip KYC onaylandı",
  "Legal registration in the United States": "ABD'de yasal tescil",
@@ -240,5 +240,6 @@
  "Integration": "Entegrasyon",
  "The company registered, the contract deployed and verified, and the first raise closed. Every one of them checkable by someone who is not us.": "Şirket tescilli, sözleşme yayında ve doğrulanmış, ilk tur kapandı. Her biri bizim dışımızda birinden teyit edilebilir.",
  "The chain and the interfaces that sit on top of it, built and out in the open, with a price anyone can look up.": "Zincir ve üzerine oturan arayüzler, kurulmuş ve açıkta; fiyatı herkes sorgulayabilir.",
- "The infrastructure ceases to be a decision factor for the issuer, in the same way interbank payment rails are not one today.": "Altyapı, ihraççı için bir karar unsuru olmaktan çıkar; tıpkı bugün bankalar arası ödeme ağlarının olmadığı gibi."
+ "The infrastructure ceases to be a decision factor for the issuer, in the same way interbank payment rails are not one today.": "Altyapı, ihraççı için bir karar unsuru olmaktan çıkar; tıpkı bugün bankalar arası ödeme ağlarının olmadığı gibi.",
+ "Contract": "Sözleşme"
 }

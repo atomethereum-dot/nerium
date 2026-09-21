@@ -212,7 +212,7 @@
  "Identity documents held in escrow · disclosed to regulators and exchanges on request": "Giấy tờ tùy thân được ký quỹ · cung cấp cho cơ quan quản lý và sàn khi có yêu cầu",
  "Development of the entire NRM ecosystem": "Phát triển toàn bộ hệ sinh thái NRM",
  "Contract deployed": "Đã triển khai hợp đồng",
- "Code verified on Etherscan": "Mã đã được xác minh trên Etherscan",
+ "Code verified on Robinscan": "Mã đã được xác minh trên Robinscan",
  "Audit passed": "Đã qua kiểm toán",
  "Team KYC passed": "KYC đội ngũ đã đạt",
  "Legal registration in the United States": "Đăng ký pháp lý tại Hoa Kỳ",
@@ -240,5 +240,6 @@
  "Integration": "Tích hợp",
  "The company registered, the contract deployed and verified, and the first raise closed. Every one of them checkable by someone who is not us.": "Công ty đã đăng ký, hợp đồng đã triển khai và được xác minh, vòng gọi vốn đầu tiên đã đóng. Từng mục đều có thể kiểm chứng ở bên thứ ba.",
  "The chain and the interfaces that sit on top of it, built and out in the open, with a price anyone can look up.": "Chuỗi và các giao diện nằm trên nó, đã dựng xong và công khai, với mức giá ai cũng tra được.",
- "The infrastructure ceases to be a decision factor for the issuer, in the same way interbank payment rails are not one today.": "Hạ tầng thôi là yếu tố cân nhắc của bên phát hành, đúng như các mạng thanh toán liên ngân hàng ngày nay."
+ "The infrastructure ceases to be a decision factor for the issuer, in the same way interbank payment rails are not one today.": "Hạ tầng thôi là yếu tố cân nhắc của bên phát hành, đúng như các mạng thanh toán liên ngân hàng ngày nay.",
+ "Contract": "Hợp đồng"
 }

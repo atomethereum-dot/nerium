@@ -212,7 +212,7 @@
  "Identity documents held in escrow · disclosed to regulators and exchanges on request": "신분 서류는 에스크로에 보관 · 요청 시 규제 기관과 거래소에 제공",
  "Development of the entire NRM ecosystem": "NRM 생태계 전체 개발",
  "Contract deployed": "컨트랙트 배포 완료",
- "Code verified on Etherscan": "Etherscan에서 코드 검증 완료",
+ "Code verified on Robinscan": "Robinscan에서 코드 검증 완료",
  "Audit passed": "감사 통과",
  "Team KYC passed": "팀 KYC 완료",
  "Legal registration in the United States": "미국 법인 등록",
@@ -240,5 +240,6 @@
  "Integration": "통합",
  "The company registered, the contract deployed and verified, and the first raise closed. Every one of them checkable by someone who is not us.": "법인 등록, 컨트랙트 배포와 검증, 첫 라운드 마감. 모두 저희가 아닌 곳에서 확인할 수 있습니다.",
  "The chain and the interfaces that sit on top of it, built and out in the open, with a price anyone can look up.": "체인과 그 위에 올라가는 인터페이스, 모두 완성되어 공개되었고 가격은 누구나 조회할 수 있습니다.",
- "The infrastructure ceases to be a decision factor for the issuer, in the same way interbank payment rails are not one today.": "발행자에게 인프라는 더 이상 선택의 기준이 아닙니다. 오늘날 은행 간 결제망이 그렇지 않은 것과 같습니다."
+ "The infrastructure ceases to be a decision factor for the issuer, in the same way interbank payment rails are not one today.": "발행자에게 인프라는 더 이상 선택의 기준이 아닙니다. 오늘날 은행 간 결제망이 그렇지 않은 것과 같습니다.",
+ "Contract": "컬트랙트"
 }

@@ -212,7 +212,7 @@
  "Identity documents held in escrow · disclosed to regulators and exchanges on request": "身份文件由托管方保管 · 应要求提供给监管机构和交易所",
  "Development of the entire NRM ecosystem": "NRM 生态系统全面开发",
  "Contract deployed": "合约已部署",
- "Code verified on Etherscan": "代码已在 Etherscan 验证",
+ "Code verified on Robinscan": "代码已在 Robinscan 验证",
  "Audit passed": "审计已通过",
  "Team KYC passed": "团队 KYC 已通过",
  "Legal registration in the United States": "在美国完成法律注册",
@@ -240,5 +240,6 @@
  "Integration": "融入",
  "The company registered, the contract deployed and verified, and the first raise closed. Every one of them checkable by someone who is not us.": "公司已注册，合约已部署并通过验证，首轮融资已完成。每一项都能在我们之外的地方核实。",
  "The chain and the interfaces that sit on top of it, built and out in the open, with a price anyone can look up.": "这条链以及运行其上的界面，均已建成并公开，价格任何人都能查到。",
- "The infrastructure ceases to be a decision factor for the issuer, in the same way interbank payment rails are not one today.": "基础设施不再是发行方的决策因素，正如今天的银行间支付网络一样。"
+ "The infrastructure ceases to be a decision factor for the issuer, in the same way interbank payment rails are not one today.": "基础设施不再是发行方的决策因素，正如今天的银行间支付网络一样。",
+ "Contract": "合约"
 }

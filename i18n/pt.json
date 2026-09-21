@@ -212,7 +212,7 @@
  "Identity documents held in escrow · disclosed to regulators and exchanges on request": "Documentos de identidade em custódia · entregues a reguladores e exchanges quando solicitados",
  "Development of the entire NRM ecosystem": "Desenvolvimento de todo o ecossistema NRM",
  "Contract deployed": "Contrato implantado",
- "Code verified on Etherscan": "Código verificado no Etherscan",
+ "Code verified on Robinscan": "Código verificado no Robinscan",
  "Audit passed": "Auditoria aprovada",
  "Team KYC passed": "KYC da equipe aprovado",
  "Legal registration in the United States": "Registo legal nos Estados Unidos",
@@ -240,5 +240,6 @@
  "Integration": "Integração",
  "The company registered, the contract deployed and verified, and the first raise closed. Every one of them checkable by someone who is not us.": "A empresa registada, o contrato implantado e verificado, e a primeira ronda fechada. Qualquer uma delas pode ser confirmada por alguém que não somos nós.",
  "The chain and the interfaces that sit on top of it, built and out in the open, with a price anyone can look up.": "A cadeia e as interfaces que assentam sobre ela, construídas e à vista, com um preço que qualquer pessoa pode consultar.",
- "The infrastructure ceases to be a decision factor for the issuer, in the same way interbank payment rails are not one today.": "A infraestrutura deixa de ser um fator de decisão para o emissor, tal como hoje não o são as redes de pagamentos interbancários."
+ "The infrastructure ceases to be a decision factor for the issuer, in the same way interbank payment rails are not one today.": "A infraestrutura deixa de ser um fator de decisão para o emissor, tal como hoje não o são as redes de pagamentos interbancários.",
+ "Contract": "Contrato"
 }

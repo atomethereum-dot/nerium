@@ -212,7 +212,7 @@
  "Identity documents held in escrow · disclosed to regulators and exchanges on request": "本人確認書類はエスクロー保管 · 要請に応じて規制当局と取引所に開示",
  "Development of the entire NRM ecosystem": "NRM エコシステム全体の開発",
  "Contract deployed": "コントラクトをデプロイ済み",
- "Code verified on Etherscan": "Etherscan でコードを検証済み",
+ "Code verified on Robinscan": "Robinscan でコードを検証済み",
  "Audit passed": "監査に合格",
  "Team KYC passed": "チームの KYC 完了",
  "Legal registration in the United States": "米国での法人登記",
@@ -240,5 +240,6 @@
  "Integration": "統合",
  "The company registered, the contract deployed and verified, and the first raise closed. Every one of them checkable by someone who is not us.": "法人登記、コントラクトのデプロイと検証、最初のラウンドのクローズ。いずれも当社以外の相手で確認できます。",
  "The chain and the interfaces that sit on top of it, built and out in the open, with a price anyone can look up.": "チェーンと、その上で動く画面。どちらも完成して公開され、価格は誰でも確認できます。",
- "The infrastructure ceases to be a decision factor for the issuer, in the same way interbank payment rails are not one today.": "発行体にとってインフラが選択の条件でなくなります。今日の銀行間決済網がそうでないのと同じです。"
+ "The infrastructure ceases to be a decision factor for the issuer, in the same way interbank payment rails are not one today.": "発行体にとってインフラが選択の条件でなくなります。今日の銀行間決済網がそうでないのと同じです。",
+ "Contract": "コントラクト"
 }
