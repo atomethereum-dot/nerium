@@ -159,12 +159,12 @@ di(marca !== null, 'la palabra de la marca va en su propia caja');
 di(marca && marca.alto > 0, 'y se puede medir su alto de verdad');
 // El cero geometrico no es el sitio: centrar la caja de mayusculas exacta
 // deja la palabra alta, porque «Nereum» es una N y cinco letras bajas y el
-// ojo lee donde esta la tinta, no donde acaba la caja. Baja 0,0934 em, que
+// ojo lee donde esta la tinta, no donde acaba la caja. Baja 0,1734 em, que
 // es lo que se eligio mirando la barra. Se comprueba el valor elegido, no
 // un cero que nunca fue el bueno: si alguien lo mueve sin querer, salta.
-di(marca && Math.abs(marca.desfase - 0.0934) < 0.03,
+di(marca && Math.abs(marca.desfase - 0.1734) < 0.03,
    'y baja del medio del rombo lo que tiene que bajar (' +
-   (marca ? marca.desfase.toFixed(4) : '?') + ' em, buscado 0,0934; el dibujo va del ' +
+   (marca ? marca.desfase.toFixed(4) : '?') + ' em, buscado 0,1734; el dibujo va del ' +
    (marca ? (marca.arriba*100).toFixed(1) : '?') + ' al ' +
    (marca ? (marca.abajo*100).toFixed(1) : '?') + ' % de su recuadro)');
 di(marca && Math.abs(marca.centroBarra - marca.centroCubo) < 0.6,

@@ -146,12 +146,17 @@ di((await mo.evaluate(() => document.documentElement.scrollWidth - document.docu
 await ctx2.close();
 
 // ── la misma marca en las tres paginas ──
+// La marca va de canto, en rombo (GIRO -45 en herramientas/logo/logo.py).
+// Esto comprueba las tres paginas a la vez porque el whitepaper y el
+// explorador llevan el logotipo escrito DENTRO, con sus propios ids de
+// degradado: no comparten el <symbol> del index, asi que es justo donde se
+// queda una atras cuando la marca cambia.
 const CUBO = /M136\.00 136\.00 L536\.00 136\.00 L536\.00 536\.00 L136\.00 536\.00 Z/;
 const ROMBO = /M53\.16 336\.00 L336\.00 53\.16/;
 for (const [f, n] of [['index.html','la portada'], ['whitepaper/index.html','el whitepaper'],
                       ['explorer/index.html','el explorador']]) {
   const s = fs.readFileSync(path.join(RAIZ, f), 'utf8');
-  di(CUBO.test(s) && !ROMBO.test(s), n + ' lleva el cubo de pie, no el rombo');
+  di(ROMBO.test(s) && !CUBO.test(s), n + ' lleva el rombo, no el cubo de pie');
 }
 console.log(mal ? `\n${ok} bien, ${mal} MAL` : `\n${ok}/${ok} correctas`);
 await nav.close(); srv.close();

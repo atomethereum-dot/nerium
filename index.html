@@ -1933,10 +1933,13 @@ html[dir="rtl"] .subir{left:16px !important;right:auto !important}
    no de la tabla—, así que el medio de la caja de mayúsculas cae 0,0334 em
    por debajo del centro. Centrarla ahí exacto la deja ALTA: la palabra es
    una N y cinco letras bajas, y el ojo no lee la caja de mayúsculas, lee
-   dónde está la tinta. Se bajan 0,0934 em sobre ese cero —0,06 em de
-   translateY—, que a 15 px son 1,4. Probados 0, 0,03, 0,06 y 0,09 sobre la
-   barra de verdad. */
-.hd .brand .bw{line-height:1;transform:translateY(0.06em)}
+   dónde está la tinta. Se bajan 0,1734 em sobre ese cero —0,14 em de
+   translateY—, que a 15 px son 2,6. Probados 0 · 0,03 · 0,06 · 0,09 y
+   luego 0,06 · 0,10 · 0,14 · 0,18 sobre la barra de verdad, a seis
+   aumentos. En 0,18 la palabra ya se despega: la línea de base se le va
+   al canto blanco del rombo y dejan de leerse como una pieza. 0,14 es el
+   último sitio donde siguen juntas. */
+.hd .brand .bw{line-height:1;transform:translateY(0.14em)}
 /* ── el boton de whitepaper, al extremo derecho ─────────────────────────────
    Quien lo empujaba a la derecha era el nav del centro (margin-inline:auto).
    Al ocultar esos enlaces en escritorio, la regla de 1000px que anula el
