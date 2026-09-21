@@ -700,6 +700,19 @@ body.light .hud-band{color:rgba(232,236,244,.6)}
   font-size:clamp(10px,1.05vw,12.5px);letter-spacing:.2em;text-transform:uppercase;
   color:#63A9FF;text-align:left;line-height:1.6}
 .bcd-kind b{display:block;font-weight:500;letter-spacing:.2em}
+/* ── EL AIRE DEL TEXTO DE LA TARJETA ──
+   El texto se pegaba al canto. Medido en la tarjeta de «The chain»: en el
+   telefono el titulo caia a 3 px del borde, la descripcion a 2 y el enlace a
+   UN pixel del suelo; en escritorio, igual de pegado por la izquierda. La
+   tarjeta no tenia ni un pixel de relleno.
+   El aire entra solo en el texto: la ilustracion se queda donde esta, a
+   sangre, que es como tiene que ir. Y el enlace lleva ademas suelo propio,
+   porque era el que tocaba el borde de abajo. */
+.bcd{--aire:clamp(20px,2.2vw,28px)}
+.bcd-tag,.bcd-t,.bcd-d{margin-inline:var(--aire)}
+.bcd-go{margin-inline:var(--aire)}
+.bcd{padding-bottom:var(--aire)}
+
 .bcd-tag{margin-top:18px;font-family:var(--m);font-size:11px;letter-spacing:.22em;
   color:rgba(255,255,255,.42);display:flex;align-items:center;gap:9px}
 .bcd-dot{width:6px;height:6px;border-radius:50%;background:#3FD68C;flex:0 0 auto}
