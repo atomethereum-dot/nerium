@@ -38,6 +38,29 @@
   var previo=null;
   try{ previo=JSON.parse(S.getItem(CLAVE)||'null') }catch(e){}
 
+  /* ── EL SCROLL, LEIDO UNA VEZ Y DONDE SALE GRATIS ──
+     Leer «scrollY» no cuesta nada por si solo. Cuesta cuando se lee dentro de
+     un cuadro en el que OTROS ya han escrito estilos: entonces el navegador
+     tiene que rehacer la maquetacion antes de contestar, y la factura se la
+     lleva el que lee, no el que escribio. Esta pagina tiene una docena de
+     bucles de cuadro y todos empezaban leyendo scrollY, asi que el primero
+     pagaba un layout entero y los demas iban gratis detras. Medido con el
+     perfilador en un telefono a un cuarto de velocidad: al quitarselo a uno,
+     el 25 % del procesador se mudaba al siguiente de la fila.
+     El evento de scroll llega ANTES que los cuadros y con la maquetacion
+     limpia. Se lee ahi, se publica, y los bucles hacen aritmetica. */
+  /* Y el alto de la ventana con el, por lo mismo: solo cambia al cambiar de
+     tamaño, y preguntarlo en cada cuadro es abrir la misma puerta. */
+  window.__y = window.scrollY || window.pageYOffset || 0;
+  window.__vh = window.innerHeight;
+  addEventListener('scroll', function(){
+    window.__y = window.scrollY || window.pageYOffset || 0;
+  }, {passive:true});
+  addEventListener('resize', function(){
+    window.__y = window.scrollY || window.pageYOffset || 0;
+    window.__vh = window.innerHeight;
+  }, {passive:true});
+
   function anota(){
     try{
       var y=Math.round(window.scrollY||window.pageYOffset||0);
@@ -284,6 +307,18 @@ body.lock{overflow:hidden}
 .hero,section.dark,.stack,footer{background:var(--wash)}
 main>section.dark,main>section.stack{background:var(--wash)}
 @property --e{syntax:'<number>';initial-value:0;inherits:false}
+/* LAS QUE NO HEREDAN, DECLARADAS COMO TALES.
+   Una propiedad personalizada sin registrar se hereda, y heredar significa
+   que al escribirla el navegador tiene que recalcular el estilo de TODO lo
+   que cuelga del elemento. Estas cuatro las usa cada una en su propia regla
+   y en ningun descendiente —scaleY, opacity, translate3d y una mascara—,
+   asi que declararlas «inherits:false» acota la invalidacion a un elemento.
+   Medido con la traza antes de esto: 1.081 recalculos de estilo en una
+   bajada, 5,2 s de trabajo, y los peores tocaban 1.200 elementos. */
+@property --ms{syntax:'<number>';initial-value:1;inherits:false}
+@property --bo{syntax:'<number>';initial-value:1;inherits:false}
+@property --malla-y{syntax:'<length>';initial-value:0px;inherits:false}
+@property --hj{syntax:'<number>';initial-value:0;inherits:false}
 .glowfloor{position:absolute;inset:auto 0 0 0;height:50%;z-index:3;pointer-events:none;opacity:0;
   background:radial-gradient(ellipse 84% 100% at 50% 132%,
     rgba(186,188,194,.85),rgba(159,161,166,.44) 36%,rgba(119,120,124,.12) 62%,rgba(0,0,0,0) 82%);
@@ -7551,7 +7586,10 @@ const CALM=matchMedia('(prefers-reduced-motion: reduce)').matches;
       }
       if(mesh)mesh.style.opacity=cl((p-.34)/.20).toFixed(3);
       if(edges)edges.style.opacity=(Math.sin(cl(front/1.32)*Math.PI)*.9).toFixed(3);
-      if(inn)inn.style.setProperty('--sq',(1-cl((p-.04)/.34)*.14).toFixed(3));
+      /* Aqui se escribia «--sq» en «.hero-in» once veces por segundo. No lo
+         lee NADIE: cero usos en toda la hoja. Y como no estaba registrada,
+         era una propiedad heredable, asi que cada escritura invalidaba el
+         estilo de toda la portada para nada. */
       if(grain)grain.style.opacity=(cl((p-.36)/.22)*.5).toFixed(3);
       if(lock){
         const inp=cl((p-.38)/.14), outp=cl((p-.84)/.16);
@@ -7829,9 +7867,16 @@ const CALM=matchMedia('(prefers-reduced-motion: reduce)').matches;
       if(c1!==lastBg){lastBg=c1;lavado(c1)}
       /* El azul si vive en la raiz —lo piden «::selection» y «:focus-visible»,
          que valen para cualquier elemento—, pero no se reescribe por cuadro:
-         mientras corre, cada seis puntos de 255; en cuanto se para, exacto. */
+         mientras corre, cada CATORCE puntos de 255; en cuanto se para, exacto.
+         Eran seis. Esta variable vive en <html> y la usa media pagina, asi
+         que no hay forma de acotarla: cada escritura obliga a recalcular el
+         estilo del documento ENTERO. Medido, los recalculos mas caros de la
+         bajada eran estos, de 1.200 elementos y cien milisegundos cada uno.
+         A catorce se escriben menos de la mitad de veces y en movimiento no
+         se distingue: un 5 % de color entre cuadro y cuadro, con la pagina
+         corriendo. Parada sigue siendo exacta, que es cuando se mira. */
       if(c2!==puesto&&(c2===lastAcc||
-         Math.max(Math.abs(ca[0]-ap[0]),Math.abs(ca[1]-ap[1]),Math.abs(ca[2]-ap[2]))>=6)){
+         Math.max(Math.abs(ca[0]-ap[0]),Math.abs(ca[1]-ap[1]),Math.abs(ca[2]-ap[2]))>=14)){
         puesto=c2; ap=[ca[0],ca[1],ca[2]];
         document.documentElement.style.setProperty('--blue',c2);
       }
@@ -7911,15 +7956,46 @@ const CALM=matchMedia('(prefers-reduced-motion: reduce)').matches;
        entrando, y seguia leyendo una caja por tarjeta en cada cuadro DESPUES
        de que estuvieran todas encendidas. Cuando no queda ninguna por
        encender, deja de mirar. */
-    let faltan=cards.length;
-    jobs.push({measure,run(){
+    /* Y MIENTRAS QUEDA ALGUNA, TAMPOCO SE MIDE POR CUADRO.
+       Con las ocho sin encender, esto leia ocho cajas en cada cuadro de
+       scroll: medido con el perfilador, 716 de las 1.296 lecturas que quedaban
+       en toda la pagina salian de aqui, y cada una obliga a rehacer la
+       maquetacion.
+       Lo que hace falta saber son dos cosas y ninguna necesita preguntar:
+       donde cae la tarjeta a lo ALTO es su sitio en el documento menos
+       scrollY, y donde cae a lo ANCHO es su sitio dentro de la tira menos lo
+       que la tira lleva corrido —«scrollLeft» en movil, la transformacion en
+       escritorio, que se calcula aqui mismo—. Se miden una vez y el resto es
+       aritmetica.
+       La caja de cero no se guarda: con content-visibility, una seccion sin
+       dibujar no tiene medidas, y guardarlas dejaria las tarjetas apagadas
+       para siempre. */
+    /* Y si la tira todavia no esta dibujada —content-visibility— no se
+       reintenta en cada cuadro: eso era volver a medir sesenta veces por
+       segundo algo que no existe. Se espera un poco entre intentos. */
+    let faltan=cards.length, fichas=null, tiraX=0, proximo=0;
+    const mideCards=()=>{
+      const ahora=performance.now();
+      if(ahora<proximo) return;
+      const rs=strip.getBoundingClientRect();
+      if(rs.height===0 && rs.width===0){ fichas=null; proximo=ahora+400; return }
+      const y=S.y||scrollY, corrido=wide?0:strip.scrollLeft;
+      tiraX=rs.left+(wide?0:corrido);
+      fichas=cards.map(c=>{const r=c.getBoundingClientRect();
+        return {c, y:r.top+y, h:r.height, x:r.left-rs.left+corrido}});
+    };
+    const medirTodo=()=>{ measure(); fichas=null };
+    jobs.push({measure:medirTodo,run(){
       if(!wide){
         if(!faltan)return;
+        if(!fichas) mideCards();
+        if(!fichas) return;
+        const corrido=strip.scrollLeft, lim=innerWidth*0.94;
         faltan=0;
-        for(const c of cards){
-          if(c.classList.contains('in'))continue;
-          const r=c.getBoundingClientRect();
-          if(r.left<innerWidth*0.94&&r.bottom>0&&r.top<S.vh)c.classList.add('in');
+        for(const m of fichas){
+          if(m.c.classList.contains('in'))continue;
+          const izq=tiraX+m.x-corrido, arriba=m.y-S.y;
+          if(izq<lim&&arriba+m.h>0&&arriba<S.vh)m.c.classList.add('in');
           else faltan++;
         }
         return;
@@ -7927,9 +8003,15 @@ const CALM=matchMedia('(prefers-reduced-motion: reduce)').matches;
       const t=cl((S.y-top)/span);
       strip.style.transform='translate3d('+(-t*dist).toFixed(1)+'px,0,0)';
       if(fill)fill.style.width=(t*100).toFixed(1)+'%';
-      for(const c of cards){
-        if(c.classList.contains('in'))continue;
-        if(c.getBoundingClientRect().left<innerWidth*0.94)c.classList.add('in');
+      if(!faltan)return;
+      if(!fichas) mideCards();
+      if(!fichas) return;
+      const lim=innerWidth*0.94, corrido=t*dist;
+      faltan=0;
+      for(const m of fichas){
+        if(m.c.classList.contains('in'))continue;
+        if(tiraX+m.x-corrido<lim)m.c.classList.add('in');
+        else faltan++;
       }
     }});
   })();
@@ -8062,15 +8144,26 @@ const CALM=matchMedia('(prefers-reduced-motion: reduce)').matches;
      geometria y no recalculan estilo, que era lo caro. De atras hacia
      delante: cuando dos se solapan manda la de despues, que se pinta encima.
      Y solo cuando el scroll ha cambiado: parado no hay nada que preguntar. */
-  const bandas=[...document.querySelectorAll('main>section[data-bg]')]
-    .map(el=>({el,bg:el.getAttribute('data-bg'),hero:el.classList.contains('hero')}))
-    .filter(b=>b.bg);
+  const hexB=h=>[parseInt(h.slice(1,3),16),parseInt(h.slice(3,5),16),parseInt(h.slice(5,7),16)];
   const f8=v=>{v/=255;return v<=.03928?v/12.92:Math.pow((v+.055)/1.055,2.4)};
   const lumHex=h=>{
     const m=/^#?([0-9a-f]{6})$/i.exec((h||'').trim()); if(!m)return 0;
     const n=parseInt(m[1],16);
     return .2126*f8(n>>16&255)+.7152*f8(n>>8&255)+.0722*f8(n&255);
   };
+  /* EL COLOR DE UNA BANDA NO CAMBIA, ASI QUE SE MIDE UNA VEZ.
+     Esto llamaba a «lumHex» en cada cuadro: una expresion regular, un
+     parseInt y TRES «Math.pow» con exponente fraccionario —que es de lo mas
+     caro que hay en aritmetica de coma flotante— para sacar un numero que es
+     siempre el mismo, porque sale de un atributo escrito en el marcado.
+     Medido con el perfilador una vez quitadas las lecturas de caja, esta
+     funcion sola se llevaba el 24 % del procesador: era, con diferencia, lo
+     que mas costaba de la pagina. Se calcula al montar la lista y por cuadro
+     queda una comparacion. */
+  const bandas=[...document.querySelectorAll('main>section[data-bg]')]
+    .map(el=>({el,bg:el.getAttribute('data-bg'),hero:el.classList.contains('hero')}))
+    .filter(b=>b.bg)
+    .map(b=>(b.luz=lumHex(b.bg), b.rgb=hexB(b.bg), b));
   /* Y las cajas se miden UNA VEZ, no en cada cuadro. Medir las diecinueve
      secciones por cuadro era, junto con el iman, el otro gran lector de
      geometria, y una lectura de geometria obliga al navegador a recalcular
@@ -8086,15 +8179,33 @@ const CALM=matchMedia('(prefers-reduced-motion: reduce)').matches;
       return {b, t:r.top+scrollY, b2:r.bottom+scrollY}});
   };
   addEventListener('resize',()=>{cajas=null},{passive:true});
-  setInterval(()=>{cajas=null}, 2000);
-  let ultimoY=-1e9;
+  /* Se remedia cuando la pagina AVISA de que ha cambiado de alto, que es la
+     unica razon por la que estas cajas se quedan viejas. El temporizador de
+     dos segundos que habia era preguntar a ciegas: medido, 108 lecturas de
+     caja en una bajada, todas para confirmar que nada se habia movido. Se
+     queda uno mucho mas lento por si algo cambia sin avisar. */
+  addEventListener('nrm:remide',()=>{cajas=null},{passive:true});
+  setInterval(()=>{cajas=null}, 12000);
+  /* Y EL SCROLL SE LEE DONDE SALE GRATIS.
+     Esta funcion abria con «const sy=scrollY» dentro de su rAF. Leer scrollY
+     no cuesta nada por si solo, pero en un cuadro en el que OTROS han escrito
+     estilos obliga al navegador a rehacer la maquetacion antes de contestar,
+     y quien paga esa cuenta es el que lee, no el que escribio. Medido con el
+     perfilador: con las lecturas de caja ya quitadas, esta linea dejaba a
+     «mira» en el 25 % del procesador de toda la pagina, siendo lo unico que
+     hace un bucle de diecinueve comparaciones.
+     El valor se recoge en el evento de scroll, que llega ANTES de que nadie
+     escriba nada y con la maquetacion todavia limpia. El alto de la ventana,
+     igual: solo cambia al cambiar de tamaño. */
+  let ultimoY=-1e9, sy=scrollY, vh=innerHeight;
+  addEventListener('scroll',()=>{sy=scrollY},{passive:true});
+  addEventListener('resize',()=>{sy=scrollY;vh=innerHeight},{passive:true});
   (function mira(){
     requestAnimationFrame(mira);
-    const sy=scrollY;
     if(Math.abs(sy-ultimoY)<2&&cajas)return;
     ultimoY=sy;
     if(!cajas)mide();
-    const yd=sy+innerHeight-24;
+    const yd=sy+vh-24;
     /* De las que cubren el punto se coge LA QUE EMPIEZA MAS ABAJO, no la
        ultima del documento. Varias secciones son «sticky» dentro de un
        soporte de tres o cuatro pantallas, asi que sus cajas se solapan y
@@ -8118,10 +8229,10 @@ const CALM=matchMedia('(prefers-reduced-motion: reduce)').matches;
        darlo por supuesto. */
     if(b){
       if(b.hero && window.__cortina>0){
-        const c=hex(b.bg), k=Math.min(1,window.__cortina);
+        const c=b.rgb, k=Math.min(1,window.__cortina);
         const m=[0,1,2].map(i=>c[i]+(SUELO[i]-c[i])*k);
         q = (.2126*f8(m[0])+.7152*f8(m[1])+.0722*f8(m[2])) > .35;
-      } else q = lumHex(b.bg)>.35;
+      } else q = b.luz>.35;
     }
     else  q = lum(sitio?sitio.style.getPropertyValue('--wash'):'')>.35;
     if(q!==claro){claro=q;document.body.classList.toggle('light',q)}
@@ -8450,7 +8561,7 @@ function campoGL(){
       M.x+=(M.tx-M.x)*Math.min(1,dt*14); M.y+=(M.ty-M.y)*Math.min(1,dt*14);
       M.vx=(M.x-px)/Math.max(dt,.001); M.vy=(M.y-py)/Math.max(dt,.001);
     }
-    desliz += ((scrollY*0.62*dpr) - desliz) * Math.min(1,dt*6);
+    desliz += ((__y*0.62*dpr) - desliz) * Math.min(1,dt*6);
     const lx=cv.width*(0.5+0.34*Math.sin(t*0.113)+0.10*Math.sin(t*0.291));
     const ly=cv.height*(0.5+0.30*Math.cos(t*0.087)+0.09*Math.cos(t*0.233));
     const lr=Math.min(cv.width,cv.height)*0.52;
@@ -8564,7 +8675,7 @@ function campo2D(){
       M.x+=(M.tx-M.x)*Math.min(1,dt*14);M.y+=(M.ty-M.y)*Math.min(1,dt*14);
       M.vx=(M.x-px)/Math.max(dt,.001);M.vy=(M.y-py)/Math.max(dt,.001);
     }
-    desliz += ((scrollY*0.62) - desliz) * Math.min(1,dt*6);
+    desliz += ((__y*0.62) - desliz) * Math.min(1,dt*6);
     ctx.globalCompositeOperation='source-over';
     ctx.fillStyle='rgba(0,0,0,.17)';ctx.fillRect(0,0,W,H);
     rejilla();
@@ -8930,7 +9041,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
   addEventListener('nrm:remide',measure,{passive:true});
   let last=-1,busy=false;
   (function paint(){
-    const y=scrollY;
+    const y=__y;
     for(const o of items){
       if(y+vh<o.top-40||y>o.top+o.h+40){
         if(o.p!==0){o.p=0;o.sec.style.transform='';if(o.d)o.d.style.opacity='0'}
@@ -9096,7 +9207,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
   }),{threshold:.14}).observe(cards);
   (function tick(){
     const y0=top-vh*.82, span=Math.max(vh*1.15,h+vh*.72);
-    const p=clm((scrollY-y0)/span);
+    const p=clm((__y-y0)/span);
     if(Math.abs(p-lastP)>.0015){
       lastP=p;
       live.style.strokeDashoffset=(100-p*100).toFixed(2);
@@ -9372,7 +9483,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
   addEventListener('load',()=>setTimeout(measure,600));
   addEventListener('nrm:remide',measure,{passive:true});
   (function tick(){
-    const a=scrollY+innerHeight*.45;
+    const a=__y+__vh*.45;
     let i=0;for(let k=0;k<tops.length;k++)if(tops[k]<=a)i=k;
     if(i!==last){last=i;btns.forEach((b,k)=>b.classList.toggle('on',k===i))}
     requestAnimationFrame(tick);
@@ -9824,7 +9935,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
   }
   (function tick(){
     const run=Math.max(1,hh-vh);
-    const p=clm((scrollY-top)/run);
+    const p=clm((__y-top)/run);
     const moving=p<.80;
     const now=performance.now();
     const due=moving && now-lastT>24;
@@ -10001,11 +10112,22 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
     stage.classList.toggle('lit', p>.46 && p<.95);
     stage.classList.toggle('go', p<.80);
   }
-  build();
-  addEventListener('resize',()=>{build();last=-1},{passive:true});
+  /* EL SITIO DE LA SECCION NO CAMBIA AL BAJAR, ASI QUE NO SE PREGUNTA POR EL.
+     Este bucle abria cada cuadro con «dTop(sec)» y «sec.offsetHeight»: dos
+     lecturas de maquetacion por cuadro, y en un cuadro donde otros ya han
+     escrito estilos cada una obliga al navegador a rehacerla entera. Medido,
+     entre las dos escenas que hacian esto salian 2.467 lecturas de
+     «offsetTop» en una bajada. Se miden con el resto, en «build», que ya se
+     rehace al cambiar de tamaño, y se añade «nrm:remide» por si algo de
+     arriba crece. */
+  let topSec=0, runSec=1;
+  const sitio=()=>{ topSec=dTop(sec); runSec=Math.max(1,sec.offsetHeight-innerHeight) };
+  build(); sitio();
+  addEventListener('resize',()=>{build();sitio();last=-1},{passive:true});
+  addEventListener('nrm:remide',sitio,{passive:true});
   (function tick(){
-    const top=dTop(sec), run=Math.max(1,sec.offsetHeight-innerHeight);
-    const p=clm((scrollY-top)/run);
+    const top=topSec, run=runSec;
+    const p=clm((__y-top)/run);
     if(Math.abs(p-last)>.0015 || p>.46 || p<.30){last=p;draw(p)}
     raf=requestAnimationFrame(tick);
   })();
@@ -10272,11 +10394,22 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
     stage.classList.toggle('lit', p>.66);
     stage.classList.toggle('go', p<.7);
   }
-  build();
-  addEventListener('resize',build,{passive:true});
+  /* EL SITIO DE LA SECCION NO CAMBIA AL BAJAR, ASI QUE NO SE PREGUNTA POR EL.
+     Este bucle abria cada cuadro con «dTop(sec)» y «sec.offsetHeight»: dos
+     lecturas de maquetacion por cuadro, y en un cuadro donde otros ya han
+     escrito estilos cada una obliga al navegador a rehacerla entera. Medido,
+     entre las dos escenas que hacian esto salian 2.467 lecturas de
+     «offsetTop» en una bajada. Se miden con el resto, en «build», que ya se
+     rehace al cambiar de tamaño, y se añade «nrm:remide» por si algo de
+     arriba crece. */
+  let topSec=0, runSec=1;
+  const sitio=()=>{ topSec=dTop(sec); runSec=Math.max(1,sec.offsetHeight-innerHeight) };
+  build(); sitio();
+  addEventListener('resize',()=>{build();sitio()},{passive:true});
+  addEventListener('nrm:remide',sitio,{passive:true});
   (function tick(){
-    const top=dTop(sec), run=Math.max(1,sec.offsetHeight-innerHeight);
-    const p=clm((scrollY-top)/run*1.26 + 0.06);
+    const top=topSec, run=runSec;
+    const p=clm((__y-top)/run*1.26 + 0.06);
     if(Math.abs(p-last)>.0014 || p>.40 || p<.30){last=p;draw(p)}
     requestAnimationFrame(tick);
   })();
@@ -10424,7 +10557,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
   (function tick(){
     if(pinned){
       const top=_top, run=_run;
-      const p=Math.min(1,Math.max(0,(scrollY-top)/run));
+      const p=Math.min(1,Math.max(0,(__y-top)/run));
       show(Math.min(cards.length-1,Math.floor(p*cards.length*.999)));
       /* el aviso acompaña mientras quede alguna tarjeta por delante */
       if(cue) cue.classList.toggle('on', p<.90);
@@ -10522,7 +10655,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
     sub.onclick=()=>scrollTo({top:0,behavior:CALMA?'auto':'smooth'});
     let vis=false;
     addEventListener('scroll',()=>{
-      const q=scrollY>innerHeight*1.6;
+      const q=__y>__vh*1.6;
       if(q!==vis){vis=q;sub.classList.toggle('on',q)}
     },{passive:true});
   }
@@ -11207,9 +11340,9 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
     requestAnimationFrame(paso);
     if(pend.length) repaso(t || 0);
     if(!flota.length) return;
-    if(scrollY === antesY) return;
-    antesY = scrollY;
-    var h = innerHeight, medio = scrollY + h / 2;
+    if(__y === antesY) return;
+    antesY = __y;
+    var h = innerHeight, medio = __y + h / 2;
     for(var i = 0; i < flota.length; i++){
       var f = flota[i], d = f.y - medio;
       if(d < -h - 240 || d > h + 240) continue;
@@ -11287,15 +11420,39 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
      recta blanca por encima del dibujo, y se leian como dos: una trenza que
      curva y un palo que no. Ahora el punto cabalga la curva y lo que baja
      encendido es la propia hebra. */
-  function curvaX(f){
+  /* LA CURVA SE PREGUNTA UNA VEZ, NO VEINTE VECES POR LLAMADA.
+     Esto hacia una busqueda binaria de veinte pasos sobre la ruta, y cada
+     paso es un «getPointAtLength»: veinte teselados de la curva para sacar un
+     punto. Medido con el perfilador en un telefono a un cuarto de velocidad,
+     esas llamadas se llevaban el 6 % del procesador de toda la pagina.
+     La ruta no cambia: vive en un viewBox fijo. Asi que se muestrea entera
+     una vez —96 puntos— y despues esto es una busqueda binaria sobre un array
+     y una interpolacion. De paso sale MAS fino que antes: la version vieja
+     devolvia el punto muestreado y esta interpola entre los dos vecinos. */
+  var tablaC = null;
+  function haceTabla(){
     if(!espina) return null;
-    var u = f * altoVB;
-    var L = espina.getTotalLength(), lo = 0, hi = L, p = null;
-    for(var i = 0; i < 20; i++){
-      var m = (lo + hi) / 2; p = espina.getPointAtLength(m);
-      if(p.y < u) lo = m; else hi = m;
+    var L = espina.getTotalLength();
+    if(!L) return null;
+    var n = 96, t = new Float64Array(n * 2);
+    for(var i = 0; i < n; i++){
+      var p = espina.getPointAtLength(L * i / (n - 1));
+      t[i*2] = p.y; t[i*2+1] = p.x;
     }
-    return p ? p.x / 96 * 100 : null;
+    return t;
+  }
+  addEventListener('nrm:remide', function(){ tablaC = null }, {passive:true});
+  function curvaX(f){
+    if(!tablaC) tablaC = haceTabla();
+    var t = tablaC; if(!t) return null;
+    var u = f * altoVB, n = t.length / 2;
+    if(u <= t[0]) return t[1] / 96 * 100;
+    if(u >= t[(n-1)*2]) return t[(n-1)*2+1] / 96 * 100;
+    var lo = 0, hi = n - 1;
+    while(hi - lo > 1){ var m = (lo + hi) >> 1; if(t[m*2] <= u) lo = m; else hi = m }
+    var y0 = t[lo*2], y1 = t[hi*2];
+    var k = y1 > y0 ? (u - y0) / (y1 - y0) : 0;
+    return (t[lo*2+1] + (t[hi*2+1] - t[lo*2+1]) * k) / 96 * 100;
   }
 
   /* ── donde va cada cosa ──
@@ -12575,30 +12732,51 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
 (function(){
   if(innerWidth >= 900) return;
   if(!document.getAnimations) return;
-  function revisa(){
-    var vh = innerHeight, M = vh * 0.6, l;
+  /* NI UNA MEDIDA, PUNTO.
+     Esto preguntaba la caja de las noventa y ocho animaciones cada vez que
+     repasaba —cada 260 ms mientras se baja—, y cada pregunta obliga al
+     navegador a rehacer la maquetacion antes de contestar. Medido con el
+     perfilador en un telefono a un cuarto de velocidad, «getBoundingClientRect»
+     se llevaba el 34,9 % del procesador de toda la pagina y de aqui salian
+     6.167 de las 7.110 llamadas que se hacian bajando. El freno de las
+     animaciones era lo que mas frenaba.
+
+     Guardar las cajas medidas lo bajo mucho, pero seguia midiendo: un
+     elemento dentro de una seccion sin dibujar no tiene caja, asi que se le
+     volvia a preguntar en cada pasada por si ya la tenia.
+
+     La respuesta no era medir mejor: era no medir. Saber si algo esta cerca
+     del encuadre es exactamente lo que hace un IntersectionObserver, y lo
+     hace el navegador por su cuenta, sin bloquear nada y sin que la pagina
+     tenga que preguntar. Se observa cada elemento animado una vez con un
+     margen del 60 % —el mismo medio encuadre de antes— y ya no hay ni
+     escucha de scroll ni lecturas de caja: cero.
+
+     La ronda periodica se queda, pero solo para enterarse de animaciones
+     NUEVAS; no mide nada. */
+  var cerca = new WeakMap(), vistos = new WeakSet();
+  function aplica(){
+    var l;
     try{ l = document.getAnimations() }catch(e){ return }
     for(var i=0;i<l.length;i++){
       var a = l[i], e = a.effect && a.effect.target;
-      if(!e || !e.getBoundingClientRect) continue;
-      var r;
-      try{ r = e.getBoundingClientRect() }catch(err){ continue }
-      var cerca = r.width > 0 && r.bottom > -M && r.top < vh + M;
+      if(!e || e.nodeType !== 1) continue;
+      if(!vistos.has(e)){ vistos.add(e); try{ ojo.observe(e) }catch(err){} }
+      var c = cerca.get(e);
+      if(c === undefined) continue;          /* todavia sin noticia suya */
       try{
-        if(cerca){ if(a.__freno){ a.__freno = 0; a.play() } }
+        if(c){ if(a.__freno){ a.__freno = 0; a.play() } }
         else if(a.playState === 'running'){ a.__freno = 1; a.pause() }
       }catch(err){}
     }
   }
-  var pide = (function(){
-    var p = 0;
-    return function(){ if(p) return; p = 1;
-      setTimeout(function(){ p = 0; revisa() }, 260) };
-  })();
-  addEventListener('scroll', pide, {passive:true});
-  addEventListener('resize', pide, {passive:true});
-  addEventListener('load', function(){ setTimeout(revisa, 1600) });
-  setInterval(revisa, 2400);
+  var ojo = new IntersectionObserver(function(ee){
+    for(var i=0;i<ee.length;i++) cerca.set(ee[i].target, ee[i].isIntersecting);
+    aplica();
+  }, {rootMargin:'60% 0px'});
+  addEventListener('load', function(){ setTimeout(aplica, 1600) });
+  setInterval(aplica, 2400);
+  aplica();
 })();
 </script>
 <script>
