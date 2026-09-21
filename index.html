@@ -712,6 +712,12 @@ body.light .hud-band{color:rgba(232,236,244,.6)}
 .bcd-tag,.bcd-t,.bcd-d{margin-inline:var(--aire)}
 .bcd-go{margin-inline:var(--aire)}
 .bcd{padding-bottom:var(--aire)}
+/* La ilustracion se alinea con el texto, no con el canto de la tarjeta.
+   Estaba a UN pixel del borde de arriba y a cinco de los lados: eso no era un
+   margen, era lo que sobraba. Con el mismo «--aire» en los tres lados, la
+   foto y el texto comparten el mismo canto izquierdo y la tarjeta se lee como
+   una sola pieza. */
+.bcd-art{margin:var(--aire) var(--aire) 0}
 
 .bcd-tag{margin-top:18px;font-family:var(--m);font-size:11px;letter-spacing:.22em;
   color:rgba(255,255,255,.42);display:flex;align-items:center;gap:9px}
