@@ -112,7 +112,15 @@ if (!MONTADO) {
      'y trae la cifra nueva');
 }
 
-// ── la marca: la palabra clavada en la punta del rombo ──
+// ── la marca: la palabra centrada con el rombo ──
+// Antes esto media que la linea de base cayera en el canto de abajo del
+// cubo. Tenia sentido mientras el cubo era un CUADRADO: habia una recta
+// horizontal sobre la que posar la palabra. El rombo acaba en punta, y
+// colgar la palabra de un vertice la deja flotando. La regla nueva es
+// centrar, y se mide igual de duro: el alto real de la palabra sale del
+// canvas (actualBoundingBoxAscent, no una constante a ojo) y el centro del
+// dibujo del getBBox del simbolo, asi que si la marca cambia otra vez de
+// forma la comprobacion cambia con ella.
 const marca = await pg.evaluate(() => {
   const br = document.querySelector('.hd .brand');
   const svg = br.querySelector('svg'), sp = br.querySelector('.bw');
@@ -135,15 +143,23 @@ const marca = await pg.evaluate(() => {
   const ys = [[bb.x, bb.y], [bb.x + bb.width, bb.y], [bb.x, bb.y + bb.height],
               [bb.x + bb.width, bb.y + bb.height]].map(([x, y]) => m.b * x + m.d * y + m.f);
   t.remove();
-  const abajo = Math.max(...ys) / vb[3];
-  return { abajo, desfase: base - (rs.top + rs.height * abajo),
+  const arriba = Math.min(...ys) / vb[3], abajo = Math.max(...ys) / vb[3];
+  const cs = getComputedStyle(sp);
+  const cv = document.createElement('canvas').getContext('2d');
+  cv.font = cs.fontStyle + ' ' + cs.fontWeight + ' ' + cs.fontSize + ' ' + cs.fontFamily;
+  const alto = cv.measureText(sp.textContent.trim()).actualBoundingBoxAscent;
+  const centroPalabra = base - alto / 2;
+  const centroDibujo = rs.top + rs.height * (arriba + abajo) / 2;
+  return { arriba, abajo, alto, desfase: centroPalabra - centroDibujo,
            centroBarra: hd.top + hd.height / 2, centroCubo: rs.top + rs.height / 2 };
 });
 di(marca !== null, 'la palabra de la marca va en su propia caja');
-di(marca && Math.abs(marca.desfase) < 0.6,
-   'y su linea de base cae en el canto de abajo del cubo, al ' +
-   (marca ? (marca.abajo*100).toFixed(1) : '?') + ' % de su recuadro (' +
-   (marca ? marca.desfase.toFixed(2) : '?') + ' px)');
+di(marca && marca.alto > 0, 'y se puede medir su alto de verdad');
+di(marca && Math.abs(marca.desfase) < 1,
+   'y su medio optico coincide con el del rombo (' +
+   (marca ? marca.desfase.toFixed(2) : '?') + ' px, el dibujo va del ' +
+   (marca ? (marca.arriba*100).toFixed(1) : '?') + ' al ' +
+   (marca ? (marca.abajo*100).toFixed(1) : '?') + ' % de su recuadro)');
 di(marca && Math.abs(marca.centroBarra - marca.centroCubo) < 0.6,
    'sin desplazar el cubo: sigue centrado en la barra');
 

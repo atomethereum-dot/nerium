@@ -31,7 +31,7 @@ flotando sobre blanco, no de la marca (en la web la pone el CSS).
 """
 import math
 
-GIRO = 0.0                       # cuadrado de pie; -45 lo pone de canto, en rombo
+GIRO = -45.0                     # de canto, en rombo; 0 lo pone de pie
 BANDA = 0.185                    # fracción inferior de la cara que es blanca
 CANTO_U, CANTO_V = 0.031, 0.060  # cuánto asoma el canto, en ejes de la cara
 
