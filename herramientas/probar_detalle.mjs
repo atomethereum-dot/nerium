@@ -119,7 +119,8 @@ await ctx2.close();
 // ── 7 · la marca de «the stack» se arma a tamano legible ──
 //
 // El tercer paso de la seccion arma las teselas en la marca de Nereum: el
-// disco, el escalon de la derecha y los dos cuadros azules. La escena se
+// rombo y la banda blanca de su canto de abajo. (Antes eran el disco, el
+// escalon y los dos cuadros azules del logotipo anterior.) La escena se
 // dimensiona con la franja que queda entre la cabecera y el texto, asi que en
 // una pantalla ANCHA Y BAJA -donde el texto sube- esa franja se estrecha y la
 // marca encoge sola. Medido en 1523x772 salia a 84 px: con 18 teselas por
@@ -141,10 +142,13 @@ await ctx2.close();
 const ctx3 = await nav.newContext({ viewport:{width:1523,height:772} });
 const w = await ctx3.newPage();
 await w.goto('http://127.0.0.1:9017/', { waitUntil:'load' }); await w.waitForTimeout(2400);
-const marca = await w.evaluate(async () => {
+// La caja de lo que el lienzo pinta de verdad, en el punto del recorrido que
+// se le pida. Se mide en varios sitios porque el tramo final ya no es quieto:
+// la marca gira.
+const caja = (p) => w.evaluate(async (p) => {
   const sec = document.querySelector('.stack');
   const r = sec.getBoundingClientRect();
-  scrollTo(0, Math.round(r.top + scrollY + 0.80 * (r.height - innerHeight)));
+  scrollTo(0, Math.round(r.top + scrollY + p * (r.height - innerHeight)));
   await new Promise(s => setTimeout(s, 900));
   const cv = document.getElementById('stkCv');
   const c = document.createElement('canvas'); c.width = cv.width; c.height = cv.height;
@@ -163,11 +167,27 @@ const marca = await w.evaluate(async () => {
   const esc = c.height / cv.getBoundingClientRect().height;
   return { alto: y1 < 0 ? 0 : Math.round((y1 - y0 + 1) / esc),
            ancho: x1 < 0 ? 0 : Math.round((x1 - x0 + 1) / esc) };
-});
-di(marca.alto >= 240, 'en 1523x772 la marca del tercer paso se arma a tamano legible (' +
-   marca.alto + ' px de alto, limite 240)');
-di(marca.ancho >= 240, 'y no es un hilo: tambien tiene cuerpo a lo ancho (' +
-   marca.ancho + ' px)');
+}, p);
+
+// Al 70 % la marca ya esta montada y todavia no ha empezado a girar: ese es
+// el momento en que se mide si se lee. Antes se media al 80, que hoy cae
+// dentro del giro y devolvia una rendija.
+const quieta = await caja(0.70);
+di(quieta.alto >= 240, 'en 1523x772 la marca del tercer paso se arma a tamano legible (' +
+   quieta.alto + ' px de alto, limite 240)');
+di(quieta.ancho >= 240, 'y no es un hilo: tambien tiene cuerpo a lo ancho (' +
+   quieta.ancho + ' px)');
+
+// El trompo. No se comprueba la formula, se comprueba que la lamina se pone
+// DE CANTO por el camino y vuelve de frente al final: si alguien quita el
+// giro, la primera salta; si lo deja a medias y la marca se queda de perfil,
+// salta la segunda.
+const canto = await caja(0.80);
+di(canto.ancho < quieta.ancho * 0.6,
+   'y a mitad de giro se pone de canto (' + canto.ancho + ' px contra ' + quieta.ancho + ')');
+const final = await caja(1.00);
+di(final.ancho >= quieta.ancho * 0.9,
+   'y acaba de frente otra vez, no de perfil (' + final.ancho + ' px)');
 await ctx3.close();
 
 console.log(mal ? `\n${ok} bien, ${mal} MAL` : `\n${ok}/${ok} correctas`);

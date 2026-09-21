@@ -9459,8 +9459,15 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
     ctx.strokeStyle='rgba(208,211,217,'+(.34*a*(.4+lit*.6)).toFixed(3)+')';
     ctx.lineWidth=1.2;ctx.stroke();
   }
-  const LOGO='M336 0 H464 V224 H672 V336 H560 V560 H464 V672 H336 A336 336 0 0 1 336 0 Z';
-  const LCHIPS=[[464,112,112,112],[560,336,112,112]];
+  /* La pila de cubos monta LA MARCA, asi que cuando la marca giro a rombo
+     esto tenia que girar con ella: seguia armando el logotipo anterior, el
+     del cuarto de circulo con sus dos fichas. Ahora arma el rombo, y la
+     «ficha» pasa a ser la banda blanca del canto de abajo, que es lo que
+     distingue a esta marca de un rombo cualquiera.
+     Las dos rutas son las mismas que viven en el <symbol> de arriba, no una
+     copia parecida: si la marca cambia otra vez, se copian de alli. */
+  const LOGO='M53.16 336.00 L336.00 53.16 L618.84 336.00 L336.00 618.84 Z';
+  const LBANDA='M283.67 566.52 L566.52 283.67 L618.84 336.00 L336.00 618.84 Z';
   /* La paleta de la pila va en HSL y por eso el paso a plata no la alcanzo:
      el conversor buscaba azules en RGB. Se desatura -de 100 a 8-14 de
      saturacion, lo justo para que el metal no sea gris muerto sino que
@@ -9480,9 +9487,18 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
   const TONES=[{h:219,s:100,l:56},{h:224,s:97,l:46},{h:216,s:88,l:38},
                {h:214,s:14,l:30},{h:220,s:26,l:19},{h:226,s:92,l:16},
                {h:210,s:10,l:92},{h:213,s:13,l:76},{h:218,s:100,l:62}];
-  const OWN={body:{h:212,s:9,l:90}, chip:{h:222,s:98,l:50}};
+  /* El color de la marca ya montada. Era blanco con fichas azules, que es el
+     logotipo viejo. El rombo es PLATA con la banda casi blanca: 71 de luz
+     para la cara —el punto medio entre los dos extremos del degradado,
+     #C6CAD7 y #9498A1— y 98 para la banda. La banda se lee por contraste con
+     la cara, igual que en la marca de verdad, y no por ser de otro color. */
+  const OWN={body:{h:224,s:12,l:71}, chip:{h:220,s:6,l:98}};
   const mixTone=(a,b,k)=>({h:a.h+(b.h-a.h)*k, s:a.s+(b.s-a.s)*k, l:a.l+(b.l-a.l)*k});
-  const NV=18;
+  /* 24 y no 18. El rombo ocupa la mitad del cuadro que ocupaba el logotipo
+     anterior, asi que a la misma rejilla se quedaba en 112 cubos contra 218:
+     la mitad del campo. A 24 salen 220, que es el mismo puñado de piezas de
+     antes repartido por una silueta mas estrecha. */
+  const NV=24;
   let vox=null;
   function bakeVox(){
     const off=document.createElement('canvas');off.width=off.height=NV;
@@ -9491,7 +9507,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
     o.fillStyle='#fff';o.fill(new Path2D(LOGO));
     const body=o.getImageData(0,0,NV,NV).data;
     o.clearRect(0,0,672,672);
-    LCHIPS.forEach(c=>o.fillRect(c[0],c[1],c[2],c[3]));
+    o.fill(new Path2D(LBANDA));
     const chip=o.getImageData(0,0,NV,NV).data;
     vox=[];
     const cg=(NV-1)/2;
@@ -9635,7 +9651,21 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
     const U=S/NV;
     const cxp=W*.5, cyp=(bandTop+bandBot)*.5;
     const k=1-ease(clm(p));            /* 1 disperso → 0 en su sitio */
-    vprep(.20-p*.30, -.30+p*.14);
+    /* EL TROMPO. Montada la marca, el ultimo tramo de scroll la hace girar
+       sobre su eje vertical. Se aprovecha que vprep gira TODO —las posiciones
+       de los cubos y las caras de cada uno— con la misma matriz: no hay que
+       montar nada aparte, la pila entera es un solo solido.
+
+       Dos vueltas exactas y no una y media: el rombo es una lamina, y media
+       vuelta lo deja de espaldas, con la banda blanca en el canto que no le
+       toca. Con un numero entero de vueltas acaba mirando como empezo.
+
+       El suavizado es el mismo del resto (ease): arranca despacio, coge
+       velocidad y se para sola, que es justo lo que hace un trompo. Y como al
+       pasar de canto la lamina se ve de perfil, la inclinacion que ya traia
+       —que nunca es cero— deja una rendija en vez de una linea. */
+    const trompo = ease(clm((p-.70)/.30)) * Math.PI*4;
+    vprep(.20-p*.30+trompo, -.30+p*.14);
     const T=performance.now()/1000;
     const FREE=Math.max(U*1.25, Math.min(W,H)*.038);
     const BIG=FREE, RZ=S*.75;
