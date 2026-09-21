@@ -788,7 +788,16 @@ body.light .hud-band{color:rgba(232,236,244,.6)}
 .tkp-ctr-a code{font:inherit;color:inherit}
 .tkp-ctr-a:hover{color:var(--blue-lite);border-bottom-color:var(--blue-lite)}
 .tkp-ctr-n{font-size:13.5px;letter-spacing:-.012em;color:#9EA2AB}
-@media(max-width:560px){.tkp-ctr{gap:4px 14px}.tkp-ctr-k,.tkp-ctr-n{flex:1 0 100%}}
+.tkp-ctr-v{display:inline-flex;align-items:center;gap:7px;flex:0 0 auto;
+  font-family:var(--m);font-weight:400;font-size:var(--fs-lab);
+  letter-spacing:.34em;text-transform:uppercase;text-decoration:none;
+  color:var(--verde,#3FD68C)}
+.tkp-ctr-v i{width:6px;height:6px;border-radius:50%;flex:0 0 auto;
+  background:var(--verde,#3FD68C);
+  box-shadow:0 0 0 3px rgba(63,214,140,.26),0 0 10px rgba(63,214,140,.6);
+  animation:annVivo 2.4s ease-in-out infinite}
+@media(prefers-reduced-motion:reduce){.tkp-ctr-v i{animation:none}}
+@media(max-width:560px){.tkp-ctr{gap:4px 14px}.tkp-ctr-k{flex:1 0 100%}}
 @media(max-width:880px){
   .tkp-svg{display:none}
   .tkp-fig{aspect-ratio:1/1;width:min(540px,100%)}
@@ -6971,6 +6980,7 @@ window.__mide = function(cv, w, h){
     <span class="tkp-ctr-k">Contract</span>
     <a class="tkp-ctr-a" href="https://robinhoodchain.blockscout.com/token/0x3A2f46170E57DDF11135e13884db0236f1924292" target="_blank" rel="noopener"><code>0x3A2f46170E57DDF11135e13884db0236f1924292</code></a>
     <span class="tkp-ctr-n">Robinhood Chain · ERC-20</span>
+    <a class="tkp-ctr-v" href="https://robinhoodchain.blockscout.com/address/0x3A2f46170E57DDF11135e13884db0236f1924292?tab=contract" target="_blank" rel="noopener"><i aria-hidden="true"></i>Verified</a>
   </div>
 </section>
 
