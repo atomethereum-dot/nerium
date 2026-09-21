@@ -20,16 +20,22 @@ function tabla(vendidos, tope=0n){return {
 
 const nav=await chromium.launch({executablePath:'/opt/pw-browsers/chromium-1194/chrome-linux/chrome',args:['--no-sandbox']});
 const Rs=[]; const chk=(n,a,b)=>Rs.push({n,ok:String(a)===String(b),a,b});
-async function ver(eth,bsc){
+// Tres redes, tres tablas. Con dos, el RPC de Robinhood caia en el «else» y
+// se le servia la tabla de Ethereum: la pagina contaba las ventas de Ethereum
+// DOS veces y la barra salia inflada. No era un fallo de la pagina —en
+// produccion esa cadena no responde y no suma nada— sino del doble que hacia
+// de RPC. Se enruta por url, como las otras dos.
+async function ver(eth,bsc,rh){
+ rh = rh || tabla(0n);
  const ctx=await nav.newContext({viewport:{width:1400,height:1000}});
- await ctx.addInitScript(({eth,bsc})=>{const of=window.fetch;
+ await ctx.addInitScript(({eth,bsc,rh})=>{const of=window.fetch;
   window.fetch=async(u,o)=>{const url=String(u);
    if(url.indexOf('explorer-api')>=0)return new Response('{"listings":{}}',{status:200,headers:{'content-type':'application/json'}});
    if(!o||!o.body)return of(u,o); const j=JSON.parse(o.body);
-   const t=/bsc|binance|defibit/.test(url)?bsc:eth; let res=null;
+   const t=/robinhood/.test(url)?rh:(/bsc|binance|defibit/.test(url)?bsc:eth); let res=null;
    if(j.method==='eth_call')res=t[j.params[0].data.slice(0,10)]??'0x'+'0'.repeat(64);
    return new Response(JSON.stringify({jsonrpc:'2.0',id:j.id,result:res}),{status:200,headers:{'content-type':'application/json'}});};
- },{eth,bsc});
+ },{eth,bsc,rh});
  const pg=await ctx.newPage();
  await pg.goto('http://127.0.0.1:8938/index.html',{waitUntil:'load'});
  await pg.locator('#presale').scrollIntoViewIfNeeded();
@@ -45,6 +51,11 @@ async function ver(eth,bsc){
 { const {ctx,pg}=await ver(tabla(1000000n*E18),tabla(500000n*E18));
   chk('suma lo vendido en las dos redes', await pg.locator('#saleRaised').textContent(), '$13,916,000');
   chk('y el porcentaje sube', await pg.locator('#saleTip em').textContent(), '87.0%');
+  await ctx.close(); }
+// y la tercera cuenta igual que las otras dos: 1.000.000 NRM = $200.000
+{ const {ctx,pg}=await ver(tabla(0n),tabla(0n),tabla(1000000n*E18));
+  chk('lo vendido en Robinhood Chain tambien suma',
+      await pg.locator('#saleRaised').textContent(), '$13,816,000');
   await ctx.close(); }
 // con hard cap puesto, el objetivo sale de la cadena
 { const {ctx,pg}=await ver(tabla(1000000n*E18, 11920000n*E18), tabla(0n));
