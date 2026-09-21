@@ -136,7 +136,14 @@ async function montar(extra={}, movil=false){
      await pg.locator('.nrm-qr .marco svg rect').getAttribute('fill'), 'white');
  chk('hay botón de copiar', await pg.locator('.nrm-copiar').textContent(), 'Copy link');
  chk('el SDK arranca sin su modal', await pg.evaluate(()=>window.__wcInit.showQrModal), false);
- chk('y con rpcMap', await pg.evaluate(()=>Object.keys(window.__wcInit.rpcMap).join(',')), '1,56');
+// Las tres redes que la pagina ofrece: Ethereum, BNB Chain y Robinhood
+// Chain. Si una falta aqui, la cartera no sabe cambiarse a ella por
+// WalletConnect y el boton se queda pidiendo un cambio que nunca llega.
+ chk('y con rpcMap de las tres redes',
+     await pg.evaluate(()=>Object.keys(window.__wcInit.rpcMap).join(',')), '1,56,4663');
+ chk('y las tres con su RPC',
+     await pg.evaluate(()=>Object.values(window.__wcInit.rpcMap)
+       .filter(v=>/^https:\/\//.test(v)).length), 3);
  await pg.locator('.nrm-ico').first().click(); await pg.waitForTimeout(300);
  chk('la flecha vuelve a la lista', await pg.locator('.nrm-cab h3').textContent(), 'Connect a wallet');
  chk('y el QR desaparece de verdad', await pg.locator('.nrm-qr').isVisible(), false);
