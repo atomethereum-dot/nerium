@@ -952,14 +952,23 @@ body.light .hud-band{color:rgba(232,236,244,.6)}
 .tkp-core span{transition:color .3s ease}
 #grain{position:fixed;inset:0;z-index:88;pointer-events:none;opacity:.035;
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='4'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23g)'/%3E%3C/svg%3E")}
-.srail{position:fixed;right:10px;top:50%;transform:translateY(-50%);z-index:86;
-  display:none;flex-direction:column;gap:5px;align-items:flex-end}
-@media(min-width:1180px) and (hover:hover){.srail{display:flex}}
+/* ── el indice de secciones: SIEMPRE, y SIEMPRE abierto ──
+   Antes existia solo de 1180 px para arriba y con raton —o sea, en el movil
+   no habia indice— y en reposo enseñaba una sola raya. Ahora se ve entero en
+   las dos versiones.
+
+   Lo que hace que quepa sin montarse encima de nada es una cuenta, no un
+   apaño: la pagina deja 16 px de margen a cada lado en movil y 32 de 900
+   para arriba, asi que el carril mide EXACTAMENTE eso y se pega al canto.
+   16 = 2 de aire + 12 de raya encendida + 2. 32 = 5 + 22 + 5. Por ahi no
+   pasa una letra, porque por ahi no pasa la caja que las lleva. */
+.srail{position:fixed;right:0;top:50%;transform:translateY(-50%);z-index:86;
+  display:flex;flex-direction:column;gap:4px;align-items:flex-end}
 .srail button{position:relative;display:flex;align-items:center;justify-content:flex-end;gap:10px;
   background:none;padding:6px 4px 6px 26px}
-.srail i{display:block;width:18px;height:1px;background:currentColor;opacity:.45;
+.srail i{display:block;width:8px;height:1px;background:currentColor;opacity:.45;
   transition:width .4s cubic-bezier(.16,.84,.26,1),opacity .3s ease,background .3s ease}
-.srail button:hover i,.srail button.on i{width:34px;opacity:1}
+.srail button:hover i,.srail button.on i{width:12px;opacity:1}
 .srail button.on i{background:var(--blue);opacity:1;height:2px}
 .srail s{text-decoration:none;font-family:var(--m);font-size:9.5px;letter-spacing:.18em;
   text-transform:uppercase;white-space:nowrap;opacity:0;transform:translateX(6px);
@@ -2141,7 +2150,20 @@ html[dir="rtl"] .ann-in:hover .ann-go{transform:scaleX(-1) translateX(4px)}
    en mono— y el color de cada medio: Benzinga el azul suyo, MarketWatch su
    verde sobre negro, Morningstar su rojo. Blancas y todas iguales no se
    distinguian unas de otras ni pedian que las miraras. */
-.press-rail{padding:6px 2px 12px}
+/* ── el velo de los cantos ──
+   Esta es la UNICA fila de la pagina que llega de borde a borde con texto
+   dentro, asi que es la unica que le pasaba por debajo al indice: medido, la
+   pisaba 16 px en movil y 25 en escritorio. No se estrecha la fila —es a
+   sangre a proposito— sino que se le apaga el texto antes de llegar: el velo
+   es mas ancho que la tinta del carril, asi que lo que se cruza con el ya no
+   se ve. Va en los dos cantos y no solo en el derecho porque un desvanecido
+   a un lado es un fallo y a los dos es lo que dice que la fila sigue. */
+.press-rail{padding:6px 2px 12px;--velo:24px;
+  -webkit-mask-image:linear-gradient(90deg,transparent 0,#000 var(--velo),
+    #000 calc(100% - var(--velo)),transparent 100%);
+  mask-image:linear-gradient(90deg,transparent 0,#000 var(--velo),
+    #000 calc(100% - var(--velo)),transparent 100%)}
+@media(min-width:900px){.press-rail{--velo:42px}}
 .pcd{--pl:#1B1E25;--i3:#AEB2BB;
   --ac:#1A7AFF;--w1:#1A2331;--w2:#05080F;
   --luz:rgba(157,159,164,.30);--rej:rgba(196,198,204,.085);--rej2:rgba(196,198,204,.060);
@@ -3117,23 +3139,22 @@ footer :is(.fcopy,.f-legal){color:#9EA2AB}
    La ronda que resta. Treinta y cuatro piezas de menos de 26 px en una sola
    pantalla, y tres cosas distintas diciendo en que seccion estas. */
 
-/* ── el rail de la derecha, dormido ──
-   El menu de arriba ya subraya la seccion y el rotulo de abajo la nombra.
-   Trece rayas mas es decirlo por tercera vez. En reposo solo se ve la de la
-   seccion actual; al acercar el raton aparecen las trece, que para eso estan.
-   La zona sensible se ensancha con padding, no con un ancho mayor: asi no se
-   come el margen de la pagina. */
-.srail{padding:10px 6px;transition:opacity .3s var(--ease)}
-.srail button:not(.on) i{opacity:0;transition:opacity .3s var(--ease),
-  width .3s var(--ease)}
-.srail:hover button:not(.on) i,
-.srail:focus-within button:not(.on) i{opacity:.45}
-/* Y el dedo no tiene raton: en tactil se queda solo la marca de la seccion,
-   que es informacion, y se navega con el menu. */
-@media(hover:none){
-  .srail button:not(.on) i{opacity:0}
-  .srail s{display:none}
-}
+/* ── abierto, no dormido ──
+   Estaba en reposo con una sola raya: la de la seccion actual, y las demas
+   aparecian al acercar el raton. Se pidio verlo siempre abierto, asi que
+   todas se quedan puestas y lo que distingue a la actual es el color y el
+   largo, no que las otras no esten.
+   La zona sensible YA NO se ensancha con padding. Ese padding era
+   transparente pero seguia siendo una caja fija por delante del texto: en el
+   movil se comia los toques de lo que hubiera debajo, a lo ancho de media
+   pantalla de margen. */
+.srail{padding:8px 2px;transition:opacity .3s var(--ease)}
+.srail button{pointer-events:none}
+/* El dedo no tiene raton, y diecisiete objetivos de 44 px son 748: mas alto
+   que la pantalla de la mayoria de los telefonos. Asi que en tactil el indice
+   no es un mando, es un indicador —se mira, no se pulsa— y por eso tampoco
+   necesita ser tocable ni puede robar un toque. */
+@media(hover:none){ .srail s{display:none} }
 
 /* ── el pautado de las filas ──
    Las cuatro garantias iban separadas por una linea de puntos. A ese tamano
@@ -4065,9 +4086,15 @@ footer .fgrid h4,footer .tec-real{color:#9EA2AB}
 
 /* ── la caja, del ancho de la raya ──
    La etiqueta sale del flujo: en la fila no ocupa, y el <nav> deja de estar
-   por delante del texto de media pagina. De 159 px a 54. */
-.srail{padding:10px 6px}
-.srail button{padding:6px 4px;gap:0}
+   por delante del texto de media pagina. De 159 px a 54, y de 54 a 16 y 32,
+   que son los margenes que la pagina ya deja libres. */
+.srail button{padding:4px 0;gap:0}
+@media(min-width:900px){
+  .srail{padding:10px 5px;gap:5px}
+  .srail button{padding:6px 0;pointer-events:auto}
+  .srail i{width:14px}
+  .srail button:hover i,.srail button.on i{width:22px}
+}
 .srail s{position:absolute;right:calc(100% + 12px);top:50%;
   transform:translate(6px,-50%);
   padding:4px 8px;border-radius:5px;
@@ -4099,12 +4126,12 @@ body.light .srail s{background:rgba(255,255,255,.88);
     rgba(3,5,10,.86) 0%, rgba(3,5,10,.56) 42%, rgba(3,5,10,0) 78%)}
 body.light .hud::after{background:radial-gradient(120% 120% at 100% 100%,
     rgba(244,247,252,.88) 0%, rgba(244,247,252,.58) 42%, rgba(244,247,252,0) 78%)}
-/* ── y si por debajo pasa una banda de borde a borde, se aparta ── */
-/* Aparecer con calma y desaparecer deprisa: mientras se va, sigue estando
-   encima. Medido, con el fundido simetrico quedaba un choque en el punto en
-   que «kin» entra en la banda. */
+/* ── y ya no se aparta de nada, porque nada le pasa por debajo ──
+   Estaba la clase «tapa», que lo desvanecia cuando una banda a sangre se le
+   cruzaba. El indice se pide visible SIEMPRE, y ademas ya no hace falta: cabe
+   entero en el margen que la pagina deja libre. La regla se queda solo con su
+   transicion, que sigue sirviendo para el cambio de tema. */
 .srail{transition:opacity .34s var(--ease)}
-.srail.tapa{opacity:0;pointer-events:none;transition-duration:.12s}
 /* ══ fin: carril ══ */
 /* ══ relieve ═══════════════════════════════════════════════════════════════
    El plano de fondo: pauta de ingenieria, luz de escena y dos suelos. */
@@ -5391,7 +5418,6 @@ h1,.sec-h,.press-h,.builds-h,.tkp-h,.sale-h,.ruta-h,.join-h{max-width:22ch}
   .hd .get{min-height:42px;display:inline-flex;align-items:center}
   .press-all,.sec-go,.bcd-go,.hp-go,.tk-go,.lane a,a.mono{
     display:inline-flex;align-items:center;min-height:44px}
-  .srail button{min-height:44px}
 
   /* ── lo que se lee ── */
   /* LA FILA DE DATOS DE LA PORTADA: SOLO EL TAMAÑO, Y AQUI ME EQUIVOQUE
@@ -11387,194 +11413,27 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
 </script>
 
 
-<script>
-/* El indice no se monta encima de nada. Solo donde existe: raton y 1180 px
-   para arriba. */
-(function(){
-  var rail=document.getElementById('srail'); if(!rail) return;
-  if(!matchMedia('(min-width:1180px) and (hover:hover)').matches) return;
-  var secs=[], llenas=[], lim=0, puesto=null;
+<!-- EL DETECTOR DE CHOQUES DEL INDICE, RETIRADO.
+     Aqui vivian doscientas lineas que, en cada scroll, recorrian TODOS los
+     elementos de la seccion a la vista preguntando por su estilo calculado y
+     por su caja, para esconder el indice si algo se le ponia debajo. Sus
+     propias notas decian que era de largo lo que mas pesaba de la pagina.
 
-  /* hasta donde se ve de verdad: la caja, cortada por cada overflow que lleve
-     encima. Sin esto una marquesina de 4000 px dice que llega a 4000, cuando
-     en pantalla acaba en el borde. */
-  function corte(el){
-    var der=Infinity, izq=-Infinity, mov=false;
-    for(var p=el.parentElement;p&&p!==document.body;p=p.parentElement)
-      if(getComputedStyle(p).overflowX!=='visible'){
-        var q=p.getBoundingClientRect();
-        if(q.right<der) der=q.right;
-        if(q.left>izq) izq=q.left;
-        if(p.scrollWidth>p.clientWidth+2) mov=true;
-      }
-    return {der:der, izq:izq, mov:mov};
-  }
-  /* ¿este texto se mueve? Si su caja se sale del recorte que lo contiene es
-     una tira -marquesina o carrusel-, y entonces no vale donde esta AHORA la
-     palabra: dentro de un segundo esta en otro sitio. Cuenta ocupado el
-     recorte entero.
-     Mirar solo scrollWidth no basta: la marquesina de «thesis» se mueve con
-     transform, y un transform no crea desbordamiento de scroll. Daba verde y
-     a los dos segundos estaba encima del indice. */
-  function tira(r,c){
-    return c.mov || r.right>c.der+2 || (c.izq>-Infinity && r.left<c.izq-2);
-  }
-  /* Y se mide el TEXTO, no la caja que lo contiene: la caja de un rotulo
-     ocupa todo el carril aunque la palabra acabe a la izquierda del todo. Por
-     ahi salieron doce secciones dando choque sin tener ninguno. */
-  /* Devuelve null si la seccion no esta dibujada todavia: con
-     content-visibility:auto, lo que esta fuera no tiene medidas y TODO sale
-     limpio. Si eso se guarda, la seccion queda marcada como limpia para
-     siempre y la marquesina se pasea por encima del indice el resto de la
-     visita. Aqui se cayo la primera version. */
-  function llena(sec){
-    var todo=sec.querySelectorAll('*'), medido=false;
-    for(var i=0;i<todo.length;i++){
-      var e=todo[i], c=null, mirado=false;
-      /* «getComputedStyle» estaba DENTRO del bucle de nodos de texto, asi que
-         un parrafo partido en veinte trozos lo pedia veinte veces. Se pide
-         una vez por elemento, y solo si el elemento tiene texto propio. */
-      for(var k=0;k<e.childNodes.length;k++){
-        var n=e.childNodes[k];
-        if(n.nodeType!==3||!n.textContent.trim()) continue;
-        if(!mirado){ mirado=true; if(getComputedStyle(e).visibility==='hidden') break }
-        if(c===null) c=corte(e);
-        var re=e.getBoundingClientRect();
-        if(re.width<2&&re.height<2) continue;          /* sin dibujar */
-        medido=true;
-        if(tira(re,c)){ if(c.der>lim) return true; continue }
-        var rg=document.createRange(); rg.selectNodeContents(n);
-        var rs=rg.getClientRects();
-        for(var j=0;j<rs.length;j++){
-          var q=rs[j];
-          if(q.width<2||q.height<2) continue;
-          if(Math.min(q.right,c.der)>lim) return true;
-        }
-      }
-    }
-    return medido ? false : null;
-  }
+     Ya no tiene trabajo. El indice mide ahora lo que mide el margen que la
+     pagina deja libre —16 px en movil, 32 de 900 para arriba— y se pega al
+     canto, asi que el texto no llega hasta el; y la unica fila a sangre que
+     si llegaba, la de prensa, se apaga antes con un velo mas ancho que la
+     tinta del carril. Barrida la pagina entera a las dos anchuras: cero
+     choques.
 
-  /* Se mide cuando la seccion entra en pantalla, no al cargar: la pagina
-     lleva content-visibility:auto, asi que lo de fuera no tiene medidas y
-     todo saldria limpio. Hasta que se mide cuenta como llena: equivocarse
-     escondiendo el indice no le tapa el texto a nadie. */
-  /* ESTA MEDIDA ES CARA Y NO PUEDE IR EN EL CAMINO DEL SCROLL.
-     «llena» recorre TODOS los elementos de una seccion preguntando por su
-     estilo calculado y por su caja. Medido: 1.642 «getComputedStyle» y 611
-     cajas en 122 pasos de scroll, que es de largo lo que mas pesaba de toda
-     la pagina. Y se repetia: cuando una seccion devuelve «null» -todavia sin
-     dibujar por «content-visibility»- no se guarda nada, asi que la siguiente
-     vez que entra se vuelve a medir entera, y asi mientras dure la visita.
-     Dos cosas. Una: la medida se aparta a un hueco libre del navegador
-     -«requestIdleCallback»-, asi que deja de competir con el scroll; mientras
-     tanto la seccion cuenta como llena, que es el lado seguro. Dos: como
-     mucho tres intentos por seccion; si a la tercera sigue sin dibujarse, se
-     da por llena y se deja de preguntar. Equivocarse escondiendo el indice no
-     le tapa el texto a nadie; repetir la medida para siempre, si. */
-  var intentos=[], ocioso=window.requestIdleCallback||function(f){return setTimeout(function(){f({timeRemaining:function(){return 8}})},120)};
-  var enCola=false, cola=[];
-  function vacia(){
-    enCola=false;
-    var nuevo=false, t0=(performance.now?performance.now():Date.now());
-    while(cola.length){
-      var sec=cola.shift(), k=secs.indexOf(sec);
-      if(k<0||llenas[k]!==undefined) continue;
-      var v=llena(sec);
-      if(v===null){ intentos[k]=(intentos[k]||0)+1;
-                    if(intentos[k]>=3) llenas[k]=true, nuevo=true;
-                    continue }
-      llenas[k]=v; nuevo=true;
-      if((performance.now?performance.now():Date.now())-t0>6) break;
-    }
-    if(cola.length){ enCola=true; ocioso(vacia) }
-    if(nuevo) pintar();
-  }
-  var ojoMedir=new IntersectionObserver(function(ee){
-    for(var i=0;i<ee.length;i++){
-      if(!ee[i].isIntersecting) continue;
-      var k=secs.indexOf(ee[i].target);
-      if(k<0||llenas[k]!==undefined) continue;
-      if(cola.indexOf(ee[i].target)<0) cola.push(ee[i].target);
-    }
-    if(cola.length&&!enCola){ enCola=true; ocioso(vacia) }
-  },{threshold:[0,0.02,0.2]});
+     Y lo que hacia cuando encontraba uno —esconder el indice— es justo lo
+     contrario de lo que se pide: que se vea siempre.
 
-  /* El indice ocupa casi 300 px de alto: cae sobre DOS secciones a la vez casi
-     siempre. Preguntar por la seccion ACTIVA daba verde mientras la de al
-     lado le pasaba la marquesina por debajo -medido: estando en «thesis», el
-     texto que se le montaba encima era de «kin»-. Asi que se mira la banda.
-     Y se mira leyendo las cajas, no con un IntersectionObserver de margen
-     negativo: lo probe y en esta pagina no llegaba a disparar. Quince
-     getBoundingClientRect por cuadro con el layout ya limpio no se notan, y
-     la clase solo se escribe cuando cambia. */
-  var puestoB=null;
-
-  /* NI UNA LECTURA DE GEOMETRIA POR CUADRO, TAMPOCO AQUI.
-     La nota de arriba decia que quince «getBoundingClientRect» con el layout
-     limpio no se notan. Se notan: medido bajando la pagina, esta funcion sola
-     hacia 555 llamadas en cuatro segundos —el carril mas diecisiete secciones,
-     cada vez que el scroll se mueve— y cada una obliga al navegador a rehacer
-     la maquetacion antes de contestar.
-     Lo que se mira no necesita ninguna de esas lecturas. La posicion de una
-     seccion dentro del DOCUMENTO no cambia al bajar, y el carril va fijo, o
-     sea que su caja en pantalla tampoco. Las dos cosas se miden una vez y se
-     vuelven a medir cuando cambia el alto —«nrm:remide»— o la ventana. El
-     resto del tiempo esto es una resta. */
-  var cajaRail=null, sitioSec=[];
-  function medirCajas(){
-    cajaRail = rail.getBoundingClientRect();
-    var y = window.scrollY || window.pageYOffset || 0;
-    sitioSec = secs.map(function(e){
-      var r = e.getBoundingClientRect();
-      return { y: r.top + y, h: r.height };
-    });
-  }
-  addEventListener('nrm:remide', medirCajas, {passive:true});
-
-  function pintar(){
-    if(!cajaRail || sitioSec.length!==secs.length) medirCajas();
-    var r=cajaRail, y=window.scrollY||window.pageYOffset||0, tapa=false;
-    for(var i=0;i<secs.length;i++){
-      var s=sitioSec[i]; if(!s) continue;
-      var arriba=s.y-y, abajo=arriba+s.h;
-      if(abajo<=r.top||arriba>=r.bottom) continue;
-      if(llenas[i]!==false){ tapa=true; break }
-    }
-    if(tapa!==puesto){ puesto=tapa; rail.classList.toggle('tapa',tapa) }
-  }
-  /* NO SE MIRA SI NO SE HA MOVIDO NADA.
-     «pintar()» lee la caja del carril MAS la de cada seccion -diecisiete- y
-     lo hacia en cada cuadro, parado o no. Medido: 1.208 «getBoundingClientRect»
-     en 122 pasos. El indice solo puede quedar tapado si la pagina se mueve,
-     asi que se mira cuando el scroll cambia y dos cuadros mas por si algo
-     estaba entrando; el resto del tiempo el bucle no toca el DOM. */
-  var yAnt=-1, gracia=0;
-  function vigila(){
-    if(scrollY!==yAnt){ yAnt=scrollY; gracia=2; pintar() }
-    else if(gracia>0){ gracia--; pintar() }
-    requestAnimationFrame(vigila);
-  }
-
-  function lista(){
-    ojoMedir.disconnect();
-    secs=[].slice.call(document.querySelectorAll('main>section[data-bg]'))
-      .filter(function(e){return getComputedStyle(e).display!=='none'});
-    llenas=secs.map(function(){return undefined});
-    puesto=null;
-    lim=rail.getBoundingClientRect().left;
-    medirCajas();
-    for(var i=0;i<secs.length;i++) ojoMedir.observe(secs[i]);
-  }
-
-  var cita=0;
-  addEventListener('resize',function(){
-    clearTimeout(cita); cita=setTimeout(lista,220);
-  },{passive:true});
-  addEventListener('load',function(){setTimeout(lista,700)});
-  lista(); vigila();
-})();
-</script>
+     La garantia no se pierde, cambia de sitio. Vivia en tiempo de ejecucion,
+     costando trabajo en cada cuadro de scroll de cada visita; ahora vive en
+     herramientas/probar_carril.mjs, que barre la pagina a las dos anchuras y
+     se pone rojo si una sola letra alcanza el carril. Comprobar una vez al
+     construir vale mas que comprobar un millon de veces al leer. -->
 
 <script>
 /* ── el umbral: la puerta de la ronda ── */
