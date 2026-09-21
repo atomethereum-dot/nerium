@@ -150,14 +150,21 @@ const marca = await pg.evaluate(() => {
   const alto = cv.measureText(sp.textContent.trim()).actualBoundingBoxAscent;
   const centroPalabra = base - alto / 2;
   const centroDibujo = rs.top + rs.height * (arriba + abajo) / 2;
-  return { arriba, abajo, alto, desfase: centroPalabra - centroDibujo,
+  const cuerpo = parseFloat(cs.fontSize);
+  return { arriba, abajo, alto, cuerpo,
+           desfase: (centroPalabra - centroDibujo) / cuerpo,
            centroBarra: hd.top + hd.height / 2, centroCubo: rs.top + rs.height / 2 };
 });
 di(marca !== null, 'la palabra de la marca va en su propia caja');
 di(marca && marca.alto > 0, 'y se puede medir su alto de verdad');
-di(marca && Math.abs(marca.desfase) < 1,
-   'y su medio optico coincide con el del rombo (' +
-   (marca ? marca.desfase.toFixed(2) : '?') + ' px, el dibujo va del ' +
+// El cero geometrico no es el sitio: centrar la caja de mayusculas exacta
+// deja la palabra alta, porque «Nereum» es una N y cinco letras bajas y el
+// ojo lee donde esta la tinta, no donde acaba la caja. Baja 0,0934 em, que
+// es lo que se eligio mirando la barra. Se comprueba el valor elegido, no
+// un cero que nunca fue el bueno: si alguien lo mueve sin querer, salta.
+di(marca && Math.abs(marca.desfase - 0.0934) < 0.03,
+   'y baja del medio del rombo lo que tiene que bajar (' +
+   (marca ? marca.desfase.toFixed(4) : '?') + ' em, buscado 0,0934; el dibujo va del ' +
    (marca ? (marca.arriba*100).toFixed(1) : '?') + ' al ' +
    (marca ? (marca.abajo*100).toFixed(1) : '?') + ' % de su recuadro)');
 di(marca && Math.abs(marca.centroBarra - marca.centroCubo) < 0.6,

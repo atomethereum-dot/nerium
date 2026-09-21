@@ -1928,11 +1928,15 @@ html[dir="rtl"] .subir{left:16px !important;right:auto !important}
 
    Así que se centra, que es lo que pide una figura cuya masa está en el
    medio. La cuenta sale de las mismas métricas: con line-height:1 y la caja
-   centrada, la línea de base cae 0,3824 em bajo el centro y la altura de
-   mayúscula de la Switzer es 0,72 em, así que el medio óptico de la palabra
-   —entre el alto de la M y la línea de base— queda 0,0224 em por debajo del
-   centro de la caja. Eso es lo que se sube, y no un número a ojo. */
-.hd .brand .bw{line-height:1;transform:translateY(-0.0224em)}
+   centrada, la línea de base cae 0,3667 em bajo el centro y la altura de
+   mayúscula real de «Nereum» en Switzer es 0,6667 em —medida con el canvas,
+   no de la tabla—, así que el medio de la caja de mayúsculas cae 0,0334 em
+   por debajo del centro. Centrarla ahí exacto la deja ALTA: la palabra es
+   una N y cinco letras bajas, y el ojo no lee la caja de mayúsculas, lee
+   dónde está la tinta. Se bajan 0,0934 em sobre ese cero —0,06 em de
+   translateY—, que a 15 px son 1,4. Probados 0, 0,03, 0,06 y 0,09 sobre la
+   barra de verdad. */
+.hd .brand .bw{line-height:1;transform:translateY(0.06em)}
 /* ── el boton de whitepaper, al extremo derecho ─────────────────────────────
    Quien lo empujaba a la derecha era el nav del centro (margin-inline:auto).
    Al ocultar esos enlaces en escritorio, la regla de 1000px que anula el
