@@ -92,9 +92,20 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
   display:flex;align-items:center;gap:18px;padding:0 20px}
 .marca{display:inline-flex;align-items:center;gap:10px;flex:0 0 auto}
 .marca svg{width:22px;height:22px}
+/* La palabra baja 0,22 em respecto al centro del rombo, la misma cuenta que
+   la cabecera del sitio: centrada exacta se ve alta. Aquí va en versalitas,
+   así que no hay letras bajas ni asta que sobresalga —la caja de mayúsculas
+   es toda la palabra— y por eso el ajuste se nota menos que allí. Se pone
+   igualmente: la marca es la misma en las tres páginas o no es una marca. */
 .marca b{font-weight:500;font-size:15px;letter-spacing:.16em;text-transform:uppercase;
+  line-height:1;transform:translateY(0.22em);
   /* el nombre acompaña al logotipo: gris de tinta, no negro puro */
   color:#404857}
+/* La píldora baja lo mismo. Si no, la palabra se va y ella se queda: dos
+   textos en la misma línea con dos líneas de base distintas, que es más feo
+   que cualquiera de las dos posiciones por separado. La marca se mueve
+   entera o no se mueve. */
+.marca .tag{transform:translateY(0.22em)}
 .tag{font-family:var(--m);font-size:10px;letter-spacing:.16em;text-transform:uppercase;
   background:var(--ink);color:#fff;border-radius:3px;
   /* El espaciado entre letras añade un hueco DETRÁS de la última, así que el

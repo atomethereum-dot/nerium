@@ -118,8 +118,14 @@ input,select,textarea{font:inherit;color:inherit}
    palabra baja a 15, que es la misma proporcion que la cabecera del sitio. */
 .marca{display:flex;align-items:center;gap:7px;flex:0 0 auto}
 .marca svg{width:26px;height:26px;color:var(--ink)}
-.marca b{font-family:var(--tit);font-size:15px;font-weight:500;letter-spacing:-.01em}
-.marca s{text-decoration:none;font-family:var(--m);font-size:9px;letter-spacing:.18em;
+/* Baja lo mismo que la del sitio: 0,22 em. Es la misma palabra, la misma
+   fuente y el mismo cuerpo al lado del mismo rombo. */
+.marca b{font-family:var(--tit);font-size:15px;font-weight:500;letter-spacing:-.01em;
+  line-height:1;transform:translateY(0.22em)}
+/* La pildora baja con la palabra: si se queda, quedan dos lineas de base
+   distintas en el mismo renglon. La marca se mueve entera. */
+.marca s{transform:translateY(0.22em);
+  text-decoration:none;font-family:var(--m);font-size:9px;letter-spacing:.18em;
   border:1px solid var(--linea);color:var(--ink-3);padding:2px 7px;border-radius:3px}
 .nav{display:flex;gap:2px;margin-left:8px}
 .nav a{padding:7px 12px;border-radius:6px;font-size:14px;color:var(--ink-2);
