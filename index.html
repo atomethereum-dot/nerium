@@ -373,6 +373,58 @@ main>section.dark,main>section.stack{background:var(--wash)}
   color:rgba(232,236,244,.44);opacity:0;transform:translateY(8px);
   transition:opacity .6s ease .25s,transform .7s cubic-bezier(.16,.84,.26,1) .25s}
 .lk-tag.on span{opacity:1;transform:none}
+/* ── la pista de bajar ──
+   La portada no decia en ninguna parte que hubiera que seguir bajando: la
+   unica sena era un circulo de 32 px en la esquina de abajo a la izquierda,
+   que ni se ve ni parece un boton. Esta va centrada, dice la palabra y se
+   puede pulsar.
+
+   El movimiento no es la flecha dando saltos: es una luz que CAE por un
+   filete, y la punta que la acompana. Un filete de un pixel con algo
+   recorriendolo es lo mismo que ya hace el resto de la pagina —los filetes se
+   dibujan, no se encienden— y cuesta una capa, no doce.
+
+   Vive por encima de la cortina (z-index 6 contra 5) para seguir ahi mientras
+   pasa el emblema, que es justo el momento en que uno no sabe si la pagina ha
+   terminado de cargar o si tiene que hacer algo. Se va cuando la cortina
+   acaba y empieza el contenido de verdad. */
+.pista{position:absolute;left:50%;bottom:clamp(20px,4vh,44px);transform:translateX(-50%);
+  z-index:6;display:flex;flex-direction:column;align-items:center;gap:9px;
+  background:none;border:0;padding:10px 16px;cursor:pointer;opacity:0;
+  -webkit-tap-highlight-color:transparent}
+.pista b{font-family:var(--m);font-size:9.5px;font-weight:400;letter-spacing:.3em;
+  text-transform:uppercase;color:rgba(232,236,244,.42);transition:color .3s var(--ease)}
+.pista i{position:relative;display:block;width:1px;height:34px;
+  background:rgba(232,236,244,.14);overflow:hidden}
+.pista i::after{content:"";position:absolute;left:0;top:0;width:1px;height:13px;
+  background:linear-gradient(180deg,transparent,#1A7AFF);
+  animation:pistaCae 2.2s cubic-bezier(.5,0,.35,1) infinite}
+@keyframes pistaCae{
+  0%{transform:translateY(-14px);opacity:0}
+  18%{opacity:1}
+  76%{opacity:1}
+  100%{transform:translateY(34px);opacity:0}}
+.pista svg{width:11px;height:11px;fill:none;stroke:rgba(232,236,244,.48);
+  stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;
+  animation:pistaPunta 2.2s cubic-bezier(.5,0,.35,1) infinite}
+@keyframes pistaPunta{
+  0%,52%{transform:translateY(-2px);opacity:.4}
+  74%{transform:translateY(2px);opacity:1}
+  100%{transform:translateY(-2px);opacity:.4}}
+.pista:hover b{color:#E3E6EE}
+.pista:hover svg{stroke:#fff}
+.pista:focus-visible{outline:1px solid rgba(232,236,244,.5);outline-offset:4px;border-radius:3px}
+/* El final de la cortina es claro: si ahi quedara algo de pista, iria en tinta */
+body.light .pista b{color:rgba(26,32,44,.5)}
+body.light .pista i{background:rgba(26,32,44,.16)}
+body.light .pista svg{stroke:rgba(26,32,44,.55)}
+/* Dos flechas diciendo lo mismo a la vez, no. Mientras la pista esta, el
+   circulo de la esquina se aparta; vuelve en cuanto ella se va. */
+body.pista-on .scrollbtn{opacity:0;pointer-events:none;transition:opacity .35s var(--ease)}
+@media(prefers-reduced-motion:reduce){
+  .pista i::after,.pista svg{animation:none}
+  .pista i::after{opacity:1;transform:translateY(10px)}
+}
 .sh-grain{position:absolute;inset:0;opacity:0;pointer-events:none;mix-blend-mode:multiply;
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='.42'/%3E%3C/svg%3E")}
 main>section.logos,
@@ -1289,7 +1341,10 @@ footer .fmark-logo{--fmg-a:.24;--fmg-b:.05}
 }
 .lane-k{font-family:var(--m);font-weight:400;font-size:var(--fs-lab);letter-spacing:.34em;
   text-transform:uppercase;opacity:.5}
-.press-nav{display:flex;gap:8px;justify-content:flex-end;margin-bottom:var(--s2)}
+/* Iban pegadas a la derecha del texto, y como el carril sangra mas alla de esa
+   columna quedaban en tierra de nadie: ni con el titulo ni con las tarjetas.
+   Centradas son un mando, que es lo que son. */
+.press-nav{display:flex;gap:8px;justify-content:center;margin-bottom:var(--s2)}
 .pn{width:38px;height:38px;border-radius:3px;border:1px solid rgba(232,236,244,.16);
   display:grid;place-items:center;color:rgba(232,236,244,.6);cursor:pointer;
   transition:color var(--t1) var(--ease),border-color var(--t1) var(--ease),
@@ -2204,10 +2259,27 @@ html[dir="rtl"] .ann-in:hover .ann-go{transform:scaleX(-1) translateX(4px)}
    es mas ancho que la tinta del carril, asi que lo que se cruza con el ya no
    se ve. Va en los dos cantos y no solo en el derecho porque un desvanecido
    a un lado es un fallo y a los dos es lo que dice que la fila sigue. */
-.press-rail{padding:6px 2px 12px;--velo:24px;
+/* Este bloque escribia «padding:6px 2px 12px» —en corto— y con eso se cargaba
+   el «padding-right:calc(50vw - 50%)» de arriba, que es lo que hace que el
+   carril sangre hasta el borde y aun asi TERMINE donde termina el texto. Sin
+   el, la ultima tarjeta se iba a ras de pantalla. Y de paso los 2 px de los
+   lados metian las tarjetas dos pixeles a la derecha del titulo: poco, pero
+   la vista lo pilla, porque el titulo esta justo encima. Ahora se escribe
+   lado por lado y la columna vuelve a ser una sola. */
+.press-rail{padding:6px 0 12px;padding-right:calc(50vw - 50%);--velo:24px;
   -webkit-mask-image:linear-gradient(90deg,transparent 0,#000 var(--velo),
     #000 calc(100% - var(--velo)),transparent 100%);
   mask-image:linear-gradient(90deg,transparent 0,#000 var(--velo),
+    #000 calc(100% - var(--velo)),transparent 100%)}
+/* El velo de la izquierda es para lo que SALE del carril al arrastrarlo. Con
+   el carril al principio no sale nada: ahi la primera tarjeta se ve entera y
+   desvanecerle el borde izquierdo le comia el titular —«Benzinga» aparecia
+   medio cortada— y la hacia parecer torcida. Asi que a la izquierda solo se
+   vela cuando hay algo que velar. */
+.press-rail:not(.corrida){
+  -webkit-mask-image:linear-gradient(90deg,#000 0,
+    #000 calc(100% - var(--velo)),transparent 100%);
+  mask-image:linear-gradient(90deg,#000 0,
     #000 calc(100% - var(--velo)),transparent 100%)}
 @media(min-width:900px){.press-rail{--velo:42px}}
 .pcd{--pl:#1B1E25;--i3:#AEB2BB;
@@ -6686,6 +6758,11 @@ window.__mide = function(cv, w, h){
     </ul>
     <i class="lq-sweep" aria-hidden="true"></i></div>
   </div>
+  <button class="pista" id="pista" type="button" aria-label="Scroll to the next section">
+    <b>Scroll</b>
+    <i aria-hidden="true"></i>
+    <svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2.6 4.4 6 7.8l3.4-3.4"/></svg>
+  </button>
 </section>
 </div>
 
@@ -7542,8 +7619,10 @@ const CALM=matchMedia('(prefers-reduced-motion: reduce)').matches;
           grain=document.querySelector('.sh-grain'),
           edges=document.getElementById('shEdges'),
           word=document.getElementById('lkWord'),
-          mark=document.querySelector('.lk-bar');
+          mark=document.querySelector('.lk-bar'),
+          pista=document.getElementById('pista');
     let slats=[],letters=[];
+    let pistaO=-1,pistaV=null;
     (function buildWord(){
       const t='Nereum';
       word.innerHTML=[...t].map((c,i)=>'<span'+(i>0?' class="dim"':'')+'>'+c+'</span>').join('');
@@ -7568,12 +7647,38 @@ const CALM=matchMedia('(prefers-reduced-motion: reduce)').matches;
       if(edges)edges.style.setProperty('--sw',(100/cols).toFixed(4)+'%');
     }
     buildSlats();addEventListener('resize',buildSlats,{passive:true});
+    /* Al pulsarla lleva a la seccion siguiente entera, no «un poco mas abajo»:
+       lo segundo deja al visitante en mitad de la cortina, que es donde ya
+       estaba. */
+    if(pista) pista.addEventListener('click',function(){
+      const sig=document.getElementById('network');
+      if(sig) sig.scrollIntoView({behavior:'smooth',block:'start'});
+      else scrollBy({top:innerHeight*.9,behavior:'smooth'});
+    });
     const hold=document.querySelector('.hero-hold');
     let pinRun=1;
     const measurePin=()=>{pinRun=Math.max(1,(hold?hold.offsetHeight:S.vh*1.9)-S.vh)};
     measurePin();addEventListener('resize',measurePin,{passive:true});
     jobs.push({measure:measurePin,run(){
       const p=cl(S.y/pinRun);
+      /* La pista de bajar se cuelga de la cortina, que ya trae el avance
+         calculado: ni un bucle nuevo, ni una medida mas. Acompana toda la
+         entrada —incluido el emblema, que es cuando uno duda de si la pagina
+         ha terminado— y se retira al final, cuando ya hay contenido que leer
+         y la pista pasaria de pista a estorbo. */
+      if(pista){
+        const o=1-cl((p-.86)/.14);
+        if(Math.abs(o-pistaO)>.004){
+          pistaO=o;
+          pista.style.opacity=o.toFixed(3);
+          const v=o>.02;
+          if(v!==pistaV){
+            pistaV=v;
+            pista.style.pointerEvents=v?'auto':'none';
+            document.body.classList.toggle('pista-on',v);
+          }
+        }
+      }
       cv.style.transform='scale('+(1+p*.22).toFixed(4)+')';
       cv.style.opacity=(1-p*.72).toFixed(3);
       inn.style.transform='translate3d(0,'+(S.y*.26).toFixed(1)+'px,0) scale('+((1-p*.06)*(+(inn.style.getPropertyValue('--sq')||1))).toFixed(4)+')';
@@ -9092,9 +9197,15 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
     };
     const MAX=22;
     let pedido=0;
+    let corrida=null;
     const pinta=()=>{
       pedido=0;
       if(!centros) mide();
+      /* De paso, y sin una lectura de mas: el velo de la izquierda solo se
+         enciende cuando el carril se ha movido de verdad. La clase se toca
+         unicamente al cambiar, no en cada cuadro. */
+      const c=rail.scrollLeft>1;
+      if(c!==corrida){ corrida=c; rail.classList.toggle('corrida',c) }
       const medio=rail.scrollLeft+anchoRiel/2;
       for(let i=0;i<cards.length;i++){
         const d=(centros[i]-medio)/anchoRiel;
