@@ -672,9 +672,14 @@ body.light .hud-band{color:rgba(232,236,244,.6)}
 .press-h{font-weight:300;font-size:var(--fs-h2);line-height:1.02;letter-spacing:-.045em;
   color:var(--ink);max-width:22ch}
 .press-hold{position:relative}
+/* El carril sangraba hasta el borde derecho de la pantalla y se quedaba en el
+   margen de siempre por la izquierda. Alineado con el titulo estaba, pero la
+   FILA no: aire a la izquierda, cero a la derecha, y toda la seccion parecia
+   empujada. Ahora vive dentro de la columna, con el mismo margen a los dos
+   lados. Lo que sobra por la derecha sigue avisando de que hay mas, pero lo
+   hace el velo, que para eso esta. */
 .press-rail{display:flex;gap:clamp(14px,1.8vw,26px);overflow-x:auto;scroll-snap-type:none;
-  scrollbar-width:none;padding:2px 0 8px;scroll-padding-left:0;cursor:grab;
-  margin-right:calc(50% - 50vw);padding-right:calc(50vw - 50%)}
+  scrollbar-width:none;padding:2px 0 8px;scroll-padding-left:0;cursor:grab}
 .press-rail::-webkit-scrollbar{display:none}
 .press-rail.drag{cursor:grabbing}
 .press-rail.manual{scroll-snap-type:x mandatory}
@@ -2266,7 +2271,7 @@ html[dir="rtl"] .ann-in:hover .ann-go{transform:scaleX(-1) translateX(4px)}
    lados metian las tarjetas dos pixeles a la derecha del titulo: poco, pero
    la vista lo pilla, porque el titulo esta justo encima. Ahora se escribe
    lado por lado y la columna vuelve a ser una sola. */
-.press-rail{padding:6px 0 12px;padding-right:calc(50vw - 50%);--velo:24px;
+.press-rail{padding:6px 0 12px;--velo:24px;
   -webkit-mask-image:linear-gradient(90deg,transparent 0,#000 var(--velo),
     #000 calc(100% - var(--velo)),transparent 100%);
   mask-image:linear-gradient(90deg,transparent 0,#000 var(--velo),
