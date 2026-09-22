@@ -41,6 +41,12 @@ chk('la insignia la llevan los tres que no se explican solos',
     await pg.locator('#wPay .nrm-mon .red').count(), 3);
 chk('el ETH de Robinhood la lleva verde',
     await pg.locator('#wPay button').nth(2).locator('.red circle').getAttribute('fill'), '#00C805');
+// Ahi iba una «R» mientras no se tuvo el vector. Ya es la pluma: si alguien
+// vuelve a la inicial, estas dos lo dicen.
+chk('   y dentro va la pluma, no una inicial',
+    await pg.locator('#wPay button').nth(2).locator('.red path').count(), 1);
+chk('   sin texto en la insignia',
+    await pg.locator('#wPay button').nth(2).locator('.red text').count(), 0);
 chk('la del USDT de Ethereum es Ethereum',
     await pg.locator('#wPay button').nth(3).locator('.red circle').getAttribute('fill'), '#627EEA');
 chk('la del USDT de BNB es BNB',
