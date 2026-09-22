@@ -29,13 +29,17 @@ function red(alloc,gasto,recl,extra={}){
 const nav=await chromium.launch({executablePath:'/opt/pw-browsers/chromium-1194/chrome-linux/chrome',args:['--no-sandbox']});
 const Rs=[]; const chk=(n,a,b)=>Rs.push({n,ok:String(a)===String(b),a,b});
 
-async function abrir(eth, bsc, cerrarPanel=false){
+// rbh es la tercera tabla. Sin ella, las llamadas al RPC de Robinhood caian en
+// la de Ethereum y una compra en la 4663 se contaba dos veces: la prueba habria
+// dado verde con el panel roto, que es exactamente lo que paso.
+async function abrir(eth, bsc, rbh=null, cerrarPanel=false){
   const ctx=await nav.newContext({viewport:{width:1400,height:1100}});
-  await ctx.addInitScript(({eth,bsc})=>{ const of=window.fetch;
+  await ctx.addInitScript(({eth,bsc,rbh})=>{ const of=window.fetch;
     window.fetch=async(u,o)=>{ const url=String(u);
       if(url.indexOf('explorer-api')>=0) return new Response('{"listings":{}}',{status:200,headers:{'content-type':'application/json'}});
       if(!o||!o.body) return of(u,o);
-      const j=JSON.parse(o.body); const tabla=/bsc|binance|defibit/.test(url)?bsc:eth;
+      const j=JSON.parse(o.body);
+      const tabla=/robinhood/.test(url)?(rbh||{}):(/bsc|binance|defibit/.test(url)?bsc:eth);
       let res=null;
       if(j.method==='eth_call') res=tabla[j.params[0].data.slice(0,10)]??'0x'+'0'.repeat(64);
       else if(j.method==='eth_getBalance') res=tabla.__nativo ?? '0x0';
@@ -51,7 +55,7 @@ async function abrir(eth, bsc, cerrarPanel=false){
     const info={uuid:'w1',name:'MetaMask',rdns:'io.metamask',icon:''};
     window.addEventListener('eip6963:requestProvider',()=>window.dispatchEvent(
       new CustomEvent('eip6963:announceProvider',{detail:Object.freeze({info,provider:prov})})));
-  },{eth,bsc});
+  },{eth,bsc,rbh});
   const pg=await ctx.newPage();
   await pg.goto('http://127.0.0.1:8937/index.html',{waitUntil:'load'});
   await pg.locator('#presale').scrollIntoViewIfNeeded(); await pg.waitForTimeout(1500);
@@ -129,6 +133,42 @@ async function abrir(eth, bsc, cerrarPanel=false){
  chk('USDT de BNB Chain', await pg.locator('.nrm-saldo').textContent(), 'Balance 50 USDT on BNB Chain');
  chk('y el panel ya no repite los saldos', await pg.locator('.pos-saldos').count(), 0);
  await pg.locator('#presale .widget').screenshot({path:'/tmp/saldos.png'});
+ await ctx.close();
+}
+
+// ── 4c · comprado SOLO en Robinhood ──────────────────────────────────────────
+// El panel sumaba «posicion[1] + posicion[56]» a mano. Quien compraba en la
+// 4663 veia «No purchase from this wallet yet» y, tres lineas mas abajo, el pie
+// diciendole correctamente cuanto le quedaba de su tope alli. Se vio en
+// produccion, no aqui: esta prueba es para que no vuelva.
+{
+ const R=red(140n*E18, 2800000000n, 0n);            // 140 NRM · $28
+ const {ctx,pg}=await abrir(red(0n,0n,0n), red(0n,0n,0n), R);
+ chk('ya NO dice que no compro',
+     await pg.locator('.nrm-pos .pos-pie').filter({hasText:'No purchase'}).count(), 0);
+ chk('el total aparece', await pg.locator('.pos-gran').count(), 1);
+ chk('los NRM de Robinhood suman en el total',
+     (await pg.locator('.pos-gran b').textContent().catch(()=>'')).includes('140'), true);
+ chk('y lo invertido tambien',
+     (await pg.locator('.pos-gran span').textContent().catch(()=>'')).includes('$28'), true);
+ chk('con una sola red no hay desglose', await pg.locator('.pos-redes').count(), 0);
+ await pg.locator('#presale .widget').screenshot({path:'/tmp/p_robinhood.png'});
+ await ctx.close();
+}
+// ── 4d · comprado en dos redes, una de ellas Robinhood ───────────────────────
+// El desglose se escribia con «Ethereum» y «BNB Chain» a mano: con una tercera
+// red habria callado el reparto o mentido el nombre. Sale de CADENAS.
+{
+ const E1=red(500n*E18, 10000000000n, 0n);          // 500 NRM · $100 en Ethereum
+ const R =red(140n*E18,  2800000000n, 0n);          // 140 NRM · $28  en Robinhood
+ const {ctx,pg}=await abrir(E1, red(0n,0n,0n), R);
+ chk('el total suma las dos',
+     (await pg.locator('.pos-gran b').textContent().catch(()=>'')).includes('640'), true);
+ chk('el desglose aparece', await pg.locator('.pos-redes li').count(), 2);
+ chk('   y nombra Robinhood Chain',
+     (await pg.locator('.pos-redes').textContent()).includes('Robinhood Chain'), true);
+ chk('   sin colar BNB, que no compro ahi',
+     (await pg.locator('.pos-redes').textContent()).includes('BNB'), false);
  await ctx.close();
 }
 

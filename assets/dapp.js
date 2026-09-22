@@ -1575,14 +1575,21 @@
     return li;
   }
 
+  /* Este panel sumaba a mano «posicion[1] + posicion[56]» y se quedo sin
+     Robinhood: quien compraba alli veia «No purchase from this wallet yet» al
+     mismo tiempo que el pie le decia, correctamente, cuanto le quedaba de su
+     tope en esa red. Justo lo que REDES existe para evitar. Ahora se recorre
+     la lista, asi que la proxima cadena entra sin tocar nada de aqui. */
   function pintarPanel() {
-    var p1 = posicion[1], p56 = posicion[56];
-    var hay = sesion.cuenta && (p1 || p56);
+    var pos = REDES.map(function (k) { return { cid: k, p: posicion[k] }; })
+                   .filter(function (x) { return !!x.p; });
+    var hay = sesion.cuenta && pos.length > 0;
     if (!hay) { if (panel) panel.hidden = true; return; }
 
-    var tokens = (p1 ? p1.tokens : 0n) + (p56 ? p56.tokens : 0n);
-    var gasto  = (p1 ? p1.gastado : 0n) + (p56 ? p56.gastado : 0n);
-    var recl   = (p1 ? p1.reclamable : 0n) + (p56 ? p56.reclamable : 0n);
+    var tokens = 0n, gasto = 0n, recl = 0n;
+    pos.forEach(function (x) {
+      tokens += x.p.tokens; gasto += x.p.gastado; recl += x.p.reclamable;
+    });
 
     estilosPanel();
     if (!panel) {
@@ -1625,13 +1632,16 @@
     gran.appendChild(b); gran.appendChild(g);
     panel.appendChild(gran);
 
-    /* El desglose solo aporta si compró en las dos: si no, repite la cifra
+    /* El desglose solo aporta si compró en más de una: si no, repite la cifra
        de arriba con otras palabras. */
-    if (p1 && p56 && p1.tokens > 0n && p56.tokens > 0n) {
+    var conCompra = pos.filter(function (x) { return x.p.tokens > 0n; });
+    if (conCompra.length > 1) {
       var ul = document.createElement('ul');
       ul.className = 'pos-redes';
-      ul.appendChild(fila('Ethereum',  nrm(p1.tokens)  + ' NRM · ' + usd8(p1.gastado)));
-      ul.appendChild(fila('BNB Chain', nrm(p56.tokens) + ' NRM · ' + usd8(p56.gastado)));
+      conCompra.forEach(function (x) {
+        ul.appendChild(fila(CADENAS[x.cid].nombre,
+          nrm(x.p.tokens) + ' NRM · ' + usd8(x.p.gastado)));
+      });
       panel.appendChild(ul);
     }
 
