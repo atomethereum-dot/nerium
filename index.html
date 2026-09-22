@@ -12765,12 +12765,46 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
      La ronda periodica se queda, pero solo para enterarse de animaciones
      NUEVAS; no mide nada. */
   var cerca = new WeakMap(), vistos = new WeakSet();
+
+  /* ══ SOLO LO QUE NO ACABA NUNCA ══
+     «getAnimations()» devuelve tambien las TRANSICIONES y las animaciones de
+     una sola pasada, y pausar una de esas es una trampa de la que no se sale.
+
+     El titular de portada entra letra a letra: cada letra sube desde abajo
+     dentro de una caja con «overflow:hidden», que es lo que hace que asome en
+     vez de aparecer. Y un IntersectionObserver SI tiene en cuenta ese recorte:
+     una letra que todavia no ha subido esta tapada por su propia caja, asi que
+     el observador la da por NO visible —comprobado: {dentro:true, tapada:false}
+     con la letra en mitad de la pantalla—.
+
+     De ahi el abrazo mortal: la letra esta escondida porque su transicion esta
+     pausada, y su transicion esta pausada porque la letra esta escondida. No
+     hay salida. Sale «a veces» porque depende de que una ronda del freno caiga
+     dentro del segundo escaso que dura la entrada, y corta la frase POR LA
+     MITAD, porque las letras que ya llegaron estan visibles y no se pausan.
+     Reproducido en movil: «A chain for real assets» se quedaba en
+     «Achainforreal······», seis letras congeladas para siempre.
+
+     El freno existe para lo decorativo que gira sin parar. Eso, y nada mas:
+     una animacion finita termina sola en menos de un segundo y no merece el
+     riesgo. */
+  function frenable(a){
+    var esAnim = (typeof CSSAnimation !== 'undefined')
+      ? (a instanceof CSSAnimation) : (typeof a.animationName === 'string');
+    if (!esAnim) return false;                    /* jamas una transicion */
+    var t;
+    try{ t = a.effect && a.effect.getComputedTiming && a.effect.getComputedTiming() }
+    catch(err){ return false }
+    return !!t && t.iterations === Infinity;      /* ni una de una sola pasada */
+  }
+
   function aplica(){
     var l;
     try{ l = document.getAnimations() }catch(e){ return }
     for(var i=0;i<l.length;i++){
       var a = l[i], e = a.effect && a.effect.target;
       if(!e || e.nodeType !== 1) continue;
+      if(!frenable(a)) continue;
       if(!vistos.has(e)){ vistos.add(e); try{ ojo.observe(e) }catch(err){} }
       var c = cerca.get(e);
       if(c === undefined) continue;          /* todavia sin noticia suya */
