@@ -19,9 +19,22 @@
      Brave, Phantom…) pero NO ofrece WalletConnect, porque el relay lo exige. */
   var PROYECTO_WC = '87eced186475c03170cf7792da6a9ecd';
 
-  /* La misma dirección en las dos redes. No es casualidad: se desplegó desde la
+  /* La misma dirección en Ethereum y BNB. No es casualidad: se desplegó desde la
      misma cuenta con el nonce 0 en ambas. */
   var VENTA = '0xaCbf1Add75139D0E926d57EC715FDaB8bee04A89';
+
+  /* Robinhood Chain rompe la coincidencia, y no por cambiar de cartera: es la
+     misma, 0xf222259D…B6aa6. Lo que cambió fue el nonce. En Ethereum y BNB
+     desplegó con el 0; en la 4663 ya había gastado uno antes, así que la venta
+     cayó en la siguiente dirección de la serie.
+
+       nonce 0 -> 0xaCbf1Add…04A89   Ethereum y BNB
+       nonce 1 -> 0xD9Bee…Fd4B6      Robinhood
+
+     Por eso se escribe aparte en vez de forzar que las tres compartan
+     constante: una dirección equivocada aquí manda al comprador a firmar
+     contra un contrato que en esa red no existe. */
+  var VENTA_ROBINHOOD = '0xD9BeedfbEb9778f0954f3a5016c3ffF99BcFd4B6';
 
   var CADENAS = {
     1: {
@@ -54,16 +67,16 @@
        Sin eso, «USDT en Ethereum» y «USDT en Robinhood» llevarian el mismo
        distintivo, que es justo lo que la insignia existe para evitar.
 
-       usdt va en null A PROPOSITO: no hay direccion confirmada del USDT en
-       esta cadena. Inventarla seria mandar a alguien a aprobar gasto sobre un
-       contrato que no se ha comprobado. Mientras siga en null, ese medio se
-       anuncia como no disponible en vez de fallar por dentro, y
-       probar_seed lo caza para que no se olvide. */
+       El USDT estuvo en null mientras no hubo direccion comprobada. Ya la hay, y
+       no se acepto de oido: el token es un StandardArbERC20, o sea acunado por
+       el puente oficial de Arbitrum, y su l1Address() devuelve el USDT de
+       Tether en Ethereum, el mismo 0xdAC17F9... que esta doce lineas mas
+       arriba. Seis decimales, igual que el de Ethereum. */
     4663: {
       id: 4663, hex: '0x1237', nombre: 'Robinhood Chain', simbolo: 'ETH', moneda: 'Ether',
       marca: 'ROBINHOOD',
-      venta: VENTA,
-      usdt: null, usdtDec: null,
+      venta: VENTA_ROBINHOOD,
+      usdt: '0xE246BC49b0598d7Cd9f0eAD48B885034f1254380', usdtDec: 6,
       explorador: 'https://robinhoodchain.blockscout.com',
       rpc: ['https://rpc.mainnet.chain.robinhood.com']
     }
@@ -1031,9 +1044,15 @@
   /* El orden es el del marcado y no al reves: primero las tres monedas de red
      y debajo los tres USDT. Agrupar por tipo y no por cadena es lo que deja
      cada fila leyendose sola. */
+  /* Cinco medios, no seis. Falta USDT sobre Robinhood Chain, y falta a
+     proposito: la direccion esta comprobada y el contrato la acepta, pero en
+     esa red apenas hay USDT puenteado, asi que ofrecerlo seria vender una
+     puerta por la que casi nadie puede entrar. Sobre Robinhood se compra con
+     ETH, que es su moneda de gas y la tiene todo el que opera alli. El dia que
+     haya liquidez, esta linea vuelve y la rejilla se recoloca sola. */
   var BOTONES = [
     { cid: 1, usdt: false }, { cid: 56, usdt: false }, { cid: 4663, usdt: false },
-    { cid: 1, usdt: true  }, { cid: 56, usdt: true  }, { cid: 4663, usdt: true  }
+    { cid: 1, usdt: true  }, { cid: 56, usdt: true  }
   ];
   var botones = [].slice.call(pay.querySelectorAll('button'));
   var elegido = 0;

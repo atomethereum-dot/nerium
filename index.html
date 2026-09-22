@@ -920,6 +920,17 @@ body.light .hud-band{color:rgba(232,236,244,.6)}
    cada fila dice una cosa. */
 .w-pay{display:grid;grid-template-columns:repeat(2,1fr);gap:7px;margin-bottom:18px}
 @media(min-width:480px){.w-pay{grid-template-columns:repeat(3,1fr)}}
+/* Cinco medios en una rejilla de dos o tres columnas dejan la ultima fila a
+   medias. Estas reglas reparten el sobrante, y llevan :last-child a proposito:
+   solo actuan cuando el quinto es el ultimo, asi que el dia que vuelva a haber
+   seis botones se apagan solas sin que nadie tenga que acordarse. */
+.w-pay button:nth-child(5):last-child{grid-column:1/-1}
+@media(min-width:480px){
+  .w-pay:has(button:nth-child(5):last-child){grid-template-columns:repeat(6,1fr)}
+  .w-pay:has(button:nth-child(5):last-child) button{grid-column:span 2}
+  .w-pay:has(button:nth-child(5):last-child) button:nth-child(4),
+  .w-pay:has(button:nth-child(5):last-child) button:nth-child(5){grid-column:span 3}
+}
 .w-pay button{display:grid;gap:3px;padding:10px 6px;border-radius:5px;
   border:1px solid rgba(232,236,244,.13);background:#fff;color:rgba(232,236,244,.62);
   font-family:var(--m);font-size:11.5px;letter-spacing:.08em;
@@ -6953,7 +6964,6 @@ window.__mide = function(cv, w, h){
           <button data-sym="ETH"  data-net="Robinhood Chain" data-rate="3420">ETH<em>Robinhood</em></button>
           <button data-sym="USDT" data-net="Ethereum"  data-rate="1">USDT<em>ERC-20</em></button>
           <button data-sym="USDT" data-net="BNB Chain" data-rate="1">USDT<em>BEP-20</em></button>
-          <button data-sym="USDT" data-net="Robinhood Chain" data-rate="1">USDT<em>Robinhood</em></button>
         </div>
 
         <label class="w-field">

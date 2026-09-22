@@ -32,41 +32,40 @@ await pg.locator('#presale').scrollIntoViewIfNeeded();
 await pg.waitForTimeout(1800);
 await pg.locator('#presale .widget').screenshot({path:'/tmp/vacio.png'});
 await pg.locator('#wPay').screenshot({path:'/tmp/monedas.png'});
-// Seis medios: ETH · BNB · ETH en Robinhood arriba, y los tres USDT abajo.
-chk('cada botón lleva su moneda', await pg.locator('#wPay .nrm-mon').count(), 6);
+// Cinco medios: ETH · BNB · ETH en Robinhood arriba, y los dos USDT abajo.
+chk('cada botón lleva su moneda', await pg.locator('#wPay .nrm-mon').count(), 5);
 // La insignia de red ya no es «la de los USDT»: la lleva el botón que no se
 // explica con su moneda. En Robinhood Chain la moneda de red tambien es ETH,
 // asi que sin insignia ese boton seria identico al de Ethereum.
-chk('la insignia la llevan los cuatro que no se explican solos',
-    await pg.locator('#wPay .nrm-mon .red').count(), 4);
+chk('la insignia la llevan los tres que no se explican solos',
+    await pg.locator('#wPay .nrm-mon .red').count(), 3);
 chk('el ETH de Robinhood la lleva verde',
     await pg.locator('#wPay button').nth(2).locator('.red circle').getAttribute('fill'), '#00C805');
 chk('la del USDT de Ethereum es Ethereum',
     await pg.locator('#wPay button').nth(3).locator('.red circle').getAttribute('fill'), '#627EEA');
 chk('la del USDT de BNB es BNB',
     await pg.locator('#wPay button').nth(4).locator('.red circle').getAttribute('fill'), '#F0B90B');
-chk('y la del USDT de Robinhood, verde otra vez',
-    await pg.locator('#wPay button').nth(5).locator('.red circle').getAttribute('fill'), '#00C805');
 chk('el primero es ETH',
     await pg.locator('#wPay button').nth(0).locator('.nrm-mon > svg > circle').getAttribute('fill'), '#627EEA');
 chk('el segundo BNB',
     await pg.locator('#wPay button').nth(1).locator('.nrm-mon > svg > circle').getAttribute('fill'), '#F0B90B');
 chk('el tercero ETH otra vez, que en Robinhood el gas es ether',
     await pg.locator('#wPay button').nth(2).locator('.nrm-mon > svg > circle').getAttribute('fill'), '#627EEA');
-chk('y los tres USDT en verde',
+chk('y los dos USDT en verde',
     await pg.locator('#wPay button').nth(3).locator('.nrm-mon > svg > circle').getAttribute('fill'), '#26A17B');
 chk('el campo arranca vacío', await pg.locator('#wUsd').inputValue(), '');
 chk('con marca de agua',      await pg.locator('#wUsd').getAttribute('placeholder'), '0.00');
 chk('sin NRM de salida',      await pg.locator('#wNrm').inputValue(), '');
-// El USDT de Robinhood Chain no tiene todavia direccion confirmada. Mientras
-// no la tenga, el boton lo DICE en vez de dejar que falle al pedir el permiso
-// de gasto. Esto es un cable trampa en los dos sentidos: si alguien quita el
-// aviso sin poner la direccion, salta aqui; y cuando la direccion se ponga de
-// verdad, tambien salta, que es lo que obliga a venir a esta linea y borrarla
-// a conciencia en vez de dejarla mintiendo.
-await pg.locator('#wPay button').nth(5).click(); await pg.waitForTimeout(450);
-chk('el USDT de Robinhood se anuncia, no revienta',
-    await pg.locator('#wCta').textContent(), 'USDT on Robinhood Chain coming soon');
+// Aqui vivia el cable trampa del «coming soon»: mientras el USDT de Robinhood
+// Chain no tuvo direccion comprobada, el boton lo decia en vez de fallar al
+// pedir el permiso de gasto. Ahora ese boton no existe — en la 4663 apenas hay
+// USDT puenteado y se decidio ofrecer solo ETH, que es su moneda de gas. Lo
+// que se vigila es la decision: cinco medios, y ninguno USDT sobre Robinhood.
+chk('cinco medios de pago', await pg.locator('#wPay button').count(), 5);
+chk('sin USDT sobre Robinhood',
+    await pg.locator('#wPay button[data-net="Robinhood Chain"][data-sym="USDT"]').count(), 0);
+chk('pero si ETH sobre Robinhood',
+    await pg.locator('#wPay button[data-net="Robinhood Chain"][data-sym="ETH"]').count(), 1);
 await pg.locator('#wPay button').nth(0).click(); await pg.waitForTimeout(350);
 // Sin cartera, conectar va antes que el importe: el orden en que uno lo hace.
 chk('sin cartera pide cartera', await pg.locator('#wCta').textContent(), 'Connect wallet');
