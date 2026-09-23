@@ -646,12 +646,14 @@ main>section.logos::after{display:none}
      · el carril lateral y el contador de secciones ya filtran por
        «display:none», asi que la marca desaparece y el «01/10» se recuenta
        sin que nadie toque un numero;
-     · y las cinco puertas que llevaban a la seccion —el menu, la hoja del
-       movil, el boton de la portada y la barra de aviso— se esconden con
-       ella, porque un enlace a una seccion que no esta es peor que no tener
-       enlace. */
+     · y todo lo que la anunciaba se esconde con ella: las cinco puertas que
+       llevaban alli —el menu, la hoja del movil, el boton de la portada y la
+       barra de aviso—, porque un enlace a una seccion que no esta es peor que
+       no tener enlace; y la fila de la portada («Seed Round open · 85%
+       complete · 1 NRM = $0.20 · …»), que pregonaba una venta a la que ya no
+       se puede llegar. */
 #presale[hidden]{display:none !important}
-body:has(#presale[hidden]) :is(.ann, a[href="#presale"]){display:none !important}
+body:has(#presale[hidden]) :is(.ann, #lq, a[href="#presale"]){display:none !important}
 .kin{background:#050609;padding:var(--s6) 0;overflow:hidden;
   border-block:1px solid rgba(255,255,255,.08)}
 .kin-row{overflow:hidden}
