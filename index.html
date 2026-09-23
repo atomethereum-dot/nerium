@@ -2271,7 +2271,20 @@ html[dir="rtl"] .ann-in:hover .ann-go{transform:scaleX(-1) translateX(4px)}
    lados metian las tarjetas dos pixeles a la derecha del titulo: poco, pero
    la vista lo pilla, porque el titulo esta justo encima. Ahora se escribe
    lado por lado y la columna vuelve a ser una sola. */
-.press-rail{padding:6px 0 12px;--velo:24px;
+/* ── el empujon a la izquierda ──
+   La caja estaba centrada al pixel —141 de margen a cada lado— pero eso no es
+   lo que ve el ojo: por la izquierda hay AIRE y por la derecha la tercera
+   tarjeta llega al borde de la columna y se corta. Aire a un lado, nada al
+   otro, y la fila parece empujada a la derecha aunque no lo este.
+
+   Se corrige sacando el carril de la columna solo por la izquierda. El titulo
+   no se mueve —esa columna manda en el resto de la seccion— y el corte de la
+   derecha se queda como esta, que es lo que avisa de que hay mas tarjetas.
+
+   La cantidad va en «clamp» y no en pixeles fijos: en un movil el margen
+   entero son 25 px, asi que un empujon de 40 sacaria la tarjeta de la
+   pantalla. Abajo son 14; arriba, 40. */
+.press-rail{padding:6px 0 12px;margin-left:calc(-1 * clamp(14px,2.6vw,40px));--velo:24px;
   -webkit-mask-image:linear-gradient(90deg,transparent 0,#000 var(--velo),
     #000 calc(100% - var(--velo)),transparent 100%);
   mask-image:linear-gradient(90deg,transparent 0,#000 var(--velo),
