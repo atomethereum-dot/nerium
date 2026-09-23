@@ -635,6 +635,23 @@ main>section.logos::after{display:none}
 /* «hidden» en una seccion no basta: las reglas de «main>section» le dan
    «display» y lo pisan. Se refuerza aqui. */
 .kin[hidden],#thesis[hidden]{display:none !important}
+/* ══ SEED ROUND, ESCONDIDA UN RATO ═════════════════════════════════════════
+   Pedido el 23 de septiembre de 2026. NO se ha tocado el cableado: la seccion
+   sigue entera en el HTML, la dapp sigue montada, el contrato sigue desplegado
+   y verificado, y las direcciones siguen donde estaban. Esto solo tapa.
+
+   PARA QUE VUELVA: quitar el «hidden» de <section id="presale">. Nada mas.
+   El resto se apaga y se enciende solo, colgado de ese atributo:
+
+     · el carril lateral y el contador de secciones ya filtran por
+       «display:none», asi que la marca desaparece y el «01/10» se recuenta
+       sin que nadie toque un numero;
+     · y las cinco puertas que llevaban a la seccion —el menu, la hoja del
+       movil, el boton de la portada y la barra de aviso— se esconden con
+       ella, porque un enlace a una seccion que no esta es peor que no tener
+       enlace. */
+#presale[hidden]{display:none !important}
+body:has(#presale[hidden]) :is(.ann, a[href="#presale"]){display:none !important}
 .kin{background:#050609;padding:var(--s6) 0;overflow:hidden;
   border-block:1px solid rgba(255,255,255,.08)}
 .kin-row{overflow:hidden}
@@ -7011,7 +7028,7 @@ window.__mide = function(cv, w, h){
     <span class="umb-cifra" id="umbPct">85</span>
   </div>
 </div>
-<section class="sale" id="presale" data-bg="#0E3AC4" data-acc="#7FB0FF"><i class="via" aria-hidden="true"></i>
+<section class="sale" id="presale" data-bg="#0E3AC4" data-acc="#7FB0FF" hidden><i class="via" aria-hidden="true"></i>
   <div class="sale-field" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
   <div class="wrap">
     <div class="sale-top rv">
