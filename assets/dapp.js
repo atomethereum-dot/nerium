@@ -9,6 +9,30 @@
    rellenar con ceros hasta 32 bytes. Meter ethers.js aquí serían 300 KB para
    ahorrarse veinte líneas.
    ─────────────────────────────────────────────────────────────────────────── */
+/* ══ LA VENTA, ESCONDIDA ══════════════════════════════════════════════════
+   El HTML ya la esconde, pero un navegador con una copia vieja de la pagina
+   guardada sigue pintandola. Este archivo viaja aparte y se pide por su
+   cuenta, asi que esconderla tambien desde aqui la tapa aunque el HTML que se
+   este usando sea de ayer.
+
+   PARA QUE VUELVA: borrar este bloque, quitar el «hidden» de
+   <section id="presale"> y los tres style="display:none" del HTML. */
+(function () {
+  function tapa() {
+    ['presale', 'lq', 'ann'].forEach(function (id) {
+      var e = document.getElementById(id);
+      if (e) { e.style.setProperty('display', 'none', 'important'); }
+    });
+  }
+  tapa();
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', tapa);
+  }
+  addEventListener('load', tapa);
+  /* y por si algo la repinta despues */
+  var n = 0, t = setInterval(function () { tapa(); if (++n > 20) clearInterval(t); }, 250);
+})();
+
 (function () {
   'use strict';
 
