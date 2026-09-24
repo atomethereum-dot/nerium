@@ -23,6 +23,11 @@
       var e = document.getElementById(id);
       if (e) { e.style.setProperty('display', 'none', 'important'); }
     });
+    /* el 85% gigante vive FUERA de la seccion y no tiene id */
+    var u = document.querySelectorAll('.umb');
+    for (var i = 0; i < u.length; i++) {
+      u[i].style.setProperty('display', 'none', 'important');
+    }
   }
   tapa();
   if (document.readyState === 'loading') {

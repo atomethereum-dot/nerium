@@ -655,7 +655,12 @@ main>section.logos::after{display:none}
 /* La seccion ya no esta en el archivo (se guardo en
    herramientas/seed-round.guardada.html), asi que estas puertas apuntarian a
    la nada. Se esconden tambien. Para devolverlas, borrar esta regla. */
-.ann, #lq, a[href="#presale"]{display:none !important}
+/* «.umb» es el 85% gigante a pantalla completa, y NO vive dentro de la
+   seccion de la venta: es un bloque suelto entre Security y Token. Por eso
+   esconder #presale no lo quitaba — se vio en produccion, cuatro intentos
+   seguidos. No se borra del archivo porque su guion hace
+   «lz.getContext» sin comprobar que exista. */
+.ann, #lq, .umb, a[href="#presale"]{display:none !important}
 .kin{background:#050609;padding:var(--s6) 0;overflow:hidden;
   border-block:1px solid rgba(255,255,255,.08)}
 .kin-row{overflow:hidden}
@@ -7026,7 +7031,7 @@ window.__mide = function(cv, w, h){
 
 
 
-<div class="umb" aria-hidden="true">
+<div class="umb" aria-hidden="true" style="display:none">
   <div class="umb-esc">
     <canvas class="umb-lz" id="umbLz"></canvas>
     <span class="umb-cifra" id="umbPct">85</span>
@@ -11675,7 +11680,11 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
 (function(){
   var raiz=document.querySelector('.umb'); if(!raiz) return;
   var lz=document.getElementById('umbLz'), num=document.getElementById('umbPct');
+  if(!lz||!num) return;
   var cx=lz.getContext('2d'); if(!cx) return;
+  /* si el bloque esta escondido no hay nada que dibujar */
+  var caja=lz.closest('.umb')||lz;
+  if(getComputedStyle(caja).display==='none') return;
   if(matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
   var W=0,H=0,DPR=1,dentro=false,pide=0;
@@ -11876,6 +11885,10 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
        cercana, que sigue garantizando que el punto cae dentro del glifo. */
     var okX=cifraIzq+(cifraDer-cifraIzq)*0.30;
     var okY=cifraY+(cifraBajo-cifraArriba)*0.16;
+    /* Con el bloque escondido el lienzo mide cero y no sale ni una tesela:
+       entonces «tes[mejor]» era undefined y reventaba al bajar la pagina.
+       Sin teselas no hay nada que colocar, asi que se vuelve. */
+    if(!tes.length) return;
     var mejor=0, dmin=1e9;
     for(var q2=0;q2<tes.length;q2++){
       var ex=tes[q2].x+TLADO/2-okX, ey=tes[q2].y+TLADO/2-okY;
