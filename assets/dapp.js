@@ -9,6 +9,29 @@
    rellenar con ceros hasta 32 bytes. Meter ethers.js aquí serían 300 KB para
    ahorrarse veinte líneas.
    ─────────────────────────────────────────────────────────────────────────── */
+/* ══ LA VENTA, ESCONDIDA ══════════════════════════════════════════════════
+   Puesto por herramientas/seed_round.py. Este archivo viaja aparte del HTML y
+   se pide por su cuenta, asi que tapa la venta aunque el navegador este
+   sirviendo una copia vieja de la pagina — que es lo que pasaba. */
+(function () {
+  function tapa() {
+    ['presale', 'lq', 'ann'].forEach(function (id) {
+      var e = document.getElementById(id);
+      if (e) { e.style.setProperty('display', 'none', 'important'); }
+    });
+    var u = document.querySelectorAll('.umb');   /* el 85% gigante, sin id */
+    for (var i = 0; i < u.length; i++) {
+      u[i].style.setProperty('display', 'none', 'important');
+    }
+  }
+  tapa();
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', tapa);
+  }
+  addEventListener('load', tapa);
+  var n = 0, t = setInterval(function () { tapa(); if (++n > 20) clearInterval(t); }, 250);
+})();
+
 (function () {
   'use strict';
 
