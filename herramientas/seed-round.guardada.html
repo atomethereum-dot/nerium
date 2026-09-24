@@ -1,0 +1,94 @@
+<!-- ══ LA SECCION DE LA VENTA, GUARDADA ENTERA ══════════════════════════════
+     Se saco de index.html el 24 de septiembre de 2026 a peticion del dueno:
+     esconderla con CSS no bastaba porque el navegador seguia sirviendo una
+     copia anterior de la pagina, asi que se quita del archivo y punto.
+
+     PARA DEVOLVERLA: pegar este bloque en index.html justo donde esta el
+     comentario «AQUI IBA LA SECCION DE LA VENTA», y quitar de assets/dapp.js
+     el bloque que empieza por «LA VENTA, ESCONDIDA».
+     ════════════════════════════════════════════════════════════════════════ -->
+<section class="sale" id="presale" data-bg="#0E3AC4" data-acc="#7FB0FF" hidden style="display:none"><i class="via" aria-hidden="true"></i>
+  <div class="sale-field" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+  <div class="wrap">
+    <div class="sale-top rv">
+      <span class="sale-live sk"><i class="sk-n">06</i><i></i>Seed Round open</span>
+      <span class="sale-net mono">Ethereum &#183; BNB Chain</span>
+    </div>
+
+    <div class="sale-grid">
+
+      <div class="sale-left">
+        <h2 class="sale-h">One price now. One price at listing.</h2>
+        <p class="sale-sub">Nothing hidden between them. What you pay today and what it lists at are both on this page.</p>
+
+        <div class="prices">
+          <div class="pr">
+            <span class="pr-k mono">Seed Round price</span>
+            <b class="pr-v">$0.20</b>
+            <span class="pr-n mono">per NRM</span>
+          </div>
+          <div class="pr-arrow" aria-hidden="true"><i></i><svg viewBox="0 0 18 12"><path d="M1 6h15M11 1.5 16.5 6 11 10.5"/></svg></div>
+          <div class="pr up">
+            <span class="pr-k mono">Listing price</span>
+            <b class="pr-v">$1.00</b>
+            <span class="pr-n mono">at market open</span>
+          </div>
+          <div class="pr-mult"><b>5&#215;</b><span class="mono">from Seed Round to listing</span></div>
+        </div>
+
+        <div class="raise">
+          <div class="raise-head">
+            <b id="saleRaised">$0</b><span class="mono">raised of $16,000,000</span>
+          </div>
+          <div class="raise-bar"><i id="saleFill"></i><i class="raise-tip" id="saleTip"><em>85.1%</em></i></div>
+          <div class="raise-foot mono"><span>Minimum $1</span><span>Maximum $10,000 per wallet</span></div>
+        </div>
+      </div>
+
+      <div class="widget rv">
+        <div class="w-top"><span>Buy NRM</span><span class="w-rate mono" id="wRate">1 NRM = $0.20</span></div>
+
+        <div class="w-lab mono">Pay with</div>
+        <div class="w-pay" id="wPay">
+          <button class="on" data-sym="ETH"  data-net="Ethereum"  data-rate="3420">ETH<em>Ethereum</em></button>
+          <button data-sym="BNB"  data-net="BNB Chain" data-rate="610">BNB<em>BNB Chain</em></button>
+          <button data-sym="ETH"  data-net="Robinhood Chain" data-rate="3420">ETH<em>Robinhood</em></button>
+          <button data-sym="USDT" data-net="Ethereum"  data-rate="1">USDT<em>ERC-20</em></button>
+          <button data-sym="USDT" data-net="BNB Chain" data-rate="1">USDT<em>BEP-20</em></button>
+        </div>
+
+        <label class="w-field">
+          <span class="mono">You pay</span>
+          <input id="wUsd" type="text" inputmode="decimal" value="500" aria-label="Amount in dollars">
+          <em class="mono">USD</em>
+        </label>
+        <div class="w-eq mono" id="wEq">&#8776; 0.1462 ETH on Ethereum</div>
+
+        <input class="w-range" id="wRange" type="range" min="0" max="4" step="0.001" value="2.699" aria-label="Amount">
+        <div class="w-chips" id="wChips">
+          <button data-v="1">$1</button><button data-v="100">$100</button>
+          <button data-v="500">$500</button><button data-v="2500">$2,500</button>
+          <button data-v="10000">Max</button>
+        </div>
+
+        <div class="w-swap" aria-hidden="true"><i></i><svg viewBox="0 0 16 16"><path d="M8 2v12M3 9l5 5 5-5"/></svg><i></i></div>
+
+        <label class="w-field out">
+          <span class="mono">You receive</span>
+          <input id="wNrm" type="text" value="5,000" readonly aria-label="Tokens received">
+          <em class="mono">NRM</em>
+        </label>
+
+        <dl class="w-out">
+          <div><dt class="mono">Value at listing</dt><dd id="wVal">$2,500</dd></div>
+          <div><dt class="mono">Unrealised gain</dt><dd class="up" id="wGain">+$2,000</dd></div>
+        </dl>
+
+        <button class="w-cta" id="wCta" type="button">Connect wallet</button>
+        <p class="w-note mono" id="wNote">Min $1 &#183; max $10,000 per wallet &#183; rates indicative</p>
+      </div>
+
+    </div>
+  </div>
+  <span class="hold" data-bg="#0D1017" data-acc="#0A5CF5"></span>
+</section>
