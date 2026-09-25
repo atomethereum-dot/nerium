@@ -400,6 +400,72 @@ em,.it{font-family:var(--f)!important;font-style:normal!important;font-weight:40
 .hero h1{font-weight:400;letter-spacing:-.05em;font-size:clamp(50px,8.4vw,150px);line-height:.9}
 .tx-t b em{font-size:1em}
 
+/* ══ FUSION ═══════════════════════════════════════════════════════════════════
+   La identidad de la web original (azul noche, cubos azules y blancos,
+   cabecera negra con iconos, boton azul), el aire de una fintech premium con
+   dos bandas claras de papel, la portada cinematografica a pantalla completa
+   y los datos verificables de un protocolo institucional. */
+:root{--bg:#0A0D14;--bg2:#0D1017;--panel:#10141D;--line:rgba(255,255,255,.08);--line2:rgba(255,255,255,.14);
+  --txt:#E9EEF7;--mut:#8D96A8;--mut2:#5F6778;--acc:#1A5BF0;--acc2:#4384E8;
+  --btnb:linear-gradient(176deg,#1A54F0 0%,#0E3AC4 46%,#071F84 100%);
+  --paper:#F4F2ED;--pink:#0A0D14;--pmut:#5C6270;--pline:rgba(10,13,20,.1)}
+html,body{background:var(--bg)}
+.grid-bg{display:none}
+/* cabecera de la original: barra negra flotante, iconos y boton azul */
+.hd{inset:14px 14px auto 14px}
+.hd .wrap{height:60px;max-width:none;padding:0 8px 0 18px;background:rgba(0,0,0,.78);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,.1);border-radius:2px;box-shadow:0 14px 40px -26px rgba(0,0,0,.9)}
+.hd.solid{background:none;box-shadow:none;backdrop-filter:none}
+.hd.away{transform:translateY(calc(-100% - 20px))}
+.nav{gap:2px;margin-inline:auto}
+.nav a{display:flex;align-items:center;gap:8px;padding:8px 10px;font-size:13.5px;color:rgba(226,236,255,.94)}
+.chip{display:inline-grid;place-items:center;width:20px;height:20px;border:1px solid rgba(255,255,255,.11);border-radius:6px;background:rgba(255,255,255,.075)}
+.chip svg{width:12px;height:12px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;opacity:.85}
+.nav a:hover .chip{background:rgba(26,91,240,.35);border-color:rgba(70,130,255,.5)}
+.btn{border-radius:6px!important}
+.btn.p{background:var(--btnb)!important;color:#fff!important;border:1px solid rgba(70,130,255,.34);box-shadow:0 0 0 1px rgba(20,80,230,.24),0 10px 30px -14px rgba(20,80,230,.6)}
+.btn.p:hover{box-shadow:0 0 0 1px rgba(20,80,230,.4),0 14px 36px -12px rgba(20,80,230,.8)}
+.btn.s{border:1px solid rgba(226,236,255,.22);color:var(--txt)}
+/* portada: escena a pantalla completa en azul noche */
+.hero-st{background:radial-gradient(60% 55% at 66% 38%,#13203F 0%,#0A0D14 72%)}
+.hero h1{color:#fff}.hero h1 em{color:#8FA9D8!important}
+.hero-top{top:104px}
+.hero-top b,.hero-spec b{color:#fff}
+.hero-side p{color:#AEB7C8}
+.v-ticks i b{background:#fff}
+/* entreactos en azul noche */
+.tx-st{background:radial-gradient(80% 70% at 50% 50%,#0F1A33 0%,#0A0D14 75%)}
+.stats{background:var(--bg)}
+.stat b{color:#fff}
+.panel.alt{background:var(--bg2)}
+.stack{background:var(--bg2)}
+.plate.on{background:linear-gradient(135deg,#1A5BF0,#0E3AC4);border-color:#3E7BFF;box-shadow:0 30px 80px -30px rgba(26,91,240,.7)}
+.uni .plate{background:linear-gradient(135deg,rgba(26,91,240,.7),rgba(14,58,196,.45));border-color:#3E7BFF}
+.thesis .w.sig{color:var(--acc2)!important}
+.bar i::before{border-radius:2px}
+.hl:hover span{color:var(--acc2)}
+.ft-big{color:#121827!important}
+/* ── bandas de papel: la sobriedad de una fintech, como las bandas claras de la original ── */
+.paper{background:var(--paper)!important;color:var(--pink)}
+.paper .lbl{color:var(--pmut)}.paper .lbl b{color:var(--pink)}.paper .lbl::after{background:var(--pline)}
+.paper h2,.paper h3{color:var(--pink)}
+.paper .sec-h p,.paper p{color:var(--pmut)}
+.paper .certs{background:var(--pline);border-color:var(--pline)}
+.paper .cert{background:#FFFEFA}
+.paper .cert:hover{background:#fff}
+.paper .cert::before{background:radial-gradient(380px circle at var(--gx,50%) var(--gy,0%),rgba(26,91,240,.07),transparent 60%)}
+.paper .cert dt{color:var(--pmut)}.paper .cert dd{color:var(--pink)}
+.paper .cert dl,.paper .cert dt,.paper .cert dd{border-color:var(--pline)}
+.paper .seal{color:var(--acc)}.paper .seal b{color:var(--pink)}
+.paper .cert .btn.s,.paper .btn.s{border-color:rgba(10,13,20,.2);color:var(--pink)}
+.paper .sec-q{color:var(--pmut);border-color:var(--pline)}
+.paper .road-pct small{color:var(--pmut)}
+.paper .rail{background:var(--pline)}.paper .rail b{background:var(--acc)}
+.paper .ph::before{background:var(--paper);border-color:#9AA0AC}.paper .ph.on::before{background:var(--acc);border-color:var(--acc)}
+.paper .ph .m{color:var(--pmut)}.paper .ph.done .m b{color:#0E9F6E}
+.paper .ph ul{border-color:var(--pline)}.paper .ph li{border-color:var(--pline);color:#3A404C}.paper .ph li svg{color:var(--acc)}
+.paper .cur{background:#000}
+@media (max-width:1100px){.hd .wrap{padding:0 8px 0 14px}}
+
 .hero-st .hero-top,.hero-st .hero-bot{height:auto;display:flex;padding-top:0;padding-bottom:0;grid-template-columns:none}
 .hero-st .hero-c{height:auto;display:grid;grid-template-columns:1.3fr 1fr;padding-top:0;padding-bottom:0;align-content:end}
 @media (max-width:1000px){.hero-st .hero-c{grid-template-columns:1fr;grid-template-rows:none;gap:20px}}
@@ -424,7 +490,12 @@ em,.it{font-family:var(--f)!important;font-style:normal!important;font-weight:40
 <header class="hd" id="hd"><div class="wrap">
   <a class="brand" href="#top"><svg aria-hidden="true"><use href="#logo"/></svg>Nereum</a>
   <nav class="nav" aria-label="Main">
-    <a href="#thesis">Thesis</a><a href="#stack">Protocol</a><a href="#token">Token</a><a href="#security">Security</a><a href="#build">Products</a><a href="#roadmap">Roadmap</a>
+    <a href="#thesis">Thesis<i class="chip" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4.6 6.4h14.8v8.8h-8.1L7.4 18.6v-3.4H4.6Z"/></svg></i></a>
+    <a href="#stack">Protocol<i class="chip" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 4 4 8l8 4 8-4-8-4Z"/><path d="M4 14l8 4 8-4"/></svg></i></a>
+    <a href="#token">Token<i class="chip" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="7.6"/><circle cx="12" cy="12" r="3"/></svg></i></a>
+    <a href="#security">Security<i class="chip" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3.5 5.2 6.4v4.8c0 4 2.8 6.8 6.8 7.6 4-.8 6.8-3.6 6.8-7.6V6.4L12 3.5Z"/></svg></i></a>
+    <a href="#build">Products<i class="chip" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9.2 8 5 12l4.2 4"/><path d="M14.8 8 19 12l-4.2 4"/></svg></i></a>
+    <a href="#roadmap">Roadmap<i class="chip" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4.6 18.4h14.8"/><path d="M8 18.4v-4.2M12 18.4v-8.6M16 18.4v-6.2"/></svg></i></a>
   </nav>
   <div class="hd-cta">
     <a class="btn s sm" href="https://nereum.xyz/explorer">Explorer</a>
@@ -560,7 +631,7 @@ em,.it{font-family:var(--f)!important;font-style:normal!important;font-weight:40
 
 
 <!-- ═══ SEGURIDAD ═══ -->
-<section class="panel alt sec" id="security"><div class="wrap">
+<section class="panel sec paper" id="security"><div class="wrap">
   <div class="sec-h"><div><div class="lbl"><b>05</b>Security</div><h2 class="split">Three things you can check before you send a dollar.</h2></div>
     <p>A new chain asks for trust up front. These are the three places where ours is verifiable by someone who is not us.</p></div>
   <div class="certs">
@@ -632,7 +703,7 @@ em,.it{font-family:var(--f)!important;font-style:normal!important;font-weight:40
 </section>
 
 <!-- ═══ RUTA ═══ -->
-<section class="panel sec" id="roadmap"><div class="wrap road">
+<section class="panel sec paper" id="roadmap"><div class="wrap road">
   <div class="road-l"><div class="lbl"><b>08</b>Roadmap</div><h2 class="split">Three phases, and what each one has to prove.</h2>
     <div class="road-pct"><span id="roadPct">0</span><small>% delivered</small></div></div>
   <div class="phases" id="phases"><div class="rail"><b id="railB"></b></div>
@@ -818,8 +889,8 @@ function escena(cv){
         var fill, edge, lw;
         if(mat===0){
           var k0=.55+b*.9, e0=gl*.9;
-          fill='rgba('+Math.round(10*k0+26*e0)+','+Math.round(15*k0+91*e0)+','+Math.round(32*k0+240*e0)+','+alfa.toFixed(3)+')';
-          edge='rgba('+(150+Math.round(gl*60))+','+(165+Math.round(gl*60))+','+(190+Math.round(gl*65))+','+(alfa*(.14+b*.2+gl*.5)).toFixed(3)+')'; lw=.7;
+          fill='rgba('+Math.round(9*k0+26*e0)+','+Math.round(26*k0+91*e0)+','+Math.round(78*k0+240*e0)+','+alfa.toFixed(3)+')';
+          edge='rgba('+(110+Math.round(gl*90))+','+(150+Math.round(gl*80))+',255,'+(alfa*(.22+b*.25+gl*.5)).toFixed(3)+')'; lw=.7;
         } else if(mat===1){
           var k1=.55+b*.55, e1=.35+gl*.65;
           fill='rgba('+Math.round(Math.min(255,26*k1+80*e1))+','+Math.round(Math.min(255,91*k1+90*e1))+','+Math.round(Math.min(255,240*k1+15*e1))+','+alfa.toFixed(3)+')';
@@ -1082,8 +1153,8 @@ function pinta(t){
   /* la maqueta: gran angular suave, tilt-shift arriba y abajo y suelo espejo */
   /* optica limpia en reposo: el zoom y la aberracion solo aparecen al cambiar de figura */
   E0.fx={b:.08, z:vuelo*.26, a:vuelo*.007, ts:0};
-  E0.pinta(UNI,{yaw:-.62+Math.sin(t*.1)*.12+mx*.25, pitch:.34+my*.05+Math.sin(t*.08)*.015, roll:0, dist:M?18:13.2, fov:1.05, near:6, far:40,
-    ox:M?0:.19, oy:M?-.2:-.17, floor:M?null:2.06, refA:.08, floorScreen:.6});
+  E0.pinta(UNI,{yaw:-.62+Math.sin(t*.1)*.12+mx*.25, pitch:.34+my*.05+Math.sin(t*.08)*.015, roll:0, dist:M?14:11.2, fov:1.05, near:6, far:40,
+    ox:M?0:.14, oy:M?-.14:-.08, floor:M?null:2.06, refA:.08, floorScreen:.66});
 }
 requestAnimationFrame(pinta);
 new IntersectionObserver(function(es){ vis=es[0].isIntersecting }).observe(cv);
@@ -1143,10 +1214,10 @@ if(hasG){
 
 
 /* ═══ TOKEN ═══ */
-var ALLOC=[['Private sale',50,'#3B6CF6'],['CEX listing',15,'#8FA9FF'],['Marketing',10,'#D5DCEB'],['Reserve',5,'#8F8C87'],['Team (locked)',5,'#5F5C58'],['Advisors',5,'#3A3937'],['Development',5,'#EDEBE7'],['Airdrop',5,'#262625']];
+var ALLOC=[['Private sale',50,'#1A5BF0'],['CEX listing',15,'#4384E8'],['Marketing',10,'#0C33B4'],['Reserve',5,'#BFD4FF'],['Team (locked)',5,'#3E7BFF'],['Advisors',5,'#2E62C8'],['Development',5,'#E9EDF6'],['Airdrop',5,'#1244DC']];
 var bar=$('#bar'), leg=$('#legend');
 ALLOC.forEach(function(a,i){
-  var claro=a[2]==='#EDEBE7'||a[2]==='#D5DCEB';
+  var claro=a[2]==='#E9EDF6'||a[2]==='#BFD4FF';
   var s=document.createElement('i'); s.style.cssText='flex:'+a[1]+' 1 0;--g:'+a[1]+';--c:'+a[2]+';--k:'+i; s.innerHTML='<span'+(claro?' style="color:#05070C"':'')+'>'+a[1]+'%</span>'; s.dataset.i=i; bar.appendChild(s);
   var d=document.createElement('div'); d.dataset.i=i; d.innerHTML='<span><i style="--c:'+a[2]+'"></i>'+a[0]+'</span><b>'+a[1].toFixed(1)+'%</b>'; leg.appendChild(d);
 });
