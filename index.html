@@ -635,13 +635,6 @@ main>section.logos::after{display:none}
 /* «hidden» en una seccion no basta: las reglas de «main>section» le dan
    «display» y lo pisan. Se refuerza aqui. */
 .kin[hidden],#thesis[hidden]{display:none !important}
-/* ══ SEED ROUND ESCONDIDA ══════════════════════════════════════════════════
-   Puesto por herramientas/seed_round.py. Para quitarlo:
-       python3 herramientas/seed_round.py devolver
-   «.umb» es el 85% gigante y NO esta dentro de la seccion: es un bloque
-   suelto. Los enlaces se esconden porque apuntarian a algo que no se ve. */
-#presale[hidden]{display:none !important}
-.ann, #lq, .umb, a[href="#presale"]{display:none !important}
 .kin{background:#050609;padding:var(--s6) 0;overflow:hidden;
   border-block:1px solid rgba(255,255,255,.08)}
 .kin-row{overflow:hidden}
@@ -6668,7 +6661,7 @@ window.__mide = function(cv, w, h){
   <svg viewBox="0 0 12 12"><path d="M6 1v10M2.5 7.5L6 11l3.5-3.5"/></svg>
 </button>
 
-<div class="ann" id="ann" style="display:none">
+<div class="ann" id="ann">
   <a class="ann-in" href="#presale">
     <span class="ann-k"><i class="ann-dot" aria-hidden="true"></i>Seed Round</span>
     <span class="ann-bar" aria-hidden="true"><i class="ann-fill" id="annFill" style="width:85%"></i></span>
@@ -6773,7 +6766,7 @@ window.__mide = function(cv, w, h){
       <a class="hb blue" href="#presale">Join the Seed Round</a>
       <a class="hb white" href="#security">Registered &amp; audited</a>
     </div>
-    <div class="lq" id="lq" style="display:none"><i class="lq-rail" aria-hidden="true"></i>
+    <div class="lq" id="lq"><i class="lq-rail" aria-hidden="true"></i>
     <ul class="hero-pr">
       <li><i></i>Seed Round open</li>
       <li class="hp-pct"><b id="heroPct">85%</b> <span>complete</span></li>
@@ -7012,13 +7005,13 @@ window.__mide = function(cv, w, h){
 
 
 
-<div class="umb" aria-hidden="true" style="display:none">
+<div class="umb" aria-hidden="true">
   <div class="umb-esc">
     <canvas class="umb-lz" id="umbLz"></canvas>
     <span class="umb-cifra" id="umbPct">85</span>
   </div>
 </div>
-<section class="sale" id="presale" data-bg="#0E3AC4" data-acc="#7FB0FF" hidden style="display:none"><i class="via" aria-hidden="true"></i>
+<section class="sale" id="presale" data-bg="#0E3AC4" data-acc="#7FB0FF"><i class="via" aria-hidden="true"></i>
   <div class="sale-field" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
   <div class="wrap">
     <div class="sale-top rv">
