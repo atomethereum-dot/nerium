@@ -191,7 +191,7 @@ El og:image:alt no es adorno: es lo que leen los lectores de pantalla. -->
   --fs-h1:clamp(34px,6vw,78px);
   --fs-h2:clamp(28px,4.4vw,58px);
   --fs-h3:clamp(21px,2.6vw,32px);
-  --fs-lab:clamp(9px,.86vw,11px);   
+  --fs-lab:clamp(11px,.86vw,11.5px);   /* el suelo, no el techo: en movil solo cuenta el suelo */   
   --line:rgba(255,255,255,.13); --line-d:rgba(232,236,244,.14);
   --mute:rgba(232,238,247,.56); --mute-d:rgba(232,236,244,.56);
   --f:'Switzer','Inter Tight',system-ui,-apple-system,sans-serif;
@@ -392,8 +392,8 @@ main>section.dark,main>section.stack{background:var(--wash)}
   z-index:6;display:flex;flex-direction:column;align-items:center;gap:9px;
   background:none;border:0;padding:10px 16px;cursor:pointer;opacity:0;
   -webkit-tap-highlight-color:transparent}
-.pista b{font-family:var(--m);font-size:9.5px;font-weight:400;letter-spacing:.3em;
-  text-transform:uppercase;color:rgba(232,236,244,.42);transition:color .3s var(--ease)}
+.pista b{font-family:var(--m);font-size:11px;font-weight:400;letter-spacing:.26em;
+  text-transform:uppercase;color:rgba(232,236,244,.74);transition:color .3s var(--ease)}
 .pista i{position:relative;display:block;width:1px;height:34px;
   background:rgba(232,236,244,.14);overflow:hidden}
 .pista i::after{content:"";position:absolute;left:0;top:0;width:1px;height:13px;
@@ -922,7 +922,7 @@ body.light .hud-band{color:rgba(232,236,244,.6)}
 .sale-live i{width:6px;height:6px;border-radius:50%;background:#12A45E;
   box-shadow:0 0 0 4px rgba(18,164,94,.16);animation:salePulse 2.2s ease-in-out infinite}
 @keyframes salePulse{0%,100%{opacity:1}50%{opacity:.34}}
-.sale-net{font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;color:rgba(232,236,244,.46)}
+.sale-net{font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;color:rgba(232,236,244,.78)}
 .sale-grid{display:grid;gap:36px;grid-template-columns:minmax(0,1fr)}
 .sale-grid>*{min-width:0}
 @media(min-width:1020px){.sale-grid{grid-template-columns:minmax(0,1.08fr) minmax(0,.92fr);gap:60px;
@@ -972,7 +972,7 @@ body.light .hud-band{color:rgba(232,236,244,.6)}
 @media(min-width:900px){.widget{padding:26px 24px 22px}}
 .w-top{display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin-bottom:20px}
 .w-top>span:first-child{font-size:17px;letter-spacing:-.02em;color:#E3E6EE}
-.w-rate{font-size:10.5px;letter-spacing:.14em;color:rgba(232,236,244,.5)}
+.w-rate{font-size:11px;letter-spacing:.12em;color:rgba(232,236,244,.72)}
 .w-lab{font-size:9.5px;letter-spacing:.22em;text-transform:uppercase;color:rgba(232,236,244,.42);
   margin-bottom:9px}
 /* Seis medios: tres monedas de red arriba y tres USDT abajo. Con cuatro
@@ -1012,13 +1012,20 @@ body.light .hud-band{color:rgba(232,236,244,.6)}
 .w-field.out input{color:#0A5CF5}
 .w-field em{font-style:normal;font-size:11px;letter-spacing:.12em;color:rgba(232,236,244,.6);
   flex:0 0 auto}
-.w-eq{margin:9px 2px 14px;font-size:10.5px;letter-spacing:.1em;color:rgba(232,236,244,.5)}
-.w-range{width:100%;-webkit-appearance:none;appearance:none;height:3px;border-radius:3px;
-  background:rgba(232,236,244,.14);outline:none;margin:4px 0 14px}
-.w-range::-webkit-slider-thumb{-webkit-appearance:none;width:17px;height:17px;border-radius:50%;
+.w-eq{margin:9px 2px 14px;font-size:11px;letter-spacing:.09em;color:rgba(232,236,244,.72)}
+.w-range{width:100%;-webkit-appearance:none;appearance:none;height:44px;
+  background:transparent;outline:none;margin:-8px 0 2px;display:block;cursor:pointer}
+.w-range::-webkit-slider-runnable-track{height:3px;border-radius:3px;
+  background:rgba(232,236,244,.14)}
+.w-range::-moz-range-track{height:3px;border-radius:3px;background:rgba(232,236,244,.14)}
+.w-range::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;
+  margin-top:-9.5px;
   background:#0A5CF5;border:3px solid #fff;box-shadow:0 1px 6px rgba(16,28,64,.35);cursor:grab}
-.w-range::-moz-range-thumb{width:17px;height:17px;border-radius:50%;background:#0A5CF5;
+.w-range::-moz-range-thumb{width:22px;height:22px;border-radius:50%;background:#0A5CF5;
   border:3px solid #fff;box-shadow:0 1px 6px rgba(16,28,64,.35);cursor:grab}
+.w-range:active::-webkit-slider-thumb{cursor:grabbing;
+  box-shadow:0 1px 6px rgba(16,28,64,.35),0 0 0 7px rgba(10,92,245,.18)}
+.w-range:focus-visible::-webkit-slider-thumb{box-shadow:0 0 0 4px rgba(10,92,245,.45)}
 .w-chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px}
 .w-chips button{padding:6px 11px;border-radius:4px;border:1px solid rgba(232,236,244,.13);
   background:#fff;color:rgba(232,236,244,.58);font-family:var(--m);font-size:10.5px;
@@ -1072,6 +1079,16 @@ body.light .hud-band{color:rgba(232,236,244,.6)}
   display:flex;flex-direction:column;gap:4px;align-items:flex-end}
 .srail button{position:relative;display:flex;align-items:center;justify-content:flex-end;gap:10px;
   background:none;padding:6px 4px 6px 26px}
+/* LA CAJA QUE RECOGE EL DEDO NO PUEDE SER LA DEL BOTON.
+   Las marcas median 12x10: imposibles de acertar con el pulgar. Pero darles
+   24px de alto duplicaba el carril entero —de 178 a 360px— y con eso alcanzaba
+   texto que antes no tocaba; y darles ancho lo metia dentro de la pagina, que
+   a 360px solo deja 22px de margen. Su bateria caza las dos cosas.
+   Asi que el area de toque va en una capa aparte, colocada en absoluto: no
+   ocupa sitio, no mueve nada, no cambia la marca que se ve, y el dedo cae
+   igual. */
+.srail button::before{content:'';position:absolute;right:0;top:50%;
+  width:26px;height:24px;transform:translateY(-50%)}
 .srail i{display:block;width:8px;height:1px;background:currentColor;opacity:.45;
   transition:width .4s cubic-bezier(.16,.84,.26,1),opacity .3s ease,background .3s ease}
 .srail button:hover i,.srail button.on i{width:12px;opacity:1}
@@ -1110,7 +1127,7 @@ body.light .srail{color:#E3E6EE}
   letter-spacing:.24em;color:rgba(232,236,244,.2)}
 .sec-t{margin-top:20px;font-weight:400;font-size:clamp(19px,1.9vw,23px);letter-spacing:-.03em;
   line-height:1.18;color:var(--ink)}
-.sec-k{margin-top:6px;font-family:var(--m);font-size:10px;letter-spacing:.2em;text-transform:uppercase;
+.sec-k{margin-top:6px;font-family:var(--m);font-size:11px;letter-spacing:.17em;text-transform:uppercase;
   color:rgba(232,236,244,.42)}
 .sec-p{margin-top:14px;font-size:14px;line-height:1.55;color:rgba(232,236,244,.6)}
 .sec-fields{margin-top:18px;border-top:1px solid rgba(232,236,244,.09)}
@@ -1120,7 +1137,7 @@ body.light .srail{color:#E3E6EE}
   color:rgba(232,236,244,.42);flex:0 0 auto}
 .sec-fields dd{font-size:13.5px;letter-spacing:-.012em;color:var(--ink);text-align:right}
 .sec-go{position:relative;display:inline-block;margin-top:auto;padding-top:20px;
-  font-family:var(--m);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:#0A5CF5}
+  font-family:var(--m);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#0A5CF5}
 .sec-go::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:1px;background:#0A5CF5;
   transform:scaleX(0);transform-origin:right;transition:transform .45s cubic-bezier(.16,.84,.26,1)}
 .sec-card:hover .sec-go::after{transform:scaleX(1);transform-origin:left}
@@ -1437,7 +1454,7 @@ body.cur-on input,body.cur-on textarea{cursor:text}
 .pre-bar{position:absolute;left:0;bottom:0;height:2px;width:0;background:var(--blue)}
 @media(prefers-reduced-motion:reduce){.pre{display:none}}
 .hud-count{position:fixed;right:16px;bottom:var(--hud-b);z-index:61;font-family:var(--m);font-size:11px;
-  color:rgba(255,255,255,.5);letter-spacing:.1em}
+  color:rgba(255,255,255,.72);letter-spacing:.1em}
 .hud-count b{font-weight:400;color:var(--blue)}
 .hud-count s{text-decoration:none;opacity:.6}
 body.light .hud-count{color:rgba(232,236,244,.55)}
@@ -5136,6 +5153,179 @@ body.light .subir svg{stroke:var(--c-tinta) !important}
 body.light .hud::after{background:radial-gradient(120% 120% at 100% 100%,
     rgba(244,245,248,.92) 0%, rgba(244,245,248,.60) 42%, rgba(244,245,248,0) 78%) !important}
 
+
+/* ══ COLOR Y VIDA EN EL PAPEL ═════════════════════════════════════════════
+   Las tres laminas claras —Garantias, Seguridad y Lo que estamos montando—
+   eran el mismo beige plano con tinta negra encima. Elegante y muerto: entre
+   dos secciones negras con movimiento, el ojo las leia como un hueco.
+
+   Lo que cambia NO es la identidad: sigue el mismo papel, la misma tinta y
+   el mismo azul. Cambia que el papel deje de ser un fondo y pase a ser un
+   sitio, con cuatro capas que ya estaban todas en la casa:
+
+     1 · cada lamina coge SU acento, el que ya declara en su «data-acc»,
+     2 · dos lavados de color en esquinas opuestas —el acento y un calido—,
+     3 · una retícula de 72px al 4,5 %, que es lo que le da profundidad al
+         blanco: sin ella el papel no tiene escala,
+     4 · y las placas dejan de separarse solo por sombra gris: cogen canto
+         de color, sombra teñida y un filo que se enciende al pasar.
+
+   El texto y los enlaces NO tocan el acento: siguen en «--c-azul», que es el
+   unico azul que pasa el contraste sobre papel. El color entra por el fondo,
+   los cantos y los brillos, nunca por la letra. */
+
+main>section.claro{--acc:#0A5CF5; --acc-d:#0E3AC4}
+main>section.claro#solutions{--acc:#0861F1; --acc-d:#0A3FBE}
+main>section.claro#security {--acc:#0A5CF5; --acc-d:#0E3AC4}
+main>section.claro#builds   {--acc:#2B7BFF; --acc-d:#1550C8}
+
+/* ── 1 · el suelo ── */
+main>section.claro.claro{
+  background-image:
+    radial-gradient(86% 58% at 50% -12%, #FFFFFF 0%, rgba(255,255,255,0) 64%),
+    repeating-linear-gradient(0deg,  rgba(8,11,17,.045) 0 1px, rgba(0,0,0,0) 1px 72px),
+    repeating-linear-gradient(90deg, rgba(8,11,17,.045) 0 1px, rgba(0,0,0,0) 1px 72px),
+    linear-gradient(180deg,#FBFCFE 0%,#F2F4F8 46%,#E9ECF3 100%),
+    var(--grano-claro) !important;
+  background-repeat:no-repeat,repeat,repeat,no-repeat,repeat !important;
+  background-position:center,0 0,0 0,center,0 0 !important}
+
+/* los lavados, uno por lamina: el acento en una esquina y un calido en la
+   contraria. Son del 6 al 11 %: se ven como temperatura, no como mancha. */
+main>section.claro#solutions{
+  background-color:#F3F4F9 !important;
+  background-image:
+    radial-gradient(64% 54% at 3% 94%,  rgba(8,97,241,.20) 0%, rgba(8,97,241,0) 62%),
+    radial-gradient(58% 52% at 97% 40%, rgba(232,163,61,.15) 0%, rgba(232,163,61,0) 60%),
+    radial-gradient(86% 58% at 50% -12%, #FFFFFF 0%, rgba(255,255,255,0) 64%),
+    repeating-linear-gradient(0deg,  rgba(8,11,17,.045) 0 1px, rgba(0,0,0,0) 1px 72px),
+    repeating-linear-gradient(90deg, rgba(8,11,17,.045) 0 1px, rgba(0,0,0,0) 1px 72px),
+    linear-gradient(180deg,#FBFCFE 0%,#F2F4F8 46%,#E9ECF3 100%),
+    var(--grano-claro) !important;
+  background-repeat:no-repeat,no-repeat,no-repeat,repeat,repeat,no-repeat,repeat !important;
+  background-position:center,center,center,0 0,0 0,center,0 0 !important}
+main>section.claro#security{
+  background-color:#F2F5F6 !important;
+  background-image:
+    radial-gradient(62% 56% at 99% 92%, rgba(10,92,245,.19) 0%, rgba(10,92,245,0) 60%),
+    radial-gradient(58% 54% at 1% 86%, rgba(46,190,140,.14) 0%, rgba(46,190,140,0) 58%),
+    radial-gradient(86% 58% at 50% -12%, #FFFFFF 0%, rgba(255,255,255,0) 64%),
+    repeating-linear-gradient(0deg,  rgba(8,11,17,.045) 0 1px, rgba(0,0,0,0) 1px 72px),
+    repeating-linear-gradient(90deg, rgba(8,11,17,.045) 0 1px, rgba(0,0,0,0) 1px 72px),
+    linear-gradient(180deg,#FBFCFE 0%,#F2F4F8 46%,#E9ECF3 100%),
+    var(--grano-claro) !important;
+  background-repeat:no-repeat,no-repeat,no-repeat,repeat,repeat,no-repeat,repeat !important;
+  background-position:center,center,center,0 0,0 0,center,0 0 !important}
+main>section.claro#builds{
+  background-color:#F1F4FA !important;
+  background-image:
+    radial-gradient(66% 56% at 98% 88%, rgba(43,123,255,.22) 0%, rgba(43,123,255,0) 62%),
+    radial-gradient(60% 54% at 2% 44%, rgba(124,92,255,.16) 0%, rgba(124,92,255,0) 60%),
+    radial-gradient(86% 58% at 50% -12%, #FFFFFF 0%, rgba(255,255,255,0) 64%),
+    repeating-linear-gradient(0deg,  rgba(8,11,17,.045) 0 1px, rgba(0,0,0,0) 1px 72px),
+    repeating-linear-gradient(90deg, rgba(8,11,17,.045) 0 1px, rgba(0,0,0,0) 1px 72px),
+    linear-gradient(180deg,#FBFCFE 0%,#F2F4F8 46%,#E9ECF3 100%),
+    var(--grano-claro) !important;
+  background-repeat:no-repeat,no-repeat,no-repeat,repeat,repeat,no-repeat,repeat !important;
+  background-position:center,center,center,0 0,0 0,center,0 0 !important}
+
+/* ── 2 · las placas ── */
+.claro :is(.sec-card,.bcd,.pcd){
+  position:relative;
+  background-color:var(--c-papel) !important;
+  background-image:linear-gradient(180deg,#FFFFFF 0%,#F7FAFF 100%) !important;
+  border:1px solid rgba(10,60,180,.15) !important;
+  box-shadow:0 1px 2px rgba(8,11,17,.04),
+             0 18px 42px -26px rgba(10,60,180,.42) !important}
+/* el canto de color: una linea de 2px arriba que nace corta y se abre al
+   pasar por encima. Es el unico sitio donde el acento toca la placa. */
+.claro :is(.sec-card,.bcd)::before{
+  content:'';position:absolute;left:0;right:0;top:-1px;height:2px;z-index:2;
+  border-radius:8px 8px 0 0;
+  background:linear-gradient(90deg,var(--acc) 0%,var(--acc-d) 62%,rgba(0,0,0,0) 100%);
+  transform:scaleX(.26);transform-origin:left center;opacity:.72;
+  transition:transform .55s cubic-bezier(.16,.84,.26,1),opacity .35s ease}
+.claro :is(.sec-card,.bcd):hover::before{transform:scaleX(1);opacity:1}
+.claro :is(.sec-card,.bcd):hover{
+  border-color:rgba(10,60,180,.30) !important;
+  box-shadow:0 2px 6px rgba(8,11,17,.05),
+             0 28px 60px -26px rgba(10,60,180,.50) !important}
+@media(prefers-reduced-motion:reduce){
+  .claro :is(.sec-card,.bcd)::before{transition:none}}
+
+/* ── 3 · los chapines de icono, con volumen ── */
+.claro .sec-ic,.claro .rows .ic{
+  background-image:linear-gradient(160deg,rgba(255,255,255,.96) 0%,rgba(226,236,255,.92) 100%) !important;
+  border-color:rgba(10,60,180,.26) !important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.9),
+             0 4px 12px -6px rgba(10,60,180,.40) !important}
+.claro .sec-card:hover .sec-ic,.claro .rows li:hover .ic{
+  background-image:linear-gradient(160deg,rgba(236,243,255,.98) 0%,rgba(205,224,255,.95) 100%) !important;
+  border-color:rgba(10,60,180,.42) !important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.9),
+             0 8px 20px -6px rgba(10,60,180,.52) !important}
+
+/* ── 4 · la insignia «verified», que era azul sobre azul ── */
+.claro .sec-ok{
+  background-image:linear-gradient(180deg,rgba(236,247,241,.96) 0%,rgba(219,240,229,.96) 100%) !important;
+  border-color:rgba(20,140,96,.32) !important;
+  color:#0B6B47 !important}
+.claro .sec-ok::before,.claro .sec-ok i:first-child{background:#12A06B !important}
+
+/* ── 5 · las filas de garantias ── */
+/* el lavado que ya entraba al pasar por encima iba en gris del 7 %: ahora va
+   en el acento de la lamina y entra con un filete a la izquierda. */
+.claro .rows li::before{background:var(--acc) !important;opacity:.085 !important}
+.claro .rows li::after{content:'';position:absolute;left:0;top:0;bottom:0;width:2px;z-index:1;
+  background:var(--acc);transform:scaleY(0);transform-origin:center top;
+  transition:transform .45s cubic-bezier(.16,.84,.26,1)}
+.claro .rows li:hover::after{transform:scaleY(1)}
+.claro .rows .rn{color:var(--acc-d) !important;opacity:.62}
+.claro .rows li:hover .rn{opacity:1}
+
+/* ── 6 · el numero fantasma del rotulo ── */
+/* «03», «05», «08» en gigante detras del titular estaban en gris al 4 %: un
+   borron. En azul al 6 % dejan de ser suciedad y pasan a ser marca de agua. */
+.claro .sec-n,.claro .sk-n{color:var(--c-azul) !important}
+
+
+/* ── 7 · el numeral de agua ── */
+/* «03», «05», «08» en gigante detras del titular iban en gris al 6 %: no se
+   leian como filigrana sino como suciedad del papel. En el azul de la lamina
+   y al 9 % pasan a ser lo que son: una marca de imprenta. */
+.claro .cifron>b,.claro .cifron.cifron>b{
+  color:rgba(12,58,180,.095) !important;
+  -webkit-text-fill-color:rgba(12,58,180,.095) !important}
+
+/* ── 8 · el filete del epigrafe ── */
+/* Era un pixel gris plano. Ahora sale del acento y se apaga: la misma linea,
+   pero con direccion. */
+.claro .sk::after{
+  background:linear-gradient(90deg,var(--acc) 0%,rgba(10,60,180,0) 100%) !important;
+  height:1.5px !important;opacity:.85}
+
+/* ── 9 · «In development» no es verde ── */
+.bcd-dot.obra{background:#E8A33D}
+.claro .bcd-dot.obra{background:#C9761A}
+
+/* ── 10 · el marco de las capturas ── */
+/* Un borde gris del 11 % alrededor de una interfaz azul dejaba la prueba
+   visual del producto flotando sin apoyo. El marco coge el color de la
+   lamina y una sombra teñida debajo. */
+.claro .bcd-art .bcd-plate{
+  border-color:rgba(10,60,180,.20) !important;
+  box-shadow:0 10px 26px -18px rgba(10,60,180,.55) !important}
+.claro .bcd:hover .bcd-art .bcd-plate{
+  border-color:rgba(10,60,180,.34) !important;
+  box-shadow:0 16px 34px -18px rgba(10,60,180,.65) !important}
+
+/* ── 11 · los filetes de las fichas ── */
+/* Las lineas que separan ENTIDAD, DOCUMENTO, FECHA, ESTADO iban en negro al
+   11 %. En azul al 13 % la ficha deja de parecer una tabla fotocopiada. */
+.claro :is(.sec-fields>*,.sec-foot,.sec-top){
+  border-color:rgba(10,60,180,.15) !important}
+.claro .rows li{border-color:rgba(10,60,180,.14) !important}
+
 /* ══ EL CORTE, Y LO QUE PASA CUANDO SE CRUZA ══════════════════════════════
    Una pagina que cambia de negro a papel tiene tres sitios donde pasa algo, y
    los tres son el MISMO sitio: la linea donde acaba uno y empieza el otro. Un
@@ -6913,7 +7103,7 @@ window.__mide = function(cv, w, h){
 </section>
 
 
-<section class="paper2 pad claro" id="solutions" data-bg="#F4F2ED" data-acc="#0861F1"><i class="via" aria-hidden="true"></i>
+<section class="paper2 pad claro" id="solutions" data-bg="#F3F4F9" data-acc="#0861F1"><i class="via" aria-hidden="true"></i>
   <div class="wrap">
     <div class="k sk rv"><i class="sk-n">03</i>Guarantees</div>
     <h2 class="sec-h rows-h rv">Four guarantees, written into the protocol.</h2>
@@ -6949,7 +7139,7 @@ window.__mide = function(cv, w, h){
 </section>
 
 
-<section class="secure claro" id="security" data-bg="#F4F2ED" data-acc="#0A5CF5"><i class="via" aria-hidden="true"></i>
+<section class="secure claro" id="security" data-bg="#F2F5F6" data-acc="#0A5CF5"><i class="via" aria-hidden="true"></i>
  <div class="sec-stage">
   <div class="wrap">
     <div class="sec-head">
@@ -7194,7 +7384,7 @@ window.__mide = function(cv, w, h){
 </section>
 
 
-<section class="builds claro" id="builds" data-bg="#F4F2ED" data-acc="#63A9FF"><i class="via" aria-hidden="true"></i>
+<section class="builds claro" id="builds" data-bg="#F1F4FA" data-acc="#63A9FF"><i class="via" aria-hidden="true"></i>
   <div class="wrap builds-head">
     <div class="k sk rv"><i class="sk-n">08</i>What we are building</div>
     <h2 class="builds-h">Three pieces, two already running.</h2>
@@ -7250,7 +7440,7 @@ window.__mide = function(cv, w, h){
             </div>
           </div>
         </div>
-        <div class="bcd-tag"><i class="bcd-dot"></i>In development</div>
+        <div class="bcd-tag"><i class="bcd-dot obra"></i>In development</div>
         <h3 class="bcd-t">Bitcoin mining</h3>
         <p class="bcd-d">Physical servers we own and operate, powered by solar.
         Not rented hashrate and not a reseller's contract: machines in racks,
