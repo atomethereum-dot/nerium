@@ -3,10 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Nereum — infrastructure for real-world assets</title>
+<title>Nereum — real assets, settled</title>
 <meta name="description" content="Nereum is the settlement layer for real-world assets: issuance, policy, access and liquidity in one protocol. Registered in the United States and independently audited.">
 <meta name="theme-color" content="#0A0B0D">
 <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap">
 <link rel="stylesheet" href="../assets/fonts.css">
 <style>
 /* ══ Nereum · modifit ═══════════════════════════════════════════════════════
@@ -76,11 +78,11 @@ main,footer,.tape{position:relative;z-index:1}
 /* ═══ PORTADA ═══ */
 .hero{position:relative;height:460vh}
 .hero-st{position:sticky;top:0;height:100vh;height:100svh;overflow:hidden}
-.hero-st .wrap{height:100%;display:grid;grid-template-columns:6fr 6fr;gap:clamp(24px,4vw,64px);align-items:center;padding-top:68px}
+.hero-st .wrap{height:100%;display:grid;grid-template-columns:5fr 7fr;gap:clamp(24px,4vw,64px);align-items:center;padding-top:68px}
 .hero-l{display:grid;gap:28px;align-content:center}
 .hero-k{display:flex;gap:10px;align-items:center;color:var(--mut)}
 .hero-k i{width:6px;height:6px;border-radius:50%;background:#3DDC97}
-.hero h1{font-size:clamp(40px,4.6vw,76px);line-height:1;letter-spacing:-.045em}
+.hero h1{font-size:clamp(40px,5.4vw,84px);line-height:1;letter-spacing:-.045em}
 .hero h1 em{font-style:normal;color:var(--mut)}
 .hero-l p{max-width:40ch;font-size:17px;line-height:1.55;color:var(--mut)}
 .hero-cta{display:flex;gap:10px;flex-wrap:wrap}
@@ -304,11 +306,11 @@ main,footer,.tape{position:relative;z-index:1}
 @media (max-width:1100px){.nav{display:none}.hd-cta .menu-b{display:inline-flex}}
 @media (max-width:1000px){
   .hero{height:420vh}
-  .hero-st .wrap{grid-template-columns:1fr;grid-template-rows:auto auto;align-content:start;gap:18px;padding-top:84px;padding-bottom:20px}
+  .hero-st .wrap{grid-template-columns:1fr;grid-template-rows:auto 1fr;align-content:start;gap:18px;padding-top:84px;padding-bottom:20px}
   .hero-l{gap:18px}.hero-l p{font-size:15px}
   .hero h1{font-size:clamp(34px,9vw,52px)}
   .hero-facts{display:none}
-  .view{height:44vh;height:44svh;min-height:280px}
+  .view{height:auto;min-height:0}
   .stats{grid-template-columns:1fr 1fr}.stat:nth-child(2){border-right:0}.stat:nth-child(-n+2){border-bottom:1px solid var(--line)}
   .sec-h{grid-template-columns:1fr}.sec-h p{justify-self:start}
   .row{grid-template-columns:36px 1fr 40px}.row p{grid-column:2}.row .go{grid-row:1;grid-column:3}
@@ -326,6 +328,69 @@ main,footer,.tape{position:relative;z-index:1}
 }
 @media (max-width:560px){.hd-cta .btn.s:not(.menu-b){display:none}.bar i span{display:none}.jl a{grid-template-columns:1fr auto}.jl span{display:none}.grid-bg{grid-template-columns:repeat(3,1fr)}}
 @media (prefers-reduced-motion:reduce){.tape-t,.mq,.seal svg{animation:none}.snap-in{animation:none}}
+
+/* ══ MAQUETA ═══════════════════════════════════════════════════════════════════
+   El segundo diseno: la economia de los activos reales como una maqueta de
+   arquitectura. Negro calido, tipografia sans con acentos en cursiva serif,
+   capitulos numerados y la maqueta a sangre en la portada. */
+:root{--bg:#0B0B0C;--bg2:#101011;--panel:#141415;--txt:#EDEBE7;--mut:#8F8C87;--mut2:#5F5C58;--acc:#3B6CF6;--acc2:#8FA9FF;
+  --serif:'Instrument Serif',Georgia,'Times New Roman',serif}
+em,.it{font-family:var(--serif);font-style:italic;font-weight:400;letter-spacing:-.01em}
+.grid-bg i{border-left-color:rgba(237,235,231,.025)}.grid-bg i:last-child{border-right-color:rgba(237,235,231,.025)}
+.hd.solid{background:rgba(11,11,12,.8)}
+.btn.p{background:var(--txt);color:#0B0B0C;border-radius:99px}.btn.s{border-radius:99px}
+.btn{height:46px;padding:0 22px}.btn.sm{height:36px;padding:0 16px}
+
+.hero{height:480vh}
+.hero-st{position:sticky;top:0;height:100vh;height:100svh;overflow:hidden;background:radial-gradient(70% 60% at 62% 40%,#17171A 0%,#0B0B0C 70%)}
+#fx{position:absolute;inset:0;width:100%;height:100%}
+.hero-top{position:absolute;left:0;right:0;top:110px;display:flex;justify-content:space-between;color:var(--mut)}
+.hero-top b{font-weight:400;color:var(--txt)}
+.hero-ch{display:flex;gap:6px;align-items:center}
+.v-name{display:inline-block;overflow:hidden;height:1.3em;vertical-align:bottom}.v-name span{display:block}
+.hero-c{position:absolute;left:0;right:0;bottom:clamp(90px,13vh,130px);display:grid;grid-template-columns:1.3fr 1fr;gap:40px;align-items:end;pointer-events:none}
+.hero-c a{pointer-events:auto}
+.hero h1{font-size:clamp(54px,9.4vw,170px);line-height:.88;letter-spacing:-.055em;font-weight:400;color:var(--txt)}
+.hero h1 em{font-size:1.06em;letter-spacing:-.02em;color:var(--txt)}
+.hero-side{display:grid;gap:24px;justify-items:start;max-width:420px;justify-self:end}
+.hero-side p{font-size:16px;line-height:1.6;color:var(--mut)}
+.hero-cta{display:flex;gap:10px;flex-wrap:wrap}
+.hero-bot{position:absolute;left:0;right:0;bottom:30px;display:flex;justify-content:space-between;align-items:center;color:var(--mut2)}
+.hero-spec{display:flex;gap:26px}.hero-spec b{font-weight:400;color:var(--txt)}
+.v-ticks{display:flex;gap:4px}.v-ticks i{width:26px;height:2px;background:rgba(255,255,255,.12);position:relative;overflow:hidden}
+.v-ticks i b{position:absolute;inset:0;background:var(--txt);transform-origin:0 50%;transform:scaleX(var(--k,0))}
+
+/* capitulos: el numero grande en serif */
+.lbl{color:var(--mut)}.lbl b{font-family:var(--serif);font-style:italic;font-size:22px;letter-spacing:0;text-transform:none;color:var(--txt)}
+.sec-h h2,.build-h h2,.press h2,.road-l h2,.join h2,.stack-r h2{font-weight:400}
+.sec-h h2::first-line{}
+.thesis p{font-size:clamp(32px,4.8vw,80px);letter-spacing:-.045em}
+.thesis .w.sig{font-family:var(--serif);font-style:italic;color:var(--txt)}
+.stat b{font-family:var(--serif);font-style:italic;font-weight:400;letter-spacing:-.02em;font-size:clamp(52px,6vw,96px)}
+.odo{font-family:var(--serif);font-style:normal;font-weight:400;letter-spacing:-.03em}
+.odo .d span b{font-weight:400}
+.road-pct{font-family:var(--serif);font-style:italic;font-weight:400;letter-spacing:-.02em}
+.ph h3,.cert h3,.pc-b h3,.row h3,.jl h3{font-weight:400}
+.row h3{letter-spacing:-.03em}
+.ft-big{font-family:var(--serif);font-style:italic;font-weight:400;letter-spacing:-.03em;color:#1A1A1C;font-size:clamp(80px,22vw,380px);justify-content:center;gap:.02em}
+.tx-st{background:radial-gradient(80% 70% at 50% 50%,#161618 0%,#0B0B0C 75%)}
+.tx-t b{font-weight:400}.tx-t b em{font-size:1.08em}
+.plate.on{background:linear-gradient(135deg,rgba(59,108,246,.9),rgba(59,108,246,.5))}
+.certs{border-radius:2px}.pc,.ctr,.view{border-radius:2px}
+@media (max-width:1000px){
+  .hero{height:430vh}
+  .hero-top{top:80px}
+  .hero-c{grid-template-columns:1fr;gap:20px;bottom:74px}
+  .hero-side{justify-self:start}
+  .hero h1{font-size:clamp(52px,15vw,84px)}
+  .hero-spec{display:none}
+}
+@media (max-width:560px){.hero-top>span:first-child{display:none}.hero-side p{font-size:15px}.hero-cta .btn{height:42px;padding:0 16px;font-size:13.5px}}
+
+/* la maqueta anula la reticula de la portada anterior */
+.hero-st .hero-top,.hero-st .hero-bot{height:auto;display:flex;padding-top:0;padding-bottom:0;grid-template-columns:none}
+.hero-st .hero-c{height:auto;display:grid;grid-template-columns:1.3fr 1fr;padding-top:0;padding-bottom:0;align-content:end}
+@media (max-width:1000px){.hero-st .hero-c{grid-template-columns:1fr;grid-template-rows:none;gap:20px}}
 </style>
 </head>
 <body>
@@ -363,30 +428,27 @@ main,footer,.tape{position:relative;z-index:1}
 <main>
 <!-- ═══ PORTADA ═══ -->
 <section class="hero" id="top">
-  <div class="hero-st"><div class="wrap">
-    <div class="hero-l">
-      <div class="hero-k m"><i></i>Nereum Labs · Testnet live</div>
-      <h1 class="split-h"><span class="ln"><span>The settlement layer</span></span><span class="ln"><span><em>for real&#8209;world assets.</em></span></span></h1>
-      <p>Issuance, policy, access and liquidity in one protocol. Registered in the United States and independently audited.</p>
-      <div class="hero-cta">
-        <a class="btn p" href="https://nereum.xyz/whitepaper">Read the whitepaper <span class="arr">&rarr;</span></a>
-        <a class="btn s" href="#security">Registered &amp; audited</a>
-      </div>
-      <div class="hero-facts m">
-        <div><b>160M</b><span>Fixed supply</span></div>
-        <div><b>0</b><span>Critical findings</span></div>
-        <div><b>4/4</b><span>Signers KYC</span></div>
+  <div class="hero-st">
+    <canvas id="fx" aria-hidden="true"></canvas>
+    <div class="hero-top wrap m" aria-hidden="true">
+      <span>Scale model <b>1 : 1,000,000</b></span>
+      <span class="hero-ch"><b id="vN">01</b> / 05 — <span class="v-name"><span id="vName">The asset itself</span></span></span>
+    </div>
+    <div class="hero-c wrap">
+      <h1 class="split-h"><span class="ln"><span>Real assets,</span></span><span class="ln"><span><em>settled.</em></span></span></h1>
+      <div class="hero-side">
+        <p>Nereum is the settlement layer for real-world assets. Issuance, policy, access and liquidity in one protocol, registered in the United States and independently audited.</p>
+        <div class="hero-cta">
+          <a class="btn p" href="https://nereum.xyz/whitepaper">Read the whitepaper <span class="arr">&rarr;</span></a>
+          <a class="btn s" href="https://nereum.xyz/explorer">Open the explorer</a>
+        </div>
       </div>
     </div>
-    <div class="view" id="view">
-      <canvas id="fx" aria-hidden="true"></canvas>
-      <i class="v-c tl"></i><i class="v-c tr"></i><i class="v-c bl"></i><i class="v-c br"></i>
-      <div class="v-hud m" aria-hidden="true">
-        <div class="v-row"><span>Asset class <b id="vN">01</b> / 05</span><span class="v-name"><span id="vName">The asset itself</span></span></div>
-        <div class="v-row"><div class="v-ticks"><i><b></b></i><i><b></b></i><i><b></b></i><i><b></b></i><i><b></b></i></div><span>Scroll to tokenize</span></div>
-      </div>
+    <div class="hero-bot wrap m" aria-hidden="true">
+      <div class="v-ticks"><i><b></b></i><i><b></b></i><i><b></b></i><i><b></b></i><i><b></b></i></div>
+      <span class="hero-spec"><span>Supply <b>160M</b></span><span>Audit <b>0 critical</b></span><span>KYC <b>4/4</b></span></span>
     </div>
-  </div></div>
+  </div>
 </section>
 
 <div class="tape" aria-label="Compatible with">
@@ -405,7 +467,7 @@ main,footer,.tape{position:relative;z-index:1}
 
 <section class="tx" id="tx-tunel" data-tx="tunel" style="height:300vh" aria-hidden="true">
   <div class="tx-st"><canvas class="tx-cv"></canvas><div class="tx-vig"></div>
-    <div class="tx-t"><span class="m">Nereum</span><b>Every asset,<br>one ledger.</b></div>
+    <div class="tx-t"><span class="m">Nereum</span><b>Every asset,<br><em>one ledger.</em></b></div>
     <div class="tx-go m"><i></i>Scroll</div>
     <div class="tx-hud m"><span class="tx-n"></span><i><b></b></i></div>
   </div>
@@ -552,7 +614,7 @@ main,footer,.tape{position:relative;z-index:1}
 
 <section class="tx" id="tx-ola" data-tx="ola" style="height:300vh" aria-hidden="true">
   <div class="tx-st"><canvas class="tx-cv"></canvas><div class="tx-vig"></div>
-    <div class="tx-t"><span class="m">Nereum</span><b>Built in<br>the open.</b></div>
+    <div class="tx-t"><span class="m">Nereum</span><b>Built in<br><em>the open.</em></b></div>
     <div class="tx-hud m"><span class="tx-n"></span><i><b></b></i></div>
   </div>
 </section>
@@ -669,14 +731,16 @@ function rot(v,cx,sx,cy,sy,cz,sz){
    hacia el centro (Z) y aberracion cromatica (A). Cada escena los mueve con
    el scroll y con la velocidad a la que se baja. */
 var POST_VS='attribute vec2 p;varying vec2 v;void main(){v=p*.5+.5;gl_Position=vec4(p,0.,1.);}';
-var POST_FS=['precision mediump float;varying vec2 v;uniform sampler2D t;uniform vec2 R;uniform float B,Z,A;',
+var POST_FS=['precision mediump float;varying vec2 v;uniform sampler2D t;uniform vec2 R;uniform float B,Z,A,TS,TY;',
  'vec4 s(vec2 u){return (u.x<0.||u.y<0.||u.x>1.||u.y>1.)?vec4(0.):texture2D(t,u);}',
  'void main(){vec2 a=vec2(R.x/R.y,1.);vec2 c=(v-.5)*a;float r2=dot(c,c);',
  ' vec2 u=(c*(1.-B*.55+B*r2)/a)+.5;',
+ /* tilt-shift: una franja nitida y el resto desenfocado, como una maqueta fotografiada */
+ ' float tb=TS*smoothstep(.1,.42,abs(v.y-TY))*.012;',
  ' vec4 col=vec4(0.);',
- ' for(int i=0;i<10;i++){float f=float(i)/9.;vec2 uu=.5+(u-.5)*(1.-Z*f);vec2 d=(uu-.5)*A*(1.+r2*4.);',
+ ' for(int i=0;i<12;i++){float f=float(i)/11.;float an=f*37.7;vec2 uu=.5+(u-.5)*(1.-Z*f)+vec2(cos(an),sin(an))*tb*sqrt(f);vec2 d=(uu-.5)*A*(1.+r2*4.);',
  '  vec4 m=s(uu);col+=vec4(s(uu+d).r,m.g,s(uu-d).b,m.a);}',
- ' col/=10.;gl_FragColor=col;}'].join('\n');
+ ' col/=12.;gl_FragColor=col;}'].join('\n');
 function escena(cv){
   var gl=cv.getContext('webgl',{premultipliedAlpha:true,alpha:true,antialias:false});
   var off=gl?document.createElement('canvas'):cv, c=off.getContext('2d'), o={c:c,W:0,H:0,fx:{b:0,z:0,a:0}};
@@ -689,10 +753,10 @@ function escena(cv){
     gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE); gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);
     gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR); gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);
     gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,true); gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL,true);
-    var uR=gl.getUniformLocation(pr,'R'), uB=gl.getUniformLocation(pr,'B'), uZ=gl.getUniformLocation(pr,'Z'), uA=gl.getUniformLocation(pr,'A');
+    var uR=gl.getUniformLocation(pr,'R'), uB=gl.getUniformLocation(pr,'B'), uZ=gl.getUniformLocation(pr,'Z'), uA=gl.getUniformLocation(pr,'A'), uTS=gl.getUniformLocation(pr,'TS'), uTY=gl.getUniformLocation(pr,'TY');
     o.post=function(){ var f=o.fx; gl.viewport(0,0,cv.width,cv.height); gl.clearColor(0,0,0,0); gl.clear(gl.COLOR_BUFFER_BIT);
       gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,off);
-      gl.uniform2f(uR,cv.width,cv.height); gl.uniform1f(uB,CALMA?0:f.b); gl.uniform1f(uZ,CALMA?0:Math.min(.45,f.z+VELZ)); gl.uniform1f(uA,CALMA?0:f.a+VELZ*.02);
+      gl.uniform2f(uR,cv.width,cv.height); gl.uniform1f(uB,CALMA?0:f.b); gl.uniform1f(uZ,CALMA?0:Math.min(.45,f.z+VELZ)); gl.uniform1f(uA,CALMA?0:f.a+VELZ*.02); gl.uniform1f(uTS,f.ts||0); gl.uniform1f(uTY,f.ty==null?.5:f.ty);
       gl.drawArrays(gl.TRIANGLES,0,3) };
   }
   o.tam=function(){ var d=Math.min(innerWidth<700?1.5:2,devicePixelRatio||1); o.W=cv.clientWidth; o.H=cv.clientHeight; off.width=cv.width=Math.round(o.W*d); off.height=cv.height=Math.round(o.H*d); c.setTransform(d,0,0,d,0,0) };
@@ -711,6 +775,15 @@ function escena(cv){
           ay=rot(rot([0,h,0],a1,b1,a2,b2,a3,b3),cx,sx,cy,sy,cz,sz),
           az=rot(rot([0,0,d],a1,b1,a2,b2,a3,b3),cx,sx,cy,sy,cz,sz);
       items.push({q:q,C:C,A:[ax,ay,az]});
+    }
+    if(cam.floor!=null && !cam._ref){
+      /* el suelo espejo: las mismas piezas reflejadas bajo el plano, tenues, pintadas primero */
+      var espejo=[]; for(var ii=0;ii<cubos.length;ii++){ var qq=cubos[ii]; if(qq.a<=.01) continue;
+        espejo.push({x:qq.x,y:2*cam.floor-qq.y,z:qq.z,w:qq.w,h:qq.h,d:qq.d,s:qq.s,rx:-(qq.rx||0),ry:qq.ry,rz:-(qq.rz||0),l:qq.l,a:qq.a*(cam.refA||.14),c:qq.c,g:qq.g,_m:qq._m,_id:qq._id}) }
+      var c2={}; for(var kk in cam) c2[kk]=cam[kk]; c2._ref=true; c2.noPost=true;
+      o.pinta(espejo,c2); limpio=true;
+      /* un velo del color del fondo para que el reflejo se funda hacia abajo */
+      var P0=cam.floorScreen; if(P0!=null){ var gr=o.c.createLinearGradient(0,P0*H,0,H); gr.addColorStop(0,'rgba(11,11,12,0)'); gr.addColorStop(.55,'rgba(11,11,12,.85)'); gr.addColorStop(1,'rgba(11,11,12,1)'); o.c.fillStyle=gr; o.c.fillRect(0,P0*H,W,H) }
     }
     items.sort(function(m,n){ return n.C[2]-m.C[2] });
     var ctx=o.c; if(!limpio) ctx.clearRect(0,0,W,H); ctx.lineJoin='round';
@@ -746,7 +819,7 @@ function escena(cv){
         ctx.fillStyle=fill; ctx.fill(); ctx.strokeStyle=edge; ctx.lineWidth=lw; ctx.stroke();
       }
     }
-    if(o.post) o.post();
+    if(o.post && !cam.noPost) o.post();
   };
   return o;
 }
@@ -1010,8 +1083,10 @@ function pinta(t){
     q.l=vuelo*.35; q.a=1;
   }
   var M=innerWidth<700;
-  E0.fx={b:.2, z:vuelo*.28, a:.0015+vuelo*.008};
-  E0.pinta(UNI,{yaw:-.55+Math.sin(t*.12)*.16+mx*.35, pitch:.24+my*.08+Math.sin(t*.1)*.02, roll:0, dist:M?12:10.2, fov:1.05, near:6, far:40, ox:0, oy:0});
+  /* la maqueta: gran angular suave, tilt-shift arriba y abajo y suelo espejo */
+  E0.fx={b:.16, z:vuelo*.3, a:.0012+vuelo*.008, ts:M?.6:1, ty:M?.42:.46};
+  E0.pinta(UNI,{yaw:-.62+Math.sin(t*.1)*.14+mx*.3, pitch:.3+my*.06+Math.sin(t*.08)*.02, roll:0, dist:M?15:12.5, fov:1.05, near:6, far:40,
+    ox:M?0:.13, oy:M?-.13:-.12, floor:M?null:2.08, refA:.13, floorScreen:.6});
 }
 requestAnimationFrame(pinta);
 new IntersectionObserver(function(es){ vis=es[0].isIntersecting }).observe(cv);
@@ -1028,7 +1103,7 @@ new IntersectionObserver(function(es){ vis=es[0].isIntersecting }).observe(cv);
       estado.p=st.progress; marca(Math.min(4,Math.round(st.progress*4)));
       ticks.forEach(function(el,i){ el.style.setProperty('--k',Math.max(0,Math.min(1,st.progress*4-i+1))) });
     }});
-    if(!CALMA) gsap.to('.hero-l',{opacity:.0,y:-40,ease:'none',scrollTrigger:{trigger:'.hero',start:'88% bottom',end:'bottom bottom',scrub:true}});
+    if(!CALMA){ gsap.to('.hero-c',{opacity:0,y:-40,ease:'none',scrollTrigger:{trigger:'.hero',start:'top top',end:'22% top',scrub:true}}); gsap.fromTo('.hero-c',{opacity:0},{opacity:1,immediateRender:false,ease:'none',scrollTrigger:{trigger:'.hero',start:'80% bottom',end:'bottom bottom',scrub:true}}) }
   }
 })();
 
@@ -1071,10 +1146,10 @@ if(hasG){
 
 
 /* ═══ TOKEN ═══ */
-var ALLOC=[['Private sale',50,'#3B6CF6'],['CEX listing',15,'#7FA0FF'],['Marketing',10,'#C9D4F2'],['Reserve',5,'#8B919B'],['Team (locked)',5,'#5E646D'],['Advisors',5,'#3A3F47'],['Development',5,'#E7E9ED'],['Airdrop',5,'#262A30']];
+var ALLOC=[['Private sale',50,'#3B6CF6'],['CEX listing',15,'#8FA9FF'],['Marketing',10,'#D5DCEB'],['Reserve',5,'#8F8C87'],['Team (locked)',5,'#5F5C58'],['Advisors',5,'#3A3937'],['Development',5,'#EDEBE7'],['Airdrop',5,'#262625']];
 var bar=$('#bar'), leg=$('#legend');
 ALLOC.forEach(function(a,i){
-  var claro=a[2]==='#E7E9ED'||a[2]==='#C9D4F2';
+  var claro=a[2]==='#EDEBE7'||a[2]==='#D5DCEB';
   var s=document.createElement('i'); s.style.cssText='flex:'+a[1]+' 1 0;--g:'+a[1]+';--c:'+a[2]+';--k:'+i; s.innerHTML='<span'+(claro?' style="color:#05070C"':'')+'>'+a[1]+'%</span>'; s.dataset.i=i; bar.appendChild(s);
   var d=document.createElement('div'); d.dataset.i=i; d.innerHTML='<span><i style="--c:'+a[2]+'"></i>'+a[0]+'</span><b>'+a[1].toFixed(1)+'%</b>'; leg.appendChild(d);
 });
@@ -1155,8 +1230,8 @@ function entrar(){
     .to(o,{v:100,duration:1,ease:'power2.inOut',onUpdate:function(){ $('#preN').textContent=String(Math.round(o.v)).padStart(3,'0') }},'<')
     .to(pre,{opacity:0,duration:.6,ease:'power2.out'})
     .from('.hero .ln>span',{yPercent:110,duration:1.2,ease:'expo.out',stagger:.08},'<.1')
-    .from('.hero-k, .hero-l p, .hero-cta, .hero-facts, #hd',{y:20,opacity:0,duration:1,ease:'expo.out',stagger:.06},'<.2')
-    .from('#view',{clipPath:'inset(50% 50% 50% 50%)',duration:1.4,ease:'expo.inOut'},'<-.2')
+    .from('.hero-side p, .hero-cta, .hero-top, .hero-bot, #hd',{y:20,opacity:0,duration:1,ease:'expo.out',stagger:.06},'<.2')
+    .from('#fx',{scale:1.25,opacity:0,duration:1.8,ease:'expo.out'},'<-.3')
     .add(function(){ if(pre) pre.remove() });
   if(lenis){ lenis.stop(); tl.add(function(){ lenis.start() },1.6) }
 }
