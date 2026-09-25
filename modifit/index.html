@@ -3,472 +3,266 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Nereum — real assets, settled</title>
+<title>Nereum — institutional-grade real-world assets, onchain</title>
 <meta name="description" content="Nereum is the settlement layer for real-world assets: issuance, policy, access and liquidity in one protocol. Registered in the United States and independently audited.">
-<meta name="theme-color" content="#0A0B0D">
+<meta name="theme-color" content="#F6F7F9">
 <link rel="icon" href="../favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="../assets/fonts.css">
 <style>
 /* ══ Nereum · modifit ═══════════════════════════════════════════════════════
-   Institucional: grafito, mucho aire, una reticula tecnica fina y un solo
-   azul de acento. Los cubos siguen siendo la imagen de la casa; encima llevan
-   una optica de camara (ojo de pez, zoom y aberracion) que se mueve con el
-   scroll. Nada de neones, halos ni degradados de colores. */
+   Claro e institucional, en la linea de las plataformas de activos
+   tokenizados: fondo blanco roto, titulares grandes centrados, tarjetas muy
+   redondeadas con degradados suaves, botones en pildora, una franja de
+   cifras y una banda oscura para cerrar. Los cubos pasan a porcelana y
+   cristal azul para vivir sobre fondo claro. */
 :root{
-  color-scheme:dark;
-  --bg:#0A0B0D; --bg2:#0E1013; --panel:#121418; --line:rgba(255,255,255,.07); --line2:rgba(255,255,255,.12);
-  --txt:#E7E9ED; --mut:#8B919B; --mut2:#5E646D; --acc:#3B6CF6; --acc2:#7FA0FF;
+  color-scheme:light;
+  --bg:#F6F7F9; --card:#FFFFFF; --soft:#EEF1F6; --line:rgba(12,18,32,.08); --line2:rgba(12,18,32,.14);
+  --ink:#0C1220; --mut:#5B6475; --mut2:#8A93A5;
+  --blue:#1A5BF0; --blue2:#3E7BFF; --blued:#0E3AC4; --navy:#070B16;
   --f:'Switzer','Inter Tight',system-ui,sans-serif; --m:'DM Mono',ui-monospace,monospace;
-  --e:cubic-bezier(.16,.84,.26,1); --pad:clamp(18px,4vw,64px); --max:1440px;
+  --e:cubic-bezier(.16,.84,.26,1); --pad:clamp(16px,3.6vw,48px); --max:1280px; --r:24px;
 }
 *{box-sizing:border-box;margin:0;padding:0}
-html{background:var(--bg);color:var(--txt);-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+html{background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
 html.lenis,html.lenis body{height:auto}.lenis.lenis-smooth{scroll-behavior:auto!important}
 body{font-family:var(--f);background:var(--bg);overflow-x:clip;font-size:16px}
 a{color:inherit;text-decoration:none}img{display:block;max-width:100%}
 button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
-::selection{background:var(--acc);color:#fff}
-:focus-visible{outline:2px solid var(--acc2);outline-offset:3px}
-.m{font-family:var(--m);font-size:11px;letter-spacing:.14em;text-transform:uppercase}
-h1,h2,h3{font-weight:400;letter-spacing:-.035em;text-wrap:balance}
-.ln{display:block;overflow:hidden;padding-bottom:.1em;margin-bottom:-.1em}.ln>span{display:inline-block}
+::selection{background:var(--blue);color:#fff}
+:focus-visible{outline:2px solid var(--blue);outline-offset:3px}
 .wrap{max-width:var(--max);margin-inline:auto;padding-inline:var(--pad)}
-/* la reticula: seis columnas de guia muy finas en toda la pagina */
-.grid-bg{position:fixed;inset:0;z-index:0;pointer-events:none;max-width:var(--max);margin-inline:auto;padding-inline:var(--pad);display:grid;grid-template-columns:repeat(6,1fr)}
-.grid-bg i{border-left:1px solid rgba(255,255,255,.028)}.grid-bg i:last-child{border-right:1px solid rgba(255,255,255,.028)}
-main,footer,.tape{position:relative;z-index:1}
+.m{font-family:var(--m);font-size:11px;letter-spacing:.12em;text-transform:uppercase}
+h1,h2,h3{font-weight:500;letter-spacing:-.035em;text-wrap:balance}
+.ln{display:block;overflow:hidden;padding-bottom:.1em;margin-bottom:-.1em}.ln>span{display:inline-block}
+.eyebrow{display:inline-flex;align-items:center;gap:8px;height:30px;padding:0 12px;border-radius:99px;background:var(--card);border:1px solid var(--line);font-size:13px;color:var(--mut)}
+.eyebrow i{width:6px;height:6px;border-radius:50%;background:var(--blue)}
+.sec{padding-block:clamp(80px,12vh,140px)}
+.sec-t{text-align:center;display:grid;gap:18px;justify-items:center;margin-bottom:clamp(40px,6vh,64px)}
+.sec-t h2{font-size:clamp(34px,4.4vw,60px);line-height:1.04;max-width:18ch}
+.sec-t p{max-width:56ch;font-size:17px;line-height:1.6;color:var(--mut)}
 
-/* rotulo de seccion: numero, nombre y regla */
-.lbl{display:flex;gap:14px;align-items:center;font-family:var(--m);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--mut)}
-.lbl b{font-weight:400;color:var(--txt)}
-.lbl::after{content:"";flex:1;height:1px;background:var(--line)}
+/* botones en pildora */
+.btn{display:inline-flex;align-items:center;gap:10px;height:48px;padding:0 24px;border-radius:99px;font-size:15px;font-weight:500;white-space:nowrap;transition:background .3s,box-shadow .3s,transform .3s var(--e)}
+.btn .arr{transition:transform .4s var(--e)}.btn:hover .arr{transform:translateX(3px)}
+.btn.p{background:var(--ink);color:#fff}.btn.p:hover{background:#1B2336}
+.btn.b{background:var(--blue);color:#fff;box-shadow:0 10px 30px -12px rgba(26,91,240,.6)}.btn.b:hover{background:var(--blued)}
+.btn.s{background:var(--card);color:var(--ink);border:1px solid var(--line2)}.btn.s:hover{border-color:rgba(12,18,32,.3)}
+.btn.w{background:#fff;color:var(--ink)}
+.btn.sm{height:40px;padding:0 18px;font-size:14px}
 
 /* entrada */
 .pre{position:fixed;inset:0;z-index:300;background:var(--bg);display:grid;place-items:center;pointer-events:none}
-.pre-in{display:grid;gap:16px;justify-items:center}
-.pre-logo{width:34px;height:34px;opacity:0}
-.pre-n{font-family:var(--m);font-size:11px;letter-spacing:.2em;color:var(--mut)}
+.pre svg{width:36px;height:36px}
 .calma .pre{display:none}
 
 /* cabecera */
-.hd{position:fixed;inset:0 0 auto 0;z-index:100;transition:transform .6s var(--e),background .4s}
-.hd .wrap{height:68px;display:flex;align-items:center;gap:28px}
-.hd.solid{background:rgba(10,11,13,.82);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);box-shadow:0 1px 0 var(--line)}
+.hd{position:fixed;inset:0 0 auto 0;z-index:100;transition:transform .6s var(--e),background .4s,box-shadow .4s}
+.hd .wrap{height:72px;display:flex;align-items:center;gap:28px}
+.hd.solid{background:rgba(246,247,249,.82);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);box-shadow:0 1px 0 var(--line)}
 .hd.away{transform:translateY(-100%)}
-.brand{display:flex;align-items:center;gap:10px;font-size:15px;font-weight:500;letter-spacing:-.02em}
-.brand svg{width:20px;height:20px}
-.nav{display:flex;gap:26px;margin-left:auto}
-.nav a{font-size:14px;color:var(--mut);transition:color .3s}.nav a:hover{color:var(--txt)}
-.hd-cta{display:flex;gap:8px;align-items:center}
+.brand{display:flex;align-items:center;gap:10px;font-size:17px;font-weight:600;letter-spacing:-.03em}
+.brand svg{width:24px;height:24px}
+.nav{display:flex;gap:4px;margin-left:12px}
+.nav a{padding:8px 14px;border-radius:99px;font-size:15px;color:var(--mut);transition:background .3s,color .3s}
+.nav a:hover{background:rgba(12,18,32,.05);color:var(--ink)}
+.hd-cta{margin-left:auto;display:flex;gap:8px;align-items:center}
 .hd-cta .menu-b{display:none}
-.sheet{position:fixed;inset:0;z-index:99;background:var(--bg);display:flex;flex-direction:column;justify-content:flex-end;padding:100px var(--pad) max(34px,env(safe-area-inset-bottom));clip-path:inset(0 0 100% 0);transition:clip-path .8s var(--e)}
+.sheet{position:fixed;inset:0;z-index:99;background:var(--bg);display:flex;flex-direction:column;justify-content:flex-end;padding:100px var(--pad) max(34px,env(safe-area-inset-bottom));clip-path:inset(0 0 100% 0);transition:clip-path .7s var(--e)}
 .sheet.on{clip-path:inset(0)}
-.sheet a{display:flex;justify-content:space-between;align-items:baseline;font-size:clamp(32px,9vw,56px);letter-spacing:-.04em;line-height:1.15;border-bottom:1px solid var(--line)}
-.sheet a i{font-style:normal;font-family:var(--m);font-size:11px;color:var(--mut)}
-
-/* botones: rectos, sin brillos */
-.btn{display:inline-flex;align-items:center;gap:10px;height:44px;padding:0 20px;border-radius:4px;font-size:14px;font-weight:500;white-space:nowrap;transition:background .3s,border-color .3s,color .3s}
-.btn .arr{transition:transform .4s var(--e)}.btn:hover .arr{transform:translateX(3px)}
-.btn.p{background:var(--txt);color:var(--bg)}.btn.p:hover{background:#fff}
-.btn.s{border:1px solid var(--line2);color:var(--txt)}.btn.s:hover{border-color:rgba(255,255,255,.3);background:rgba(255,255,255,.03)}
-.btn.sm{height:36px;padding:0 14px;font-size:13px}
+.sheet a{display:flex;justify-content:space-between;align-items:baseline;font-size:clamp(32px,9vw,52px);font-weight:500;letter-spacing:-.04em;line-height:1.2;border-bottom:1px solid var(--line)}
+.sheet a i{font-style:normal;font-family:var(--m);font-size:11px;color:var(--mut2)}
 
 /* ═══ PORTADA ═══ */
-.hero{position:relative;height:460vh}
-.hero-st{position:sticky;top:0;height:100vh;height:100svh;overflow:hidden}
-.hero-st .wrap{height:100%;display:grid;grid-template-columns:5fr 7fr;gap:clamp(24px,4vw,64px);align-items:center;padding-top:68px}
-.hero-l{display:grid;gap:28px;align-content:center}
-.hero-k{display:flex;gap:10px;align-items:center;color:var(--mut)}
-.hero-k i{width:6px;height:6px;border-radius:50%;background:#3DDC97}
-.hero h1{font-size:clamp(40px,5.4vw,84px);line-height:1;letter-spacing:-.045em}
-.hero h1 em{font-style:normal;color:var(--mut)}
-.hero-l p{max-width:40ch;font-size:17px;line-height:1.55;color:var(--mut)}
-.hero-cta{display:flex;gap:10px;flex-wrap:wrap}
-.hero-facts{display:grid;grid-template-columns:repeat(3,auto);gap:10px 28px;justify-content:start;padding-top:22px;border-top:1px solid var(--line)}
-.hero-facts div{display:grid;gap:4px}
-.hero-facts b{font-weight:400;font-size:20px;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
-.hero-facts span{color:var(--mut2)}
-/* el visor: donde viven los cubos, como una pantalla de instrumento */
-.view{position:relative;height:min(76vh,760px);border:1px solid var(--line);border-radius:6px;overflow:hidden;
-  background:radial-gradient(90% 70% at 50% 45%,#12161E 0%,#0B0D10 70%)}
-.view::before{content:"";position:absolute;inset:0;pointer-events:none;
-  background-image:linear-gradient(rgba(255,255,255,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.035) 1px,transparent 1px);background-size:48px 48px;
-  -webkit-mask-image:radial-gradient(70% 70% at 50% 50%,#000,transparent);mask-image:radial-gradient(70% 70% at 50% 50%,#000,transparent)}
+.hero{position:relative;padding-top:140px}
+.hero-t{text-align:center;display:grid;gap:24px;justify-items:center}
+.hero h1{font-size:clamp(44px,6.8vw,96px);line-height:.98;letter-spacing:-.05em;max-width:14ch}
+.hero h1 span.bl{color:var(--blue)}
+.hero-t p{max-width:52ch;font-size:clamp(16px,1.3vw,19px);line-height:1.55;color:var(--mut)}
+.hero-cta{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+/* el escenario de la maqueta: una tarjeta grande y clara */
+.stage{position:relative;height:460vh;margin-top:clamp(40px,6vh,64px)}
+.stage-st{position:sticky;top:88px;height:calc(100vh - 110px);height:calc(100svh - 110px)}
+.stage-card{position:relative;height:100%;border-radius:32px;overflow:hidden;background:
+  radial-gradient(60% 70% at 50% 40%,#FFFFFF 0%,#EAF0FB 60%,#DCE6F8 100%);border:1px solid var(--line);box-shadow:0 40px 80px -60px rgba(12,30,80,.35)}
+.stage-card::before{content:"";position:absolute;inset:0;pointer-events:none;
+  background-image:linear-gradient(rgba(26,91,240,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(26,91,240,.06) 1px,transparent 1px);background-size:44px 44px;
+  -webkit-mask-image:radial-gradient(70% 70% at 50% 55%,#000,transparent);mask-image:radial-gradient(70% 70% at 50% 55%,#000,transparent)}
 #fx{position:absolute;inset:0;width:100%;height:100%}
-.v-hud{position:absolute;inset:0;pointer-events:none;padding:16px 18px;display:flex;flex-direction:column;justify-content:space-between;color:var(--mut)}
-.v-row{display:flex;justify-content:space-between;align-items:center;gap:12px}
-.v-row b{font-weight:400;color:var(--txt)}
-.v-c{position:absolute;width:14px;height:14px;border-color:rgba(255,255,255,.35);border-style:solid;border-width:0}
-.v-c.tl{left:10px;top:10px;border-top-width:1px;border-left-width:1px}.v-c.tr{right:10px;top:10px;border-top-width:1px;border-right-width:1px}
-.v-c.bl{left:10px;bottom:10px;border-bottom-width:1px;border-left-width:1px}.v-c.br{right:10px;bottom:10px;border-bottom-width:1px;border-right-width:1px}
-.v-ticks{display:flex;gap:4px}.v-ticks i{width:22px;height:2px;background:rgba(255,255,255,.12);position:relative;overflow:hidden}
-.v-ticks i b{position:absolute;inset:0;background:var(--txt);transform-origin:0 50%;transform:scaleX(var(--k,0))}
-.v-name{display:block;overflow:hidden;height:1.3em}.v-name span{display:block;transition:transform .7s var(--e)}
+.st-top{position:absolute;left:24px;right:24px;top:22px;display:flex;justify-content:space-between;align-items:center;gap:12px}
+.chipset{display:flex;gap:6px;flex-wrap:wrap}
+.chipset span{height:32px;padding:0 14px;display:inline-flex;align-items:center;border-radius:99px;font-size:13.5px;color:var(--mut);background:rgba(255,255,255,.7);border:1px solid var(--line);transition:all .4s var(--e)}
+.chipset span.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.st-n{font-family:var(--m);font-size:12px;color:var(--mut2)}
+.st-bot{position:absolute;left:24px;right:24px;bottom:22px;display:flex;justify-content:space-between;align-items:flex-end;gap:16px}
+.st-cap{display:grid;gap:4px;max-width:34ch}
+.st-cap b{font-size:22px;font-weight:500;letter-spacing:-.03em}
+.st-cap span{font-size:14px;color:var(--mut);line-height:1.5}
+.v-ticks{display:flex;gap:4px}.v-ticks i{width:28px;height:3px;border-radius:3px;background:rgba(12,18,32,.1);position:relative;overflow:hidden}
+.v-ticks i b{position:absolute;inset:0;background:var(--blue);transform-origin:0 50%;transform:scaleX(var(--k,0))}
 
-/* cinta */
-.tape{border-block:1px solid var(--line);overflow:hidden;padding:20px 0;background:var(--bg)}
-.tape-t{display:flex;width:max-content;gap:60px;animation:tape 44s linear infinite}
-@keyframes tape{to{transform:translateX(-50%)}}
-.tape-i{display:flex;align-items:center;gap:12px;font-size:18px;letter-spacing:-.02em;white-space:nowrap;color:var(--mut)}
-.tape-i img{width:22px;height:22px;filter:grayscale(1) brightness(1.5);opacity:.7}
-.tape-i.k{font-family:var(--m);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--mut2)}
+/* franja de cifras */
+.figs{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:22px}
+.fig{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:26px 26px 24px;display:grid;gap:8px}
+.fig span{font-size:14px;color:var(--mut)}
+.fig b{font-size:clamp(34px,3.6vw,52px);font-weight:500;letter-spacing:-.045em;font-variant-numeric:tabular-nums;line-height:1}
+.fig small{font-size:13px;color:var(--mut2)}
 
-/* ═══ ENTREACTOS DE CUBOS ═══ */
-.tx{position:relative;background:var(--bg)}
-.tx-st{position:sticky;top:0;height:100vh;height:100svh;overflow:hidden;background:radial-gradient(80% 70% at 50% 50%,#11141A 0%,var(--bg) 75%)}
+/* socios */
+.logos{padding-block:clamp(56px,8vh,90px) 0;text-align:center}
+.logos p{font-size:14px;color:var(--mut2);margin-bottom:26px}
+.lg{display:flex;justify-content:center;flex-wrap:wrap;gap:12px}
+.lg span{display:inline-flex;align-items:center;gap:10px;height:54px;padding:0 22px;border-radius:99px;background:var(--card);border:1px solid var(--line);font-size:16px;font-weight:500;color:#2A3244}
+.lg img{width:22px;height:22px}
+
+/* productos: tarjetas grandes con degradado */
+.prods{display:grid;grid-template-columns:1.25fr 1fr;grid-auto-rows:minmax(300px,auto);gap:16px}
+.prod{position:relative;border-radius:var(--r);overflow:hidden;padding:30px;display:flex;flex-direction:column;gap:14px;background:var(--card);border:1px solid var(--line);transition:transform .5s var(--e),box-shadow .5s var(--e)}
+.prod:hover{transform:translateY(-4px);box-shadow:0 30px 60px -40px rgba(12,30,80,.35)}
+.prod.big{grid-row:span 2;background:linear-gradient(160deg,#1A5BF0 0%,#0E3AC4 55%,#071F84 100%);color:#fff;border:0}
+.prod.big p,.prod.big .tag{color:rgba(255,255,255,.8)}
+.prod.big .tag{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.2)}
+.prod .tag{align-self:flex-start;display:inline-flex;align-items:center;gap:8px;height:28px;padding:0 12px;border-radius:99px;font-size:12.5px;color:var(--mut);background:var(--soft);border:1px solid var(--line)}
+.prod .tag i{width:6px;height:6px;border-radius:50%;background:#10B981}
+.prod .tag.dev i{background:#F59E0B}
+.prod h3{font-size:clamp(28px,2.6vw,40px);line-height:1.02;letter-spacing:-.04em}
+.prod p{font-size:16px;line-height:1.55;color:var(--mut);max-width:44ch}
+.prod .btn{margin-top:auto;align-self:flex-start}
+.prod .shot{margin-top:10px;border-radius:14px;overflow:hidden;border:1px solid rgba(255,255,255,.2);box-shadow:0 30px 60px -30px rgba(0,0,20,.5)}
+.prod .shot img{width:100%;aspect-ratio:1.9;object-fit:cover;object-position:left top}
+.prod .meter{height:6px;border-radius:6px;background:var(--soft);overflow:hidden}.prod .meter b{display:block;height:100%;width:var(--v);background:var(--blue);border-radius:6px}
+
+/* por que: cuatro garantias en tarjetas */
+.why{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.w-card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:28px;display:grid;gap:14px;align-content:start}
+.w-ic{width:44px;height:44px;border-radius:14px;display:grid;place-items:center;background:var(--soft);color:var(--blue)}
+.w-ic svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.w-card h3{font-size:21px;letter-spacing:-.03em;line-height:1.15}
+.w-card p{font-size:15px;line-height:1.55;color:var(--mut)}
+
+/* ═══ 85 %: la ronda, en una banda oscura con los cubos ═══ */
+.tx{position:relative;background:transparent}
+.tx-st{position:sticky;top:88px;height:calc(100vh - 110px);height:calc(100svh - 110px);overflow:hidden;border-radius:32px;margin-inline:var(--pad);background:radial-gradient(70% 70% at 50% 50%,#0F1A33 0%,#070B16 75%)}
 .tx-cv{position:absolute;inset:0;width:100%;height:100%}
-.tx-vig{position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at center,transparent 50%,rgba(10,11,13,.9) 100%)}
-.tx-scan{display:none}
-.tx-t{position:absolute;left:var(--pad);right:var(--pad);top:50%;translate:0 -50%;text-align:center;pointer-events:none;display:grid;gap:16px;justify-items:center}
-.tx-t .m{color:var(--mut)}
-.tx-t b{font-weight:400;font-size:clamp(34px,5.6vw,92px);letter-spacing:-.045em;line-height:.98;color:#fff;text-shadow:0 2px 40px rgba(10,11,13,.95)}
-.tx-top,.tx-bot{position:absolute;left:0;right:0;text-align:center;pointer-events:none;display:grid;gap:10px;justify-items:center;padding:0 var(--pad)}
-.tx-top{top:14%}.tx-bot{bottom:12%}
-.tx-top .m,.tx-bot .m{color:var(--mut)}
-.tx-bot span:last-child{font-size:clamp(16px,1.4vw,20px);color:var(--txt)}
-.tx-go{position:absolute;left:50%;bottom:28px;translate:-50% 0;display:grid;justify-items:center;gap:8px;color:var(--mut);pointer-events:none}
-.tx-go i{width:1px;height:30px;background:linear-gradient(var(--txt),transparent)}
-.tx-hud{position:absolute;left:var(--pad);right:var(--pad);bottom:26px;display:flex;gap:14px;align-items:center;color:var(--mut2);pointer-events:none}
-.tx-hud i{display:block;width:110px;height:1px;background:var(--line2);position:relative;overflow:hidden}
-.tx-hud i b{position:absolute;inset:0;background:var(--txt);transform-origin:0 50%;transform:scaleX(var(--p,0))}
+.tx-vig{position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at center,transparent 50%,rgba(7,11,22,.85) 100%)}
+.tx-top,.tx-bot{position:absolute;left:0;right:0;text-align:center;pointer-events:none;display:grid;gap:10px;justify-items:center;padding:0 var(--pad);color:#fff}
+.tx-top{top:12%}.tx-bot{bottom:10%}
+.tx-top .m,.tx-bot .m{color:#9EB9FF}
+.tx-bot span:last-child{font-size:clamp(16px,1.4vw,20px);color:#DCE4F5}
+.tx-hud{position:absolute;left:28px;right:28px;bottom:22px;display:flex;gap:14px;align-items:center;color:rgba(255,255,255,.45);pointer-events:none}
+.tx-hud i{display:block;width:110px;height:2px;border-radius:2px;background:rgba(255,255,255,.14);position:relative;overflow:hidden}
+.tx-hud i b{position:absolute;inset:0;background:#fff;transform-origin:0 50%;transform:scaleX(var(--p,0))}
 .snap-in{animation:snap .8s cubic-bezier(.16,.84,.26,1) both}
-@keyframes snap{0%{opacity:0;transform:scale(1.06);filter:blur(12px)}40%{opacity:1}100%{opacity:1;transform:none;filter:none}}
+@keyframes snap{0%{opacity:0;transform:translateY(30px)}100%{opacity:1;transform:none}}
 
-/* ═══ SECCIONES ═══ */
-.sec{padding-block:clamp(100px,16vh,180px)}
-.panel{position:relative;background:var(--bg)}
-.panel.alt{background:var(--bg2)}
-.sec-h{display:grid;grid-template-columns:7fr 5fr;gap:40px;align-items:end;margin-bottom:clamp(44px,8vh,84px)}
-.sec-h h2{font-size:clamp(34px,4.2vw,64px);line-height:1.02;margin-top:28px}
-.sec-h p{max-width:42ch;justify-self:end;font-size:16px;line-height:1.6;color:var(--mut)}
-.stats{display:grid;grid-template-columns:repeat(4,1fr);border-bottom:1px solid var(--line);background:var(--bg)}
-.stat{padding:clamp(28px,4vw,48px) clamp(18px,2.4vw,36px);display:grid;gap:10px;border-right:1px solid var(--line)}
-.stat:last-child{border-right:0}
-.stat .m{color:var(--mut2)}
-.stat b{font-weight:400;font-size:clamp(40px,4.6vw,72px);letter-spacing:-.05em;line-height:.95;font-variant-numeric:tabular-nums}
-.stat span{color:var(--mut);font-size:14px}
-.thesis p{font-size:clamp(30px,4.4vw,72px);line-height:1.06;letter-spacing:-.04em;max-width:20ch;margin-top:44px}
-.thesis .w{opacity:.16;transition:opacity .2s linear}.thesis .w.sig{color:var(--acc2)}
-.thesis-f{margin-top:clamp(40px,8vh,84px);display:flex;justify-content:space-between;gap:24px;flex-wrap:wrap;border-top:1px solid var(--line);padding-top:22px;color:var(--mut)}
-.rows{border-top:1px solid var(--line)}
-.row{position:relative;display:grid;grid-template-columns:70px 1.1fr 1fr 44px;gap:24px;align-items:center;padding:30px 0;border-bottom:1px solid var(--line);transition:padding .5s var(--e)}
-.row:hover{padding-left:12px}
-.row .n{font-family:var(--m);font-size:12px;color:var(--mut2)}
-.row h3{font-size:clamp(22px,2.2vw,34px);line-height:1.05}
-.row p{font-size:16px;color:var(--mut);line-height:1.5}
-.row .go{justify-self:end;width:40px;height:40px;border-radius:50%;border:1px solid var(--line2);display:grid;place-items:center;transition:transform .5s var(--e),background .3s,color .3s}
-.row:hover .go{transform:rotate(-45deg);background:var(--txt);color:var(--bg)}
-/* la pila */
-.stack{position:relative;height:380vh;background:var(--bg2)}
-.stack-st{position:sticky;top:0;height:100vh;height:100svh;overflow:hidden;display:grid;grid-template-columns:1.1fr 1fr;align-items:center;max-width:var(--max);margin-inline:auto}
-.stack-l{position:relative;height:100%;perspective:1800px;display:grid;place-items:center}
-.plates{position:relative;width:min(30vw,380px);aspect-ratio:1;transform-style:preserve-3d}
-.plate{position:absolute;inset:0;border-radius:10px;transform-style:preserve-3d;background:linear-gradient(135deg,rgba(255,255,255,.06),rgba(255,255,255,.015));border:1px solid rgba(255,255,255,.2);transition:background .6s,border-color .6s,box-shadow .6s}
-.plate::before{content:"";position:absolute;inset:14%;border:1px dashed rgba(255,255,255,.1);border-radius:6px}
-.plate::after{content:attr(data-n);position:absolute;left:14px;top:12px;font-family:var(--m);font-size:10px;letter-spacing:.14em;color:rgba(255,255,255,.5)}
-.plate.on{background:linear-gradient(135deg,rgba(59,108,246,.9),rgba(59,108,246,.55));border-color:#7FA0FF;box-shadow:0 30px 80px -30px rgba(59,108,246,.6)}
-.uni .plate{background:linear-gradient(135deg,rgba(59,108,246,.55),rgba(59,108,246,.25));border-color:rgba(127,160,255,.8)}
-.stack-glow{display:none}
-.stack-r{padding-right:var(--pad);display:grid;gap:32px}
-.stack-r h2{font-size:clamp(26px,2.8vw,44px);line-height:1.15}
-.sw{position:relative;display:block;height:1.2em;overflow:hidden}.sw span{position:absolute;left:0;top:0;white-space:nowrap;line-height:1.2}
-.layers{display:grid;border-top:1px solid var(--line)}
-.layer{display:grid;grid-template-columns:40px 1fr;gap:6px 14px;padding:15px 0;border-bottom:1px solid var(--line);opacity:.35;transition:opacity .5s}
-.layer.on{opacity:1}
-.layer i{font-style:normal;font-family:var(--m);font-size:11px;color:var(--mut2);padding-top:5px}
-.layer b{font-weight:400;font-size:clamp(19px,1.7vw,24px)}
-.layer p{grid-column:2;font-size:14px;color:var(--mut);line-height:1.5;max-height:0;overflow:hidden;transition:max-height .6s var(--e)}
-.layer.act p{max-height:80px}
-.stack-note{font-size:14px;line-height:1.6;color:var(--mut);max-width:46ch}
 /* token */
-.odo{display:flex;align-items:flex-end;font-weight:300;font-size:clamp(50px,11vw,180px);line-height:.86;letter-spacing:-.065em;font-variant-numeric:tabular-nums;margin-top:40px}
-.odo .d{display:inline-block;height:.86em;overflow:hidden}.odo .d span{display:flex;flex-direction:column}.odo .d span b{font-weight:300;height:.86em}
+.tok{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.tok-a,.tok-b{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:32px}
+.tok-a{display:grid;gap:10px;align-content:space-between}
+.odo{display:flex;align-items:flex-end;font-weight:500;font-size:clamp(46px,6vw,88px);line-height:.9;letter-spacing:-.05em;font-variant-numeric:tabular-nums}
+.odo .d{display:inline-block;height:.9em;overflow:hidden}.odo .d span{display:flex;flex-direction:column}.odo .d span b{font-weight:500;height:.9em}
 .odo .c{color:var(--mut2)}
-.odo-u{display:flex;justify-content:space-between;align-items:baseline;gap:20px;flex-wrap:wrap;margin-top:22px;border-top:1px solid var(--line);padding-top:20px}
-.odo-u h2{font-size:clamp(20px,2vw,30px)}
-.bar{display:flex;height:clamp(48px,7vh,70px);gap:2px;margin-top:clamp(46px,8vh,84px)}
-.bar i{position:relative;height:100%;background:rgba(255,255,255,.03);border-radius:2px;overflow:hidden;transition:flex .6s var(--e)}
+.odo-u{display:grid;gap:6px}.odo-u h2{font-size:22px;font-weight:500}
+.odo-u .m{color:var(--mut2)}
+.ctr{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;padding:14px 16px;border-radius:16px;background:var(--soft)}
+.ctr code{font-family:var(--m);font-size:12.5px;word-break:break-all}
+.ctr .m{color:var(--mut2)}
+.ctr .ok{display:inline-flex;gap:6px;align-items:center;color:#0E9F6E}
+.ctr .ok::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
+.ctr button{margin-left:auto;font-size:13px;font-weight:500;padding:8px 14px;border-radius:99px;background:#fff;border:1px solid var(--line2)}
+.bar{display:flex;height:64px;gap:3px;border-radius:14px;overflow:hidden}
+.bar i{position:relative;height:100%;background:var(--soft);overflow:hidden;transition:flex .6s var(--e)}
 .bar i::before{content:"";position:absolute;inset:0;background:var(--c);transform:scaleY(0);transform-origin:50% 100%}
 .bar.in i::before{transform:none;transition:transform 1.1s var(--e) calc(var(--k) * 90ms)}
 .bar i span{position:absolute;left:10px;bottom:9px;font-family:var(--m);font-size:11px;color:#fff;opacity:0;transition:opacity .4s calc(var(--k) * 90ms + .5s)}
 .bar.in i span{opacity:1}
 .bar i:hover{flex-grow:calc(var(--g) * 1.35)!important}
-.legend{display:grid;grid-template-columns:repeat(4,1fr);gap:0 30px;margin-top:28px}
-.legend div{display:flex;justify-content:space-between;align-items:baseline;padding:13px 0;border-bottom:1px solid var(--line);font-size:15px;color:var(--mut);transition:color .3s}
-.legend div i{width:8px;height:8px;border-radius:2px;background:var(--c);margin-right:10px;display:inline-block}
+.legend{display:grid;grid-template-columns:1fr 1fr;gap:0 24px;margin-top:18px}
+.legend div{display:flex;justify-content:space-between;align-items:baseline;padding:11px 0;border-bottom:1px solid var(--line);font-size:15px;color:var(--mut);transition:color .3s}
+.legend div i{width:9px;height:9px;border-radius:3px;background:var(--c);margin-right:10px;display:inline-block}
 .legend div b{font-family:var(--m);font-weight:400;font-size:12px;color:var(--mut2)}
-.legend div.hi{color:var(--txt)}
-.ctr{display:flex;flex-wrap:wrap;gap:12px 22px;align-items:center;margin-top:46px;padding:18px 22px;border:1px solid var(--line);border-radius:6px;background:var(--panel)}
-.ctr code{font-family:var(--m);font-size:13px;word-break:break-all}
-.ctr .ok{display:inline-flex;gap:8px;align-items:center;color:#3DDC97}
-.ctr .ok::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
-.ctr button{margin-left:auto;font-family:var(--m);font-size:11px;letter-spacing:.14em;text-transform:uppercase;border:1px solid var(--line2);padding:9px 14px;border-radius:4px;transition:background .3s,color .3s}
-.ctr button:hover{background:var(--txt);color:var(--bg)}
+.legend div.hi{color:var(--ink)}
+
 /* seguridad */
-.certs{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:6px;overflow:hidden}
-.cert{position:relative;padding:30px;display:flex;flex-direction:column;gap:22px;background:var(--bg2);transition:background .4s}
-.cert:hover{background:#12151A}
-.cert::before{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(380px circle at var(--gx,50%) var(--gy,0%),rgba(127,160,255,.07),transparent 60%);opacity:0;transition:opacity .4s}
-.cert:hover::before{opacity:1}
-.cert-top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
-.seal{width:72px;height:72px;position:relative;color:var(--mut);flex:0 0 auto}
-.seal svg{width:100%;height:100%;animation:spin 24s linear infinite}
-.seal b{position:absolute;inset:0;display:grid;place-items:center;font-size:17px;font-weight:400;color:var(--txt)}
-@keyframes spin{to{transform:rotate(360deg)}}
-.cert h3{font-size:clamp(22px,2vw,28px);line-height:1.05}
-.cert .sub{margin-top:8px;color:var(--mut2)}
-.cert p{font-size:15px;line-height:1.6;color:var(--mut)}
+.certs{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.cert{position:relative;background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:28px;display:flex;flex-direction:column;gap:18px}
+.cert-top{display:flex;justify-content:space-between;align-items:center}
+.cert .badge{display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 12px;border-radius:99px;background:#E7F7EF;color:#0E7A55;font-size:12.5px;font-weight:500}
+.cert .badge::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
+.cert .n{font-family:var(--m);font-size:12px;color:var(--mut2)}
+.cert h3{font-size:24px;letter-spacing:-.03em}
+.cert .sub{font-size:14px;color:var(--mut2);margin-top:-10px}
+.cert p{font-size:15px;line-height:1.55;color:var(--mut)}
 .cert dl{display:grid;grid-template-columns:auto 1fr;border-top:1px solid var(--line)}
-.cert dt,.cert dd{padding:11px 0;border-bottom:1px solid var(--line);font-size:14px}
-.cert dt{font-family:var(--m);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--mut2);padding-top:14px}
-.cert dd{text-align:right}
-.cert .btn{align-self:flex-start;height:38px;font-size:13px;border:1px solid var(--line2)}
-.sec-q{margin-top:40px;display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;color:var(--mut);border-top:1px solid var(--line);padding-top:22px}
-/* productos */
-.build{position:relative;background:var(--bg)}
-.build-st{position:relative;height:100vh;height:100svh;overflow:hidden;display:flex;flex-direction:column;justify-content:center}
-.build-h{padding:0 var(--pad);display:flex;justify-content:space-between;align-items:end;gap:30px;margin-bottom:40px;max-width:var(--max);margin-inline:auto;width:100%}
-.build-h h2{font-size:clamp(32px,4vw,60px);line-height:1.02;margin-top:22px}
-.track{display:flex;gap:16px;padding:0 var(--pad);width:max-content}
-.pc{position:relative;width:min(70vw,960px);flex:0 0 auto;display:grid;grid-template-columns:1.35fr 1fr;border:1px solid var(--line);border-radius:6px;overflow:hidden;background:var(--panel)}
-.pc-art{position:relative;aspect-ratio:1.45;overflow:hidden;background:#0B0D10}
-.pc-art img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:left top;transform:scale(1.15)}
-.pc-b{padding:clamp(22px,2.4vw,34px);display:flex;flex-direction:column;gap:16px}
-.pc-b h3{font-size:clamp(26px,2.4vw,38px);line-height:1}
-.pc-b p{font-size:15px;line-height:1.6;color:var(--mut)}
-.st{display:inline-flex;gap:10px;align-items:center;color:var(--mut)}
-.st::before{content:"";width:6px;height:6px;border-radius:50%;background:#3DDC97}
-.st.dev::before{background:#F5B83D}
-.prog{height:2px;background:var(--line);overflow:hidden}.prog b{display:block;height:100%;width:var(--v);background:var(--txt);transform-origin:0 50%}
-.pc-b .btn{margin-top:auto;align-self:flex-start}
-.sun{position:absolute;inset:0;display:grid;place-items:center;background:radial-gradient(circle at 50% 36%,rgba(127,160,255,.14),transparent 55%),#0B0D10}
-.sun .orb{position:absolute;top:15%;width:70px;height:70px;border-radius:50%;background:radial-gradient(circle,#fff,#DCE6FF 45%,transparent 70%)}
-.sun .panels{position:absolute;left:8%;right:8%;bottom:10%;height:46%;display:grid;grid-template-columns:repeat(6,1fr);gap:6px;transform:perspective(600px) rotateX(55deg);transform-origin:50% 100%}
-.sun .panels i{border:1px solid rgba(127,160,255,.35);background:linear-gradient(160deg,#1C2740,#0E1422);border-radius:2px}
-/* prensa */
-.press{padding-block:clamp(100px,15vh,160px);overflow:hidden}
-.press .hd2{margin-bottom:50px;display:flex;justify-content:space-between;align-items:end;gap:20px;flex-wrap:wrap}
-.press h2{font-size:clamp(32px,4vw,60px);line-height:1.02;margin-top:22px}
-.mq{display:flex;width:max-content;animation:tape 70s linear infinite}
-.press:hover .mq{animation-play-state:paused}
-.hl{display:flex;align-items:center;gap:24px;padding:18px 40px;border-right:1px solid var(--line);white-space:nowrap}
-.hl b{font-family:var(--m);font-weight:400;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--mut)}
-.hl span{font-size:clamp(22px,2.6vw,40px);letter-spacing:-.035em;transition:color .3s}
-.hl:hover span{color:var(--acc2)}
+.cert dt,.cert dd{padding:10px 0;border-bottom:1px solid var(--line);font-size:14px}
+.cert dt{color:var(--mut2)}.cert dd{text-align:right;font-weight:500}
+.cert .btn{margin-top:auto;align-self:flex-start}
+
 /* ruta */
-.road{display:grid;grid-template-columns:1fr 1.25fr;gap:60px}
-.road-l{position:sticky;top:120px;align-self:start;display:grid;gap:26px}
-.road-l h2{font-size:clamp(32px,4vw,60px);line-height:1.02}
-.road-pct{font-weight:300;font-size:clamp(64px,8vw,130px);letter-spacing:-.065em;line-height:.9;font-variant-numeric:tabular-nums}
-.road-pct small{font-size:.26em;color:var(--mut);letter-spacing:0}
-.phases{position:relative;padding-left:44px}
-.rail{position:absolute;left:8px;top:6px;bottom:0;width:1px;background:var(--line)}
-.rail b{position:absolute;inset:0;background:var(--txt);transform-origin:50% 0;transform:scaleY(0)}
-.ph{position:relative;padding-bottom:76px}
-.ph::before{content:"";position:absolute;left:-40px;top:8px;width:9px;height:9px;border-radius:50%;background:var(--bg);border:1px solid var(--mut2);transition:all .4s}
-.ph.on::before{background:var(--txt);border-color:var(--txt)}
-.ph .m{color:var(--mut)}.ph.done .m b{color:#3DDC97;font-weight:400}
-.ph h3{font-size:clamp(30px,3.2vw,50px);margin:14px 0}
-.ph p{font-size:16px;line-height:1.6;color:var(--mut);max-width:52ch}
-.ph ul{list-style:none;margin-top:22px;display:grid;border-top:1px solid var(--line)}
-.ph li{display:flex;gap:14px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line);font-size:15px;color:var(--mut)}
-.ph li svg{width:15px;height:15px;flex:0 0 auto;color:var(--txt)}
-.ph.plan h3,.ph.plan p{opacity:.5}
-/* contacto */
-.join{padding-block:clamp(100px,15vh,170px)}
-.join h2{font-size:clamp(38px,6vw,100px);line-height:.98;letter-spacing:-.05em;max-width:14ch;margin:30px 0 56px}
-.jl{display:grid;border-top:1px solid var(--line)}
-.jl a{display:grid;grid-template-columns:1fr auto auto;gap:24px;align-items:center;padding:28px 0;border-bottom:1px solid var(--line);transition:padding .5s var(--e)}
-.jl a:hover{padding-left:14px}
-.jl h3{font-size:clamp(26px,3vw,46px)}
-.jl span{color:var(--mut)}
-.jl i{font-style:normal;font-size:24px;transition:transform .5s var(--e)}.jl a:hover i{transform:rotate(-45deg)}
+.phs{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.ph{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:28px;display:grid;gap:14px;align-content:start}
+.ph .st{display:inline-flex;align-self:start;align-items:center;gap:8px;height:28px;padding:0 12px;border-radius:99px;font-size:12.5px;font-weight:500;background:#E7F7EF;color:#0E7A55;justify-self:start}
+.ph.plan .st{background:var(--soft);color:var(--mut)}
+.ph .n{font-family:var(--m);font-size:12px;color:var(--mut2)}
+.ph h3{font-size:30px;letter-spacing:-.04em}
+.ph p{font-size:15px;line-height:1.55;color:var(--mut)}
+.ph ul{list-style:none;display:grid;border-top:1px solid var(--line)}
+.ph li{display:flex;gap:12px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line);font-size:14.5px;color:#2A3244}
+.ph li svg{width:15px;height:15px;flex:0 0 auto;color:var(--blue)}
+.road-bar{margin-top:22px;background:var(--card);border:1px solid var(--line);border-radius:99px;padding:8px;display:flex;align-items:center;gap:14px}
+.road-bar i{flex:1;height:10px;border-radius:10px;background:var(--soft);overflow:hidden}.road-bar i b{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--blue2),var(--blue));border-radius:10px;transition:width 1.6s var(--e)}
+.road-bar span{font-family:var(--m);font-size:12px;color:var(--mut);padding-right:10px;white-space:nowrap}
+
+/* prensa */
+.news{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.nw{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:24px;display:grid;gap:40px;align-content:space-between;transition:transform .5s var(--e),box-shadow .5s var(--e)}
+.nw:hover{transform:translateY(-4px);box-shadow:0 30px 60px -40px rgba(12,30,80,.35)}
+.nw b{font-family:var(--m);font-weight:400;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--blue)}
+.nw h3{font-size:20px;line-height:1.25;letter-spacing:-.025em;font-weight:500}
+.nw span{font-size:14px;color:var(--mut2)}
+
+/* cierre oscuro */
+.cta{margin:0 var(--pad);border-radius:32px;overflow:hidden;position:relative;background:linear-gradient(160deg,#0E1A3A 0%,#070B16 70%);color:#fff;padding:clamp(56px,9vh,100px) clamp(24px,5vw,72px);display:grid;grid-template-columns:1.2fr 1fr;gap:40px;align-items:end}
+.cta::after{content:"";position:absolute;right:-10%;top:-40%;width:60%;aspect-ratio:1;border-radius:50%;background:radial-gradient(closest-side,rgba(26,91,240,.45),transparent);pointer-events:none}
+.cta h2{font-size:clamp(34px,4.6vw,64px);line-height:1.02;letter-spacing:-.045em;position:relative;z-index:1}
+.cta-l{display:grid;gap:10px;position:relative;z-index:1}
+.cta-l a{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:18px 22px;border-radius:18px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);font-size:17px;font-weight:500;transition:background .3s}
+.cta-l a:hover{background:rgba(255,255,255,.12)}
+.cta-l a span{font-size:13px;font-weight:400;color:rgba(255,255,255,.6)}
+
 /* pie */
-.ft{padding-block:clamp(80px,12vh,120px) 30px;background:var(--bg);border-top:1px solid var(--line)}
+.ft{padding-block:clamp(70px,10vh,110px) 30px}
 .ft-cols{display:grid;grid-template-columns:1.4fr repeat(5,1fr);gap:30px}
-.ft-cols h4{font-family:var(--m);font-weight:400;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--mut2);margin-bottom:16px}
-.ft-cols a{display:block;font-size:14px;padding:5px 0;color:var(--mut);transition:color .3s}.ft-cols a:hover{color:var(--txt)}
+.ft-cols h4{font-size:13px;font-weight:500;color:var(--ink);margin-bottom:14px}
+.ft-cols a{display:block;font-size:14px;padding:5px 0;color:var(--mut);transition:color .3s}.ft-cols a:hover{color:var(--ink)}
 .ft-cols p{font-size:14px;color:var(--mut);line-height:1.55;max-width:28ch;margin-top:14px}
-.ft-big{margin-top:clamp(60px,10vh,110px);display:flex;justify-content:space-between;font-weight:500;font-size:clamp(64px,18.6vw,300px);line-height:.8;letter-spacing:-.06em;color:#15181D;user-select:none;overflow:hidden}
-.ft-big span{display:inline-block}
-.ft-end{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;margin-top:26px;padding-top:20px;border-top:1px solid var(--line);color:var(--mut2)}
-/* cursor */
-.cur{position:fixed;left:0;top:0;z-index:400;pointer-events:none;width:8px;height:8px;margin:-4px 0 0 -4px;border-radius:50%;background:#fff;mix-blend-mode:difference;display:grid;place-items:center;transition:width .45s var(--e),height .45s var(--e),margin .45s var(--e),opacity .3s}
-.cur span{font-family:var(--m);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#000;opacity:0;transition:opacity .25s}
-.cur.big{width:76px;height:76px;margin:-38px 0 0 -38px}.cur.big span{opacity:1}
-.cur.lnk{width:34px;height:34px;margin:-17px 0 0 -17px}
-.cur.off{opacity:0}
-@media (hover:none),(pointer:coarse){.cur{display:none}}
+.ft-end{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;margin-top:56px;padding-top:22px;border-top:1px solid var(--line);font-size:13px;color:var(--mut2)}
 
 /* responsive */
-@media (max-width:1100px){.nav{display:none}.hd-cta .menu-b{display:inline-flex}}
-@media (max-width:1000px){
-  .hero{height:420vh}
-  .hero-st .wrap{grid-template-columns:1fr;grid-template-rows:auto 1fr;align-content:start;gap:18px;padding-top:84px;padding-bottom:20px}
-  .hero-l{gap:18px}.hero-l p{font-size:15px}
-  .hero h1{font-size:clamp(34px,9vw,52px)}
-  .hero-facts{display:none}
-  .view{height:auto;min-height:0}
-  .stats{grid-template-columns:1fr 1fr}.stat:nth-child(2){border-right:0}.stat:nth-child(-n+2){border-bottom:1px solid var(--line)}
-  .sec-h{grid-template-columns:1fr}.sec-h p{justify-self:start}
-  .row{grid-template-columns:36px 1fr 40px}.row p{grid-column:2}.row .go{grid-row:1;grid-column:3}
-  .stack-st{grid-template-columns:1fr;grid-template-rows:42% 58%;align-items:start}
-  .stack-r{padding:0 var(--pad);gap:14px}.plates{width:min(54vw,270px)}
-  .layer p{display:none}.layer{padding:10px 0}
-  .legend{grid-template-columns:1fr 1fr}
-  .certs{grid-template-columns:1fr}
-  .pc{width:calc(100vw - 2 * var(--pad));grid-template-columns:1fr}.pc-art{aspect-ratio:1.6}
-  .road{grid-template-columns:1fr}.road-l{position:static}
+@media (max-width:1100px){.nav{display:none}.hd-cta .menu-b{display:inline-flex}.why{grid-template-columns:1fr 1fr}.news{grid-template-columns:1fr 1fr}}
+@media (max-width:900px){
+  .hero{padding-top:110px}
+  .stage{height:420vh}
+  .stage-st{top:80px;height:calc(100svh - 100px)}
+  .figs{grid-template-columns:1fr 1fr}
+  .prods{grid-template-columns:1fr}.prod.big{grid-row:auto}
+  .tok{grid-template-columns:1fr}
+  .certs,.phs{grid-template-columns:1fr}
+  .cta{grid-template-columns:1fr}
   .ft-cols{grid-template-columns:1fr 1fr}.ft-cols>div:first-child{grid-column:1/-1}
-  .tx{height:240vh!important}
-  .tx-t b{font-size:clamp(28px,8.4vw,40px)}
-  .tx-top{top:18%}.tx-bot{bottom:16%}
+  .tx{height:240vh!important}.tx-st{top:80px;height:calc(100svh - 100px)}
+  .st-top{flex-direction:column;align-items:flex-start}
 }
-@media (max-width:560px){.hd-cta .btn.s:not(.menu-b){display:none}.bar i span{display:none}.jl a{grid-template-columns:1fr auto}.jl span{display:none}.grid-bg{grid-template-columns:repeat(3,1fr)}}
-@media (prefers-reduced-motion:reduce){.tape-t,.mq,.seal svg{animation:none}.snap-in{animation:none}}
-
-/* ══ MAQUETA ═══════════════════════════════════════════════════════════════════
-   El segundo diseno: la economia de los activos reales como una maqueta de
-   arquitectura. Negro calido, tipografia sans con acentos en cursiva serif,
-   capitulos numerados y la maqueta a sangre en la portada. */
-:root{--bg:#0B0B0C;--bg2:#101011;--panel:#141415;--txt:#EDEBE7;--mut:#8F8C87;--mut2:#5F5C58;--acc:#3B6CF6;--acc2:#8FA9FF;
-  --serif:'Instrument Serif',Georgia,'Times New Roman',serif}
-em,.it{font-family:var(--serif);font-style:italic;font-weight:400;letter-spacing:-.01em}
-.grid-bg i{border-left-color:rgba(237,235,231,.025)}.grid-bg i:last-child{border-right-color:rgba(237,235,231,.025)}
-.hd.solid{background:rgba(11,11,12,.8)}
-.btn.p{background:var(--txt);color:#0B0B0C;border-radius:99px}.btn.s{border-radius:99px}
-.btn{height:46px;padding:0 22px}.btn.sm{height:36px;padding:0 16px}
-
-.hero{height:480vh}
-.hero-st{position:sticky;top:0;height:100vh;height:100svh;overflow:hidden;background:radial-gradient(70% 60% at 62% 40%,#17171A 0%,#0B0B0C 70%)}
-#fx{position:absolute;inset:0;width:100%;height:100%}
-.hero-top{position:absolute;left:0;right:0;top:110px;display:flex;justify-content:space-between;color:var(--mut)}
-.hero-top b{font-weight:400;color:var(--txt)}
-.hero-ch{display:flex;gap:6px;align-items:center}
-.v-name{display:inline-block;overflow:hidden;height:1.3em;vertical-align:bottom}.v-name span{display:block}
-.hero-c{position:absolute;left:0;right:0;bottom:clamp(90px,13vh,130px);display:grid;grid-template-columns:1.3fr 1fr;gap:40px;align-items:end;pointer-events:none}
-.hero-c a{pointer-events:auto}
-.hero h1{font-size:clamp(54px,9.4vw,170px);line-height:.88;letter-spacing:-.055em;font-weight:400;color:var(--txt)}
-.hero h1 em{font-size:1.06em;letter-spacing:-.02em;color:var(--txt)}
-.hero-side{display:grid;gap:24px;justify-items:start;max-width:420px;justify-self:end}
-.hero-side p{font-size:16px;line-height:1.6;color:var(--mut)}
-.hero-cta{display:flex;gap:10px;flex-wrap:wrap}
-.hero-bot{position:absolute;left:0;right:0;bottom:30px;display:flex;justify-content:space-between;align-items:center;color:var(--mut2)}
-.hero-spec{display:flex;gap:26px}.hero-spec b{font-weight:400;color:var(--txt)}
-.v-ticks{display:flex;gap:4px}.v-ticks i{width:26px;height:2px;background:rgba(255,255,255,.12);position:relative;overflow:hidden}
-.v-ticks i b{position:absolute;inset:0;background:var(--txt);transform-origin:0 50%;transform:scaleX(var(--k,0))}
-
-/* capitulos: el numero grande en serif */
-.lbl{color:var(--mut)}.lbl b{font-family:var(--serif);font-style:italic;font-size:22px;letter-spacing:0;text-transform:none;color:var(--txt)}
-.sec-h h2,.build-h h2,.press h2,.road-l h2,.join h2,.stack-r h2{font-weight:400}
-.sec-h h2::first-line{}
-.thesis p{font-size:clamp(32px,4.8vw,80px);letter-spacing:-.045em}
-.thesis .w.sig{font-family:var(--serif);font-style:italic;color:var(--txt)}
-.stat b{font-family:var(--serif);font-style:italic;font-weight:400;letter-spacing:-.02em;font-size:clamp(52px,6vw,96px)}
-.odo{font-family:var(--serif);font-style:normal;font-weight:400;letter-spacing:-.03em}
-.odo .d span b{font-weight:400}
-.road-pct{font-family:var(--serif);font-style:italic;font-weight:400;letter-spacing:-.02em}
-.ph h3,.cert h3,.pc-b h3,.row h3,.jl h3{font-weight:400}
-.row h3{letter-spacing:-.03em}
-.ft-big{font-family:var(--serif);font-style:italic;font-weight:400;letter-spacing:-.03em;color:#1A1A1C;font-size:clamp(80px,22vw,380px);justify-content:center;gap:.02em}
-.tx-st{background:radial-gradient(80% 70% at 50% 50%,#161618 0%,#0B0B0C 75%)}
-.tx-t b{font-weight:400}.tx-t b em{font-size:1.08em}
-.plate.on{background:linear-gradient(135deg,rgba(59,108,246,.9),rgba(59,108,246,.5))}
-.certs{border-radius:2px}.pc,.ctr,.view{border-radius:2px}
-@media (max-width:1000px){
-  .hero{height:430vh}
-  .hero-top{top:80px}
-  .hero-c{grid-template-columns:1fr;gap:20px;bottom:74px}
-  .hero-side{justify-self:start}
-  .hero h1{font-size:clamp(52px,15vw,84px)}
-  .hero-spec{display:none}
+@media (max-width:560px){
+  .hd-cta .btn.s{display:none}.hd-cta .btn.s.menu-b{display:inline-flex}
+  .why,.news{grid-template-columns:1fr}
+  .chipset span{height:28px;padding:0 10px;font-size:12px}
+  .st-cap b{font-size:18px}.st-cap span{display:none}
+  .bar i span{display:none}
+  .legend{grid-template-columns:1fr}
+  .hero-cta .btn{height:44px;padding:0 18px;font-size:14px}
 }
-@media (max-width:560px){.hero-top>span:first-child{display:none}.hero-side p{font-size:15px}.hero-cta .btn{height:42px;padding:0 16px;font-size:13.5px}}
-
-/* ══ SOBRIO ═══════════════════════════════════════════════════════════════════
-   Una sola familia (Switzer) y DM Mono para los datos. Nada de cursivas ni
-   serif; botones rectos; el titular se sostiene solo con peso y tamano. */
-em,.it{font-family:var(--f)!important;font-style:normal!important;font-weight:400!important;letter-spacing:inherit!important;color:var(--mut)!important}
-.hero h1 em{font-size:1em;color:var(--mut)!important}
-.btn.p,.btn.s{border-radius:4px}
-.btn.p{background:var(--txt);color:#0B0B0C}
-.lbl b{font-family:var(--m)!important;font-style:normal!important;font-size:11px!important;letter-spacing:.14em!important;color:var(--txt)}
-.thesis .w.sig{font-family:var(--f)!important;font-style:normal!important;color:var(--acc2)!important}
-.stat b,.road-pct,.odo{font-family:var(--f)!important;font-style:normal!important;font-weight:300!important;letter-spacing:-.05em!important}
-.odo .d span b{font-weight:300}
-.ft-big{font-family:var(--f)!important;font-style:normal!important;font-weight:500!important;letter-spacing:-.06em!important;color:#161618;justify-content:space-between;font-size:clamp(64px,18.6vw,300px)}
-.hero h1{font-weight:400;letter-spacing:-.05em;font-size:clamp(50px,8.4vw,150px);line-height:.9}
-.tx-t b em{font-size:1em}
-
-/* ══ FUSION ═══════════════════════════════════════════════════════════════════
-   La identidad de la web original (azul noche, cubos azules y blancos,
-   cabecera negra con iconos, boton azul), el aire de una fintech premium con
-   dos bandas claras de papel, la portada cinematografica a pantalla completa
-   y los datos verificables de un protocolo institucional. */
-:root{--bg:#0A0D14;--bg2:#0D1017;--panel:#10141D;--line:rgba(255,255,255,.08);--line2:rgba(255,255,255,.14);
-  --txt:#E9EEF7;--mut:#8D96A8;--mut2:#5F6778;--acc:#1A5BF0;--acc2:#4384E8;
-  --btnb:linear-gradient(176deg,#1A54F0 0%,#0E3AC4 46%,#071F84 100%);
-  --paper:#F4F2ED;--pink:#0A0D14;--pmut:#5C6270;--pline:rgba(10,13,20,.1)}
-html,body{background:var(--bg)}
-.grid-bg{display:none}
-/* cabecera de la original: barra negra flotante, iconos y boton azul */
-.hd{inset:14px 14px auto 14px}
-.hd .wrap{height:60px;max-width:none;padding:0 8px 0 18px;background:rgba(0,0,0,.78);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,.1);border-radius:2px;box-shadow:0 14px 40px -26px rgba(0,0,0,.9)}
-.hd.solid{background:none;box-shadow:none;backdrop-filter:none}
-.hd.away{transform:translateY(calc(-100% - 20px))}
-.nav{gap:2px;margin-inline:auto}
-.nav a{display:flex;align-items:center;gap:8px;padding:8px 10px;font-size:13.5px;color:rgba(226,236,255,.94)}
-.chip{display:inline-grid;place-items:center;width:20px;height:20px;border:1px solid rgba(255,255,255,.11);border-radius:6px;background:rgba(255,255,255,.075)}
-.chip svg{width:12px;height:12px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;opacity:.85}
-.nav a:hover .chip{background:rgba(26,91,240,.35);border-color:rgba(70,130,255,.5)}
-.btn{border-radius:6px!important}
-.btn.p{background:var(--btnb)!important;color:#fff!important;border:1px solid rgba(70,130,255,.34);box-shadow:0 0 0 1px rgba(20,80,230,.24),0 10px 30px -14px rgba(20,80,230,.6)}
-.btn.p:hover{box-shadow:0 0 0 1px rgba(20,80,230,.4),0 14px 36px -12px rgba(20,80,230,.8)}
-.btn.s{border:1px solid rgba(226,236,255,.22);color:var(--txt)}
-/* portada: escena a pantalla completa en azul noche */
-.hero-st{background:radial-gradient(60% 55% at 66% 38%,#13203F 0%,#0A0D14 72%)}
-.hero h1{color:#fff}.hero h1 em{color:#8FA9D8!important}
-.hero-top{top:104px}
-.hero-top b,.hero-spec b{color:#fff}
-.hero-side p{color:#AEB7C8}
-.v-ticks i b{background:#fff}
-/* entreactos en azul noche */
-.tx-st{background:radial-gradient(80% 70% at 50% 50%,#0F1A33 0%,#0A0D14 75%)}
-.stats{background:var(--bg)}
-.stat b{color:#fff}
-.panel.alt{background:var(--bg2)}
-.stack{background:var(--bg2)}
-.plate.on{background:linear-gradient(135deg,#1A5BF0,#0E3AC4);border-color:#3E7BFF;box-shadow:0 30px 80px -30px rgba(26,91,240,.7)}
-.uni .plate{background:linear-gradient(135deg,rgba(26,91,240,.7),rgba(14,58,196,.45));border-color:#3E7BFF}
-.thesis .w.sig{color:var(--acc2)!important}
-.bar i::before{border-radius:2px}
-.hl:hover span{color:var(--acc2)}
-.ft-big{color:#121827!important}
-/* ── bandas de papel: la sobriedad de una fintech, como las bandas claras de la original ── */
-.paper{background:var(--paper)!important;color:var(--pink)}
-.paper .lbl{color:var(--pmut)}.paper .lbl b{color:var(--pink)}.paper .lbl::after{background:var(--pline)}
-.paper h2,.paper h3{color:var(--pink)}
-.paper .sec-h p,.paper p{color:var(--pmut)}
-.paper .certs{background:var(--pline);border-color:var(--pline)}
-.paper .cert{background:#FFFEFA}
-.paper .cert:hover{background:#fff}
-.paper .cert::before{background:radial-gradient(380px circle at var(--gx,50%) var(--gy,0%),rgba(26,91,240,.07),transparent 60%)}
-.paper .cert dt{color:var(--pmut)}.paper .cert dd{color:var(--pink)}
-.paper .cert dl,.paper .cert dt,.paper .cert dd{border-color:var(--pline)}
-.paper .seal{color:var(--acc)}.paper .seal b{color:var(--pink)}
-.paper .cert .btn.s,.paper .btn.s{border-color:rgba(10,13,20,.2);color:var(--pink)}
-.paper .sec-q{color:var(--pmut);border-color:var(--pline)}
-.paper .road-pct small{color:var(--pmut)}
-.paper .rail{background:var(--pline)}.paper .rail b{background:var(--acc)}
-.paper .ph::before{background:var(--paper);border-color:#9AA0AC}.paper .ph.on::before{background:var(--acc);border-color:var(--acc)}
-.paper .ph .m{color:var(--pmut)}.paper .ph.done .m b{color:#0E9F6E}
-.paper .ph ul{border-color:var(--pline)}.paper .ph li{border-color:var(--pline);color:#3A404C}.paper .ph li svg{color:var(--acc)}
-.paper .cur{background:#000}
-@media (max-width:1100px){.hd .wrap{padding:0 8px 0 14px}}
-
-.hero-st .hero-top,.hero-st .hero-bot{height:auto;display:flex;padding-top:0;padding-bottom:0;grid-template-columns:none}
-.hero-st .hero-c{height:auto;display:grid;grid-template-columns:1.3fr 1fr;padding-top:0;padding-bottom:0;align-content:end}
-@media (max-width:1000px){.hero-st .hero-c{grid-template-columns:1fr;grid-template-rows:none;gap:20px}}
+@media (prefers-reduced-motion:reduce){.snap-in{animation:none}}
 </style>
 </head>
 <body>
@@ -483,130 +277,108 @@ html,body{background:var(--bg)}
 </svg>
 
 
-<div class="grid-bg" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></div>
-<div class="pre" id="pre" aria-hidden="true"><div class="pre-in"><svg class="pre-logo" id="preLogo"><use href="#logo"/></svg><span class="pre-n" id="preN">000</span></div></div>
-<div class="cur off" id="cur" aria-hidden="true"><span id="curT">View</span></div>
+<div class="pre" id="pre" aria-hidden="true"><svg id="preLogo"><use href="#logo"/></svg></div>
 
 <header class="hd" id="hd"><div class="wrap">
   <a class="brand" href="#top"><svg aria-hidden="true"><use href="#logo"/></svg>Nereum</a>
   <nav class="nav" aria-label="Main">
-    <a href="#thesis">Thesis<i class="chip" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4.6 6.4h14.8v8.8h-8.1L7.4 18.6v-3.4H4.6Z"/></svg></i></a>
-    <a href="#stack">Protocol<i class="chip" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 4 4 8l8 4 8-4-8-4Z"/><path d="M4 14l8 4 8-4"/></svg></i></a>
-    <a href="#token">Token<i class="chip" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="7.6"/><circle cx="12" cy="12" r="3"/></svg></i></a>
-    <a href="#security">Security<i class="chip" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3.5 5.2 6.4v4.8c0 4 2.8 6.8 6.8 7.6 4-.8 6.8-3.6 6.8-7.6V6.4L12 3.5Z"/></svg></i></a>
-    <a href="#build">Products<i class="chip" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9.2 8 5 12l4.2 4"/><path d="M14.8 8 19 12l-4.2 4"/></svg></i></a>
-    <a href="#roadmap">Roadmap<i class="chip" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4.6 18.4h14.8"/><path d="M8 18.4v-4.2M12 18.4v-8.6M16 18.4v-6.2"/></svg></i></a>
+    <a href="#products">Products</a><a href="#why">Protocol</a><a href="#token">Token</a><a href="#security">Security</a><a href="#roadmap">Roadmap</a>
   </nav>
   <div class="hd-cta">
-    <a class="btn s sm" href="https://nereum.xyz/explorer">Explorer</a>
-    <a class="btn p sm" href="https://nereum.xyz/whitepaper">Whitepaper</a>
+    <a class="btn s sm" href="https://nereum.xyz/whitepaper">Whitepaper</a>
+    <a class="btn p sm" href="https://nereum.xyz/explorer">Open app</a>
     <button class="btn s sm menu-b" id="menuB" type="button" aria-expanded="false" aria-controls="sheet">Menu</button>
   </div>
 </div></header>
 <div class="sheet" id="sheet">
-  <a href="#thesis">Thesis<i>01</i></a><a href="#stack">Protocol<i>02</i></a><a href="#token">Token<i>03</i></a><a href="#security">Security<i>04</i></a>
-  <a href="#build">Products<i>05</i></a><a href="#roadmap">Roadmap<i>06</i></a><a href="https://nereum.xyz/whitepaper">Whitepaper<i>&rarr;</i></a>
+  <a href="#products">Products<i>01</i></a><a href="#why">Protocol<i>02</i></a><a href="#token">Token<i>03</i></a><a href="#security">Security<i>04</i></a>
+  <a href="#roadmap">Roadmap<i>05</i></a><a href="https://nereum.xyz/whitepaper">Whitepaper<i>&rarr;</i></a>
 </div>
 
 <main>
 <!-- ═══ PORTADA ═══ -->
 <section class="hero" id="top">
-  <div class="hero-st">
-    <canvas id="fx" aria-hidden="true"></canvas>
-    <div class="hero-top wrap m" aria-hidden="true">
-      <span>Tokenized asset classes</span>
-      <span class="hero-ch"><b id="vN">01</b> / 05 — <span class="v-name"><span id="vName">The asset itself</span></span></span>
+  <div class="wrap hero-t">
+    <span class="eyebrow"><i></i>Testnet live · 75% to mainnet</span>
+    <h1 class="split-h"><span class="ln"><span>Real-world assets,</span></span><span class="ln"><span class="bl">settled onchain.</span></span></h1>
+    <p>Nereum is the settlement layer for real-world assets. Issuance, policy, access and liquidity in one protocol, registered in the United States and independently audited.</p>
+    <div class="hero-cta">
+      <a class="btn b" href="https://nereum.xyz/whitepaper">Read the whitepaper <span class="arr">&rarr;</span></a>
+      <a class="btn s" href="https://nereum.xyz/explorer">Open the explorer</a>
     </div>
-    <div class="hero-c wrap">
-      <h1 class="split-h"><span class="ln"><span>Real assets,</span></span><span class="ln"><span><em>settled.</em></span></span></h1>
-      <div class="hero-side">
-        <p>Nereum is the settlement layer for real-world assets. Issuance, policy, access and liquidity in one protocol, registered in the United States and independently audited.</p>
-        <div class="hero-cta">
-          <a class="btn p" href="https://nereum.xyz/whitepaper">Read the whitepaper <span class="arr">&rarr;</span></a>
-          <a class="btn s" href="https://nereum.xyz/explorer">Open the explorer</a>
-        </div>
+  </div>
+  <div class="wrap stage" id="stage">
+    <div class="stage-st"><div class="stage-card">
+      <canvas id="fx" data-light aria-hidden="true"></canvas>
+      <div class="st-top">
+        <div class="chipset" id="chips"><span class="on">The asset</span><span>Real estate</span><span>Commodities</span><span>Energy</span><span>Private credit</span></div>
+        <span class="st-n"><b id="vN">01</b> / 05</span>
       </div>
-    </div>
-    <div class="hero-bot wrap m" aria-hidden="true">
-      <div class="v-ticks"><i><b></b></i><i><b></b></i><i><b></b></i><i><b></b></i><i><b></b></i></div>
-      <span class="hero-spec"><span>Supply <b>160M</b></span><span>Audit <b>0 critical</b></span><span>KYC <b>4/4</b></span></span>
-    </div>
-  </div>
-</section>
-
-<div class="tape" aria-label="Compatible with">
-  <div class="tape-t" id="tape">
-    <span class="tape-i k">Compatible with</span>
-    <span class="tape-i"><img src="../img/marcas/ethereum.svg" alt="">Ethereum</span>
-    <span class="tape-i"><img src="../img/marcas/bnb.svg" alt="">BNB Chain</span>
-    <span class="tape-i"><img src="../img/marcas/metamask.svg" alt="">MetaMask</span>
-    <span class="tape-i"><img src="../img/marcas/trust.png" alt="">Trust Wallet</span>
-    <span class="tape-i"><img src="../img/marcas/dexscreener.svg" alt="">DexScreener</span>
-    <span class="tape-i"><img src="../img/marcas/bnb.svg" alt="">Binance Wallet</span>
-    <span class="tape-i"><img src="../img/marcas/venture.svg" alt="">Venture Capital</span>
-  </div>
-</div>
-
-
-<section class="tx" id="tx-tunel" data-tx="tunel" style="height:300vh" aria-hidden="true">
-  <div class="tx-st"><canvas class="tx-cv"></canvas><div class="tx-vig"></div>
-    <div class="tx-t"><span class="m">Nereum</span><b>Every asset,<br><em>one ledger.</em></b></div>
-    <div class="tx-go m"><i></i>Scroll</div>
-    <div class="tx-hud m"><span class="tx-n"></span><i><b></b></i></div>
-  </div>
-</section>
-
-<section class="stats" aria-label="Key figures">
-  <div class="stat"><span class="m">Total supply</span><b data-n="160" data-s="M">160M</b><span>NRM, fixed at genesis</span></div>
-  <div class="stat"><span class="m">Audit findings</span><b data-n="0" data-s="">0</b><span>Critical or high · Halborn</span></div>
-  <div class="stat"><span class="m">Signers verified</span><b data-n="4" data-s="/4">4/4</b><span>KYC by Assure DeFi</span></div>
-  <div class="stat"><span class="m">Chain to mainnet</span><b data-n="75" data-s="%">75%</b><span>Testnet live today</span></div>
-</section>
-
-
-<!-- ═══ TESIS ═══ -->
-<section class="panel sec thesis" id="thesis"><div class="wrap">
-  <div class="lbl"><b>01</b>The thesis</div>
-  <p id="thesisP">When value moves, the rules have to move with it. On <em>Nereum</em> the rules travel with the asset and hold at machine speed — for desks and contracts alike.</p>
-  <div class="thesis-f m"><span>Nothing to install</span><span>Nothing to migrate</span><span>Nothing hidden</span></div></div></section>
-
-
-<!-- ═══ GARANTIAS ═══ -->
-<section class="panel alt sec" id="guarantees"><div class="wrap">
-  <div class="sec-h"><div><div class="lbl"><b>02</b>Guarantees</div><h2 class="split">Four guarantees, written into the protocol.</h2></div>
-    <p>Properties of the chain, enforced before anything is written.</p></div>
-  <div class="rows">
-    <div class="row"><span class="n">01</span><h3>All-or-nothing settlement</h3><p>Every leg settles, or none does.</p><span class="go" aria-hidden="true">&rarr;</span></div>
-    <div class="row"><span class="n">02</span><h3>Controlled visibility</h3><p>A public register; the policy travels with the asset.</p><span class="go" aria-hidden="true">&rarr;</span></div>
-    <div class="row"><span class="n">03</span><h3>Always-on security</h3><p>Checked before anything is written, not after.</p><span class="go" aria-hidden="true">&rarr;</span></div>
-    <div class="row"><span class="n">04</span><h3>Performance under load</h3><p>Seconds, not days, and no manual checks to scale.</p><span class="go" aria-hidden="true">&rarr;</span></div>
-  </div></div></section>
-
-
-<!-- ═══ LA PILA ═══ -->
-<section class="stack" id="stack">
-  <div class="stack-st">
-    <div class="stack-l"><div class="stack-glow"></div>
-      <div class="plates" id="plates">
-        <div class="plate" data-n="04 · LIQUIDITY"></div><div class="plate" data-n="03 · ACCESS"></div>
-        <div class="plate" data-n="02 · POLICY"></div><div class="plate" data-n="01 · ISSUANCE"></div>
-      </div></div>
-    <div class="stack-r">
-      <div class="lbl"><b>03</b>The stack</div>
-      <h2><span class="sw" id="stackSw"><span>One chain, four layers.</span><span>Watch them come together.</span><span>One settlement guarantee.</span></span></h2>
-      <div class="layers">
-        <div class="layer"><i>01</i><b>Issuance</b><p>The asset is described, documented and issued with its conditions attached.</p></div>
-        <div class="layer"><i>02</i><b>Policy</b><p>The rules travel with the asset and are checked on every transfer.</p></div>
-        <div class="layer"><i>03</i><b>Access</b><p>Who can hold it and who can move it, decided by the policy itself.</p></div>
-        <div class="layer"><i>04</i><b>Liquidity</b><p>Where it trades and settles, with every leg clearing together.</p></div>
+      <div class="st-bot">
+        <div class="st-cap"><b id="vName">The asset itself</b><span id="vDesc">Any real asset becomes a token with its rules attached.</span></div>
+        <div class="v-ticks"><i><b></b></i><i><b></b></i><i><b></b></i><i><b></b></i><i><b></b></i></div>
       </div>
-      <p class="stack-note">Each layer is independently audited and can be inspected on its own. A transfer either clears every layer or it does not clear at all.</p>
+    </div></div>
+  </div>
+  <div class="wrap">
+    <div class="figs">
+      <div class="fig"><span>Total supply</span><b data-n="160" data-s="M">160M</b><small>NRM, fixed at genesis</small></div>
+      <div class="fig"><span>Audit findings</span><b>0</b><small>Critical or high · Halborn</small></div>
+      <div class="fig"><span>Signers verified</span><b data-n="4" data-s="/4">4/4</b><small>KYC by Assure DeFi</small></div>
+      <div class="fig"><span>Chain to mainnet</span><b data-n="75" data-s="%">75%</b><small>Testnet live today</small></div>
+    </div>
+  </div>
+  <div class="wrap logos">
+    <p>Compatible with the wallets and venues you already use</p>
+    <div class="lg">
+      <span><img src="../img/marcas/ethereum.svg" alt="">Ethereum</span><span><img src="../img/marcas/bnb.svg" alt="">BNB Chain</span>
+      <span><img src="../img/marcas/metamask.svg" alt="">MetaMask</span><span><img src="../img/marcas/trust.png" alt="">Trust Wallet</span>
+      <span><img src="../img/marcas/dexscreener.svg" alt="">DexScreener</span>
     </div>
   </div>
 </section>
 
+<!-- ═══ PRODUCTOS ═══ -->
+<section class="sec" id="products"><div class="wrap">
+  <div class="sec-t"><span class="eyebrow"><i></i>Products</span><h2 class="split">Three pieces, two already running.</h2><p>A chain built for regulated assets, the interface to issue them, and real infrastructure behind the token.</p></div>
+  <div class="prods">
+    <article class="prod big">
+      <span class="tag"><i></i>Testnet · 75% to mainnet</span>
+      <h3>The Nereum chain</h3>
+      <p>Own validators, own consensus, EVM-compatible. Every transfer is cleared against the asset's policy before it is written, in the protocol and not in a contract on top.</p>
+      <a class="btn w" href="https://nereum.xyz/explorer">Open the explorer <span class="arr">&rarr;</span></a>
+      <div class="shot"><img src="../img/explorer-overview.webp" alt="The Nereum explorer: block height, tokenized assets and live block production" loading="lazy"></div>
+    </article>
+    <article class="prod">
+      <span class="tag"><i></i>Testnet · live</span>
+      <h3>Asset tokenization</h3>
+      <p>Describe the asset, attach its documentation, choose the conditions that travel with it, and issue. No custom contract to write.</p>
+      <div class="meter"><b style="--v:75%"></b></div>
+      <a class="btn s sm" href="https://nereum.xyz/explorer/#/tokenize">Tokenize an asset <span class="arr">&rarr;</span></a>
+    </article>
+    <article class="prod">
+      <span class="tag dev"><i></i>In development</span>
+      <h3>Bitcoin mining</h3>
+      <p>Physical servers we own and operate, powered by solar. Machines in racks, with their own energy behind them.</p>
+      <div class="meter"><b style="--v:30%"></b></div>
+      <a class="btn s sm" href="https://nereum.xyz/whitepaper">Read the whitepaper <span class="arr">&rarr;</span></a>
+    </article>
+  </div>
+</div></section>
 
-<section class="tx" id="tx-cifra" data-tx="cifra" style="height:340vh" aria-hidden="true">
+<!-- ═══ POR QUE ═══ -->
+<section class="sec" id="why" style="padding-top:0"><div class="wrap">
+  <div class="sec-t"><span class="eyebrow"><i></i>Protocol</span><h2 class="split">Four guarantees, written into the protocol.</h2><p>When value moves, the rules move with it. On Nereum they travel with the asset and hold at machine speed.</p></div>
+  <div class="why">
+    <div class="w-card"><span class="w-ic"><svg viewBox="0 0 24 24"><path d="M5 12l4 4 10-10"/></svg></span><h3>All-or-nothing settlement</h3><p>Every leg settles, or none does.</p></div>
+    <div class="w-card"><span class="w-ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12Z"/></svg></span><h3>Controlled visibility</h3><p>A public register, with the policy travelling with the asset.</p></div>
+    <div class="w-card"><span class="w-ic"><svg viewBox="0 0 24 24"><path d="M12 3.5 5.2 6.4v4.8c0 4 2.8 6.8 6.8 7.6 4-.8 6.8-3.6 6.8-7.6V6.4L12 3.5Z"/></svg></span><h3>Always-on security</h3><p>Checked before anything is written, not after.</p></div>
+    <div class="w-card"><span class="w-ic"><svg viewBox="0 0 24 24"><path d="M13 2 4 14h7l-1 8 9-12h-7l1-8Z"/></svg></span><h3>Performance under load</h3><p>Seconds, not days, and no manual checks to scale.</p></div>
+  </div>
+</div></section>
+
+<!-- ═══ 85 % ═══ -->
+<section class="tx" id="tx-cifra" data-tx="cifra" style="height:300vh" aria-label="Seed Round 85% complete">
   <div class="tx-st"><canvas class="tx-cv"></canvas><div class="tx-vig"></div>
     <div class="tx-top"><span class="m">Seed Round</span></div>
     <div class="tx-bot"><span class="m">Complete</span><span>Registered, audited and nearly closed.</span></div>
@@ -615,123 +387,69 @@ html,body{background:var(--bg)}
 </section>
 
 <!-- ═══ TOKEN ═══ -->
-<section class="panel sec" id="token"><div class="wrap">
-  <div class="lbl"><b>04</b>Token · NRM</div>
-  <div class="odo" id="odo" aria-label="160,000,000">160,000,000</div>
-  <div class="odo-u"><h2>NRM, fixed at genesis.</h2><span class="m" style="color:var(--dim)">Total supply · no mint function</span></div>
-  <div class="bar" id="bar" aria-hidden="true"></div>
-  <div class="legend" id="legend"></div>
-  <div class="ctr">
-    <span class="m" style="color:var(--dim)">Contract</span>
-    <code id="addr">0x3A2f46170E57DDF11135e13884db0236f1924292</code>
-    <span class="m" style="color:var(--dim)">Robinhood Chain · ERC-20</span>
-    <a class="m ok" href="https://robinhoodchain.blockscout.com/address/0x3A2f46170E57DDF11135e13884db0236f1924292?tab=contract" rel="noopener">Verified</a>
-    <button type="button" id="copy">Copy</button>
-  </div></div></section>
-
-
-<!-- ═══ SEGURIDAD ═══ -->
-<section class="panel sec paper" id="security"><div class="wrap">
-  <div class="sec-h"><div><div class="lbl"><b>05</b>Security</div><h2 class="split">Three things you can check before you send a dollar.</h2></div>
-    <p>A new chain asks for trust up front. These are the three places where ours is verifiable by someone who is not us.</p></div>
-  <div class="certs">
-    <article class="cert">
-      <div class="cert-top"><div><h3>Registered company</h3><div class="m sub">Florida, United States</div></div>
-        <div class="seal"><svg viewBox="0 0 100 100"><defs><path id="c1" d="M50 50m-38 0a38 38 0 1 1 76 0a38 38 0 1 1-76 0"/></defs><text font-family="DM Mono" font-size="9.4" letter-spacing="3.1" fill="currentColor"><textPath href="#c1">VERIFIED · VERIFIED · VERIFIED ·</textPath></text></svg><b>&#10003;</b></div></div>
-      <p>Nereum Labs LLC is incorporated in the State of Florida. The filing is public record and can be checked against the state registry — name, status, date and registered agent.</p>
-      <dl><dt>Entity</dt><dd>Nereum Labs LLC</dd><dt>Document no.</dt><dd>L26000341887</dd><dt>Filed</dt><dd>14 Feb 2026</dd><dt>Status</dt><dd>Active</dd></dl>
-      <a class="btn s" href="https://nereum.xyz/whitepaper#/legal">Check the state registry <span class="arr">&rarr;</span></a>
-    </article>
-    <article class="cert">
-      <div class="cert-top"><div><h3>Contract audit</h3><div class="m sub">Independent review</div></div>
-        <div class="seal"><svg viewBox="0 0 100 100"><text font-family="DM Mono" font-size="9.4" letter-spacing="3.1" fill="currentColor"><textPath href="#c1">AUDITED · AUDITED · AUDITED ·</textPath></text></svg><b>&#10003;</b></div></div>
-      <p>Every contract that touches Seed Round funds has been reviewed by an independent security firm. The full report is published, including the findings and how each one was resolved.</p>
-      <dl><dt>Auditor</dt><dd>Halborn Security</dd><dt>Scope</dt><dd>Sale, vesting, treasury</dd><dt>Findings</dt><dd>0 critical · 0 high</dd><dt>Report</dt><dd>Published in full</dd></dl>
-      <a class="btn s" href="https://nereum.xyz/whitepaper#/audit">Read the audit <span class="arr">&rarr;</span></a>
-    </article>
-    <article class="cert">
-      <div class="cert-top"><div><h3>Team KYC</h3><div class="m sub">Verified identities</div></div>
-        <div class="seal"><svg viewBox="0 0 100 100"><text font-family="DM Mono" font-size="9.4" letter-spacing="3.1" fill="currentColor"><textPath href="#c1">KYC PASSED · KYC PASSED ·</textPath></text></svg><b>&#10003;</b></div></div>
-      <p>The founders are not anonymous. Identity documents for every signer on the treasury have been verified by a third party and are held for disclosure to regulators and exchanges.</p>
-      <dl><dt>Provider</dt><dd>Assure DeFi</dd><dt>Verified</dt><dd>4 of 4 signers</dd><dt>Held by</dt><dd>Escrow, not by us</dd><dt>Renewed</dt><dd>Annually</dd></dl>
-      <a class="btn s" href="https://nereum.xyz/whitepaper#/kyc">See the verification <span class="arr">&rarr;</span></a>
-    </article>
-  </div>
-  <div class="sec-q m"><span>Every document above is public.</span><span>If one of them ever stops being public, that is your answer.</span></div></div></section>
-
-
-<!-- ═══ CONSTRUCCION ═══ -->
-<section class="build" id="build">
-  <div class="build-st">
-    <div class="build-h"><div><div class="lbl"><b>06</b>What we are building</div><h2 class="split">Three pieces, two already running.</h2></div><span class="m" id="buildPg" style="color:var(--dim)">01 / 03</span></div>
-    <div class="track" id="track">
-      <article class="pc"><div class="pc-art"><img src="../img/explorer-overview.webp" alt="The Nereum explorer: block height, tokenized assets and live block production" loading="lazy"></div>
-        <div class="pc-b"><span class="m st">Testnet · 75% to mainnet</span><div class="prog"><b style="--v:75%"></b></div><h3>The chain</h3>
-          <p>Own validators, own consensus, EVM-compatible. Every transfer is cleared against the asset's policy before it is written — in the protocol, not in a contract on top.</p>
-          <a class="btn p" href="https://nereum.xyz/explorer">Open the explorer <span class="arr">&rarr;</span></a></div></article>
-      <article class="pc"><div class="pc-art"><img src="../img/explorer-tokenize.webp" alt="Tokenizing an asset in the Nereum explorer" loading="lazy"></div>
-        <div class="pc-b"><span class="m st">Testnet · 75% to mainnet</span><div class="prog"><b style="--v:75%"></b></div><h3>Asset tokenization</h3>
-          <p>Describe the asset, attach its documentation, choose the conditions that travel with it, and issue. No custom contract to write and no audit to commission for every issuance.</p>
-          <a class="btn p" href="https://nereum.xyz/explorer/#/tokenize">Tokenize an asset <span class="arr">&rarr;</span></a></div></article>
-      <article class="pc"><div class="pc-art"><div class="sun" aria-hidden="true"><i class="orb"></i><div class="panels"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div></div>
-        <div class="pc-b"><span class="m st dev">In development</span><div class="prog"><b style="--v:30%"></b></div><h3>Bitcoin mining</h3>
-          <p>Physical servers we own and operate, powered by solar. Not rented hashrate and not a reseller's contract: machines in racks, with their own energy behind them.</p>
-          <a class="btn p" href="https://nereum.xyz/whitepaper">Read the whitepaper <span class="arr">&rarr;</span></a></div></article>
+<section class="sec" id="token"><div class="wrap">
+  <div class="sec-t"><span class="eyebrow"><i></i>Token</span><h2 class="split">One hundred and sixty million NRM, fixed at genesis.</h2></div>
+  <div class="tok">
+    <div class="tok-a">
+      <div class="odo" id="odo" aria-label="160,000,000">160,000,000</div>
+      <div class="odo-u"><h2>Total supply</h2><span class="m">No mint function</span></div>
+      <div class="ctr"><span class="m">Contract</span><code id="addr">0x3A2f46170E57DDF11135e13884db0236f1924292</code>
+        <a class="m ok" href="https://robinhoodchain.blockscout.com/address/0x3A2f46170E57DDF11135e13884db0236f1924292?tab=contract" rel="noopener">Verified</a><button type="button" id="copy">Copy</button></div>
     </div>
-  </div>
-</section>
-
-
-<!-- ═══ PRENSA ═══ -->
-<section class="panel alt press" id="press">
-  <div class="wrap"><div class="hd2"><div><div class="lbl"><b>07</b>In the press</div><h2 class="split">What they are writing about the chain.</h2></div>
-    <a class="btn s" href="https://nereum.xyz/whitepaper#/press">All coverage <span class="arr">&rarr;</span></a></div></div>
-  <div class="mq" id="mq1">
-    <a class="hl" href="https://nereum.xyz/whitepaper#/press"><b>Benzinga</b><span>Nereum settlement on the markets desk watchlist</span></a>
-    <a class="hl" href="https://nereum.xyz/whitepaper#/press"><b>MarketWatch</b><span>Why finality, not throughput, is the next infrastructure race</span></a>
-    <a class="hl" href="https://nereum.xyz/whitepaper#/press"><b>Morningstar</b><span>Nereum instruments added to tokenized asset coverage</span></a>
-    <a class="hl" href="https://nereum.xyz/whitepaper#/press"><b>Announcement</b><span>Settlement layer opens to third-party issuers</span></a>
-  </div>
-</section>
-
-
-<section class="tx" id="tx-ola" data-tx="ola" style="height:300vh" aria-hidden="true">
-  <div class="tx-st"><canvas class="tx-cv"></canvas><div class="tx-vig"></div>
-    <div class="tx-t"><span class="m">Nereum</span><b>Built in<br><em>the open.</em></b></div>
-    <div class="tx-hud m"><span class="tx-n"></span><i><b></b></i></div>
-  </div>
-</section>
-
-<!-- ═══ RUTA ═══ -->
-<section class="panel sec paper" id="roadmap"><div class="wrap road">
-  <div class="road-l"><div class="lbl"><b>08</b>Roadmap</div><h2 class="split">Three phases, and what each one has to prove.</h2>
-    <div class="road-pct"><span id="roadPct">0</span><small>% delivered</small></div></div>
-  <div class="phases" id="phases"><div class="rail"><b id="railB"></b></div>
-    <div class="ph done"><div class="m">01 / 03 · <b>Completed</b></div><h3>Foundation</h3>
-      <p>The company registered, the contract deployed and verified, and the first raise closed. Every one of them checkable by someone who is not us.</p>
-      <ul><li><svg><use href="#chk"/></svg>Development of the entire NRM ecosystem</li><li><svg><use href="#chk"/></svg>Contract deployed</li><li><svg><use href="#chk"/></svg>Code verified on Blockscout</li><li><svg><use href="#chk"/></svg>Audit passed</li><li><svg><use href="#chk"/></svg>Team KYC passed</li><li><svg><use href="#chk"/></svg>Legal registration in the United States</li><li><svg><use href="#chk"/></svg>$5M Seed Round</li></ul></div>
-    <div class="ph done"><div class="m">02 / 03 · <b>Completed</b></div><h3>Expansion</h3>
-      <p>The chain and the interfaces that sit on top of it, built and out in the open, with a price anyone can look up.</p>
-      <ul><li><svg><use href="#chk"/></svg>Nereum Blockchain infrastructure</li><li><svg><use href="#chk"/></svg>Assets Tokenization interface</li><li><svg><use href="#chk"/></svg>Online BTC mining interface</li><li><svg><use href="#chk"/></svg>Coverage in the main crypto and web3 outlets</li><li><svg><use href="#chk"/></svg>Pre-listing on DexScreener at $1</li><li><svg><use href="#chk"/></svg>$10M Seed Round</li></ul></div>
-    <div class="ph plan"><div class="m">03 / 03 · Planned</div><h3>Integration</h3>
-      <p>The infrastructure ceases to be a decision factor for the issuer, in the same way interbank payment rails are not one today.</p></div>
-  </div></div></section>
-
-
-<section class="panel sec join" id="join"><div class="wrap">
-  <div class="lbl"><b>09</b>Contact</div>
-  <h2 class="split">Everything we ship is announced in the open.</h2>
-  <div class="jl">
-    <a href="https://x.com/nereumlab" rel="noopener"><h3>Follow on X</h3><span class="m">Releases · audits · mainnet notes</span><i aria-hidden="true">&rarr;</i></a>
-    <a href="https://nereum.xyz/whitepaper#/links"><h3>Join Telegram</h3><span class="m">Questions answered by the team</span><i aria-hidden="true">&rarr;</i></a>
-    <a href="https://nereum.xyz/whitepaper"><h3>Read the whitepaper</h3><span class="m">Protocol, token and legal</span><i aria-hidden="true">&rarr;</i></a>
+    <div class="tok-b"><div class="bar" id="bar" aria-hidden="true"></div><div class="legend" id="legend"></div></div>
   </div>
 </div></section>
 
-<section class="tx" id="tx-logo" data-tx="logo" style="height:320vh" aria-hidden="true">
-  <div class="tx-st"><canvas class="tx-cv"></canvas><div class="tx-vig"></div>
-    <div class="tx-bot"><span class="m">Nereum Labs</span><span>Infrastructure for real-world assets</span></div>
-    <div class="tx-hud m"><span class="tx-n"></span><i><b></b></i></div>
+<!-- ═══ SEGURIDAD ═══ -->
+<section class="sec" id="security" style="padding-top:0"><div class="wrap">
+  <div class="sec-t"><span class="eyebrow"><i></i>Security</span><h2 class="split">Three things you can check before you send a dollar.</h2><p>A new chain asks for trust up front. These are the three places where ours is verifiable by someone who is not us.</p></div>
+  <div class="certs">
+    <article class="cert"><div class="cert-top"><span class="badge">Verified</span><span class="n">01</span></div><h3>Registered company</h3><div class="sub">Florida, United States</div>
+      <p>Nereum Labs LLC is incorporated in the State of Florida. The filing is public record and can be checked against the state registry.</p>
+      <dl><dt>Entity</dt><dd>Nereum Labs LLC</dd><dt>Document no.</dt><dd>L26000341887</dd><dt>Filed</dt><dd>14 Feb 2026</dd><dt>Status</dt><dd>Active</dd></dl>
+      <a class="btn s sm" href="https://nereum.xyz/whitepaper#/legal">Check the registry <span class="arr">&rarr;</span></a></article>
+    <article class="cert"><div class="cert-top"><span class="badge">Audited</span><span class="n">02</span></div><h3>Contract audit</h3><div class="sub">Independent review</div>
+      <p>Every contract that touches Seed Round funds has been reviewed by an independent security firm. The full report is published.</p>
+      <dl><dt>Auditor</dt><dd>Halborn Security</dd><dt>Scope</dt><dd>Sale, vesting, treasury</dd><dt>Findings</dt><dd>0 critical · 0 high</dd><dt>Report</dt><dd>Published in full</dd></dl>
+      <a class="btn s sm" href="https://nereum.xyz/whitepaper#/audit">Read the audit <span class="arr">&rarr;</span></a></article>
+    <article class="cert"><div class="cert-top"><span class="badge">KYC passed</span><span class="n">03</span></div><h3>Team KYC</h3><div class="sub">Verified identities</div>
+      <p>Identity documents for every signer on the treasury have been verified by a third party and are held for disclosure to regulators and exchanges.</p>
+      <dl><dt>Provider</dt><dd>Assure DeFi</dd><dt>Verified</dt><dd>4 of 4 signers</dd><dt>Held by</dt><dd>Escrow, not by us</dd><dt>Renewed</dt><dd>Annually</dd></dl>
+      <a class="btn s sm" href="https://nereum.xyz/whitepaper#/kyc">See the verification <span class="arr">&rarr;</span></a></article>
+  </div>
+</div></section>
+
+<!-- ═══ RUTA ═══ -->
+<section class="sec" id="roadmap" style="padding-top:0"><div class="wrap">
+  <div class="sec-t"><span class="eyebrow"><i></i>Roadmap</span><h2 class="split">Three phases, and what each one has to prove.</h2></div>
+  <div class="phs">
+    <div class="ph done"><span class="st">Completed</span><span class="n">01 / 03</span><h3>Foundation</h3><p>The company registered, the contract deployed and verified, and the first raise closed.</p>
+      <ul><li><svg><use href="#chk"/></svg>Contract deployed and verified</li><li><svg><use href="#chk"/></svg>Audit passed</li><li><svg><use href="#chk"/></svg>Team KYC passed</li><li><svg><use href="#chk"/></svg>Legal registration in the US</li><li><svg><use href="#chk"/></svg>$5M Seed Round</li></ul></div>
+    <div class="ph done"><span class="st">Completed</span><span class="n">02 / 03</span><h3>Expansion</h3><p>The chain and the interfaces on top of it, built in the open, with a price anyone can look up.</p>
+      <ul><li><svg><use href="#chk"/></svg>Nereum Blockchain infrastructure</li><li><svg><use href="#chk"/></svg>Asset tokenization interface</li><li><svg><use href="#chk"/></svg>Online BTC mining interface</li><li><svg><use href="#chk"/></svg>Pre-listing on DexScreener at $1</li><li><svg><use href="#chk"/></svg>$10M Seed Round</li></ul></div>
+    <div class="ph plan"><span class="st">Planned</span><span class="n">03 / 03</span><h3>Integration</h3><p>The infrastructure stops being a decision factor for the issuer, the way interbank payment rails are not one today.</p></div>
+  </div>
+  <div class="road-bar"><i><b id="roadB"></b></i><span>2 of 3 phases delivered</span></div>
+</div></section>
+
+<!-- ═══ PRENSA ═══ -->
+<section class="sec" id="press" style="padding-top:0"><div class="wrap">
+  <div class="sec-t"><span class="eyebrow"><i></i>In the press</span><h2 class="split">What they are writing about the chain.</h2></div>
+  <div class="news">
+    <a class="nw" href="https://nereum.xyz/whitepaper#/press"><b>Benzinga</b><h3>Nereum settlement on the markets desk watchlist</h3><span>Read coverage &rarr;</span></a>
+    <a class="nw" href="https://nereum.xyz/whitepaper#/press"><b>MarketWatch</b><h3>Why finality, not throughput, is the next infrastructure race</h3><span>Read coverage &rarr;</span></a>
+    <a class="nw" href="https://nereum.xyz/whitepaper#/press"><b>Morningstar</b><h3>Nereum instruments added to tokenized asset coverage</h3><span>Read coverage &rarr;</span></a>
+    <a class="nw" href="https://nereum.xyz/whitepaper#/press"><b>Announcement</b><h3>Settlement layer opens to third-party issuers</h3><span>Read more &rarr;</span></a>
+  </div>
+</div></section>
+
+<!-- ═══ CIERRE ═══ -->
+<section class="cta" id="join">
+  <h2 class="split">Everything we ship is announced in the open.</h2>
+  <div class="cta-l">
+    <a href="https://x.com/nereumlab" rel="noopener">Follow on X <span>Releases · audits · mainnet notes &rarr;</span></a>
+    <a href="https://nereum.xyz/whitepaper#/links">Join Telegram <span>Questions answered by the team &rarr;</span></a>
+    <a href="https://nereum.xyz/whitepaper">Read the whitepaper <span>Protocol, token and legal &rarr;</span></a>
   </div>
 </section>
 </main>
@@ -746,8 +464,7 @@ html,body{background:var(--bg)}
     <div><h4>Company</h4><a href="https://nereum.xyz/whitepaper#/team">Team</a><a href="https://nereum.xyz/whitepaper#/press">News</a><a href="https://nereum.xyz/whitepaper#/links">Official links</a><a href="https://nereum.xyz/whitepaper#/faq">Questions</a></div>
   </div>
   
-  <div class="ft-big" id="ftBig" aria-hidden="true"><span>N</span><span>E</span><span>R</span><span>E</span><span>U</span><span>M</span></div>
-  <div class="ft-end m"><span>©2026 Nereum Labs</span><span>Miami, Florida</span><a href="#top">Back to top &uarr;</a></div>
+  <div class="ft-end"><span>©2026 Nereum Labs · Miami, Florida</span><span>Real-world asset chain</span></div>
 </div></footer>
 
 <script src="vendor/gsap.min.js"></script>
@@ -757,26 +474,24 @@ html,body{background:var(--bg)}
 (function(){
 'use strict';
 var CALMA = matchMedia('(prefers-reduced-motion:reduce)').matches;
-var FINO = matchMedia('(hover:hover) and (pointer:fine)').matches;
 var $ = function(s,c){ return (c||document).querySelector(s) };
 var $$ = function(s,c){ return [].slice.call((c||document).querySelectorAll(s)) };
 var hasG = !!window.gsap && !!window.ScrollTrigger;
 if(hasG) gsap.registerPlugin(ScrollTrigger);
 var AZULES=['#0C33B4','#1244DC','#1A5BF0','#3E7BFF','#2E62C8'], BLANCOS=['#E9EDF6','#C3CCDD','#BFD4FF'], _rgb={};
 
-/* ── scroll suave y velocidad: la velocidad del scroll empuja el zoom ── */
 var lenis=null, VELZ=0;
 if(!CALMA && window.Lenis && hasG){
-  lenis=new Lenis({lerp:.085,smoothWheel:true});
-  lenis.on('scroll',function(e){ ScrollTrigger.update(); VELZ=Math.min(.18,Math.abs(e.velocity||0)*.006) });
+  lenis=new Lenis({lerp:.09,smoothWheel:true});
+  lenis.on('scroll',function(e){ ScrollTrigger.update(); VELZ=Math.min(.12,Math.abs(e.velocity||0)*.004) });
   gsap.ticker.add(function(t){ lenis.raf(t*1000); VELZ*=.9 }); gsap.ticker.lagSmoothing(0);
 }
 var sheet=$('#sheet'), menuB=$('#menuB');
 function cerrar(){ sheet.classList.remove('on'); menuB.setAttribute('aria-expanded','false'); menuB.textContent='Menu' }
 menuB.addEventListener('click',function(){ var on=sheet.classList.toggle('on'); menuB.setAttribute('aria-expanded',on); menuB.textContent=on?'Close':'Menu' });
-$$('a[href^="#"]').forEach(function(a){ a.addEventListener('click',function(e){ var id=a.getAttribute('href'), t=id.length>1&&$(id); if(!t) return; e.preventDefault(); cerrar(); if(lenis) lenis.scrollTo(t,{duration:1.6}); else t.scrollIntoView({behavior:CALMA?'auto':'smooth'}) }) });
+$$('a[href^="#"]').forEach(function(a){ a.addEventListener('click',function(e){ var id=a.getAttribute('href'), t=id.length>1&&$(id); if(!t) return; e.preventDefault(); cerrar(); if(lenis) lenis.scrollTo(t,{duration:1.4,offset:-80}); else t.scrollIntoView({behavior:CALMA?'auto':'smooth'}) }) });
 var hd=$('#hd'), ultY=0;
-addEventListener('scroll',function(){ var y=scrollY; hd.classList.toggle('solid',y>40); if(y>ultY+2&&y>300&&!sheet.classList.contains('on')) hd.classList.add('away'); else if(y<ultY-2) hd.classList.remove('away'); ultY=y },{passive:true});
+addEventListener('scroll',function(){ var y=scrollY; hd.classList.toggle('solid',y>20); if(y>ultY+2&&y>400&&!sheet.classList.contains('on')) hd.classList.add('away'); else if(y<ultY-2) hd.classList.remove('away'); ultY=y },{passive:true});
 
 /* ── titulares en lineas ── */
 function partir(el){
@@ -826,7 +541,7 @@ var POST_FS=['precision mediump float;varying vec2 v;uniform sampler2D t;uniform
  ' col/=12.;gl_FragColor=col;}'].join('\n');
 function escena(cv){
   var gl=cv.getContext('webgl',{premultipliedAlpha:true,alpha:true,antialias:false});
-  var off=gl?document.createElement('canvas'):cv, c=off.getContext('2d'), o={c:c,W:0,H:0,fx:{b:0,z:0,a:0}};
+  var off=gl?document.createElement('canvas'):cv, c=off.getContext('2d'), o={c:c,W:0,H:0,fx:{b:0,z:0,a:0},light:cv.hasAttribute('data-light')};
   if(gl){
     var sh=function(t,s){ var x=gl.createShader(t); gl.shaderSource(x,s); gl.compileShader(x); return x };
     var pr=gl.createProgram(); gl.attachShader(pr,sh(gl.VERTEX_SHADER,POST_VS)); gl.attachShader(pr,sh(gl.FRAGMENT_SHADER,POST_FS)); gl.linkProgram(pr); gl.useProgram(pr);
@@ -887,7 +602,12 @@ function escena(cv){
         var nl=Math.hypot(nx,ny,nz)||1, b=Math.max(0,(nx*LUZ[0]+ny*LUZ[1]+nz*LUZ[2])/nl);
         ctx.beginPath(); ctx.moveTo(P[fc[0]][0],P[fc[0]][1]); ctx.lineTo(P[fc[1]][0],P[fc[1]][1]); ctx.lineTo(P[fc[2]][0],P[fc[2]][1]); ctx.lineTo(P[fc[3]][0],P[fc[3]][1]); ctx.closePath();
         var fill, edge, lw;
-        if(mat===0){
+        if(o.light){
+          /* material claro: porcelana, cristal azulado y un azul de acento */
+          if(mat===1){ var k1=.62+b*.45; fill='rgba('+Math.round(26*k1+40*gl)+','+Math.round(91*k1+40*gl)+','+Math.round(Math.min(255,240*k1+15))+','+alfa.toFixed(3)+')'; edge='rgba(255,255,255,'+(alfa*.55).toFixed(3)+')'; lw=.8 }
+          else if(mat===2){ fill='rgba(160,190,255,'+(alfa*(.14+b*.16)).toFixed(3)+')'; edge='rgba(26,91,240,'+(alfa*.4).toFixed(3)+')'; lw=.8 }
+          else { var kp=.72+b*.28; fill='rgba('+Math.round(205*kp+50*gl)+','+Math.round(214*kp+41*gl)+','+Math.round(236*kp+19*gl)+','+alfa.toFixed(3)+')'; edge='rgba(26,60,140,'+(alfa*(.24+(1-b)*.14)).toFixed(3)+')'; lw=.7 }
+        } else if(mat===0){
           var k0=.55+b*.9, e0=gl*.9;
           fill='rgba('+Math.round(9*k0+26*e0)+','+Math.round(26*k0+91*e0)+','+Math.round(78*k0+240*e0)+','+alfa.toFixed(3)+')';
           edge='rgba('+(110+Math.round(gl*90))+','+(150+Math.round(gl*80))+',255,'+(alfa*(.22+b*.25+gl*.5)).toFixed(3)+')'; lw=.7;
@@ -1152,72 +872,43 @@ function pinta(t){
   var M=innerWidth<700;
   /* la maqueta: gran angular suave, tilt-shift arriba y abajo y suelo espejo */
   /* optica limpia en reposo: el zoom y la aberracion solo aparecen al cambiar de figura */
-  E0.fx={b:.08, z:vuelo*.26, a:vuelo*.007, ts:0};
-  E0.pinta(UNI,{yaw:-.62+Math.sin(t*.1)*.12+mx*.25, pitch:.34+my*.05+Math.sin(t*.08)*.015, roll:0, dist:M?14:11.2, fov:1.05, near:6, far:40,
-    ox:M?0:.14, oy:M?-.14:-.08, floor:M?null:2.06, refA:.08, floorScreen:.66});
+  E0.fx={b:.06, z:vuelo*.2, a:vuelo*.004, ts:0};
+  E0.pinta(UNI,{yaw:-.62+Math.sin(t*.1)*.12+mx*.25, pitch:.34+my*.05+Math.sin(t*.08)*.015, roll:0, dist:M?13:9.4, fov:1.05, near:5, far:60, ox:0, oy:.02});
 }
 requestAnimationFrame(pinta);
 new IntersectionObserver(function(es){ vis=es[0].isIntersecting }).observe(cv);
 
 
-/* ═══ PORTADA: el visor recorre las cinco clases de activo con el scroll ═══ */
+/* ═══ la maqueta recorre las cinco clases de activo con el scroll ═══ */
 (function(){
-  var N=['The asset itself','Real estate','Commodities','Energy','Private credit'], vN=$('#vN'), vName=$('#vName'), ticks=$$('.v-ticks i b'), act=-1;
-  function marca(n){ if(n===act) return; act=n; vN.textContent='0'+(n+1);
-    if(hasG&&!CALMA){ gsap.fromTo(vName,{yPercent:100},{yPercent:0,duration:.7,ease:'expo.out'}) } vName.textContent=N[n] }
+  var N=['The asset itself','Real estate','Commodities','Energy','Private credit'];
+  var D=['Any real asset becomes a token with its rules attached.','Towers and offices, divided into shares that settle in seconds.','Gold, grain and goods in transit, owned onchain.','Solar farms, storage and turbines, financed by the people who use them.','Loans and receivables with the terms written into the asset.'];
+  var vN=$('#vN'), vName=$('#vName'), vDesc=$('#vDesc'), chips=$$('#chips span'), ticks=$$('.v-ticks i b'), act=-1;
+  function marca(n){ if(n===act) return; act=n; vN.textContent='0'+(n+1); vName.textContent=N[n]; vDesc.textContent=D[n];
+    chips.forEach(function(c,i){ c.classList.toggle('on',i===n) });
+    if(hasG&&!CALMA) gsap.fromTo([vName,vDesc],{y:10,opacity:0},{y:0,opacity:1,duration:.6,ease:'expo.out',stagger:.05}) }
   marca(0);
-  if(hasG){
-    ScrollTrigger.create({trigger:'.hero',start:'top top',end:'bottom bottom',scrub:true,onUpdate:function(st){
-      estado.p=st.progress; marca(Math.min(4,Math.round(st.progress*4)));
-      ticks.forEach(function(el,i){ el.style.setProperty('--k',Math.max(0,Math.min(1,st.progress*4-i+1))) });
-    }});
-    if(!CALMA){ gsap.to('.hero-c',{opacity:0,y:-40,ease:'none',scrollTrigger:{trigger:'.hero',start:'top top',end:'22% top',scrub:true}}); gsap.fromTo('.hero-c',{opacity:0},{opacity:1,immediateRender:false,ease:'none',scrollTrigger:{trigger:'.hero',start:'80% bottom',end:'bottom bottom',scrub:true}}) }
-  }
+  if(hasG) ScrollTrigger.create({trigger:'#stage',start:'top 88px',end:'bottom bottom',scrub:true,onUpdate:function(st){
+    estado.p=st.progress; marca(Math.min(4,Math.round(st.progress*4)));
+    ticks.forEach(function(el,i){ el.style.setProperty('--k',Math.max(0,Math.min(1,st.progress*4-i+1))) }) }});
 })();
 
-/* ═══ CIFRAS ═══ */
-$$('.stat b').forEach(function(b){ var n=+b.dataset.n, s=b.dataset.s; if(!hasG||CALMA||!n) return; var o={v:0};
-  ScrollTrigger.create({trigger:b,start:'top 92%',once:true,onEnter:function(){ gsap.to(o,{v:n,duration:1.8,ease:'expo.out',onUpdate:function(){ b.textContent=Math.round(o.v)+s }}) }}) });
-
-
-/* ═══ TESIS ═══ */
-(function(){
-  var tp=$('#thesisP'), html='';
-  [].slice.call(tp.childNodes).forEach(function(n){
-    if(n.nodeType===3) html+=n.textContent.split(/(\s+)/).map(function(w){ return /\S/.test(w)?'<span class="w">'+w+'</span>':w }).join('');
-    else html+='<span class="w sig">'+n.textContent+'</span>';
+/* ═══ cifras ═══ */
+$$('.fig b[data-n]').forEach(function(b){ var n=+b.dataset.n, s=b.dataset.s; if(!hasG||CALMA) return; var o={v:0};
+  ScrollTrigger.create({trigger:b,start:'top 92%',once:true,onEnter:function(){ gsap.to(o,{v:n,duration:1.6,ease:'expo.out',onUpdate:function(){ b.textContent=Math.round(o.v)+s }}) }}) });
+if(hasG && !CALMA){
+  ['.figs .fig','.lg span','.prod','.w-card','.cert','.ph','.nw','.cta-l a'].forEach(function(sel){
+    var els=$$(sel); if(!els.length) return;
+    gsap.from(els,{y:40,opacity:0,duration:1,ease:'expo.out',stagger:.07,scrollTrigger:{trigger:els[0],start:'top 90%'}});
   });
-  tp.innerHTML=html; var ws=$$('.w',tp);
-  if(!hasG||CALMA){ ws.forEach(function(w){ w.style.opacity=1 }); return }
-  ScrollTrigger.create({trigger:tp,start:'top 80%',end:'bottom 45%',scrub:true,onUpdate:function(s){ var c=s.progress*ws.length; ws.forEach(function(w,i){ w.style.opacity=Math.max(.14,Math.min(1,c-i+.3)) }) }});
-})();
-if(hasG && !CALMA) gsap.from('.row',{y:40,opacity:0,stagger:.08,duration:1.1,ease:'expo.out',scrollTrigger:{trigger:'.rows',start:'top 85%'}});
-
-
-if(hasG && !CALMA) gsap.from('.row',{y:30,opacity:0,stagger:.07,duration:1,ease:'expo.out',scrollTrigger:{trigger:'.rows',start:'top 86%'}});
-/* ═══ LA PILA ═══ */
-if(hasG){
-  var plates=$$('.plate'), layers=$$('.layer'), sw=$$('#stackSw span'), swN=0;
-  gsap.set(sw,{yPercent:130}); gsap.set(sw[0],{yPercent:0}); gsap.set('#plates',{rotateX:58,rotateZ:-42});
-  var titular=function(n){ if(n===swN) return; var up=n>swN; gsap.to(sw[swN],{yPercent:up?-130:130,duration:.9,ease:'expo.out'}); gsap.fromTo(sw[n],{yPercent:up?130:-130},{yPercent:0,duration:.9,ease:'expo.out'}); swN=n };
-  var tl=gsap.timeline({scrollTrigger:{trigger:'#stack',start:'top top',end:'bottom bottom',scrub:1,onUpdate:function(s){
-    var p=s.progress, on=Math.min(3,Math.floor(p*4.4));
-    layers.forEach(function(l,i){ l.classList.toggle('on',i<=on); l.classList.toggle('act',i===on) });
-    plates.forEach(function(pl,i){ pl.classList.toggle('on',3-i===on && p<.86) });
-    $('#plates').classList.toggle('uni',p>=.86);
-    titular(p<.2?0:p<.82?1:2);
-  }}});
-  tl.fromTo(plates,{z:function(i){ return (3-i)*-170+250 },rotateZ:function(i){ return (i-1.5)*14 },opacity:.15},{z:function(i){ return (3-i)*-170+250 },rotateZ:0,opacity:1,stagger:.08,duration:1,ease:'none'})
-    .to(plates,{z:function(i){ return (3-i)*-24+36 },duration:1.4,ease:'power2.inOut'})
-    .to('#plates',{rotateZ:48,duration:1.4,ease:'power1.inOut'},'<');
-}
-
+  ScrollTrigger.create({trigger:'.road-bar',start:'top 90%',once:true,onEnter:function(){ $('#roadB').style.width='67%' }});
+} else { $('#roadB').style.width='67%' }
 
 /* ═══ TOKEN ═══ */
-var ALLOC=[['Private sale',50,'#1A5BF0'],['CEX listing',15,'#4384E8'],['Marketing',10,'#0C33B4'],['Reserve',5,'#BFD4FF'],['Team (locked)',5,'#3E7BFF'],['Advisors',5,'#2E62C8'],['Development',5,'#E9EDF6'],['Airdrop',5,'#1244DC']];
+var ALLOC=[['Private sale',50,'#1A5BF0'],['CEX listing',15,'#3E7BFF'],['Marketing',10,'#0E3AC4'],['Reserve',5,'#8FB0FF'],['Team (locked)',5,'#0C1220'],['Advisors',5,'#5B6475'],['Development',5,'#C9D6F5'],['Airdrop',5,'#2E62C8']];
 var bar=$('#bar'), leg=$('#legend');
 ALLOC.forEach(function(a,i){
-  var claro=a[2]==='#E9EDF6'||a[2]==='#BFD4FF';
+  var claro=a[2]==='#C9D6F5'||a[2]==='#8FB0FF';
   var s=document.createElement('i'); s.style.cssText='flex:'+a[1]+' 1 0;--g:'+a[1]+';--c:'+a[2]+';--k:'+i; s.innerHTML='<span'+(claro?' style="color:#05070C"':'')+'>'+a[1]+'%</span>'; s.dataset.i=i; bar.appendChild(s);
   var d=document.createElement('div'); d.dataset.i=i; d.innerHTML='<span><i style="--c:'+a[2]+'"></i>'+a[0]+'</span><b>'+a[1].toFixed(1)+'%</b>'; leg.appendChild(d);
 });
@@ -1234,74 +925,16 @@ if(hasG && !CALMA){
 $('#copy').addEventListener('click',function(){ var b=this; (navigator.clipboard?navigator.clipboard.writeText($('#addr').textContent):Promise.reject()).then(function(){ b.textContent='Copied' },function(){ var r=document.createRange(); r.selectNodeContents($('#addr')); var s=getSelection(); s.removeAllRanges(); s.addRange(r); b.textContent='Selected' }); setTimeout(function(){ b.textContent='Copy' },1800) });
 
 
-/* ═══ SEGURIDAD: la luz sigue al puntero ═══ */
-$$('.cert').forEach(function(c){ c.addEventListener('pointermove',function(e){ var r=c.getBoundingClientRect(); c.style.setProperty('--gx',(e.clientX-r.left)+'px'); c.style.setProperty('--gy',(e.clientY-r.top)+'px') }) });
-if(hasG && !CALMA) gsap.from('.cert',{y:60,opacity:0,stagger:.1,duration:1.2,ease:'expo.out',scrollTrigger:{trigger:'.certs',start:'top 85%'}});
-
-
-/* ═══ CONSTRUCCION ═══ */
-var track=$('#track'), build=$('#build'), pg=$('#buildPg'), pcs=$$('.pc',track);
-if(hasG){
-  var mm=gsap.matchMedia();
-  mm.add('(min-width:1001px)',function(){
-    var dist=function(){ return track.scrollWidth-innerWidth };
-    var tw=gsap.to(track,{x:function(){ return -dist() },ease:'none',scrollTrigger:{trigger:build,start:'top top',end:function(){ return '+='+dist()*1.1 },pin:'.build-st',scrub:1,invalidateOnRefresh:true,
-      onUpdate:function(s){ pg.textContent='0'+Math.min(3,1+Math.floor(s.progress*2.999))+' / 03' }}});
-    pcs.forEach(function(c){
-      var im=$('img',c); if(im) gsap.to(im,{scale:1,ease:'none',scrollTrigger:{trigger:c,containerAnimation:tw,start:'left right',end:'center center',scrub:true}});
-      gsap.from($('.prog b',c),{scaleX:0,ease:'none',scrollTrigger:{trigger:c,containerAnimation:tw,start:'left 80%',end:'center center',scrub:true}});
-    });
-  });
-  mm.add('(max-width:1000px)',function(){
-    var bs=$('.build-st'); bs.style.height='auto'; bs.style.padding='110px 0'; track.style.flexDirection='column'; track.style.width='auto';
-    pcs.forEach(function(c){ gsap.from(c,{y:60,opacity:0,duration:1,ease:'expo.out',scrollTrigger:{trigger:c,start:'top 88%'}}) });
-  });
-}
-
-/* ═══ PRENSA y cinta: se duplican para no acabarse ═══ */
-[$('#mq1'),$('#tape')].forEach(function(m){ var n=m.children.length; m.innerHTML+=m.innerHTML; [].slice.call(m.children,n).forEach(function(a){ a.setAttribute('aria-hidden','true'); if(a.tagName==='A') a.setAttribute('tabindex','-1') }) });
-
-
-/* ═══ RUTA ═══ */
-var phs=$$('.ph'), railB=$('#railB'), rp=$('#roadPct');
-if(hasG){
-  ScrollTrigger.create({trigger:'#phases',start:'top 60%',end:'bottom 70%',scrub:true,onUpdate:function(s){
-    railB.style.transform='scaleY('+s.progress+')'; rp.textContent=Math.round(Math.min(1,s.progress/.72)*67);
-    phs.forEach(function(p,i){ p.classList.toggle('on',s.progress>=i/phs.length-.02) }) }});
-} else { rp.textContent='67'; railB.style.transform='none'; phs.forEach(function(p){ p.classList.add('on') }) }
-
-
-if(hasG && !CALMA){
-  gsap.from('.jl a',{y:30,opacity:0,stagger:.08,duration:1,ease:'expo.out',scrollTrigger:{trigger:'.jl',start:'top 88%'}});
-  gsap.from('#ftBig span',{yPercent:100,stagger:.05,duration:1.3,ease:'expo.out',scrollTrigger:{trigger:'#ftBig',start:'top 95%'}});
-}
-/* ═══ cursor y botones magneticos ═══ */
-if(FINO && hasG && !CALMA){
-  $$('.btn, .row .go').forEach(function(b){
-    b.addEventListener('pointermove',function(e){ var r=b.getBoundingClientRect(); gsap.to(b,{x:(e.clientX-r.left-r.width/2)*.2,y:(e.clientY-r.top-r.height/2)*.3,duration:.5,ease:'power3.out'}) });
-    b.addEventListener('pointerleave',function(){ gsap.to(b,{x:0,y:0,duration:.9,ease:'elastic.out(1,.4)'}) });
-  });
-  var cur=$('#cur'), curT=$('#curT'), qx=gsap.quickTo(cur,'x',{duration:.35,ease:'power3'}), qy=gsap.quickTo(cur,'y',{duration:.35,ease:'power3'});
-  addEventListener('pointermove',function(e){ cur.classList.remove('off'); qx(e.clientX); qy(e.clientY) },{passive:true});
-  document.addEventListener('pointerleave',function(){ cur.classList.add('off') });
-  document.addEventListener('pointerover',function(e){ var t=e.target, big=t.closest('.pc-art, .hl'), lnk=t.closest('a, button');
-    cur.classList.toggle('big',!!big); cur.classList.toggle('lnk',!big&&!!lnk); if(big) curT.textContent=t.closest('.pc-art')?'View':'Open' });
-}
-
-
 /* ═══ entrada ═══ */
 function entrar(){
   var pre=$('#pre');
   if(!hasG || CALMA){ if(pre) pre.remove(); return }
-  var o={v:0}, tl=gsap.timeline();
-  tl.to('#preLogo',{opacity:1,duration:.4})
-    .to(o,{v:100,duration:1,ease:'power2.inOut',onUpdate:function(){ $('#preN').textContent=String(Math.round(o.v)).padStart(3,'0') }},'<')
-    .to(pre,{opacity:0,duration:.6,ease:'power2.out'})
-    .from('.hero .ln>span',{yPercent:110,duration:1.2,ease:'expo.out',stagger:.08},'<.1')
-    .from('.hero-side p, .hero-cta, .hero-top, .hero-bot, #hd',{y:20,opacity:0,duration:1,ease:'expo.out',stagger:.06},'<.2')
-    .from('#fx',{scale:1.25,opacity:0,duration:1.8,ease:'expo.out'},'<-.3')
+  var tl=gsap.timeline();
+  tl.to(pre,{opacity:0,duration:.6,delay:.3,ease:'power2.out'})
+    .from('.hero .ln>span',{yPercent:110,duration:1.2,ease:'expo.out',stagger:.08},'<')
+    .from('.hero .eyebrow, .hero-t p, .hero-cta, #hd',{y:20,opacity:0,duration:1,ease:'expo.out',stagger:.06},'<.15')
+    .from('.stage-card',{y:80,opacity:0,scale:.96,duration:1.4,ease:'expo.out'},'<.1')
     .add(function(){ if(pre) pre.remove() });
-  if(lenis){ lenis.stop(); tl.add(function(){ lenis.start() },1.6) }
 }
 if(document.readyState==='complete') entrar(); else addEventListener('load',entrar);
 })();
