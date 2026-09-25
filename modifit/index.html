@@ -7,8 +7,6 @@
 <meta name="description" content="Nereum is the settlement layer for real-world assets: issuance, policy, access and liquidity in one protocol. Registered in the United States and independently audited.">
 <meta name="theme-color" content="#0A0B0D">
 <link rel="icon" href="../favicon.svg" type="image/svg+xml">
-<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap">
 <link rel="stylesheet" href="../assets/fonts.css">
 <style>
 /* ══ Nereum · modifit ═══════════════════════════════════════════════════════
@@ -387,7 +385,21 @@ em,.it{font-family:var(--serif);font-style:italic;font-weight:400;letter-spacing
 }
 @media (max-width:560px){.hero-top>span:first-child{display:none}.hero-side p{font-size:15px}.hero-cta .btn{height:42px;padding:0 16px;font-size:13.5px}}
 
-/* la maqueta anula la reticula de la portada anterior */
+/* ══ SOBRIO ═══════════════════════════════════════════════════════════════════
+   Una sola familia (Switzer) y DM Mono para los datos. Nada de cursivas ni
+   serif; botones rectos; el titular se sostiene solo con peso y tamano. */
+em,.it{font-family:var(--f)!important;font-style:normal!important;font-weight:400!important;letter-spacing:inherit!important;color:var(--mut)!important}
+.hero h1 em{font-size:1em;color:var(--mut)!important}
+.btn.p,.btn.s{border-radius:4px}
+.btn.p{background:var(--txt);color:#0B0B0C}
+.lbl b{font-family:var(--m)!important;font-style:normal!important;font-size:11px!important;letter-spacing:.14em!important;color:var(--txt)}
+.thesis .w.sig{font-family:var(--f)!important;font-style:normal!important;color:var(--acc2)!important}
+.stat b,.road-pct,.odo{font-family:var(--f)!important;font-style:normal!important;font-weight:300!important;letter-spacing:-.05em!important}
+.odo .d span b{font-weight:300}
+.ft-big{font-family:var(--f)!important;font-style:normal!important;font-weight:500!important;letter-spacing:-.06em!important;color:#161618;justify-content:space-between;font-size:clamp(64px,18.6vw,300px)}
+.hero h1{font-weight:400;letter-spacing:-.05em;font-size:clamp(50px,8.4vw,150px);line-height:.9}
+.tx-t b em{font-size:1em}
+
 .hero-st .hero-top,.hero-st .hero-bot{height:auto;display:flex;padding-top:0;padding-bottom:0;grid-template-columns:none}
 .hero-st .hero-c{height:auto;display:grid;grid-template-columns:1.3fr 1fr;padding-top:0;padding-bottom:0;align-content:end}
 @media (max-width:1000px){.hero-st .hero-c{grid-template-columns:1fr;grid-template-rows:none;gap:20px}}
@@ -431,7 +443,7 @@ em,.it{font-family:var(--serif);font-style:italic;font-weight:400;letter-spacing
   <div class="hero-st">
     <canvas id="fx" aria-hidden="true"></canvas>
     <div class="hero-top wrap m" aria-hidden="true">
-      <span>Scale model <b>1 : 1,000,000</b></span>
+      <span>Tokenized asset classes</span>
       <span class="hero-ch"><b id="vN">01</b> / 05 — <span class="v-name"><span id="vName">The asset itself</span></span></span>
     </div>
     <div class="hero-c wrap">
@@ -969,81 +981,65 @@ var cv = $('#fx'), E0 = null;
 var estado = {p:0}, mx=0, my=0, tmx=0, tmy=0, vis=true;
 addEventListener('pointermove', function(e){ tmx=(e.clientX/innerWidth-.5); tmy=(e.clientY/innerHeight-.5) }, {passive:true});
 /* y hacia arriba es negativo en pantalla: aqui se escribe «arriba» positivo y se voltea al final */
-function pieza(L,x,y,z,w,h,d,n,pB,col,vid){ var q={tx:x,ty:-y,tz:z,tw:w,th:h,td:d}; if(col){ q.c=col; q.g=!!vid } else tinta(q,n,pB); L.push(q); return q }
+/* LAS PIEZAS. Volumenes limpios, como una maqueta de arquitectura: medidas
+   en semiejes, «y» hacia arriba, y un material decidido pieza a pieza:
+   0 obsidiana (el cuerpo), 1 acento azul (un solo gesto por figura) y
+   2 cristal (fachadas, marcos, lo que en una maqueta seria metacrilato). */
+var OB=0, AC=1, CR=2;
+function caja(L,x,y,z,w,h,d,m,extra){ var q={tx:x,ty:-y,tz:z,tw:w,th:h,td:d,_m:m,c:m===CR?'#E9EDF6':(m===AC?'#1A5BF0':'#0C33B4'),g:m===CR}; if(extra) for(var k in extra) q[k]=extra[k]; L.push(q); return q }
+/* 01 el activo: el rombo del logotipo, con su franja clara */
 function diamante(){
-  var L=[], N=6, e=.34;
+  var L=[], N=5, e=.5, s=.215;
   for(var i=-N;i<=N;i++) for(var j=-N;j<=N;j++){ if(Math.abs(i)+Math.abs(j)>N) continue;
-    for(var c=0;c<2;c++){ var n=(i+20)*53+(j+20)*7+c*333, br=(i-j)<=-(N-2);
-      pieza(L,i*e,j*e+.6,c*e-.2,e*.46,e*.46,e*.46,n,.25, br?'#E9EDF6':null, false) } }
+    var franja=(i-j)>=N-1; for(var c=0;c<2;c++) caja(L,i*e,j*e,(c-.5)*e,s,s,s,franja?CR:OB) }
   return L;
 }
+/* 02 inmobiliario: torres de forjados con banda de vidrio y una aguja azul */
 function ciudad(){
-  var L=[], e=.26, torres=[[-2.2,0,2,2,9],[-1.2,-.6,3,3,15],[0,.3,2,2,11],[1.1,-.3,3,2,19],[2.3,.4,2,2,8],[-.5,1.1,2,2,6],[1.9,-1.1,2,2,13]];
-  torres.forEach(function(T,ti){
-    for(var f=0;f<T[4];f++) for(var a=0;a<T[2];a++) for(var b=0;b<T[3];b++){
-      if(a>0&&a<T[2]-1&&b>0&&b<T[3]-1) continue;
-      var n=ti*977+f*31+a*7+b, ventana=f%2===1&&f<T[4]-1;
-      pieza(L,T[0]+a*e,f*e*.9-1.6,T[1]+b*e,e*.47,e*.44,e*.47,n,0, ventana?BLANCOS[n%2]:AZULES[(ti+f)%5], ventana);
-    }
-    if(T[4]>14) for(var k=0;k<4;k++) pieza(L,T[0]+(T[2]-1)*e/2,(T[4]+k)*e*.9-1.6,T[1]+(T[3]-1)*e/2,e*.14,e*.44,e*.14,ti*5+k,0,'#E9EDF6',false);
+  var L=[], H=.2;
+  caja(L,0,-.04,0,2.9,.04,1.9,CR);
+  [[-1.75,.55,.36,.36,9],[-.7,-.35,.46,.46,17],[.55,.4,.4,.4,13],[1.65,-.25,.34,.34,8],[.9,-1.2,.3,.3,5],[-1.5,-1.05,.34,.3,6],[-2.3,-.3,.26,.26,4]].forEach(function(T,ti){
+    for(var f=0;f<T[4];f++){ var y=f*H;
+      caja(L,T[0],y+.075,T[1],T[2],.075,T[3],OB);
+      caja(L,T[0],y+.17,T[1],T[2]+.015,.025,T[3]+.015,CR) }
+    if(ti===1){ caja(L,T[0],T[4]*H+.35,T[1],.035,.35,.035,AC) }
   });
-  /* una casa: planta, fachada con ventanas y tejado a dos aguas escalonado */
-  var hx=-3.3, hz=.9;
-  for(var f=0;f<3;f++) for(var a=0;a<4;a++) for(var b=0;b<3;b++){ if(a>0&&a<3&&b>0&&b<2) continue;
-    pieza(L,hx+a*e,f*e*.9-1.6,hz+b*e,e*.47,e*.44,e*.47,f*9+a*3+b,0,(f===1&&(a===1||a===2))?'#E9EDF6':AZULES[(a+b)%3+1],f===1&&(a===1||a===2)) }
-  for(var r=0;r<3;r++) for(var a=0;a<4;a++) pieza(L,hx+a*e,(3+r)*e*.9-1.6,hz+(r*.5)*e,e*.49,e*.2,(1.5-r*.5)*e+e*.02,77+r*4+a,0,'#2E62C8',false);
-  /* el suelo */
-  for(var a=-6;a<=6;a++) for(var b=-2;b<=3;b++) if((a+b)%2===0) pieza(L,a*.55,-1.86,b*.55,.26,.02,.26,a*13+b,0,'#C3CCDD',true);
   return L;
 }
+/* 03 materias primas: pila de lingotes y contenedores de un puerto */
 function materias(){
   var L=[];
-  /* lingotes en piramide */
-  var filas=[4,3,2,1];
-  filas.forEach(function(nf,f){ for(var k=0;k<nf;k++) for(var c=0;c<2;c++){ var n=f*40+k*3+c;
-    pieza(L,-2.2+(k-(nf-1)/2)*.74,-1.2+f*.3,c*.46-.2,.34,.13,.2,n,0, (n%3===0)?'#E9EDF6':AZULES[(n%4)+1], false) } });
-  /* un silo: anillos de piezas y cupula */
-  for(var f=0;f<12;f++){ var rr=f<9?.5:.5-(f-8)*.12, na=f<9?14:Math.max(4,14-(f-8)*3);
-    for(var k=0;k<na;k++){ var a=k/na*6.283; pieza(L,-.2+Math.cos(a)*rr,-1.2+f*.25,.2+Math.sin(a)*rr,.1,.12,.1,1500+f*20+k,0,(f%3===0)?'#C3CCDD':(f<9?'#E9EDF6':AZULES[2]),f%3!==0&&f<9) } }
-  /* contenedores apilados */
-  for(var f=0;f<3;f++) for(var k=0;k<(f===2?2:3);k++){ var n=500+f*10+k;
-    var q=pieza(L,1.1+k*.95-(f===2?-.47:0),-1.2+f*.52,.1,.44,.24,.24,n,0,[AZULES[2],'#C3CCDD',AZULES[0],AZULES[3],'#E9EDF6',AZULES[1],AZULES[4],'#C3CCDD'][(f*3+k)%8],false);
-    /* nervaduras del contenedor */
-    for(var r=0;r<5;r++) pieza(L,q.tx-.36+r*.18,-q.ty,q.tz+.25,.012,.235,.012,n*7+r,0,'#E9EDF6',false);
-  }
+  caja(L,0,-.04,0,2.9,.04,1.5,CR);
+  [4,3,2,1].forEach(function(nf,f){ for(var k=0;k<nf;k++) for(var c=0;c<2;c++)
+    caja(L,-1.45+(k-(nf-1)/2)*.72,f*.22+.1,(c-.5)*.44,.32,.1,.19,(f===3?AC:(f===0&&c===0?CR:OB))) });
+  for(var f=0;f<3;f++) for(var k=0;k<(f===2?2:3);k++){ var x=.7+k*.95+(f===2?.47:0), y=f*.46+.22;
+    caja(L,x,y,-.15,.45,.21,.21,OB);
+    caja(L,x,y,.07,.44,.2,.012,CR) }
   return L;
 }
+/* 04 energia: un campo solar, un banco de baterias y un aerogenerador */
 function energia(){
   var L=[];
-  /* placas solares inclinadas sobre patas */
-  for(var r=0;r<3;r++) for(var k=0;k<4;k++){ var n=r*11+k, x=-3+k*.95, z=-.3+r*.8;
-    var q=pieza(L,x,-1.1+r*.04,z,.42,.02,.3,n,0,AZULES[(r+k)%2?0:1],false); q.trx=.62;
-    for(var a=0;a<3;a++){ var c=pieza(L,x-.28+a*.28,-1.1+r*.04+.012,z,.004,.024,.3,n*5+a,0,'#C3CCDD',false); c.trx=.62 }
-    pieza(L,x,-1.45,z+.1,.03,.3,.03,n+300,0,'#C3CCDD',true);
-  }
-  /* aerogenerador: torre que se estrecha, gondola y tres palas */
-  var bx=1.9, top=1.62;
-  for(var f=0;f<12;f++){ var w=.13-f*.005; pieza(L,bx,-1.6+f*.27,0,w,.135,w,900+f,0,f%3?'#E9EDF6':'#C3CCDD',false) }
-  pieza(L,bx,top,-.05,.22,.12,.12,950,0,AZULES[2],false);
-  for(var pa=0;pa<3;pa++) for(var k=0;k<9;k++){ var q=pieza(L,bx,top,.1,.07-k*.004,.14,.02,960+pa*20+k,0,k>6?AZULES[3]:'#E9EDF6',false); q.pala=pa; q.rk=.2+k*.27 }
-  /* el sol */
-  for(var k=0;k<24;k++){ var a=k/24*6.283; pieza(L,-1.3+Math.cos(a)*.5,2.3+Math.sin(a)*.5,-.6,.07,.07,.07,1200+k,0,k%2?'#3E7BFF':'#E9EDF6',false) }
+  caja(L,0,-.04,0,2.9,.04,1.7,CR);
+  for(var r=0;r<3;r++) for(var k=0;k<4;k++){ var x=-2.3+k*.66, z=-.6+r*.62;
+    caja(L,x,.32,z,.29,.012,.2,OB,{trx:.55}); caja(L,x,.33,z,.3,.004,.21,CR,{trx:.55});
+    caja(L,x,.15,z+.06,.02,.15,.02,CR) }
+  for(var b=0;b<3;b++) for(var s=0;s<5;s++) caja(L,.25+b*.34,s*.14+.08,.8,.13,.06,.18,s<(b===1?3:4)?AC:OB);
+  for(var f=0;f<10;f++){ var w=.075-f*.004; caja(L,1.75,f*.26+.13,-.1,w,.13,w,CR) }
+  caja(L,1.75,2.66,-.1,.2,.08,.1,OB);
+  for(var pa=0;pa<3;pa++) for(var k=0;k<7;k++) caja(L,1.75,2.66,.05,.05-k*.004,.12,.012,CR,{pala:pa,rk:.18+k*.24});
   return L;
 }
+/* 05 credito privado: la fachada de un banco y pilas de fichas */
 function banco(){
-  var L=[], e=.3;
-  /* escalinata */
-  for(var s_=0;s_<3;s_++) pieza(L,-.9,-1.6+s_*.14,.1-s_*.08,1.9-s_*.12,.07,.75-s_*.08,s_,0,s_%2?'#C3CCDD':'#E9EDF6',false);
-  /* columnas de tambores */
-  for(var c=0;c<6;c++) for(var f=0;f<9;f++) pieza(L,-2.4+c*.6,-1.12+f*.26,.1,.1,.125,.1,c*20+f,0,f===0||f===8?'#E9EDF6':'#C3CCDD',false);
-  /* arquitrabe y friso */
-  pieza(L,-.9,1.26,.1,1.72,.1,.5,700,0,'#E9EDF6',false);
-  pieza(L,-.9,1.46,.1,1.64,.08,.46,701,0,AZULES[2],false);
-  /* fronton escalonado */
-  for(var r=0;r<6;r++) pieza(L,-.9,1.6+r*.13,.1,1.6-r*.28,.065,.44,710+r,0,r%2?'#E9EDF6':'#C3CCDD',false);
-  /* monedas apiladas al lado */
-  [[1.8,.4,11],[2.45,.0,7],[2.2,.9,15],[3.0,.6,4]].forEach(function(P,pi){
-    for(var k=0;k<P[2];k++){ var q=pieza(L,P[0],-1.58+k*.1,P[1],.24,.04,.24,800+pi*30+k,0,k%2?AZULES[pi%5]:AZULES[(pi+2)%5],false); q.try_=k*.39 } });
+  var L=[];
+  for(var s_=0;s_<3;s_++) caja(L,-.9,s_*.1+.05,.1-s_*.08,1.9-s_*.12,.05,.75-s_*.08,s_===2?CR:OB);
+  for(var c=0;c<6;c++) caja(L,-2.3+c*.56,1.1,.1,.09,.8,.09,CR);
+  caja(L,-.9,1.97,.1,1.72,.07,.5,OB);
+  caja(L,-.9,2.07,.1,1.66,.03,.46,AC);
+  for(var r=0;r<5;r++) caja(L,-.9,2.16+r*.1,.1,1.6-r*.33,.05,.44,OB);
+  [[1.6,.35,12],[2.2,-.1,8],[2.05,.65,5]].forEach(function(P){
+    for(var k=0;k<P[2];k++) caja(L,P[0],k*.075+.04,P[1],.22,.03,.22,k===P[2]-1?AC:(k%2?OB:CR)) });
   return L;
 }
 var FORMAS=[diamante(), ciudad(), materias(), energia(), banco()];
@@ -1060,7 +1056,7 @@ var NMAX=0; FORMAS.forEach(function(F){ F.sort(function(a,b){ return a.ty-b.ty||
 var UNI=[]; for(var u=0;u<NMAX;u++) UNI.push({x:0,y:0,z:0,w:0,h:0,d:0,rx:0,ry:0,rz:0,l:0,a:1,c:'#1A5BF0',g:false,r0:azar(u+7)*5,sx:(azar(u)-.5)*9,sy:(azar(u+1)-.5)*7,sz:(azar(u+2)-.5)*6});
 function objetivo(F,u,t){
   var q=F[u]; if(!q) return null;
-  var o={x:q.tx,y:q.ty,z:q.tz,w:q.tw,h:q.th,d:q.td,rx:q.trx||0,ry:q.try_||0,c:q.c,g:q.g};
+  var o={x:q.tx,y:q.ty,z:q.tz,w:q.tw,h:q.th,d:q.td,rx:q.trx||0,ry:q.try_||0,c:q.c,g:q.g,m:q._m};
   if(q.pala!=null){ var ang=t*1.4+q.pala*2.094, r=q.rk; o.x=q.tx+Math.cos(ang)*r; o.y=q.ty-Math.sin(ang)*r; o.rz=-ang+Math.PI/2 }
   return o;
 }
@@ -1074,19 +1070,20 @@ function pinta(t){
   var A=FORMAS[a], B=FORMAS[a+1], vuelo=Math.sin(k*Math.PI);
   for(var u=0;u<NMAX;u++){
     var q=UNI[u], oa=objetivo(A,u,t), ob=objetivo(B,u,t);
-    if(!oa) oa={x:q.sx*.3,y:q.sy*.3,z:q.sz*.3,w:0,h:0,d:0,rx:0,ry:0,rz:0,c:ob?ob.c:q.c,g:ob?ob.g:false};
-    if(!ob) ob={x:q.sx*.3,y:q.sy*.3,z:q.sz*.3,w:0,h:0,d:0,rx:0,ry:0,rz:0,c:oa.c,g:oa.g};
+    if(!oa) oa={x:q.sx*.3,y:q.sy*.3,z:q.sz*.3,w:0,h:0,d:0,rx:0,ry:0,rz:0,c:ob?ob.c:q.c,g:ob?ob.g:false,m:ob?ob.m:0};
+    if(!ob) ob={x:q.sx*.3,y:q.sy*.3,z:q.sz*.3,w:0,h:0,d:0,rx:0,ry:0,rz:0,c:oa.c,g:oa.g,m:oa.m};
     q.x=oa.x+(ob.x-oa.x)*k+q.sx*vuelo*.35; q.y=oa.y+(ob.y-oa.y)*k+q.sy*vuelo*.35; q.z=oa.z+(ob.z-oa.z)*k+q.sz*vuelo*.35;
     q.w=oa.w+(ob.w-oa.w)*k; q.h=oa.h+(ob.h-oa.h)*k; q.d=oa.d+(ob.d-oa.d)*k;
     q.rx=(oa.rx||0)+((ob.rx||0)-(oa.rx||0))*k+vuelo*q.r0; q.ry=(oa.ry||0)+((ob.ry||0)-(oa.ry||0))*k+vuelo*q.r0*.7; q.rz=(oa.rz||0)+((ob.rz||0)-(oa.rz||0))*k;
-    var fin=k<.5?oa:ob; q.c=fin.c; q.g=fin.g;
-    q.l=vuelo*.35; q.a=1;
+    var fin=k<.5?oa:ob; q.c=fin.c; q.g=fin.g; q._m=fin.m==null?0:fin.m;
+    q.l=vuelo*.25; q.a=1;
   }
   var M=innerWidth<700;
   /* la maqueta: gran angular suave, tilt-shift arriba y abajo y suelo espejo */
-  E0.fx={b:.16, z:vuelo*.3, a:.0012+vuelo*.008, ts:M?.6:1, ty:M?.42:.46};
-  E0.pinta(UNI,{yaw:-.62+Math.sin(t*.1)*.14+mx*.3, pitch:.3+my*.06+Math.sin(t*.08)*.02, roll:0, dist:M?15:12.5, fov:1.05, near:6, far:40,
-    ox:M?0:.13, oy:M?-.13:-.12, floor:M?null:2.08, refA:.13, floorScreen:.6});
+  /* optica limpia en reposo: el zoom y la aberracion solo aparecen al cambiar de figura */
+  E0.fx={b:.08, z:vuelo*.26, a:vuelo*.007, ts:0};
+  E0.pinta(UNI,{yaw:-.62+Math.sin(t*.1)*.12+mx*.25, pitch:.34+my*.05+Math.sin(t*.08)*.015, roll:0, dist:M?18:13.2, fov:1.05, near:6, far:40,
+    ox:M?0:.19, oy:M?-.2:-.17, floor:M?null:2.06, refA:.08, floorScreen:.6});
 }
 requestAnimationFrame(pinta);
 new IntersectionObserver(function(es){ vis=es[0].isIntersecting }).observe(cv);
