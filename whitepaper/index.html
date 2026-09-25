@@ -2420,20 +2420,39 @@ cualquiera puede consultar en el registro del estado.</p>
 <h2 id="token">Sobre el token</h2>
 
 <h3>¿Se puede crear más NRM?</h3>
-<p>No. El suministro está fijado en 160.000.000 en el génesis y no existe función
-de acuñación que nadie pueda invocar. Con la <a class="enl" href="https://robinhoodchain.blockscout.com/tx/0xae5fd230fa1387b9a3b38ab9e048304ec81f4753c355a25092d3e9fa54549edb" target="_blank" rel="noopener">propiedad renunciada &#8599;</a>, tampoco se
-podría añadir después. Comprueba tú mismo el suministro y el contrato en
-<a class="enl" href="https://nereum.xyz/explorer">nereum.xyz/explorer</a>.</p>
+<p>No, y la razón no es una promesa nuestra: es cómo funciona la máquina.</p>
+<p>Los 160.000.000 se acuñaron una sola vez, al desplegar el contrato. El código
+no contiene ninguna función que cree tokens nuevos. Y el código de un contrato
+ya desplegado no se puede reescribir: queda grabado en la cadena tal como se
+publicó. Una función que no está ahí no se puede añadir después — ni nosotros,
+ni un futuro equipo, ni nadie que se hiciera con nuestras claves.</p>
+<p>Hay dos maneras conocidas de saltarse eso, y ninguna cabe aquí. La primera es
+un contrato actualizable: un <em>proxy</em> que guarda las cuentas en un sitio y
+va a buscar el código a otro, de modo que cambiando el segundo cambian las
+reglas. NRM no es un proxy, es un contrato plano. La segunda es una función
+reservada al propietario; la <a class="enl" href="https://robinhoodchain.blockscout.com/tx/0xae5fd230fa1387b9a3b38ab9e048304ec81f4753c355a25092d3e9fa54549edb" target="_blank" rel="noopener">propiedad está renunciada &#8599;</a> y el campo
+de propietario es la dirección cero, así que no queda ninguna dirección a la que
+esa reserva pudiera obedecer.</p>
+<p>Nada de esto hay que creérnoslo. El código está verificado en Blockscout y se
+puede leer entero, y el suministro se mira en <a class="enl" href="https://nereum.xyz/explorer">nereum.xyz/explorer</a>.</p>
 
 <h3>¿Hay impuesto al comprar o vender?</h3>
 <p>No. No hay ninguna función de comisión en el contrato — no es una comisión
 puesta a cero que pudiera subirse después.</p>
 
 <h3>¿Pueden congelar o bloquear mi cartera?</h3>
-<p>No. Se ha <a class="enl" href="https://robinhoodchain.blockscout.com/tx/0xae5fd230fa1387b9a3b38ab9e048304ec81f4753c355a25092d3e9fa54549edb" target="_blank" rel="noopener">renunciado a la propiedad del contrato &#8599;</a>, así que no existe ninguna
-dirección con poder para pausar transferencias ni bloquear a un titular. El campo
-de propietario figura como la dirección cero, y puedes verificarlo en
-<a class="enl" href="https://nereum.xyz/explorer">nereum.xyz/explorer</a>.</p>
+<p>No. Un contrato sólo puede hacer aquello que su código dice, y el de NRM no
+dice nada de esto: no hay función de pausa, ni lista negra, ni lista blanca, ni
+un gancho en las transferencias que consulte ninguna lista. Al transferir se
+comprueban dos cosas —que la cartera tenga saldo y, si el envío lo ordena un
+tercero, que tenga tu permiso— y ninguna más.</p>
+<p>Como el código desplegado no se puede reescribir, esa función tampoco se puede
+añadir más tarde. Y la <a class="enl" href="https://robinhoodchain.blockscout.com/tx/0xae5fd230fa1387b9a3b38ab9e048304ec81f4753c355a25092d3e9fa54549edb" target="_blank" rel="noopener">propiedad está renunciada &#8599;</a>: el campo de
+propietario es la dirección cero, de modo que ni siquiera queda una dirección con
+privilegios a la que pedírselo.</p>
+<p>Dicho de otro modo: congelar tu cartera exigiría cambiar el código de un
+contrato que ya no se puede cambiar, por orden de un propietario que ya no
+existe. Se comprueba en <a class="enl" href="https://nereum.xyz/explorer">nereum.xyz/explorer</a>.</p>
 
 <h3>¿Dónde cotiza NRM y a qué precio?</h3>
 <p>A $1,00 en Uniswap v3. Como v3 concentra la liquidez en un rango elegido, el
@@ -3100,20 +3119,37 @@ up on the state registry.</p>
 <h2 id="token">About the token</h2>
 
 <h3>Can more NRM be created?</h3>
-<p>No. Supply is fixed at 160,000,000 at genesis and there is no mint function
-anyone can call. With <a class="enl" href="https://robinhoodchain.blockscout.com/tx/0xae5fd230fa1387b9a3b38ab9e048304ec81f4753c355a25092d3e9fa54549edb" target="_blank" rel="noopener">ownership renounced &#8599;</a>, none could be added later either.
-Check the supply and the contract yourself on
-<a class="enl" href="https://nereum.xyz/explorer">nereum.xyz/explorer</a>.</p>
+<p>No — and the reason is not a promise from us, it is how the machine works.</p>
+<p>All 160,000,000 were minted once, when the contract was deployed. The code
+contains no function that creates new tokens. And the code of a deployed contract
+cannot be rewritten: it is fixed on chain exactly as published. A function that
+is not there cannot be added later — not by us, not by a future team, not by
+anyone who got hold of our keys.</p>
+<p>There are two known ways around that, and neither applies here. The first is an
+upgradeable contract: a <em>proxy</em> that keeps the books in one place and
+fetches its code from another, so changing the second changes the rules. NRM is
+not a proxy; it is a plain contract. The second is a function reserved to the
+owner; <a class="enl" href="https://robinhoodchain.blockscout.com/tx/0xae5fd230fa1387b9a3b38ab9e048304ec81f4753c355a25092d3e9fa54549edb" target="_blank" rel="noopener">ownership is renounced &#8599;</a> and the owner field is the zero
+address, so there is no address left for such a reservation to obey.</p>
+<p>None of this has to be taken on trust. The source is verified on Blockscout and
+can be read in full, and the supply is visible on <a class="enl" href="https://nereum.xyz/explorer">nereum.xyz/explorer</a>.</p>
 
 <h3>Is there a tax on buying or selling?</h3>
 <p>No. There is no fee function in the contract at all — not a fee set to zero
 that could be raised later.</p>
 
 <h3>Can my wallet be frozen or blacklisted?</h3>
-<p>No. Contract ownership has <a class="enl" href="https://robinhoodchain.blockscout.com/tx/0xae5fd230fa1387b9a3b38ab9e048304ec81f4753c355a25092d3e9fa54549edb" target="_blank" rel="noopener">been renounced &#8599;</a>, so there is no address with the
-power to pause transfers or block a holder. The owner field reads as the zero
-address, and you can verify it on
-<a class="enl" href="https://nereum.xyz/explorer">nereum.xyz/explorer</a>.</p>
+<p>No. A contract can only do what its code says, and the NRM code says nothing
+of the kind: there is no pause function, no blacklist, no whitelist, and no
+transfer hook that consults any list. A transfer checks two things — that the
+wallet holds the balance and, if a third party is moving it, that they have your
+allowance — and nothing else.</p>
+<p>Since deployed code cannot be rewritten, such a function cannot be added later
+either. And <a class="enl" href="https://robinhoodchain.blockscout.com/tx/0xae5fd230fa1387b9a3b38ab9e048304ec81f4753c355a25092d3e9fa54549edb" target="_blank" rel="noopener">ownership is renounced &#8599;</a>: the owner field is the zero
+address, so there is not even a privileged address left to ask.</p>
+<p>Put another way: freezing your wallet would take changing the code of a
+contract that can no longer be changed, on the orders of an owner who no longer
+exists. Check it on <a class="enl" href="https://nereum.xyz/explorer">nereum.xyz/explorer</a>.</p>
 
 <h3>Where does NRM list, and at what price?</h3>
 <p>At $1.00 on Uniswap v3. Because v3 concentrates liquidity in a chosen range,
