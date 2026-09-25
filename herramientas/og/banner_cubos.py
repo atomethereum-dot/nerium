@@ -60,7 +60,12 @@ await pg.evaluate(() => {
       color:rgba(255,255,255,.80);pointer-events:none;white-space:nowrap;
       text-shadow:0 0 14px rgba(6,7,10,.95),0 0 4px rgba(6,7,10,.95)}
     .ban-url.tl{left:46px;top:40px}
-    .ban-url.br{right:46px;bottom:40px}`;
+    .ban-url.br{right:46px;bottom:40px}
+    /* la palabra del centro es lo unico que hay que poder leer de un vistazo */
+    #xfade .xf-word{color:#fff !important;font-size:16px !important;
+      letter-spacing:.52em !important;
+      text-shadow:0 0 26px rgba(4,7,16,.98),0 0 10px rgba(4,7,16,.95),
+                  0 1px 2px rgba(4,7,16,.9) !important}`;
   document.head.appendChild(css);
   for (const d of ['tl','br']) {
     const n = document.createElement('div');
@@ -81,7 +86,7 @@ console.log('  · escena en y=' + sitio.y + ', recorrido ' + sitio.run);
 /* El enjambre se siembra al azar: hay tiradas en las que un cubo grande cae
    justo encima de la palabra del centro y se la come. Se mira la franja que
    hay detras del texto y, si viene cargada, se vuelve a tirar. */
-const CLARO = 30, PICO = 120;
+const CLARO = 52, TAPADO = 0.045;   /* media de la franja y parte de ella comida */
 let tirada = 0, franja = null;
 for (; tirada < 8; tirada++) {
   await pg.waitForTimeout(3200);                            /* que el enjambre coja fondo */
@@ -93,16 +98,20 @@ for (; tirada < 8; tirada++) {
     const px = Math.round((w.left - st.left - 24) * d), py = Math.round((w.top - st.top - 10) * d);
     const pw = Math.round((w.width + 48) * d), ph = Math.round((w.height + 20) * d);
     const im = cv.getContext('2d').getImageData(px, py, pw, ph).data;
-    let suma = 0, pico = 0;
+    /* El pico no sirve de vara: con los cubos ya claros, un solo pixel
+       brillante rozando la franja lo dispara y no habria tirada buena. Lo
+       que estorba a la lectura es que una PARTE de la franja venga clara,
+       asi que se cuenta cuanta. */
+    let suma = 0, claros = 0, n = im.length / 4;
     for (let i = 0; i < im.length; i += 4) {
       const l = 0.2126*im[i] + 0.7152*im[i+1] + 0.0722*im[i+2];
-      suma += l; if (l > pico) pico = l;
+      suma += l; if (l > 120) claros++;
     }
-    return { media: suma / (im.length / 4), pico, caja: [px, py, pw, ph] };
+    return { media: suma / n, tapado: claros / n, caja: [px, py, pw, ph] };
   });
-  if (franja.media < CLARO && franja.pico < PICO) break;
+  if (franja.media < CLARO && franja.tapado < TAPADO) break;
   console.log('  · tirada ' + (tirada+1) + ': la palabra queda tapada (media ' +
-              franja.media.toFixed(1) + ', pico ' + franja.pico.toFixed(0) + ') — se repite');
+              franja.media.toFixed(1) + ', ' + (franja.tapado*100).toFixed(1) + '%% comida) — se repite');
   await pg.reload({ waitUntil:'load' });
   await pg.evaluate(() => document.fonts && document.fonts.ready);
   await pg.waitForTimeout(900);
@@ -125,7 +134,11 @@ for (; tirada < 8; tirada++) {
         color:rgba(255,255,255,.80);pointer-events:none;white-space:nowrap;
         text-shadow:0 0 14px rgba(6,7,10,.95),0 0 4px rgba(6,7,10,.95)}
       .ban-url.tl{left:46px;top:40px}
-      .ban-url.br{right:46px;bottom:40px}`;
+      .ban-url.br{right:46px;bottom:40px}
+      #xfade .xf-word{color:#fff !important;font-size:16px !important;
+        letter-spacing:.52em !important;
+        text-shadow:0 0 26px rgba(4,7,16,.98),0 0 10px rgba(4,7,16,.95),
+                    0 1px 2px rgba(4,7,16,.9) !important}`;
     document.head.appendChild(css);
     for (const d of ['tl','br']) {
       const n = document.createElement('div');
@@ -137,11 +150,11 @@ for (; tirada < 8; tirada++) {
     scrollTo(0, y + %(punto)s * Math.max(1, sec.offsetHeight - innerHeight));
   });
 }
-if (!franja || franja.media >= CLARO || franja.pico >= PICO) {
+if (!franja || franja.media >= CLARO || franja.tapado >= TAPADO) {
   console.log('  x ocho tiradas y la palabra sigue tapada'); process.exit(1);
 }
-console.log('  · palabra libre en la tirada ' + (tirada+1) +
-            ' (media ' + franja.media.toFixed(1) + ', pico ' + franja.pico.toFixed(0) + ')');
+console.log('  · palabra libre en la tirada ' + (tirada+1) + ' (media ' +
+            franja.media.toFixed(1) + ', ' + (franja.tapado*100).toFixed(1) + '%% comida)');
 
 const st = await pg.evaluate(() => {
   const s = document.getElementById('xfStage');
@@ -175,8 +188,34 @@ def parchea(dst):
             hechos['ancho'] += 1
     if hechos['cuantos'] != 1 or hechos['ancho'] != 2:
         sys.exit('  x la escena #xfade ha cambiado de forma: ' + repr(hechos))
-    open(p, 'w', encoding='utf-8').write('\n'.join(L))
-    print('  · escena abierta de lado y subida a 1000 cubos')
+
+    # En la web la escena se ve a pantalla completa y en movimiento, asi que
+    # aguanta ser casi negra. Una foto quieta y pequena en una linea de tiempo
+    # no: se lee como un rectangulo oscuro. Se le sube la luz.
+    t = '\n'.join(L)
+    luz = [
+        # la paleta, un paso mas arriba (los mismos azules, no otros)
+        ('const PAL=[[24,59,246],[8,28,196],[28,46,140],[48,53,128],[26,25,60],[4,13,104]];',
+         'const PAL=[[58,102,255],[38,72,232],[62,88,186],[86,94,176],[62,60,112],[30,48,156]];'),
+        # mas cubos claros entre los azules
+        ('const cl=Math.random()<0.16;', 'const cl=Math.random()<0.24;'),
+        # y todos menos transparentes
+        ('a:cl?0.20+Math.random()*0.30 : 0.30+Math.random()*0.7',
+         'a:cl?0.38+Math.random()*0.34 : 0.52+Math.random()*0.48'),
+        # el suelo deja de ser casi negro...
+        ("ctx.fillStyle='#06070A';ctx.fillRect(0,0,W,H);",
+         "ctx.fillStyle='#0B1020';ctx.fillRect(0,0,W,H);"),
+        # ...y las persianas, que a esta altura de la escena lo tapan entero,
+        # tampoco: eran negro puro y por eso el suelo no se notaba nunca
+        ("      const h=H*k, down=i%2===0, y=down?0:H-h;\n      ctx.fillStyle='#000000';",
+         "      const h=H*k, down=i%2===0, y=down?0:H-h;\n      ctx.fillStyle='#0A1122';"),
+    ]
+    for a, b in luz:
+        if t.count(a) != 1:
+            sys.exit('  x no encuentro donde subir la luz: ' + a[:40])
+        t = t.replace(a, b, 1)
+    open(p, 'w', encoding='utf-8').write(t)
+    print('  · escena abierta de lado, 1000 cubos y un paso mas de luz')
 
 def main():
     if not os.path.exists(CROMO):
