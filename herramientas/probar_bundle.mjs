@@ -1,6 +1,8 @@
 import { chromium } from 'playwright';
 import http from 'node:http'; import fs from 'node:fs';
-const JS = fs.readFileSync('/tmp/claude-0/-home-user-test2/f0f81d8c-503b-5035-a856-a071059ad8b5/scratchpad/wcbuild/salida.js');
+/* El haz que de verdad viaja al navegador, no el de una carpeta de /tmp que
+   se evapora al reiniciarse el contenedor. */
+const JS = fs.readFileSync('/home/user/nerium/assets/walletconnect.js');
 const srv=http.createServer((q,r)=>{
   if(q.url.startsWith('/wc.js')){ r.writeHead(200,{'content-type':'text/javascript'}); return r.end(JS); }
   r.writeHead(200,{'content-type':'text/html'}); r.end('<!doctype html><meta charset=utf-8><body>hola');
