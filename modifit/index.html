@@ -263,6 +263,49 @@ h1,h2,h3{font-weight:500;letter-spacing:-.035em;text-wrap:balance}
   .hero-cta .btn{height:44px;padding:0 18px;font-size:14px}
 }
 @media (prefers-reduced-motion:reduce){.snap-in{animation:none}}
+
+/* ══ PORTADA: SEDA AZUL ═══════════════════════════════════════════════════════
+   Un shader a pantalla completa: seda liquida en azul noche, azul Nereum y
+   reflejos hielo que fluye sola. El puntero la abomba como una lente con
+   aberracion cromatica; al bajar, la seda se descompone en pixeles cuadrados
+   (los cubos de la casa) y la portada se recoge en una tarjeta. */
+.hx{position:relative;height:190vh;background:var(--bg)}
+.hx-st{position:sticky;top:0;height:100vh;height:100svh;overflow:hidden;background:#040817;color:#fff;will-change:clip-path}
+#silk{position:absolute;inset:0;width:100%;height:100%}
+.hx-noise{position:absolute;inset:0;pointer-events:none;opacity:.08;mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+.hx-st::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(180deg,rgba(4,8,23,.5) 0%,rgba(4,8,23,0) 30%,rgba(4,8,23,0) 55%,rgba(4,8,23,.75) 100%)}
+.hx-in{position:absolute;left:0;right:0;bottom:clamp(100px,15vh,150px);z-index:2;display:grid;gap:28px}
+.hx-k{display:inline-flex;align-items:center;gap:10px;color:rgba(255,255,255,.7)}
+.hx-k i{width:7px;height:7px;border-radius:50%;background:#6EE7B7;box-shadow:0 0 12px #6EE7B7}
+.hx-h{font-size:clamp(52px,9.6vw,168px);line-height:.9;letter-spacing:-.06em;font-weight:500;color:#fff}
+.hx-dim{color:rgba(214,226,255,.55)}
+.hx-row{display:grid;grid-template-columns:1fr auto;gap:40px;align-items:end;padding-top:26px;border-top:1px solid rgba(255,255,255,.14)}
+.hx-row p{max-width:48ch;font-size:clamp(15px,1.2vw,18px);line-height:1.55;color:rgba(226,234,255,.75)}
+.hx-cta{display:flex;gap:10px;flex-wrap:wrap}
+.btn.g{background:rgba(255,255,255,.08);color:#fff;border:1px solid rgba(255,255,255,.2);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.btn.g:hover{background:rgba(255,255,255,.16)}
+.hx-bot{position:absolute;left:0;right:0;bottom:28px;z-index:2;display:flex;justify-content:space-between;align-items:center;color:rgba(255,255,255,.5)}
+.hx-bot b{font-weight:400;color:#fff}
+.hx-data{display:flex;gap:26px}
+.hx-scroll{display:inline-flex;align-items:center;gap:10px}
+.hx-scroll i{width:1px;height:26px;background:linear-gradient(#fff,transparent);animation:drip 2s var(--e) infinite}
+@keyframes drip{0%{transform:scaleY(0);transform-origin:0 0}50%{transform:scaleY(1);transform-origin:0 0}51%{transform-origin:0 100%}100%{transform:scaleY(0);transform-origin:0 100%}}
+.after{position:relative;z-index:2;margin-top:-30vh;padding-top:36px;background:var(--bg);border-radius:36px 36px 0 0;box-shadow:0 -30px 60px -30px rgba(4,8,23,.5)}
+/* la cabecera sobre la portada oscura */
+.hd.dark .brand,.hd.dark .nav a{color:#fff}
+.hd.dark .nav a{color:rgba(255,255,255,.75)}.hd.dark .nav a:hover{background:rgba(255,255,255,.1);color:#fff}
+.hd.dark .btn.s{background:rgba(255,255,255,.08);color:#fff;border-color:rgba(255,255,255,.2)}
+.hd.dark .btn.p{background:#fff;color:#0C1220}
+@media (max-width:900px){
+  .hx{height:170vh}
+  .hx-row{grid-template-columns:1fr;gap:22px}
+  .hx-in{bottom:84px;gap:20px}
+  .hx-h{font-size:clamp(46px,13.4vw,76px)}
+  .hx-data{display:none}
+  .after{margin-top:-24vh;border-radius:26px 26px 0 0}
+}
+@media (prefers-reduced-motion:reduce){.hx-scroll i{animation:none}}
 </style>
 </head>
 <body>
@@ -277,7 +320,7 @@ h1,h2,h3{font-weight:500;letter-spacing:-.035em;text-wrap:balance}
 </svg>
 
 
-<div class="pre" id="pre" aria-hidden="true"><svg id="preLogo"><use href="#logo"/></svg></div>
+<div class="pre" id="pre" aria-hidden="true" style="background:#040817;color:#fff"><svg id="preLogo"><use href="#logo"/></svg></div>
 
 <header class="hd" id="hd"><div class="wrap">
   <a class="brand" href="#top"><svg aria-hidden="true"><use href="#logo"/></svg>Nereum</a>
@@ -297,29 +340,32 @@ h1,h2,h3{font-weight:500;letter-spacing:-.035em;text-wrap:balance}
 
 <main>
 <!-- ═══ PORTADA ═══ -->
-<section class="hero" id="top">
-  <div class="wrap hero-t">
-    <span class="eyebrow"><i></i>Testnet live · 75% to mainnet</span>
-    <h1 class="split-h"><span class="ln"><span>Real-world assets,</span></span><span class="ln"><span class="bl">settled onchain.</span></span></h1>
-    <p>Nereum is the settlement layer for real-world assets. Issuance, policy, access and liquidity in one protocol, registered in the United States and independently audited.</p>
-    <div class="hero-cta">
-      <a class="btn b" href="https://nereum.xyz/whitepaper">Read the whitepaper <span class="arr">&rarr;</span></a>
-      <a class="btn s" href="https://nereum.xyz/explorer">Open the explorer</a>
+<section class="hx" id="top">
+  <div class="hx-st" id="hxSt">
+    <canvas id="silk" aria-hidden="true"></canvas>
+    <div class="hx-noise" aria-hidden="true"></div>
+    <div class="hx-in wrap">
+      <span class="hx-k m"><i></i>Testnet live · 75% to mainnet</span>
+      <h1 class="hx-h" aria-label="Real-world assets, settled onchain.">
+        <span class="ln"><span>Real-world assets,</span></span>
+        <span class="ln"><span class="hx-dim">settled onchain.</span></span>
+      </h1>
+      <div class="hx-row">
+        <p>Nereum is the settlement layer for real-world assets. Issuance, policy, access and liquidity in one protocol, registered in the United States and independently audited.</p>
+        <div class="hx-cta">
+          <a class="btn w" href="https://nereum.xyz/whitepaper">Read the whitepaper <span class="arr">&rarr;</span></a>
+          <a class="btn g" href="https://nereum.xyz/explorer">Open the explorer</a>
+        </div>
+      </div>
+    </div>
+    <div class="hx-bot wrap m" aria-hidden="true">
+      <span class="hx-scroll"><i></i>Scroll</span>
+      <span class="hx-data"><span>Supply <b>160M NRM</b></span><span>Audit <b>0 critical</b></span><span>KYC <b>4/4</b></span></span>
     </div>
   </div>
-  <div class="wrap stage" id="stage">
-    <div class="stage-st"><div class="stage-card">
-      <canvas id="fx" data-light aria-hidden="true"></canvas>
-      <div class="st-top">
-        <div class="chipset" id="chips"><span class="on">The asset</span><span>Real estate</span><span>Commodities</span><span>Energy</span><span>Private credit</span></div>
-        <span class="st-n"><b id="vN">01</b> / 05</span>
-      </div>
-      <div class="st-bot">
-        <div class="st-cap"><b id="vName">The asset itself</b><span id="vDesc">Any real asset becomes a token with its rules attached.</span></div>
-        <div class="v-ticks"><i><b></b></i><i><b></b></i><i><b></b></i><i><b></b></i><i><b></b></i></div>
-      </div>
-    </div></div>
-  </div>
+</section>
+
+<section class="after" id="figs">
   <div class="wrap">
     <div class="figs">
       <div class="fig"><span>Total supply</span><b data-n="160" data-s="M">160M</b><small>NRM, fixed at genesis</small></div>
@@ -764,133 +810,70 @@ $$('.tx').forEach(function(sec){
 });
 
 
-/* ═══ PORTADA: objetos reales hechos de cubos ═══════════════════════════════
-   Cinco escenas: el diamante de la marca, una ciudad, lingotes y contenedores,
-   energia (placas y un aerogenerador que gira) y un banco con monedas. Las
-   mismas piezas vuelan de una escena a la siguiente con el scroll. */
-var cv = $('#fx'), E0 = null;
-var estado = {p:0}, mx=0, my=0, tmx=0, tmy=0, vis=true;
-addEventListener('pointermove', function(e){ tmx=(e.clientX/innerWidth-.5); tmy=(e.clientY/innerHeight-.5) }, {passive:true});
-/* y hacia arriba es negativo en pantalla: aqui se escribe «arriba» positivo y se voltea al final */
-/* LAS PIEZAS. Volumenes limpios, como una maqueta de arquitectura: medidas
-   en semiejes, «y» hacia arriba, y un material decidido pieza a pieza:
-   0 obsidiana (el cuerpo), 1 acento azul (un solo gesto por figura) y
-   2 cristal (fachadas, marcos, lo que en una maqueta seria metacrilato). */
-var OB=0, AC=1, CR=2;
-function caja(L,x,y,z,w,h,d,m,extra){ var q={tx:x,ty:-y,tz:z,tw:w,th:h,td:d,_m:m,c:m===CR?'#E9EDF6':(m===AC?'#1A5BF0':'#0C33B4'),g:m===CR}; if(extra) for(var k in extra) q[k]=extra[k]; L.push(q); return q }
-/* 01 el activo: el rombo del logotipo, con su franja clara */
-function diamante(){
-  var L=[], N=5, e=.5, s=.215;
-  for(var i=-N;i<=N;i++) for(var j=-N;j<=N;j++){ if(Math.abs(i)+Math.abs(j)>N) continue;
-    var franja=(i-j)>=N-1; for(var c=0;c<2;c++) caja(L,i*e,j*e,(c-.5)*e,s,s,s,franja?CR:OB) }
-  return L;
-}
-/* 02 inmobiliario: torres de forjados con banda de vidrio y una aguja azul */
-function ciudad(){
-  var L=[], H=.2;
-  caja(L,0,-.04,0,2.9,.04,1.9,CR);
-  [[-1.75,.55,.36,.36,9],[-.7,-.35,.46,.46,17],[.55,.4,.4,.4,13],[1.65,-.25,.34,.34,8],[.9,-1.2,.3,.3,5],[-1.5,-1.05,.34,.3,6],[-2.3,-.3,.26,.26,4]].forEach(function(T,ti){
-    for(var f=0;f<T[4];f++){ var y=f*H;
-      caja(L,T[0],y+.075,T[1],T[2],.075,T[3],OB);
-      caja(L,T[0],y+.17,T[1],T[2]+.015,.025,T[3]+.015,CR) }
-    if(ti===1){ caja(L,T[0],T[4]*H+.35,T[1],.035,.35,.035,AC) }
-  });
-  return L;
-}
-/* 03 materias primas: pila de lingotes y contenedores de un puerto */
-function materias(){
-  var L=[];
-  caja(L,0,-.04,0,2.9,.04,1.5,CR);
-  [4,3,2,1].forEach(function(nf,f){ for(var k=0;k<nf;k++) for(var c=0;c<2;c++)
-    caja(L,-1.45+(k-(nf-1)/2)*.72,f*.22+.1,(c-.5)*.44,.32,.1,.19,(f===3?AC:(f===0&&c===0?CR:OB))) });
-  for(var f=0;f<3;f++) for(var k=0;k<(f===2?2:3);k++){ var x=.7+k*.95+(f===2?.47:0), y=f*.46+.22;
-    caja(L,x,y,-.15,.45,.21,.21,OB);
-    caja(L,x,y,.07,.44,.2,.012,CR) }
-  return L;
-}
-/* 04 energia: un campo solar, un banco de baterias y un aerogenerador */
-function energia(){
-  var L=[];
-  caja(L,0,-.04,0,2.9,.04,1.7,CR);
-  for(var r=0;r<3;r++) for(var k=0;k<4;k++){ var x=-2.3+k*.66, z=-.6+r*.62;
-    caja(L,x,.32,z,.29,.012,.2,OB,{trx:.55}); caja(L,x,.33,z,.3,.004,.21,CR,{trx:.55});
-    caja(L,x,.15,z+.06,.02,.15,.02,CR) }
-  for(var b=0;b<3;b++) for(var s=0;s<5;s++) caja(L,.25+b*.34,s*.14+.08,.8,.13,.06,.18,s<(b===1?3:4)?AC:OB);
-  for(var f=0;f<10;f++){ var w=.075-f*.004; caja(L,1.75,f*.26+.13,-.1,w,.13,w,CR) }
-  caja(L,1.75,2.66,-.1,.2,.08,.1,OB);
-  for(var pa=0;pa<3;pa++) for(var k=0;k<7;k++) caja(L,1.75,2.66,.05,.05-k*.004,.12,.012,CR,{pala:pa,rk:.18+k*.24});
-  return L;
-}
-/* 05 credito privado: la fachada de un banco y pilas de fichas */
-function banco(){
-  var L=[];
-  for(var s_=0;s_<3;s_++) caja(L,-.9,s_*.1+.05,.1-s_*.08,1.9-s_*.12,.05,.75-s_*.08,s_===2?CR:OB);
-  for(var c=0;c<6;c++) caja(L,-2.3+c*.56,1.1,.1,.09,.8,.09,CR);
-  caja(L,-.9,1.97,.1,1.72,.07,.5,OB);
-  caja(L,-.9,2.07,.1,1.66,.03,.46,AC);
-  for(var r=0;r<5;r++) caja(L,-.9,2.16+r*.1,.1,1.6-r*.33,.05,.44,OB);
-  [[1.6,.35,12],[2.2,-.1,8],[2.05,.65,5]].forEach(function(P){
-    for(var k=0;k<P[2];k++) caja(L,P[0],k*.075+.04,P[1],.22,.03,.22,k===P[2]-1?AC:(k%2?OB:CR)) });
-  return L;
-}
-var FORMAS=[diamante(), ciudad(), materias(), energia(), banco()];
-/* cada escena se centra y se escala a la misma caja, para que todas ocupen lo mismo */
-function encaja(F,AW,AH){
-  var x0=1e9,x1=-1e9,y0=1e9,y1=-1e9,z0=1e9,z1=-1e9;
-  F.forEach(function(q){ x0=Math.min(x0,q.tx-q.tw); x1=Math.max(x1,q.tx+q.tw); y0=Math.min(y0,q.ty-q.th); y1=Math.max(y1,q.ty+q.th); z0=Math.min(z0,q.tz-q.td); z1=Math.max(z1,q.tz+q.td) });
-  var k=Math.min(AW/(x1-x0), AH/(y1-y0)), cx=(x0+x1)/2, cy=(y0+y1)/2, cz=(z0+z1)/2;
-  F.forEach(function(q){ q.tx=(q.tx-cx)*k; q.ty=(q.ty-cy)*k; q.tz=(q.tz-cz)*k; q.tw*=k; q.th*=k; q.td*=k; if(q.rk) q.rk*=k; q.cx=cx; q.k=k });
-  F.k=k; F.cx=cx; F.cy=cy;
-}
-FORMAS.forEach(function(F){ encaja(F,7.6,4.1) });
-var NMAX=0; FORMAS.forEach(function(F){ F.sort(function(a,b){ return a.ty-b.ty||a.tx-b.tx }); NMAX=Math.max(NMAX,F.length) });
-var UNI=[]; for(var u=0;u<NMAX;u++) UNI.push({x:0,y:0,z:0,w:0,h:0,d:0,rx:0,ry:0,rz:0,l:0,a:1,c:'#1A5BF0',g:false,r0:azar(u+7)*5,sx:(azar(u)-.5)*9,sy:(azar(u+1)-.5)*7,sz:(azar(u+2)-.5)*6});
-function objetivo(F,u,t){
-  var q=F[u]; if(!q) return null;
-  var o={x:q.tx,y:q.ty,z:q.tz,w:q.tw,h:q.th,d:q.td,rx:q.trx||0,ry:q.try_||0,c:q.c,g:q.g,m:q._m};
-  if(q.pala!=null){ var ang=t*1.4+q.pala*2.094, r=q.rk; o.x=q.tx+Math.cos(ang)*r; o.y=q.ty-Math.sin(ang)*r; o.rz=-ang+Math.PI/2 }
-  return o;
-}
-function ease(t){ return t<.5 ? 4*t*t*t : 1-Math.pow(-2*t+2,3)/2 }
-function pinta(t){
-  requestAnimationFrame(pinta);
-  if(!vis) return;
-  if(!E0){ E0=escena(cv) }
-  t*=.001; if(CALMA) t=0; mx+=(tmx-mx)*.05; my+=(tmy-my)*.05;
-  var p = Math.max(0,estado.p)*(FORMAS.length-1), a=Math.min(FORMAS.length-2, Math.floor(p)), k=ease(Math.min(1,Math.max(0,(p-a-.2)/.6)));
-  var A=FORMAS[a], B=FORMAS[a+1], vuelo=Math.sin(k*Math.PI);
-  for(var u=0;u<NMAX;u++){
-    var q=UNI[u], oa=objetivo(A,u,t), ob=objetivo(B,u,t);
-    if(!oa) oa={x:q.sx*.3,y:q.sy*.3,z:q.sz*.3,w:0,h:0,d:0,rx:0,ry:0,rz:0,c:ob?ob.c:q.c,g:ob?ob.g:false,m:ob?ob.m:0};
-    if(!ob) ob={x:q.sx*.3,y:q.sy*.3,z:q.sz*.3,w:0,h:0,d:0,rx:0,ry:0,rz:0,c:oa.c,g:oa.g,m:oa.m};
-    q.x=oa.x+(ob.x-oa.x)*k+q.sx*vuelo*.35; q.y=oa.y+(ob.y-oa.y)*k+q.sy*vuelo*.35; q.z=oa.z+(ob.z-oa.z)*k+q.sz*vuelo*.35;
-    q.w=oa.w+(ob.w-oa.w)*k; q.h=oa.h+(ob.h-oa.h)*k; q.d=oa.d+(ob.d-oa.d)*k;
-    q.rx=(oa.rx||0)+((ob.rx||0)-(oa.rx||0))*k+vuelo*q.r0; q.ry=(oa.ry||0)+((ob.ry||0)-(oa.ry||0))*k+vuelo*q.r0*.7; q.rz=(oa.rz||0)+((ob.rz||0)-(oa.rz||0))*k;
-    var fin=k<.5?oa:ob; q.c=fin.c; q.g=fin.g; q._m=fin.m==null?0:fin.m;
-    q.l=vuelo*.25; q.a=1;
-  }
-  var M=innerWidth<700;
-  /* la maqueta: gran angular suave, tilt-shift arriba y abajo y suelo espejo */
-  /* optica limpia en reposo: el zoom y la aberracion solo aparecen al cambiar de figura */
-  E0.fx={b:.06, z:vuelo*.2, a:vuelo*.004, ts:0};
-  E0.pinta(UNI,{yaw:-.62+Math.sin(t*.1)*.12+mx*.25, pitch:.34+my*.05+Math.sin(t*.08)*.015, roll:0, dist:M?13:9.4, fov:1.05, near:5, far:60, ox:0, oy:.02});
-}
-requestAnimationFrame(pinta);
-new IntersectionObserver(function(es){ vis=es[0].isIntersecting }).observe(cv);
-
-
-/* ═══ la maqueta recorre las cinco clases de activo con el scroll ═══ */
+/* ═══ PORTADA: seda azul en WebGL ════════════════════════════════════════════ */
 (function(){
-  var N=['The asset itself','Real estate','Commodities','Energy','Private credit'];
-  var D=['Any real asset becomes a token with its rules attached.','Towers and offices, divided into shares that settle in seconds.','Gold, grain and goods in transit, owned onchain.','Solar farms, storage and turbines, financed by the people who use them.','Loans and receivables with the terms written into the asset.'];
-  var vN=$('#vN'), vName=$('#vName'), vDesc=$('#vDesc'), chips=$$('#chips span'), ticks=$$('.v-ticks i b'), act=-1;
-  function marca(n){ if(n===act) return; act=n; vN.textContent='0'+(n+1); vName.textContent=N[n]; vDesc.textContent=D[n];
-    chips.forEach(function(c,i){ c.classList.toggle('on',i===n) });
-    if(hasG&&!CALMA) gsap.fromTo([vName,vDesc],{y:10,opacity:0},{y:0,opacity:1,duration:.6,ease:'expo.out',stagger:.05}) }
-  marca(0);
-  if(hasG) ScrollTrigger.create({trigger:'#stage',start:'top 88px',end:'bottom bottom',scrub:true,onUpdate:function(st){
-    estado.p=st.progress; marca(Math.min(4,Math.round(st.progress*4)));
-    ticks.forEach(function(el,i){ el.style.setProperty('--k',Math.max(0,Math.min(1,st.progress*4-i+1))) }) }});
+  var cv=$('#silk'), gl=cv.getContext('webgl',{antialias:false,alpha:false});
+  if(!gl){ cv.style.background='radial-gradient(80% 70% at 60% 30%,#1A5BF0 0%,#0A1A4A 45%,#040817 80%)'; return }
+  var VS='attribute vec2 p;varying vec2 v;void main(){v=p*.5+.5;gl_Position=vec4(p,0.,1.);}';
+  var FS=[
+  'precision highp float;varying vec2 v;uniform vec2 R,M;uniform float T,P,H;',
+  'float h(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}',
+  'float n(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(h(i),h(i+vec2(1,0)),f.x),mix(h(i+vec2(0,1)),h(i+vec2(1,1)),f.x),f.y);}',
+  'float fbm(vec2 p){float s=0.,a=.5;mat2 r=mat2(.8,.6,-.6,.8);for(int i=0;i<5;i++){s+=a*n(p);p=r*p*2.02;a*=.5;}return s;}',
+  /* la seda: ruido deformado dos veces, que da pliegues largos y brillantes */
+  'float silk(vec2 p){vec2 q=vec2(fbm(p+vec2(0.,T*.05)),fbm(p+vec2(5.2,1.3)-T*.04));vec2 r=vec2(fbm(p+3.*q+vec2(1.7,9.2)+T*.03),fbm(p+3.*q+vec2(8.3,2.8)));return fbm(p+3.5*r);}',
+  'vec3 pal(float t){vec3 a=vec3(.016,.03,.09),b=vec3(.04,.14,.48),c=vec3(.1,.36,.94),d=vec3(.78,.86,1.);',
+  ' return t<.45?mix(a,b,t/.45):(t<.78?mix(b,c,(t-.45)/.33):mix(c,d,(t-.78)/.22));}',
+  'vec3 col(vec2 u){vec2 a=vec2(R.x/R.y,1.);vec2 p=u*a*1.6;float s=silk(p);',
+  /* los pliegues: la derivada del ruido da el brillo del satinado */
+  ' float e=.004;float sx=silk(p+vec2(e,0.))-s;float sy=silk(p+vec2(0.,e))-s;float sh=clamp(.5+(sx-sy)*45.,0.,1.);',
+  ' float t=clamp(s*1.25-.18+sh*.25,0.,1.);vec3 c=pal(t);c+=vec3(.55,.7,1.)*pow(sh,6.)*.35;',
+  /* luz por arriba a la derecha, mas oscuro abajo a la izquierda, donde va el texto */
+  ' c*=mix(.45,1.15,smoothstep(-.2,1.1,u.x*.7+u.y*.8));return c;}',
+  'void main(){vec2 u=v;vec2 a=vec2(R.x/R.y,1.);',
+  /* la lente del puntero: abomba y separa colores */
+  ' vec2 d=(u-M)*a;float dm=length(d);float lens=smoothstep(.34,0.,dm)*H;',
+  ' vec2 uu=u-d/a*lens*.28;',
+  /* al bajar: pixeles cuadrados que crecen */
+  ' float px=mix(0.,90.,P*P);if(px>1.5){vec2 g=R/px;uu=(floor(uu*g)+.5)/g;}',
+  ' vec2 ab=(uu-M)*.006*(lens*3.+P*2.)+ (uu-.5)*.002;',
+  ' vec3 c=vec3(col(uu+ab).r,col(uu).g,col(uu-ab).b);',
+  ' c+=vec3(.35,.55,1.)*smoothstep(.345,.33,dm)*smoothstep(.29,.335,dm)*.22*H;',
+  /* las juntas de los pixeles, como aristas de cubo */
+  ' if(px>1.5){vec2 g=fract(u*R/px);float j=step(.94,max(g.x,g.y));c=mix(c,c*.35,j*smoothstep(.1,.5,P));}',
+  ' c+=(h(u*R+T)-.5)*.03;gl_FragColor=vec4(c,1.);}'
+  ].join('\n');
+  function sh(t,src){ var x=gl.createShader(t); gl.shaderSource(x,src); gl.compileShader(x); return x }
+  var pr=gl.createProgram(); gl.attachShader(pr,sh(gl.VERTEX_SHADER,VS)); gl.attachShader(pr,sh(gl.FRAGMENT_SHADER,FS)); gl.linkProgram(pr);
+  if(!gl.getProgramParameter(pr,gl.LINK_STATUS)){ cv.style.background='#0A1A4A'; return }
+  gl.useProgram(pr);
+  var bf=gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER,bf); gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,3,-1,-1,3]),gl.STATIC_DRAW);
+  var lp=gl.getAttribLocation(pr,'p'); gl.enableVertexAttribArray(lp); gl.vertexAttribPointer(lp,2,gl.FLOAT,false,0,0);
+  var U={}; ['R','M','T','P','H'].forEach(function(k){ U[k]=gl.getUniformLocation(pr,k) });
+  var W=0,Hh=0, mx=.72,my=.62,tx=.72,ty=.62, hov=0,thov=0, P=0, vis=true;
+  function tam(){ var q=Math.min(innerWidth<700?.75:1,devicePixelRatio||1); W=Math.round(cv.clientWidth*q); Hh=Math.round(cv.clientHeight*q); cv.width=W; cv.height=Hh; gl.viewport(0,0,W,Hh) }
+  tam(); addEventListener('resize',tam);
+  var st=$('#hxSt');
+  st.addEventListener('pointermove',function(e){ var r=cv.getBoundingClientRect(); tx=(e.clientX-r.left)/r.width; ty=1-(e.clientY-r.top)/r.height; thov=1 },{passive:true});
+  st.addEventListener('pointerleave',function(){ thov=0 });
+  new IntersectionObserver(function(es){ vis=es[0].isIntersecting }).observe(cv);
+  function fr(t){ requestAnimationFrame(fr); if(!vis) return;
+    mx+=(tx-mx)*.06; my+=(ty-my)*.06; hov+=(thov-hov)*.05;
+    gl.uniform2f(U.R,W,Hh); gl.uniform2f(U.M,mx,my); gl.uniform1f(U.T,CALMA?0:t*.001); gl.uniform1f(U.P,P); gl.uniform1f(U.H,CALMA?0:hov);
+    gl.drawArrays(gl.TRIANGLES,0,3) }
+  requestAnimationFrame(fr);
+  if(hasG && !CALMA){
+    ScrollTrigger.create({trigger:'.hx',start:'top top',end:'bottom bottom',scrub:true,onUpdate:function(s){
+      P=s.progress;
+      var k=Math.min(1,P*1.4);
+      st.style.clipPath='inset('+(k*4)+'% '+(k*4)+'% '+(k*4)+'% '+(k*4)+'% round '+(k*40)+'px)';
+      st.style.transform='scale('+(1-k*.06)+')';
+    }});
+    gl && gsap.to('.hx-in',{yPercent:-30,opacity:0,ease:'none',scrollTrigger:{trigger:'.hx',start:'top top',end:'40% top',scrub:true}});
+    gsap.to('.hx-bot',{opacity:0,ease:'none',scrollTrigger:{trigger:'.hx',start:'top top',end:'15% top',scrub:true}});
+  }
+  /* la cabecera en blanco mientras esta sobre la portada */
+  var hdr=$('#hd'); function tono(){ hdr.classList.toggle('dark', scrollY < innerHeight*.75) } tono(); addEventListener('scroll',tono,{passive:true});
 })();
 
 /* ═══ cifras ═══ */
@@ -930,10 +913,10 @@ function entrar(){
   var pre=$('#pre');
   if(!hasG || CALMA){ if(pre) pre.remove(); return }
   var tl=gsap.timeline();
-  tl.to(pre,{opacity:0,duration:.6,delay:.3,ease:'power2.out'})
-    .from('.hero .ln>span',{yPercent:110,duration:1.2,ease:'expo.out',stagger:.08},'<')
-    .from('.hero .eyebrow, .hero-t p, .hero-cta, #hd',{y:20,opacity:0,duration:1,ease:'expo.out',stagger:.06},'<.15')
-    .from('.stage-card',{y:80,opacity:0,scale:.96,duration:1.4,ease:'expo.out'},'<.1')
+  tl.to(pre,{opacity:0,duration:.6,delay:.2,ease:'power2.out'})
+    .from('#silk',{scale:1.25,duration:2.2,ease:'expo.out'},'<')
+    .from('.hx-h .ln>span',{yPercent:115,duration:1.3,ease:'expo.out',stagger:.09},'<.1')
+    .from('.hx-k, .hx-row, .hx-bot, #hd',{y:24,opacity:0,duration:1.1,ease:'expo.out',stagger:.07},'<.25')
     .add(function(){ if(pre) pre.remove() });
 }
 if(document.readyState==='complete') entrar(); else addEventListener('load',entrar);
