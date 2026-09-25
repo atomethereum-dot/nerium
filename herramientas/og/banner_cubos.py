@@ -178,7 +178,7 @@ def parchea(dst):
     for i, ln in enumerate(L):
         if 'const cuantos=W<760?' in ln and 'HONDO' not in ln and hechos['cuantos'] == 0 \
            and 'haceVuelo' in '\n'.join(L[max(0, i - 3):i + 1]):
-            L[i] = ln[:ln.index('const cuantos=')] + 'const cuantos=W<760?420:1000;'
+            L[i] = ln[:ln.index('const cuantos=')] + 'const cuantos=W<760?150:340;'
             hechos['cuantos'] += 1
         elif '(Math.random()*2-1)*1.5' in ln and 'c.z' not in ln and 'x:' in ln and hechos['ancho'] == 0:
             L[i] = ln.replace('x:(Math.random()*2-1)*1.5', 'x:(Math.random()*2-1)*3.6') \
@@ -204,6 +204,8 @@ def parchea(dst):
         # y todos menos transparentes
         ('a:cl?0.20+Math.random()*0.30 : 0.30+Math.random()*0.7',
          'a:cl?0.38+Math.random()*0.34 : 0.52+Math.random()*0.48'),
+        # menos cubos pero cada uno mas grande
+        ('lado:0.12+Math.random()*0.30,', 'lado:0.30+Math.random()*0.52,'),
         # el suelo deja de ser casi negro...
         ("ctx.fillStyle='#06070A';ctx.fillRect(0,0,W,H);",
          "ctx.fillStyle='#0B1020';ctx.fillRect(0,0,W,H);"),
@@ -217,7 +219,7 @@ def parchea(dst):
             sys.exit('  x no encuentro donde subir la luz: ' + a[:40])
         t = t.replace(a, b, 1)
     open(p, 'w', encoding='utf-8').write(t)
-    print('  · escena abierta de lado, 1000 cubos y un paso mas de luz')
+    print('  · escena abierta de lado, 340 cubos grandes y un paso mas de luz')
 
 def main():
     if not os.path.exists(CROMO):
