@@ -62,11 +62,12 @@ await pg.evaluate(() => {
     .ban-url.tl{left:46px;top:40px}
     .ban-url.br{right:46px;bottom:40px}
     /* la palabra del centro es lo unico que hay que poder leer de un vistazo */
-    #xfade .xf-word{color:#fff !important;font-size:16px !important;
-      letter-spacing:.52em !important;
+    #xfade .xf-word{color:#fff !important;font-size:18px !important;
+      letter-spacing:.46em !important;
       text-shadow:0 0 26px rgba(4,7,16,.98),0 0 10px rgba(4,7,16,.95),
                   0 1px 2px rgba(4,7,16,.9) !important}`;
   document.head.appendChild(css);
+  document.querySelector('.xf-word').textContent = 'Nereum Finance';
   for (const d of ['tl','br']) {
     const n = document.createElement('div');
     n.className = 'ban-url ' + d; n.textContent = 'nereum.xyz';
@@ -135,11 +136,12 @@ for (; tirada < 8; tirada++) {
         text-shadow:0 0 14px rgba(6,7,10,.95),0 0 4px rgba(6,7,10,.95)}
       .ban-url.tl{left:46px;top:40px}
       .ban-url.br{right:46px;bottom:40px}
-      #xfade .xf-word{color:#fff !important;font-size:16px !important;
-        letter-spacing:.52em !important;
+      #xfade .xf-word{color:#fff !important;font-size:18px !important;
+        letter-spacing:.46em !important;
         text-shadow:0 0 26px rgba(4,7,16,.98),0 0 10px rgba(4,7,16,.95),
                     0 1px 2px rgba(4,7,16,.9) !important}`;
     document.head.appendChild(css);
+    document.querySelector('.xf-word').textContent = 'Nereum Finance';
     for (const d of ['tl','br']) {
       const n = document.createElement('div');
       n.className = 'ban-url ' + d; n.textContent = 'nereum.xyz';
