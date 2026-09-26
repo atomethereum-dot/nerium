@@ -5333,7 +5333,7 @@ body.light .hud::after{background:radial-gradient(120% 120% at 100% 100%,
    la de dentro la ENTRADA -opacidad y escala-. Meter las dos en el mismo
    «transform» es el error clasico de este efecto. */
 .prs-vis{position:absolute;left:0;top:0;z-index:4;pointer-events:none;
-  --v:clamp(148px,16.5vw,248px);
+  --v:clamp(230px,23vw,360px);
   width:var(--v);height:var(--v);
   margin-left:calc(var(--v) / -2);margin-top:calc(var(--v) / -2);
   will-change:transform}
@@ -5379,22 +5379,15 @@ body.light .hud::after{background:radial-gradient(120% 120% at 100% 100%,
 
 /* ── el telefono: el titular no cabe al lado del medio ── */
 @media(max-width:760px){
-  .press{--vt:clamp(62px,17vw,92px)}
   .prs-f{grid-template-columns:auto 1fr auto;row-gap:10px;column-gap:14px;
     align-items:start;padding-block:18px;min-height:0}
   .prs-n{grid-row:1;grid-column:1}
   .prs-s{grid-row:1;grid-column:2;padding-left:0}
-  /* El hueco de la vista previa se reserva en las CUATRO filas aunque solo
-     dos tengan imagen: reservarlo solo donde hace falta deja unas filas mas
-     altas que otras, y una tabla con las filas desiguales se lee rota. */
-  /* 26 y no 14: el cuadro de la salida va GIRADO 45 grados, asi que su
-     rombo sobresale de su caja por los cuatro lados y con 14 rozaba la
-     imagen. Se reserva contando el rombo, no la caja. */
-  .prs-f{padding-right:calc(var(--vt) + 26px)}
-  /* solo cambia el tamaño: los margenes de centrado salen de «--v», asi que
-     el guion sigue apuntando al CENTRO de la imagen en los dos sitios y no
-     hay dos convenios distintos que acaben restando media anchura de mas */
-  .prs-vis{--v:var(--vt)}
+  /* La imagen sale ENCIMA de la fila, no dentro, asi que aqui no hay hueco
+     que reservar: la fila recupera su ancho entero y el titular deja de
+     partirse antes de tiempo. Y va grande —el 64 % de la pantalla—, que un
+     cuadrito metido en una esquina no es una vista previa, es un icono. */
+  .prs-vis{--v:min(64vw,300px)}
   .prs-go{grid-row:1;grid-column:3;align-self:center;margin-right:0}
   .prs-t{grid-row:2;grid-column:1 / -1;padding-left:0;font-size:19px}
   .prs-tr{background:repeating-linear-gradient(90deg,
@@ -14123,14 +14116,23 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
   var quieto = !!(window.matchMedia && matchMedia('(prefers-reduced-motion:reduce)').matches);
   var x = 0, y = 0, dx = 0, dy = 0, puesta = false, pedido = false, viva = null;
 
+  /* ARRIBA DE LA FILA, NO DENTRO. La imagen se apoya en el borde superior de
+     la fila abierta y crece hacia arriba, flotando sobre lo que haya encima.
+     Centrarla en el puntero -que es lo que hacia antes- la planta justo
+     encima del titular que estas leyendo, y con titulares largos como los de
+     esta tabla eso no parece un efecto, parece un fallo.
+     Con raton sigue al puntero EN HORIZONTAL; la vertical la manda la fila.
+     Y se le pone freno a los lados para que no se salga de la tabla. */
   function destino(){
     var c = lista.getBoundingClientRect();
-    if(fino && dentro) return { x:raton.x - c.left, y:raton.y - c.top };
     if(!viva) return null;
     var r = viva.getBoundingClientRect();
-    /* en el telefono, en el hueco reservado a la derecha */
-    return { x: r.right - c.left - (capa.offsetWidth / 2) - 14,
-             y: r.top + r.height / 2 - c.top };   /* al CENTRO, como con raton */
+    var an = capa.offsetWidth, al = capa.offsetHeight;
+    var x = (fino && dentro) ? raton.x - c.left
+                             : r.left + r.width / 2 - c.left;
+    var min = an / 2 + 8, max = c.width - an / 2 - 8;
+    x = (max < min) ? c.width / 2 : Math.max(min, Math.min(max, x));
+    return { x: x, y: r.top - c.top - al / 2 - 12 };
   }
 
   function coloca(saltando){
