@@ -113,6 +113,37 @@ di(Math.abs(geo.alto / geo.ancho - 0.0852) < 0.012,
 di(Math.abs(geo.col - 3) < 0.15, 'el titular arranca en la cuarta columna (' + geo.col + ')');
 di(geo.caja >= 44, 'la caja de salida no baja de 44 px, que es lo que mide un dedo (' + geo.caja + ')');
 
+/* ── EL HUECO DEL LOGOTIPO NO SE COME EL TITULAR ──
+   Los archivos no estan -son marcas de terceros y no se inventan-, asi que
+   esto se comprueba METIENDO uno: se fabrica un logotipo absurdamente ancho
+   -640x32, cinco veces su columna- y se mira que se quede dentro. Sin el
+   «min-width:0» una celda de rejilla no baja de su contenido y el logotipo
+   se salia por la derecha a meterse debajo del titular; con un archivo de
+   los normales no se notaba, y el dia que llegue uno ancho se rompe sola.
+   Probarlo con el caso comodo es no probarlo. */
+const hueco = await pg.evaluate(() => {
+  const f = document.querySelectorAll('.prs-f')[1];
+  const i = document.createElement('i');
+  i.className = 'prs-logo'; i.setAttribute('aria-hidden','true');
+  const img = document.createElement('img');
+  img.src = 'data:image/svg+xml,' + encodeURIComponent(
+    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 32">' +
+    '<rect width="640" height="32" fill="#fff"/></svg>');
+  i.appendChild(img);
+  f.insertBefore(i, f.querySelector('.prs-t'));
+  return new Promise(res => requestAnimationFrame(() => requestAnimationFrame(() => {
+    const a = i.getBoundingClientRect(), b = f.querySelector('.prs-t').getBoundingClientRect();
+    const col = f.getBoundingClientRect().width / 12;
+    i.remove();
+    res({ invade: +(a.right - b.left).toFixed(2), ancho: +a.width.toFixed(2), col: +col.toFixed(2) });
+  })));
+});
+di(hueco.invade <= 0.5,
+   'un logotipo ancho se queda en su columna y no invade el titular (' +
+   hueco.invade + ' px)');
+di(Math.abs(hueco.ancho - hueco.col) <= 1,
+   'y ocupa su columna exacta, ni mas ni menos (' + hueco.ancho + ' de ' + hueco.col + ')');
+
 /* ── LAS DOS EXCEPCIONES DE ESTA SECCION, ATADAS AQUI ──
    La prensa se sale de dos reglas de la pagina, y las dos a proposito. Si
    solo se quitan de las pruebas que las exigian, manana son un descuido
