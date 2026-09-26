@@ -113,6 +113,31 @@ di(Math.abs(geo.alto / geo.ancho - 0.0852) < 0.012,
 di(Math.abs(geo.col - 3) < 0.15, 'el titular arranca en la cuarta columna (' + geo.col + ')');
 di(geo.caja >= 44, 'la caja de salida no baja de 44 px, que es lo que mide un dedo (' + geo.caja + ')');
 
+/* ── LAS DOS EXCEPCIONES DE ESTA SECCION, ATADAS AQUI ──
+   La prensa se sale de dos reglas de la pagina, y las dos a proposito. Si
+   solo se quitan de las pruebas que las exigian, manana son un descuido
+   que nadie recuerda haber tomado. Asi que se afirman por el lado bueno:
+
+   1. SUELO PLANO. Las demas bandas llevan degradados y grano -lo pide
+      «probar_pagina» y lo mide «probar_giro»-. Esta no: con luz encima, la
+      trama de columnas al 4 % deja de leerse, y la trama es la seccion.
+   2. FUERA DE LA COLUMNA DE LA PAGINA. Las demas viven en «.wrap»
+      -min(1360px, 100% - 64px)-. Esta llega al filo menos 12 px, porque una
+      rejilla que se para antes del borde no se lee como registro. Es el
+      unico sitio de la pagina donde el borde izquierdo no coincide, y por
+      eso tuvo que salir de la referencia de «probar_ruta». */
+const exc = await pg.evaluate(() => {
+  const s = document.getElementById('press'), c = getComputedStyle(s);
+  const w = s.querySelector('.prs-w');
+  return { img: c.backgroundImage, col: c.backgroundColor,
+           canal: Math.round(w.getBoundingClientRect().left - s.getBoundingClientRect().left),
+           wraps: s.querySelectorAll('.wrap').length };
+});
+di(exc.img === 'none' && exc.col === 'rgb(3, 4, 9)',
+   'el suelo de la prensa es plano y negro, sin degradados ni grano (' + exc.col + ')');
+di(exc.canal === 12 && exc.wraps === 0,
+   'y la seccion vive fuera de la columna de la pagina, a 12 px del filo (' + exc.canal + ')');
+
 // ── al pasar por encima: la fila se DESCUBRE, no se ilumina ──
 const antes = await pg.evaluate(() => {
   const f = document.querySelectorAll('.prs-f')[2];

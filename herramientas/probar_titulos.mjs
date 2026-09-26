@@ -89,7 +89,12 @@ for (const [W, H] of [[1440,900],[1280,900],[768,1024],[390,844]]) {
     await pg.waitForTimeout(420);
     const f = await pg.evaluate(i => {
       const sec = document.getElementById(i); if (!sec) return null;
-      const caja = sec.querySelector('.wrap') || sec;
+      /* La prensa no usa «.wrap»: lleva contenedor propio -«.prs-w», de
+         borde a borde menos 12 px- porque su rejilla de doce columnas tiene
+         que llegar al filo. Si no se nombra aqui, la caja de referencia pasa
+         a ser la SECCION y las tres piezas salen a 12 px de un borde que no
+         es el suyo: la prueba dejaba de medir lo que dice medir. */
+      const caja = sec.querySelector('.wrap, .prs-w') || sec;
       const cajaR = caja.getBoundingClientRect();
       /* «05 The stack» es la unica CENTRADA de las once, y a proposito: su
          escena es una marca que se arma en el eje. Sacar el texto al margen
@@ -161,7 +166,7 @@ for (const [W, H] of [[1440,900],[1280,900],[768,1024],[390,844]]) {
     const d = await pg.evaluate(i => {
       const sec = document.getElementById(i), h2 = sec && sec.querySelector('h2');
       if (!h2) return null;
-      const caja = sec.querySelector('.wrap') || sec;
+      const caja = sec.querySelector('.wrap, .prs-w') || sec;
       return caja.getBoundingClientRect().right - h2.getBoundingClientRect().right;
     }, s);
     if (d === null) { di(false, 'rtl · ' + s + ' sin titular'); continue; }

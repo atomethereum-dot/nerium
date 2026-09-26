@@ -28,7 +28,11 @@ await pg.goto('http://127.0.0.1:9007/', { waitUntil:'load' });
 await pg.waitForTimeout(2600);
 
 // ── el papel ──
-const papel = await pg.evaluate(() => ['.paper', '.paper2', '.secure', '.sale', '.tkp', '.join', '.press']
+/* «.press» ya no esta en esta lista: su suelo es plano a proposito -#030409,
+   sin degradados y sin grano-, copiado del video. Las demas siguen teniendo
+   que llevar luz y grano, que es lo que esto defiende. Que la prensa sea
+   plana se afirma en «probar_prensa». */
+const papel = await pg.evaluate(() => ['.paper', '.paper2', '.secure', '.sale', '.tkp', '.join']
   .map(s => { const e = document.querySelector(s); if (!e) return null;
     const c = getComputedStyle(e);
     return { sel: s, claro: e.classList.contains('claro'), col: c.backgroundColor,

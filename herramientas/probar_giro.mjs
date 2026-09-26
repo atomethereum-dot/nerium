@@ -154,7 +154,14 @@ const grado = k => Math.abs(medidas[k].alto.medio - medidas[k].bajo.medio);
    que su numero es alto con modulo y sin el: informan, pero no discriminan, y
    colgar la comprobacion de ellas seria fingir que mide mas de lo que mide.
    Medido quitando el modulo: press 0,115 → 0,000 y solutions 0,087 → 0,001. */
-const LISAS = ['press', 'solutions'];
+/* La prensa SE CAE de esta lista. Su suelo es ahora plano -#030409, sin
+   degradados y sin grano- porque asi esta medido en el video que se copio:
+   con la luz encima, la trama de columnas al 4 % deja de leerse, y la trama
+   es la seccion. Queda «solutions», que sigue afirmando lo mismo que
+   afirmaba esto: que una banda lisa esta compuesta y no es un color plano.
+   Que la prensa SI sea plana lo vigila «probar_prensa», para que la
+   excepcion este atada por los dos lados y no sea solo una ausencia. */
+const LISAS = ['solutions'];
 di(LISAS.every(k => grado(k) >= 0.020),
    'cada banda lisa esta graduada, no es un color plano (salto arriba-abajo ' +
    CLARAS.map(k => k + ' ' + grado(k).toFixed(3)).join(' / ') + ')');

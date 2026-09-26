@@ -254,7 +254,14 @@ for (let y = 0; y < alto; y += 450) { await pg.evaluate(v => scrollTo(0, v), y);
       return { builds:izq('.builds-h'), press:izq('.press-h'), token:izq('.tkp-h'),
                rot:izq('.ruta-top'), tit:izq('.ruta-h') };
     });
-    const casa = [r.builds, r.press, r.token].filter(v => v !== null);
+    /* La prensa SALE de la referencia. Su titular ya no nace en la columna
+       de la pagina sino en la rejilla de doce columnas que cruza la seccion
+       de borde a borde -12 px-, que es lo que se pidio al copiar el video.
+       Dejarla dentro hacia que «el borde de los demas» fuese el suyo y que
+       la ruta -alineada con builds y token, o sea bien- saliera en rojo en
+       los seis anchos. La referencia son las secciones que SI viven en la
+       columna de la pagina. */
+    const casa = [r.builds, r.token].filter(v => v !== null);
     const ref = casa.length ? Math.min(...casa) : null;
     di(ref !== null && Math.abs(r.tit - ref) <= 1,
        W + 'px · el titular de la ruta nace en el mismo borde que los demas: ' +
