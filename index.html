@@ -324,7 +324,11 @@ main>section.dark,main>section.stack{background:var(--wash)}
     rgba(186,188,194,.85),rgba(159,161,166,.44) 36%,rgba(119,120,124,.12) 62%,rgba(0,0,0,0) 82%);
   will-change:opacity}
 .wipe{position:absolute;inset:0;z-index:5;pointer-events:none;overflow:hidden}
-.sh-mesh{position:absolute;inset:0;opacity:0;background:var(--suelo);overflow:hidden;will-change:opacity}
+/* Iba en «--suelo» -#12151D-, que es el grafito del pie y del equipo. En la
+   portada eso es una plancha gris detras de los cubos: al aparecer la malla,
+   el fondo se iba a rgb(20,24,30) mientras la prensa estaba en (3,4,9). El
+   mismo negro para las dos. */
+.sh-mesh{position:absolute;inset:0;opacity:0;background:var(--negro);overflow:hidden;will-change:opacity}
 .sh-mesh i{position:absolute;border-radius:50%;will-change:transform;
   animation:meshDrift 26s ease-in-out infinite alternate}
 .sh-mesh i:nth-child(2){animation-duration:31s;animation-delay:-7s}
@@ -1524,7 +1528,7 @@ main>section{position:relative;z-index:1}
    y no cambia nunca. Las etapas «sticky» de aqui abajo si pueden seguir en
    «dvh»: no estan en el flujo y llenar la ventana visible es justo lo que
    tienen que hacer. */
-.hero-hold{position:relative;height:calc(100svh + 42svh);z-index:0;background:var(--suelo)}
+.hero-hold{position:relative;height:calc(100svh + 42svh);z-index:0;background:var(--negro)}
 @media(max-width:900px){
   .hero-hold{height:calc(100svh + 125svh)}
 }
@@ -6795,10 +6799,16 @@ main>section:is(.tkp,.join):not(.claro){
    seccion. Lleva «!important» porque la regla de la que se sale tambien
    lo lleva. */
 main>section.press:not(.claro){
-  background-color:#030409 !important;
+  background-color:var(--negro) !important;
   background-image:none !important;
-  --tapa:#030409}
+  --tapa:var(--negro)}
 
+/* «--negro» es el fondo mas hondo de la pagina: el de la tabla de prensa,
+   medido en el video (3,4,9). La portada lo comparte. Va en una variable y
+   no repetido en los dos sitios porque el dia que uno cambie tienen que
+   cambiar los dos: si se separan, al bajar de la portada a la prensa se ve
+   un escalon de gris que no estaba antes. */
+:root{--negro:#030409}
 :root{--suelo:#12151D; --suelo2:#0A0D14}
 
 /* las escenas de lienzo llevan su propio negro dentro; el suelo de su caja
@@ -7238,7 +7248,7 @@ window.__mide = function(cv, w, h){
 
 
 <div class="hero-hold">
-<section class="hero" id="top" data-bg="#0A0D14" data-acc="#1A7AFF">
+<section class="hero" id="top" data-bg="#030409" data-acc="#1A7AFF">
   <canvas id="burst"></canvas>
   <div class="glowfloor" aria-hidden="true"></div>
   <div class="wipe" aria-hidden="true">
