@@ -55,13 +55,14 @@ di(fsx.every(f => f.fuente && f.tit && f.flecha),
    'cada una con su medio, su titular y su salida');
 di(fsx.every(f => f.orden === 'prs-n>prs-s>prs-t>prs-go'),
    'y en ese orden: numero, medio, titular, salida');
-
-/* EL MEDIO SALE DEL TITULAR, no de una etiqueta suelta: si algun dia se
-   cambia un titular y se olvida la columna, quedan diciendo cosas distintas
-   y nadie se entera. «Announcement» es el unico que no nombra a nadie,
-   porque lo firma la casa. */
-di(fsx.slice(0,3).every(f => f.tit.toLowerCase().includes(f.fuente.toLowerCase())),
-   'el medio de cada fila es el que nombra su titular');
+/* EL MEDIO NO SE REPITE EN SU PROPIO TITULAR. Esto es al reves de lo que
+   defendia la version anterior de esta prueba, y el cambio es a proposito:
+   en el video el medio tiene COLUMNA, asi que volver a nombrarlo en el
+   titular es decir dos veces lo mismo en la misma fila y comerse el ancho
+   que necesita la noticia. Los cuatro titulares de ahora son los del
+   video, letra por letra. */
+di(fsx.slice(0,3).every(f => !f.tit.toLowerCase().includes(f.fuente.toLowerCase())),
+   'ningun titular repite el nombre de su medio: para eso esta la columna');
 di(fsx[3].fuente.toLowerCase() === 'announcement', 'y la cuarta la firma la casa');
 
 /* LOS TITULARES NO SE TOCAN. Estan traducidos a doce idiomas con la cadena
@@ -73,36 +74,85 @@ di(huerfanos.length === 0,
    'los cuatro titulares siguen siendo claves del traductor' +
    (huerfanos.length ? ' — falta: «' + huerfanos[0].slice(0,46) + '…»' : ''));
 
-// ── la rejilla: se ve al mirarla, no antes ──
+// ── la trama de doce columnas ──
 const rej = await pg.evaluate(() => {
-  const c = getComputedStyle(document.querySelector('.prs'), '::before');
+  const e = document.querySelector('#press .prs-tr');
+  if (!e) return { hay:false };
+  const c = getComputedStyle(e);
   const m = /rgba\(([^)]+)\)/.exec(c.backgroundImage || '');
   const v = m ? m[1].split(',').map(Number) : null;
+  const caja = e.getBoundingClientRect(), sec = document.getElementById('press').getBoundingClientRect();
   return { hay: /repeating-linear-gradient/.test(c.backgroundImage || ''),
-           alfa: v && v.length > 3 ? v[3] : 1 };
+           alfa: v && v.length > 3 ? v[3] : 1,
+           canal: Math.round(caja.left - sec.left),
+           altaEntera: Math.round(caja.height) >= Math.round(sec.height) - 2 };
 });
-di(rej.hay, 'la tabla lleva su rejilla de columnas');
-di(rej.alfa <= 0.08, 'y es un susurro, no una jaula (alfa ' + rej.alfa + ')');
+di(rej.hay, 'la seccion lleva su trama de columnas');
+di(rej.alfa <= 0.06, 'y es un susurro, no una jaula (alfa ' + rej.alfa + ')');
+di(rej.canal === 12, 'con el canal de 12 px del video (' + rej.canal + ')');
+/* la trama sube hasta el titular: en el video las columnas cruzan la seccion
+   entera, no solo la tabla. Es lo que hace que el titular se lea posado
+   sobre un registro y no flotando encima de el. */
+di(rej.altaEntera, 'y cruza la seccion entera, tambien por detras del titular');
 
-// ── al pasar por encima: la fila se enciende entera ──
-const fondoAntes = fsx[2].fondo;
+// ── las medidas de la fila, contra las del video ──
+const geo = await pg.evaluate(() => {
+  const f = document.querySelectorAll('.prs-f')[0];
+  const r = f.getBoundingClientRect();
+  const x = e => Math.round(f.querySelector(e).getBoundingClientRect().left - r.left);
+  const g = f.querySelector('.prs-go').getBoundingClientRect();
+  return { alto: Math.round(r.height), ancho: Math.round(r.width),
+           col: +( (x('.prs-t')) / (r.width/12) ).toFixed(2),
+           caja: Math.round(g.width),
+           margen: Math.round(r.right - g.right) };
+});
+/* 121 px de alto sobre 1420 de ancho: 8,38 %. Se comprueba la PROPORCION y
+   no el pixel, que la pagina se mira en mil anchos distintos. */
+di(Math.abs(geo.alto / geo.ancho - 0.0852) < 0.012,
+   'la fila guarda la proporcion del video (' + geo.alto + ' sobre ' + geo.ancho + ')');
+di(Math.abs(geo.col - 3) < 0.15, 'el titular arranca en la cuarta columna (' + geo.col + ')');
+di(geo.caja >= 44, 'la caja de salida no baja de 44 px, que es lo que mide un dedo (' + geo.caja + ')');
+
+// ── al pasar por encima: la fila se DESCUBRE, no se ilumina ──
+const antes = await pg.evaluate(() => {
+  const f = document.querySelectorAll('.prs-f')[2];
+  return { tinta: getComputedStyle(f.querySelector('.prs-t')).color,
+           barrido: getComputedStyle(f, '::before').transform };
+});
 await pg.locator('.prs-f').nth(2).hover();
-await pg.waitForTimeout(600);
+await pg.waitForTimeout(700);
 const hov = await pg.evaluate(() => {
   const f = document.querySelectorAll('.prs-f')[2];
-  const g = f.querySelector('.prs-go');
-  const c = getComputedStyle(f), t = getComputedStyle(f.querySelector('.prs-t'));
+  const b = getComputedStyle(f, '::before');
   const rgb = s => (s.match(/[\d.]+/g) || []).slice(0,3).map(Number);
   const f8 = v => { v/=255; return v<=.03928 ? v/12.92 : Math.pow((v+.055)/1.055,2.4) };
-  const L = c3 => .2126*f8(c3[0]) + .7152*f8(c3[1]) + .0722*f8(c3[2]);
-  const l1 = L(rgb(c.backgroundColor)), l2 = L(rgb(t.color));
-  return { fondo: c.backgroundColor, texto: t.color,
+  const L = c => .2126*f8(c[0]) + .7152*f8(c[1]) + .0722*f8(c[2]);
+  const azul = rgb(b.backgroundColor), tinta = rgb(getComputedStyle(f.querySelector('.prs-t')).color);
+  const l1 = L(azul), l2 = L(tinta);
+  return { barrido: b.transform, azul: b.backgroundColor,
+           tinta: getComputedStyle(f.querySelector('.prs-t')).color,
+           num: getComputedStyle(f.querySelector('.prs-n')).color,
+           medio: getComputedStyle(f.querySelector('.prs-s')).color,
            razon: +((Math.max(l1,l2)+.05)/(Math.min(l1,l2)+.05)).toFixed(2),
-           giro: getComputedStyle(g).transform };
+           giro: getComputedStyle(f.querySelector('.prs-go')).transform };
 });
-di(hov.fondo !== fondoAntes && /^rgb/.test(hov.fondo), 'al pasar por encima se pinta la fila entera');
-di(hov.texto === 'rgb(255, 255, 255)', 'y el titular pasa a blanco');
-di(hov.razon >= 4.5, 'con contraste de sobra sobre el azul (' + hov.razon + ':1, minimo 4,5)');
+di(/matrix\(1,/.test(hov.barrido) && !/matrix\(1,/.test(antes.barrido),
+   'al pasar por encima el relleno recorre la fila entera');
+/* ESTO ES EL DISEÑO, no un descuido: la tinta del titular NO CAMBIA. Es la
+   misma parada que sobre el azul, y lo que la descubre es el relleno
+   pasando por debajo. Quien la «arregle» subiendola para que se lea en
+   reposo apaga el gesto entero, que es lo unico que hace esta seccion.
+   Va con su precio escrito al lado, abajo. */
+di(hov.tinta === antes.tinta,
+   'y la tinta del titular es la MISMA: lo que lo revela es el azul, no un cambio de color');
+di(hov.num === 'rgb(255, 255, 255)' && hov.medio === 'rgb(255, 255, 255)',
+   'el numero y el medio si pasan a blanco');
+/* El precio, medido y dicho en voz alta: sobre el azul el titular da 3,3:1,
+   por debajo del 4,5 de la norma. Es una decision, y esta comprobacion
+   existe para que sea una decision VIGILADA: si alguien empeora eso todavia
+   mas, salta. */
+di(hov.razon >= 3.1,
+   'contraste del titular sobre el azul: ' + hov.razon + ':1 — POR DEBAJO del 4,5 de la norma, a proposito');
 /* 45 grados son 0,7071 en la matriz. El cuadro se vuelve rombo, que es la
    marca de la casa: si alguien quita ese giro, la flecha se queda en una caja
    y el gesto deja de decir nada. */
