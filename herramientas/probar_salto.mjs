@@ -68,10 +68,32 @@ for (const [nombre, opciones] of [['móvil', {...devices['iPhone 13']}],
      número de píxeles ya caducado, y tiraba de la lectura 781 px hacia atrás.
      Cuatro veces en un recorrido. Así que se para en cada tramo, se deja a la
      página sola medio segundo, y se comprueba que siga donde se la dejó. */
+  /* LA PORTADA TIENE UNA EXCEPCION, Y ES A PROPOSITO. Al terminar el
+     recorrido del tunel la pagina salta sola a la siguiente seccion, porque
+     si no te quedas parado en un tramo de portada donde la animacion ya
+     acabo y la seccion todavia no ha llegado.
+     Esa excepcion NO se tapa quitando el tramo del barrido y a correr: se
+     saca del barrido Y se le exige su contrato aparte, abajo. Un salto de
+     navegacion que nadie vigila es exactamente el fallo que esta prueba
+     nacio para cazar —la pagina moviendose sola— con otro nombre. */
+  const zona = await pg.evaluate(()=>{
+    const h = document.querySelector('.hero-hold');
+    if(!h) return null;
+    const fin = h.offsetHeight - innerHeight;
+    const sig = [...document.querySelectorAll('main>section')].find(s=>
+      s.getBoundingClientRect().top + scrollY > 20 &&
+      getComputedStyle(s).display !== 'none' &&
+      s.getBoundingClientRect().height > 40);
+    return sig ? { fin, destino: Math.round(sig.getBoundingClientRect().top + scrollY),
+                   id: sig.id || sig.className.split(' ')[0] } : null;
+  });
+
   const quieta = await (async () => {
     const h = await pg.evaluate(()=>document.documentElement.scrollHeight);
     let peor = 0, dondeError = 0;
     for (let y = 0; y < h; y += 300) {
+      /* el tramo del salto se mide aparte */
+      if (zona && y >= zona.fin - 320 && y <= zona.destino) continue;
       await pg.evaluate(v=>scrollTo(0,v), y);
       await pg.waitForTimeout(60);
       const a = await pg.evaluate(()=>Math.round(scrollY));
@@ -84,6 +106,40 @@ for (const [nombre, opciones] of [['móvil', {...devices['iPhone 13']}],
   chk(`${nombre}: la página no se desplaza sola mientras se lee` +
       (Math.abs(quieta.peor) > 20 ? ` (${quieta.peor}px en y=${quieta.dondeError})` : ''),
       Math.abs(quieta.peor) <= 20, true);
+
+  /* ── y el contrato del salto, las cuatro cosas ── */
+  if (zona) {
+    /* 1 · bajando, aterriza EN la seccion. Ni antes ni pasado */
+    await pg.evaluate(v=>scrollTo(0,v), 0); await pg.waitForTimeout(260);
+    for (let y = Math.round(zona.fin * 0.5); y <= zona.fin + 40; y += 120)
+      { await pg.evaluate(v=>scrollTo(0,v), Math.min(y, zona.fin + 40)); await pg.waitForTimeout(70); }
+    await pg.evaluate(v=>scrollTo(0,v), zona.fin + 40); await pg.waitForTimeout(1500);
+    const aterriza = await pg.evaluate(()=>Math.round(scrollY));
+    chk(`${nombre}: al acabar el tunel salta a «${zona.id}» (${aterriza} de ${zona.destino})`,
+        Math.abs(aterriza - zona.destino) <= 4, true);
+
+    /* 2 · subiendo NO salta, o no se podria volver a mirar el final */
+    await pg.evaluate(v=>scrollTo(0,v), Math.round(zona.fin * 0.6)); await pg.waitForTimeout(1500);
+    const subiendo = await pg.evaluate(()=>Math.round(scrollY));
+    chk(`${nombre}: subiendo no vuelve a saltar (${subiendo})`,
+        subiendo < zona.destino - 40, true);
+
+    /* 3 · pero se REARMA: bajar otra vez vuelve a saltar */
+    for (let y = Math.round(zona.fin * 0.6); y <= zona.fin + 40; y += 120)
+      { await pg.evaluate(v=>scrollTo(0,v), Math.min(y, zona.fin + 40)); await pg.waitForTimeout(70); }
+    await pg.evaluate(v=>scrollTo(0,v), zona.fin + 40); await pg.waitForTimeout(1500);
+    const otra = await pg.evaluate(()=>Math.round(scrollY));
+    chk(`${nombre}: y se rearma al volver arriba (${otra} de ${zona.destino})`,
+        Math.abs(otra - zona.destino) <= 4, true);
+
+    /* 4 · y estando YA abajo no vuelve a tirar de la pagina */
+    await pg.evaluate(v=>scrollTo(0,v), zona.destino + 500); await pg.waitForTimeout(260);
+    const c = await pg.evaluate(()=>Math.round(scrollY));
+    await pg.waitForTimeout(700);
+    const d = await pg.evaluate(()=>Math.round(scrollY));
+    chk(`${nombre}: pasada la seccion, ya no tira de nadie (${d - c}px)`,
+        Math.abs(d - c) <= 8, true);
+  }
 
   await ctx.close();
 }
