@@ -5497,13 +5497,6 @@ main>section.claro#builds{
 .claro .sec-n,.claro .sk-n{color:var(--c-azul) !important}
 
 
-/* ── 7 · el numeral de agua ── */
-/* «03», «05», «08» en gigante detras del titular iban en gris al 6 %: no se
-   leian como filigrana sino como suciedad del papel. En el azul de la lamina
-   y al 9 % pasan a ser lo que son: una marca de imprenta. */
-.claro .cifron>b,.claro .cifron.cifron>b{
-  color:rgba(12,58,180,.095) !important;
-  -webkit-text-fill-color:rgba(12,58,180,.095) !important}
 
 /* ── 8 · el filete del epigrafe ── */
 /* Era un pixel gris plano. Ahora sale del acento y se apaga: la misma linea,
@@ -6344,55 +6337,21 @@ footer .fmark-logo{filter:none}
 
 
 /* ══════════════════════════════════════════════════════════════════════════
-   EL CIFRON: el numero de seccion, entero
+   EL CIFRON SE VA
    ══════════════════════════════════════════════════════════════════════════
-   El mejor material grafico que tiene la pagina —los numerales 01 a 10— vivia
-   en un cintillo de 10 px.
-   ENTRABA CORTADO POR EL BORDE IZQUIERDO y de eso no se veia un numero: se
-   veian dos curvas sueltas detras del cintillo, en telefono y en escritorio y
-   en todas las secciones. Un numeral a medias no es un numeral. Ahora se ve
-   ENTERO: arranca en el margen y su caja mide lo que mide el glifo, asi que
-   no lo recorta nada. Baja de 384 a 240 porque entero a 384 se comeria el
-   titular, y sube un punto de contraste porque a 11 % y cortado no era nada.
-   Sobre negro va en hueco, solo el contorno; sobre papel, macizo y palido. En
-   los dos casos por debajo del texto en la pila y muy por debajo en contraste:
-   es una filigrana de imprenta, no un rotulo.
-   Se recorta con su propia caja y no con la seccion: poner «overflow:hidden»
-   en la seccion habria matado todos los «position:sticky» que cuelgan de
-   ella, que es exactamente el error que ya costo una pantalla en blanco. */
-.cifron{--cf:clamp(92px,15.6vw,240px);
-  position:absolute;left:0;top:calc(var(--cf) * -.06);
-  width:min(64vw,760px);height:calc(var(--cf) * 1.06);
-  overflow:hidden;pointer-events:none;z-index:0;
-  contain:paint}
-.cifron>b{position:absolute;top:0;left:0;
-  display:block;font-family:var(--f);font-weight:200;
-  font-size:var(--cf);
-  line-height:1.02;letter-spacing:-.055em;
-  font-variant-numeric:tabular-nums lining-nums;
-  color:transparent;-webkit-text-stroke:1.2px rgba(233,238,247,.16)}
-/* En papel va macizo, pero MUY palido: es filigrana de imprenta, no texto.
-   Hace falta ganarle a «.claro :is(h1,h2,h3,h4,b,strong,…)», que pinta de
-   tinta cualquier «b» que caiga dentro de una banda clara —y el numeral
-   ES un «b»—: por eso la regla lleva el nombre de la clase dos veces. */
-.claro .cifron>b,.claro .cifron.cifron>b{
-  -webkit-text-stroke:0 !important;
-  color:rgba(10,12,17,.060) !important;
-  -webkit-text-fill-color:rgba(10,12,17,.060) !important}
-/* el contenido de la cabecera va por encima del numeral, siempre */
-/* El contenido de la cabecera va por encima del numeral. El «:not(.cifron)»
-   no es cosmetico: sin el, «.sec-head>*» (0,1,1) le gana a «.cifron» (0,1,0)
-   y le devuelve el «position:relative», con lo que el numeral vuelve al flujo
-   —660 px de ancho— y empuja de sitio a todo lo que tenga al lado. En
-   «.sale-top», que es una fila flex, eso mandaba el cintillo al centro. */
-.sec-head>*:not(.cifron),.press-head>*:not(.cifron),
-.tkp-head>*:not(.cifron),.builds-head>*:not(.cifron),
-.join-head>*:not(.cifron),.tm-head>*:not(.cifron),
-.sale-top>*:not(.cifron){position:relative;z-index:1}
+   Era un numeral gigante -01 a 10- en hueco detras del titular de cada
+   seccion. Se pidio fuera, y se va entero: la regla, la variante de papel,
+   la de la ronda, la del telefono y el guion que lo inyectaba. No se apaga
+   con un «display:none», porque eso deja el guion recorriendo las secciones
+   y creando elementos que nadie ve. El numero sigue estando donde siempre
+   estuvo, en el cintillo -«.sk-n»-, que es de donde salia. */
 
-@media(max-width:899px){
-  .cifron{--cf:clamp(74px,21vw,104px);width:86vw}
-}
+/* El «:not(.cifron)» que llevaban estos selectores estaba para que el
+   numeral no recuperase el «position:relative» y volviese al flujo. Sin
+   numeral no hay a quien excluir, y un «:not()» de una clase que ya no
+   existe solo sirve para que el siguiente que lo lea crea que si. */
+.sec-head>*,.press-head>*,.tkp-head>*,.builds-head>*,
+.join-head>*,.tm-head>*,.sale-top>*{position:relative;z-index:1}
 
 
 /* ══════════════════════════════════════════════════════════════════════════
@@ -6431,7 +6390,6 @@ main>section#presale{
 #presale .sale-live,#presale .sale-live .sk-n{color:#FFFFFF !important}
 #presale .sale-net{color:rgba(255,255,255,.72)}
 #presale .sk::after,#presale .sk i:last-child{background:rgba(255,255,255,.28)}
-#presale .cifron>b{-webkit-text-stroke-color:rgba(255,255,255,.22)}
 
 /* ── la ficha de precios, en su columna ──
    Se saco a cruzar la pagina entera para poder agrandar el precio y fue un
@@ -13584,37 +13542,6 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
     act.style.setProperty('--my', Math.max(-1,Math.min(1,y)).toFixed(3));
   },{passive:true});
   addEventListener('blur',suelta);
-})();
-</script>
-
-<script>
-/* ── el cifron: un numeral gigante por seccion ─────────────────────────
-   El numero sale del cintillo que ya existe («.sk-n»), asi que no hay dato
-   nuevo que mantener ni nada que se desincronice si manana cambia el orden
-   de las secciones. */
-(function(){
-  document.querySelectorAll('main>section').forEach(function(s){
-    var sk=s.querySelector('.sk-n'); if(!sk) return;
-    var n=(sk.textContent||'').trim();
-    if(!/^[0-9]{1,2}$/.test(n)) return;
-    var cabeza=sk.closest('.sec-head,.press-head,.tkp-head,.builds-head,.join-head,.tm-head,.sale-top,.wrap');
-    /* Y NO DENTRO DE ALGO QUE RECORTE. El sistema de aparicion —«.rv»— lleva un
-       «clip-path» que recorta a sus hijos a la caja del bloque. En la ronda, el
-       cintillo vive en «.sale-top», que es «.rv»: una fila de 38 px de alto.
-       El numeral se pintaba entero y se cortaba ahi, y lo que se veia eran los
-       arcos de arriba del cero y del seis colgando bajo el cintillo. Si la
-       caja elegida recorta, se sube a la siguiente que no lo haga. */
-    while(cabeza && cabeza!==s && getComputedStyle(cabeza).clipPath!=='none'){
-      cabeza = cabeza.parentElement && cabeza.parentElement.closest(
-        '.sec-head,.press-head,.tkp-head,.builds-head,.join-head,.tm-head,.wrap,main>section');
-    }
-    if(!cabeza || cabeza.querySelector(':scope>.cifron')) return;
-    if(getComputedStyle(cabeza).position==='static') cabeza.style.position='relative';
-    var c=document.createElement('i');
-    c.className='cifron'; c.setAttribute('aria-hidden','true');
-    var b=document.createElement('b'); b.textContent=n;
-    c.appendChild(b); cabeza.insertBefore(c,cabeza.firstChild);
-  });
 })();
 </script>
 
