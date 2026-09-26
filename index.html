@@ -5199,6 +5199,78 @@ body.light .hud::after{background:radial-gradient(120% 120% at 100% 100%,
     rgba(244,245,248,.92) 0%, rgba(244,245,248,.60) 42%, rgba(244,245,248,0) 78%) !important}
 
 
+
+/* ══ LA PRENSA, EN TABLA ══════════════════════════════════════════════════
+   Antes eran cuatro tarjetas en un carril horizontal, cada una con el logo
+   del medio en grande. Se veia bien y no decia nada: para leer los cuatro
+   titulares habia que arrastrar, y los logos ocupaban mas sitio que las
+   noticias. Ahora es lo que es —una lista de lo que se ha escrito— y se lee
+   entera de un vistazo.
+
+   Cuatro columnas: el numero, el medio, el titular y la salida. La rejilla
+   de fondo no es adorno: es lo que hace que una lista parezca un registro
+   y no un menu. Y al pasar por encima la fila entera se pinta de azul de
+   marca, que es la unica manera de que una fila de tabla se sienta como un
+   sitio al que se puede entrar. */
+.prs{position:relative;border-top:1px solid rgba(232,236,244,.13);
+  margin-top:clamp(26px,3vw,44px)}
+/* la reticula de columnas, al 5 %: se ve al mirarla y no antes */
+.prs::before{content:'';position:absolute;inset:0;z-index:0;pointer-events:none;
+  background:repeating-linear-gradient(90deg,
+    rgba(232,236,244,.05) 0 1px, rgba(0,0,0,0) 1px calc(100% / 11))}
+.prs-f{position:relative;z-index:1;display:grid;
+  grid-template-columns:clamp(54px,5.4vw,84px) clamp(100px,10.5vw,166px) 1fr auto;
+  align-items:center;gap:clamp(12px,1.8vw,30px);
+  padding:clamp(17px,2vw,27px) clamp(10px,1.3vw,22px);
+  border-bottom:1px solid rgba(232,236,244,.13);
+  text-decoration:none;color:inherit;
+  transition:background .34s var(--ease,cubic-bezier(.16,.84,.26,1))}
+.prs-n,.prs-s{font-family:var(--m);font-style:normal;font-size:11px}
+.prs-n{letter-spacing:.16em;color:rgba(232,236,244,.40)}
+.prs-s{letter-spacing:.22em;text-transform:uppercase;color:var(--blue-lite,#3985FF)}
+.prs-t{margin:0;font-weight:400;font-size:clamp(15.5px,1.55vw,23px);line-height:1.26;
+  letter-spacing:-.022em;color:rgba(232,236,244,.86);max-width:46ch}
+.prs-go{flex:0 0 auto;width:clamp(32px,2.6vw,40px);height:clamp(32px,2.6vw,40px);
+  display:grid;place-items:center;border:1px solid rgba(232,236,244,.22);
+  transition:transform .42s var(--ease,cubic-bezier(.16,.84,.26,1)),
+             border-color .3s ease,background .3s ease}
+.prs-go svg{width:52%;height:52%;fill:none;stroke:rgba(232,236,244,.62);stroke-width:1.6;
+  stroke-linecap:round;stroke-linejoin:round;
+  transition:transform .42s var(--ease,cubic-bezier(.16,.84,.26,1)),stroke .3s ease}
+/* ── al pasar por encima ── */
+.prs-f:hover,.prs-f:focus-visible{background:var(--blue,#0A5CF5)}
+.prs-f:hover .prs-n,.prs-f:focus-visible .prs-n{color:rgba(255,255,255,.72)}
+.prs-f:hover .prs-s,.prs-f:focus-visible .prs-s,
+.prs-f:hover .prs-t,.prs-f:focus-visible .prs-t{color:#fff}
+/* el cuadro se vuelve rombo —la marca de la casa— y la flecha se endereza */
+.prs-f:hover .prs-go,.prs-f:focus-visible .prs-go{
+  transform:rotate(45deg);border-color:rgba(255,255,255,.9)}
+.prs-f:hover .prs-go svg,.prs-f:focus-visible .prs-go svg{
+  transform:rotate(-45deg);stroke:#fff}
+@media(prefers-reduced-motion:reduce){
+  .prs-f,.prs-go,.prs-go svg{transition:none}}
+
+/* ── el telefono: el titular no cabe al lado del medio ── */
+@media(max-width:760px){
+  .prs-f{grid-template-columns:auto 1fr auto;gap:10px 14px;
+    padding:16px 6px;align-items:start}
+  .prs-n{grid-row:1}
+  .prs-s{grid-row:1;grid-column:2}
+  .prs-go{grid-row:1;grid-column:3;align-self:center}
+  .prs-t{grid-row:2;grid-column:1 / -1;max-width:none;margin-top:2px}
+  .prs::before{background-size:calc(100% / 5) 100%}
+}
+
+/* ── sobre papel ── */
+.claro .prs{border-top-color:rgba(10,60,180,.16)}
+.claro .prs-f{border-bottom-color:rgba(10,60,180,.16)}
+.claro .prs::before{background:repeating-linear-gradient(90deg,
+    rgba(10,60,180,.06) 0 1px, rgba(0,0,0,0) 1px calc(100% / 11))}
+.claro .prs-n{color:var(--c-tinta3)}
+.claro .prs-t{color:var(--c-tinta)}
+.claro .prs-go{border-color:rgba(10,60,180,.26)}
+.claro .prs-go svg{stroke:var(--c-azul)}
+
 /* ══ COLOR Y VIDA EN EL PAPEL ═════════════════════════════════════════════
    Las tres laminas claras —Garantias, Seguridad y Lo que estamos montando—
    eran el mismo beige plano con tinta negra encima. Elegante y muerto: entre
@@ -7113,67 +7185,33 @@ window.__mide = function(cv, w, h){
     <div class="k sk rv"><i class="sk-n">02</i>In the press</div>
     <h2 class="press-h">What they are writing about the chain.</h2>
   </div>
-  <div class="wrap press-hold"><div class="press-nav">
-      <button class="pn" id="pnPrev" aria-label="Noticia anterior">
-        <svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
-      <button class="pn" id="pnNext" aria-label="Noticia siguiente">
-        <svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button>
-    </div>
-    <div class="press-rail" id="pressRail">
-        <article class="pcd" style="--ac:#D2D6E0;--w1:#2A2D34;--w2:#0B0D11;--luz:rgba(210,214,224,.26);--rej:rgba(210,214,224,.085);--rej2:rgba(210,214,224,.060);--sh:210,214,224">
-          <div class="pcd-art">
-            <i class="cn tl"></i><i class="cn tr"></i><i class="cn bl"></i><i class="cn br"></i>
-            <div class="pcd-plate">
-              <span class="cb"><svg class="cb-mark" aria-hidden="true"><use href="#nlogo"/></svg><span class="cb-word">Nereum</span></span>
-              <span class="cb-rule"></span>
-              <span class="cb-tile"><img class="cb-logo" alt="Benzinga" src="img/p1.jpg"></span>
-            </div>
-          </div>
-          <div class="pcd-body">
-            <div class="pcd-tag">MIGRATION</div>
-            <h3 class="pcd-t">Benzinga puts Nereum settlement on its markets desk watchlist</h3>
-          </div>
-        </article>
-        <article class="pcd" style="--ac:#A6ABB6;--w1:#23262C;--w2:#08090C;--luz:rgba(166,171,182,.24);--rej:rgba(166,171,182,.085);--rej2:rgba(166,171,182,.060);--sh:166,171,182">
-          <div class="pcd-art">
-            <i class="cn tl"></i><i class="cn tr"></i><i class="cn bl"></i><i class="cn br"></i>
-            <div class="pcd-plate">
-              <span class="cb"><svg class="cb-mark" aria-hidden="true"><use href="#nlogo"/></svg><span class="cb-word">Nereum</span></span>
-              <span class="cb-rule"></span>
-              <span class="cb-tile"><img class="cb-logo" alt="MarketWatch" src="img/p2.jpg"></span>
-            </div>
-          </div>
-          <div class="pcd-body">
-            <div class="pcd-tag">COVERAGE</div>
-            <h3 class="pcd-t">MarketWatch: why finality, not throughput, is the next infrastructure race</h3>
-          </div>
-        </article>
-        <article class="pcd" style="--ac:#EDF0F6;--w1:#32353D;--w2:#0D0F13;--luz:rgba(237,240,246,.26);--rej:rgba(237,240,246,.090);--rej2:rgba(237,240,246,.065);--sh:237,240,246">
-          <div class="pcd-art">
-            <i class="cn tl"></i><i class="cn tr"></i><i class="cn bl"></i><i class="cn br"></i>
-            <div class="pcd-plate">
-              <span class="cb"><svg class="cb-mark" aria-hidden="true"><use href="#nlogo"/></svg><span class="cb-word">Nereum</span></span>
-              <span class="cb-rule"></span>
-              <span class="cb-tile"><img class="cb-logo" alt="Morningstar" src="img/p3.jpg"></span>
-            </div>
-          </div>
-          <div class="pcd-body">
-            <div class="pcd-tag">ANALYSIS</div>
-            <h3 class="pcd-t">Morningstar adds Nereum instruments to its tokenized asset coverage</h3>
-          </div>
-        </article>
-        <article class="pcd" style="--ac:#7F848F;--w1:#1C1F25;--w2:#06070A;--luz:rgba(127,132,143,.28);--rej:rgba(127,132,143,.085);--rej2:rgba(127,132,143,.060);--sh:127,132,143">
-          <div class="pcd-art dark">
-            <i class="cn tl"></i><i class="cn tr"></i><i class="cn bl"></i><i class="cn br"></i>
-          </div>
-          <div class="pcd-body">
-            <div class="pcd-tag">ANNOUNCEMENT</div>
-            <h3 class="pcd-t">Nereum opens its settlement layer to third-party issuers</h3>
-          </div>
-        </article>
-  </div></div>
+  <div class="wrap prs">
+    <a class="prs-f rv" href="https://www.benzinga.com/" target="_blank" rel="noopener">
+      <i class="prs-n">P-01</i>
+      <i class="prs-s">Benzinga</i>
+      <h3 class="prs-t">Benzinga puts Nereum settlement on its markets desk watchlist</h3>
+      <i class="prs-go"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7.5 16.5 16.5 7.5M9.5 7.5h7v7"/></svg></i>
+    </a>
+    <a class="prs-f rv" href="https://www.marketwatch.com/" target="_blank" rel="noopener">
+      <i class="prs-n">P-02</i>
+      <i class="prs-s">MarketWatch</i>
+      <h3 class="prs-t">MarketWatch: why finality, not throughput, is the next infrastructure race</h3>
+      <i class="prs-go"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7.5 16.5 16.5 7.5M9.5 7.5h7v7"/></svg></i>
+    </a>
+    <a class="prs-f rv" href="https://www.morningstar.com/" target="_blank" rel="noopener">
+      <i class="prs-n">P-03</i>
+      <i class="prs-s">Morningstar</i>
+      <h3 class="prs-t">Morningstar adds Nereum instruments to its tokenized asset coverage</h3>
+      <i class="prs-go"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7.5 16.5 16.5 7.5M9.5 7.5h7v7"/></svg></i>
+    </a>
+    <a class="prs-f rv" href="https://nereum.xyz/whitepaper#/press" target="_blank" rel="noopener">
+      <i class="prs-n">P-04</i>
+      <i class="prs-s">Announcement</i>
+      <h3 class="prs-t">Nereum opens its settlement layer to third-party issuers</h3>
+      <i class="prs-go"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7.5 16.5 16.5 7.5M9.5 7.5h7v7"/></svg></i>
+    </a>
+  </div>
   <div class="wrap press-foot rv">
-    <span class="mono">Drag or scroll &#8594;</span>
     <a class="press-all" href="#">All coverage &#8594;</a>
   </div>
 </section>
@@ -9979,106 +10017,6 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
   })();
 })();
 (function(){
-  const rail=document.getElementById('pressRail');if(!rail)return;
-  new IntersectionObserver(es=>es.forEach(e=>{
-    if(e.isIntersecting){e.target.classList.add('in')}
-  }),{threshold:.14}).observe(rail);
-  /* EL PARALAJE DEL RIEL. Al arrastrar, lo de dentro de cada lamina se
-     desplaza un poco CONTRA el riel. Es lo que separa una fila de imagenes de
-     una fila de VENTANAS: si el contenido y el marco van pegados es un
-     mosaico; si el contenido se retrasa, hay profundidad.
-     Se hace sin leer geometria por cuadro, que es lo caro: los centros de las
-     tarjetas se miden UNA vez -y al cambiar el tamano- y por evento solo se
-     lee «scrollLeft», que es un numero. Escribir «--px» en cada tarjeta no
-     invalida el estilo de nadie mas: solo la usa su propia lamina, y en un
-     «translate3d», o sea en capa aparte. */
-  (function(){
-    if(matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-    const cards=[...rail.querySelectorAll('.pcd')];
-    if(!cards.length) return;
-    let centros=null, anchoRiel=1;
-    const mide=()=>{
-      centros=cards.map(c=>c.offsetLeft+c.offsetWidth/2);
-      anchoRiel=Math.max(1,rail.clientWidth);
-    };
-    const MAX=22;
-    let pedido=0;
-    let corrida=null;
-    const pinta=()=>{
-      pedido=0;
-      if(!centros) mide();
-      /* De paso, y sin una lectura de mas: el velo de la izquierda solo se
-         enciende cuando el carril se ha movido de verdad. La clase se toca
-         unicamente al cambiar, no en cada cuadro. */
-      const c=rail.scrollLeft>1;
-      if(c!==corrida){ corrida=c; rail.classList.toggle('corrida',c) }
-      const medio=rail.scrollLeft+anchoRiel/2;
-      for(let i=0;i<cards.length;i++){
-        const d=(centros[i]-medio)/anchoRiel;
-        const px=Math.max(-MAX,Math.min(MAX,-d*MAX*1.6));
-        cards[i].style.setProperty('--px',px.toFixed(1)+'px');
-      }
-    };
-    const pide=()=>{ if(!pedido) pedido=requestAnimationFrame(pinta) };
-    rail.addEventListener('scroll',pide,{passive:true});
-    addEventListener('resize',()=>{centros=null;pide()},{passive:true});
-    addEventListener('load',()=>{centros=null;pide()});
-    pinta();
-  })();
-  let down=false,sx=0,sl=0;
-  rail.addEventListener('pointerdown',e=>{
-    down=true;sx=e.clientX;sl=rail.scrollLeft;rail.classList.add('drag');
-    try{rail.setPointerCapture(e.pointerId)}catch(err){}
-  });
-  rail.addEventListener('pointermove',e=>{if(down)rail.scrollLeft=sl-(e.clientX-sx)});
-  const up=e=>{down=false;rail.classList.remove('drag');
-    try{rail.releasePointerCapture(e.pointerId)}catch(err){}};
-  rail.addEventListener('pointerup',up);
-  rail.addEventListener('pointercancel',up);
-  (function(){
-    const hold=rail.parentElement;
-    const calm=matchMedia('(prefers-reduced-motion: reduce)').matches;
-    let manual=calm;
-    const takeOver=()=>{if(!manual){manual=true;rail.classList.add('manual')}};
-    rail.addEventListener('pointerdown',takeOver);
-    rail.addEventListener('wheel',takeOver,{passive:true});
-    rail.addEventListener('keydown',takeOver);
-    const dTop=el=>{let y=0;while(el){y+=el.offsetTop;el=el.offsetParent}return y};
-    let top=0,h=0,vh=innerHeight;
-    const measure=()=>{top=dTop(hold);h=hold.offsetHeight;vh=innerHeight};
-    measure();
-    addEventListener('resize',measure,{passive:true});
-    addEventListener('load',()=>setTimeout(measure,600));
-    /* Aqui habia un bucle que en cada cuadro leia «scrollWidth» y
-       «clientWidth» —las dos fuerzan maquetacion— para calcular una fraccion
-       que guardaba en «lastP», y «lastP» no se leia en ninguna parte. Sesenta
-       veces por segundo, mientras la pagina estuviera abierta, para nada.
-       Los escuchadores de «takeOver» se quedan: esos si cambian el modo. */
-  })();
-  const cv=rail.querySelector('.pcd-glow');
-  if(cv){
-    const draw=()=>{
-      const r=cv.getBoundingClientRect();if(!r.width)return;
-      const dpr=__dens();
-      __mide(cv, r.width*dpr, r.height*dpr);
-      const c=cv.getContext('2d');c.setTransform(dpr,0,0,dpr,0,0);
-      c.fillStyle='#0A1024';c.fillRect(0,0,r.width,r.height);
-      const g=c.createLinearGradient(r.width*.12,r.height,r.width*.92,0);
-      g.addColorStop(0,'rgba(10,16,36,0)');
-      g.addColorStop(.42,'rgba(170,172,177,.85)');
-      g.addColorStop(.52,'rgba(227,230,237,.95)');
-      g.addColorStop(.62,'rgba(170,172,177,.7)');
-      g.addColorStop(1,'rgba(10,16,36,0)');
-      c.strokeStyle=g;c.lineWidth=Math.max(2,r.height*.035);c.lineCap='round';
-      c.beginPath();c.moveTo(r.width*.06,r.height*1.02);c.lineTo(r.width*1.02,r.height*-.02);c.stroke();
-      const h=c.createRadialGradient(r.width*.62,r.height*.42,0,r.width*.62,r.height*.42,r.width*.6);
-      h.addColorStop(0,'rgba(176,178,183,.34)');h.addColorStop(1,'rgba(176,178,183,0)');
-      c.fillStyle=h;c.fillRect(0,0,r.width,r.height);
-    };
-    draw();addEventListener('resize',draw,{passive:true});setTimeout(draw,700);
-  }
-})();
-(function(){
   const track=document.getElementById('rm2Track'),cards=document.getElementById('rm2Cards'),
         wire=document.getElementById('rm2Wire'),base=document.getElementById('rm2Base'),
         live=document.getElementById('rm2Live'),dot=document.getElementById('rm2Dot');
@@ -11504,27 +11442,6 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
   addEventListener('resize',set,{passive:true});
   if(vv){vv.addEventListener('resize',set,{passive:true});
          vv.addEventListener('scroll',set,{passive:true})}
-})();
-(function(){
-  const rail=document.getElementById('pressRail');
-  const prev=document.getElementById('pnPrev'), next=document.getElementById('pnNext');
-  if(!rail||!prev||!next)return;
-  const paso=()=>{
-    const c=rail.querySelector('.pcd');
-    if(!c)return rail.clientWidth*.8;
-    const r=c.getBoundingClientRect();
-    const g=parseFloat(getComputedStyle(rail).gap)||20;
-    return r.width+g;
-  };
-  const estado=()=>{
-    prev.toggleAttribute('disabled', rail.scrollLeft<=2);
-    next.toggleAttribute('disabled', rail.scrollLeft>=rail.scrollWidth-rail.clientWidth-2);
-  };
-  prev.onclick=()=>rail.scrollBy({left:-paso(),behavior:'smooth'});
-  next.onclick=()=>rail.scrollBy({left: paso(),behavior:'smooth'});
-  rail.addEventListener('scroll',estado,{passive:true});
-  addEventListener('resize',estado,{passive:true});
-  estado();
 })();
 (function(){
   const visto=new WeakMap();
