@@ -38,6 +38,31 @@ const SONDA = `(e)=>{const s=document.createElement('span');
   e.insertBefore(s,e.firstChild);
   const y=s.getBoundingClientRect().bottom; s.remove(); return y;}`;
 
+/* ── ¿ESTA LA SECCION A LA VISTA? ──
+   Esta prueba vive entera dentro de «#solutions». Con la seccion oculta,
+   todo lo que mide da cero y salen cinco rojas seguidas diciendo que el
+   epigrafe «despega 0 px del borde», que es verdad y no significa nada.
+   Asi que se pregunta primero, y si no esta se dice EN VOZ ALTA y se sale.
+   No se borra la prueba: el dia que la seccion vuelva, vuelve ella sola. */
+{
+  const ctx0 = await nav.newContext({ viewport:{ width:1440, height:900 } });
+  const pg0 = await ctx0.newPage();
+  await pg0.goto('http://127.0.0.1:9151/', { waitUntil:'load' });
+  await pg0.waitForTimeout(1200);
+  const viva = await pg0.evaluate(() => {
+    const s = document.getElementById('solutions');
+    return !!s && getComputedStyle(s).display !== 'none' && s.offsetHeight > 40;
+  });
+  await ctx0.close();
+  if (!viva) {
+    console.log('  --  «Guarantees» esta OCULTA: no hay nada que comprobar aqui.');
+    console.log('      (esta prueba vuelve sola el dia que la seccion vuelva)');
+    console.log('\n0/0 correctas');
+    await nav.close(); srv.close();
+    process.exit(0);
+  }
+}
+
 for (const [W, H] of [[1512,900],[1440,900],[1280,900],[900,1000],[390,844]]) {
   const movil = W <= 820;                       // por debajo de 820 la descripcion baja a su renglon
   const ctx = await nav.newContext({ viewport:{ width:W, height:H }, deviceScaleFactor:1,

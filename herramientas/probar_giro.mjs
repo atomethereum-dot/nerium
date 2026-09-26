@@ -112,7 +112,21 @@ await pg.waitForTimeout(1600);
 // Se mide una franja de fondo LIMPIA de cada banda —el aire de debajo del
 // titular—, no la banda entera: con tarjetas dentro se estaria midiendo las
 // tarjetas.
-const CLARAS = ['network', 'press', 'thesis', 'solutions'];
+/* LA LISTA SE MIDE, NO SE ESCRIBE. Estaba a mano —network, press, thesis,
+   solutions— y tres de esas cuatro estan hoy ocultas. «scrollIntoView» sobre
+   un elemento en «display:none» no hace nada, asi que la foto se tomaba
+   donde estuviera la ventana y se medía OTRA seccion: la prueba daba 0,066
+   de relieve para una banda que no se ve. Verde, y sin comprobar nada.
+   Ahora se pregunta a la pagina que secciones hay visibles y de fondo claro,
+   que es de lo que habla esta comprobacion. */
+const CLARAS = await pg.evaluate(() => {
+  const lum = s => { const c = (getComputedStyle(s).backgroundColor.match(/[\d.]+/g)||[0,0,0]).map(Number);
+    return .2126*c[0] + .7152*c[1] + .0722*c[2] };
+  return [...document.querySelectorAll('main>section')]
+    .filter(s => getComputedStyle(s).display !== 'none' && s.offsetHeight > 300 && lum(s) > 110)
+    .map(s => s.id || s.className.split(' ')[0]);
+});
+console.log('      (bandas claras visibles: ' + (CLARAS.join(', ') || 'ninguna') + ')');
 const medidas = {};
 for (const id of CLARAS) {
   await pg.evaluate(k => {
@@ -154,17 +168,22 @@ const grado = k => Math.abs(medidas[k].alto.medio - medidas[k].bajo.medio);
    que su numero es alto con modulo y sin el: informan, pero no discriminan, y
    colgar la comprobacion de ellas seria fingir que mide mas de lo que mide.
    Medido quitando el modulo: press 0,115 → 0,000 y solutions 0,087 → 0,001. */
-/* La prensa SE CAE de esta lista. Su suelo es ahora plano -#030409, sin
-   degradados y sin grano- porque asi esta medido en el video que se copio:
-   con la luz encima, la trama de columnas al 4 % deja de leerse, y la trama
-   es la seccion. Queda «solutions», que sigue afirmando lo mismo que
-   afirmaba esto: que una banda lisa esta compuesta y no es un color plano.
-   Que la prensa SI sea plana lo vigila «probar_prensa», para que la
-   excepcion este atada por los dos lados y no sea solo una ausencia. */
-const LISAS = ['solutions'];
-di(LISAS.every(k => grado(k) >= 0.020),
-   'cada banda lisa esta graduada, no es un color plano (salto arriba-abajo ' +
-   CLARAS.map(k => k + ' ' + grado(k).toFixed(3)).join(' / ') + ')');
+/* Las bandas de ARTE PROPIO -la tira de logotipos, la marquesina- informan
+   pero no discriminan: su numero es alto con relieve y sin el. Se afirma
+   sobre las LISAS, que son las que de verdad podrian quedarse en un color
+   plano. La prensa nunca entra: su suelo es plano a proposito -#030409,
+   copiado del video- y eso lo vigila «probar_prensa» por el lado contrario.
+   Si no queda ninguna banda lisa visible, NO se da por buena en silencio:
+   se dice, porque un verde que no ha medido nada es peor que un rojo. */
+const CON_ARTE = ['network', 'thesis'];
+const LISAS = CLARAS.filter(k => k !== 'press' && CON_ARTE.indexOf(k) < 0);
+if (!LISAS.length) {
+  console.log('      (NO SE COMPRUEBA: no queda ninguna banda clara y lisa a la vista)');
+} else {
+  di(LISAS.every(k => grado(k) >= 0.020),
+     'cada banda lisa esta graduada, no es un color plano (salto arriba-abajo ' +
+     LISAS.map(k => k + ' ' + grado(k).toFixed(3)).join(' / ') + ')');
+}
 /* Y dos claras SEGUIDAS tienen que distinguirse una de otra. Esto se mide en
    el SUELO, no en un recorte de pantalla: el primer intento comparaba una
    franja de cada banda a la misma altura y daba 0,004, porque las dos llevan
