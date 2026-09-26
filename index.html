@@ -8420,15 +8420,20 @@ const CALM=matchMedia('(prefers-reduced-motion: reduce)').matches;
        bajar. El estallido se comprime al ultimo 8 %, asi que el tunel llega
        lleno hasta el final y se abre justo cuando la prensa ya esta
        entrando por abajo. */
-    const salida=crudo<=0.92 ? 0 : Math.pow((crudo-0.92)/0.08, 2.2);
-    /* SIN APERTURA. El tunel se abria al final para dejar el centro vacio:
-       es el hueco oscuro que se veia justo antes de la prensa. Ahora que al
-       acabar el recorrido la pagina salta sola a la seccion siguiente, ese
-       vaciado no lleva a ningun sitio: el tunel llega LLENO al salto. La
-       embestida final se queda -es la velocidad, «salida» en «vel» de abajo-;
-       lo que se quita es que los cubos se aparten. */
+    /* SIN APERTURA Y SIN EMBESTIDA. El tunel se abria al final para dejar el
+       centro vacio -el hueco oscuro que se veia justo antes de la prensa- y
+       ademas aceleraba de golpe. Ahora que al acabar el recorrido la pagina
+       salta sola a la seccion siguiente, ninguna de las dos lleva a ningun
+       sitio: el tunel llega lleno y a su paso al salto. */
     const abre=1;
-    const vel=(0.40+emp*3.30+salida*5.2)*dt;
+    /* MAS LENTO Y SIN EMBESTIDA. Iba de 0,40 en reposo a 3,70 en lo mas
+       hondo, y en el ultimo 8 % la «salida» sumaba otros 5,2: casi el doble
+       de golpe, justo antes del salto. A esa velocidad los cubos de delante
+       -los que estan a 0,42 de la camara- cruzan la pantalla en un par de
+       cuadros y se ven como estelas deformadas: es lo que se veia
+       «distorsionado». Ahora va de 0,20 a 1,70 -la mitad- y la salida ya no
+       acelera nada: el tunel llega al salto a su paso. */
+    const vel=(0.20+emp*1.50)*dt;
     t=(t+vel)%RANGO;
     vt+=dt;
     giro+=(0.040+emp*0.075)*dt;
@@ -8616,11 +8621,18 @@ const CALM=matchMedia('(prefers-reduced-motion: reduce)').matches;
      la contesta el navegador, que para eso sabe lo que hay en pantalla. */
   let aVista=true;
   try{
+    /* «-80px» arriba y abajo: una tira de menos de 80 px NO cuenta como «a la
+       vista». La prensa se monta 36 px sobre el final de la portada para que
+       no haya costura, y justo donde aterriza el salto quedaban esos 36 px de
+       lienzo asomando por debajo de ella. Con eso bastaba para que el tunel
+       se creyera visible: medido, seguia a 34.000 dibujos por segundo en
+       escritorio y 10.000 en telefono, tapado por la prensa, en el sitio
+       exacto donde uno se queda leyendo. */
     new IntersectionObserver(e=>{
       aVista=e[0].isIntersecting;
       window.__tunelVivo=aVista;
       if(aVista) enciende();
-    },{threshold:0.01}).observe(cv);
+    },{threshold:0,rootMargin:'-80px 0px'}).observe(cv);
   }catch(e){ window.__tunelVivo=true }
 
   addEventListener('resize',()=>{ if(mide())siembra() },{passive:true});
@@ -14518,10 +14530,14 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
     saltando = true; hecho = true;
     if(seco){ pon(d); saltando = false; antes = d; return; }
     bloquea(true);
-    var t0 = performance.now(), DUR = 640;
+    /* 1,1 s y curva de ENTRADA Y SALIDA suaves. Eran 0,64 s con una curva que
+       sale a toda velocidad desde el primer cuadro: lo que se notaba era un
+       tiron, no un viaje. Ahora arranca despacio, coge velocidad a mitad de
+       camino y frena al llegar. */
+    var t0 = performance.now(), DUR = 1100;
     (function paso(t){
       var k = Math.min(1, (t - t0) / DUR);
-      var e = 1 - Math.pow(1 - k, 3);
+      var e = k < 0.5 ? 4*k*k*k : 1 - Math.pow(-2*k + 2, 3) / 2;
       /* el destino se vuelve a medir en cada cuadro: si algo cambia de alto
          durante el vuelo -una imagen que termina de cargar-, se aterriza en
          la seccion y no en el numero que valia al despegar */

@@ -29,6 +29,9 @@ for (const [nombre, opciones] of [['móvil', {...devices['iPhone 13']}],
     if(j.method==='eth_call')res=R[j.params[0].data.slice(0,10)]??'0x'+'0'.repeat(64);
     return new Response(JSON.stringify({jsonrpc:'2.0',id:j.id,result:res}),{status:200,headers:{'content-type':'application/json'}});};
   },{R});
+  /* cuenta lo que pinta el tunel, para saber si sigue encendido */
+  await ctx.addInitScript(()=>{ window.__tp=0; const P=CanvasRenderingContext2D.prototype, f=P.fillRect;
+    P.fillRect=function(){ if(this.canvas&&this.canvas.id==='shTunel') window.__tp++; return f.apply(this,arguments); }; });
   const pg=await ctx.newPage();
   await pg.goto('http://127.0.0.1:8949/index.html',{waitUntil:'load'});
   await pg.waitForTimeout(1600);
@@ -158,6 +161,17 @@ for (const [nombre, opciones] of [['móvil', {...devices['iPhone 13']}],
         Math.abs(conRueda - zona.destino) <= 60, true);
     chk(`${nombre}: y al final del tunel «Nereum» sigue ahi, no queda el hueco (${nereumFin})`,
         nereumFin !== null && nereumFin > 0.9, true);
+
+    /* 6 · Y AL ATERRIZAR, EL TUNEL APAGADO. La prensa se monta 36 px sobre el
+       final de la portada, y justo donde aterriza el salto quedaban esos 36
+       px de lienzo asomando: el tunel se creia visible y seguia pintando
+       tapado, a 34.000 dibujos por segundo, en el sitio exacto donde uno se
+       queda leyendo. Se mide ahi y no un poco mas abajo, que es donde se
+       media antes y por eso no se vio. */
+    await pg.evaluate(()=>{ window.__tp=0 }); await pg.waitForTimeout(1200);
+    const tunelTras = await pg.evaluate(()=>Math.round(window.__tp / 1.2));
+    chk(`${nombre}: aterrizado en la seccion, el tunel esta apagado (${tunelTras} dibujos/s)`,
+        tunelTras === 0, true);
 
     /* 4 · y estando YA abajo no vuelve a tirar de la pagina */
     await pg.evaluate(v=>scrollTo(0,v), zona.destino + 500); await pg.waitForTimeout(260);
