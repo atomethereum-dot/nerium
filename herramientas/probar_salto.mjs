@@ -71,14 +71,10 @@ for (const [nombre, opciones] of [['móvil', {...devices['iPhone 13']}],
      número de píxeles ya caducado, y tiraba de la lectura 781 px hacia atrás.
      Cuatro veces en un recorrido. Así que se para en cada tramo, se deja a la
      página sola medio segundo, y se comprueba que siga donde se la dejó. */
-  /* LA PORTADA TIENE UNA EXCEPCION, Y ES A PROPOSITO. Al terminar el
-     recorrido del tunel la pagina salta sola a la siguiente seccion, porque
-     si no te quedas parado en un tramo de portada donde la animacion ya
-     acabo y la seccion todavia no ha llegado.
-     Esa excepcion NO se tapa quitando el tramo del barrido y a correr: se
-     saca del barrido Y se le exige su contrato aparte, abajo. Un salto de
-     navegacion que nadie vigila es exactamente el fallo que esta prueba
-     nacio para cazar —la pagina moviendose sola— con otro nombre. */
+  /* La portada ya NO salta sola a la prensa: se pidio que baje normal.
+     Asi que no tiene excepcion en el barrido -se mide como todo lo demas- y
+     abajo se exige lo contrario de lo que se exigia: que al terminar el
+     tunel la pagina se quede donde la dejas. */
   const zona = await pg.evaluate(()=>{
     const h = document.querySelector('.hero-hold');
     if(!h) return null;
@@ -95,8 +91,6 @@ for (const [nombre, opciones] of [['móvil', {...devices['iPhone 13']}],
     const h = await pg.evaluate(()=>document.documentElement.scrollHeight);
     let peor = 0, dondeError = 0;
     for (let y = 0; y < h; y += 300) {
-      /* el tramo del salto se mide aparte */
-      if (zona && y >= zona.fin - 320 && y <= zona.destino) continue;
       await pg.evaluate(v=>scrollTo(0,v), y);
       await pg.waitForTimeout(60);
       const a = await pg.evaluate(()=>Math.round(scrollY));
@@ -110,39 +104,20 @@ for (const [nombre, opciones] of [['móvil', {...devices['iPhone 13']}],
       (Math.abs(quieta.peor) > 20 ? ` (${quieta.peor}px en y=${quieta.dondeError})` : ''),
       Math.abs(quieta.peor) <= 20, true);
 
-  /* ── y el contrato del salto, las cuatro cosas ── */
+  /* ── la portada baja normal ── */
   if (zona) {
-    /* 1 · bajando, aterriza EN la seccion. Ni antes ni pasado */
+    /* 1 · al acabar el tunel NO salta: se queda donde se la deja */
     await pg.evaluate(v=>scrollTo(0,v), 0); await pg.waitForTimeout(260);
     for (let y = Math.round(zona.fin * 0.5); y <= zona.fin + 40; y += 120)
       { await pg.evaluate(v=>scrollTo(0,v), Math.min(y, zona.fin + 40)); await pg.waitForTimeout(70); }
     await pg.evaluate(v=>scrollTo(0,v), zona.fin + 40); await pg.waitForTimeout(1500);
-    const aterriza = await pg.evaluate(()=>Math.round(scrollY));
-    chk(`${nombre}: al acabar el tunel salta a «${zona.id}» (${aterriza} de ${zona.destino})`,
-        Math.abs(aterriza - zona.destino) <= 4, true);
+    const quedo = await pg.evaluate(()=>Math.round(scrollY));
+    chk(`${nombre}: al acabar el tunel no salta sola, se queda donde se deja (${quedo} de ${zona.fin + 40})`,
+        Math.abs(quedo - (zona.fin + 40)) <= 4, true);
 
-    /* 2 · subiendo NO salta, o no se podria volver a mirar el final */
-    await pg.evaluate(v=>scrollTo(0,v), Math.round(zona.fin * 0.6)); await pg.waitForTimeout(1500);
-    const subiendo = await pg.evaluate(()=>Math.round(scrollY));
-    chk(`${nombre}: subiendo no vuelve a saltar (${subiendo})`,
-        subiendo < zona.destino - 40, true);
-
-    /* 3 · pero se REARMA: bajar otra vez vuelve a saltar */
-    for (let y = Math.round(zona.fin * 0.6); y <= zona.fin + 40; y += 120)
-      { await pg.evaluate(v=>scrollTo(0,v), Math.min(y, zona.fin + 40)); await pg.waitForTimeout(70); }
-    await pg.evaluate(v=>scrollTo(0,v), zona.fin + 40); await pg.waitForTimeout(1500);
-    const otra = await pg.evaluate(()=>Math.round(scrollY));
-    chk(`${nombre}: y se rearma al volver arriba (${otra} de ${zona.destino})`,
-        Math.abs(otra - zona.destino) <= 4, true);
-
-    /* 5 · CON LA RUEDA DE VERDAD. Todo lo de arriba baja con «scrollTo», y
-       asi esta prueba dio verde mientras el salto estaba roto: el
-       desplazamiento suave del navegador lo cancela cualquier golpe de
-       rueda, y quien baja con la rueda da golpes seguidos. Con «scrollTo» no
-       hay golpes que cancelen nada. Aqui se baja como una persona, a golpes
-       de rueda, sin parar, y se exige llegar a la seccion. Y que «Nereum»
-       siga en su sitio al final del tunel: si se va, lo que queda a la vista
-       es el hueco que el tunel talla para el. */
+    /* 2 · CON LA RUEDA DE VERDAD, bajando normal, se llega a la seccion. Y
+       «Nereum» sigue en su sitio al final del tunel: si se va, lo que queda a
+       la vista es el hueco que el tunel talla para el. */
     await pg.evaluate(v=>scrollTo(0,v), 0); await pg.waitForTimeout(500);
     await pg.mouse.move(200, 300);
     let nereumFin = null, llego = false;
@@ -155,14 +130,14 @@ for (const [nombre, opciones] of [['móvil', {...devices['iPhone 13']}],
       if (s.p >= 0.99 && nereumFin === null) nereumFin = s.op;
       if (s.y >= zona.destino - 4) llego = true;
     }
-    await pg.waitForTimeout(1200);
+    await pg.evaluate(v=>scrollTo(0,v), zona.destino); await pg.waitForTimeout(1200);
     const conRueda = await pg.evaluate(()=>Math.round(scrollY));
     chk(`${nombre}: bajando a golpes de rueda, sin parar, llega a «${zona.id}» (${conRueda} de ${zona.destino})`,
-        Math.abs(conRueda - zona.destino) <= 60, true);
+        llego && Math.abs(conRueda - zona.destino) <= 4, true);
     chk(`${nombre}: y al final del tunel «Nereum» sigue ahi, no queda el hueco (${nereumFin})`,
         nereumFin !== null && nereumFin > 0.9, true);
 
-    /* 6 · Y AL ATERRIZAR, EL TUNEL APAGADO. La prensa se monta 36 px sobre el
+    /* 3 · Y EN LA SECCION, EL TUNEL APAGADO. La prensa se monta 36 px sobre el
        final de la portada, y justo donde aterriza el salto quedaban esos 36
        px de lienzo asomando: el tunel se creia visible y seguia pintando
        tapado, a 34.000 dibujos por segundo, en el sitio exacto donde uno se
@@ -170,16 +145,9 @@ for (const [nombre, opciones] of [['móvil', {...devices['iPhone 13']}],
        media antes y por eso no se vio. */
     await pg.evaluate(()=>{ window.__tp=0 }); await pg.waitForTimeout(1200);
     const tunelTras = await pg.evaluate(()=>Math.round(window.__tp / 1.2));
-    chk(`${nombre}: aterrizado en la seccion, el tunel esta apagado (${tunelTras} dibujos/s)`,
+    chk(`${nombre}: en la seccion, el tunel esta apagado (${tunelTras} dibujos/s)`,
         tunelTras === 0, true);
 
-    /* 4 · y estando YA abajo no vuelve a tirar de la pagina */
-    await pg.evaluate(v=>scrollTo(0,v), zona.destino + 500); await pg.waitForTimeout(260);
-    const c = await pg.evaluate(()=>Math.round(scrollY));
-    await pg.waitForTimeout(700);
-    const d = await pg.evaluate(()=>Math.round(scrollY));
-    chk(`${nombre}: pasada la seccion, ya no tira de nadie (${d - c}px)`,
-        Math.abs(d - c) <= 8, true);
   }
 
   await ctx.close();

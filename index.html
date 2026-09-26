@@ -8119,9 +8119,6 @@ const CALM=matchMedia('(prefers-reduced-motion: reduce)').matches;
     addEventListener('wheel',e=>{
       if(e.ctrlKey)return;
       e.preventDefault();
-      /* durante el salto de la portada la rueda no cuenta: si se acumulara
-         aqui, al aterrizar la pagina seguiria bajando sola */
-      if(window.__vuelo)return;
       S.t=cl(S.t+e.deltaY*(e.deltaMode===1?18:1),0,maxScroll());
     },{passive:false});
     addEventListener('keydown',e=>{
@@ -8142,10 +8139,7 @@ const CALM=matchMedia('(prefers-reduced-motion: reduce)').matches;
   new ResizeObserver(measure).observe(el);
   let antesT=0;
   function frame(ahora){
-    if(smooth && window.__vuelo){
-      /* el salto coloca la pagina el solo; aqui solo se toma nota */
-      S.t=S.y=scrollY; S.v=0; antesT=ahora||0;
-    }else if(smooth){
+    if(smooth){
       const prev=S.y;
       /* El paso, por TIEMPO y no por cuadro. Antes era un 0,11 fijo por
          cuadro: con cuadros de 34 ms —medido con ruedas de verdad— avanzaba la
@@ -8616,7 +8610,7 @@ const CALM=matchMedia('(prefers-reduced-motion: reduce)').matches;
        vuelo iba a su ritmo -8 a 12 cuadros, con saltos de 200 ms-. El lienzo
        conserva la imagen, asi que se ve el tunel quieto subiendo, no un
        hueco. Si se vuelve a la portada, su vigia lo enciende de nuevo. */
-    if(!aVista || window.__vuelo){ corre=false; return; }
+    if(!aVista){ corre=false; return; }
     raf=requestAnimationFrame(tick);
     const dt=Math.min(.05,((ahora-ultimo)||16)/1000); ultimo=ahora;
     if((window.__tunel||0)<=0.004) return;       /* aun no ha entrado */
@@ -14508,135 +14502,6 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
       pedido = true; requestAnimationFrame(paso);
     }
   }
-})();
-</script>
-<script>
-/* ══ EL SALTO AL FINAL DE LA PORTADA ══════════════════════════════════════
-   La portada es un anclado: el tunel se monta mientras bajas y, cuando la
-   animacion termina, todavia queda una pantalla entera de recorrido en la
-   que el tunel se va hacia arriba y no pasa nada mas. Ahi es donde se
-   quedaba uno parado, en medio de la portada, sin escena y sin seccion.
-
-   Al completar el recorrido del tunel, la pagina se va sola a la siguiente
-   seccion. Es un salto de NAVEGACION, no un adorno, asi que se porta como
-   tal:
-
-     · solo BAJANDO. Subiendo desde la prensa no hace nada, o seria
-       imposible volver a mirar el final del tunel
-     · UNA SOLA VEZ. Se rearma al volver arriba del todo, no en cada cuadro
-     · no se pelea con el dedo: mientras el salto esta en marcha no escucha,
-       y al soltar vuelve a escuchar desde donde te haya dejado
-     · con «prefers-reduced-motion» el salto es SECO. Quien pide menos
-       movimiento no quiere que le desplacen la pagina un segundo entero;
-       quiere llegar
-     · y el destino se busca, no se escribe: la primera seccion visible de
-       verdad despues de la portada. Escribir «#press» aqui es el mismo
-       fallo que ya tuvo el boton de bajar el dia que se oculto «#network». */
-(function(){
-  var hold = document.querySelector('.hero-hold');
-  if(!hold) return;
-
-  function siguiente(){
-    var s = [].slice.call(document.querySelectorAll('main>section'));
-    for(var i=0;i<s.length;i++){
-      var c = s[i].getBoundingClientRect();
-      if(c.top + (window.scrollY||window.pageYOffset) > 20 &&
-         getComputedStyle(s[i]).display !== 'none' && c.height > 40) return s[i];
-    }
-    return null;
-  }
-
-  var seco = window.matchMedia &&
-             matchMedia('(prefers-reduced-motion:reduce)').matches;
-  var antes = window.scrollY || 0, saltando = false, hecho = false;
-
-  /* EL VUELO LO LLEVA LA PAGINA, NO EL NAVEGADOR. La primera version usaba
-     «scrollIntoView» con desplazamiento suave, y el desplazamiento suave del
-     navegador lo cancela cualquier golpe de rueda o de trackpad. Quien baja
-     con la rueda da golpes seguidos: el siguiente llegaba a los 90 ms, antes
-     de que el salto terminara, y lo cortaba. Tres reintentos, tres cortes, y
-     te dejaba bajando a mano. Medido con la rueda de verdad: quince golpes
-     por un tunel vacio hasta llegar a la prensa.
-     Ahora el vuelo se dibuja cuadro a cuadro con saltos SECOS -«instant»- a
-     lo largo de una curva: no hay nada que cancelar, porque cada cuadro pone
-     la posicion. Y mientras vuela se tragan la rueda, el arrastre y las
-     teclas de bajar; esos oyentes se ponen al despegar y se QUITAN al
-     aterrizar, porque un oyente de rueda que puede frenar el scroll obliga
-     al navegador a esperar al guion en cada golpe, y eso fuera del vuelo
-     seria el lag que acabamos de quitar. */
-  var TECLAS = [32,33,34,35,36,38,40];
-  function traga(e){ e.preventDefault(); }
-  function tragaTecla(e){ if(TECLAS.indexOf(e.keyCode) >= 0) e.preventDefault(); }
-  function bloquea(si){
-    var f = si ? addEventListener : removeEventListener;
-    f('wheel', traga, {passive:false});
-    f('touchmove', traga, {passive:false});
-    f('keydown', tragaTecla, false);
-  }
-  function pon(y){
-    try{ window.scrollTo({top:y, left:0, behavior:'instant'}); }
-    catch(e){ window.scrollTo(0, y); }
-  }
-  function vuela(sig){
-    var y0 = window.scrollY || window.pageYOffset;
-    var d = sig.getBoundingClientRect().top + y0;
-    if(y0 >= d - 8){ hecho = true; return; }
-    saltando = true; hecho = true;
-    if(seco){ pon(d); saltando = false; antes = d; return; }
-    window.__vuelo = true;
-    bloquea(true);
-    /* EL VUELO YA NO SE DIBUJA CUADRO A CUADRO. Era un «scrollTo» por cuadro
-       desde el guion, y cada uno despertaba a todo lo que escucha el scroll
-       -medido con la CPU a un cuarto: 15 cuadros por segundo en telefono, con
-       tirones de medio segundo en escritorio-. Y en telefono ademas pasaba
-       por el freno de cuadros de la pagina, que lo dejaba a 30 como mucho.
-       Ahora la pagina se coloca en la prensa DE UNA VEZ -un solo evento de
-       scroll, un solo calculo- y lo que se ve viajar es el <main> entero
-       deslizandose desde donde estaba hasta su sitio: una animacion de
-       «transform» que la hace la tarjeta grafica sola, a su ritmo, aunque el
-       guion este ocupado. Se ve exactamente igual que un scroll: la portada
-       anclada termina justo donde empieza la prensa, asi que el primer
-       cuadro desplazado es identico al ultimo sin desplazar.
-       Misma duracion y misma curva de entrada y salida que antes. */
-    var main = sig.parentElement, dy = d - y0, DUR = 1100, fin = false;
-    pon(d);
-    antes = window.scrollY || 0;
-    function aterriza(){
-      if(fin) return; fin = true;
-      /* si algo cambio de alto durante el viaje, se corrige al llegar */
-      var dd = sig.getBoundingClientRect().top + (window.scrollY || 0);
-      if(Math.abs((window.scrollY || 0) - dd) > 2) pon(dd);
-      bloquea(false);
-      window.__vuelo = false;
-      saltando = false;
-      antes = window.scrollY || 0;
-    }
-    var an = null;
-    try{
-      an = main.animate(
-        [{transform:'translate3d(0,'+dy+'px,0)'}, {transform:'translate3d(0,0,0)'}],
-        {duration:DUR, easing:'cubic-bezier(.65,0,.35,1)'});
-      an.onfinish = aterriza; an.oncancel = aterriza;
-    }catch(e){ an = null }
-    /* y por si la animacion no avisa -pestaña oculta, navegador viejo- */
-    setTimeout(aterriza, an ? DUR + 600 : 0);
-  }
-
-  addEventListener('scroll', function(){
-    var y = window.scrollY || window.pageYOffset;
-    var baja = y > antes + 0.5;
-    antes = y;
-    if(saltando) return;
-
-    var recorrido = Math.max(1, hold.offsetHeight - innerHeight);
-    /* por debajo del final del anclado se rearma: asi volver arriba y bajar
-       otra vez vuelve a saltar, que es lo que uno espera */
-    if(y < recorrido - 2){ hecho = false; return; }
-    if(hecho || !baja) return;
-
-    var sig = siguiente(); if(!sig) return;
-    vuela(sig);
-  }, {passive:true});
 })();
 </script>
 <script>
