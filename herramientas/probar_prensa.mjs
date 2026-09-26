@@ -29,114 +29,98 @@ await pg.goto('http://127.0.0.1:8993/', { waitUntil:'load' });
 await pg.waitForTimeout(2600);
 await pg.evaluate(() => document.getElementById('press').scrollIntoView());
 await pg.waitForTimeout(1400);
+/* ══ LA PRENSA, EN TABLA ══════════════════════════════════════════════════
+   Esta prueba defendia un carril de tarjetas con logotipos: cuantas habia,
+   que el logo no se deshiciera, que las flechas movieran una tarjeta justa.
+   Esa seccion ya no existe —ahora es una lista— asi que las comprobaciones
+   viejas no se «arreglan»: se tiran y se escriben las del sitio nuevo. */
 
-const t = await pg.evaluate(() => [...document.querySelectorAll('.pcd')].map(c => {
-  const s = getComputedStyle(c);
-  const art = c.querySelector('.pcd-art'), body = c.querySelector('.pcd-body');
-  const esq = [...c.querySelectorAll('.cn')].map(e => getComputedStyle(e).backgroundColor);
-  return { borde: s.borderTopWidth, radio: parseFloat(s.borderRadius), fondo: s.backgroundColor,
-           art: !!art, body: !!body,
-           tag: !!(body && body.querySelector('.pcd-tag')),
-           tit: !!(body && body.querySelector('.pcd-t')),
-           orden: body ? [...body.children].map(x => x.className.split(' ')[0]).join('>') : '',
-           tile: c.querySelectorAll('.cb-tile img.cb-logo').length,
-           img: c.querySelectorAll('img.cb-logo').length,
-           esqMacizas: esq.filter(v => v !== 'rgba(0, 0, 0, 0)' && v !== 'transparent').length };
+const fsx = await pg.evaluate(() => [...document.querySelectorAll('.prs-f')].map(f => {
+  const n = f.querySelector('.prs-n'), s = f.querySelector('.prs-s'),
+        t = f.querySelector('.prs-t'), g = f.querySelector('.prs-go');
+  const c = getComputedStyle(f);
+  return { href: f.getAttribute('href') || '', tag: f.tagName,
+           num: n ? n.textContent.trim() : '', fuente: s ? s.textContent.trim() : '',
+           tit: t ? t.textContent.replace(/\s+/g,' ').trim() : '',
+           flecha: !!(g && g.querySelector('svg')),
+           orden: [...f.children].map(e => e.className).join('>'),
+           fondo: c.backgroundColor };
 }));
-di(t.length === 4, 'las cuatro tarjetas siguen ahi (' + t.length + ')');
-di(t.every(c => parseFloat(c.borde) >= 1), 'cada una es un panel con su filete');
-di(t.every(c => c.radio >= 8), 'con las esquinas redondeadas (' + t[0].radio + 'px)');
-di(t.every(c => c.art && c.body), 'con su figura arriba y su texto abajo');
-di(t.every(c => c.tag && c.tit), 'el epigrafe y el titular, dentro del texto');
-di(t.every(c => c.orden === 'pcd-tag>pcd-t'), 'y en ese orden: primero el rotulo');
-di(t.every(c => c.esqMacizas === 0),
-   'las esquinas ya no son cuadros azules macizos, son escuadras de 1 px');
-di(t.every(c => c.img === c.tile), 'cada logotipo del medio, en su baldosa (' +
-   t.map(c => c.img + '/' + c.tile).join(' ') + ')');
+di(fsx.length === 4, 'las cuatro noticias siguen ahi (' + fsx.length + ')');
+di(fsx.every(f => f.tag === 'A' && /^https?:/.test(f.href)),
+   'cada fila es un enlace de verdad, no un div que escucha clics');
+di(fsx.map(f => f.num).join(' ') === 'P-01 P-02 P-03 P-04',
+   'numeradas y en orden (' + fsx.map(f => f.num).join(' ') + ')');
+di(fsx.every(f => f.fuente && f.tit && f.flecha),
+   'cada una con su medio, su titular y su salida');
+di(fsx.every(f => f.orden === 'prs-n>prs-s>prs-t>prs-go'),
+   'y en ese orden: numero, medio, titular, salida');
 
-// ── el color de cada medio ──
-const col = await pg.evaluate(() => [...document.querySelectorAll('.pcd')].map(c => {
-  const s = getComputedStyle(c);
-  const v = n => s.getPropertyValue(n).trim();
-  return { ac: v('--ac'), w1: v('--w1'), w2: v('--w2'),
-           tag: getComputedStyle(c.querySelector('.pcd-tag')).color,
-           palabra: c.querySelector('.cb') ? getComputedStyle(c.querySelector('.cb')).color : null };
-}));
-const rgb = h => [1,3,5].map(i => parseInt(h.slice(i, i+2), 16));
-const lum = h => { const [r,g,b] = rgb(h); return (0.2126*r + 0.7152*g + 0.0722*b) / 255; };
-const sat = h => { const c = rgb(h), M = Math.max(...c), m = Math.min(...c); return M ? (M-m)/M : 0; };
-di(col.length === 4 && new Set(col.map(c => c.ac)).size === 4,
-   'cada tarjeta lleva su propio acento: ' + col.map(c => c.ac).join(' '));
-di(col.every(c => lum(c.w1) < 0.42),
-   'y la figura no es blanca, es color: luminancia ' + col.map(c => lum(c.w1).toFixed(2)).join(' '));
-// Y AHORA AL REVES, a proposito. La pagina entera paso a negro y plata, asi
-// que lo que esta prueba tiene que defender ya no es que haya color: es que NO
-// lo haya. Tres platas y un verde no son una serie. El limite en 0,28 de
-// saturacion deja pasar el frio leve que hace que el metal no sea gris muerto
-// y corta cualquier tono de verdad.
-di(col.every(c => sat(c.w1) <= 0.28),
-   'la lamina es neutra, del material del sitio, no un campo de color (saturacion ' +
-   col.map(c => sat(c.w1).toFixed(2)).join(' ') + ')');
-di(col.every(c => lum(c.w2) <= lum(c.w1) + 0.02), 'y el degradado va de claro a oscuro');
-di(col.filter(c => c.palabra).every(c => c.palabra === 'rgb(255, 255, 255)'),
-   'sobre ese color, la palabra Nereum va en blanco');
-// ── los cuatro acentos: del mismo material, pero distinguibles ──
-// Antes cada acento era el TONO del logotipo del medio -el azul de Benzinga,
-// el verde de MarketWatch, el rojo de Morningstar-. Con la pagina en negro y
-// plata eso ya no se sostiene: eran los unicos colores que quedaban. Ahora los
-// cuatro son plata, y lo que hay que defender cambia con ellos: que sigan
-// siendo CUATRO y no uno repetido -si no, las tarjetas se vuelven una sola
-// cosa- y que se distingan por LUMINANCIA, que es lo unico que queda cuando
-// quitas el tono.
-const tono = c => { const [r,g,b] = c, M = Math.max(...c), m = Math.min(...c), D = M-m;
-  if (!D) return -1;
-  const h = M === r ? ((g-b)/D % 6) : M === g ? ((b-r)/D + 2) : ((r-g)/D + 4);
-  return (h*60 + 360) % 360; };
-di(col.every(c => sat(c.ac) <= 0.16),
-   'los cuatro acentos son plata, sin tono (saturacion ' +
-   col.map(c => sat(c.ac).toFixed(2)).join(' ') + ')');
-const luces = col.map(c => lum(c.ac)).sort((a,b) => a-b);
-const saltos = luces.slice(1).map((v,i) => v - luces[i]);
-di(saltos.every(d => d >= 0.05),
-   'y se distinguen por luminancia, que es lo unico que queda sin tono (saltos ' +
-   saltos.map(d => d.toFixed(2)).join(' ') + ', minimo 0,05)');
+/* EL MEDIO SALE DEL TITULAR, no de una etiqueta suelta: si algun dia se
+   cambia un titular y se olvida la columna, quedan diciendo cosas distintas
+   y nadie se entera. «Announcement» es el unico que no nombra a nadie,
+   porque lo firma la casa. */
+di(fsx.slice(0,3).every(f => f.tit.toLowerCase().includes(f.fuente.toLowerCase())),
+   'el medio de cada fila es el que nombra su titular');
+di(fsx[3].fuente.toLowerCase() === 'announcement', 'y la cuarta la firma la casa');
 
-// ── ni cuadricula, ni logotipos deshechos ──
-const fig = await pg.evaluate(() => getComputedStyle(document.querySelector('.pcd-art')).backgroundImage);
-di(!/repeating-linear-gradient/.test(fig), 'la figura ya no lleva cuadricula');
+/* LOS TITULARES NO SE TOCAN. Estan traducidos a doce idiomas con la cadena
+   inglesa como clave: cambiar una coma aqui deja doce ficheros mintiendo.
+   Esta comprobacion es el unico sitio donde eso salta antes de publicar. */
+const dicc = JSON.parse(fs.readFileSync(path.join(RAIZ,'i18n/es.json'),'utf8'));
+const huerfanos = fsx.map(f => f.tit).filter(t => !(t in dicc));
+di(huerfanos.length === 0,
+   'los cuatro titulares siguen siendo claves del traductor' +
+   (huerfanos.length ? ' — falta: «' + huerfanos[0].slice(0,46) + '…»' : ''));
 
-/* En un ordenador corriente hay UN pixel de pantalla por cada pixel de CSS,
-   asi que el logotipo se dibuja con los pixeles que mida su caja y ni uno mas.
-   Con la baldosa de 80 eran 62, y el de Morningstar son once letras de palo
-   seco en ese ancho: cuatro pixeles por letra. Se deshacia. En el telefono no
-   se veia porque alli hay dos o tres pixeles de pantalla por cada uno de CSS.
-   Por debajo de 88 vuelve el problema. */
-const real = await pg.evaluate(() => [...document.querySelectorAll('.cb-logo')].map(i =>
-  ({ alt: i.alt, px: Math.round(i.getBoundingClientRect().width * devicePixelRatio),
-     origen: i.naturalWidth })));
-di(real.every(l => l.px >= 88),
-   'en pantalla de 1x el logotipo se dibuja con ' + real.map(l => l.px).join('/') + ' px reales');
-di(real.every(l => l.origen >= l.px),
-   'y el archivo tiene al menos esa resolucion (' + real.map(l => l.origen).join('/') + ')');
-
-// el hueco entre la figura y el texto: la tarjeta tiene que tener un dentro
-const sep = await pg.evaluate(() => {
-  const c = document.querySelector('.pcd');
-  return { linea: getComputedStyle(c.querySelector('.pcd-art')).borderBottomWidth,
-           aire: parseFloat(getComputedStyle(c.querySelector('.pcd-body')).paddingLeft) };
+// ── la rejilla: se ve al mirarla, no antes ──
+const rej = await pg.evaluate(() => {
+  const c = getComputedStyle(document.querySelector('.prs'), '::before');
+  const m = /rgba\(([^)]+)\)/.exec(c.backgroundImage || '');
+  const v = m ? m[1].split(',').map(Number) : null;
+  return { hay: /repeating-linear-gradient/.test(c.backgroundImage || ''),
+           alfa: v && v.length > 3 ? v[3] : 1 };
 });
-di(parseFloat(sep.linea) >= 1, 'una linea separa la figura del texto');
-di(sep.aire >= 14, 'y el texto respira dentro de la tarjeta (' + sep.aire + 'px)');
-const haz = await pg.evaluate(() => {
-  const a = document.querySelector('.pcd-art.dark');
-  return { canvas: !!a.querySelector('canvas'),
-           fondo: getComputedStyle(a).backgroundImage };
+di(rej.hay, 'la tabla lleva su rejilla de columnas');
+di(rej.alfa <= 0.08, 'y es un susurro, no una jaula (alfa ' + rej.alfa + ')');
+
+// ── al pasar por encima: la fila se enciende entera ──
+const fondoAntes = fsx[2].fondo;
+await pg.locator('.prs-f').nth(2).hover();
+await pg.waitForTimeout(600);
+const hov = await pg.evaluate(() => {
+  const f = document.querySelectorAll('.prs-f')[2];
+  const g = f.querySelector('.prs-go');
+  const c = getComputedStyle(f), t = getComputedStyle(f.querySelector('.prs-t'));
+  const rgb = s => (s.match(/[\d.]+/g) || []).slice(0,3).map(Number);
+  const f8 = v => { v/=255; return v<=.03928 ? v/12.92 : Math.pow((v+.055)/1.055,2.4) };
+  const L = c3 => .2126*f8(c3[0]) + .7152*f8(c3[1]) + .0722*f8(c3[2]);
+  const l1 = L(rgb(c.backgroundColor)), l2 = L(rgb(t.color));
+  return { fondo: c.backgroundColor, texto: t.color,
+           razon: +((Math.max(l1,l2)+.05)/(Math.min(l1,l2)+.05)).toFixed(2),
+           giro: getComputedStyle(g).transform };
 });
-di(!haz.canvas, 'la del anuncio ya no pinta su haz en un lienzo');
-di(/linear-gradient\(56deg/.test(haz.fondo), 'lo lleva en el fondo, que no se puede quedar en blanco');
+di(hov.fondo !== fondoAntes && /^rgb/.test(hov.fondo), 'al pasar por encima se pinta la fila entera');
+di(hov.texto === 'rgb(255, 255, 255)', 'y el titular pasa a blanco');
+di(hov.razon >= 4.5, 'con contraste de sobra sobre el azul (' + hov.razon + ':1, minimo 4,5)');
+/* 45 grados son 0,7071 en la matriz. El cuadro se vuelve rombo, que es la
+   marca de la casa: si alguien quita ese giro, la flecha se queda en una caja
+   y el gesto deja de decir nada. */
+di(/matrix\(0\.707/.test(hov.giro), 'y el cuadro de la flecha se vuelve rombo');
+
+// ── con el teclado se llega igual ──
+const foco = await pg.evaluate(() => {
+  const f = document.querySelectorAll('.prs-f')[0];
+  f.focus();
+  const c = getComputedStyle(f);
+  return { esEl: document.activeElement === f,
+           marca: (c.outlineStyle !== 'none' && parseFloat(c.outlineWidth) > 0) ||
+                  (c.boxShadow && c.boxShadow !== 'none') ||
+                  c.backgroundColor !== 'rgba(0, 0, 0, 0)' };
+});
+di(foco.esEl && foco.marca, 'con el teclado se llega a las filas y se ve donde estas');
+
 di(errs.length === 0, 'sin errores de pagina' + (errs.length ? ': ' + errs[0] : ''));
-await ctx.close();
-
 // ── el telefono ──
 const ctx2 = await nav.newContext({ viewport:{width:390,height:844}, deviceScaleFactor:2, isMobile:true, hasTouch:true });
 const mo = await ctx2.newPage();
