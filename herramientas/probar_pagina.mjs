@@ -258,7 +258,15 @@ di(Object.values(dic).every(d => d[sub]), 'y la frase de «Compatible with» tam
 
 // ── la escala tipografica ──
 const tipo = await pg.evaluate(() => {
-  const g = s => { const e = document.querySelector(s); if (!e) return null;
+  /* EL PRIMERO QUE COINCIDA NO VALE: TIENE QUE ESTAR A LA VISTA. Con una
+     seccion oculta, «querySelector» devolvia igualmente su titular, que mide
+     cero, y la comprobacion de «media columna» salia NaN —0 dividido entre
+     0— y suspendia. No era un titular ahogado: era un titular que no esta.
+     Se coge el primero que ocupe sitio de verdad. */
+  const g = s => { const e = [...document.querySelectorAll(s)].find(x => {
+      const b = x.getBoundingClientRect();
+      return b.width > 1 && b.height > 1 && getComputedStyle(x).display !== 'none';
+    }); if (!e) return null;
     const c = getComputedStyle(e), r = e.getBoundingClientRect();
     const sec = e.closest('section');
     const col = e.parentElement;
