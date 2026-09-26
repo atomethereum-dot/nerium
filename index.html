@@ -369,7 +369,9 @@ body.tunel-on .sh-mesh i{opacity:0}
 .sh-mesh i:nth-child(4){right:8%;bottom:-16%;width:52%;height:62%;
   background:radial-gradient(circle,rgba(12,34,96,.26) 0%,rgba(12,34,96,.13) 34%,rgba(12,34,96,.05) 58%,rgba(12,34,96,0) 78%)}
 .slats{position:absolute;inset:0;display:flex}
-.slats i{--e:0;flex:1 1 0;background:var(--suelo);transform:scaleX(calc(var(--e) * 1.02));
+/* Las lamas iban en «--suelo» —el grafito— sobre una portada que ahora es
+   negra: se veian como bandas grises cruzando los cubos. Mismo negro. */
+.slats i{--e:0;flex:1 1 0;background:var(--negro);transform:scaleX(calc(var(--e) * 1.02));
   transform-origin:var(--o,left);will-change:transform}
 .sh-edges{position:absolute;inset:0;opacity:0;pointer-events:none;will-change:opacity;
   background:repeating-linear-gradient(90deg,
@@ -1530,7 +1532,11 @@ main>section{position:relative;z-index:1}
    tienen que hacer. */
 .hero-hold{position:relative;height:calc(100svh + 42svh);z-index:0;background:var(--negro)}
 @media(max-width:900px){
-  .hero-hold{height:calc(100svh + 125svh)}
+  /* 125svh de sobra eran dos pantallas y cuarto de portada en un telefono:
+     mas de la mitad del recorrido era tunel ya montado sin nada nuevo que
+     contar. 78 baja el anclado de 1055 px a 658 sin tocar la animacion, que
+     va por porcentaje del recorrido y no por pixeles. */
+  .hero-hold{height:calc(100svh + 78svh)}
 }
 .hero{position:sticky;top:0;z-index:0}
 main>section+section{margin-top:clamp(-36px,-3.4vw,-64px);
@@ -8362,8 +8368,13 @@ const CALM=matchMedia('(prefers-reduced-motion: reduce)').matches;
        geometria —se multiplica la distancia de cada pieza al eje, que es lo
        mismo que separar las paredes—, y como crece muy deprisa al final, lo
        que se ve es que sales. */
-    const salida=crudo<=0.80 ? 0 : Math.pow((crudo-0.80)/0.20, 2.2);
-    const abre=1+salida*2.6;
+    /* EMPEZABA EN EL 80 % y dejaba el ultimo quinto de la portada con la
+       escena ya vaciada: una pantalla negra esperando a que terminaras de
+       bajar. El estallido se comprime al ultimo 8 %, asi que el tunel llega
+       lleno hasta el final y se abre justo cuando la prensa ya esta
+       entrando por abajo. */
+    const salida=crudo<=0.92 ? 0 : Math.pow((crudo-0.92)/0.08, 2.2);
+    const abre=1+salida*1.0;
     const vel=(0.40+emp*3.30+salida*5.2)*dt;
     t=(t+vel)%RANGO;
     vt+=dt;
@@ -8595,7 +8606,16 @@ const CALM=matchMedia('(prefers-reduced-motion: reduce)').matches;
        lo segundo deja al visitante en mitad de la cortina, que es donde ya
        estaba. */
     if(pista) pista.addEventListener('click',function(){
-      const sig=document.getElementById('network');
+      /* IBA A «#network» POR SU NOMBRE, y el dia que esa seccion se
+         oculto el boton dejo de llevar a ningun sitio: el elemento sigue en
+         el documento, mide cero y esta arriba del todo, asi que «bajar»
+         devolvia a la portada. Ahora se busca la PRIMERA seccion visible
+         de verdad despues de la portada, que hoy es la prensa y mañana
+         sera la que toque. */
+      const sig=[...document.querySelectorAll('main>section')].find(s=>
+        s.getBoundingClientRect().top + scrollY > 20 &&
+        getComputedStyle(s).display !== 'none' &&
+        s.getBoundingClientRect().height > 40);
       if(sig) sig.scrollIntoView({behavior:'smooth',block:'start'});
       else scrollBy({top:innerHeight*.9,behavior:'smooth'});
     });
