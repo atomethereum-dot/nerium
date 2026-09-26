@@ -5320,42 +5320,33 @@ body.light .hud::after{background:radial-gradient(120% 120% at 100% 100%,
 .prs-f:hover .prs-go svg,.prs-f:focus-visible .prs-go svg,
 .prs-f.sel .prs-go svg{stroke:#fff}
 
-/* ── el logotipo del medio, en la columna que el video deja vacia ──
-   Aparece SOLO con la fila abierta, y no empuja a nadie: vive en la tercera
-   columna, que en reposo esta vacia. Va forzado a blanco -los logotipos
-   vienen en su color de marca y sobre el azul cada uno tiraria por su lado-.
-   Si el archivo no esta, el hueco no existe: el guion solo lo mete cuando la
-   imagen ha cargado de verdad, asi que no hay marco roto ni sitio guardado
-   para algo que no va a venir. */
-/* El «min-width:0» y el «max-width» no son adorno: una celda de rejilla no
-   baja de su contenido por defecto, asi que un logotipo mas ancho que su
-   columna se sale por la derecha y se mete debajo del titular. Medido con
-   un archivo de 220x32: se comia 3 px del titular a 1444. Se recorta a la
-   columna y la imagen se ajusta dentro, anclada a la izquierda. */
-/* Y SIN «justify-self:start». Con el, la celda se encoge al contenido y el
-   «max-width:100%» se mide contra la columna PERO el relleno de 7 px la
-   empuja: el borde derecho acababa 3 px dentro del titular. Estirada ocupa
-   la columna exacta -249 a 367- y el relleno va por dentro. */
-/* 20 px de relleno y no los 7 de las demas columnas: «MORNINGSTAR» ocupa
-   105 px de los 118 de la suya, asi que con 7 el logotipo empezaba a doce
-   pixeles del final del nombre y se leian pegados. Sigue cabiendo: 20 mas
-   los 82 del logotipo mas ancho son 102 de 118. */
-.prs-logo{grid-column:3;align-self:center;padding-left:20px;
-  display:block;min-width:0;max-width:100%;overflow:hidden;
-  opacity:0;transform:translateX(-8px);pointer-events:none;
+/* ── LA VISTA PREVIA QUE SIGUE AL PUNTERO ──
+   Al abrirse la fila sale la imagen del medio, flotando. Con raton va
+   PEGADA AL PUNTERO -con retardo, no clavada- y por encima de la fila; en
+   un telefono no hay puntero al que seguir, asi que se ancla al borde
+   derecho de la fila y se le reserva el hueco en TODAS las filas, tambien
+   en las dos que no tienen imagen, para que la tabla no quede con unas
+   filas mas altas que otras.
+
+   Dos capas y no una: la de fuera lleva la POSICION -se reescribe cuadro a
+   cuadro y no puede llevar transicion, o el retardo se sumaria dos veces- y
+   la de dentro la ENTRADA -opacidad y escala-. Meter las dos en el mismo
+   «transform» es el error clasico de este efecto. */
+.prs-vis{position:absolute;left:0;top:0;z-index:4;pointer-events:none;
+  --v:clamp(148px,16.5vw,248px);
+  width:var(--v);height:var(--v);
+  margin-left:calc(var(--v) / -2);margin-top:calc(var(--v) / -2);
+  will-change:transform}
+.prs-vis img{position:absolute;inset:0;width:100%;height:100%;
+  object-fit:cover;display:block;
+  opacity:0;transform:scale(.84);
   transition:opacity 420ms cubic-bezier(.17,.89,.32,1),
              transform 420ms cubic-bezier(.17,.89,.32,1)}
-.prs-logo img{display:block;width:auto;max-width:100%;
-  height:clamp(13px,1.2vw,19px);
-  object-fit:contain;object-position:left center;
-  filter:brightness(0) invert(1)}
-.prs-f:hover .prs-logo,.prs-f:focus-visible .prs-logo,
-.prs-f.sel .prs-logo{opacity:1;transform:none}
-/* el titular y la flecha NO cambian de color: los descubre el azul */
+.prs-vis img.on{opacity:1;transform:none}
 
 /* la curva medida, para quien entienda «linear()» */
 @supports (transition-timing-function:linear(0,1)){
-  .prs-f::before,.prs-n,.prs-s,.prs-go,.prs-logo{
+  .prs-f::before,.prs-n,.prs-s,.prs-go,.prs-vis img{
     transition-timing-function:linear(0,.375 6.5%,.567 15.9%,.7 25.2%,
       .793 34.6%,.857 43.9%,.903 53.3%,.937 62.6%,.963 72%,.982 81.3%,
       .995 90.7%,1)}
@@ -5381,20 +5372,29 @@ body.light .hud::after{background:radial-gradient(120% 120% at 100% 100%,
 .prs-ret.on{opacity:1}
 
 @media(prefers-reduced-motion:reduce){
-  .prs-f::before,.prs-n,.prs-s,.prs-go,.prs-logo{transition:none}
+  .prs-f::before,.prs-n,.prs-s,.prs-go,.prs-vis img{transition:none}
+  .prs-vis{display:none}
   .prs-ret{display:none}
 }
 
 /* ── el telefono: el titular no cabe al lado del medio ── */
 @media(max-width:760px){
+  .press{--vt:clamp(62px,17vw,92px)}
   .prs-f{grid-template-columns:auto 1fr auto;row-gap:10px;column-gap:14px;
     align-items:start;padding-block:18px;min-height:0}
   .prs-n{grid-row:1;grid-column:1}
   .prs-s{grid-row:1;grid-column:2;padding-left:0}
-  /* en el telefono comparte celda con el nombre del medio -no hay otra
-     libre-, asi que se le pone techo para que no se junten */
-  .prs-logo{grid-row:1;grid-column:2;justify-self:end;padding-left:0;
-    max-width:44%;margin-right:12px}
+  /* El hueco de la vista previa se reserva en las CUATRO filas aunque solo
+     dos tengan imagen: reservarlo solo donde hace falta deja unas filas mas
+     altas que otras, y una tabla con las filas desiguales se lee rota. */
+  /* 26 y no 14: el cuadro de la salida va GIRADO 45 grados, asi que su
+     rombo sobresale de su caja por los cuatro lados y con 14 rozaba la
+     imagen. Se reserva contando el rombo, no la caja. */
+  .prs-f{padding-right:calc(var(--vt) + 26px)}
+  /* solo cambia el tamaño: los margenes de centrado salen de «--v», asi que
+     el guion sigue apuntando al CENTRO de la imagen en los dos sitios y no
+     hay dos convenios distintos que acaben restando media anchura de mas */
+  .prs-vis{--v:var(--vt)}
   .prs-go{grid-row:1;grid-column:3;align-self:center;margin-right:0}
   .prs-t{grid-row:2;grid-column:1 / -1;padding-left:0;font-size:19px}
   .prs-tr{background:repeating-linear-gradient(90deg,
@@ -7297,13 +7297,13 @@ window.__mide = function(cv, w, h){
       <h3 class="prs-t">Nereum settlement on the markets desk watchlist</h3>
       <i class="prs-go"><svg viewBox="0 0 16 10" aria-hidden="true"><path d="M0 5h13.4M11 2.6 14 5l-3 2.4"/></svg></i>
     </a>
-    <a class="prs-f rv" data-logo="img/medios/marketwatch.png" href="https://www.marketwatch.com/" target="_blank" rel="noopener">
+    <a class="prs-f rv" data-vista="img/medios/marketwatch.png" href="https://www.marketwatch.com/" target="_blank" rel="noopener">
       <i class="prs-n">P-02</i>
       <i class="prs-s">MarketWatch</i>
       <h3 class="prs-t">Why finality, not throughput, is the next infrastructure race</h3>
       <i class="prs-go"><svg viewBox="0 0 16 10" aria-hidden="true"><path d="M0 5h13.4M11 2.6 14 5l-3 2.4"/></svg></i>
     </a>
-    <a class="prs-f rv" data-logo="img/medios/morningstar.png" href="https://www.morningstar.com/" target="_blank" rel="noopener">
+    <a class="prs-f rv" data-vista="img/medios/morningstar.png" href="https://www.morningstar.com/" target="_blank" rel="noopener">
       <i class="prs-n">P-03</i>
       <i class="prs-s">Morningstar</i>
       <h3 class="prs-t">Nereum instruments added to tokenized asset coverage</h3>
@@ -14083,44 +14083,109 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
   }
 })();
 
-/* ══ EL LOGOTIPO DEL MEDIO ════════════════════════════════════════════════
-   La fila que tiene logotipo lo dice, y dice cual: «data-logo». La version
-   anterior adivinaba el nombre a partir del medio y lo pedia a ver si
-   estaba, lo que significaba cuatro peticiones para dos archivos, dos de
-   ellas al vacio, y -peor- que la seccion prometia por marcado unos logos
-   que no existian. Ahora solo lo lleva quien lo tiene.
+/* ══ LA VISTA PREVIA DEL MEDIO ══════════════════════════════════════════
+   Al abrirse una fila sale la imagen del medio flotando. Con raton VA
+   DETRAS DEL PUNTERO, con el mismo retardo exponencial que el barrido de
+   las filas -lo que le queda por recorrer se multiplica por 0,83 en cada
+   cuadro a 60 por segundo-. En un telefono no hay puntero, asi que se
+   ancla al hueco que la fila le reserva a la derecha.
 
-   Aun asi la etiqueta se crea DESPUES de que la imagen haya cargado de
-   verdad: un nombre mal escrito deja un marco roto encima del azul, y eso
-   se ve mas que no tener logotipo.
+   Las imagenes se crean TODAS al empezar y se quedan quietas una encima de
+   otra; lo que cambia es cual lleva la clase. Cambiar el «src» al vuelo
+   deja un parpadeo en blanco la primera vez, que es justo el cuadro en el
+   que se esta mirando.
 
-   Los dos archivos van en blanco sobre transparente -recortados de los
-   originales, que venian sobre rojo y sobre negro- porque sobre el azul de
-   la fila cada marca en su color tiraria por su lado. El filtro del CSS los
-   deja en blanco igualmente, asi que uno nuevo entra sin prepararlo siempre
-   que traiga el fondo transparente. */
+   El bucle se apaga solo cuando alcanza al puntero: no queda nada girando
+   cuando la seccion esta quieta, que en esta pagina importa -el telefono
+   lleva un tope de imagenes por segundo puesto a proposito-. */
 (function(){
-  var filas = document.querySelectorAll('#press .prs-f[data-logo]');
-  if(!filas.length) return;
-  Array.prototype.forEach.call(filas, function(f){
-    var ruta = f.getAttribute('data-logo') || '';
-    /* ruta relativa y dentro de la carpeta de medios: nada de «//», «..» ni
-       un origen de fuera colado en el marcado */
-    if(!/^img\/medios\/[a-z0-9_-]+\.(svg|png|webp)$/.test(ruta)) return;
-    var prueba = new Image();
-    prueba.onload = function(){
-      if(f.querySelector('.prs-logo')) return;
-      var i = document.createElement('i');
-      i.className = 'prs-logo'; i.setAttribute('aria-hidden','true');
-      var img = document.createElement('img');
-      img.src = ruta; img.alt = ''; img.decoding = 'async';
-      img.width = prueba.naturalWidth; img.height = prueba.naturalHeight;
-      i.appendChild(img);
-      var t = f.querySelector('.prs-t');
-      t ? f.insertBefore(i, t) : f.appendChild(i);
-    };
-    prueba.src = ruta;
+  var lista = document.querySelector('#press .prs');
+  if(!lista) return;
+  var conImagen = [].slice.call(lista.querySelectorAll('.prs-f[data-vista]'));
+  if(!conImagen.length) return;
+
+  var capa = document.createElement('i');
+  capa.className = 'prs-vis'; capa.setAttribute('aria-hidden','true');
+  var mapa = [];
+  conImagen.forEach(function(f){
+    var ruta = f.getAttribute('data-vista') || '';
+    /* relativa y de dentro de casa: nada de «..» ni un origen de fuera */
+    if(!/^img\/medios\/[a-z0-9_-]+\.(png|jpg|jpeg|webp|avif|svg)$/.test(ruta)) return;
+    var img = document.createElement('img');
+    img.src = ruta; img.alt = ''; img.decoding = 'async';
+    capa.appendChild(img);
+    mapa.push({ fila:f, img:img });
   });
+  if(!mapa.length) return;
+  lista.appendChild(capa);
+
+  var fino = !!(window.matchMedia && matchMedia('(pointer:fine)').matches);
+  var quieto = !!(window.matchMedia && matchMedia('(prefers-reduced-motion:reduce)').matches);
+  var x = 0, y = 0, dx = 0, dy = 0, puesta = false, pedido = false, viva = null;
+
+  function destino(){
+    var c = lista.getBoundingClientRect();
+    if(fino && dentro) return { x:raton.x - c.left, y:raton.y - c.top };
+    if(!viva) return null;
+    var r = viva.getBoundingClientRect();
+    /* en el telefono, en el hueco reservado a la derecha */
+    return { x: r.right - c.left - (capa.offsetWidth / 2) - 14,
+             y: r.top + r.height / 2 - c.top };   /* al CENTRO, como con raton */
+  }
+
+  function coloca(saltando){
+    var d = destino(); if(!d) return;
+    dx = d.x; dy = d.y;
+    if(saltando || quieto || !puesta){ x = dx; y = dy; puesta = true; escribe(); return; }
+    if(!pedido){ pedido = true; requestAnimationFrame(paso); }
+  }
+  function escribe(){ capa.style.transform = 'translate3d(' + x + 'px,' + y + 'px,0)'; }
+  function paso(){
+    pedido = false;
+    x += (dx - x) * 0.17; y += (dy - y) * 0.17;
+    escribe();
+    if(Math.abs(dx - x) > 0.4 || Math.abs(dy - y) > 0.4){
+      pedido = true; requestAnimationFrame(paso);
+    }
+  }
+
+  /* quien esta abierta lo decide el resto de la seccion; aqui solo se mira */
+  function repasa(){
+    var abierta = lista.querySelector('.prs-f.sel, .prs-f:hover, .prs-f:focus-visible');
+    var nueva = null;
+    mapa.forEach(function(m){
+      var suya = (m.fila === abierta);
+      m.img.classList.toggle('on', suya);
+      if(suya) nueva = m.fila;
+    });
+    var cambia = (nueva !== viva);
+    viva = nueva;
+    if(viva) coloca(cambia && !(fino && dentro));
+  }
+
+  var raton = { x:0, y:0 }, dentro = false;
+  if(fino){
+    lista.addEventListener('pointermove', function(e){
+      if(e.pointerType && e.pointerType !== 'mouse') return;
+      raton.x = e.clientX; raton.y = e.clientY;
+      if(!dentro){ dentro = true; puesta = false; }
+      coloca(false); repasa();
+    }, {passive:true});
+    lista.addEventListener('pointerleave', function(){ dentro = false; puesta = false; repasa(); },
+      {passive:true});
+  }
+
+  /* la seleccion por scroll cambia una clase: se vigila con un observador de
+     mutaciones y no con un oyente de scroll, que ya hay uno menos en esta
+     pagina por la misma razon */
+  var mo = new MutationObserver(repasa);
+  [].slice.call(lista.querySelectorAll('.prs-f')).forEach(function(f){
+    mo.observe(f, { attributes:true, attributeFilter:['class'] });
+  });
+  lista.addEventListener('focusin', repasa);
+  lista.addEventListener('focusout', repasa);
+  addEventListener('resize', function(){ puesta = false; repasa(); }, {passive:true});
+  repasa();
 })();
 
 (function(){

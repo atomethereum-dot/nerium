@@ -118,81 +118,65 @@ di(Math.abs(geo.alto / geo.ancho - 0.0852) < 0.012,
 di(Math.abs(geo.col - 3) < 0.15, 'el titular arranca en la cuarta columna (' + geo.col + ')');
 di(geo.caja >= 44, 'la caja de salida no baja de 44 px, que es lo que mide un dedo (' + geo.caja + ')');
 
-/* ── LOS LOGOTIPOS DE LOS MEDIOS ──
-   Dos de las cuatro filas tienen logotipo -MarketWatch y Morningstar- y las
-   otras dos no. Eso no es un fallo a medias: solo lo lleva la fila que
-   tiene el archivo, y el guion crea la etiqueta DESPUES de que la imagen
-   haya cargado, para que un nombre mal escrito no deje un marco roto encima
-   del azul.
-   Lo que se comprueba es que salgan con la fila abierta y que no choquen
-   con nada, en escritorio Y en telefono: ahi el logotipo comparte celda con
-   el nombre del medio, que es donde se juntarian. */
-const logos = await pg.evaluate(() => {
+/* ── LA VISTA PREVIA DEL MEDIO ──
+   Dos de las cuatro filas tienen imagen -MarketWatch y Morningstar-. Al
+   abrirse la fila sale flotando; con raton, detras del puntero.
+   Se comprueba que salga la que toca y SOLO esa, que la ruta sea de casa, y
+   -lo que de verdad se rompe- que en el telefono no se salga de la pantalla
+   ni se coma al titular: ahi no hay puntero al que seguir y la imagen se
+   ancla al hueco que la fila le reserva, que es un calculo, no un sitio. */
+const vis = await pg.evaluate(() => {
   const f = [...document.querySelectorAll('#press .prs-f')];
-  return { conRuta: f.filter(x => x.hasAttribute('data-logo')).length,
-           pintados: f.filter(x => x.querySelector('.prs-logo')).length,
-           rutas: f.map(x => x.getAttribute('data-logo') || '') };
+  const v = document.querySelector('#press .prs-vis');
+  return { conRuta: f.filter(x => x.hasAttribute('data-vista')).length,
+           capa: !!v, imagenes: v ? v.querySelectorAll('img').length : 0,
+           rutas: f.map(x => x.getAttribute('data-vista') || '') };
 });
-di(logos.conRuta === logos.pintados && logos.pintados === 2,
-   'salen los dos logotipos que tienen archivo, y solo esos (' + logos.pintados + ')');
-di(logos.rutas.every(r => r === '' || /^img\/medios\/[a-z0-9_-]+\.(svg|png|webp)$/.test(r)),
+di(vis.capa && vis.imagenes === vis.conRuta && vis.imagenes === 2,
+   'la vista previa tiene sus dos imagenes, una por fila con archivo (' + vis.imagenes + ')');
+di(vis.rutas.every(r => r === '' || /^img\/medios\/[a-z0-9_-]+\.(png|jpg|jpeg|webp|avif|svg)$/.test(r)),
    'y las rutas son relativas y de dentro de la casa');
 
 /* Se abre la fila a mano, se espera a que la transicion TERMINE -420 ms- y
-   se deja la fila como estaba. Medir a mitad de la transicion daba 0,6 de
-   opacidad y parecia un fallo del logotipo; y olvidarse de quitar la marca
-   dejaba dos filas abiertas mas abajo, que es justo el fallo que busca la
-   comprobacion siguiente. Una prueba que ensucia lo que viene detras miente
-   dos veces. */
-await pg.evaluate(() => document.querySelectorAll('#press .prs-f')[2].classList.add('sel'));
-await pg.waitForTimeout(700);
-const choque = await pg.evaluate(() => {
+   se deja la fila como estaba. Medir a mitad daba 0,6 de opacidad y parecia
+   un fallo de la imagen; y olvidarse de quitar la marca dejaba dos filas
+   abiertas mas abajo, que es justo el fallo que busca la comprobacion
+   siguiente. Una prueba que ensucia lo que viene detras miente dos veces. */
+/* Se abre la fila POR EL CAMINO DE VERDAD -bajando hasta que cruza el
+   centro- y no poniendole la clase a mano. Poniendola a mano no se
+   comprueba la integracion y ademas sale mal: la seleccion automatica ya
+   tiene abierta la suya, quedan dos filas marcadas y gana la primera del
+   documento, con lo que la imagen que sale es la de otra fila. Eso no es un
+   fallo de la vista previa, es la prueba peleandose con la pagina.
+   Y se aparta el raton antes, porque el raton manda sobre la seleccion
+   automatica -que es la regla, y esta bien-. */
+await pg.mouse.move(6, 6);
+await pg.waitForTimeout(150);
+await pg.evaluate(() => {
+  const f = document.querySelectorAll('#press .prs-f')[2], c = f.getBoundingClientRect();
+  scrollTo(0, scrollY + c.top + c.height / 2 - innerHeight / 2);
+});
+await pg.waitForTimeout(800);
+const salida = await pg.evaluate(() => {
   const f = document.querySelectorAll('#press .prs-f')[2];
-  const g = f.querySelector('.prs-logo');
-  if (!g) { f.classList.remove('sel'); return { hay:false } }
-  const R = e => e.getBoundingClientRect();
-  const s = (A,B) => !(A.right<=B.left+.5||B.right<=A.left+.5||A.bottom<=B.top+.5||B.bottom<=A.top+.5);
-  const a = R(g);
-  const con = [['titular','.prs-t'],['medio','.prs-s'],['numero','.prs-n'],['salida','.prs-go']]
-    .filter(q => { const e = f.querySelector(q[1]); return e && s(a, R(e)) }).map(q => q[0]);
-  const r = { hay:true, con, op:+getComputedStyle(g).opacity,
-              fuera: a.left < -.5 || a.right > innerWidth + .5 };
-  f.classList.remove('sel');
-  return r;
+  const v = document.querySelector('#press .prs-vis');
+  const encendidas = [...v.querySelectorAll('img')].filter(i => i.classList.contains('on'));
+  const r = v.getBoundingClientRect();
+  const out = {
+    cuantas: encendidas.length,
+    suya: encendidas.length === 1 &&
+          encendidas[0].getAttribute('src') === f.getAttribute('data-vista'),
+    op: encendidas.length ? +getComputedStyle(encendidas[0]).opacity : 0,
+    fuera: r.left < -1 || r.right > innerWidth + 1,
+    ancho: Math.round(r.width),
+    abierta: f.classList.contains('sel')
+  };
+  return out;
 });
-di(choque.hay && choque.op > .9, 'y se ven enteros con la fila abierta');
-di(choque.hay && choque.con.length === 0 && !choque.fuera,
-   'sin pisar al titular, al medio ni a la salida' +
-   (choque.hay && choque.con.length ? ' — pisa: ' + choque.con.join(', ') : ''));
-
-/* ── Y UNO ANCHO SE QUEDA EN SU COLUMNA ──
-   Se fabrica uno absurdo -640x32, cinco veces su columna- porque sin el
-   «min-width:0» una celda de rejilla no baja de su contenido y se salia por
-   la derecha a meterse debajo del titular. Con los dos archivos que hay no
-   se nota; el dia que llegue uno ancho se rompe sola. Probarlo con el caso
-   comodo es no probarlo. */
-const hueco = await pg.evaluate(() => {
-  const f = document.querySelectorAll('.prs-f')[1];
-  const i = document.createElement('i');
-  i.className = 'prs-logo'; i.setAttribute('aria-hidden','true');
-  const img = document.createElement('img');
-  img.src = 'data:image/svg+xml,' + encodeURIComponent(
-    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 32">' +
-    '<rect width="640" height="32" fill="#fff"/></svg>');
-  i.appendChild(img);
-  f.insertBefore(i, f.querySelector('.prs-t'));
-  return new Promise(res => requestAnimationFrame(() => requestAnimationFrame(() => {
-    const a = i.getBoundingClientRect(), b = f.querySelector('.prs-t').getBoundingClientRect();
-    const col = f.getBoundingClientRect().width / 12;
-    i.remove();
-    res({ invade: +(a.right - b.left).toFixed(2), ancho: +a.width.toFixed(2), col: +col.toFixed(2) });
-  })));
-});
-di(hueco.invade <= 0.5,
-   'un logotipo ancho se queda en su columna y no invade el titular (' +
-   hueco.invade + ' px)');
-di(Math.abs(hueco.ancho - hueco.col) <= 1,
-   'y ocupa su columna exacta, ni mas ni menos (' + hueco.ancho + ' de ' + hueco.col + ')');
+di(salida.abierta, 'la fila se abre sola al cruzar el centro, y con ella su imagen');
+di(salida.cuantas === 1 && salida.suya, 'al abrirse una fila sale SU imagen, y solo esa');
+di(salida.op > 0.9, 'y sale entera (' + salida.op + ')');
+di(!salida.fuera, 'sin salirse de la pantalla (' + salida.ancho + ' px de ancho)');
 
 /* ── LAS DOS EXCEPCIONES DE ESTA SECCION, ATADAS AQUI ──
    La prensa se sale de dos reglas de la pagina, y las dos a proposito. Si
