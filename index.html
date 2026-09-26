@@ -8053,6 +8053,14 @@ const CALM=matchMedia('(prefers-reduced-motion: reduce)').matches;
     return true;
   }
 
+  /* el mismo apagado y la misma niebla que la cara, con otro factor de luz:
+     una cara mas oscura sigue estando en el mismo sitio del pasillo */
+  function sombra(c,luz,nie){
+    return ((c[0]*luz)*(1-nie)+10*nie|0)+','+
+           ((c[1]*luz)*(1-nie)+22*nie|0)+','+
+           ((c[2]*luz)*(1-nie)+72*nie|0);
+  }
+
   function pinta(dt){
     ctx.clearRect(0,0,W,H);
     const cx=W/2, cy=H/2, foco=Math.min(W,H)*0.92;
@@ -8138,10 +8146,58 @@ const CALM=matchMedia('(prefers-reduced-motion: reduce)').matches;
         ctx.lineWidth=Math.max(1,lado*0.7);
         ctx.beginPath(); ctx.moveTo(ax,ay); ctx.lineTo(px,py); ctx.stroke();
       }
+      /* ══ LA PIEZA, QUE YA NO ES UN CUADRADO ═══════════════════════════
+         Un cuadrado plano nunca sale de la pantalla por mucho que crezca:
+         crece y ya. Lo que hace que una caja se salga es ver sus COSTADOS, y
+         para eso hay que proyectar dos veces —la cara de delante y la de
+         detras— y unirlas.
+
+         Cual costado se ve no se elige a ojo: sale del signo. Una caja a la
+         derecha del punto de fuga enseña su cara IZQUIERDA, porque es la que
+         mira hacia la camara; una que esta por encima enseña la de ABAJO. Y
+         cuanto mas cerca y mas descentrada, mas costado se ve: por eso las
+         de los bordes son las que se te vienen encima.
+
+         Solo se despieza lo que es lo bastante grande en pantalla. Una pieza
+         del fondo de doce pixeles no tiene costados que ensenar y pagarlos
+         costaria tres rellenos en vez de uno, por nada. */
+      const media=lado*0.5;
+      if(lado>24){
+        const prof=q.lado*0.92, zf=z-prof*0.5, zb=z+prof*0.5;
+        if(zf>0.14){
+          const kf=foco/zf, kb=foco/zb, hs=q.lado*0.5;
+          const fx0=vx+(q.x-hs)*kf, fx1=vx+(q.x+hs)*kf;
+          const fy0=vy+(q.y-hs)*kf, fy1=vy+(q.y+hs)*kf;
+          const bx0=vx+(q.x-hs)*kb, bx1=vx+(q.x+hs)*kb;
+          const by0=vy+(q.y-hs)*kb, by1=vy+(q.y+hs)*kb;
+          /* los costados van ANTES que la cara: estan detras */
+          if(q.x>0.02||q.x<-0.02){
+            ctx.fillStyle='rgba('+sombra(q.c,luz*0.50,nie)+','+al.toFixed(3)+')';
+            ctx.beginPath();
+            if(q.x>0){ ctx.moveTo(fx0,fy0);ctx.lineTo(fx0,fy1);ctx.lineTo(bx0,by1);ctx.lineTo(bx0,by0) }
+            else     { ctx.moveTo(fx1,fy0);ctx.lineTo(fx1,fy1);ctx.lineTo(bx1,by1);ctx.lineTo(bx1,by0) }
+            ctx.closePath(); ctx.fill();
+          }
+          if(q.y>0.02||q.y<-0.02){
+            /* la de abajo mas oscura que la de arriba: la luz viene de arriba,
+               como en toda la casa */
+            ctx.fillStyle='rgba('+sombra(q.c,luz*(q.y<0?0.80:0.38),nie)+','+al.toFixed(3)+')';
+            ctx.beginPath();
+            if(q.y>0){ ctx.moveTo(fx0,fy0);ctx.lineTo(fx1,fy0);ctx.lineTo(bx1,by0);ctx.lineTo(bx0,by0) }
+            else     { ctx.moveTo(fx0,fy1);ctx.lineTo(fx1,fy1);ctx.lineTo(bx1,by1);ctx.lineTo(bx0,by1) }
+            ctx.closePath(); ctx.fill();
+          }
+          ctx.fillStyle='rgba('+col+','+al.toFixed(3)+')';
+          ctx.fillRect(fx0,fy0,fx1-fx0,fy1-fy0);
+          ctx.fillStyle='rgba(215,232,255,'+(al*0.16*(0.30+hondo*0.70)).toFixed(3)+')';
+          ctx.fillRect(fx0,fy0,fx1-fx0,Math.max(1,(fy1-fy0)*0.11));
+          continue;
+        }
+      }
       ctx.fillStyle='rgba('+col+','+al.toFixed(3)+')';
-      ctx.fillRect(px-lado/2,py-lado/2,lado,lado);
+      ctx.fillRect(px-media,py-media,lado,lado);
       ctx.fillStyle='rgba(215,232,255,'+(al*0.13*(0.30+hondo*0.70)).toFixed(3)+')';
-      ctx.fillRect(px-lado/2,py-lado/2,lado,Math.max(1,lado*0.12));
+      ctx.fillRect(px-media,py-media,lado,Math.max(1,lado*0.12));
     }
     ctx.restore();
     if(hueco){
