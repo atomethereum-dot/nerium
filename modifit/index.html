@@ -714,6 +714,37 @@ h1,h2,h3{font-weight:600}
 .pf:not(.pin) .pf-card{grid-area:auto;display:flex}
 @media (max-width:900px){
   .pf-side{display:none}
+  /* movil fijado: pestanas finas arriba y la tarjeta compacta a pantalla */
+  .pf.pin{gap:10px}
+  .pf.pin .pf-side{display:block}
+  .pf.pin .pf-tabs{grid-auto-flow:column;grid-auto-columns:1fr;overflow:visible;margin:0;padding:0}
+  .pf.pin .pf-tab{border-left:0;border-bottom:1px solid var(--line2);padding:6px 2px 10px;grid-template-columns:auto 1fr;grid-template-rows:auto;gap:6px}
+  .pf.pin .pf-tt small,.pf.pin .pf-ok{display:none}
+  .pf.pin .pf-tt b{font-size:17px}
+  .pf.pin .pf-n{padding-top:2px}
+  .pf.pin .pf-bar{left:0;right:0;top:auto;bottom:-1px;width:auto;height:2px}
+  .pf.pin .pf-bar u,.pf.pin .pf-tab:not(.on) .pf-bar u{transform-origin:0 50%;transform:scaleX(var(--t,0))}
+  .pf.pin .pf-stage{height:calc(100vh - 150px);height:calc(100svh - 150px)}
+  .pf.pin .pf-card{padding:16px 16px 14px;border-radius:26px}
+  .pf.pin .pf-hd{font-size:9.5px}
+  .pf.pin .pf-main{margin-top:10px;gap:10px}
+  .pf.pin .pf-l1{gap:8px}
+  .pf.pin .pf-ico{width:32px;height:32px}
+  .pf.pin .pf-l1 h3{font-size:clamp(26px,7.4vw,32px)}
+  .pf.pin .pf-l1 p{font-size:13px;line-height:1.45}
+  .pf.pin .pf-l1 dt,.pf.pin .pf-l1 dd{padding:5px 0;font-size:12.5px}
+  .pf.pin .pf-l1 dt{font-size:9.5px}
+  .pf.pin .pf-l1 .btn{height:34px;padding:0 14px;font-size:13px;margin-top:4px}
+  .pf.pin .pf-r1{gap:0}
+  .pf.pin .pf-seal{position:absolute;top:-6px;right:-4px;width:70px;z-index:2}
+  .pf.pin .pf-l1 h3{max-width:calc(100% - 64px)}
+  .pf.pin .pf-log{font-size:10px}
+  .pf.pin .pf-log li{padding:5px 0}
+  .pf.pin .pf-ft{margin-top:8px;font-size:9px;gap:4px}
+}
+@media (max-width:900px) and (max-height:760px){
+  .pf.pin .pf-l1 p{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+  .pf.pin .pf-ft .pf-anc{display:none}
 }
 </style>
 </head>
@@ -1688,7 +1719,7 @@ if(hasG && !CALMA){
   function apiladas(){ pf.classList.remove('pin'); var io=new IntersectionObserver(function(es){ es.forEach(function(e){ if(e.isIntersecting){ var k=cards.indexOf(e.target); io.unobserve(e.target); corre(e.target); tabs.forEach(function(t,j){ t.classList.toggle('on',j===k) }) } }) },{threshold:.4});
     cards.forEach(function(c){ c.classList.add('on'); io.observe(c) }); return function(){ io.disconnect() } }
   if(!hasG||CALMA){ apiladas(); return }
-  gsap.matchMedia().add({pin:'(min-width:901px) and (min-height:700px)',pila:'(max-width:900px), (max-height:699px)'},function(ctx){
+  gsap.matchMedia().add({pin:'(min-width:901px) and (min-height:700px), (max-width:900px) and (min-height:600px)',pila:'(min-width:901px) and (max-height:699px), (max-width:900px) and (max-height:599px)'},function(ctx){
     if(ctx.conditions.pila) return apiladas();
     pf.classList.add('pin'); act=-1;
     gsap.set(cards,{yPercent:0,opacity:1,scale:1,filter:'blur(0px)'});
@@ -1701,7 +1732,8 @@ if(hasG && !CALMA){
     }
     tl.to({},{duration:.55});
     var tramos=cards.length-1, total=tl.duration();
-    ST=ScrollTrigger.create({trigger:pf,start:'top top+=96',end:function(){ return '+='+Math.round(innerHeight*.95*tramos+innerHeight*.5) },pin:true,scrub:.6,animation:tl,invalidateOnRefresh:true,refreshPriority:0,
+    var arriba=innerWidth<901?72:96;
+    ST=ScrollTrigger.create({trigger:pf,start:'top top+='+arriba,end:function(){ return '+='+Math.round(innerHeight*.95*tramos+innerHeight*.5) },pin:true,scrub:.6,animation:tl,invalidateOnRefresh:true,refreshPriority:0,
       onUpdate:function(s){ var t=s.progress*total, i=Math.min(cards.length-1,Math.floor((t+.1)/1.55));
         marca(i);
         var ini=i===0?0:i*1.55-.45, fin=i*1.55+1.1, k=Math.max(0,Math.min(1,(t-ini)/(fin-ini)));
