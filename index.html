@@ -1292,7 +1292,7 @@ footer>.wrap{position:relative;z-index:1}
 footer .fbrand{color:#E3E6EE}
 footer .fbrand svg{color:#E3E6EE}
 footer .fcopy{color:rgba(232,236,244,.5)}
-footer .fgrid h4{color:rgba(232,236,244,.44)}
+footer .fgrid h3{color:rgba(232,236,244,.44)}
 footer .fgrid a{color:rgba(232,236,244,.66)}
 footer .fgrid a:hover{color:#E3E6EE}
 footer .fend{border-top-color:rgba(232,236,244,.14)}
@@ -1613,7 +1613,7 @@ footer{background:var(--suelo);border-top:1px solid rgba(232,236,244,.12);paddin
   font-family:var(--m);font-size:11.5px}
 .fgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:26px 18px}
 @media(min-width:1430px){.fgrid{grid-template-columns:repeat(6,1fr)}}
-.fgrid h4{font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:rgba(232,236,244,.42);
+.fgrid h3{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:rgba(232,236,244,.42);
   margin-bottom:12px}
 .fgrid a{display:block;padding:3px 0;color:rgba(232,236,244,.68);transition:color .18s}
 .fgrid a::before{content:"└── ";color:rgba(232,236,244,.26)}
@@ -1652,7 +1652,7 @@ body.light .hud-band i{background:var(--blue-d)}
   background-image:repeating-linear-gradient(90deg,
     rgba(232,236,244,.26) 0 2px, transparent 2px 10px);
   background-size:100% 1px;background-repeat:no-repeat;background-position:0 100%}
-.fgrid h4{padding-bottom:11px;margin-bottom:0}
+.fgrid h3{padding-bottom:11px;margin-bottom:0}
 .fgrid>div>h4{position:relative}
 .fgrid>div{position:relative;padding-top:0}
 .fgrid>div h4::after{content:"";position:absolute;left:0;bottom:0;
@@ -3431,7 +3431,7 @@ footer :is(.fcopy,.f-legal){color:#9EA2AB}
    llegan ahi —el pie no es una de las siete— y el efecto de texto revuelto
    les clona el contenido dentro de un «.tec-real», que es lo que delata la
    bateria. */
-footer .fgrid h4,footer .tec-real{color:#9EA2AB}
+footer .fgrid h3,footer .tec-real{color:#9EA2AB}
 
 /* ── la via, que acaba donde tiene que acabar ──
    Medida, se metia 71 px dentro de la seccion y chocaba con el epigrafe en
@@ -5326,6 +5326,44 @@ main>section.claro#builds{
   border-color:rgba(10,60,180,.15) !important}
 .claro .rows li{border-color:rgba(10,60,180,.14) !important}
 
+
+/* ══ ACCESIBILIDAD: LO QUE PIDE LA NORMA Y NO ESTABA ══════════════════════
+   Auditado contra WCAG 2.1 AA con el guion de «accessibility-review», que
+   vive en «.claude/skills». Lo que ya cumplia: un solo <h1>, «lang» puesto,
+   los cuatro hitos —main, nav, header, footer—, ninguna imagen sin texto
+   alternativo, ningun campo sin etiqueta, ningun control sin nombre, y el
+   foco visible en las 34 paradas que hay al tabular. Lo que faltaba, aqui. */
+
+/* ── 2.4.1 · saltar al contenido ──
+   Con trece secciones y un menu por delante, quien navega con teclado tenia
+   que tabular por todo para llegar al texto. El enlace no ocupa sitio ni se
+   ve; al recibir el foco se planta arriba del todo. */
+.saltar{position:fixed;left:16px;top:-64px;z-index:9999;
+  display:inline-flex;align-items:center;min-height:44px;padding:0 20px;
+  border-radius:6px;background:var(--blue,#0A5CF5);color:#fff;
+  font-family:var(--m);font-size:12px;letter-spacing:.14em;text-transform:uppercase;
+  text-decoration:none;box-shadow:0 10px 30px -10px rgba(10,60,180,.7);
+  transition:top .22s cubic-bezier(.16,.84,.26,1)}
+.saltar:focus-visible{top:16px}
+#contenido:focus{outline:none}      /* recibe el foco al saltar, no lo dibuja */
+@media(prefers-reduced-motion:reduce){.saltar{transition:none}}
+
+/* ── 2.5.5 · blancos de toque de 44px ──
+   Los enlaces de llamada sueltos —«Read the audit», «Open the explorer»,
+   «All coverage», los sellos del contrato, el boton de volver arriba— median
+   entre 18 y 19px de alto: el texto y nada mas. Crecer su caja moveria la
+   maquetacion de media pagina, asi que el area va en una capa aparte,
+   colocada en absoluto: no ocupa sitio, no mueve nada, y el dedo cae igual.
+   Mismo recurso que en el carril de indice, y por el mismo motivo. */
+:is(.sec-go,.bcd-go,.press-all,.tkp-ctr-v,.tkp-ctr-a,.lk-go,.hp-go){position:relative}
+:is(.sec-go,.bcd-go,.press-all,.tkp-ctr-v,.tkp-ctr-a,.lk-go,.hp-go)::before{
+  content:'';position:absolute;left:0;right:0;top:50%;height:44px;
+  transform:translateY(-50%);pointer-events:auto}
+/* «.sec-go» cuelga de la parte de abajo de su ficha y ya trae 20px de aire
+   arriba: centrar ahi la capa la sacaria de la tarjeta. Se ancla al texto. */
+.sec-go::before{top:auto;bottom:-13px;height:44px;transform:none}
+.subir{min-width:44px;min-height:44px}
+
 /* ══ EL CORTE, Y LO QUE PASA CUANDO SE CRUZA ══════════════════════════════
    Una pagina que cambia de negro a papel tiene tres sitios donde pasa algo, y
    los tres son el MISMO sitio: la linea donde acaba uno y empieza el otro. Un
@@ -6803,6 +6841,24 @@ window.__mide = function(cv, w, h){
 </script>
 </head>
 <body class="ann-fuera">
+<a class="saltar" href="#contenido">Skip to content</a>
+<script>
+/* El enlace de saltar llevaba a ninguna parte: la pagina intercepta los
+   anclas para su propio desplazamiento suave y se comia el clic —medido:
+   Enter dejaba el hash vacio y el foco en el propio enlace—. Se le pone su
+   manejador, que es corto y no depende de nadie: arriba del todo y el foco
+   al <main>, que lleva tabindex="-1" para poder recibirlo. Desde ahi el
+   siguiente tabulador sigue por el contenido, que es de lo que se trataba. */
+(function(){
+  var a=document.querySelector('.saltar'); if(!a) return;
+  a.addEventListener('click',function(e){
+    var m=document.getElementById('contenido'); if(!m) return;
+    e.preventDefault(); e.stopPropagation();
+    try{ scrollTo({top:0,behavior:'auto'}) }catch(err){ scrollTo(0,0) }
+    m.focus({preventScroll:true});
+  }, true);
+})();
+</script>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
 <!-- El cubo lleva su plata fija: no toma el color del texto como la marca
@@ -6935,7 +6991,7 @@ window.__mide = function(cv, w, h){
   <a class="sheet-cta" href="#presale">Join the Seed Round</a>
 </div>
 
-<div id="scroll"><main>
+<div id="scroll"><main id="contenido" tabindex="-1">
 
 
 <div class="hero-hold">
@@ -7687,11 +7743,11 @@ window.__mide = function(cv, w, h){
       <p class="fcopy">&copy;2026 Nereum Labs. All rights reserved.</p>
     </div>
     <div class="fgrid">
-      <div><h4>Overview</h4><a href="https://nereum.xyz/whitepaper#/introduction">Introduction</a><a href="https://nereum.xyz/whitepaper#/vision">Vision</a></div>
-      <div><h4>Trust</h4><a href="https://nereum.xyz/whitepaper#/legal">Legal Document — Miami, FL</a><a href="https://nereum.xyz/whitepaper#/audit">Audit</a><a href="https://nereum.xyz/whitepaper#/kyc">Team KYC</a></div>
-      <div><h4>Token</h4><a href="https://nereum.xyz/whitepaper#/seedround">Join the Seed Round</a><a href="https://nereum.xyz/whitepaper#/dexscreener">DexScreener</a></div>
-      <div><h4>Protocol</h4><a href="https://nereum.xyz/whitepaper#/network">NereumEVM — Blockchain</a><a href="https://nereum.xyz/whitepaper#/scan">NereumEVM — Explorer</a><a href="https://nereum.xyz/whitepaper#/tokenization">Asset tokenization</a><a href="https://nereum.xyz/whitepaper#/dex">Nereum DEX</a><a href="https://nereum.xyz/whitepaper#/nusd">NUSD</a></div><div><h4>Products</h4><a href="https://nereum.xyz/whitepaper#/forge">Nereum Forge</a><a href="https://nereum.xyz/whitepaper#/vaults">Nereum Vaults</a><a href="https://nereum.xyz/whitepaper#/feed">Nereum Feed</a><a href="https://nereum.xyz/whitepaper#/link">Nereum Link</a><a href="https://nereum.xyz/whitepaper#/wallet">Wallet and tooling</a></div>
-      <div><h4>Company</h4><a href="https://nereum.xyz/whitepaper#/team">Team</a><a href="https://nereum.xyz/whitepaper#/press">News and mentions</a><a href="https://nereum.xyz/whitepaper#/links">Official links</a><a href="https://nereum.xyz/whitepaper#/faq">Questions</a></div>
+      <div><h3>Overview</h3><a href="https://nereum.xyz/whitepaper#/introduction">Introduction</a><a href="https://nereum.xyz/whitepaper#/vision">Vision</a></div>
+      <div><h3>Trust</h3><a href="https://nereum.xyz/whitepaper#/legal">Legal Document — Miami, FL</a><a href="https://nereum.xyz/whitepaper#/audit">Audit</a><a href="https://nereum.xyz/whitepaper#/kyc">Team KYC</a></div>
+      <div><h3>Token</h3><a href="https://nereum.xyz/whitepaper#/seedround">Join the Seed Round</a><a href="https://nereum.xyz/whitepaper#/dexscreener">DexScreener</a></div>
+      <div><h3>Protocol</h3><a href="https://nereum.xyz/whitepaper#/network">NereumEVM — Blockchain</a><a href="https://nereum.xyz/whitepaper#/scan">NereumEVM — Explorer</a><a href="https://nereum.xyz/whitepaper#/tokenization">Asset tokenization</a><a href="https://nereum.xyz/whitepaper#/dex">Nereum DEX</a><a href="https://nereum.xyz/whitepaper#/nusd">NUSD</a></div><div><h4>Products</h4><a href="https://nereum.xyz/whitepaper#/forge">Nereum Forge</a><a href="https://nereum.xyz/whitepaper#/vaults">Nereum Vaults</a><a href="https://nereum.xyz/whitepaper#/feed">Nereum Feed</a><a href="https://nereum.xyz/whitepaper#/link">Nereum Link</a><a href="https://nereum.xyz/whitepaper#/wallet">Wallet and tooling</a></div>
+      <div><h3>Company</h3><a href="https://nereum.xyz/whitepaper#/team">Team</a><a href="https://nereum.xyz/whitepaper#/press">News and mentions</a><a href="https://nereum.xyz/whitepaper#/links">Official links</a><a href="https://nereum.xyz/whitepaper#/faq">Questions</a></div>
     </div>
     <div class="fmark" aria-hidden="true"><span>NEREUM</span><svg class="fmark-logo" viewBox="0 0 672 672">
       <defs>
@@ -11121,7 +11177,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
 })();
 (function(){
   const CALMA=matchMedia('(prefers-reduced-motion:reduce)').matches;
-  const filas=[...document.querySelectorAll('#solutions .rows b, footer .fgrid h4')];
+  const filas=[...document.querySelectorAll('#solutions .rows b, footer .fgrid h3')];
   if(!filas.length)return;
   const SIM='ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789/\\<>[]{}#$%&*+=-';
   if(CALMA)return;
@@ -11170,7 +11226,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
   const io=new IntersectionObserver(es=>es.forEach(e=>{
     if(!e.isIntersecting||e.target.__hecho)return;
     e.target.__hecho=1;
-    const grupo=[...e.target.querySelectorAll('#solutions .rows b, footer .fgrid h4')];
+    const grupo=[...e.target.querySelectorAll('#solutions .rows b, footer .fgrid h3')];
     grupo.forEach((el,i)=>escribe(el, i*190));
   }),{threshold:0, rootMargin:'420px 0px'});
   cajas.forEach(c=>io.observe(c));
