@@ -132,6 +132,33 @@ for (const [nombre, opciones] of [['móvil', {...devices['iPhone 13']}],
     chk(`${nombre}: y se rearma al volver arriba (${otra} de ${zona.destino})`,
         Math.abs(otra - zona.destino) <= 4, true);
 
+    /* 5 · CON LA RUEDA DE VERDAD. Todo lo de arriba baja con «scrollTo», y
+       asi esta prueba dio verde mientras el salto estaba roto: el
+       desplazamiento suave del navegador lo cancela cualquier golpe de
+       rueda, y quien baja con la rueda da golpes seguidos. Con «scrollTo» no
+       hay golpes que cancelen nada. Aqui se baja como una persona, a golpes
+       de rueda, sin parar, y se exige llegar a la seccion. Y que «Nereum»
+       siga en su sitio al final del tunel: si se va, lo que queda a la vista
+       es el hueco que el tunel talla para el. */
+    await pg.evaluate(v=>scrollTo(0,v), 0); await pg.waitForTimeout(500);
+    await pg.mouse.move(200, 300);
+    let nereumFin = null, llego = false;
+    for (let k = 0; k < 60 && !llego; k++) {
+      await pg.mouse.wheel(0, 60);
+      await pg.waitForTimeout(90);
+      const s = await pg.evaluate(()=>{ const l = document.querySelector('.lockup');
+        return { y: Math.round(scrollY), p: window.__tunelP || 0,
+                 op: l ? +getComputedStyle(l).opacity : 1 }; });
+      if (s.p >= 0.99 && nereumFin === null) nereumFin = s.op;
+      if (s.y >= zona.destino - 4) llego = true;
+    }
+    await pg.waitForTimeout(1200);
+    const conRueda = await pg.evaluate(()=>Math.round(scrollY));
+    chk(`${nombre}: bajando a golpes de rueda, sin parar, llega a «${zona.id}» (${conRueda} de ${zona.destino})`,
+        Math.abs(conRueda - zona.destino) <= 60, true);
+    chk(`${nombre}: y al final del tunel «Nereum» sigue ahi, no queda el hueco (${nereumFin})`,
+        nereumFin !== null && nereumFin > 0.9, true);
+
     /* 4 · y estando YA abajo no vuelve a tirar de la pagina */
     await pg.evaluate(v=>scrollTo(0,v), zona.destino + 500); await pg.waitForTimeout(260);
     const c = await pg.evaluate(()=>Math.round(scrollY));

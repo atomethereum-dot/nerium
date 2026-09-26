@@ -8731,7 +8731,13 @@ const CALM=matchMedia('(prefers-reduced-motion: reduce)').matches;
          estilo de toda la portada para nada. */
       if(grain)grain.style.opacity=(cl((p-.36)/.22)*.5).toFixed(3);
       if(lock){
-        const inp=cl((p-.38)/.14), outp=cl((p-.84)/.16);
+        /* «NEREUM» YA NO SE VA. Se desvanecia en el ultimo 16 % del recorrido
+           para «entregar» a la seccion siguiente, y al irse dejaba a la vista
+           el hueco eliptico que el tunel talla justo para el: un agujero
+           negro en mitad de los cubos, que es lo que se veia al final. Ahora
+           la entrega la hace el salto, asi que el rotulo se queda hasta que la
+           portada sale de la pantalla. */
+        const inp=cl((p-.38)/.14), outp=0;
         const over=inp<1?1+Math.sin(inp*Math.PI)*.045:1;      /* a touch of overshoot */
         lock.style.opacity=(inp*(1-outp)).toFixed(3);
     lock.style.transform='translate(calc(-50% - .16em),-50%) scale('+((.82+inp*.18)*over-outp*.06).toFixed(3)+')';
@@ -14435,49 +14441,72 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
   var seco = window.matchMedia &&
              matchMedia('(prefers-reduced-motion:reduce)').matches;
   var antes = window.scrollY || 0, saltando = false, hecho = false;
-  var subio = false, intentos = 0, temp = null;
 
-  function salta(sig){
-    var y = window.scrollY || window.pageYOffset;
-    var destino = sig.getBoundingClientRect().top + y;
-    if(y >= destino - 8){ hecho = true; saltando = false; return; }
-    saltando = true; intentos++;
-    try{ sig.scrollIntoView({ behavior: seco ? 'auto' : 'smooth', block:'start' }); }
-    catch(e){ scrollTo(0, destino); }
-    clearTimeout(temp);
-    temp = setTimeout(function(){
+  /* EL VUELO LO LLEVA LA PAGINA, NO EL NAVEGADOR. La primera version usaba
+     «scrollIntoView» con desplazamiento suave, y el desplazamiento suave del
+     navegador lo cancela cualquier golpe de rueda o de trackpad. Quien baja
+     con la rueda da golpes seguidos: el siguiente llegaba a los 90 ms, antes
+     de que el salto terminara, y lo cortaba. Tres reintentos, tres cortes, y
+     te dejaba bajando a mano. Medido con la rueda de verdad: quince golpes
+     por un tunel vacio hasta llegar a la prensa.
+     Ahora el vuelo se dibuja cuadro a cuadro con saltos SECOS -«instant»- a
+     lo largo de una curva: no hay nada que cancelar, porque cada cuadro pone
+     la posicion. Y mientras vuela se tragan la rueda, el arrastre y las
+     teclas de bajar; esos oyentes se ponen al despegar y se QUITAN al
+     aterrizar, porque un oyente de rueda que puede frenar el scroll obliga
+     al navegador a esperar al guion en cada golpe, y eso fuera del vuelo
+     seria el lag que acabamos de quitar. */
+  var TECLAS = [32,33,34,35,36,38,40];
+  function traga(e){ e.preventDefault(); }
+  function tragaTecla(e){ if(TECLAS.indexOf(e.keyCode) >= 0) e.preventDefault(); }
+  function bloquea(si){
+    var f = si ? addEventListener : removeEventListener;
+    f('wheel', traga, {passive:false});
+    f('touchmove', traga, {passive:false});
+    f('keydown', tragaTecla, false);
+  }
+  function pon(y){
+    try{ window.scrollTo({top:y, left:0, behavior:'instant'}); }
+    catch(e){ window.scrollTo(0, y); }
+  }
+  function vuela(sig){
+    var y0 = window.scrollY || window.pageYOffset;
+    var d = sig.getBoundingClientRect().top + y0;
+    if(y0 >= d - 8){ hecho = true; return; }
+    saltando = true; hecho = true;
+    if(seco){ pon(d); saltando = false; antes = d; return; }
+    bloquea(true);
+    var t0 = performance.now(), DUR = 640;
+    (function paso(t){
+      var k = Math.min(1, (t - t0) / DUR);
+      var e = 1 - Math.pow(1 - k, 3);
+      /* el destino se vuelve a medir en cada cuadro: si algo cambia de alto
+         durante el vuelo -una imagen que termina de cargar-, se aterriza en
+         la seccion y no en el numero que valia al despegar */
+      var dd = sig.getBoundingClientRect().top + (window.scrollY || 0);
+      pon(y0 + (dd - y0) * e);
+      if(k < 1){ requestAnimationFrame(paso); return; }
+      pon(dd);
+      bloquea(false);
       saltando = false;
-      antes = window.scrollY || window.pageYOffset;
-      var d = sig.getBoundingClientRect().top + antes;
-      if(antes >= d - 8){ hecho = true; return; }
-      /* NO LLEGO. Un dedo que sigue bajando mientras la pagina se desplaza
-         sola cancela el desplazamiento, y dandolo por hecho te quedabas otra
-         vez en el tramo muerto —justo lo que esto viene a quitar—. Se vuelve
-         a intentar, pero solo si NO se ha subido a mano: si alguien sube, ha
-         decidido quedarse mirando el final del tunel y mandar manda el.
-         Tres intentos como mucho, que un bucle que insiste para siempre es
-         peor que el tramo muerto. */
-      if(!subio && intentos < 3){ salta(sig); return; }
-      hecho = true;
-    }, seco ? 60 : 900);
+      antes = window.scrollY || 0;
+    })(t0);
   }
 
   addEventListener('scroll', function(){
     var y = window.scrollY || window.pageYOffset;
     var baja = y > antes + 0.5;
-    var subeFuerte = y < antes - 30;
     antes = y;
-    if(saltando){ if(subeFuerte) subio = true; return; }
+    if(saltando) return;
 
     var recorrido = Math.max(1, hold.offsetHeight - innerHeight);
     /* por debajo del final del anclado se rearma: asi volver arriba y bajar
        otra vez vuelve a saltar, que es lo que uno espera */
-    if(y < recorrido - 2){ hecho = false; subio = false; intentos = 0; return; }
+    if(y < recorrido - 2){ hecho = false; return; }
     if(hecho || !baja) return;
 
     var sig = siguiente(); if(!sig) return;
-    hecho = true;
-    salta(sig);
+    vuela(sig);
   }, {passive:true});
 })();
 </script>
