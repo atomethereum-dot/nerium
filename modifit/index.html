@@ -1,0 +1,1501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Nereum — institutional-grade real-world assets, onchain</title>
+<meta name="description" content="Nereum is the settlement layer for real-world assets: issuance, policy, access and liquidity in one protocol. Registered in the United States and independently audited.">
+<meta name="theme-color" content="#05060A">
+<link rel="icon" href="../favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../assets/fonts.css">
+<style>
+/* ══ Nereum · modifit · PLANO TECNICO ═══════════════════════════════════════
+   Negro con una reticula de doce columnas a la vista, esquinas rectas,
+   rotulos en mono entre corchetes, cabecera como barra de estado con bloque
+   y hora en vivo, y el azul Nereum como tinta de senal: marcas, barras y
+   rellenos que barren al pasar. Las animaciones son las de siempre. */
+:root{
+  color-scheme:dark;
+  --bg:#05060A; --bg2:#08090F; --card:#0A0C13; --line:rgba(255,255,255,.08); --line2:rgba(255,255,255,.14); --grid:rgba(255,255,255,.035);
+  --ink:#F2F4F8; --mut:#A3AABA; --mut2:#6E7588;
+  --blue:#1A5BF0; --blue2:#4C84FF; --blued:#0E3AC4; --ice:#BFD1FF;
+  --f:'Switzer','Inter Tight',system-ui,sans-serif; --m:'DM Mono',ui-monospace,monospace;
+  --e:cubic-bezier(.16,.84,.26,1); --pad:clamp(16px,3.2vw,44px); --max:1440px; --hh:56px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+html.lenis,html.lenis body{height:auto}.lenis.lenis-smooth{scroll-behavior:auto!important}
+body{font-family:var(--f);background:var(--bg);overflow-x:clip;font-size:16px}
+a{color:inherit;text-decoration:none}img{display:block;max-width:100%}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+::selection{background:var(--blue);color:#fff}
+:focus-visible{outline:1px solid var(--blue2);outline-offset:3px}
+.wrap{max-width:var(--max);margin-inline:auto;padding-inline:var(--pad);position:relative}
+.m{font-family:var(--m);font-size:11px;letter-spacing:.1em;text-transform:uppercase}
+h1,h2,h3{font-weight:500;letter-spacing:-.04em;text-wrap:balance}
+.ln{display:block;overflow:hidden;padding-bottom:.1em;margin-bottom:-.1em}.ln>span{display:inline-block}
+
+/* la reticula */
+.grid-bg{position:fixed;inset:0;z-index:0;pointer-events:none;display:grid;grid-template-columns:repeat(12,1fr);max-width:var(--max);margin:0 auto;padding-inline:var(--pad)}
+.grid-bg i{border-left:1px solid var(--grid)}.grid-bg i:last-child{border-right:1px solid var(--grid)}
+main,.ft{position:relative;z-index:1}
+
+/* botones rectos con barrido */
+.btn{position:relative;display:inline-flex;align-items:center;gap:12px;height:48px;padding:0 20px;font-family:var(--m);font-size:12px;letter-spacing:.08em;text-transform:uppercase;white-space:nowrap;overflow:hidden;isolation:isolate;border:1px solid var(--line2);color:var(--ink);transition:color .4s var(--e),border-color .4s}
+.btn::before{content:"";position:absolute;inset:0;z-index:-1;background:var(--blue);transform:scaleX(0);transform-origin:100% 50%;transition:transform .55s var(--e)}
+.btn:hover::before{transform:scaleX(1);transform-origin:0 50%}
+.btn:hover{border-color:var(--blue);color:#fff}
+.btn .arr{transition:transform .4s var(--e)}.btn:hover .arr{transform:translateX(4px)}
+.btn.p,.btn.w{background:var(--ink);color:#05060A;border-color:var(--ink)}
+.btn.p:hover,.btn.w:hover{color:#fff}
+.btn.g{background:rgba(255,255,255,.03);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.btn.sm{height:36px;padding:0 14px;font-size:11px}
+
+/* entrada */
+.pre{position:fixed;inset:0;z-index:300;background:var(--bg);display:grid;place-items:center;pointer-events:none}
+.pre svg{width:34px;height:34px}
+.calma .pre{display:none}
+
+/* cabecera: una barra de estado en celdas */
+.hd{position:fixed;inset:0 0 auto 0;z-index:100;height:var(--hh);display:flex;align-items:stretch;border-bottom:1px solid var(--line);background:rgba(5,6,10,.55);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);transition:transform .6s var(--e),background .4s}
+.hd>*{display:flex;align-items:center;border-right:1px solid var(--line);padding:0 18px}
+.hd.solid{background:rgba(5,6,10,.85)}
+.hd.away{transform:translateY(-100%)}
+.brand{gap:10px;font-size:16px;font-weight:600;letter-spacing:-.02em}
+.brand svg{width:22px;height:22px}
+.nav{gap:0;padding:0!important}
+.nav a{height:100%;display:flex;align-items:center;gap:8px;padding:0 18px;border-right:1px solid var(--line);color:var(--mut);transition:background .3s,color .3s}
+.nav a b{font-weight:400;color:var(--mut2)}
+.nav a:hover{background:rgba(26,91,240,.12);color:var(--ink)}
+.nav a:hover b{color:var(--blue2)}
+.hd-live{gap:22px;color:var(--mut2);margin-left:auto}
+.hd-live b{font-weight:400;color:var(--ink);font-variant-numeric:tabular-nums}
+.hd-live i{display:inline-block;width:6px;height:6px;background:#34D399;margin-right:8px;box-shadow:0 0 10px #34D399;animation:blink 1.4s steps(2) infinite}
+@keyframes blink{50%{opacity:.3}}
+.hd-cta{gap:8px;border-right:0!important}
+.hd-cta .menu-b{display:none}
+.sheet{position:fixed;inset:0;z-index:99;background:var(--bg);display:flex;flex-direction:column;justify-content:flex-end;padding:100px var(--pad) max(34px,env(safe-area-inset-bottom));clip-path:inset(0 0 100% 0);transition:clip-path .7s var(--e)}
+.sheet.on{clip-path:inset(0)}
+.sheet a{display:flex;justify-content:space-between;align-items:baseline;font-size:clamp(32px,9vw,52px);font-weight:500;letter-spacing:-.04em;line-height:1.25;border-bottom:1px solid var(--line)}
+.sheet a i{font-style:normal;font-family:var(--m);font-size:11px;color:var(--mut2)}
+
+/* esquinas de encuadre */
+.hx-frame,.tx-frame{position:absolute;inset:calc(var(--hh) + 18px) var(--pad) 18px;pointer-events:none;z-index:2}
+.hx-frame i,.tx-frame i{position:absolute;width:18px;height:18px;border-color:rgba(191,209,255,.45);border-style:solid;border-width:0}
+.hx-frame i:nth-child(1),.tx-frame i:nth-child(1){left:0;top:0;border-left-width:1px;border-top-width:1px}
+.hx-frame i:nth-child(2),.tx-frame i:nth-child(2){right:0;top:0;border-right-width:1px;border-top-width:1px}
+.hx-frame i:nth-child(3),.tx-frame i:nth-child(3){left:0;bottom:0;border-left-width:1px;border-bottom-width:1px}
+.hx-frame i:nth-child(4),.tx-frame i:nth-child(4){right:0;bottom:0;border-right-width:1px;border-bottom-width:1px}
+
+/* foco que sigue al puntero */
+.spot{position:relative;isolation:isolate}
+.spot::before{content:"";position:absolute;inset:0;pointer-events:none;z-index:-1;opacity:0;transition:opacity .5s;background:radial-gradient(380px circle at var(--mx,50%) var(--my,50%),rgba(76,132,255,.12),transparent 60%)}
+.spot:hover::before{opacity:1}
+
+/* ═══ PORTADA ═══ */
+.hx{position:relative;height:160vh;background:var(--bg);z-index:1}
+.hx-st{position:sticky;top:0;height:100vh;height:100svh;overflow:hidden;background:#04050A;color:#fff;will-change:clip-path}
+.hx-st::before{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(38% 50% at 50% 50%,rgba(26,91,240,.14),transparent 70%);
+  background-image:radial-gradient(38% 50% at 50% 50%,rgba(26,91,240,.14),transparent 70%),linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:auto,80px 80px,80px 80px}
+#globe{position:absolute;inset:0;width:100%;height:100%;touch-action:pan-y;cursor:grab}
+#globe:active{cursor:grabbing}
+.hx-noise{position:absolute;inset:0;pointer-events:none;opacity:.05;mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+.hx-st::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(180deg,rgba(4,5,10,.4),transparent 25%,transparent 70%,rgba(4,5,10,.85))}
+.hx-in{position:absolute;inset:calc(var(--hh) + 44px) calc(var(--pad) + 30px) 90px;z-index:3;display:grid;grid-template-rows:auto 1fr auto;pointer-events:none}
+.hx-in a{pointer-events:auto}
+.hx-k{display:flex;gap:28px;color:rgba(255,255,255,.6)}
+.hx-k i{display:inline-block;width:6px;height:6px;background:#34D399;box-shadow:0 0 10px #34D399;margin-right:9px}
+.hx-coord{margin-left:auto}
+/* el titular partido alrededor del globo */
+.hx-h{align-self:center;display:grid;font-size:clamp(46px,7.6vw,138px);line-height:.9;letter-spacing:-.065em;color:#fff}
+.hx-h .l1{justify-self:start}
+.hx-h .l2{justify-self:end;margin-top:clamp(120px,24vh,260px)}
+.hx-dim{color:var(--ice)}
+.hx-row{display:flex;justify-content:space-between;align-items:end;gap:40px}
+.hx-row p{max-width:40ch;font-size:15px;line-height:1.6;color:rgba(214,222,240,.7)}
+.hx-cta{display:flex;gap:8px;flex-wrap:wrap}
+.hx-bot{position:absolute;left:calc(var(--pad) + 30px);right:calc(var(--pad) + 30px);bottom:32px;z-index:3;display:flex;justify-content:space-between;align-items:center;color:rgba(255,255,255,.42)}
+.hx-bot b{font-weight:400;color:#fff}
+.hx-data{display:flex;gap:26px}
+.hx-scroll{display:inline-flex;align-items:center;gap:10px}
+.hx-scroll i{width:1px;height:22px;background:linear-gradient(#fff,transparent);animation:drip 2s var(--e) infinite}
+@keyframes drip{0%{transform:scaleY(0);transform-origin:0 0}50%{transform:scaleY(1);transform-origin:0 0}51%{transform-origin:0 100%}100%{transform:scaleY(0);transform-origin:0 100%}}
+.hx-tag{position:absolute;z-index:4;left:0;top:0;pointer-events:none;display:flex;align-items:center;gap:10px;opacity:0;transition:opacity .6s;font-family:var(--m);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.85);white-space:nowrap}
+.hx-tag.on{opacity:1}
+.hx-tag i{width:30px;height:1px;background:var(--blue2)}
+.hx-tag span{padding:5px 8px;border:1px solid rgba(76,132,255,.5);background:rgba(5,6,10,.6)}
+.hx-tag b{font-weight:400;color:var(--blue2)}
+.hx-tag em{font-style:normal}
+.after{position:relative;z-index:2;margin-top:-30vh;padding-top:clamp(40px,7vh,80px);background:var(--bg);border-top:1px solid var(--line2)}
+.after::before{content:"";position:absolute;left:var(--pad);top:-1px;width:120px;height:3px;background:var(--blue)}
+.hd.dark{background:rgba(4,5,10,.25)}
+
+/* cabecera de seccion */
+.sec{padding-block:clamp(90px,14vh,160px) 0;position:relative}
+.sh{display:grid;grid-template-columns:repeat(12,1fr);gap:28px 0;margin-bottom:clamp(40px,7vh,72px)}
+.sh-k{grid-column:1/-1;display:flex;align-items:center;gap:14px;color:var(--mut2)}
+.sh-k b{font-weight:400;color:var(--blue2)}
+.sh-k span:nth-of-type(1){color:var(--ink)}
+.sh-k i{flex:1;height:1px;background:var(--line2);transform-origin:0 50%;transform:scaleX(var(--l,1))}
+.sh h2{grid-column:1/9;font-size:clamp(40px,5.8vw,96px);line-height:.95;letter-spacing:-.055em}
+.sh h2 em{font-style:normal;color:var(--mut2)}
+.sh p{grid-column:9/13;align-self:end;padding-left:24px;border-left:1px solid var(--line2);font-size:15px;line-height:1.65;color:var(--mut)}
+
+/* cifras: celdas de tabla */
+.figs{display:grid;grid-template-columns:repeat(4,1fr);border:1px solid var(--line2)}
+.fig{padding:22px 24px 26px;display:grid;gap:14px;border-left:1px solid var(--line2);position:relative;background:var(--bg)}
+.fig:first-child{border-left:0}
+.fig::after{content:"";position:absolute;left:0;bottom:0;height:2px;width:0;background:var(--blue);transition:width .8s var(--e)}
+.fig:hover::after{width:100%}
+.fig span{font-family:var(--m);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut2)}
+.fig b{font-size:clamp(48px,6vw,104px);font-weight:500;letter-spacing:-.06em;font-variant-numeric:tabular-nums;line-height:.85}
+.fig small{font-size:13px;color:var(--mut)}
+.logos{display:grid;grid-template-columns:auto 1fr;align-items:center;border:1px solid var(--line2);border-top:0}
+.logos p{padding:0 24px;height:100%;display:flex;align-items:center;border-right:1px solid var(--line2);color:var(--mut2)}
+.mq{overflow:hidden;-webkit-mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent);mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent)}
+.mq-t{display:flex;width:max-content;animation:mq 36s linear infinite}
+.mq:hover .mq-t{animation-play-state:paused}
+@keyframes mq{to{transform:translateX(-50%)}}
+.mq span{display:inline-flex;align-items:center;gap:12px;padding:0 40px;height:72px;font-size:20px;font-weight:500;letter-spacing:-.02em;color:#7C8499;border-right:1px solid var(--line);transition:color .3s,background .3s}
+.mq span:hover{color:var(--ink);background:rgba(26,91,240,.08)}
+.mq img{width:22px;height:22px;filter:grayscale(1) brightness(1.6);opacity:.7;transition:filter .3s,opacity .3s}
+.mq span:hover img{filter:none;opacity:1}
+
+/* ═══ PRODUCTOS: fichas tecnicas apiladas ═══ */
+.stack{display:grid;gap:18px}
+.pn{position:sticky;top:calc(var(--hh) + 24px);background:var(--bg2);border:1px solid var(--line2);overflow:hidden;
+  display:grid;grid-template-columns:1fr 1.2fr;grid-template-rows:auto 1fr;min-height:min(600px,calc(100vh - 120px));transform-origin:50% 0}
+.pn:nth-child(2){top:calc(var(--hh) + 40px)}.pn:nth-child(3){top:calc(var(--hh) + 56px)}
+.pn>.dim{position:absolute;inset:0;background:#03040A;opacity:var(--dim,0);pointer-events:none;z-index:3}
+.pn-bar{grid-column:1/-1;display:grid;grid-template-columns:120px 1fr auto;border-bottom:1px solid var(--line2);color:var(--mut2)}
+.pn-bar span{padding:14px 18px;border-right:1px solid var(--line2)}
+.pn-bar span:first-child{color:var(--blue2)}
+.pn-bar span:last-child{border-right:0}
+.pn-bar .ok{color:#6EE7B7}.pn-bar .dev{color:#FCD34D}
+.pn-c{padding:clamp(26px,3vw,44px);display:flex;flex-direction:column;gap:20px;border-right:1px solid var(--line2)}
+.pn h3{font-size:clamp(40px,4.8vw,80px);line-height:.92;letter-spacing:-.06em;margin-top:auto}
+.pn p{font-size:16px;line-height:1.6;color:var(--mut);max-width:40ch}
+.pn .meter{display:grid;gap:8px;max-width:380px}
+.pn .meter div{display:flex;justify-content:space-between;font-family:var(--m);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut2)}
+.pn .meter i{height:6px;background:repeating-linear-gradient(90deg,rgba(255,255,255,.08) 0 6px,transparent 6px 8px);overflow:hidden}
+.pn .meter i b{display:block;height:100%;width:var(--v);background:repeating-linear-gradient(90deg,var(--blue2) 0 6px,transparent 6px 8px)}
+.pn .btn{align-self:flex-start}
+.pn-v{position:relative;overflow:hidden;display:grid;place-items:center;padding:clamp(20px,3vw,44px);perspective:1200px;
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:32px 32px}
+.shot{position:relative;width:100%;border:1px solid rgba(191,209,255,.2);box-shadow:0 40px 80px -30px rgba(0,0,0,.9)}
+.shot::before{content:"PREVIEW · EXPLORER";position:absolute;left:-1px;top:-24px;font-family:var(--m);font-size:10px;letter-spacing:.1em;color:var(--mut2)}
+.shot img{width:100%;aspect-ratio:1.6;object-fit:cover;object-position:left top}
+.mk{position:relative;width:min(100%,420px);background:var(--bg);border:1px solid var(--line2);display:grid}
+.mk-h{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;border-bottom:1px solid var(--line2);font-size:15px;font-weight:500}
+.mk-h span{font-family:var(--m);font-size:10.5px;letter-spacing:.1em;color:var(--blue2);text-transform:uppercase}
+.mk-r{display:flex;justify-content:space-between;align-items:center;padding:13px 16px;border-bottom:1px solid var(--line);font-size:14px}
+.mk-r span{color:var(--mut2);font-family:var(--m);font-size:11px;letter-spacing:.08em;text-transform:uppercase}
+.mk-r.ok b::after{content:" ✓";color:#34D399}
+.mk-bar{margin:14px 16px 16px;height:44px;background:var(--blue);display:grid;place-items:center;font-family:var(--m);font-size:12px;letter-spacing:.08em;text-transform:uppercase}
+.rk{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;width:min(100%,440px)}
+.rk-u{background:var(--bg);border:1px solid var(--line2);padding:10px;display:grid;gap:5px}
+.rk-u i{display:flex;justify-content:space-between;align-items:center;height:18px;padding:0 8px;background:rgba(255,255,255,.035)}
+.rk-u i::before{content:"";width:40%;height:2px;background:rgba(255,255,255,.12)}
+.rk-u i::after{content:"";width:5px;height:5px;background:var(--blue2);box-shadow:0 0 8px var(--blue2);animation:led 1.6s steps(2) infinite;animation-delay:calc(var(--d) * -.37s)}
+@keyframes led{50%{opacity:.25}}
+.rk-s{grid-column:1/-1;display:flex;justify-content:space-between;font-family:var(--m);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut2);padding-top:6px}
+.rk-s b{font-weight:400;color:#FCD34D}
+
+/* ═══ PROTOCOLO: cuadricula 2x2 que se rellena ═══ */
+.gl{display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--line2)}
+.gr{position:relative;display:grid;grid-template-columns:1fr auto;grid-template-rows:auto 1fr auto;gap:18px;min-height:300px;padding:28px;overflow:hidden;isolation:isolate}
+.gr:nth-child(odd){border-right:1px solid var(--line2)}
+.gr:nth-child(-n+2){border-bottom:1px solid var(--line2)}
+.gr::before{content:"";position:absolute;inset:0;z-index:-1;background:var(--blue);transform:scaleY(0);transform-origin:50% 100%;transition:transform .7s var(--e)}
+.gr:hover::before{transform:none}
+.gr .n{color:var(--mut2);transition:color .4s}
+.gr .ic{width:44px;height:44px;border:1px solid var(--line2);display:grid;place-items:center;color:var(--blue2);transition:color .4s,border-color .4s}
+.gr .ic svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.gr h3{grid-column:1/-1;align-self:end;font-size:clamp(28px,3vw,48px);line-height:.98;letter-spacing:-.05em;max-width:12ch}
+.gr p{grid-column:1/-1;font-size:15px;line-height:1.55;color:var(--mut);transition:color .4s}
+.gr:hover .n,.gr:hover p{color:rgba(255,255,255,.8)}
+.gr:hover .ic{color:#fff;border-color:rgba(255,255,255,.5)}
+
+/* ═══ ESCENAS DE CUBOS ═══ */
+.tx{position:relative;background:transparent;margin-top:clamp(90px,14vh,160px);z-index:1}
+.tx-st{position:sticky;top:0;height:100vh;height:100svh;overflow:hidden;background:#03050A;will-change:clip-path}
+.tx-cv{position:absolute;inset:0;width:100%;height:100%;display:block}
+.tx-vig{position:absolute;inset:0;pointer-events:none;background:linear-gradient(180deg,rgba(3,5,10,.35),transparent 16%,transparent 84%,rgba(3,5,10,.4))}
+.tx-top,.tx-bot{position:absolute;left:calc(var(--pad) + 30px);right:calc(var(--pad) + 30px);pointer-events:none;display:flex;justify-content:space-between;gap:10px;color:#fff;z-index:2}
+.tx-top{top:calc(var(--hh) + 44px)}.tx-bot{bottom:84px;align-items:end}
+.tx-top .m,.tx-bot .m{color:var(--ice);padding:5px 8px;border:1px solid rgba(191,209,255,.3);background:rgba(3,5,10,.5)}
+.tx-bot span:last-child{font-size:clamp(18px,1.8vw,28px);letter-spacing:-.03em;max-width:24ch;text-align:right}
+.tx-t{position:absolute;inset:0;display:grid;align-items:end;justify-items:start;padding:0 calc(var(--pad) + 30px) 90px;pointer-events:none;z-index:2}
+.tx-t h3{font-size:clamp(48px,8.4vw,150px);line-height:.88;letter-spacing:-.065em;font-weight:500;color:#fff;text-shadow:0 10px 50px rgba(3,5,10,.7)}
+.tx-t h3 em{font-style:normal;color:var(--ice)}
+.tx-hud{position:absolute;left:calc(var(--pad) + 30px);right:calc(var(--pad) + 30px);bottom:36px;display:flex;gap:14px;align-items:center;justify-content:flex-end;color:rgba(255,255,255,.5);pointer-events:none;z-index:2}
+.tx-hud i{display:block;width:160px;height:2px;background:rgba(255,255,255,.14);position:relative;overflow:hidden}
+.tx-hud i b{position:absolute;inset:0;background:var(--blue2);transform-origin:0 50%;transform:scaleX(var(--p,0))}
+.snap-in{animation:snap .9s cubic-bezier(.16,.84,.26,1) backwards}
+@keyframes snap{0%{opacity:0;transform:translateY(40px);filter:blur(8px)}100%{opacity:1;transform:none;filter:none}}
+
+/* ═══ TOKEN ═══ */
+.tok{border:1px solid var(--line2)}
+.odo{display:flex;align-items:flex-end;justify-content:center;padding:clamp(20px,4vh,44px) 12px 6px;font-weight:500;font-size:clamp(52px,12.4vw,210px);line-height:1;letter-spacing:-.07em;font-variant-numeric:tabular-nums;color:#fff;border-bottom:1px solid var(--line2);
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:40px 40px}
+.odo .d{display:inline-block;height:1em;overflow:hidden}.odo .d span{display:flex;flex-direction:column}.odo .d span b{font-weight:500;height:1em;line-height:1}
+.odo .c{color:var(--blue2)}
+.tk-u{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;padding:16px 20px;border-bottom:1px solid var(--line2)}
+.tk-u h3{font-size:20px;font-weight:500;letter-spacing:-.02em}
+.tk-u .m{color:var(--mut2)}
+.ctr{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center}
+.ctr code{font-family:var(--m);font-size:12px;word-break:break-all;color:var(--mut)}
+.ctr .m{color:var(--mut2)}
+.ctr .ok{display:inline-flex;gap:6px;align-items:center;color:#34D399}
+.ctr .ok::before{content:"";width:6px;height:6px;background:currentColor}
+.ctr button{font-family:var(--m);font-size:11px;letter-spacing:.08em;text-transform:uppercase;padding:8px 12px;color:var(--ink);border:1px solid var(--line2);transition:background .3s,border-color .3s}
+.ctr button:hover{background:var(--blue);border-color:var(--blue)}
+.bar{display:flex;height:72px;gap:2px;margin:20px}
+.bar i{position:relative;height:100%;background:rgba(255,255,255,.03);overflow:hidden;transition:flex .6s var(--e)}
+.bar i::before{content:"";position:absolute;inset:0;background:var(--c);transform:scaleY(0);transform-origin:50% 100%}
+.bar.in i::before{transform:none;transition:transform 1.1s var(--e) calc(var(--k) * 90ms)}
+.bar i span{position:absolute;left:10px;bottom:9px;font-family:var(--m);font-size:11px;color:#fff;opacity:0;transition:opacity .4s calc(var(--k) * 90ms + .5s)}
+.bar.in i span{opacity:1}
+.bar i:hover{flex-grow:calc(var(--g) * 1.35)!important}
+.legend{display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid var(--line2)}
+.legend div{display:flex;justify-content:space-between;align-items:baseline;padding:14px 20px;border-right:1px solid var(--line);border-bottom:1px solid var(--line);font-size:14px;color:var(--mut);transition:color .3s,background .3s}
+.legend div:nth-child(4n){border-right:0}
+.legend div:nth-last-child(-n+4){border-bottom:0}
+.legend div i{width:8px;height:8px;background:var(--c);margin-right:10px;display:inline-block}
+.legend div b{font-family:var(--m);font-weight:400;font-size:12px;color:var(--mut2)}
+.legend div.hi{color:var(--ink);background:rgba(26,91,240,.1)}
+
+/* ═══ SEGURIDAD: certificados ═══ */
+.certs{display:grid;grid-template-columns:repeat(3,1fr);border:1px solid var(--line2)}
+.cert{padding:26px;display:flex;flex-direction:column;gap:18px;border-right:1px solid var(--line2);background:var(--bg)}
+.cert:last-child{border-right:0}
+.cert-top{display:flex;justify-content:space-between;align-items:center;color:var(--mut2)}
+.badge{display:inline-flex;align-items:center;gap:7px;height:26px;padding:0 10px;border:1px solid rgba(52,211,153,.35);color:#6EE7B7;font-family:var(--m);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase}
+.badge::before{content:"";width:5px;height:5px;background:currentColor;box-shadow:0 0 8px currentColor}
+.cert h3{font-size:clamp(28px,2.6vw,38px);letter-spacing:-.05em;line-height:.95;margin-top:28px}
+.cert .sub{font-family:var(--m);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--blue2);margin-top:-6px}
+.cert p{font-size:15px;line-height:1.6;color:var(--mut)}
+.cert dl{display:grid;grid-template-columns:auto 1fr;border-top:1px solid var(--line2)}
+.cert dt,.cert dd{padding:10px 0;border-bottom:1px solid var(--line);font-size:13.5px}
+.cert dt{color:var(--mut2);font-family:var(--m);font-size:11px;letter-spacing:.08em;text-transform:uppercase;align-self:center}.cert dd{text-align:right;font-weight:500}
+.cert .btn{margin-top:auto;align-self:flex-start}
+
+/* ═══ RUTA ═══ */
+.tl-l{position:relative;height:1px;background:var(--line2);margin:0 0 36px}
+.tl-l b{position:absolute;left:0;top:-1px;height:3px;width:var(--w,0%);background:var(--blue2);box-shadow:0 0 16px rgba(76,132,255,.8)}
+.tl-l i{position:absolute;top:50%;width:11px;height:11px;margin:-5.5px 0 0 0;background:var(--bg);border:1px solid var(--line2);transition:background .5s,border-color .5s,box-shadow .5s}
+.tl-l i.on{background:var(--blue2);border-color:var(--blue2);box-shadow:0 0 0 5px rgba(76,132,255,.15)}
+.phs{display:grid;grid-template-columns:repeat(3,1fr);border:1px solid var(--line2)}
+.ph{display:grid;gap:14px;align-content:start;padding:26px;border-right:1px solid var(--line2)}
+.ph:last-child{border-right:0}
+.ph .n{color:var(--mut2)}
+.ph .st{justify-self:start}
+.ph.plan .badge{border-color:var(--line2);color:var(--mut)}
+.ph h3{font-size:clamp(32px,3.2vw,50px);letter-spacing:-.055em;line-height:.95;margin-top:18px}
+.ph p{font-size:15px;line-height:1.6;color:var(--mut)}
+.ph ul{list-style:none;display:grid;border-top:1px solid var(--line2)}
+.ph li{display:flex;gap:12px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line);font-size:14px;color:#C2C8D6}
+.ph li svg{width:14px;height:14px;flex:0 0 auto;color:var(--blue2)}
+
+/* ═══ PRENSA: tabla ═══ */
+.news{border-top:1px solid var(--line2)}
+.nw{position:relative;display:grid;grid-template-columns:80px 180px 1fr 56px;gap:20px;align-items:center;padding:24px 0;border-bottom:1px solid var(--line2);isolation:isolate}
+.nw::before{content:"";position:absolute;inset:0 calc(-1 * var(--pad));z-index:-1;background:var(--blue);clip-path:inset(0 100% 0 0);transition:clip-path .6s var(--e)}
+.nw:hover::before{clip-path:inset(0 0 0 0)}
+.nw .n{color:var(--mut2);transition:color .3s}
+.nw b{font-family:var(--m);font-weight:400;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--blue2);transition:color .3s}
+.nw h3{font-size:clamp(20px,2.2vw,34px);line-height:1.1;letter-spacing:-.04em;font-weight:500}
+.nw .ar{width:48px;height:48px;border:1px solid var(--line2);display:grid;place-items:center;transition:transform .6s var(--e),border-color .4s}
+.nw:hover .n,.nw:hover b{color:#fff}
+.nw:hover .ar{transform:rotate(-45deg);border-color:#fff}
+
+/* ═══ CIERRE ═══ */
+.cta{position:relative;margin-top:clamp(90px,14vh,160px);padding-bottom:clamp(40px,6vh,70px)}
+.cta-k{display:flex;align-items:center;gap:14px;color:var(--mut2);margin-bottom:28px}
+.cta-k b{font-weight:400;color:var(--blue2)}.cta-k span:nth-of-type(1){color:var(--ink)}
+.cta-k i{flex:1;height:1px;background:var(--line2)}
+.cta h2{font-size:clamp(46px,8.6vw,156px);line-height:.88;letter-spacing:-.07em;max-width:13ch}
+.cta-l{display:grid;grid-template-columns:repeat(3,1fr);margin-top:clamp(36px,6vh,64px);border:1px solid var(--line2)}
+.cta-l a{position:relative;display:grid;grid-template-columns:auto 1fr auto;grid-template-rows:auto auto;gap:6px 14px;align-items:center;padding:22px;border-right:1px solid var(--line2);font-size:20px;font-weight:500;letter-spacing:-.02em;isolation:isolate;overflow:hidden}
+.cta-l a:last-child{border-right:0}
+.cta-l a::before{content:"";position:absolute;inset:0;z-index:-1;background:var(--blue);transform:scaleY(0);transform-origin:50% 100%;transition:transform .6s var(--e)}
+.cta-l a:hover::before{transform:none}
+.cta-l a .m{color:var(--blue2);grid-row:1/3}
+.cta-l a>span:not(.m){grid-column:2;font-size:13px;font-weight:400;color:var(--mut);letter-spacing:0}
+.cta-l a i{grid-column:3;grid-row:1/3;font-style:normal;font-size:22px;transition:transform .5s var(--e)}
+.cta-l a:hover .m,.cta-l a:hover>span{color:#fff}
+.cta-l a:hover i{transform:translateX(6px)}
+
+/* pie */
+.ft{padding-block:clamp(60px,9vh,100px) 0;overflow:hidden;border-top:1px solid var(--line2)}
+.ft-cols{display:grid;grid-template-columns:1.4fr repeat(5,1fr);gap:30px}
+.ft-cols h4{font-family:var(--m);font-size:11px;letter-spacing:.12em;text-transform:uppercase;font-weight:400;color:var(--blue2);margin-bottom:16px}
+.ft-cols a{display:block;font-size:14px;padding:5px 0;color:var(--mut);transition:color .3s}.ft-cols a:hover{color:var(--ink)}
+.ft-cols p{font-size:14px;color:var(--mut);line-height:1.55;max-width:28ch;margin-top:14px}
+.ft-end{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;margin-top:56px;padding-top:18px;border-top:1px solid var(--line2);color:var(--mut2)}
+.ft-big{font-size:clamp(80px,20vw,340px);font-weight:600;letter-spacing:-.07em;line-height:.8;text-align:center;margin-top:30px;transform:translateY(12%);
+  color:transparent;-webkit-text-stroke:1px rgba(191,209,255,.22);user-select:none}
+
+/* cursor en cruz y botones magneticos, solo con raton */
+.cur,.cur-d{position:fixed;left:0;top:0;pointer-events:none;z-index:400;opacity:0;transition:opacity .3s}
+.cur{width:34px;height:34px;margin:-17px 0 0 -17px;transition:opacity .3s,width .45s var(--e),height .45s var(--e),margin .45s var(--e),background .4s;
+  background:linear-gradient(var(--ice),var(--ice)) 0 0/8px 1px,linear-gradient(var(--ice),var(--ice)) 0 0/1px 8px,linear-gradient(var(--ice),var(--ice)) 100% 0/8px 1px,linear-gradient(var(--ice),var(--ice)) 100% 0/1px 8px,
+             linear-gradient(var(--ice),var(--ice)) 0 100%/8px 1px,linear-gradient(var(--ice),var(--ice)) 0 100%/1px 8px,linear-gradient(var(--ice),var(--ice)) 100% 100%/8px 1px,linear-gradient(var(--ice),var(--ice)) 100% 100%/1px 8px;background-repeat:no-repeat}
+.cur-d{width:4px;height:4px;margin:-2px 0 0 -2px;background:var(--blue2)}
+.cur.on,.cur-d.on{opacity:1}
+.cur.link{width:62px;height:62px;margin:-31px 0 0 -31px}
+.cur.drag{width:84px;height:84px;margin:-42px 0 0 -42px}
+.cur.drag::after{content:"Drag";position:absolute;inset:0;display:grid;place-items:center;font-family:var(--m);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#fff}
+
+/* responsive */
+@media (max-width:1200px){.hd-live{display:none}}
+@media (max-width:1100px){.nav{display:none!important}.hd-cta .menu-b{display:inline-flex}.hd-cta{margin-left:auto}.legend{grid-template-columns:1fr 1fr}.legend div:nth-child(4n){border-right:1px solid var(--line)}.legend div:nth-child(2n){border-right:0}.legend div:nth-last-child(-n+4){border-bottom:1px solid var(--line)}.legend div:nth-last-child(-n+2){border-bottom:0}}
+@media (max-width:900px){
+  .grid-bg{grid-template-columns:repeat(4,1fr)}.grid-bg i:nth-child(n+5){display:none}.grid-bg i:nth-child(4){border-right:1px solid var(--grid)}
+  .hx{height:150vh}
+  .hx-in{inset:calc(var(--hh) + 30px) calc(var(--pad) + 14px) 76px}
+  .hx-k{flex-wrap:wrap;gap:8px 18px}.hx-coord{display:none}
+  .hx-h{font-size:clamp(42px,12.4vw,72px)}
+  .hx-h .l2{margin-top:clamp(160px,34vh,300px)}
+  .hx-row{flex-direction:column;align-items:start;gap:18px}
+  .hx-row p{font-size:14px}
+  .hx-data{display:none}
+  .hx-bot{display:none}
+  .hx-tag em{display:none}
+  .hx-in{bottom:34px}
+  .hx-h .l2{margin-top:clamp(120px,27vh,250px)}
+  .hx-frame,.tx-frame{inset:calc(var(--hh) + 12px) var(--pad) 12px}
+  .sh{grid-template-columns:1fr;gap:20px}.sh h2,.sh p{grid-column:1}.sh p{padding-left:16px}
+  .figs{grid-template-columns:1fr 1fr}
+  .fig:nth-child(3){border-left:0}
+  .fig:nth-child(n+3){border-top:1px solid var(--line2)}
+  .fig{padding:18px 16px 20px}
+  .logos{grid-template-columns:1fr}.logos p{border-right:0;border-bottom:1px solid var(--line2);height:auto;padding:12px 16px}
+  .pn{position:relative;top:auto!important;grid-template-columns:1fr;min-height:0}
+  .pn-bar{grid-template-columns:80px 1fr}.pn-bar span:last-child{display:none}.pn-bar span:nth-child(2){border-right:0}
+  .pn-c{border-right:0;border-bottom:1px solid var(--line2)}
+  .pn-v{min-height:280px}
+  .gl{grid-template-columns:1fr}
+  .gr{min-height:220px;border-right:0!important;border-bottom:1px solid var(--line2)}.gr:last-child{border-bottom:0}
+  .tx{height:230vh!important}
+  .tx-top,.tx-bot,.tx-hud{left:calc(var(--pad) + 14px);right:calc(var(--pad) + 14px)}
+  .tx-t{padding:0 calc(var(--pad) + 14px) 84px}
+  .tx-bot{flex-direction:column;align-items:start}.tx-bot span:last-child{text-align:left}
+  .certs,.phs{grid-template-columns:1fr}
+  .cert,.ph{border-right:0;border-bottom:1px solid var(--line2)}.cert:last-child,.ph:last-child{border-bottom:0}
+  .tl-l{display:none}
+  .nw{grid-template-columns:1fr 44px;gap:8px 14px;padding:20px 0}
+  .nw .n{display:none}
+  .nw b{grid-column:1}.nw h3{grid-column:1}
+  .nw .ar{grid-row:1/3;grid-column:2;width:44px;height:44px}
+  .cta-l{grid-template-columns:1fr}.cta-l a{border-right:0;border-bottom:1px solid var(--line2)}.cta-l a:last-child{border-bottom:0}
+  .ft-cols{grid-template-columns:1fr 1fr}.ft-cols>div:first-child{grid-column:1/-1}
+}
+@media (max-width:560px){
+  .hd>*{padding:0 12px}
+  .hd-cta .btn.s{display:none}.hd-cta .btn.s.menu-b{display:inline-flex}
+  .fig b{font-size:46px}
+  .bar{height:56px;margin:14px}.bar i span{display:none}
+  .legend{grid-template-columns:1fr}.legend div{border-right:0!important;border-bottom:1px solid var(--line)!important}
+}
+@media (prefers-reduced-motion:reduce){.snap-in,.hx-scroll i,.mq-t,.rk-u i::after,.hd-live i{animation:none}}
+
+/* ══ CAPA LOCA ══════════════════════════════════════════════════════════════ */
+/* la intro: contador y persiana de doce columnas */
+.pre{background:transparent;display:block}
+.pre-cols{position:absolute;inset:0;display:grid;grid-template-columns:repeat(12,1fr)}
+.pre-cols i{background:#05060A;border-right:1px solid rgba(255,255,255,.04)}
+.pre-in{position:absolute;inset:0;display:grid;place-content:center;justify-items:center;gap:18px;color:#fff}
+.pre-in svg{width:30px;height:30px}
+.pre-n{font-size:clamp(90px,16vw,240px);font-weight:500;letter-spacing:-.07em;line-height:.85;font-variant-numeric:tabular-nums}
+.pre-b{width:min(340px,60vw);height:1px;background:rgba(255,255,255,.15)}
+.pre-b b{display:block;height:100%;background:var(--blue2);transform-origin:0 50%;transform:scaleX(0);box-shadow:0 0 12px var(--blue2)}
+.pre-t{color:var(--mut2)}
+/* letras del titular que responden al cursor */
+.hx-h .w{display:inline-block;white-space:nowrap}
+.hx-h .ch{display:inline-block;transform:translateY(calc(var(--p,0) * -.16em)) scaleY(calc(1 + var(--p,0) * .12));transform-origin:50% 100%;transition:transform .6s var(--e),color .6s,text-shadow .6s;
+  color:color-mix(in srgb,var(--blue2) calc(var(--p,0) * 100%),currentColor);text-shadow:0 0 calc(var(--p,0) * 40px) rgba(76,132,255,calc(var(--p,0) * .8))}
+/* rotulos que se descifran */
+.dec{color:var(--blue2)!important}
+/* marquesinas gigantes */
+.bigmq{position:relative;z-index:1;overflow:hidden;margin-top:clamp(80px,12vh,140px);border-block:1px solid var(--line2);padding-block:clamp(10px,2vh,22px);background:var(--bg)}
+.bigmq-r{transform:rotate(-2.2deg) scale(1.06)}
+.bigmq.alt .bigmq-r{transform:rotate(2deg) scale(1.06)}
+.bigmq-t{display:flex;align-items:center;width:max-content;will-change:transform}
+.bigmq span{font-size:clamp(64px,11vw,190px);font-weight:500;letter-spacing:-.065em;line-height:1;padding:0 .12em;color:transparent;-webkit-text-stroke:1px rgba(191,209,255,.35);white-space:nowrap}
+.bigmq span.f{color:var(--ink);-webkit-text-stroke:0}
+.bigmq.alt span.f{color:var(--blue2)}
+.bigmq i{flex:0 0 auto;width:.12em;height:.12em;font-size:clamp(64px,11vw,190px);margin:0 .22em;background:var(--blue2);box-shadow:0 0 30px var(--blue2)}
+/* protocolo en horizontal */
+.gl-pin{position:relative;overflow:hidden}
+.gl-hud{display:none;align-items:center;gap:16px;color:var(--mut2);margin-bottom:16px}
+.gl-hud i{flex:1;height:1px;background:var(--line2);position:relative}
+.gl-hud i b{position:absolute;left:0;top:-1px;height:3px;width:100%;background:var(--blue2);transform-origin:0 50%;transform:scaleX(0)}
+.gr-big{position:absolute;right:-.06em;bottom:-.2em;font-size:clamp(160px,18vw,300px);font-weight:600;letter-spacing:-.08em;line-height:1;color:transparent;-webkit-text-stroke:1px rgba(191,209,255,.12);pointer-events:none;z-index:-1;transition:-webkit-text-stroke-color .5s,transform .8s var(--e)}
+.gr:hover .gr-big{-webkit-text-stroke-color:rgba(255,255,255,.4);transform:translateY(-6%)}
+.gl.hz{display:flex;width:max-content;border-right:0}
+.gl.hz .gr{flex:0 0 min(560px,40vw);min-height:min(64vh,600px);border-right:1px solid var(--line2)!important;border-bottom:0!important}
+.gl.hz .gr h3{font-size:clamp(34px,3.6vw,60px)}
+.gl.hz+.gl-end{display:block}
+@media (min-width:901px){.gl-hud{display:flex}}
+/* foto del explorer: separacion de color al pasar */
+.shot{overflow:hidden}
+.shot img{transition:transform 1s var(--e),filter .6s}
+.pn:hover .shot img{transform:scale(1.04);filter:drop-shadow(3px 0 0 rgba(255,40,80,.35)) drop-shadow(-3px 0 0 rgba(60,140,255,.45))}
+
+/* ══ DISENO POSTER ══════════════════════════════════════════════════════════
+   Cada seccion es una tarjeta enorme de esquinas redondas que sube sobre la
+   anterior, alternando negro, azul Nereum electrico y blanco papel. Letra
+   gruesa y gigante, botones en pildora, cabecera flotante y un cursor que
+   invierte lo que tiene debajo. */
+:root{--page:#000;--r:clamp(28px,3.4vw,48px)}
+html,body{background:var(--page)}
+.grid-bg,.hx-frame,.tx-frame{display:none}
+h1,h2,h3{font-weight:600}
+.t-dark{--bg:#0D0E13;--bg2:#15171E;--ink:#F4F5F8;--mut:#A7ADBB;--mut2:#6F7688;--line:rgba(255,255,255,.08);--line2:rgba(255,255,255,.14);--blue:#1A5BF0;--blue2:#4C84FF;--grid:rgba(255,255,255,.03)}
+.t-paper{--bg:#ECEEF2;--bg2:#FFFFFF;--ink:#0A0B0F;--mut:#4C5364;--mut2:#7B8293;--line:rgba(10,11,15,.1);--line2:rgba(10,11,15,.16);--blue:#1A5BF0;--blue2:#1A5BF0;--grid:rgba(10,11,15,.04);--ice:#1A5BF0}
+.t-blue{--bg:#1A5BF0;--bg2:#1650DA;--ink:#FFFFFF;--mut:rgba(255,255,255,.8);--mut2:rgba(255,255,255,.58);--line:rgba(255,255,255,.2);--line2:rgba(255,255,255,.32);--blue:#0A0B0F;--blue2:#FFFFFF;--grid:rgba(255,255,255,.06);--ice:#fff}
+.t-dark,.t-paper,.t-blue{background:var(--bg);color:var(--ink)}
+/* las tarjetas-seccion */
+.sec,.after,.cta{position:relative;z-index:2;border-radius:var(--r) var(--r) 0 0;padding-bottom:clamp(90px,14vh,160px);margin-top:calc(var(--r) * -1);box-shadow:0 -40px 80px -40px rgba(0,0,0,.7)}
+.tx+.sec,.bigmq+.sec,.bigmq+.tx{margin-top:0}
+.sec{padding-top:clamp(90px,13vh,150px)}
+.after{margin-top:-30vh;border-top:0;padding-top:clamp(56px,9vh,100px)}
+.after::before{display:none}
+.tx{margin-top:0}
+/* cabecera flotante en pildora */
+.hd{top:14px;left:50%;right:auto;width:min(1180px,calc(100% - 24px));transform:translateX(-50%);height:58px;border:1px solid rgba(255,255,255,.12);border-radius:99px;background:rgba(10,11,15,.55);padding:0 8px;overflow:hidden}
+.hd.solid{background:rgba(10,11,15,.8)}
+.hd.away{transform:translate(-50%,-160%)}
+.hd>*{border-right:0!important;padding:0 10px}
+.nav a{border-right:0;padding:0 12px;border-radius:99px;height:40px;margin:auto 0}
+.nav a b{display:none}
+.hd-live{font-size:10.5px}
+/* botones en pildora */
+.btn{border-radius:99px;font-family:var(--f);font-size:15px;letter-spacing:-.01em;text-transform:none;height:52px;padding:0 24px;font-weight:500}
+.btn.sm{height:40px;padding:0 18px;font-size:14px}
+.btn.p,.btn.w{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.hd .btn.p{background:#fff;color:#0A0B0F;border-color:#fff}
+.hd .btn.s{color:#fff;border-color:rgba(255,255,255,.2)}
+.t-blue .btn::before{background:#0A0B0F}.t-blue .btn:hover{border-color:#0A0B0F;color:#fff}
+.t-paper .btn.s{color:var(--ink)}
+/* portada: titular grande abajo a la izquierda */
+.hx-h{font-weight:600;font-size:clamp(52px,9vw,168px);letter-spacing:-.07em;align-self:end;margin-bottom:28px}
+.hx-h .l2{justify-self:start;margin-top:0}
+.hx-dim{color:#4C84FF}
+.hx-in{inset:calc(58px + 40px) var(--pad) 70px;grid-template-rows:auto 1fr auto}
+.hx-row{border-top:1px solid rgba(255,255,255,.14);padding-top:22px}
+.hx-bot{left:var(--pad);right:var(--pad)}
+.hx-tag span{border-radius:99px;padding:6px 12px}
+/* cabeceras de seccion */
+.sh h2{font-size:clamp(46px,7vw,124px);letter-spacing:-.065em;line-height:.9;grid-column:1/11}
+.sh p{grid-column:1/7;border-left:0;padding-left:0;font-size:18px;margin-top:6px}
+.sh-k b{color:var(--blue2)}
+.sh-k span:nth-of-type(1){color:var(--ink)}
+/* cifras en pildoras sobre papel */
+.figs{border:0;gap:12px}
+.fig{border:0!important;border-radius:28px;background:var(--bg2);padding:28px 26px 30px;box-shadow:0 1px 0 rgba(0,0,0,.04)}
+.fig b{font-size:clamp(54px,6.4vw,112px);font-weight:600}
+.fig::after{border-radius:0 0 28px 28px}
+.logos{border:0;margin-top:12px;border-radius:99px;background:var(--bg2);overflow:hidden}
+.logos p{border-right:1px solid var(--line)}
+.mq span{border-right:0;color:var(--mut)}
+.mq img{filter:none;opacity:1}
+/* marquesinas: bandas azules */
+.bigmq{z-index:3;background:#1A5BF0;border:0;margin:0;padding-block:clamp(14px,2.4vh,26px)}
+.bigmq span{-webkit-text-stroke:1.5px rgba(255,255,255,.6);font-weight:600}
+.bigmq span.f{color:#0A0B0F}.bigmq.alt span.f{color:#fff}
+.bigmq i{background:#fff;box-shadow:none;border-radius:50%}
+.bigmq.alt{background:#0A0B0F}.bigmq.alt i{background:#1A5BF0}
+/* productos: paneles redondeados */
+.pn{border-radius:36px;border:1px solid var(--line2);background:var(--bg2)}
+.pn-bar{border-bottom:1px solid var(--line)}
+.pn-bar span{border-right:0}
+.pn-c{border-right:0}
+.pn h3{font-weight:600;font-size:clamp(44px,5.4vw,92px)}
+.pn-v{margin:12px;border-radius:26px;background-color:#0A0B0F}
+.pn .meter i,.pn .meter i b{border-radius:6px}
+.shot,.mk,.rk-u{border-radius:18px;overflow:hidden}
+.mk-bar{border-radius:99px}
+/* protocolo sobre azul */
+.gl{border:0;gap:12px}
+.gr{border:0!important;border-radius:32px;background:var(--bg2)}
+.gr::before{background:#0A0B0F}
+.gr .ic{border-radius:50%}
+.gr-big{-webkit-text-stroke:1.5px rgba(255,255,255,.3)}
+.gl.hz{gap:14px}
+/* token sobre papel */
+.tok{border:0}
+.odo{border:0;border-radius:36px;background:#0A0B0F;color:#fff;background-image:none;padding:clamp(28px,5vh,56px) 16px 12px}
+.odo .c{color:#4C84FF}
+.tk-u{border:0;padding:22px 4px}
+.bar{margin:0;border-radius:22px;overflow:hidden;height:96px}
+.legend{border:0;margin-top:14px;gap:8px}
+.legend div{border:0!important;border-radius:16px;background:var(--bg2)}
+.ctr button{border-radius:99px}
+/* seguridad: tarjetas oscuras */
+.certs{border:0;gap:14px}
+.cert{border:1px solid var(--line2)!important;border-radius:32px;background:var(--bg2)}
+.badge{border-radius:99px}
+.cert h3{font-weight:600}
+/* ruta sobre azul */
+.phs{border:0;gap:14px}
+.ph{border:0!important;border-radius:32px;background:var(--bg2)}
+.ph .badge{border-color:rgba(255,255,255,.5);color:#fff}
+.tl-l i{border-radius:50%}
+/* prensa sobre papel */
+.nw{border-color:var(--line2)}
+.nw::before{background:#0A0B0F}
+.nw:hover{color:#fff}
+.nw .ar{border-radius:50%}
+.nw:hover .ar{background:#1A5BF0;border-color:#1A5BF0}
+/* cierre azul */
+.cta{padding-top:clamp(90px,14vh,160px)}
+.cta h2{font-weight:600}
+.cta-l{border:0;gap:12px}
+.cta-l a{border:0!important;border-radius:28px;background:var(--bg2)}
+.cta-l a::before{background:#0A0B0F}
+/* pie */
+.ft{border-top:0;background:#000;position:relative;z-index:2}
+.ft-big{-webkit-text-stroke:0;color:#1A5BF0;font-weight:700}
+/* cursor que invierte */
+.cur{background:#fff!important;border-radius:50%;width:16px;height:16px;margin:-8px 0 0 -8px;mix-blend-mode:difference}
+.cur.link{width:70px;height:70px;margin:-35px 0 0 -35px}
+.cur.drag{width:96px;height:96px;margin:-48px 0 0 -48px}
+.cur.drag::after{color:#000}
+.cur-d{display:none}
+@media (max-width:1100px){.hd-live{display:none}}
+@media (max-width:900px){
+  .hd{height:52px;top:10px}
+  .hx-in{inset:calc(52px + 30px) var(--pad) 40px}
+  .hx-h{font-size:clamp(46px,13vw,80px);margin-bottom:18px}
+  .sh h2,.sh p{grid-column:1}
+  .figs{gap:8px}.fig{border-radius:22px}
+  .logos{border-radius:22px}
+  .gl{gap:10px}
+  .pn-v{margin:8px}
+}
+</style>
+</head>
+<body>
+<script>document.documentElement.classList.add('js');if(matchMedia('(prefers-reduced-motion:reduce)').matches)document.documentElement.classList.add('calma');</script>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs><linearGradient id="gPlata" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFFFFF"/><stop offset=".55" stop-color="#C9CDD6"/><stop offset="1" stop-color="#8E939E"/></linearGradient></defs>
+  <symbol id="logo" viewBox="0 0 672 672"><g transform="translate(-43.88 -34.34) scale(1.0889)">
+    <path fill="#8E939E" d="M336 53.16 361.74 61.36 644.58 344.2 361.74 627.05 336 618.84 618.84 336Z"/>
+    <path fill="url(#gPlata)" d="M53.16 336 336 53.16 618.84 336 336 618.84Z"/>
+    <path fill="#FCFCFC" d="M283.67 566.52 566.52 283.67 618.84 336 336 618.84Z"/></g></symbol>
+  <symbol id="chk" viewBox="0 0 16 16"><path d="M3 8.5 6.5 12 13 4.5" fill="none" stroke="currentColor" stroke-width="1.5"/></symbol>
+</svg>
+
+
+<div class="pre" id="pre" aria-hidden="true"><div class="pre-cols"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><div class="pre-in"><svg><use href="#logo"/></svg><span class="pre-n">000</span><div class="pre-b"><b></b></div><span class="m pre-t">Initialising settlement layer</span></div></div>
+
+<!-- la reticula de fondo: doce columnas en linea fina -->
+<div class="grid-bg" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+
+<header class="hd" id="hd">
+  <a class="brand" href="#top"><svg aria-hidden="true"><use href="#logo"/></svg><span>Nereum</span></a>
+  <nav class="nav m" aria-label="Main">
+    <a href="#products"><b>01</b>Products</a><a href="#why"><b>02</b>Protocol</a><a href="#token"><b>03</b>Token</a><a href="#security"><b>04</b>Security</a><a href="#roadmap"><b>05</b>Roadmap</a>
+  </nav>
+  <div class="hd-live m" aria-hidden="true"><span><i></i>Block <b id="blk">4,812,337</b></span><span>UTC <b id="clk">00:00:00</b></span></div>
+  <div class="hd-cta">
+    <a class="btn s sm" href="https://nereum.xyz/whitepaper">Whitepaper</a>
+    <a class="btn p sm" href="https://nereum.xyz/explorer">Open app</a>
+    <button class="btn s sm menu-b" id="menuB" type="button" aria-expanded="false" aria-controls="sheet">Menu</button>
+  </div>
+</header>
+<div class="sheet" id="sheet">
+  <a href="#products">Products<i>01</i></a><a href="#why">Protocol<i>02</i></a><a href="#token">Token<i>03</i></a><a href="#security">Security<i>04</i></a>
+  <a href="#roadmap">Roadmap<i>05</i></a><a href="https://nereum.xyz/whitepaper">Whitepaper<i>&rarr;</i></a>
+</div>
+
+<main>
+<!-- ═══ PORTADA ═══ -->
+<section class="hx" id="top">
+  <div class="hx-st" id="hxSt">
+    <canvas id="globe" aria-hidden="true"></canvas>
+    <div class="hx-noise" aria-hidden="true"></div>
+    <div class="hx-frame" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+    <div class="hx-tag" id="hxTag" aria-hidden="true"><i></i><span><em>Asset #0142 · Commercial tower · </em><b>Tokenized</b></span></div>
+    <div class="hx-in">
+      <div class="hx-k m"><span><i></i>Testnet live</span><span>75% to mainnet</span><span class="hx-coord">25.76°N 80.19°W · Miami HQ</span></div>
+      <h1 class="hx-h" aria-label="Real-world assets, settled onchain.">
+        <span class="ln l1"><span>Real-world assets,</span></span>
+        <span class="ln l2"><span class="hx-dim">settled onchain.</span></span>
+      </h1>
+      <div class="hx-row">
+        <p>Nereum is the settlement layer for real-world assets. Issuance, policy, access and liquidity in one protocol, registered in the United States and independently audited.</p>
+        <div class="hx-cta">
+          <a class="btn w" href="https://nereum.xyz/whitepaper">Read the whitepaper <span class="arr">&rarr;</span></a>
+          <a class="btn g" href="https://nereum.xyz/explorer">Open the explorer</a>
+        </div>
+      </div>
+    </div>
+    <div class="hx-bot m" aria-hidden="true">
+      <span class="hx-scroll"><i></i>Scroll to settle</span>
+      <span class="hx-data"><span>Supply <b>160M NRM</b></span><span>Audit <b>0 critical</b></span><span>KYC <b>4/4</b></span></span>
+    </div>
+  </div>
+</section>
+
+<section class="after t-paper" id="figs">
+  <div class="wrap">
+    <div class="figs">
+      <div class="fig rv"><span>[A] Total supply</span><b data-n="160" data-s="M">160M</b><small>NRM, fixed at genesis</small></div>
+      <div class="fig rv"><span>[B] Audit findings</span><b>0</b><small>Critical or high · Halborn</small></div>
+      <div class="fig rv"><span>[C] Signers verified</span><b data-n="4" data-s="/4">4/4</b><small>KYC by Assure DeFi</small></div>
+      <div class="fig rv"><span>[D] Chain to mainnet</span><b data-n="75" data-s="%">75%</b><small>Testnet live today</small></div>
+    </div>
+    <div class="logos">
+      <p class="m">Compatible with</p>
+      <div class="mq"><div class="mq-t" id="mq">
+        <span><img src="../img/marcas/ethereum.svg" alt="">Ethereum</span><span><img src="../img/marcas/bnb.svg" alt="">BNB Chain</span>
+        <span><img src="../img/marcas/metamask.svg" alt="">MetaMask</span><span><img src="../img/marcas/trust.png" alt="">Trust Wallet</span>
+        <span><img src="../img/marcas/dexscreener.svg" alt="">DexScreener</span>
+      </div></div>
+    </div>
+  </div>
+</section>
+
+<div class="bigmq" data-dir="1" aria-hidden="true"><div class="bigmq-r"><div class="bigmq-t"><span>Settlement</span><i></i><span class="f">Tokenization</span><i></i><span>Compliance</span><i></i><span class="f">Liquidity</span><i></i></div></div></div>
+
+<!-- ═══ PRODUCTOS ═══ -->
+<section class="sec t-dark" id="products"><div class="wrap">
+  <div class="sh"><div class="sh-k m"><b>[01]</b><span>Products</span><i></i><span>03 items</span></div><h2 class="split">Three pieces, <em>two already running.</em></h2><p>A chain built for regulated assets, the interface to issue them, and real infrastructure behind the token.</p></div>
+  <div class="stack">
+    <article class="pn spot"><i class="dim"></i>
+      <div class="pn-bar m"><span>NRM-01</span><span>The Nereum chain</span><span class="ok">● Testnet · 75% to mainnet</span></div>
+      <div class="pn-c">
+        <h3>The Nereum chain</h3>
+        <p>Own validators, own consensus, EVM-compatible. Every transfer is cleared against the asset's policy before it is written, in the protocol and not in a contract on top.</p>
+        <div class="meter"><div><span>Mainnet</span><span>75%</span></div><i><b style="--v:75%"></b></i></div>
+        <a class="btn w" href="https://nereum.xyz/explorer">Open the explorer <span class="arr">&rarr;</span></a>
+      </div>
+      <div class="pn-v"><div class="shot"><img src="../img/explorer-overview.webp" alt="The Nereum explorer: block height, tokenized assets and live block production" loading="lazy"></div></div>
+    </article>
+    <article class="pn spot"><i class="dim"></i>
+      <div class="pn-bar m"><span>NRM-02</span><span>Asset tokenization</span><span class="ok">● Testnet · live</span></div>
+      <div class="pn-c">
+        <h3>Asset tokenization</h3>
+        <p>Describe the asset, attach its documentation, choose the conditions that travel with it, and issue. No custom contract to write.</p>
+        <div class="meter"><div><span>Rollout</span><span>75%</span></div><i><b style="--v:75%"></b></i></div>
+        <a class="btn s" href="https://nereum.xyz/explorer/#/tokenize">Tokenize an asset <span class="arr">&rarr;</span></a>
+      </div>
+      <div class="pn-v" aria-hidden="true"><div class="mk">
+        <div class="mk-h">New asset <span>Draft</span></div>
+        <div class="mk-r"><span>Asset</span><b>Commercial building · Miami</b></div>
+        <div class="mk-r ok"><span>Documentation</span><b>3 files</b></div>
+        <div class="mk-r ok"><span>Policy</span><b>KYC · US only</b></div>
+        <div class="mk-r"><span>Supply</span><b>1,000,000</b></div>
+        <div class="mk-bar">Issue on Nereum</div>
+      </div></div>
+    </article>
+    <article class="pn spot"><i class="dim"></i>
+      <div class="pn-bar m"><span>NRM-03</span><span>Bitcoin mining</span><span class="dev">● In development</span></div>
+      <div class="pn-c">
+        <h3>Bitcoin mining</h3>
+        <p>Physical servers we own and operate, powered by solar. Machines in racks, with their own energy behind them.</p>
+        <div class="meter"><div><span>Build-out</span><span>30%</span></div><i><b style="--v:30%"></b></i></div>
+        <a class="btn s" href="https://nereum.xyz/whitepaper">Read the whitepaper <span class="arr">&rarr;</span></a>
+      </div>
+      <div class="pn-v" aria-hidden="true"><div class="rk" id="rk"></div></div>
+    </article>
+  </div>
+</div></section>
+
+<!-- ═══ ESCENA: ola ═══ -->
+<section class="tx" id="tx-ola" data-tx="ola" style="height:280vh" aria-label="Every asset, one ledger">
+  <div class="tx-st"><div class="tx-vig"></div><div class="tx-frame" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+    <div class="tx-top"><span class="m">[Scene 01] Settlement layer</span></div>
+    <div class="tx-t"><h3>Every asset.<br><em>One ledger.</em></h3></div>
+    <div class="tx-hud m"><span class="tx-n"></span><i><b></b></i></div>
+  </div>
+</section>
+
+<!-- ═══ PROTOCOLO ═══ -->
+<section class="sec t-blue" id="why"><div class="wrap">
+  <div class="sh"><div class="sh-k m"><b>[02]</b><span>Protocol</span><i></i><span>04 guarantees</span></div><h2 class="split">Four guarantees, <em>written into the protocol.</em></h2><p>When value moves, the rules move with it. On Nereum they travel with the asset and hold at machine speed.</p></div>
+  <div class="gl-pin"><div class="gl-hud m"><span>Scroll · 04 guarantees</span><i><b id="glB"></b></i></div><div class="gl">
+    <div class="gr rv"><span class="gr-big" aria-hidden="true">01</span><span class="n m">G—01</span><span class="ic"><svg viewBox="0 0 24 24"><path d="M5 12l4 4 10-10"/></svg></span><h3>All-or-nothing settlement</h3><p>Every leg settles, or none does.</p></div>
+    <div class="gr rv"><span class="gr-big" aria-hidden="true">02</span><span class="n m">G—02</span><span class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12Z"/></svg></span><h3>Controlled visibility</h3><p>A public register, with the policy travelling with the asset.</p></div>
+    <div class="gr rv"><span class="gr-big" aria-hidden="true">03</span><span class="n m">G—03</span><span class="ic"><svg viewBox="0 0 24 24"><path d="M12 3.5 5.2 6.4v4.8c0 4 2.8 6.8 6.8 7.6 4-.8 6.8-3.6 6.8-7.6V6.4L12 3.5Z"/></svg></span><h3>Always-on security</h3><p>Checked before anything is written, not after.</p></div>
+    <div class="gr rv"><span class="gr-big" aria-hidden="true">04</span><span class="n m">G—04</span><span class="ic"><svg viewBox="0 0 24 24"><path d="M13 2 4 14h7l-1 8 9-12h-7l1-8Z"/></svg></span><h3>Performance under load</h3><p>Seconds, not days, and no manual checks to scale.</p></div>
+  </div></div>
+</div></section>
+
+<!-- ═══ 85 % ═══ -->
+<section class="tx" id="tx-cifra" data-tx="cifra" style="height:300vh" aria-label="Seed Round 85% complete">
+  <div class="tx-st"><div class="tx-vig"></div><div class="tx-frame" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+    <div class="tx-top"><span class="m">[Scene 02] Seed Round</span></div>
+    <div class="tx-bot"><span class="m">Complete</span><span>Registered, audited and nearly closed.</span></div>
+    <div class="tx-hud m"><span class="tx-n"></span><i><b></b></i></div>
+  </div>
+</section>
+
+<!-- ═══ TOKEN ═══ -->
+<section class="sec t-paper" id="token"><div class="wrap">
+  <div class="sh"><div class="sh-k m"><b>[03]</b><span>Token</span><i></i><span>NRM</span></div><h2 class="split">One hundred and sixty million NRM, <em>fixed at genesis.</em></h2></div>
+  <div class="tok">
+    <div class="odo" id="odo" aria-label="160,000,000">160,000,000</div>
+    <div class="tk-u"><h3>Total supply <span class="m">&nbsp;/ No mint function</span></h3>
+      <div class="ctr"><span class="m">Contract</span><code id="addr">0x3A2f46170E57DDF11135e13884db0236f1924292</code>
+        <a class="m ok" href="https://robinhoodchain.blockscout.com/address/0x3A2f46170E57DDF11135e13884db0236f1924292?tab=contract" rel="noopener">Verified</a><button type="button" id="copy">Copy</button></div>
+    </div>
+    <div class="bar" id="bar" aria-hidden="true"></div><div class="legend" id="legend"></div>
+  </div>
+</div></section>
+
+<!-- ═══ ESCENA: tunel ═══ -->
+<section class="tx" id="tx-tunel" data-tx="tunel" style="height:280vh" aria-label="Checked before anything is written">
+  <div class="tx-st"><div class="tx-vig"></div><div class="tx-frame" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+    <div class="tx-top"><span class="m">[Scene 03] Security</span></div>
+    <div class="tx-t"><h3>Checked before<br><em>anything is written.</em></h3></div>
+    <div class="tx-hud m"><span class="tx-n"></span><i><b></b></i></div>
+  </div>
+</section>
+
+<!-- ═══ SEGURIDAD ═══ -->
+<section class="sec t-dark" id="security"><div class="wrap">
+  <div class="sh"><div class="sh-k m"><b>[04]</b><span>Security</span><i></i><span>03 proofs</span></div><h2 class="split">Three things you can check <em>before you send a dollar.</em></h2><p>A new chain asks for trust up front. These are the three places where ours is verifiable by someone who is not us.</p></div>
+  <div class="certs">
+    <article class="cert spot rv"><div class="cert-top m"><span>Proof 01</span><span class="badge">Verified</span></div><h3>Registered company</h3><div class="sub">Florida, United States</div>
+      <p>Nereum Labs LLC is incorporated in the State of Florida. The filing is public record and can be checked against the state registry.</p>
+      <dl><dt>Entity</dt><dd>Nereum Labs LLC</dd><dt>Document no.</dt><dd>L26000341887</dd><dt>Filed</dt><dd>14 Feb 2026</dd><dt>Status</dt><dd>Active</dd></dl>
+      <a class="btn s sm" href="https://nereum.xyz/whitepaper#/legal">Check the registry <span class="arr">&rarr;</span></a></article>
+    <article class="cert spot rv"><div class="cert-top m"><span>Proof 02</span><span class="badge">Audited</span></div><h3>Contract audit</h3><div class="sub">Independent review</div>
+      <p>Every contract that touches Seed Round funds has been reviewed by an independent security firm. The full report is published.</p>
+      <dl><dt>Auditor</dt><dd>Halborn Security</dd><dt>Scope</dt><dd>Sale, vesting, treasury</dd><dt>Findings</dt><dd>0 critical · 0 high</dd><dt>Report</dt><dd>Published in full</dd></dl>
+      <a class="btn s sm" href="https://nereum.xyz/whitepaper#/audit">Read the audit <span class="arr">&rarr;</span></a></article>
+    <article class="cert spot rv"><div class="cert-top m"><span>Proof 03</span><span class="badge">KYC passed</span></div><h3>Team KYC</h3><div class="sub">Verified identities</div>
+      <p>Identity documents for every signer on the treasury have been verified by a third party and are held for disclosure to regulators and exchanges.</p>
+      <dl><dt>Provider</dt><dd>Assure DeFi</dd><dt>Verified</dt><dd>4 of 4 signers</dd><dt>Held by</dt><dd>Escrow, not by us</dd><dt>Renewed</dt><dd>Annually</dd></dl>
+      <a class="btn s sm" href="https://nereum.xyz/whitepaper#/kyc">See the verification <span class="arr">&rarr;</span></a></article>
+  </div>
+</div></section>
+
+<!-- ═══ RUTA ═══ -->
+<section class="sec t-blue" id="roadmap"><div class="wrap">
+  <div class="sh"><div class="sh-k m"><b>[05]</b><span>Roadmap</span><i></i><span>2 / 3 delivered</span></div><h2 class="split">Three phases, <em>and what each one has to prove.</em></h2></div>
+  <div class="tl-l" id="tl"><b></b><i style="left:0"></i><i style="left:33.333%"></i><i style="left:66.666%"></i></div>
+  <div class="phs">
+    <div class="ph rv"><span class="n m">Phase 01 / 03</span><span class="badge st">Completed</span><h3>Foundation</h3><p>The company registered, the contract deployed and verified, and the first raise closed.</p>
+      <ul><li><svg><use href="#chk"/></svg>Contract deployed and verified</li><li><svg><use href="#chk"/></svg>Audit passed</li><li><svg><use href="#chk"/></svg>Team KYC passed</li><li><svg><use href="#chk"/></svg>Legal registration in the US</li><li><svg><use href="#chk"/></svg>$5M Seed Round</li></ul></div>
+    <div class="ph rv"><span class="n m">Phase 02 / 03</span><span class="badge st">Completed</span><h3>Expansion</h3><p>The chain and the interfaces on top of it, built in the open, with a price anyone can look up.</p>
+      <ul><li><svg><use href="#chk"/></svg>Nereum Blockchain infrastructure</li><li><svg><use href="#chk"/></svg>Asset tokenization interface</li><li><svg><use href="#chk"/></svg>Online BTC mining interface</li><li><svg><use href="#chk"/></svg>Pre-listing on DexScreener at $1</li><li><svg><use href="#chk"/></svg>$10M Seed Round</li></ul></div>
+    <div class="ph plan rv"><span class="n m">Phase 03 / 03</span><span class="badge st">Planned</span><h3>Integration</h3><p>The infrastructure stops being a decision factor for the issuer, the way interbank payment rails are not one today.</p></div>
+  </div>
+</div></section>
+
+<!-- ═══ PRENSA ═══ -->
+<section class="sec t-paper" id="press"><div class="wrap">
+  <div class="sh"><div class="sh-k m"><b>[06]</b><span>In the press</span><i></i><span>04 entries</span></div><h2 class="split">What they are writing <em>about the chain.</em></h2></div>
+  <div class="news">
+    <a class="nw rv" href="https://nereum.xyz/whitepaper#/press"><span class="n m">P—01</span><b>Benzinga</b><h3>Nereum settlement on the markets desk watchlist</h3><span class="ar">&rarr;</span></a>
+    <a class="nw rv" href="https://nereum.xyz/whitepaper#/press"><span class="n m">P—02</span><b>MarketWatch</b><h3>Why finality, not throughput, is the next infrastructure race</h3><span class="ar">&rarr;</span></a>
+    <a class="nw rv" href="https://nereum.xyz/whitepaper#/press"><span class="n m">P—03</span><b>Morningstar</b><h3>Nereum instruments added to tokenized asset coverage</h3><span class="ar">&rarr;</span></a>
+    <a class="nw rv" href="https://nereum.xyz/whitepaper#/press"><span class="n m">P—04</span><b>Announcement</b><h3>Settlement layer opens to third-party issuers</h3><span class="ar">&rarr;</span></a>
+  </div>
+</div></section>
+
+<div class="bigmq alt" data-dir="-1" aria-hidden="true"><div class="bigmq-r"><div class="bigmq-t"><span class="f">Registered</span><i></i><span>Audited</span><i></i><span class="f">Onchain</span><i></i><span>Built in the open</span><i></i></div></div></div>
+
+<!-- ═══ ESCENA: logo ═══ -->
+<section class="tx" id="tx-logo" data-tx="logo" style="height:260vh" aria-label="Nereum, built in the open">
+  <div class="tx-st"><div class="tx-vig"></div><div class="tx-frame" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+    <div class="tx-top"><span class="m">[Scene 04] Nereum</span></div>
+    <div class="tx-bot"><span class="m">Built in the open</span><span>Every release, audit and mainnet note, public.</span></div>
+    <div class="tx-hud m"><span class="tx-n"></span><i><b></b></i></div>
+  </div>
+</section>
+
+<!-- ═══ CIERRE ═══ -->
+<section class="cta t-blue" id="join"><div class="wrap">
+  <div class="cta-k m"><b>[07]</b><span>Join</span><i></i><span>Public channels</span></div>
+  <h2 class="split">Everything we ship is announced in the open.</h2>
+  <div class="cta-l">
+    <a class="rv" href="https://x.com/nereumlab" rel="noopener"><span class="m">01</span>Follow on X <span>Releases · audits</span><i>&rarr;</i></a>
+    <a class="rv" href="https://nereum.xyz/whitepaper#/links"><span class="m">02</span>Join Telegram <span>Ask the team</span><i>&rarr;</i></a>
+    <a class="rv" href="https://nereum.xyz/whitepaper"><span class="m">03</span>Read the whitepaper <span>Protocol · token · legal</span><i>&rarr;</i></a>
+  </div>
+</div></section>
+</main>
+
+<footer class="ft"><div class="wrap">
+  <div class="ft-cols">
+    <div><a class="brand" href="#top"><svg aria-hidden="true"><use href="#logo"/></svg><span>Nereum</span></a><p>No private groups, no paid signals. The same information reaches everyone at the same time.</p></div>
+    <div><h4>Trust</h4><a href="https://nereum.xyz/whitepaper#/legal">Legal Document — Miami, FL</a><a href="https://nereum.xyz/whitepaper#/audit">Audit</a><a href="https://nereum.xyz/whitepaper#/kyc">Team KYC</a></div>
+    <div><h4>Token</h4><a href="https://nereum.xyz/whitepaper#/seedround">Seed Round</a><a href="https://nereum.xyz/whitepaper#/dexscreener">DexScreener</a></div>
+    <div><h4>Protocol</h4><a href="https://nereum.xyz/whitepaper#/network">NereumEVM</a><a href="https://nereum.xyz/whitepaper#/scan">Explorer</a><a href="https://nereum.xyz/whitepaper#/tokenization">Tokenization</a><a href="https://nereum.xyz/whitepaper#/dex">Nereum DEX</a><a href="https://nereum.xyz/whitepaper#/nusd">NUSD</a></div>
+    <div><h4>Products</h4><a href="https://nereum.xyz/whitepaper#/forge">Forge</a><a href="https://nereum.xyz/whitepaper#/vaults">Vaults</a><a href="https://nereum.xyz/whitepaper#/feed">Feed</a><a href="https://nereum.xyz/whitepaper#/link">Link</a><a href="https://nereum.xyz/whitepaper#/wallet">Wallet</a></div>
+    <div><h4>Company</h4><a href="https://nereum.xyz/whitepaper#/team">Team</a><a href="https://nereum.xyz/whitepaper#/press">News</a><a href="https://nereum.xyz/whitepaper#/links">Official links</a><a href="https://nereum.xyz/whitepaper#/faq">Questions</a></div>
+  </div>
+  <div class="ft-end m"><span>©2026 Nereum Labs · Miami, Florida</span><span>25.76°N 80.19°W</span><span>Real-world asset chain</span></div>
+  <div class="ft-big" aria-hidden="true">NEREUM</div>
+</div></footer>
+
+
+<script src="vendor/three.min.js"></script>
+<script src="vendor/three-post.js"></script>
+<script src="vendor/gsap.min.js"></script>
+<script src="vendor/ScrollTrigger.min.js"></script>
+<script src="vendor/lenis.min.js"></script>
+<script>
+(function(){
+'use strict';
+var CALMA = matchMedia('(prefers-reduced-motion:reduce)').matches;
+var $ = function(s,c){ return (c||document).querySelector(s) };
+var $$ = function(s,c){ return [].slice.call((c||document).querySelectorAll(s)) };
+var hasG = !!window.gsap && !!window.ScrollTrigger;
+if(hasG) gsap.registerPlugin(ScrollTrigger);
+var AZULES=['#0C33B4','#1244DC','#1A5BF0','#3E7BFF','#2E62C8'], BLANCOS=['#E9EDF6','#C3CCDD','#BFD4FF'], _rgb={};
+
+var lenis=null, VELZ=0, VEL=0;
+if(!CALMA && window.Lenis && hasG){
+  lenis=new Lenis({lerp:.09,smoothWheel:true});
+  lenis.on('scroll',function(e){ ScrollTrigger.update(); VELZ=Math.min(.12,Math.abs(e.velocity||0)*.004); VEL=e.velocity||0 });
+  gsap.ticker.add(function(t){ lenis.raf(t*1000); VELZ*=.9 }); gsap.ticker.lagSmoothing(0);
+}
+var sheet=$('#sheet'), menuB=$('#menuB');
+function cerrar(){ sheet.classList.remove('on'); menuB.setAttribute('aria-expanded','false'); menuB.textContent='Menu' }
+menuB.addEventListener('click',function(){ var on=sheet.classList.toggle('on'); menuB.setAttribute('aria-expanded',on); menuB.textContent=on?'Close':'Menu' });
+$$('a[href^="#"]').forEach(function(a){ a.addEventListener('click',function(e){ var id=a.getAttribute('href'), t=id.length>1&&$(id); if(!t) return; e.preventDefault(); cerrar(); if(lenis) lenis.scrollTo(t,{duration:1.4,offset:-80}); else t.scrollIntoView({behavior:CALMA?'auto':'smooth'}) }) });
+var hd=$('#hd'), ultY=0;
+addEventListener('scroll',function(){ var y=scrollY; hd.classList.toggle('solid',y>20); if(y>ultY+2&&y>400&&!sheet.classList.contains('on')) hd.classList.add('away'); else if(y<ultY-2) hd.classList.remove('away'); ultY=y },{passive:true});
+
+/* ── titulares en lineas ── */
+function partir(el){
+  var ws=[];
+  (function rec(n,em){ [].slice.call(n.childNodes).forEach(function(c){ if(c.nodeType===3) c.data.trim().split(/\s+/).forEach(function(w){ if(w) ws.push({w:w,em:em}) }); else if(c.nodeType===1) rec(c,em||c.tagName==='EM') }) })(el,false);
+  el.innerHTML=ws.map(function(o){ return '<span class="wd" style="display:inline-block">'+(o.em?'<em>'+o.w+'</em>':o.w)+'</span>' }).join(' ');
+  var lineas=[], y=null;
+  $$('.wd',el).forEach(function(w){ var t=w.offsetTop; if(t!==y){ lineas.push([]); y=t } lineas[lineas.length-1].push(w.innerHTML) });
+  el.innerHTML=lineas.map(function(l){ return '<span class="ln"><span>'+l.join(' ')+'</span></span>' }).join('');
+  el.setAttribute('aria-label',ws.map(function(o){ return o.w }).join(' '));
+}
+if(hasG && !CALMA){
+  (document.fonts?document.fonts.ready:Promise.resolve()).then(function(){
+    $$('.split').forEach(function(h){ partir(h); gsap.from($$('.ln>span',h),{yPercent:115,duration:1.3,ease:'expo.out',stagger:.08,scrollTrigger:{trigger:h,start:'top 86%'}}) });
+    ScrollTrigger.refresh();
+  });
+}
+
+
+/* ═══ MOTOR DE CUBOS ═══════════════════════════════════════════════════════
+   Un render 3D minimo en canvas 2D: cubos con giro propio, camara con
+   guinada, cabeceo y alabeo, caras ocultas descartadas, sombreado por la
+   normal y aristas de neon. Pinta de lejos a cerca. */
+var NID=0, CV=[]; for(var v=0;v<8;v++) CV.push([(v&1)?1:-1,(v&2)?1:-1,(v&4)?1:-1]);
+var CF=[[0,1,3,2,2,-1],[4,5,7,6,2,1],[0,2,6,4,0,-1],[1,3,7,5,0,1],[0,1,5,4,1,-1],[2,3,7,6,1,1]];
+var LUZ=(function(){ var l=[-.45,-.8,-.4], m=Math.hypot(l[0],l[1],l[2]); return [l[0]/m,l[1]/m,l[2]/m] })();
+function rot(v,cx,sx,cy,sy,cz,sz){
+  var x=v[0],y=v[1],z=v[2], t;
+  t=x*cz-y*sz; y=x*sz+y*cz; x=t;          /* alabeo */
+  t=x*cy+z*sy; z=-x*sy+z*cy; x=t;         /* guinada */
+  t=y*cx-z*sx; z=y*sx+z*cx; y=t;          /* cabeceo */
+  return [x,y,z];
+}
+/* LA CAMARA: los cubos se dibujan en un lienzo 2D fuera de pantalla y un
+   pase WebGL les pone la optica encima: ojo de pez (B), desenfoque de zoom
+   hacia el centro (Z) y aberracion cromatica (A). Cada escena los mueve con
+   el scroll y con la velocidad a la que se baja. */
+var POST_VS='attribute vec2 p;varying vec2 v;void main(){v=p*.5+.5;gl_Position=vec4(p,0.,1.);}';
+var POST_FS=['precision mediump float;varying vec2 v;uniform sampler2D t;uniform vec2 R;uniform float B,Z,A,TS,TY;',
+ 'vec4 s(vec2 u){return (u.x<0.||u.y<0.||u.x>1.||u.y>1.)?vec4(0.):texture2D(t,u);}',
+ 'void main(){vec2 a=vec2(R.x/R.y,1.);vec2 c=(v-.5)*a;float r2=dot(c,c);',
+ ' vec2 u=(c*(1.-B*.55+B*r2)/a)+.5;',
+ /* tilt-shift: una franja nitida y el resto desenfocado, como una maqueta fotografiada */
+ ' float tb=TS*smoothstep(.1,.42,abs(v.y-TY))*.012;',
+ ' vec4 col=vec4(0.);',
+ ' for(int i=0;i<12;i++){float f=float(i)/11.;float an=f*37.7;vec2 uu=.5+(u-.5)*(1.-Z*f)+vec2(cos(an),sin(an))*tb*sqrt(f);vec2 d=(uu-.5)*A*(1.+r2*4.);',
+ '  vec4 m=s(uu);col+=vec4(s(uu+d).r,m.g,s(uu-d).b,m.a);}',
+ ' col/=12.;gl_FragColor=col;}'].join('\n');
+function escena(cv){
+  var gl=cv.getContext('webgl',{premultipliedAlpha:true,alpha:true,antialias:false});
+  var off=gl?document.createElement('canvas'):cv, c=off.getContext('2d'), o={c:c,W:0,H:0,fx:{b:0,z:0,a:0},light:cv.hasAttribute('data-light')};
+  if(gl){
+    var sh=function(t,s){ var x=gl.createShader(t); gl.shaderSource(x,s); gl.compileShader(x); return x };
+    var pr=gl.createProgram(); gl.attachShader(pr,sh(gl.VERTEX_SHADER,POST_VS)); gl.attachShader(pr,sh(gl.FRAGMENT_SHADER,POST_FS)); gl.linkProgram(pr); gl.useProgram(pr);
+    var bf=gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER,bf); gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,3,-1,-1,3]),gl.STATIC_DRAW);
+    var lp=gl.getAttribLocation(pr,'p'); gl.enableVertexAttribArray(lp); gl.vertexAttribPointer(lp,2,gl.FLOAT,false,0,0);
+    var tx=gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D,tx);
+    gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE); gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR); gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);
+    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,true); gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL,true);
+    var uR=gl.getUniformLocation(pr,'R'), uB=gl.getUniformLocation(pr,'B'), uZ=gl.getUniformLocation(pr,'Z'), uA=gl.getUniformLocation(pr,'A'), uTS=gl.getUniformLocation(pr,'TS'), uTY=gl.getUniformLocation(pr,'TY');
+    o.post=function(){ var f=o.fx; gl.viewport(0,0,cv.width,cv.height); gl.clearColor(0,0,0,0); gl.clear(gl.COLOR_BUFFER_BIT);
+      gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,off);
+      gl.uniform2f(uR,cv.width,cv.height); gl.uniform1f(uB,CALMA?0:f.b); gl.uniform1f(uZ,CALMA?0:Math.min(.45,f.z+VELZ)); gl.uniform1f(uA,CALMA?0:f.a+VELZ*.02); gl.uniform1f(uTS,f.ts||0); gl.uniform1f(uTY,f.ty==null?.5:f.ty);
+      gl.drawArrays(gl.TRIANGLES,0,3) };
+  }
+  o.tam=function(){ var d=Math.min(innerWidth<700?1.5:2,devicePixelRatio||1); o.W=cv.clientWidth; o.H=cv.clientHeight; off.width=cv.width=Math.round(o.W*d); off.height=cv.height=Math.round(o.H*d); c.setTransform(d,0,0,d,0,0) };
+  o.tam(); addEventListener('resize',o.tam);
+  /* cubos: {x,y,z,s,rx,ry,rz,l,a}; cam: {yaw,pitch,roll,dist,fov} */
+  o.pinta=function(cubos,cam,limpio){
+    var W=o.W,H=o.H,F=H*(cam.fov||1.1), items=[], ox=cam.ox||0, oy=cam.oy||0;
+    var cx=Math.cos(cam.pitch||0),sx=Math.sin(cam.pitch||0),cy=Math.cos(cam.yaw||0),sy=Math.sin(cam.yaw||0),cz=Math.cos(cam.roll||0),sz=Math.sin(cam.roll||0);
+    for(var i=0;i<cubos.length;i++){
+      var q=cubos[i]; if(q.a<=0.01) continue;
+      var w=q.w!=null?q.w:q.s, h=q.h!=null?q.h:q.s, d=q.d!=null?q.d:q.s; if(w<.004&&h<.004) continue;
+      var C=rot([q.x,q.y,q.z],cx,sx,cy,sy,cz,sz); C[2]+=cam.dist;
+      if(C[2]<.6) continue;
+      var a1=Math.cos(q.rx||0),b1=Math.sin(q.rx||0),a2=Math.cos(q.ry||0),b2=Math.sin(q.ry||0),a3=Math.cos(q.rz||0),b3=Math.sin(q.rz||0);
+      var ax=rot(rot([w,0,0],a1,b1,a2,b2,a3,b3),cx,sx,cy,sy,cz,sz),
+          ay=rot(rot([0,h,0],a1,b1,a2,b2,a3,b3),cx,sx,cy,sy,cz,sz),
+          az=rot(rot([0,0,d],a1,b1,a2,b2,a3,b3),cx,sx,cy,sy,cz,sz);
+      items.push({q:q,C:C,A:[ax,ay,az]});
+    }
+    if(cam.floor!=null && !cam._ref){
+      /* el suelo espejo: las mismas piezas reflejadas bajo el plano, tenues, pintadas primero */
+      var espejo=[]; for(var ii=0;ii<cubos.length;ii++){ var qq=cubos[ii]; if(qq.a<=.01) continue;
+        espejo.push({x:qq.x,y:2*cam.floor-qq.y,z:qq.z,w:qq.w,h:qq.h,d:qq.d,s:qq.s,rx:-(qq.rx||0),ry:qq.ry,rz:-(qq.rz||0),l:qq.l,a:qq.a*(cam.refA||.14),c:qq.c,g:qq.g,_m:qq._m,_id:qq._id}) }
+      var c2={}; for(var kk in cam) c2[kk]=cam[kk]; c2._ref=true; c2.noPost=true;
+      o.pinta(espejo,c2); limpio=true;
+      /* un velo del color del fondo para que el reflejo se funda hacia abajo */
+      var P0=cam.floorScreen; if(P0!=null){ var gr=o.c.createLinearGradient(0,P0*H,0,H); gr.addColorStop(0,'rgba(11,11,12,0)'); gr.addColorStop(.55,'rgba(11,11,12,.85)'); gr.addColorStop(1,'rgba(11,11,12,1)'); o.c.fillStyle=gr; o.c.fillRect(0,P0*H,W,H) }
+    }
+    items.sort(function(m,n){ return n.C[2]-m.C[2] });
+    var ctx=o.c; if(!limpio) ctx.clearRect(0,0,W,H); ctx.lineJoin='round';
+    for(var k=0;k<items.length;k++){
+      var it=items[k], C=it.C, A=it.A, q=it.q, P=[];
+      for(var v=0;v<8;v++){ var cv_=CV[v]; var X=C[0]+cv_[0]*A[0][0]+cv_[1]*A[1][0]+cv_[2]*A[2][0], Y=C[1]+cv_[0]*A[0][1]+cv_[1]*A[1][1]+cv_[2]*A[2][1], Z=C[2]+cv_[0]*A[0][2]+cv_[1]*A[1][2]+cv_[2]*A[2][2]; if(Z<.3) Z=.3; P.push([W/2+ox*W+X*F/Z, H/2+oy*H+Y*F/Z]) }
+      var niebla=Math.max(0,Math.min(1,1-(C[2]-(cam.near||8))/(cam.far||40)));
+      var alfa=q.a*niebla; if(alfa<=.01) continue;
+      /* TRES MATERIALES, nada de piezas de colores al azar:
+         obsidiana (la mayoria), acento azul electrico (pocas, emiten luz) y
+         cristal esmerilado (lo que en la escena es blanco). */
+      if(q._m==null){ if(q._id==null) q._id=(++NID); var cc=q.c||'#1A5BF0';
+        q._m = BLANCOS.indexOf(cc)>=0 ? 2 : (azar(q._id*3.7)<.07 ? 1 : 0) }
+      var mat=q._m, gl=q.l||0;
+      for(var f=0;f<6;f++){
+        var fc=CF[f], ej=A[fc[4]], sg=fc[5], nx=ej[0]*sg, ny=ej[1]*sg, nz=ej[2]*sg;
+        if(nx*(C[0]+nx)+ny*(C[1]+ny)+nz*(C[2]+nz)>=0) continue;
+        var nl=Math.hypot(nx,ny,nz)||1, b=Math.max(0,(nx*LUZ[0]+ny*LUZ[1]+nz*LUZ[2])/nl);
+        ctx.beginPath(); ctx.moveTo(P[fc[0]][0],P[fc[0]][1]); ctx.lineTo(P[fc[1]][0],P[fc[1]][1]); ctx.lineTo(P[fc[2]][0],P[fc[2]][1]); ctx.lineTo(P[fc[3]][0],P[fc[3]][1]); ctx.closePath();
+        var fill, edge, lw;
+        if(o.light){
+          /* material claro: porcelana, cristal azulado y un azul de acento */
+          if(mat===1){ var k1=.62+b*.45; fill='rgba('+Math.round(26*k1+40*gl)+','+Math.round(91*k1+40*gl)+','+Math.round(Math.min(255,240*k1+15))+','+alfa.toFixed(3)+')'; edge='rgba(255,255,255,'+(alfa*.55).toFixed(3)+')'; lw=.8 }
+          else if(mat===2){ fill='rgba(160,190,255,'+(alfa*(.14+b*.16)).toFixed(3)+')'; edge='rgba(26,91,240,'+(alfa*.4).toFixed(3)+')'; lw=.8 }
+          else { var kp=.72+b*.28; fill='rgba('+Math.round(205*kp+50*gl)+','+Math.round(214*kp+41*gl)+','+Math.round(236*kp+19*gl)+','+alfa.toFixed(3)+')'; edge='rgba(26,60,140,'+(alfa*(.24+(1-b)*.14)).toFixed(3)+')'; lw=.7 }
+        } else if(mat===0){
+          var k0=.55+b*.9, e0=gl*.9;
+          fill='rgba('+Math.round(9*k0+26*e0)+','+Math.round(26*k0+91*e0)+','+Math.round(78*k0+240*e0)+','+alfa.toFixed(3)+')';
+          edge='rgba('+(110+Math.round(gl*90))+','+(150+Math.round(gl*80))+',255,'+(alfa*(.22+b*.25+gl*.5)).toFixed(3)+')'; lw=.7;
+        } else if(mat===1){
+          var k1=.55+b*.55, e1=.35+gl*.65;
+          fill='rgba('+Math.round(Math.min(255,26*k1+80*e1))+','+Math.round(Math.min(255,91*k1+90*e1))+','+Math.round(Math.min(255,240*k1+15*e1))+','+alfa.toFixed(3)+')';
+          edge='rgba(190,212,255,'+(alfa*(.55+b*.35)).toFixed(3)+')'; lw=.8;
+        } else {
+          fill='rgba(205,220,250,'+(alfa*(.07+b*.16+gl*.2)).toFixed(3)+')';
+          edge='rgba(226,236,255,'+(alfa*(.42+b*.3)).toFixed(3)+')'; lw=.8;
+        }
+        ctx.fillStyle=fill; ctx.fill(); ctx.strokeStyle=edge; ctx.lineWidth=lw; ctx.stroke();
+      }
+    }
+    if(o.post && !cam.noPost) o.post();
+  };
+  return o;
+}
+function tri(hex){ var v=_rgb[hex]; if(!v){ v=[parseInt(hex.slice(1,3),16),parseInt(hex.slice(3,5),16),parseInt(hex.slice(5,7),16)]; _rgb[hex]=v } return v }
+/* un color de la paleta original: azul macizo o blanco de cristal */
+function tinta(q,n,pBlanco){ if(azar(n)<(pBlanco==null?.3:pBlanco)){ q.c=BLANCOS[(azar(n+1)*3)|0]; q.g=azar(n+2)<.75 } else { q.c=AZULES[(azar(n+1)*5)|0]; q.g=false } return q }
+function suave(t){ t=Math.max(0,Math.min(1,t)); return t*t*(3-2*t) }
+function tramo(p,a,b){ return Math.max(0,Math.min(1,(p-a)/(b-a))) }
+function azar(n){ var x=Math.sin(n*127.1+311.7)*43758.5453; return x-Math.floor(x) }
+
+/* voxeles de un texto: celdas llenas de una rejilla sobre el texto pintado */
+function voxeles(txt,cols){
+  var k=document.createElement('canvas'), g=k.getContext('2d'), fs=120;
+  g.font='600 '+fs+'px Switzer, "Inter Tight", sans-serif';
+  var w=Math.ceil(g.measureText(txt).width)+10, h=Math.ceil(fs*1.05);
+  k.width=w; k.height=h; g.font='600 '+fs+'px Switzer, "Inter Tight", sans-serif'; g.textBaseline='middle'; g.fillStyle='#fff'; g.fillText(txt,5,h/2);
+  var d=g.getImageData(0,0,w,h).data, paso=w/cols, filas=Math.round(h/paso), out=[];
+  for(var j=0;j<filas;j++) for(var i=0;i<cols;i++){
+    var px=Math.floor((i+.5)*paso), py=Math.floor((j+.5)*paso);
+    if(d[(py*w+px)*4+3]>120) out.push([i-cols/2+.5, j-filas/2+.5]);
+  }
+  return out;
+}
+
+var TX={
+  /* un tunel de cubos que se recorre: el scroll es el avance */
+  tunel:function(){
+    var M=innerWidth<700, R=3.4, D=M?20:28, K=M?5:6, L=1.3, cubos=[];
+    for(var d=0;d<D;d++) for(var w=0;w<4;w++) for(var k=0;k<K;k++){
+      var u=-R+(k+.5)*(2*R/K), n=d*97+w*13+k, off=azar(n)*.9*(azar(n+5)>.55?1:0), pos;
+      if(w===0) pos=[u,R-off]; else if(w===1) pos=[u,-R+off]; else if(w===2) pos=[-R+off,u]; else pos=[R-off,u];
+      cubos.push(tinta({bx:pos[0],by:pos[1],bz:d*L,x:0,y:0,z:0,s:.5,rx:0,ry:0,rz:0,l:azar(n+9)>.94?1:0,a:1,ph:azar(n+3)*6.28},n+40,.32));
+    }
+    return function(p,t){
+      var av=p*D*L*.9+t*.6, largo=D*L;
+      for(var i=0;i<cubos.length;i++){ var q=cubos[i], z=((q.bz-av)%largo+largo)%largo;
+        q.x=q.bx; q.y=q.by; q.z=z-2; q.a=Math.min(1,z/3);
+        q.l=q.l>.5?(.6+.3*Math.sin(t*3+q.ph)):Math.max(0,.25*Math.sin(t*1.5+q.ph+z*.4)-.1); }
+      return {cubos:cubos,cam:{yaw:Math.sin(t*.2)*.05,pitch:Math.cos(t*.23)*.04,roll:p*1.6+t*.03,dist:0,fov:.9,near:6,far:34}};
+    };
+  },
+  /* el 85 %: cubos que llegan de todas partes, forman la cifra, giran y estallan */
+  cifra:function(){
+    var M=innerWidth<700, NC=M?34:58, cel=voxeles('85%',NC), cubos=[], esc=Math.min(.3, .78*innerWidth*(M?19:17)/(NC*innerHeight*1.05));
+    cel.forEach(function(c,i){
+      for(var capa=0;capa<1;capa++){
+        var n=i*7+capa*991, th=azar(n)*6.28, ph=Math.acos(2*azar(n+1)-1), r=14+azar(n+2)*10;
+        cubos.push({tx:c[0]*esc,ty:c[1]*esc,tz:capa*esc,
+          sx:r*Math.sin(ph)*Math.cos(th),sy:r*Math.sin(ph)*Math.sin(th),sz:r*Math.cos(ph),
+          ex:c[0]*esc*3+(azar(n+3)-.5)*20,ey:(azar(n+4)-.2)*18,ez:-(4+azar(n+5)*14),
+          x:0,y:0,z:0,s:esc*.46,rx:0,ry:0,rz:0,l:0,a:1,dl:(c[0]+20)/40*.25+azar(n+6)*.12,r0:azar(n+7)*9});
+        var u=cubos[cubos.length-1]; tinta(u,n+50,.28); u._m=azar(n+77)<.22?2:1;
+      }
+    });
+    return function(p,t){
+      var ent=tramo(p,.02,.5), sal=tramo(p,.74,1);
+      for(var i=0;i<cubos.length;i++){ var q=cubos[i];
+        var k=suave(tramo(ent,q.dl,q.dl+.6)), e=Math.pow(tramo(sal,q.dl*.6,q.dl*.6+.55),1.6);
+        q.x=q.sx+(q.tx-q.sx)*k; q.y=q.sy+(q.ty-q.sy)*k; q.z=q.sz+(q.tz-q.sz)*k;
+        q.x+=(q.ex-q.tx)*e; q.y+=(q.ey-q.ty)*e; q.z+=(q.ez-q.tz)*e;
+        q.rx=(1-k)*q.r0+e*q.r0*.6; q.ry=(1-k)*q.r0*.7+e*q.r0; q.rz=0;
+        var barrido=Math.exp(-Math.pow((q.tx/esc)-(-NC/2-4+tramo(p,.42,.74)*(NC+8)),2)/14);
+        q.l=Math.min(1,barrido*.95+(k>.98&&azar(i)>.93?.6+.4*Math.sin(t*4+i):0));
+        q.a=1-e*.9;
+      }
+      var y=-.55+suave(ent)*.55+Math.sin(t*.5)*.05 + sal*.4;
+      return {cubos:cubos,cam:{yaw:y,pitch:-.12+Math.sin(t*.4)*.04,roll:0,dist:M?19:17,fov:1.05,near:10,far:40}};
+    };
+  },
+  /* un mar de cubos: la ola crece con el scroll y la camara baja a ras */
+  ola:function(){
+    var M=innerWidth<700, NX=M?16:30, NZ=M?14:20, cubos=[];
+    for(var i=0;i<NX;i++) for(var j=0;j<NZ;j++) cubos.push(tinta({i:i-NX/2+.5,j:j-NZ/2+.5,x:0,y:0,z:0,s:.46,rx:0,ry:0,rz:0,l:0,a:1},i*31+j*7,.3));
+    return function(p,t){
+      var amp=.5+suave(tramo(p,.1,.7))*2.4;
+      for(var k=0;k<cubos.length;k++){ var q=cubos[k];
+        var h=(Math.sin(q.i*.42+t*1.4)+Math.cos(q.j*.5+t*1.1)+Math.sin((q.i+q.j)*.25-t*.9))/3;
+        q.x=q.i*1.02; q.z=q.j*1.02; q.y=-h*amp; q.l=Math.max(0,h-.35)*.9; q.ry=h*.3;
+      }
+      return {cubos:cubos,cam:{yaw:-.5+p*1.1,pitch:.95-suave(p)*.6,roll:0,dist:M?20:24,fov:1,near:14,far:34}};
+    };
+  },
+  /* el logotipo en cubos: se arma, gira y queda */
+  logo:function(){
+    var M=innerWidth<700, N=M?6:8, cubos=[];
+    for(var i=-N;i<=N;i++) for(var j=-N;j<=N;j++){ if(Math.abs(i)+Math.abs(j)>N) continue;
+      for(var c=0;c<2;c++){ var n=(i+20)*53+(j+20)*7+c*333, brillo=(i+j)>=N-2?1:0;
+        cubos.push({tx:i*.62,ty:j*.62,tz:c*.62,sx:(azar(n)-.5)*30,sy:(azar(n+1)-.5)*22,sz:(azar(n+2)-.3)*-30,
+          x:0,y:0,z:0,s:.29,rx:0,ry:0,rz:0,l:0,b:brillo,a:1,dl:(Math.abs(i)+Math.abs(j))/N*.35,r0:azar(n+3)*8});
+        var u=cubos[cubos.length-1]; if(brillo){ u.c='#E9EDF6'; u.g=false } else tinta(u,n+60,.22); } }
+    return function(p,t){
+      var ent=tramo(p,.05,.6);
+      for(var k=0;k<cubos.length;k++){ var q=cubos[k], e=suave(tramo(ent,q.dl,q.dl+.55));
+        q.x=q.sx+(q.tx-q.sx)*e; q.y=q.sy+(q.ty-q.sy)*e; q.z=q.sz+(q.tz-q.sz)*e;
+        q.rx=(1-e)*q.r0; q.ry=(1-e)*q.r0*.8;
+        var ola=Math.max(0,Math.sin(t*1.6-(q.tx+q.ty)*.5));
+        q.l=q.b?.15*ola:Math.pow(ola,6)*.5;
+      }
+      return {cubos:cubos,cam:{yaw:(1-suave(ent))*1.8+Math.sin(t*.4)*.35+p*.6,pitch:.35+Math.sin(t*.3)*.08,roll:0,dist:M?19:18,fov:1.05,near:10,far:40}};
+    };
+  }
+};
+
+/* ═══ MOTOR 3D DE CUBOS ══════════════════════════════════════════════════════
+   Las mismas escenas de antes (tunel, cifra, ola, logo) pero con cubos de
+   verdad: piezas biseladas instanciadas, obsidiana que refleja un estudio de
+   luces azules, acentos que emiten, cristal esmerilado, niebla, bloom y un
+   pase final de lente (ojo de pez, zoom, aberracion, desenfoque, grano).
+   Un solo renderizador para todas las escenas: el lienzo se muda a la que
+   ocupa el centro de la pantalla. */
+var M3=(function(){
+  if(!window.THREE || !THREE.EffectComposer || !THREE.UnrealBloomPass) return null;
+  var cv=document.createElement('canvas'), R;
+  try{ R=new THREE.WebGLRenderer({canvas:cv,antialias:false,powerPreference:'high-performance'}) }catch(e){ return null }
+  cv.className='tx-cv';
+  var MOV=innerWidth<700; R.setPixelRatio(Math.min(devicePixelRatio||1,2));
+  var FONDO=0x03050A, esc=new THREE.Scene(); esc.background=new THREE.Color(FONDO); esc.fog=new THREE.Fog(0x060A16,10,40);
+  var cam=new THREE.PerspectiveCamera(50,1,.1,300);
+  /* el estudio que se refleja en la obsidiana */
+  var est=new THREE.Scene(); est.background=new THREE.Color(0x010207);
+  function caja(w,h,p,col,k){ var m=new THREE.Mesh(new THREE.PlaneGeometry(w,h),new THREE.MeshBasicMaterial({color:new THREE.Color(col).multiplyScalar(k),side:THREE.DoubleSide})); m.position.set(p[0],p[1],p[2]); m.lookAt(0,0,0); est.add(m) }
+  caja(8,2.4,[0,7,1],0xDDE6FF,2.2); caja(2.4,9,[-7,1,2],0x3E7BFF,3.2); caja(2,9,[7,-1,-2],0x9DB8FF,1.6); caja(12,1.2,[0,-6,-5],0x1A5BF0,2.4); caja(3,3,[3,3,7],0xffffff,1.2);
+  var pm=new THREE.PMREMGenerator(R); esc.environment=pm.fromScene(est,.035).texture;
+  esc.add(new THREE.HemisphereLight(0xB8CCFF,0x0A1430,.6));
+  var sol=new THREE.DirectionalLight(0xF2F6FF,2.3); sol.position.set(-.45,.8,.4); esc.add(sol);
+  var cont=new THREE.DirectionalLight(0x3E7BFF,1.4); cont.position.set(.6,-.3,-.8); esc.add(cont);
+  /* la pieza: un cubo con cantos redondeados de lado 2 */
+  var sh=new THREE.Shape(), a=.62, r=.2;
+  sh.moveTo(-a+r,-a); sh.lineTo(a-r,-a); sh.quadraticCurveTo(a,-a,a,-a+r); sh.lineTo(a,a-r); sh.quadraticCurveTo(a,a,a-r,a); sh.lineTo(-a+r,a); sh.quadraticCurveTo(-a,a,-a,a-r); sh.lineTo(-a,-a+r); sh.quadraticCurveTo(-a,-a,-a+r,-a);
+  var geo=new THREE.ExtrudeGeometry(sh,{depth:1.24,bevelEnabled:true,bevelThickness:.38,bevelSize:.38,bevelSegments:3,curveSegments:3});
+  geo.center(); geo.computeBoundingBox(); var bb=geo.boundingBox, k=2/Math.max(bb.max.x-bb.min.x,bb.max.y-bb.min.y,bb.max.z-bb.min.z); geo.scale(k,k,k); geo.computeVertexNormals();
+  function brillo(m){ m.onBeforeCompile=function(s){
+    s.vertexShader='attribute float aG;varying float vG;\n'+s.vertexShader.replace('#include <begin_vertex>','#include <begin_vertex>\nvG=aG;');
+    s.fragmentShader='varying float vG;\n'+s.fragmentShader.replace('#include <emissivemap_fragment>','#include <emissivemap_fragment>\ntotalEmissiveRadiance+=vec3(.12,.36,1.)*vG*1.7;') }; return m }
+  var MAT=[brillo(new THREE.MeshStandardMaterial({color:0x172A58,metalness:.78,roughness:.22,envMapIntensity:1.5})),
+           brillo(new THREE.MeshStandardMaterial({color:0x1A5BF0,metalness:.35,roughness:.22,emissive:0x1A5BF0,emissiveIntensity:.55,envMapIntensity:1})),
+           brillo(new THREE.MeshPhysicalMaterial({color:0xE4ECFF,metalness:.1,roughness:.08,clearcoat:1,clearcoatRoughness:.05,transparent:true,opacity:.2,emissive:0x0E2A6E,emissiveIntensity:.35,depthWrite:false,envMapIntensity:1.8}))];
+  var CAP=1600, grupo=new THREE.Group(); grupo.matrixAutoUpdate=false; esc.add(grupo);
+  var IM=MAT.map(function(m){ var g=geo.clone(), at=new THREE.InstancedBufferAttribute(new Float32Array(CAP),1); at.setUsage(THREE.DynamicDrawUsage); g.setAttribute('aG',at);
+    var im=new THREE.InstancedMesh(g,m,CAP); im.instanceMatrix.setUsage(THREE.DynamicDrawUsage); im.frustumCulled=false; grupo.add(im); return im });
+  IM[2].renderOrder=2;
+  /* la cadena de postproceso */
+  var RT=null; if(R.capabilities.isWebGL2 && THREE.WebGLMultisampleRenderTarget){ RT=new THREE.WebGLMultisampleRenderTarget(4,4,{format:THREE.RGBAFormat}); RT.samples=4 }
+  var comp=RT?new THREE.EffectComposer(R,RT):new THREE.EffectComposer(R); comp.addPass(new THREE.RenderPass(esc,cam));
+  var bloom=new THREE.UnrealBloomPass(new THREE.Vector2(256,256),.55,.35,.88); comp.addPass(bloom);
+  var lente=new THREE.ShaderPass({uniforms:{tDiffuse:{value:null},R:{value:new THREE.Vector2(1,1)},B:{value:0},Z:{value:0},A:{value:0},TS:{value:0},TY:{value:.5},T:{value:0}},
+    vertexShader:'varying vec2 vUv;void main(){vUv=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}',
+    fragmentShader:['uniform sampler2D tDiffuse;uniform vec2 R;uniform float B,Z,A,TS,TY,T;varying vec2 vUv;',
+      'vec3 s(vec2 u){return (u.x<0.||u.y<0.||u.x>1.||u.y>1.)?vec3(.012,.02,.04):texture2D(tDiffuse,u).rgb;}',
+      'float h(vec2 p){return fract(sin(dot(p,vec2(12.9898,78.233)))*43758.5453);}',
+      'void main(){vec2 a=vec2(R.x/R.y,1.);vec2 c=(vUv-.5)*a;float r2=dot(c,c);vec2 u=(c*(1.-B*.55+B*r2)/a)+.5;',
+      ' float tb=TS*smoothstep(.1,.42,abs(vUv.y-TY))*.012;vec3 col=vec3(0.);',
+      ' for(int i=0;i<10;i++){float f=float(i)/9.;float an=f*37.7;vec2 uu=.5+(u-.5)*(1.-Z*f)+vec2(cos(an),sin(an))*tb*sqrt(f);vec2 d=(uu-.5)*A*(1.+r2*4.);',
+      '  col+=vec3(s(uu+d).r,s(uu).g,s(uu-d).b);}',
+      ' col/=10.;col*=1.12*mix(1.,.72,smoothstep(.45,1.2,length(c)));col+=(h(vUv*R+fract(T))-.5)*.018;gl_FragColor=vec4(col,1.);}'].join('\n')});
+  comp.addPass(lente);
+  var W=0,H=0, O=new THREE.Object3D(), E=new THREE.Euler(0,0,0,'XYZ'), MC=new THREE.Matrix4(), MT=new THREE.Matrix4(), MS=new THREE.Matrix4().makeScale(1,-1,-1), MX=new THREE.Matrix4();
+  function tam(w,h){ if(w===W&&h===H) return; W=w; H=h; R.setSize(w,h,false); comp.setSize(w,h); var pr=R.getPixelRatio(); bloom.resolution.set(w*pr*.5,h*pr*.5); lente.uniforms.R.value.set(w*pr,h*pr); cam.aspect=w/h; cam.updateProjectionMatrix() }
+  function azarM(q){ if(q._m==null){ if(q._id==null) q._id=(++NID); q._m=BLANCOS.indexOf(q.c||'#1A5BF0')>=0?2:(azar(q._id*3.7)<.07?1:0) } return q._m }
+  return {cv:cv,
+    pinta:function(cubos,c,fx,t,w,h){
+      tam(w,h);
+      var n=[0,0,0];
+      for(var i=0;i<cubos.length;i++){ var q=cubos[i]; if(q.a<=.01) continue;
+        var m=azarM(q), im=IM[m], j=n[m]; if(j>=CAP) continue;
+        var sw=q.w!=null?q.w:q.s, shh=q.h!=null?q.h:q.s, sd=q.d!=null?q.d:q.s, e=q.a<1?Math.sqrt(q.a):1;
+        O.position.set(q.x,q.y,q.z); O.rotation.set(q.rx||0,q.ry||0,q.rz||0,'XYZ'); O.scale.set(sw*e,shh*e,sd*e); O.updateMatrix();
+        im.setMatrixAt(j,O.matrix); im.geometry.attributes.aG.array[j]=q.l||0; n[m]=j+1 }
+      IM.forEach(function(im,k){ im.count=n[k]; im.instanceMatrix.needsUpdate=true; im.geometry.attributes.aG.needsUpdate=true });
+      E.set(c.pitch||0,c.yaw||0,c.roll||0,'XYZ'); MC.makeRotationFromEuler(E); MT.makeTranslation(0,0,-(c.dist||0));
+      grupo.matrix.copy(MT).multiply(MS).multiply(MC); grupo.matrixWorldNeedsUpdate=true;
+      cam.fov=2*Math.atan(1/(2*(c.fov||1.1)))*180/Math.PI; cam.updateProjectionMatrix();
+      esc.fog.near=(c.near||8)*1.3; esc.fog.far=(c.near||8)*1.3+(c.far||40)*1.3;
+      var U=lente.uniforms; U.B.value=CALMA?0:fx.b; U.Z.value=CALMA?0:Math.min(.45,fx.z+VELZ); U.A.value=CALMA?0:fx.a+VELZ*.02; U.TS.value=fx.ts||0; U.TY.value=fx.ty==null?.5:fx.ty; U.T.value=t;
+      comp.render();
+    }};
+})();
+
+/* las escenas de cubos entre secciones */
+var TXS=$$('.tx').map(function(sec){
+  var st=$('.tx-st',sec), viejo=$('.tx-cv',sec), E=null;
+  if(!M3){ if(!viejo){ viejo=document.createElement('canvas'); viejo.className='tx-cv'; st.insertBefore(viejo,st.firstChild) } E=escena(viejo) }
+  var o={sec:sec,st:st,E:E,make:TX[sec.dataset.tx],p:0,vis:false,hud:$('.tx-hud',sec),n:$('.tx-n',sec),tipo:sec.dataset.tx};
+  o.paso=o.make();
+  addEventListener('resize',function(){ o.paso=o.make() });
+  new IntersectionObserver(function(es){ o.vis=es[0].isIntersecting }).observe(sec);
+  var capas=$$('.tx-t, .tx-top, .tx-bot',sec), sig=sec.nextElementSibling, hecho=false;
+  if(hasG){
+    ScrollTrigger.create({trigger:sec,start:'top top',end:'bottom bottom',refreshPriority:-1,onUpdate:function(s){ o.p=s.progress;
+      if(o.p>.985&&!hecho&&sig){ hecho=true; sig.classList.remove('snap-in'); void sig.offsetWidth; sig.classList.add('snap-in') } if(o.p<.9) hecho=false }});
+    /* la escena entra como una tarjeta que se despliega hasta llenar la pantalla */
+    if(!CALMA) gsap.fromTo(st,{clipPath:'inset(9% 7% 9% 7% round 36px)'},{clipPath:'inset(0% 0% 0% 0% round 0px)',ease:'none',scrollTrigger:{trigger:sec,start:'top 95%',end:'top top',scrub:true,refreshPriority:-1}});
+    capas.forEach(function(el){
+      var tl=gsap.timeline({scrollTrigger:{trigger:sec,start:'top top',end:'bottom bottom',scrub:true,refreshPriority:-1}});
+      var largo=o.tipo==='cifra'||o.tipo==='logo', a0=o.tipo==='cifra'?.36:o.tipo==='logo'?.4:.14, fin=largo?.86:.74;
+      tl.fromTo(el,{opacity:0,scale:.92,filter:'blur(14px)'},{opacity:1,scale:1,filter:'blur(0px)',duration:.14,ease:'none'},a0)
+        .to(el,{opacity:1,duration:fin-a0-.14})
+        .to(el,{opacity:0,scale:1.1,filter:'blur(12px)',duration:1-fin,ease:'none'});
+    });
+  }
+  return o;
+});
+function opticaTX(tipo,p){ var fin=Math.max(0,(p-.82)/.18), c=Math.max(0,(p-.74)/.26);
+  return tipo==='tunel' ? {b:.45,z:fin*.4,a:.0006+fin*.01}
+       : tipo==='cifra' ? {b:.18,z:c*.3,a:.0004+c*.01}
+       : tipo==='ola'   ? {b:.3,z:fin*.32,a:.0005+fin*.008,ts:.25,ty:.5}
+       :                  {b:.16,z:fin*.38,a:.0004+fin*.01} }
+(function bucleTX(t){
+  requestAnimationFrame(bucleTX);
+  var tt=CALMA?0:t*.001, mid=innerHeight/2, activo=null;
+  TXS.forEach(function(o){ if(!o.vis) return; if(!hasG){ var r=o.sec.getBoundingClientRect(); o.p=Math.max(0,Math.min(1,-r.top/(o.sec.offsetHeight-innerHeight))) }
+    o.hud.style.setProperty('--p',o.p.toFixed(3)); o.n.textContent=String(Math.round(o.p*100)).padStart(3,'0');
+    if(M3){ var rr=o.st.getBoundingClientRect(); if(rr.top<=mid&&rr.bottom>=mid) activo=o; else if(!activo&&rr.bottom>0&&rr.top<innerHeight) activo=activo||o }
+    else { var r2=o.paso(o.p,tt); o.E.fx=opticaTX(o.tipo,o.p); o.E.pinta(r2.cubos,r2.cam) } });
+  if(M3 && activo){ if(M3.cv.parentNode!==activo.st) activo.st.insertBefore(M3.cv,activo.st.firstChild);
+    var r=activo.paso(activo.p,tt); M3.pinta(r.cubos,r.cam,opticaTX(activo.tipo,activo.p),tt,activo.st.clientWidth,activo.st.clientHeight) }
+})(0);
+
+
+/* ═══ PORTADA: la ciudad ══════════════════════════════════════════════════
+   Los activos reales: una manzana de edificios hechos de cubos sobre una
+   planta en rombo, como el logo. Se construye piso a piso al cargar, un
+   escaner de luz azul la recorre de abajo arriba tokenizando cada planta,
+   las ventanas parpadean, los edificios cercanos al cursor se elevan y al
+   bajar la ciudad sale volando en cubos. */
+var GLOBO={inn:0};
+(function(){
+  var cv=$('#globe'), st=$('#hxSt'), tag=$('#hxTag');
+  function sinGL(){ cv.style.background='radial-gradient(30% 45% at 50% 48%,rgba(26,91,240,.35),transparent 70%)'; GLOBO.inn=1 }
+  if(!window.THREE || !THREE.EffectComposer){ sinGL(); return }
+  var R; try{ R=new THREE.WebGLRenderer({canvas:cv,antialias:false,powerPreference:'high-performance'}) }catch(e){ sinGL(); return }
+  var MOV=innerWidth<700; R.setPixelRatio(Math.min(devicePixelRatio||1,2)); R.setClearColor(0x04050A,1);
+  var esc=new THREE.Scene(), cam=new THREE.PerspectiveCamera(30,1,.1,400); cam.position.set(0,0,40);
+  esc.fog=new THREE.Fog(0x04050A,34,70);
+  /* estudio que se refleja */
+  var est=new THREE.Scene(); est.background=new THREE.Color(0x010207);
+  function caja(w,h,p,col,k){ var m=new THREE.Mesh(new THREE.PlaneGeometry(w,h),new THREE.MeshBasicMaterial({color:new THREE.Color(col).multiplyScalar(k),side:THREE.DoubleSide})); m.position.set(p[0],p[1],p[2]); m.lookAt(0,0,0); est.add(m) }
+  caja(8,2.4,[0,7,2],0xE6EEFF,2.4); caja(2.4,9,[-7,1,3],0x4C84FF,3); caja(2,9,[7,-1,-1],0xBFD1FF,1.8); caja(12,1.2,[0,-6,-4],0x1A5BF0,2.6); caja(3,3,[3,3,7],0xffffff,1.4);
+  var pm=new THREE.PMREMGenerator(R); esc.environment=pm.fromScene(est,.03).texture;
+  esc.add(new THREE.HemisphereLight(0xBFD1FF,0x0A1430,.55));
+  var sol=new THREE.DirectionalLight(0xF2F6FF,2.2); sol.position.set(-.5,.8,.6); esc.add(sol);
+  var cont=new THREE.DirectionalLight(0x4C84FF,1.6); cont.position.set(.7,-.3,-.6); esc.add(cont);
+  /* la pieza */
+  var sh=new THREE.Shape(), a=.62, r=.2;
+  sh.moveTo(-a+r,-a); sh.lineTo(a-r,-a); sh.quadraticCurveTo(a,-a,a,-a+r); sh.lineTo(a,a-r); sh.quadraticCurveTo(a,a,a-r,a); sh.lineTo(-a+r,a); sh.quadraticCurveTo(-a,a,-a,a-r); sh.lineTo(-a,-a+r); sh.quadraticCurveTo(-a,-a,-a+r,-a);
+  var geo=new THREE.ExtrudeGeometry(sh,{depth:1.24,bevelEnabled:true,bevelThickness:.38,bevelSize:.38,bevelSegments:2,curveSegments:2});
+  geo.center(); geo.computeBoundingBox(); var bb=geo.boundingBox, kk=2/Math.max(bb.max.x-bb.min.x,bb.max.y-bb.min.y,bb.max.z-bb.min.z); geo.scale(kk,kk,kk); geo.computeVertexNormals();
+  function brillo(m){ m.onBeforeCompile=function(s){
+    s.vertexShader='attribute float aG;varying float vG;\n'+s.vertexShader.replace('#include <begin_vertex>','#include <begin_vertex>\nvG=aG;');
+    s.fragmentShader='varying float vG;\n'+s.fragmentShader.replace('#include <emissivemap_fragment>','#include <emissivemap_fragment>\ntotalEmissiveRadiance+=vec3(.14,.4,1.)*vG*2.;') }; return m }
+  var MAT=[brillo(new THREE.MeshStandardMaterial({color:0x14264F,metalness:.8,roughness:.22,envMapIntensity:1.5})),
+           brillo(new THREE.MeshStandardMaterial({color:0x1A5BF0,metalness:.35,roughness:.2,emissive:0x1A5BF0,emissiveIntensity:.6})),
+           brillo(new THREE.MeshPhysicalMaterial({color:0xE8EEFF,metalness:.15,roughness:.08,clearcoat:1,clearcoatRoughness:.05,transparent:true,opacity:.42,envMapIntensity:1.6,emissive:0x0E2250,emissiveIntensity:.2}))];
+  /* la ciudad: parcelas en rombo, torres huecas de cubos */
+  var RAD=MOV?4:5, L=2, PASO=.5, piezas=[], ALTO=0, cima=null;
+  for(var li=-RAD;li<=RAD;li++) for(var lj=-RAD;lj<=RAD;lj++){
+    var dist=Math.abs(li)+Math.abs(lj); if(dist>RAD) continue;
+    var sd=(li+20)*41+(lj+20)*7; if(dist>0 && azar(sd)<.14) continue;
+    var gran=dist<=1 && azar(sd+1)<.7, fp=gran?3:L, alto=Math.max(1,Math.round(Math.pow(1-dist/(RAD+1.5),1.6)*(MOV?26:34)*(.4+.6*azar(sd+2))));
+    var vidrio=azar(sd+3)<.22, ox=li*(L+2)+(gran?-.5:0), oz=lj*(L+2)+(gran?-.5:0);
+    for(var f=0;f<alto;f++) for(var a1=0;a1<fp;a1++) for(var a2=0;a2<fp;a2++){
+      var borde=a1===0||a2===0||a1===fp-1||a2===fp-1; if(!borde && f<alto-1) continue;
+      var n=piezas.length, x=(ox+a1)*PASO, y=f*PASO, z=(oz+a2)*PASO, rr=azar(n*1.37+.5);
+      var techo=f===alto-1, m=vidrio?2:((techo&&alto>12&&azar(n+2)<.6)||rr<.03?1:0);
+      var q={p:new THREE.Vector3(x,y,z),r:rr,m:m,f:f,alto:alto,win:!techo&&azar(n+5)<.16,ph:azar(n+6)*6.28,
+        e:new THREE.Vector3(x+(azar(n+7)-.5)*4,6+azar(n+8)*10,z+(azar(n+9)-.5)*4).normalize(),r0:azar(n+11)*9};
+      piezas.push(q); if(y>ALTO){ ALTO=y; cima=q }
+    }
+  }
+  var CX=0,CZ=0; piezas.forEach(function(q){ CX+=q.p.x; CZ+=q.p.z }); CX/=piezas.length; CZ/=piezas.length;
+  piezas.forEach(function(q){ q.p.x-=CX; q.p.z-=CZ; q.p.y-=ALTO*.42 });
+  var ANCHO=(RAD*2+1)*(L+2)*PASO;
+  var G=new THREE.Group(); esc.add(G);
+  /* la planta: una reticula azul bajo la ciudad */
+  var rej=new THREE.GridHelper(ANCHO*1.5,Math.round(ANCHO*1.5/(PASO*2)),0x4C84FF,0x1A2A55); rej.position.y=-ALTO*.42-.3; rej.material.transparent=true; rej.material.opacity=.35; rej.material.depthWrite=false; G.add(rej);
+  var IM=MAT.map(function(mt,k){ var cnt=piezas.filter(function(q){ return q.m===k }).length||1, g=geo.clone(), at=new THREE.InstancedBufferAttribute(new Float32Array(cnt),1); at.setUsage(THREE.DynamicDrawUsage); g.setAttribute('aG',at);
+    var im=new THREE.InstancedMesh(g,mt,cnt); im.instanceMatrix.setUsage(THREE.DynamicDrawUsage); im.frustumCulled=false; G.add(im); return im });
+  IM[2].renderOrder=2;
+  var cont3=[0,0,0]; piezas.forEach(function(q){ q.i=cont3[q.m]++ });
+  /* postproceso: bloom y un pase de grano y vineta */
+  var RT=null; if(R.capabilities.isWebGL2 && THREE.WebGLMultisampleRenderTarget){ RT=new THREE.WebGLMultisampleRenderTarget(4,4,{format:THREE.RGBAFormat}); RT.samples=4 }
+  var comp=RT?new THREE.EffectComposer(R,RT):new THREE.EffectComposer(R); comp.addPass(new THREE.RenderPass(esc,cam));
+  var bloom=new THREE.UnrealBloomPass(new THREE.Vector2(256,256),.5,.4,.86); comp.addPass(bloom);
+  var fin=new THREE.ShaderPass({uniforms:{tDiffuse:{value:null},R:{value:new THREE.Vector2(1,1)},T:{value:0},A:{value:0}},
+    vertexShader:'varying vec2 vUv;void main(){vUv=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}',
+    fragmentShader:'uniform sampler2D tDiffuse;uniform vec2 R;uniform float T,A;varying vec2 vUv;float h(vec2 p){return fract(sin(dot(p,vec2(12.9898,78.233)))*43758.5453);}'+
+      'void main(){vec2 c=vUv-.5;vec2 d=c*A;vec3 col=vec3(texture2D(tDiffuse,vUv+d).r,texture2D(tDiffuse,vUv).g,texture2D(tDiffuse,vUv-d).b);'+
+      'col*=mix(1.,.62,smoothstep(.35,.95,length(c*vec2(R.x/R.y,1.))));col+=(h(vUv*R+fract(T))-.5)*.02;gl_FragColor=vec4(col,1.);}'});
+  comp.addPass(fin);
+  /* medidas */
+  var W=0,H=0,base={x:0,y:0,s:1};
+  function tam(){ W=cv.clientWidth; H=cv.clientHeight; R.setSize(W,H,false); comp.setSize(W,H); var pr=R.getPixelRatio(); bloom.resolution.set(W*pr*.5,H*pr*.5); fin.uniforms.R.value.set(W*pr,H*pr);
+    cam.aspect=W/H; cam.updateProjectionMatrix();
+    var vh=2*40*Math.tan(15*Math.PI/180), vw=vh*cam.aspect;
+    base= cam.aspect>=1 ? {x:vw*.2,y:-vh*.06,s:Math.min(vh*1.05,vw*.5)/ANCHO} : {x:0,y:vh*.05,s:Math.min(vh*.46,vw*1.0)/ANCHO} }
+  tam(); addEventListener('resize',tam);
+  /* puntero y arrastre */
+  var rotY=.6, vel=0, tX=0, tY=0, mx=0, my=0, hov=0, thov=0, arr=null, P=0, ray=new THREE.Raycaster(), ndc=new THREE.Vector2(), plano=new THREE.Plane(new THREE.Vector3(0,1,0),0), rayL=new THREE.Ray(), pw=new THREE.Vector3(), pl=new THREE.Vector3(-99,-99,-99), inv=new THREE.Matrix4();
+  st.addEventListener('pointermove',function(e){ var r=cv.getBoundingClientRect(); mx=(e.clientX-r.left)/r.width*2-1; my=-(e.clientY-r.top)/r.height*2+1; thov=1; if(arr!==null){ vel=(e.clientX-arr)*.004; arr=e.clientX } },{passive:true});
+  st.addEventListener('pointerleave',function(){ thov=0 });
+  cv.addEventListener('pointerdown',function(e){ if(e.pointerType==='mouse') arr=e.clientX });
+  addEventListener('pointerup',function(){ arr=null });
+  var vis=true; new IntersectionObserver(function(es){ vis=es[0].isIntersecting }).observe(cv);
+  var O=new THREE.Object3D(), t0=performance.now(), prev=t0, tmp=new THREE.Vector3(), TOP=cima?cima.p.clone().add(new THREE.Vector3(0,.8,0)):new THREE.Vector3();
+  function sv(t){ t=Math.max(0,Math.min(1,t)); return t*t*(3-2*t) }
+  function fr(now){ requestAnimationFrame(fr); if(!vis) return;
+    var dt=Math.min(.05,(now-prev)/1000); prev=now; var t=CALMA?0:(now-t0)/1000, inn=GLOBO.inn;
+    if(!CALMA) rotY+=dt*(.07+(1-inn)*.5+P*.5)+vel; vel*=.93;
+    tX+=(my*.25-tX)*.05; tY+=(mx*.35-tY)*.05; hov+=(thov-hov)*.06;
+    var k=P*P, s=base.s*(1+k*.6);
+    G.position.set(base.x,base.y-k*2,0); G.scale.setScalar(s);
+    G.rotation.set(.3+tX*.6,rotY+tY,0);
+    G.updateMatrixWorld();
+    /* el cursor sobre el suelo de la ciudad */
+    ndc.set(mx,my); ray.setFromCamera(ndc,cam); inv.copy(G.matrixWorld).invert(); rayL.copy(ray.ray).applyMatrix4(inv);
+    plano.constant=ALTO*.42; if(!rayL.intersectPlane(plano,pl)) pl.set(-99,0,-99);
+    var ex=sv((P-.06)/.8), ciclo=(t*.16)%1.25, sY=-ALTO*.42+ciclo*(ALTO+2);
+    for(var i=0;i<piezas.length;i++){ var q=piezas[i], im=IM[q.m];
+      var llega=sv(inn*1.5-(q.f/(q.alto+4))*.5-q.r*.25);
+      var dx=q.p.x-pl.x, dz=q.p.z-pl.z, f=Math.exp(-(dx*dx+dz*dz)/7)*hov;
+      var banda=Math.exp(-Math.pow((q.p.y-sY)/.55,2)), hecho=q.p.y<sY?1:0;
+      var sube=f*(1.2+q.f*.12)+banda*.12;
+      var px=q.p.x, py=q.p.y+sube, pz=q.p.z;
+      var vx=q.e.x*28*(.4+q.r), vy=q.e.y*22*(.4+q.r), vz=q.e.z*28*(.4+q.r);
+      px+=vx*ex*ex; py+=vy*ex*ex; pz+=vz*ex*ex;
+      py+=(1-llega)*(18+q.r*14);
+      O.position.set(px,py,pz);
+      var gi=(1-llega)*q.r0*.4+ex*q.r0*.8+banda*.25; O.rotation.set(gi,gi*.6,0);
+      O.scale.setScalar(.2*(1-ex*.2)*(llega<.02?0:1)); O.updateMatrix(); im.setMatrixAt(q.i,O.matrix);
+      var g=banda*.75+hecho*.06+f*1.1+(q.win?(.35+.3*Math.sin(t*2.2+q.ph))*(Math.sin(t*.7+q.ph*3)>-.2?1:0):0)+(q.m===1?.3+.2*Math.sin(t*3+i):0);
+      im.geometry.attributes.aG.array[q.i]=Math.min(1.4,g*(q.m===0?.85:1));
+    }
+    IM.forEach(function(im){ im.instanceMatrix.needsUpdate=true; im.geometry.attributes.aG.needsUpdate=true });
+    fin.uniforms.T.value=t; fin.uniforms.A.value=CALMA?0:.002+ex*.012+Math.min(.01,VELZ*.05);
+    comp.render();
+    /* la etiqueta sale del vertice de arriba */
+    tmp.copy(TOP).applyMatrix4(G.matrixWorld).project(cam);
+    var on=inn>.9&&P<.12; tag.classList.toggle('on',on);
+    if(on) tag.style.transform='translate('+((tmp.x*.5+.5)*W+14).toFixed(1)+'px,'+((-tmp.y*.5+.5)*H-10).toFixed(1)+'px)';
+  }
+  requestAnimationFrame(fr);
+  if(hasG && !CALMA){
+    ScrollTrigger.create({trigger:'.hx',start:'top top',end:'bottom bottom',scrub:true,onUpdate:function(s){
+      P=s.progress; var k=Math.max(0,Math.min(1,(P-.35)*1.6));
+      st.style.clipPath='inset('+(k*4)+'% '+(k*4)+'% '+(k*4)+'% '+(k*4)+'% round '+(k*40)+'px)';
+      st.style.transform='scale('+(1-k*.06)+')';
+    }});
+    gsap.to('.hx-in',{yPercent:-30,opacity:0,filter:'blur(8px)',ease:'none',scrollTrigger:{trigger:'.hx',start:'top top',end:'22% top',scrub:true}});
+    gsap.to('.hx-bot',{opacity:0,ease:'none',scrollTrigger:{trigger:'.hx',start:'top top',end:'12% top',scrub:true}});
+  }
+  var hdr=$('#hd'); function tono(){ hdr.classList.toggle('dark', scrollY < innerHeight*.75) } tono(); addEventListener('scroll',tono,{passive:true});
+})();
+
+/* ═══ secciones ═══ */
+(function(){
+  var mq=$('#mq'); mq.innerHTML+=mq.innerHTML.replace(/alt=""/g,'alt="" aria-hidden="true"');
+  var rk=$('#rk'), h='';
+  for(var u=0;u<3;u++){ h+='<div class="rk-u">'; for(var s=0;s<8;s++) h+='<i style="--d:'+(u*8+s)*3%11+'"></i>'; h+='</div>' }
+  rk.innerHTML=h+'<div class="rk-s"><span>Solar · 24 units</span><b>Building</b></div>';
+  $$('.spot').forEach(function(c){ c.addEventListener('pointermove',function(e){ var r=c.getBoundingClientRect(); c.style.setProperty('--mx',(e.clientX-r.left)+'px'); c.style.setProperty('--my',(e.clientY-r.top)+'px') },{passive:true}) });
+  var tl=$('#tl'), nodos=$$('i',tl), marcas=[0,33.3,66.6];
+  function linea(w){ tl.style.setProperty('--w',w+'%'); nodos.forEach(function(n,i){ n.classList.toggle('on',w>=marcas[i]-.5) }) }
+  if(!hasG || CALMA){ linea(67); return }
+  gsap.set('.rv',{y:44,opacity:0});
+  ScrollTrigger.batch('.rv',{start:'top 92%',once:true,onEnter:function(b){ gsap.to(b,{y:0,opacity:1,duration:1.1,ease:'expo.out',stagger:.08}) }});
+  $$('.sh').forEach(function(s){ gsap.fromTo(s,{'--l':0},{'--l':1,duration:1.6,ease:'expo.inOut',scrollTrigger:{trigger:s,start:'top 88%'}}) });
+  var o={w:0}; gsap.to(o,{w:67,ease:'none',onUpdate:function(){ linea(o.w) },scrollTrigger:{trigger:tl,start:'top 85%',end:'top 35%',scrub:true}});
+  gsap.matchMedia().add('(min-width:901px)',function(){
+    var pn=$$('.pn');
+    pn.forEach(function(p,i){ if(i===pn.length-1) return;
+      gsap.to(p,{scale:.93,'--dim':.7,ease:'none',scrollTrigger:{trigger:pn[i+1],start:'top bottom',end:'top '+(112+16*i)+'px',scrub:true}}) });
+  });
+  $$('.pn-v').forEach(function(v){ gsap.fromTo(v.firstElementChild,{y:60,rotateX:8},{y:-20,rotateX:0,ease:'none',scrollTrigger:{trigger:v,start:'top bottom',end:'bottom top',scrub:true}}) });
+  gsap.fromTo('.ft-big',{yPercent:40},{yPercent:12,ease:'none',scrollTrigger:{trigger:'.ft',start:'top bottom',end:'bottom bottom',scrub:true}});
+})();
+
+/* ═══ cifras ═══ */
+$$('.fig b[data-n]').forEach(function(b){ var n=+b.dataset.n, s=b.dataset.s; if(!hasG||CALMA) return; var o={v:0};
+  ScrollTrigger.create({trigger:b,start:'top 92%',once:true,onEnter:function(){ gsap.to(o,{v:n,duration:1.6,ease:'expo.out',onUpdate:function(){ b.textContent=Math.round(o.v)+s }}) }}) });
+
+/* ═══ cursor y botones magneticos ═══ */
+if(matchMedia('(hover:hover) and (pointer:fine)').matches && hasG && !CALMA){
+  var cur=document.createElement('i'), dot=document.createElement('i'); cur.className='cur'; dot.className='cur-d';
+  document.body.appendChild(cur); document.body.appendChild(dot);
+  var cx=gsap.quickTo(cur,'x',{duration:.5,ease:'expo.out'}), cy=gsap.quickTo(cur,'y',{duration:.5,ease:'expo.out'});
+  var dx=gsap.quickTo(dot,'x',{duration:.08}), dy=gsap.quickTo(dot,'y',{duration:.08});
+  addEventListener('pointermove',function(e){ if(e.pointerType!=='mouse') return; cx(e.clientX); cy(e.clientY); dx(e.clientX); dy(e.clientY); cur.classList.add('on'); dot.classList.add('on') },{passive:true});
+  document.addEventListener('pointerleave',function(){ cur.classList.remove('on'); dot.classList.remove('on') });
+  document.addEventListener('pointerover',function(e){ var t=e.target;
+    cur.classList.toggle('drag',!!(t.closest&&t.closest('#globe')));
+    cur.classList.toggle('link',!!(t.closest&&t.closest('a,button'))) });
+  $$('.btn, .nw .ar, .gr .ic').forEach(function(b){
+    var mx=gsap.quickTo(b,'x',{duration:.6,ease:'expo.out'}), my=gsap.quickTo(b,'y',{duration:.6,ease:'expo.out'});
+    b.addEventListener('pointermove',function(e){ var r=b.getBoundingClientRect(); mx((e.clientX-r.left-r.width/2)*.28); my((e.clientY-r.top-r.height/2)*.35) });
+    b.addEventListener('pointerleave',function(){ mx(0); my(0) });
+  });
+}
+
+
+/* ═══ barra de estado: hora UTC y bloque que avanza ═══ */
+(function(){ var clk=$('#clk'), blk=$('#blk'), n=4812337;
+  function z(v){ return (v<10?'0':'')+v }
+  function hora(){ var d=new Date(); clk.textContent=z(d.getUTCHours())+':'+z(d.getUTCMinutes())+':'+z(d.getUTCSeconds()) }
+  hora(); setInterval(hora,1000);
+  if(!CALMA) setInterval(function(){ n+=1; blk.textContent=n.toLocaleString('en-US') },2000);
+})();
+
+
+/* ═══ CAPA LOCA ═══════════════════════════════════════════════════════════ */
+/* el titular, letra a letra; las cercanas al cursor se levantan y se encienden */
+var LETRAS=[];
+$$('.hx-h .ln>span').forEach(function(sp){
+  sp.innerHTML=sp.textContent.split(' ').map(function(w){ return '<span class="w">'+w.split('').map(function(c){ return '<span class="ch">'+c+'</span>' }).join('')+'</span>' }).join(' ');
+});
+LETRAS=$$('.hx-h .ch');
+if(matchMedia('(hover:hover) and (pointer:fine)').matches && !CALMA){
+  var cajas=null, lx=0, ly=0, lped=false, hst=$('#hxSt');
+  function medir(){ cajas=LETRAS.map(function(l){ var r=l.getBoundingClientRect(); return [r.left+r.width/2,r.top+r.height/2] }) }
+  addEventListener('resize',function(){ cajas=null }); addEventListener('scroll',function(){ cajas=null },{passive:true});
+  hst.addEventListener('pointermove',function(e){ lx=e.clientX; ly=e.clientY; if(lped) return; lped=true;
+    requestAnimationFrame(function(){ lped=false; if(!cajas) medir();
+      for(var i=0;i<LETRAS.length;i++){ var c=cajas[i], d=Math.hypot(lx-c[0],(ly-c[1])*1.4); LETRAS[i].style.setProperty('--p',Math.max(0,1-d/220).toFixed(3)) } }) },{passive:true});
+  hst.addEventListener('pointerleave',function(){ LETRAS.forEach(function(l){ l.style.setProperty('--p',0) }) });
+}
+
+/* rotulos en mono que se descifran al entrar */
+var SIG='▮▯/\\<>_#%01';
+function descifra(el){
+  var nodos=[]; (function rec(n){ for(var c=n.firstChild;c;c=c.nextSibling){ if(c.nodeType===3&&c.data.trim()) nodos.push(c); else if(c.nodeType===1&&c.tagName!=='svg') rec(c) } })(el);
+  el.classList.add('dec');
+  nodos.forEach(function(n){ var fin=n.data, t0=performance.now(), dur=500+fin.length*22;
+    (function paso(t){ var k=Math.min(1,(t-t0)/dur), h=Math.floor(k*fin.length), o='';
+      for(var i=0;i<fin.length;i++){ var ch=fin[i]; o+=(i<h||ch===' ')?ch:SIG[(Math.random()*SIG.length)|0] }
+      n.data=o; if(k<1) requestAnimationFrame(paso); else { n.data=fin; el.classList.remove('dec') } })(t0) });
+}
+if(!CALMA && 'IntersectionObserver' in window){
+  var ioD=new IntersectionObserver(function(es){ es.forEach(function(e){ if(!e.isIntersecting) return; ioD.unobserve(e.target); descifra(e.target) }) },{threshold:.6});
+  $$('.sh-k span, .pn-bar span, .tx-top .m, .tx-bot .m, .cert-top span, .ph .n, .nw b, .fig span, .gr .n, .cta-k span, .ft-cols h4, .gl-hud span').forEach(function(el){ ioD.observe(el) });
+}
+
+if(hasG && !CALMA){
+  /* marquesinas gigantes: avanzan solas y se disparan con la velocidad del scroll */
+  var MQS=$$('.bigmq').map(function(m){ var t=$('.bigmq-t',m); t.innerHTML+=t.innerHTML; return {t:t,d:+m.dataset.dir||1,x:0,w:0} });
+  function anchoMQ(){ MQS.forEach(function(o){ o.w=o.t.scrollWidth/2 }) } anchoMQ(); addEventListener('resize',anchoMQ); addEventListener('load',anchoMQ);
+  /* bloques que se inclinan con la velocidad */
+  var SKW=$$('.sh h2, .figs, .certs, .phs, .news, .odo, .cta h2, .stack'), sk=0;
+  gsap.ticker.add(function(){
+    var v=Math.max(-40,Math.min(40,VEL)); VEL*=.92;
+    MQS.forEach(function(o){ o.x-=o.d*(1.1+Math.abs(v)*.45); if(o.w){ o.x=((o.x%o.w)+o.w)%o.w } o.t.style.transform='translate3d('+(-o.x).toFixed(1)+'px,0,0)' });
+    var obj=v*.07; sk+=(obj-sk)*.1;
+    if(Math.abs(sk)>.005) SKW.forEach(function(e){ e.style.transform='skewY('+sk.toFixed(3)+'deg)' });
+    else if(sk!==0){ sk=0; SKW.forEach(function(e){ e.style.transform='' }) }
+  });
+  /* el protocolo en horizontal: la seccion se fija y las garantias pasan de lado */
+  gsap.matchMedia().add('(min-width:901px)',function(){
+    var pin=$('.gl-pin'), gl=$('.gl'), bb=$('#glB'); gl.classList.add('hz');
+    function dist(){ return Math.max(0,gl.scrollWidth-pin.clientWidth) }
+    gsap.to(gl,{x:function(){ return -dist() },ease:'none',scrollTrigger:{trigger:pin,start:'top top+=96',end:function(){ return '+='+dist() },pin:true,scrub:.8,invalidateOnRefresh:true,refreshPriority:1,
+      onUpdate:function(s){ bb.style.transform='scaleX('+s.progress.toFixed(3)+')' }}});
+    return function(){ gl.classList.remove('hz'); gsap.set(gl,{clearProps:'transform'}) };
+  });
+}
+
+/* ═══ TOKEN ═══ */
+var ALLOC=[['Private sale',50,'#1A5BF0'],['CEX listing',15,'#3E7BFF'],['Marketing',10,'#0E3AC4'],['Reserve',5,'#8FB0FF'],['Team (locked)',5,'#2A3550'],['Advisors',5,'#5B6475'],['Development',5,'#C9D6F5'],['Airdrop',5,'#2E62C8']];
+var bar=$('#bar'), leg=$('#legend');
+ALLOC.forEach(function(a,i){
+  var claro=a[2]==='#C9D6F5'||a[2]==='#8FB0FF';
+  var s=document.createElement('i'); s.style.cssText='flex:'+a[1]+' 1 0;--g:'+a[1]+';--c:'+a[2]+';--k:'+i; s.innerHTML='<span'+(claro?' style="color:#05070C"':'')+'>'+a[1]+'%</span>'; s.dataset.i=i; bar.appendChild(s);
+  var d=document.createElement('div'); d.dataset.i=i; d.innerHTML='<span><i style="--c:'+a[2]+'"></i>'+a[0]+'</span><b>'+a[1].toFixed(1)+'%</b>'; leg.appendChild(d);
+});
+function hi(i){ $$('div',leg).forEach(function(d){ d.classList.toggle('hi',d.dataset.i==i) }) }
+$$('i',bar).concat($$('div',leg)).forEach(function(s){ s.addEventListener('pointerenter',function(){ hi(s.dataset.i) }); s.addEventListener('pointerleave',function(){ hi(-1) }) });
+var odo=$('#odo');
+odo.innerHTML='160,000,000'.split('').map(function(ch){ if(ch===',') return '<span class="c">,</span>'; var col=''; for(var r=0;r<3;r++) for(var d=0;d<10;d++) col+='<b>'+d+'</b>'; return '<span class="d" data-v="'+ch+'"><span>'+col+'</span></span>' }).join('');
+var cols=$$('.d',odo);
+function fijaOdo(){ cols.forEach(function(c){ $('span',c).style.transform='translateY(-'+((100/30)*(20+ +c.dataset.v))+'%)' }) }
+if(hasG && !CALMA){
+  ScrollTrigger.create({trigger:odo,start:'top 85%',once:true,onEnter:function(){ cols.forEach(function(c,i){ gsap.to($('span',c),{yPercent:-(100/30)*(20+ +c.dataset.v),duration:2.2+i*.12,ease:'expo.out',delay:i*.05}) }) }});
+  ScrollTrigger.create({trigger:bar,start:'top 88%',once:true,onEnter:function(){ bar.classList.add('in') }});
+} else { fijaOdo(); bar.classList.add('in') }
+$('#copy').addEventListener('click',function(){ var b=this; (navigator.clipboard?navigator.clipboard.writeText($('#addr').textContent):Promise.reject()).then(function(){ b.textContent='Copied' },function(){ var r=document.createRange(); r.selectNodeContents($('#addr')); var s=getSelection(); s.removeAllRanges(); s.addRange(r); b.textContent='Selected' }); setTimeout(function(){ b.textContent='Copy' },1800) });
+
+
+/* ═══ entrada ═══ */
+function entrar(){
+  var pre=$('#pre');
+  if(!hasG || CALMA){ GLOBO.inn=1; if(pre) pre.remove(); return }
+  var o={v:0}, n=$('.pre-n'), bar=$('.pre-b b'), tl=gsap.timeline();
+  tl.to(o,{v:100,duration:1.5,ease:'power2.inOut',onUpdate:function(){ n.textContent=String(Math.round(o.v)).padStart(3,'0'); bar.style.transform='scaleX('+(o.v/100).toFixed(3)+')' }})
+    .to('.pre-in',{opacity:0,y:-40,filter:'blur(10px)',duration:.5,ease:'power2.in'})
+    .to('.pre-cols i',{yPercent:-100,duration:1,ease:'expo.inOut',stagger:{each:.04,from:'center'}},'-=.15')
+    .to(GLOBO,{inn:1,duration:2.8,ease:'power2.out'},'<.25')
+    .from('.hx-h .w',{yPercent:120,rotate:6,opacity:0,duration:1.2,ease:'expo.out',stagger:.07},'<.15')
+    .from('.hx-k, .hx-row, .hx-bot, #hd, .hx-frame',{y:24,opacity:0,duration:1.1,ease:'expo.out',stagger:.07},'<.35')
+    .add(function(){ $$('.hx-k span, .hx-bot .hx-scroll').forEach(descifra) },'<')
+    .add(function(){ if(pre) pre.remove() });
+}
+if(document.readyState==='complete') entrar(); else addEventListener('load',entrar);
+})();
+</script>
+</body>
+</html>
