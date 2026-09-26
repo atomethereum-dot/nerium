@@ -10049,154 +10049,125 @@ function campo2D(){
 if(!campoGL()){ window.__campo='canvas'; campo2D(); }
 (function(){
   /* ══════════════════════════════════════════════════════════════════════════
-     LA CORRIENTE · TRANSACCIONES
+     LA CORRIENTE · EL LIBRO MAYOR
      ══════════════════════════════════════════════════════════════════════════
-     Antes era un campo de bloques. Ahora son las transacciones mismas: miles
-     de trazos de luz que cruzan la banda y se asientan en una linea. Lo que
-     se conserva de la escena anterior es el gobierno, que es lo que costo
-     medir: se anima solo con un tercio de la banda a la vista, se pinta un
-     cuadro quieto si asoma menos, tiene techo de cuadros y respeta
+     La tabla de la prensa, hecha registro. Misma rejilla de doce columnas
+     -alineada filete con filete con la de arriba-, mismas tipografias, mismo
+     negro y el mismo relleno azul: la banda se lee como la continuacion de la
+     tabla y no como un adorno aparte.
+     Las filas suben a golpes, como un panel de salidas. Al cruzar la linea de
+     finalidad, el relleno de la prensa la barre de izquierda a derecha -misma
+     curva, 420 ms-, pasa de PENDING a SETTLED y luego se apaga.
+     Las cifras son de muestra: no se presentan como datos en vivo.
+     El gobierno es el de siempre: solo anima con un tercio a la vista, un
+     cuadro quieto si asoma menos, techo de 30 cuadros y quieta con
      «prefers-reduced-motion». */
   var cv=document.getElementById('chroma'); if(!cv) return;
   var ctx=cv.getContext('2d',{alpha:false}); if(!ctx) return;
   var CALMA=matchMedia('(prefers-reduced-motion:reduce)').matches;
-  var mono=(getComputedStyle(document.documentElement).getPropertyValue('--m')||'').trim()||'ui-monospace,monospace';
+  var cs=getComputedStyle(document.documentElement);
+  var FT=(cs.getPropertyValue('--f')||'').trim()||'system-ui,sans-serif';
+  var MN=(cs.getPropertyValue('--m')||'').trim()||'ui-monospace,monospace';
+  var BG='#030409', MID='#797887', MED='#5380F0', PG=12;
+  var ESP='letterSpacing' in ctx;
 
-  /* LA CORRIENTE DE TRANSACCIONES
-     Miles de transacciones cruzando la banda. Entran por la izquierda
-     desordenadas -cada una a su altura, a su velocidad, a su profundidad- y
-     convergen en una linea de luz vertical: la liquidacion. Cada una que la
-     cruza deja un destello. Al otro lado salen ORDENADAS, en carriles, blancas
-     y mas rapidas. Del caos al orden: donde el valor se asienta. */
-  function Corriente(opc){
-    opc=opc||{};
-    var MONO=opc.mono||'"DejaVu Sans Mono",monospace';
-    var P=[], F=[], CH=[], W=0, H=0, sx=0, esc=1, carriles=[], t=0, sem=7, proxChip=0, fondo=opc.fondo||'#05070C';
-    function rnd(){ sem=(sem*16807)%2147483647; return sem/2147483647 }
-    function sm(x){ x=x<0?0:x>1?1:x; return x*x*(3-2*x) }
-    function sprite(r,g,b){ var c=document.createElement('canvas'); c.width=c.height=64; var x=c.getContext('2d');
-      var gr=x.createRadialGradient(32,32,0,32,32,32); gr.addColorStop(0,'rgba(255,255,255,1)'); gr.addColorStop(.18,'rgba('+r+','+g+','+b+',.85)');
-      gr.addColorStop(.5,'rgba('+r+','+g+','+b+',.22)'); gr.addColorStop(1,'rgba('+r+','+g+','+b+',0)'); x.fillStyle=gr; x.fillRect(0,0,64,64); return c }
-    var SA=sprite(46,134,255), SB=sprite(170,203,255);
-    var HEX='0123456789abcdef';
-    function hash(){ var s='0x'; for(var k=0;k<4;k++) s+=HEX[rnd()*16|0]; s+='…'; for(k=0;k<4;k++) s+=HEX[rnd()*16|0]; return s }
-    function yDe(p,x){
-      if(x<sx){ var u=x<=0?0:x/sx; var e=sm(Math.pow(u,1.25)); return p.y0+(p.car-p.y0)*e }
-      var r=(x-sx)/(W-sx); return p.car+(p.car-H*.5)*r*.85;
+  function cl(v){ return v<0?0:v>1?1:v }
+  function sm(x){ x=cl(x); return x*x*(3-2*x) }
+  function eio(x){ x=cl(x); return x<.5?4*x*x*x:1-Math.pow(-2*x+2,3)/2 }
+  /* la curva del relleno de la prensa: cubic-bezier(.17,.89,.32,1) */
+  function prensa(x){ x=cl(x); var t=x;
+    for(var i=0;i<8;i++){ var cx=.51,bx=3*(.32-.17)-cx,ax=1-cx-bx, xt=((ax*t+bx)*t+cx)*t-x, d=(3*ax*t+2*bx)*t+cx; if(Math.abs(d)<1e-6) break; t-=xt/d }
+    var cy=2.67,by=3*(1-.89)-cy,ay=1-cy-by; return ((ay*t+by)*t+cy)*t }
+  function rng(s){ return function(){ s=(s*16807)%2147483647; return s/2147483647 } }
+  var HEX='0123456789abcdef';
+  function hx(r,n){ var s=''; for(var i=0;i<n;i++) s+=HEX[r()*16|0]; return s }
+  function corto(r){ return '0x'+hx(r,4)+'…'+hx(r,4) }
+  var ACT=['USDC','NRM','EURC','USDT','NRM','USDC'];
+  function nueva(k){ var r=rng(k*7919+13); r(); r();
+    return { id:'TX-'+(48210+k), de:corto(r), a:corto(r),
+      mon:(Math.pow(r(),2)*48000+12).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}),
+      act:ACT[r()*ACT.length|0], fin:(0.28+r()*0.3).toFixed(2), ts:null } }
+  function tx(s,x,y,font,col,al,ls){ ctx.font=font; ctx.fillStyle=col; ctx.textAlign=al||'left'; ctx.textBaseline='middle';
+    if(ESP) ctx.letterSpacing=(ls||0)+'px'; ctx.fillText(s,x,y); if(ESP) ctx.letterSpacing='0px' }
+
+  var W=0, H=0, dpr=1, t=0, filas={}, vivo=false, pintada=false;
+  var STEP=.62, MOV=.42;
+  function draw(){
+    var movil=W<700, ncol=movil?4:12, w=(W-PG*2)/ncol, rh=Math.round(H/(movil?5.2:6.2));
+    ctx.fillStyle=BG; ctx.fillRect(0,0,W,H);
+    ctx.fillStyle='rgba(255,255,255,.045)';
+    for(var i=0;i<=ncol;i++) ctx.fillRect(Math.round(PG+i*w),0,1,H);
+    var n=Math.floor(t/STEP), scroll=n+eio((t-n*STEP)/MOV);
+    /* la linea cae en el borde entre dos filas -donde se paran-, nunca encima del texto */
+    var base=H-4.5*rh, ys=Math.round(base+Math.round((H*.56-base)/rh)*rh)-1, k0=Math.floor(scroll-base/rh)-2, k1=Math.ceil(scroll+(H-base)/rh)+2;
+    for(var k=k0;k<=k1;k++){
+      var f=filas[k], y=Math.round(base+(k-scroll)*rh);
+      if(!f){ f=filas[k]=nueva(k); if(y+rh/2<ys-rh) f.ts=-99 }
+      if(y<-rh||y>H+rh) continue;
+      if(f.ts===null && y+rh/2<ys) f.ts=t;
+      var p=f.ts===null?0:prensa((t-f.ts)/.42), luz=f.ts===null?0:1-sm((t-f.ts-.55)/.8);
+      var hecho=p>.5, on=hecho&&luz>.35, yc=y+rh/2;
+      /* el relleno, de borde a borde como en la prensa, y su filete a la izquierda */
+      if(p>0){ ctx.fillStyle='rgba(32,87,233,'+(.07+.93*luz).toFixed(3)+')'; ctx.fillRect(0,y,W*p,rh);
+        ctx.fillStyle='#2057E9'; ctx.fillRect(PG,y,3,rh) }
+      ctx.fillStyle='rgba(255,255,255,.14)'; ctx.fillRect(PG,y+rh-1,W-PG*2,1);
+      var ct=on?'#FFFFFF':'#C9CCD6', cm=on?'rgba(255,255,255,.85)':MID;
+      var estado=hecho?'SETTLED · '+f.fin+' s':'PENDING', ce=hecho?(on?'#FFFFFF':MED):MID;
+      if(movil){
+        tx(f.id,PG+10,yc-rh*.17,'400 10px '+MN,cm,'left',1);
+        tx(f.de+' → '+f.a,PG+10,yc+rh*.17,'400 10px '+MN,cm,'left',.2);
+        tx(f.act,W-PG-10,yc-rh*.17,'400 10px '+MN,on?'#fff':MED,'right',1);
+        ctx.font='300 '+Math.round(rh*.34)+'px '+FT;
+        tx(f.mon,W-PG-16-ctx.measureText(f.act).width*1.25-4,yc-rh*.17,'300 '+Math.round(rh*.34)+'px '+FT,ct,'right',-.3);
+        tx(estado,W-PG-10,yc+rh*.2,'400 9px '+MN,ce,'right',1);
+      } else {
+        tx(f.id,PG+10,yc,'400 12px '+MN,cm,'left',1.2);
+        tx(f.de,PG+w*2+8,yc,'400 13px '+MN,cm);
+        tx('→',PG+w*4-6,yc,'300 16px '+FT,cm);
+        tx(f.a,PG+w*4+14,yc,'400 13px '+MN,cm);
+        tx(f.mon,PG+w*9-10,yc,'300 '+Math.round(rh*.36)+'px '+FT,ct,'right',-.4);
+        tx(f.act,PG+w*9+2,yc,'400 12px '+MN,on?'#fff':MED,'left',1.2);
+        if(!hecho){ var pu=.5+.5*Math.sin(t*5+k); ctx.fillStyle='rgba(121,120,135,'+(.4+.6*pu).toFixed(2)+')';
+          ctx.beginPath(); ctx.arc(W-PG-92,yc,2.5,0,Math.PI*2); ctx.fill() }
+        tx(estado,W-PG-12,yc,'400 12px '+MN,ce,'right',1.2);
+      }
     }
-    function nace(p,repartir){
-      p.y0=H*(.06+rnd()*.88); p.car=carriles[rnd()*carriles.length|0];
-      p.v=(70+560*p.d)*(.72+rnd()*.56)*esc; p.x=repartir? -100+rnd()*(W+220) : -40-rnd()*260;
-      p.tono=rnd(); p.cruzo=p.x>=sx; p.chip=null;
-    }
-    function mide(w,h){
-      W=w; H=h; sx=Math.round(W*.56); esc=Math.max(.42,Math.min(1,W/1440));
-      carriles=[]; var N=13; for(var k=0;k<N;k++) carriles.push(H*.5+(k-(N-1)/2)*H*.034);
-      var n=Math.round(Math.min(1400, W*H/(W<700?360:560))*(opc.cantidad||1));
-      P=[]; for(var i=0;i<n;i++){ var p={d:Math.pow(i/n,1.7)}; nace(p,true); P.push(p) }   /* ordenadas de lejos a cerca */
-      F=[]; CH=[];
-    }
-    function paso(dt){
-      t+=dt; proxChip-=dt;
-      for(var i=0;i<P.length;i++){ var p=P[i]; p.x+=p.v*dt*(p.x>sx?1.18:1);
-        if(!p.cruzo && p.x>=sx){ p.cruzo=true; if(p.d>.3) F.push({y:yDe(p,sx),a:1,d:p.d}) }
-        if(p.x>W+120){ if(p.chip){ p.chip.fin=true; p.chip=null } nace(p,false) } }
-      for(i=F.length-1;i>=0;i--){ F[i].a-=dt*(2.2+2*(1-F[i].d)); if(F[i].a<=0) F.splice(i,1) }
-      if(proxChip<=0 && CH.filter(function(c){return !c.fin}).length<5){
-        for(var k=0;k<40;k++){ var q=P[(P.length*.72+rnd()*P.length*.28)|0]; if(q && !q.chip && q.x>20 && q.x<sx*.35){ q.chip={p:q,txt:hash(),t0:t,fin:false}; CH.push(q.chip); break } }
-        proxChip=.45+rnd()*.5 }
-      for(i=CH.length-1;i>=0;i--) if(CH[i].fin) CH.splice(i,1);
-    }
-    function pinta(c){
-      c.globalCompositeOperation='source-over'; c.fillStyle=fondo; c.fillRect(0,0,W,H);
-      /* el resplandor de la linea, de fondo */
-      var g=c.createRadialGradient(sx,H*.5,0,sx,H*.5,W*.42); g.addColorStop(0,'rgba(32,87,233,.20)'); g.addColorStop(1,'rgba(32,87,233,0)');
-      c.fillStyle=g; c.fillRect(0,0,W,H);
-      /* los carriles de salida, apenas marcados */
-      c.lineWidth=1;
-      for(var k=0;k<carriles.length;k++){ var y0=carriles[k], y1=y0+(y0-H*.5)*.85; c.strokeStyle='rgba(120,160,230,.06)'; c.beginPath(); c.moveTo(sx,y0); c.lineTo(W,y1); c.stroke() }
-      c.globalCompositeOperation='lighter';
-      /* LOS TRAZOS VAN POR LOTES. Uno por uno eran 2.800 «stroke» por cuadro
-         -57.000 por segundo en escritorio-. Se agrupan por profundidad (8
-         niveles), lado (antes o despues de la linea), tono (2) y tramo (cola o
-         cabeza): 64 caminos, 64 trazos por cuadro, y a la vista no se nota. */
-      var NB=8, lotes=[];
-      for(var i=0;i<P.length;i++){ var p=P[i]; if(p.x<-60) continue;
-        var der=p.x>sx, lar=p.v*(der?.11:.07)*(.6+.8*p.d), xa=p.x-lar, xm=p.x-lar*.45;
-        var nb=Math.min(NB-1,(p.d*NB)|0), k=((nb*2+(der?1:0))*2+(p.tono>.5?1:0))*2;
-        var L0=lotes[k]||(lotes[k]=new Path2D()), L1=lotes[k+1]||(lotes[k+1]=new Path2D());
-        var ym=yDe(p,xm); L0.moveTo(xa,yDe(p,xa)); L0.lineTo(xm,ym); L1.moveTo(xm,ym); L1.lineTo(p.x,yDe(p,p.x)) }
-      c.lineCap='round';
-      for(var k2=0;k2<lotes.length;k2+=2){ if(!lotes[k2]) continue;
-        var nb2=k2>>3, der2=(k2>>2)&1, ton=(k2>>1)&1, d=(nb2+.5)/NB, al=(.10+.75*d)*(der2?1:.8), r,gg,b;
-        if(der2){ r=190+50*d; gg=215+30*d; b=255 } else { var m=ton?.75:.25; r=60+60*(1-m); gg=110+40*(1-m)+24*m; b=200+55*m }
-        var col='rgba('+(r|0)+','+(gg|0)+','+(b|0)+',';
-        c.lineWidth=.5+2.3*d;
-        c.strokeStyle=col+(al*.28).toFixed(3)+')'; c.stroke(lotes[k2]);
-        c.strokeStyle=col+al.toFixed(3)+')'; c.stroke(lotes[k2+1]) }
-      /* y el brillo de la cabeza, solo en las mas cercanas */
-      for(i=0;i<P.length;i++){ p=P[i]; if(p.d<=.74||p.x<-60) continue; var s=4+16*p.d, yb=yDe(p,p.x);
-        c.globalAlpha=(p.d-.74)*2.6; c.drawImage(p.x>sx?SB:SA,p.x-s/2,yb-s/2,s,s) }
-      c.globalAlpha=1;
-      /* la linea de liquidacion */
-      var gl=c.createLinearGradient(sx-34,0,sx+34,0); gl.addColorStop(0,'rgba(46,134,255,0)'); gl.addColorStop(.5,'rgba(46,134,255,.22)'); gl.addColorStop(1,'rgba(46,134,255,0)');
-      c.fillStyle=gl; c.fillRect(sx-34,0,68,H);
-      var gv=c.createLinearGradient(0,0,0,H); gv.addColorStop(0,'rgba(235,242,255,0)'); gv.addColorStop(.5,'rgba(235,242,255,.85)'); gv.addColorStop(1,'rgba(235,242,255,0)');
-      c.fillStyle=gv; c.fillRect(sx-.75,0,1.5,H);
-      for(i=0;i<F.length;i++){ var f=F[i], s2=(8+30*f.d)*(1.3-f.a*.3); c.globalAlpha=f.a*(.18+.42*f.d); c.drawImage(SB,sx-s2/2,f.y-s2/2,s2,s2);
-        c.globalAlpha=f.a*.28; c.drawImage(SA,sx-s2*1.6,f.y-s2*.12,s2*3.2,s2*.24) }
-      c.globalAlpha=1;
-      /* las etiquetas de algunas cercanas */
-      c.globalCompositeOperation='source-over';
-      c.font='500 '+Math.max(9,Math.round(H*.022))+'px '+MONO; c.textBaseline='middle';
-      for(i=0;i<CH.length;i++){ var ch=CH[i], q=ch.p; if(!q) continue; var y=yDe(q,q.x), der2=q.x>sx;
-        var a=sm((t-ch.t0)/.35)*(1-sm((q.x-(W*.9))/(W*.08)));
-        var txt=der2?'\u2713 settled':ch.txt, tw=c.measureText(txt).width, bx=Math.min(q.x+10,W-tw-24), by=y-H*.055, bh=Math.max(16,H*.042);
-        c.globalAlpha=a*.92; c.fillStyle='rgba(5,7,12,.75)'; c.beginPath(); if(c.roundRect) c.roundRect(bx,by-bh/2,tw+16,bh,bh/2); else c.rect(bx,by-bh/2,tw+16,bh); c.fill();
-        c.strokeStyle=der2?'rgba(46,134,255,.8)':'rgba(170,203,255,.28)'; c.lineWidth=1; c.stroke();
-        c.fillStyle=der2?'rgba(235,242,255,1)':'rgba(170,203,255,.9)'; c.fillText(txt,bx+8,by+.5);
-        c.strokeStyle='rgba(170,203,255,.35)'; c.beginPath(); c.moveTo(q.x+2,y-2); c.lineTo(bx,by+bh/2-2); c.stroke(); c.globalAlpha=1 }
-      /* los cantos se funden con la seccion */
-      var e1=c.createLinearGradient(0,0,0,H*.22); e1.addColorStop(0,fondo); e1.addColorStop(1,'rgba(5,7,12,0)'); c.fillStyle=e1; c.fillRect(0,0,W,H*.22);
-      var e2=c.createLinearGradient(0,H,0,H*.78); e2.addColorStop(0,fondo); e2.addColorStop(1,'rgba(5,7,12,0)'); c.fillStyle=e2; c.fillRect(0,H*.78,W,H*.22);
-      var e3=c.createLinearGradient(0,0,W*.12,0); e3.addColorStop(0,fondo); e3.addColorStop(1,'rgba(5,7,12,0)'); c.fillStyle=e3; c.fillRect(0,0,W*.12,H);
-      var e4=c.createLinearGradient(W,0,W*.88,0); e4.addColorStop(0,fondo); e4.addColorStop(1,'rgba(5,7,12,0)'); c.fillStyle=e4; c.fillRect(W*.88,0,W*.12,H);
-    }
-    return {mide:mide, paso:paso, pinta:pinta};
+    for(var q in filas) if(+q<k0-4) delete filas[q];
+    /* la linea de finalidad, con su marca en cada filete de la rejilla */
+    ctx.fillStyle='rgba(83,128,240,.9)'; ctx.fillRect(0,ys,W,1);
+    for(i=0;i<=ncol;i++) ctx.fillRect(Math.round(PG+i*w)-3,ys-3,7,7);
+    /* arriba y abajo se funde con la seccion */
+    var g=ctx.createLinearGradient(0,0,0,H*.2); g.addColorStop(0,BG); g.addColorStop(1,'rgba(3,4,9,0)');
+    ctx.fillStyle=g; ctx.fillRect(0,0,W,H*.2);
+    g=ctx.createLinearGradient(0,H,0,H*.8); g.addColorStop(0,BG); g.addColorStop(1,'rgba(3,4,9,0)');
+    ctx.fillStyle=g; ctx.fillRect(0,H*.8,W,H*.2);
   }
 
-  var esc=Corriente({mono:mono, fondo:'#05070C'});
-  var vivo=false, W=0, H=0, dpr=1, pintada=false;
   function mide(){
     var r=cv.getBoundingClientRect();
     dpr=__dens();
     W=Math.max(1,Math.round(r.width)); H=Math.max(1,Math.round(r.height));
     __mide(cv, W*dpr, H*dpr);
     ctx.setTransform(dpr,0,0,dpr,0,0);
-    esc.mide(W,H);
-    /* se arranca con la corriente ya llena, no vacia entrando por la izquierda */
-    for(var k=0;k<45;k++) esc.paso(1/30);
-    esc.pinta(ctx);
+    draw();
   }
-  /* 30 cuadros como techo: los trazos rapidos a 24 se veian a saltos, y la
-     estela ya disimula lo que falta hasta 60 */
   var CUADRO=1000/30, reloj=0, ultimoTs=0;
   function pinta(ts){
     if(vivo && W && !CALMA){
       if(!ultimoTs) ultimoTs=ts;
-      if(ts-reloj>=CUADRO){
-        var dt=Math.min(0.1,(ts-ultimoTs)/1000); ultimoTs=ts; reloj=ts;
-        esc.paso(dt); esc.pinta(ctx);
-      }
+      if(ts-reloj>=CUADRO){ t+=Math.min(0.1,(ts-ultimoTs)/1000); ultimoTs=ts; reloj=ts; draw() }
     } else { ultimoTs=0 }
     requestAnimationFrame(pinta);
   }
   mide();
   addEventListener('resize', mide, {passive:true});
+  /* las letras son las de la web: hasta que no cargan, el primer cuadro sale
+     con la de sistema. Al tenerlas se vuelve a pintar */
+  if(document.fonts && document.fonts.ready) document.fonts.ready.then(function(){ if(W) draw() });
   new IntersectionObserver(function(e){
     var r=e[0].intersectionRatio;
     vivo = e[0].isIntersecting && r >= 0.33;
-    if(e[0].isIntersecting && !pintada && W){ pintada=true; esc.pinta(ctx); }
+    if(e[0].isIntersecting && !pintada && W){ pintada=true; draw(); }
   },{threshold:[0, 0.33]}).observe(cv);
   requestAnimationFrame(pinta);
 })();
