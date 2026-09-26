@@ -213,10 +213,28 @@ di(await pg.evaluate(() => getComputedStyle(document.querySelector('.nav')).disp
 // ── el subrayado ──
 di((await pg.evaluate(() => document.querySelectorAll('.nav>a.on').length)) === 0,
    'en la portada no hay nada subrayado');
-// «thesis» sale de la lista: la seccion esta oculta, asi que no hay adonde
-// desplazarse ni que subrayar. Dejarla aqui era pedirle a la prueba que
-// comprobara algo que ya no existe.
-for (const id of ['network','press','solutions','stack','security','presale','token','builds','join']) {
+/* LA LISTA SALE DEL MENU, NO DE AQUI. Llevaba los nueve nombres escritos a
+   mano, y cada vez que se oculta una seccion hay que acordarse de venir a
+   tacharla —paso con «thesis» y ha vuelto a pasar con «network»—. Una
+   prueba que hay que editar cuando la pagina cambia no vigila la pagina,
+   lleva su inventario.
+   De paso se gana la comprobacion que de verdad hacia falta: que NINGUN
+   enlace del menu lleve a una seccion oculta o inexistente. Eso es lo que
+   se rompe al esconder una seccion, y es lo que deja el subrayado marcando
+   un sitio al que no se puede ir. */
+const delMenu = await pg.evaluate(() => [...document.querySelectorAll('.nav>a')]
+  .map(a => (a.getAttribute('href') || '').replace(/^#/, ''))
+  .filter(Boolean));
+const vivos = await pg.evaluate(ids => ids.filter(i => {
+  const e = document.getElementById(i);
+  return e && getComputedStyle(e).display !== 'none';
+}), delMenu);
+di(delMenu.length >= 5, 'el menu tiene sus entradas (' + delMenu.length + ')');
+di(vivos.length === delMenu.length,
+   'y ninguna lleva a una seccion oculta o que no existe' +
+   (vivos.length === delMenu.length ? '' :
+    ' — sobran: ' + delMenu.filter(i => !vivos.includes(i)).join(', ')));
+for (const id of vivos) {
   await pg.evaluate(i => { const e = document.getElementById(i); let y=0,n=e;
     while(n){y+=n.offsetTop;n=n.offsetParent} scrollTo(0, y + e.offsetHeight/2 - innerHeight/2); }, id);
   await pg.waitForTimeout(800);

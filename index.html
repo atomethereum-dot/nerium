@@ -4290,6 +4290,19 @@ footer .fgrid h3,footer .tec-real{color:#9EA2AB}
    por delante del texto de media pagina. De 159 px a 54, y de 54 a 16 y 32,
    que son los margenes que la pagina ya deja libres. */
 .srail button{padding:4px 0;gap:0}
+/* ── Y EN EL TELEFONO, DENTRO DEL MARGEN DEL TODO ──
+   Media 16 px pegado al borde y el margen de la pagina a 360 son 14: o sea
+   que el carril vivia 2 px metido DENTRO del texto. No se ve -las lineas
+   raramente llegan hasta el filo- pero la caja del parrafo si pasa por
+   debajo, y a la larga eso es un texto tapado por un adorno fijo.
+   Se le quita el relleno de la derecha y la marca encendida baja de 12 a 10:
+   12 px en total, dentro de los 14 que la pagina ya dejaba libres, con dos
+   de sobra. La caja que recoge el dedo NO cambia: va en un «::before»
+   absoluto que no ocupa sitio, asi que sigue midiendo sus 44 px. */
+@media(max-width:899px){
+  .srail{padding-right:0}
+  .srail button:hover i,.srail button.on i{width:10px}
+}
 @media(min-width:900px){
   .srail{padding:10px 5px;gap:5px}
   .srail button{padding:6px 0;pointer-events:auto}
