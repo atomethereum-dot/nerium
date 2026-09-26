@@ -113,7 +113,11 @@ for (const [W, H] of [[1440,900],[1280,900],[768,1024],[390,844]]) {
       // La pila no escribe su titular en un «h2» ni su entradilla en un «p»:
       // son tres «b» y tres «s» que se van relevando, y solo el que lleva
       // «.on» esta a la vista. Los demas miden cero y «iz» ya los descarta.
-      return { base: centrada ? cajaR.left + cajaR.width / 2 : cajaR.left,
+      /* el borde que cuenta es el del CONTENIDO de la caja: en telefono la
+         cabecera de la prensa lleva 16 px de aire dentro para no montarse en
+         el filete de la rejilla, y ese aire es el margen, no un desvio */
+      const padIz = parseFloat(getComputedStyle(caja).paddingLeft) || 0;
+      return { base: centrada ? cajaR.left + cajaR.width / 2 : cajaR.left + padIz,
                ep:iz(sec.querySelector('.sk')),
                ti:iz(sec.querySelector('h2, .stk-t b.on')),
                su:iz(sec.querySelector('.sec-sub,.join-note,.lane-sub,.sale-sub,.sub,.stk-sub s.on')) };
