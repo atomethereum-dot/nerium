@@ -6814,6 +6814,22 @@ main>section.press:not(.claro){
    no repetido en los dos sitios porque el dia que uno cambie tienen que
    cambiar los dos: si se separan, al bajar de la portada a la prensa se ve
    un escalon de gris que no estaba antes. */
+/* ══ LO QUE NO SE VE, NO SE MUEVE ══════════════════════════════════════════
+   Medido con la pagina quieta en la hoja de ruta: 120 animaciones CSS
+   infinitas corriendo a la vez, y casi ninguna a la vista -de las 64
+   chispas del ADN se veian 20, de las derivas de la ronda 0, del rotulo de
+   la portada 0-. Cada una hace latir el motor de estilos en cada cuadro, y
+   dos ni siquiera las puede hacer la tarjeta grafica: una anima una sombra
+   y otra anima «top», que obliga a remaquetar.
+   Una seccion fuera de pantalla recibe «.fuera» y todo lo que lleva dentro
+   se queda en pausa -no parado: en PAUSA, asi que al volver sigue por donde
+   iba y no pega un salto-. Es global a proposito: la animacion que alguien
+   añada mañana en cualquier seccion queda cubierta sin acordarse de esto. */
+.fuera,.fuera *,.fuera *::before,.fuera *::after{animation-play-state:paused !important}
+/* la barra de aviso vive fuera de las secciones: plegada -«ann-fuera»- o
+   desplazada fuera de la vista, tambien se pausa. Es la que anima una
+   SOMBRA, lo unico de la lista que no puede hacer la tarjeta grafica. */
+body.ann-fuera .ann,body.ann-fuera .ann *,.ann.fuera,.ann.fuera *{animation-play-state:paused !important}
 :root{--negro:#030409}
 :root{--suelo:#12151D; --suelo2:#0A0D14}
 
@@ -8379,7 +8395,13 @@ const CALM=matchMedia('(prefers-reduced-motion: reduce)').matches;
        lleno hasta el final y se abre justo cuando la prensa ya esta
        entrando por abajo. */
     const salida=crudo<=0.92 ? 0 : Math.pow((crudo-0.92)/0.08, 2.2);
-    const abre=1+salida*1.0;
+    /* SIN APERTURA. El tunel se abria al final para dejar el centro vacio:
+       es el hueco oscuro que se veia justo antes de la prensa. Ahora que al
+       acabar el recorrido la pagina salta sola a la seccion siguiente, ese
+       vaciado no lleva a ningun sitio: el tunel llega LLENO al salto. La
+       embestida final se queda -es la velocidad, «salida» en «vel» de abajo-;
+       lo que se quita es que los cubos se aparten. */
+    const abre=1;
     const vel=(0.40+emp*3.30+salida*5.2)*dt;
     t=(t+vel)%RANGO;
     vt+=dt;
@@ -8626,10 +8648,28 @@ const CALM=matchMedia('(prefers-reduced-motion: reduce)').matches;
     });
     const hold=document.querySelector('.hero-hold');
     let pinRun=1;
-    const measurePin=()=>{pinRun=Math.max(1,(hold?hold.offsetHeight:S.vh*1.9)-S.vh)};
+    /* «ultP» va ANTES que «measurePin»: la medida se llama al momento, y un
+       «let» usado antes de su linea no da «undefined», lanza. Habria tumbado
+       la portada entera y tambien daria cero escrituras: el mismo numero que
+       el arreglo, por la razon contraria. */
+    let ultP=-1;
+    const measurePin=()=>{pinRun=Math.max(1,(hold?hold.offsetHeight:S.vh*1.9)-S.vh); ultP=-1};
     measurePin();addEventListener('resize',measurePin,{passive:true});
+    /* SI EL AVANCE NO CAMBIA, NO HAY NADA QUE ESCRIBIR. Este trabajo corre en
+       CADA cuadro durante toda la vida de la pagina, y todo lo que pinta
+       -el rotulo, sus letras, la barra, la etiqueta, las lamas, la malla, el
+       tunel- es funcion del avance «p». Pasada la portada «p» se queda clavado
+       en 1, y aun asi se reescribia todo 60 veces por segundo: medido parado
+       en la hoja de ruta, a 12.000 px de aqui, 300 cambios de clase en las
+       letras, 120 propiedades en la barra y 60 en la etiqueta cada segundo.
+       Cada una obliga a recalcular estilos: 373 ms de cada segundo se iban en
+       eso con la CPU de un movil medio, con la pagina quieta.
+       Lo unico que no depende de «p» es el paralaje de «.hero-in», que va por
+       el scroll -pero con «p» en 1 esta a opacidad cero, asi que no se ve-. */
     jobs.push({measure:measurePin,run(){
       const p=cl(S.y/pinRun);
+      if(p===ultP) return;
+      ultP=p;
       /* La pista de bajar se cuelga de la cortina, que ya trae el avance
          calculado: ni un bucle nuevo, ni una medida mas. Acompana toda la
          entrada —incluido el emblema, que es cuando uno duda de si la pagina
@@ -10314,9 +10354,9 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
       let a=Math.atan2(dy,dx)/D2R; if(a<-90)a+=360;
       hit=groups.findIndex(g=>a>=g.a0-2&&a<=g.a1+2);
     }
-    if(hit!==hover){hover=hit;paintLabels()}
+    if(hit!==hover){hover=hit;paintLabels();despierta()}
   });
-  cv.addEventListener('pointerleave',()=>{if(hover!==-1){hover=-1;paintLabels()}});
+  cv.addEventListener('pointerleave',()=>{if(hover!==-1){hover=-1;paintLabels();despierta()}});
   function paintLabels(){
     fig.classList.toggle('hot',hover>=0);
     cals.forEach((c,i)=>c.classList.toggle('lit',i===hover));
@@ -10402,17 +10442,35 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
           if(hover<0)numEl.textContent=Math.round(160*e)+'M';
           if(q<1)requestAnimationFrame(run)})(s0);}
     }
+    /* UN DONUT QUIETO NO SE REPINTA. Montado ya -«sol» en 1- y con los
+       gajos en su sitio, cada cuadro dibujaba EXACTAMENTE lo mismo que el
+       anterior: una sombra con degradado y ocho gajos con su degradado y su
+       filete. Medido: 41.000 llamadas de dibujo por segundo, la escena mas
+       cara de la pagina, para una imagen que no se movia. El lienzo conserva
+       lo ultimo que se pinto, asi que se pinta ese cuadro quieto UNA vez y se
+       para; lo despierta pasar el raton por un gajo o cambiar el tamaño. */
+    /* Y ANTES DE ARRANCAR, IGUAL: con «started» en falso el reloj esta en
+       cero y cada cuadro es identico al anterior -los cubos en su sitio de
+       salida-. Medido: 25.000 llamadas por segundo pintando esa foto fija
+       mientras se esperaba a que la figura subiera. */
+    const quieto = !started || (shown && sol>=1 &&
+      groups.every((g,i)=>Math.abs(((i===hover)?13:0)-offs[i])<0.05));
+    if(quieto){ parado=true; return; }
     requestAnimationFrame(frame);
   }
-  build();addEventListener('resize',build,{passive:true});
+  let parado=false;
+  const despierta=()=>{ if(parado&&vivo){ parado=false; requestAnimationFrame(frame); } };
+  build();addEventListener('resize',()=>{build();despierta()},{passive:true});
   let vivo=false;
   new IntersectionObserver(es=>es.forEach(e=>{
     const antes=vivo; vivo=e.isIntersecting;
     if(vivo&&!antes)requestAnimationFrame(frame);
-  }),{threshold:0,rootMargin:'400px 0px'}).observe(fig);
+  /* 80 px y no 400: con 400 el donut ya pintaba 22.000 veces por segundo
+     cuando todavia faltaba media pantalla para verlo. */
+  }),{threshold:0,rootMargin:'80px 0px'}).observe(fig);
   new IntersectionObserver(es=>es.forEach(e=>{
     if(e.isIntersecting&&!started){started=true;t0=performance.now();
-      vivo=true;requestAnimationFrame(frame)}
+      vivo=true;parado=false;requestAnimationFrame(frame)}
   }),{threshold:0,rootMargin:'0px 0px -32% 0px'}).observe(fig);
   requestAnimationFrame(frame);
 })();
@@ -11148,12 +11206,27 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
   build(); sitio();
   addEventListener('resize',()=>{build();sitio();last=-1},{passive:true});
   addEventListener('nrm:remide',sitio,{passive:true});
-  (function tick(){
+  /* EL BUCLE SOLO CORRE CON LA ESCENA A LA VISTA. Antes arrancaba al cargar
+     y no paraba nunca, y fuera de su tramo -antes de llegar y despues de
+     irse- el avance se queda clavado en 0 o en 1, que es justo donde la
+     condicion de abajo manda repintar SIEMPRE. O sea: repintaba en cada
+     cuadro cuando menos falta hacia. Medido, seguia pintando 6.000 veces
+     por segundo con la escena ya fuera de pantalla. */
+  let corre=false;
+  function tick(){
+    if(!corre) return;
     const top=topSec, run=runSec;
     const p=clm((__y-top)/run);
     if(Math.abs(p-last)>.0015 || p>.46 || p<.30){last=p;draw(p)}
     raf=requestAnimationFrame(tick);
-  })();
+  }
+  new IntersectionObserver(es=>es.forEach(e=>{
+    const antes=corre; corre=e.isIntersecting;
+    if(corre&&!antes){ last=-1; raf=requestAnimationFrame(tick); }
+  /* el LIENZO y no la seccion: el lienzo va anclado y la seccion es mas
+     alta, asi que la seccion seguia asomando cuando el lienzo ya se habia
+     ido, y con ella el bucle -7.800 llamadas por segundo sin verse- */
+  }),{rootMargin:'0px'}).observe(cv);
 })();
 (function(){
   const sec=document.getElementById('xlight'), stage=document.getElementById('xlStage'),
@@ -11430,12 +11503,24 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
   build(); sitio();
   addEventListener('resize',()=>{build();sitio()},{passive:true});
   addEventListener('nrm:remide',sitio,{passive:true});
-  (function tick(){
+  /* EL BUCLE SOLO CORRE CON LA ESCENA A LA VISTA. Antes arrancaba al cargar
+     y no paraba nunca, y fuera de su tramo -antes de llegar y despues de
+     irse- el avance se queda clavado en 0 o en 1, que es justo donde la
+     condicion de abajo manda repintar SIEMPRE. O sea: repintaba en cada
+     cuadro cuando menos falta hacia. Medido, seguia pintando 6.000 veces
+     por segundo con la escena ya fuera de pantalla. */
+  let corre=false;
+  function tick(){
+    if(!corre) return;
     const top=topSec, run=runSec;
     const p=clm((__y-top)/run*1.26 + 0.06);
     if(Math.abs(p-last)>.0014 || p>.40 || p<.30){last=p;draw(p)}
     requestAnimationFrame(tick);
-  })();
+  }
+  new IntersectionObserver(es=>es.forEach(e=>{
+    const antes=corre; corre=e.isIntersecting;
+    if(corre&&!antes){ last=-1; requestAnimationFrame(tick); }
+  }),{rootMargin:'0px'}).observe(cv);
 })();
 (function(){
   const fine=matchMedia('(hover:hover) and (pointer:fine)').matches;
@@ -11484,11 +11569,26 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
     hov=t;
   },{passive:true});
   addEventListener('pointerdown',e=>{if(e.pointerType==='touch')document.body.classList.remove('cur-on')});
-  document.addEventListener('mouseleave',()=>{mx=-999});
-  (function tick(){
-    requestAnimationFrame(tick);
-    ctx.clearRect(0,0,W,H);
-    if(mx<-500)return;
+  /* EL CURSOR SE DUERME. Este lienzo ocupa la pantalla entera y el bucle
+     empezaba con «clearRect(0,0,W,H)»: borrar la pantalla completa en CADA
+     cuadro, durante toda la visita, estuviera el raton donde estuviera —
+     tambien fuera de la ventana, tambien quieto—. Para dibujar una escuadra
+     de 30 px.
+     Ahora se borra solo el trozo donde se pinto la ultima vez, y si nada ha
+     cambiado desde el cuadro anterior -raton quieto, escuadra ya en su
+     sitio- el bucle se duerme. Lo despiertan mover el raton, salir de la
+     ventana -para borrar la escuadra una vez- y el scroll, porque con el
+     raton quieto la pagina se puede mover por debajo y la escuadra tiene
+     que seguir al elemento. */
+  let dormido=false, ult=null, firma='';
+  const despierta=()=>{ if(dormido){ dormido=false; requestAnimationFrame(tick); } };
+  const limpia=()=>{ if(ult){ ctx.clearRect(ult[0],ult[1],ult[2]-ult[0],ult[3]-ult[1]); ult=null; } };
+  addEventListener('pointermove',despierta,{passive:true});
+  addEventListener('scroll',despierta,{passive:true});
+  document.addEventListener('mouseleave',()=>{mx=-999;despierta()});
+  addEventListener('resize',()=>{ult=null;firma='';ctx.clearRect(0,0,W,H);despierta()},{passive:true});
+  function tick(){
+    if(mx<-500){ limpia(); firma=''; dormido=true; return; }
     const c=ink();
     let x0,x1,y0,y1;
     if(hov){
@@ -11510,6 +11610,10 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
     }
     const X0=aPixel(box.cx-box.an/2), X1=aPixel(box.cx+box.an/2),
           Y0=aPixel(box.cy-box.al/2), Y1=aPixel(box.cy+box.al/2);
+    const f=X0+','+X1+','+Y0+','+Y1+','+mx+','+my+','+(hov?1:0);
+    if(f===firma){ dormido=true; return; }     /* nada ha cambiado: a dormir */
+    firma=f;
+    limpia();
     const A=Math.round(Math.max(6,Math.min(15,Math.min(X1-X0,Y1-Y0)*.30)));
     const L=A, B=A;
     ctx.strokeStyle=hov?'rgba(157,159,164,.95)':'rgba('+c+',.6)';
@@ -11523,7 +11627,11 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
     ctx.stroke();
     ctx.fillStyle=hov?'rgba(157,159,164,.95)':'rgba('+c+',.9)';
     ctx.beginPath();ctx.arc(mx,my,2,0,6.2832);ctx.fill();
-  })();
+    /* lo que se ha pintado, con margen para el grosor de la linea */
+    ult=[Math.min(X0,mx-3)-3, Math.min(Y0,my-3)-3, Math.max(X1,mx+3)+3, Math.max(Y1,my+3)+3];
+    requestAnimationFrame(tick);
+  }
+  tick();
 })();
 (function(){
   const sec=document.getElementById('security'); if(!sec)return;
@@ -14371,6 +14479,26 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
     hecho = true;
     salta(sig);
   }, {passive:true});
+})();
+</script>
+<script>
+/* ══ QUIEN ESTA FUERA DE PANTALLA ══════════════════════════════════════════
+   Un solo observador para toda la pagina. Marca «.fuera» en cada bloque que
+   no se ve -con 300 px de margen arriba y abajo, para que lo que entra ya
+   este en marcha cuando asoma y no arranque delante de los ojos-. El CSS
+   pausa sus animaciones, y las escenas de lienzo leen la misma marca para
+   no pintar lo que nadie esta mirando. */
+(function(){
+  if(!('IntersectionObserver' in window)) return;
+  var bloques = [].slice.call(document.querySelectorAll('main>section, main>div, footer, #ann'));
+  var io = new IntersectionObserver(function(es){
+    es.forEach(function(e){ e.target.classList.toggle('fuera', !e.isIntersecting); });
+  }, { rootMargin:'300px 0px 300px 0px', threshold:0 });
+  bloques.forEach(function(b){ io.observe(b); });
+  window.__fuera = function(el){
+    var b = el && el.closest && el.closest('main>section, main>div, footer');
+    return !!(b && b.classList.contains('fuera'));
+  };
 })();
 </script>
 </body>
