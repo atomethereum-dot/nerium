@@ -5427,6 +5427,12 @@ body.light .hud::after{background:radial-gradient(120% 120% at 100% 100%,
   .prs-t{grid-row:2;grid-column:1 / -1;padding-left:0;font-size:19px}
   .prs-tr{background:repeating-linear-gradient(90deg,
     var(--prs-trama) 0 1px, transparent 1px calc((100% - 1px) / 4))}
+  /* El texto no se monta en el filete: en telefono la rejilla y el contenido
+     empezaban en el mismo pixel, y el numero, el titular y «All coverage»
+     quedaban pegados a la raya de la izquierda -y la flecha a la de la
+     derecha-. Se les da aire DENTRO de la fila, asi las rayas de separacion
+     y el relleno azul siguen yendo de filete a filete. */
+  .prs-f,.press-head,.press-foot{padding-inline:16px}
 }
 
 /* ── sobre papel: la seccion es oscura, pero si algun dia se invierte ── */
