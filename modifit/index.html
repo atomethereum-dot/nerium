@@ -443,6 +443,139 @@ main,.ft{position:relative;z-index:1}
 .shot{overflow:hidden}
 .shot img{transition:transform 1s var(--e),filter .6s}
 .pn:hover .shot img{transform:scale(1.04);filter:drop-shadow(3px 0 0 rgba(255,40,80,.35)) drop-shadow(-3px 0 0 rgba(60,140,255,.45))}
+
+/* ══ DISENO POSTER ══════════════════════════════════════════════════════════
+   Cada seccion es una tarjeta enorme de esquinas redondas que sube sobre la
+   anterior, alternando negro, azul Nereum electrico y blanco papel. Letra
+   gruesa y gigante, botones en pildora, cabecera flotante y un cursor que
+   invierte lo que tiene debajo. */
+:root{--page:#000;--r:clamp(28px,3.4vw,48px)}
+html,body{background:var(--page)}
+.grid-bg,.hx-frame,.tx-frame{display:none}
+h1,h2,h3{font-weight:600}
+.t-dark{--bg:#0D0E13;--bg2:#15171E;--ink:#F4F5F8;--mut:#A7ADBB;--mut2:#6F7688;--line:rgba(255,255,255,.08);--line2:rgba(255,255,255,.14);--blue:#1A5BF0;--blue2:#4C84FF;--grid:rgba(255,255,255,.03)}
+.t-paper{--bg:#ECEEF2;--bg2:#FFFFFF;--ink:#0A0B0F;--mut:#4C5364;--mut2:#7B8293;--line:rgba(10,11,15,.1);--line2:rgba(10,11,15,.16);--blue:#1A5BF0;--blue2:#1A5BF0;--grid:rgba(10,11,15,.04);--ice:#1A5BF0}
+.t-blue{--bg:#1A5BF0;--bg2:#1650DA;--ink:#FFFFFF;--mut:rgba(255,255,255,.8);--mut2:rgba(255,255,255,.58);--line:rgba(255,255,255,.2);--line2:rgba(255,255,255,.32);--blue:#0A0B0F;--blue2:#FFFFFF;--grid:rgba(255,255,255,.06);--ice:#fff}
+.t-dark,.t-paper,.t-blue{background:var(--bg);color:var(--ink)}
+/* las tarjetas-seccion */
+.sec,.after,.cta{position:relative;z-index:2;border-radius:var(--r) var(--r) 0 0;padding-bottom:clamp(90px,14vh,160px);margin-top:calc(var(--r) * -1);box-shadow:0 -40px 80px -40px rgba(0,0,0,.7)}
+.tx+.sec,.bigmq+.sec,.bigmq+.tx{margin-top:0}
+.sec{padding-top:clamp(90px,13vh,150px)}
+.after{margin-top:-30vh;border-top:0;padding-top:clamp(56px,9vh,100px)}
+.after::before{display:none}
+.tx{margin-top:0}
+/* cabecera flotante en pildora */
+.hd{top:14px;left:50%;right:auto;width:min(1180px,calc(100% - 24px));transform:translateX(-50%);height:58px;border:1px solid rgba(255,255,255,.12);border-radius:99px;background:rgba(10,11,15,.55);padding:0 8px;overflow:hidden}
+.hd.solid{background:rgba(10,11,15,.8)}
+.hd.away{transform:translate(-50%,-160%)}
+.hd>*{border-right:0!important;padding:0 10px}
+.nav a{border-right:0;padding:0 12px;border-radius:99px;height:40px;margin:auto 0}
+.nav a b{display:none}
+.hd-live{font-size:10.5px}
+/* botones en pildora */
+.btn{border-radius:99px;font-family:var(--f);font-size:15px;letter-spacing:-.01em;text-transform:none;height:52px;padding:0 24px;font-weight:500}
+.btn.sm{height:40px;padding:0 18px;font-size:14px}
+.btn.p,.btn.w{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.hd .btn.p{background:#fff;color:#0A0B0F;border-color:#fff}
+.hd .btn.s{color:#fff;border-color:rgba(255,255,255,.2)}
+.t-blue .btn::before{background:#0A0B0F}.t-blue .btn:hover{border-color:#0A0B0F;color:#fff}
+.t-paper .btn.s{color:var(--ink)}
+/* portada: titular grande abajo a la izquierda */
+.hx-h{font-weight:600;font-size:clamp(52px,9vw,168px);letter-spacing:-.07em;align-self:end;margin-bottom:28px}
+.hx-h .l2{justify-self:start;margin-top:0}
+.hx-dim{color:#4C84FF}
+.hx-in{inset:calc(58px + 40px) var(--pad) 70px;grid-template-rows:auto 1fr auto}
+.hx-row{border-top:1px solid rgba(255,255,255,.14);padding-top:22px}
+.hx-bot{left:var(--pad);right:var(--pad)}
+.hx-tag span{border-radius:99px;padding:6px 12px}
+/* cabeceras de seccion */
+.sh h2{font-size:clamp(46px,7vw,124px);letter-spacing:-.065em;line-height:.9;grid-column:1/11}
+.sh p{grid-column:1/7;border-left:0;padding-left:0;font-size:18px;margin-top:6px}
+.sh-k b{color:var(--blue2)}
+.sh-k span:nth-of-type(1){color:var(--ink)}
+/* cifras en pildoras sobre papel */
+.figs{border:0;gap:12px}
+.fig{border:0!important;border-radius:28px;background:var(--bg2);padding:28px 26px 30px;box-shadow:0 1px 0 rgba(0,0,0,.04)}
+.fig b{font-size:clamp(54px,6.4vw,112px);font-weight:600}
+.fig::after{border-radius:0 0 28px 28px}
+.logos{border:0;margin-top:12px;border-radius:99px;background:var(--bg2);overflow:hidden}
+.logos p{border-right:1px solid var(--line)}
+.mq span{border-right:0;color:var(--mut)}
+.mq img{filter:none;opacity:1}
+/* marquesinas: bandas azules */
+.bigmq{z-index:3;background:#1A5BF0;border:0;margin:0;padding-block:clamp(14px,2.4vh,26px)}
+.bigmq span{-webkit-text-stroke:1.5px rgba(255,255,255,.6);font-weight:600}
+.bigmq span.f{color:#0A0B0F}.bigmq.alt span.f{color:#fff}
+.bigmq i{background:#fff;box-shadow:none;border-radius:50%}
+.bigmq.alt{background:#0A0B0F}.bigmq.alt i{background:#1A5BF0}
+/* productos: paneles redondeados */
+.pn{border-radius:36px;border:1px solid var(--line2);background:var(--bg2)}
+.pn-bar{border-bottom:1px solid var(--line)}
+.pn-bar span{border-right:0}
+.pn-c{border-right:0}
+.pn h3{font-weight:600;font-size:clamp(44px,5.4vw,92px)}
+.pn-v{margin:12px;border-radius:26px;background-color:#0A0B0F}
+.pn .meter i,.pn .meter i b{border-radius:6px}
+.shot,.mk,.rk-u{border-radius:18px;overflow:hidden}
+.mk-bar{border-radius:99px}
+/* protocolo sobre azul */
+.gl{border:0;gap:12px}
+.gr{border:0!important;border-radius:32px;background:var(--bg2)}
+.gr::before{background:#0A0B0F}
+.gr .ic{border-radius:50%}
+.gr-big{-webkit-text-stroke:1.5px rgba(255,255,255,.3)}
+.gl.hz{gap:14px}
+/* token sobre papel */
+.tok{border:0}
+.odo{border:0;border-radius:36px;background:#0A0B0F;color:#fff;background-image:none;padding:clamp(28px,5vh,56px) 16px 12px}
+.odo .c{color:#4C84FF}
+.tk-u{border:0;padding:22px 4px}
+.bar{margin:0;border-radius:22px;overflow:hidden;height:96px}
+.legend{border:0;margin-top:14px;gap:8px}
+.legend div{border:0!important;border-radius:16px;background:var(--bg2)}
+.ctr button{border-radius:99px}
+/* seguridad: tarjetas oscuras */
+.certs{border:0;gap:14px}
+.cert{border:1px solid var(--line2)!important;border-radius:32px;background:var(--bg2)}
+.badge{border-radius:99px}
+.cert h3{font-weight:600}
+/* ruta sobre azul */
+.phs{border:0;gap:14px}
+.ph{border:0!important;border-radius:32px;background:var(--bg2)}
+.ph .badge{border-color:rgba(255,255,255,.5);color:#fff}
+.tl-l i{border-radius:50%}
+/* prensa sobre papel */
+.nw{border-color:var(--line2)}
+.nw::before{background:#0A0B0F}
+.nw:hover{color:#fff}
+.nw .ar{border-radius:50%}
+.nw:hover .ar{background:#1A5BF0;border-color:#1A5BF0}
+/* cierre azul */
+.cta{padding-top:clamp(90px,14vh,160px)}
+.cta h2{font-weight:600}
+.cta-l{border:0;gap:12px}
+.cta-l a{border:0!important;border-radius:28px;background:var(--bg2)}
+.cta-l a::before{background:#0A0B0F}
+/* pie */
+.ft{border-top:0;background:#000;position:relative;z-index:2}
+.ft-big{-webkit-text-stroke:0;color:#1A5BF0;font-weight:700}
+/* cursor que invierte */
+.cur{background:#fff!important;border-radius:50%;width:16px;height:16px;margin:-8px 0 0 -8px;mix-blend-mode:difference}
+.cur.link{width:70px;height:70px;margin:-35px 0 0 -35px}
+.cur.drag{width:96px;height:96px;margin:-48px 0 0 -48px}
+.cur.drag::after{color:#000}
+.cur-d{display:none}
+@media (max-width:1100px){.hd-live{display:none}}
+@media (max-width:900px){
+  .hd{height:52px;top:10px}
+  .hx-in{inset:calc(52px + 30px) var(--pad) 40px}
+  .hx-h{font-size:clamp(46px,13vw,80px);margin-bottom:18px}
+  .sh h2,.sh p{grid-column:1}
+  .figs{gap:8px}.fig{border-radius:22px}
+  .logos{border-radius:22px}
+  .gl{gap:10px}
+  .pn-v{margin:8px}
+}
 </style>
 </head>
 <body>
@@ -508,7 +641,7 @@ main,.ft{position:relative;z-index:1}
   </div>
 </section>
 
-<section class="after" id="figs">
+<section class="after t-paper" id="figs">
   <div class="wrap">
     <div class="figs">
       <div class="fig rv"><span>[A] Total supply</span><b data-n="160" data-s="M">160M</b><small>NRM, fixed at genesis</small></div>
@@ -530,7 +663,7 @@ main,.ft{position:relative;z-index:1}
 <div class="bigmq" data-dir="1" aria-hidden="true"><div class="bigmq-r"><div class="bigmq-t"><span>Settlement</span><i></i><span class="f">Tokenization</span><i></i><span>Compliance</span><i></i><span class="f">Liquidity</span><i></i></div></div></div>
 
 <!-- ═══ PRODUCTOS ═══ -->
-<section class="sec" id="products"><div class="wrap">
+<section class="sec t-dark" id="products"><div class="wrap">
   <div class="sh"><div class="sh-k m"><b>[01]</b><span>Products</span><i></i><span>03 items</span></div><h2 class="split">Three pieces, <em>two already running.</em></h2><p>A chain built for regulated assets, the interface to issue them, and real infrastructure behind the token.</p></div>
   <div class="stack">
     <article class="pn spot"><i class="dim"></i>
@@ -583,7 +716,7 @@ main,.ft{position:relative;z-index:1}
 </section>
 
 <!-- ═══ PROTOCOLO ═══ -->
-<section class="sec" id="why"><div class="wrap">
+<section class="sec t-blue" id="why"><div class="wrap">
   <div class="sh"><div class="sh-k m"><b>[02]</b><span>Protocol</span><i></i><span>04 guarantees</span></div><h2 class="split">Four guarantees, <em>written into the protocol.</em></h2><p>When value moves, the rules move with it. On Nereum they travel with the asset and hold at machine speed.</p></div>
   <div class="gl-pin"><div class="gl-hud m"><span>Scroll · 04 guarantees</span><i><b id="glB"></b></i></div><div class="gl">
     <div class="gr rv"><span class="gr-big" aria-hidden="true">01</span><span class="n m">G—01</span><span class="ic"><svg viewBox="0 0 24 24"><path d="M5 12l4 4 10-10"/></svg></span><h3>All-or-nothing settlement</h3><p>Every leg settles, or none does.</p></div>
@@ -603,7 +736,7 @@ main,.ft{position:relative;z-index:1}
 </section>
 
 <!-- ═══ TOKEN ═══ -->
-<section class="sec" id="token"><div class="wrap">
+<section class="sec t-paper" id="token"><div class="wrap">
   <div class="sh"><div class="sh-k m"><b>[03]</b><span>Token</span><i></i><span>NRM</span></div><h2 class="split">One hundred and sixty million NRM, <em>fixed at genesis.</em></h2></div>
   <div class="tok">
     <div class="odo" id="odo" aria-label="160,000,000">160,000,000</div>
@@ -625,7 +758,7 @@ main,.ft{position:relative;z-index:1}
 </section>
 
 <!-- ═══ SEGURIDAD ═══ -->
-<section class="sec" id="security"><div class="wrap">
+<section class="sec t-dark" id="security"><div class="wrap">
   <div class="sh"><div class="sh-k m"><b>[04]</b><span>Security</span><i></i><span>03 proofs</span></div><h2 class="split">Three things you can check <em>before you send a dollar.</em></h2><p>A new chain asks for trust up front. These are the three places where ours is verifiable by someone who is not us.</p></div>
   <div class="certs">
     <article class="cert spot rv"><div class="cert-top m"><span>Proof 01</span><span class="badge">Verified</span></div><h3>Registered company</h3><div class="sub">Florida, United States</div>
@@ -644,7 +777,7 @@ main,.ft{position:relative;z-index:1}
 </div></section>
 
 <!-- ═══ RUTA ═══ -->
-<section class="sec" id="roadmap"><div class="wrap">
+<section class="sec t-blue" id="roadmap"><div class="wrap">
   <div class="sh"><div class="sh-k m"><b>[05]</b><span>Roadmap</span><i></i><span>2 / 3 delivered</span></div><h2 class="split">Three phases, <em>and what each one has to prove.</em></h2></div>
   <div class="tl-l" id="tl"><b></b><i style="left:0"></i><i style="left:33.333%"></i><i style="left:66.666%"></i></div>
   <div class="phs">
@@ -657,7 +790,7 @@ main,.ft{position:relative;z-index:1}
 </div></section>
 
 <!-- ═══ PRENSA ═══ -->
-<section class="sec" id="press"><div class="wrap">
+<section class="sec t-paper" id="press"><div class="wrap">
   <div class="sh"><div class="sh-k m"><b>[06]</b><span>In the press</span><i></i><span>04 entries</span></div><h2 class="split">What they are writing <em>about the chain.</em></h2></div>
   <div class="news">
     <a class="nw rv" href="https://nereum.xyz/whitepaper#/press"><span class="n m">P—01</span><b>Benzinga</b><h3>Nereum settlement on the markets desk watchlist</h3><span class="ar">&rarr;</span></a>
@@ -679,7 +812,7 @@ main,.ft{position:relative;z-index:1}
 </section>
 
 <!-- ═══ CIERRE ═══ -->
-<section class="cta" id="join"><div class="wrap">
+<section class="cta t-blue" id="join"><div class="wrap">
   <div class="cta-k m"><b>[07]</b><span>Join</span><i></i><span>Public channels</span></div>
   <h2 class="split">Everything we ship is announced in the open.</h2>
   <div class="cta-l">
@@ -1157,7 +1290,7 @@ var GLOBO={inn:0};
   function tam(){ W=cv.clientWidth; H=cv.clientHeight; R.setSize(W,H,false); comp.setSize(W,H); var pr=R.getPixelRatio(); bloom.resolution.set(W*pr*.5,H*pr*.5); fin.uniforms.R.value.set(W*pr,H*pr);
     cam.aspect=W/H; cam.updateProjectionMatrix();
     var vh=2*40*Math.tan(15*Math.PI/180), vw=vh*cam.aspect;
-    base= cam.aspect>=1 ? {x:0,y:-vh*.1,s:Math.min(vh*1.1,vw*.7)/ANCHO} : {x:0,y:vh*.05,s:Math.min(vh*.46,vw*1.0)/ANCHO} }
+    base= cam.aspect>=1 ? {x:vw*.2,y:-vh*.06,s:Math.min(vh*1.05,vw*.5)/ANCHO} : {x:0,y:vh*.05,s:Math.min(vh*.46,vw*1.0)/ANCHO} }
   tam(); addEventListener('resize',tam);
   /* puntero y arrastre */
   var rotY=.6, vel=0, tX=0, tY=0, mx=0, my=0, hov=0, thov=0, arr=null, P=0, ray=new THREE.Raycaster(), ndc=new THREE.Vector2(), plano=new THREE.Plane(new THREE.Vector3(0,1,0),0), rayL=new THREE.Ray(), pw=new THREE.Vector3(), pl=new THREE.Vector3(-99,-99,-99), inv=new THREE.Matrix4();
