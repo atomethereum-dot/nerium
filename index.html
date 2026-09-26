@@ -642,9 +642,13 @@ main>section.logos::after{display:none}
 .fgrid.in>div:nth-child(5){transition-delay:.32s}
 .fgrid a{transition:color .18s,padding-left .3s cubic-bezier(.16,.84,.26,1)}
 .fgrid a:hover{padding-left:6px}
-.chroma{clip-path:inset(14% 6% round 18px);
+/* El recorte de entrada va en el LIENZO y no en la seccion: recortando la
+   seccion, lo que quedaba fuera del recorte era el fondo gris de atras de la
+   pagina, y bajo la prensa se veia una franja. Asi la seccion ocupa siempre
+   su caja entera y lo que se abre es la imagen dentro de ella. */
+.chroma canvas{clip-path:inset(14% 6% round 18px);
   transition:clip-path 1.2s cubic-bezier(.16,.84,.26,1)}
-.chroma.in{clip-path:inset(0 0 round 0px)}
+.chroma.in canvas{clip-path:inset(0 0 round 0px)}
 .hpin{padding:0;background:#0A0E18}
 .hpin-hold{position:relative;height:330vh}
 .hpin-stage{position:sticky;top:0;height:100dvh;overflow:hidden;display:flex;align-items:stretch}
@@ -1546,6 +1550,9 @@ main>section+section::after{content:"";position:absolute;top:0;left:clamp(20px,2
   right:clamp(20px,2.6vw,40px);height:2px;background:var(--blue);opacity:.85;
   transform:scaleX(0);transform-origin:50%;transition:transform 1.2s cubic-bezier(.16,.84,.26,1)}
 main>section.edge::after{transform:scaleX(1)}
+/* la linea que separa la prensa de la siguiente seccion no sale de golpe:
+   crece con el scroll, de nada a entera segun la seccion sube por la pantalla */
+main>section.linea-viva::after{transform:scaleX(var(--ln,0)) !important;transition:none !important}
 #burst{will-change:transform,opacity}
 .hero-in{will-change:transform,opacity}
 .swap{position:relative;display:inline-block;overflow:hidden;vertical-align:middle}
@@ -10263,6 +10270,9 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
                                                             al terminar de montarse */
               && sec.id!=='security'                     /* a tamaño fijo: el hundimiento
                                                             la encogía al bajar */
+              && sec.id!=='press'                        /* tambien a tamaño fijo: al
+                                                            encogerse dejaba ver el fondo
+                                                            gris de atras como una franja */
               && !sec.querySelector('.hero-hold, .hpin-stage'))
     .map(sec=>{
       sec.classList.add('depth');
@@ -14502,6 +14512,43 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
       pedido = true; requestAnimationFrame(paso);
     }
   }
+})();
+</script>
+<script>
+/* ══ LA LINEA BAJO LA PRENSA ══════════════════════════════════════════════
+   La prensa ya no se encoge al irse -dejaba ver el fondo de atras-. Lo que
+   marca el paso a la siguiente seccion es su linea azul de arriba, y crece
+   con el scroll: nace cuando la seccion asoma por abajo y esta entera cuando
+   ha subido algo mas de media pantalla. Solo escribe cuando cambia, y solo
+   mientras la seccion esta a la vista. */
+(function(){
+  var p = document.getElementById('press'); if(!p) return;
+  var n = p.nextElementSibling;
+  while(n && (n.tagName !== 'SECTION' || n.hidden)) n = n.nextElementSibling;
+  if(!n) return;
+  n.classList.add('linea-viva');
+  var top = 0, ult = -1, cerca = false;
+  function mide(){ var y = 0, x = n; while(x){ y += x.offsetTop; x = x.offsetParent } top = y; ult = -1; pinta() }
+  function pinta(){
+    if(!cerca) return;
+    var vh = innerHeight, k = (scrollY + vh - top) / (vh * .55);
+    k = k < 0 ? 0 : k > 1 ? 1 : k;
+    k = Math.round(k * k * (3 - 2 * k) * 1000) / 1000;
+    if(k === ult) return;
+    ult = k; n.style.setProperty('--ln', k);
+  }
+  if('IntersectionObserver' in window){
+    new IntersectionObserver(function(es){
+      cerca = es[0].isIntersecting;
+      if(cerca) pinta();
+      else { var t = n.getBoundingClientRect().top, v = t > 0 ? 0 : 1; if(v !== ult){ ult = v; n.style.setProperty('--ln', v) } }
+    }, {threshold:0}).observe(n);
+  } else cerca = true;
+  addEventListener('scroll', pinta, {passive:true});
+  addEventListener('resize', mide, {passive:true});
+  addEventListener('load', function(){ setTimeout(mide, 400) });
+  addEventListener('nrm:remide', mide, {passive:true});
+  mide();
 })();
 </script>
 <script>
