@@ -53,8 +53,13 @@ di(fsx.map(f => f.num).join(' ') === 'P-01 P-02 P-03 P-04',
    'numeradas y en orden (' + fsx.map(f => f.num).join(' ') + ')');
 di(fsx.every(f => f.fuente && f.tit && f.flecha),
    'cada una con su medio, su titular y su salida');
-di(fsx.every(f => f.orden === 'prs-n>prs-s>prs-t>prs-go'),
-   'y en ese orden: numero, medio, titular, salida');
+/* El logotipo, cuando lo hay, entra entre el medio y el titular: es su
+   columna. Asi que el orden valido es con el y sin el, pero NO en otro
+   sitio —si alguien lo mete al final, la rejilla lo coloca igual y el
+   marcado deja de contar la fila en el orden en que se lee—. */
+di(fsx.every(f => f.orden === 'prs-n>prs-s>prs-t>prs-go' ||
+                  f.orden === 'prs-n>prs-s>prs-logo>prs-t>prs-go'),
+   'y en ese orden: numero, medio, [logotipo,] titular, salida');
 /* EL MEDIO NO SE REPITE EN SU PROPIO TITULAR. Esto es al reves de lo que
    defendia la version anterior de esta prueba, y el cambio es a proposito:
    en el video el medio tiene COLUMNA, asi que volver a nombrarlo en el
@@ -113,14 +118,59 @@ di(Math.abs(geo.alto / geo.ancho - 0.0852) < 0.012,
 di(Math.abs(geo.col - 3) < 0.15, 'el titular arranca en la cuarta columna (' + geo.col + ')');
 di(geo.caja >= 44, 'la caja de salida no baja de 44 px, que es lo que mide un dedo (' + geo.caja + ')');
 
-/* ── EL HUECO DEL LOGOTIPO NO SE COME EL TITULAR ──
-   Los archivos no estan -son marcas de terceros y no se inventan-, asi que
-   esto se comprueba METIENDO uno: se fabrica un logotipo absurdamente ancho
-   -640x32, cinco veces su columna- y se mira que se quede dentro. Sin el
-   «min-width:0» una celda de rejilla no baja de su contenido y el logotipo
-   se salia por la derecha a meterse debajo del titular; con un archivo de
-   los normales no se notaba, y el dia que llegue uno ancho se rompe sola.
-   Probarlo con el caso comodo es no probarlo. */
+/* ── LOS LOGOTIPOS DE LOS MEDIOS ──
+   Dos de las cuatro filas tienen logotipo -MarketWatch y Morningstar- y las
+   otras dos no. Eso no es un fallo a medias: solo lo lleva la fila que
+   tiene el archivo, y el guion crea la etiqueta DESPUES de que la imagen
+   haya cargado, para que un nombre mal escrito no deje un marco roto encima
+   del azul.
+   Lo que se comprueba es que salgan con la fila abierta y que no choquen
+   con nada, en escritorio Y en telefono: ahi el logotipo comparte celda con
+   el nombre del medio, que es donde se juntarian. */
+const logos = await pg.evaluate(() => {
+  const f = [...document.querySelectorAll('#press .prs-f')];
+  return { conRuta: f.filter(x => x.hasAttribute('data-logo')).length,
+           pintados: f.filter(x => x.querySelector('.prs-logo')).length,
+           rutas: f.map(x => x.getAttribute('data-logo') || '') };
+});
+di(logos.conRuta === logos.pintados && logos.pintados === 2,
+   'salen los dos logotipos que tienen archivo, y solo esos (' + logos.pintados + ')');
+di(logos.rutas.every(r => r === '' || /^img\/medios\/[a-z0-9_-]+\.(svg|png|webp)$/.test(r)),
+   'y las rutas son relativas y de dentro de la casa');
+
+/* Se abre la fila a mano, se espera a que la transicion TERMINE -420 ms- y
+   se deja la fila como estaba. Medir a mitad de la transicion daba 0,6 de
+   opacidad y parecia un fallo del logotipo; y olvidarse de quitar la marca
+   dejaba dos filas abiertas mas abajo, que es justo el fallo que busca la
+   comprobacion siguiente. Una prueba que ensucia lo que viene detras miente
+   dos veces. */
+await pg.evaluate(() => document.querySelectorAll('#press .prs-f')[2].classList.add('sel'));
+await pg.waitForTimeout(700);
+const choque = await pg.evaluate(() => {
+  const f = document.querySelectorAll('#press .prs-f')[2];
+  const g = f.querySelector('.prs-logo');
+  if (!g) { f.classList.remove('sel'); return { hay:false } }
+  const R = e => e.getBoundingClientRect();
+  const s = (A,B) => !(A.right<=B.left+.5||B.right<=A.left+.5||A.bottom<=B.top+.5||B.bottom<=A.top+.5);
+  const a = R(g);
+  const con = [['titular','.prs-t'],['medio','.prs-s'],['numero','.prs-n'],['salida','.prs-go']]
+    .filter(q => { const e = f.querySelector(q[1]); return e && s(a, R(e)) }).map(q => q[0]);
+  const r = { hay:true, con, op:+getComputedStyle(g).opacity,
+              fuera: a.left < -.5 || a.right > innerWidth + .5 };
+  f.classList.remove('sel');
+  return r;
+});
+di(choque.hay && choque.op > .9, 'y se ven enteros con la fila abierta');
+di(choque.hay && choque.con.length === 0 && !choque.fuera,
+   'sin pisar al titular, al medio ni a la salida' +
+   (choque.hay && choque.con.length ? ' — pisa: ' + choque.con.join(', ') : ''));
+
+/* ── Y UNO ANCHO SE QUEDA EN SU COLUMNA ──
+   Se fabrica uno absurdo -640x32, cinco veces su columna- porque sin el
+   «min-width:0» una celda de rejilla no baja de su contenido y se salia por
+   la derecha a meterse debajo del titular. Con los dos archivos que hay no
+   se nota; el dia que llegue uno ancho se rompe sola. Probarlo con el caso
+   comodo es no probarlo. */
 const hueco = await pg.evaluate(() => {
   const f = document.querySelectorAll('.prs-f')[1];
   const i = document.createElement('i');
