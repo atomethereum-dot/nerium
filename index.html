@@ -7946,17 +7946,27 @@ const CALM=matchMedia('(prefers-reduced-motion: reduce)').matches;
      Los claros van en el gris plata de la casa, no en blanco: en «#xfade» se
      pinta sumando luz y un claro se apaga solo; aqui se pinta solido y un
      blanco seria una mancha. */
-  /* EL AZUL DE «#xfade», PERO PARA PINTAR SOLIDO.
-     Copiar su paleta tal cual no valia, y el motivo es el modo de pintado:
-     alli se SUMA luz sobre negro, asi que un [28,46,140] apagado acaba
-     saliendo azul electrico al superponerse con sus vecinos. Aqui se pinta
-     solido, y ese mismo numero sale tal como es —gris azulado— y lava la
-     escena entera.
-     Asi que lo que se copia no son los numeros sino el RESULTADO: el mismo
-     azul hondo y saturado que se ve alli, ya sumado, con dos marinos casi
-     negros para la sombra. Cero grises: eran ellos los que descoloraban. */
-  const PAL=[[22,52,232],[12,30,180],[30,68,255],[16,40,205],[8,18,120],[4,10,72]];
-  const CLAROS=[[126,158,214],[96,126,184]];
+  /* LA PALETA DE «THE STACK», la seccion 04, traida de su fuente.
+     Alli los tonos estan escritos en HSL —«{h:219,s:100,l:56}» y ocho mas— y
+     los cubos se pintan SOLIDOS, igual que aqui: por eso esta si se puede
+     copiar numero a numero, cosa que con la de «#xfade» no pasaba. Son estos
+     nueve, pasados a RGB:
+       tres azules vivos, un azul hondo, dos pizarras oscuras, un marino casi
+       negro y dos claros —blanco y gris plata—.
+     Van con PESO, no a partes iguales: los azules salen cuatro veces mas que
+     los claros. Repartidos a la par, los blancos mandan y la escena se lava;
+     contados asi, son lo que son alli: el acento que separa una pieza de su
+     vecina. */
+  const PAL=[
+    [31,109,255],[31,109,255],[31,109,255],[31,109,255],   /* azul vivo      */
+    [4,64,231],  [4,64,231],  [4,64,231],  [4,64,231],     /* azul fuerte    */
+    [12,80,182], [12,80,182], [12,80,182],                  /* azul hondo     */
+    [61,132,255],[61,132,255],[61,132,255],                 /* azul claro     */
+    [66,75,87],  [66,75,87],                                /* pizarra        */
+    [36,44,61],                                             /* pizarra oscura */
+    [3,21,78],   [3,21,78]                                  /* marino, sombra */
+  ];
+  const CLAROS=[[233,235,237],[186,193,202]];               /* blanco y plata */
   const HONDO=9.6, CERCA=0.42, RANGO=HONDO-CERCA;
   let W=0,H=0,piezas=null,giro=0,raf=0,ultimo=0,t=0,hueco=null,huecoW=0,huecoH=0;
 
@@ -7988,7 +7998,7 @@ const CALM=matchMedia('(prefers-reduced-motion: reduce)').matches;
     for(const c of cols){
       const desf=Math.random()*dz;              /* cada columna, su desfase */
       for(let i=0;i<filas;i++){
-        const claro=Math.random()<0.04;
+        const claro=Math.random()<0.10;
         piezas.push({
           x:c.x+(Math.random()*2-1)*paso*0.16,
           y:c.y+(Math.random()*2-1)*paso*0.16,
@@ -8030,9 +8040,14 @@ const CALM=matchMedia('(prefers-reduced-motion: reduce)').matches;
   function pinta(dt){
     ctx.clearRect(0,0,W,H);
     const cx=W/2, cy=H/2, foco=Math.min(W,H)*0.92;
-    const vel=1.35*dt;
+    /* SE AHONDA AL BAJAR. Quieto en la entrada el pasillo apenas avanza;
+       segun se baja, se entra en el. La velocidad va de 0,55 a 3,1 y el giro
+       la acompaña a la mitad de ese paso, que si no el pasillo rueda mas
+       deprisa de lo que avanza y marea en vez de hundir. */
+    const emp=window.__tunelP||0;
+    const vel=(0.55+emp*2.55)*dt;
     t=(t+vel)%RANGO;
-    giro+=0.075*dt;
+    giro+=(0.045+emp*0.085)*dt;
     /* EL PASILLO GIRA UNA VEZ, NO PIEZA A PIEZA.
        Girar cada cuadrado por separado son dos «save/restore» y una rotacion
        por pieza: con quinientas, medio millar de cambios de estado por cuadro.
@@ -8068,7 +8083,7 @@ const CALM=matchMedia('(prefers-reduced-motion: reduce)').matches;
       const sale=Math.min(1,d/0.55);
       const al=q.a*sale;
       if(al<0.012) continue;
-      const luz=0.56+hondo*0.44;
+      const luz=0.60+hondo*0.40;
       const col=(q.c[0]*luz|0)+','+(q.c[1]*luz|0)+','+(q.c[2]*luz|0);
       const kA=foco/(z+vel), ax=cx+q.x*kA, ay=cy+q.y*kA;
       const dx=px-ax, dy=py-ay;
@@ -8208,6 +8223,10 @@ const CALM=matchMedia('(prefers-reduced-motion: reduce)').matches;
         const tf=cl((p-.36)/.18);
         if(Math.abs(tf-tunelF)>.004){ tunelF=tf; tunel.style.opacity=tf.toFixed(3) }
         window.__tunel=tf;
+        /* y su AVANCE, que el corredor usa para ahondarse: cuanto mas se
+           baja, mas adentro se va. Es el mismo numero que ya gobierna la
+           cortina, no uno nuevo. */
+        window.__tunelP=p;
       }
       if(edges)edges.style.opacity=(Math.sin(cl(front/1.32)*Math.PI)*.9).toFixed(3);
       /* Aqui se escribia «--sq» en «.hero-in» once veces por segundo. No lo
