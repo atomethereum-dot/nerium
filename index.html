@@ -336,6 +336,15 @@ main>section.dark,main>section.stack{background:var(--wash)}
   100%{transform:translate3d(-5%,4%,0) scale(.94)}
 }
 @media(prefers-reduced-motion:reduce){.sh-mesh i{animation:none}}
+/* EL CORREDOR DE LA PORTADA.
+   La cortina terminaba en cuatro manchas azules que se mueven muy despacio:
+   sobre negro eso no es un fondo, es un hueco. Entra aqui el mismo enjambre
+   de cubos que ya vive en «#xfade» —la misma lengua, no otra—, pero volando
+   de frente: el corredor va hacia quien mira, no de lado.
+   Encima de la malla y debajo del lockup, y con su propio agujero en el
+   centro para que «Nereum» no compita con nada. */
+.sh-tunel{position:absolute;inset:0;width:100%;height:100%;opacity:0;
+  pointer-events:none;z-index:1;will-change:opacity}
 .sh-mesh i:nth-child(1){left:-4%;top:4%;width:62%;height:76%;
   background:radial-gradient(circle,rgba(16,44,120,.30) 0%,rgba(16,44,120,.22) 34%,rgba(16,44,120,.06) 58%,rgba(16,44,120,0) 78%)}
 .sh-mesh i:nth-child(2){right:-6%;top:-10%;width:58%;height:70%;
@@ -7002,6 +7011,7 @@ window.__mide = function(cv, w, h){
     <div class="slats" id="slats"></div>
     <div class="sh-edges" id="shEdges"></div>
     <div class="sh-mesh"><i></i><i></i><i></i><i></i></div>
+    <canvas class="sh-tunel" id="shTunel" aria-hidden="true"></canvas>
     <div class="lockup" id="lockup">
       <i class="lk-bar" aria-hidden="true"></i>
       <span class="lk-word" id="lkWord" translate="no"></span>
@@ -7877,9 +7887,130 @@ const CALM=matchMedia('(prefers-reduced-motion: reduce)').matches;
     for(const j of jobs)j.run(S);
     requestAnimationFrame(frame);
   }
-  (function(){
+  /* ══ EL CORREDOR DE LA PORTADA ════════════════════════════════════════════
+   El mismo enjambre de «#xfade», con dos diferencias que vienen del sitio:
+
+     · AQUI VUELA DE FRENTE. En tokenomics el corredor cruza de lado y se
+       mira pasar; en la portada va hacia quien mira. Es la misma cuenta
+       —una z que baja y una perspectiva que la abre— con la camara girada.
+     · AQUI HAY UN AGUJERO. El lockup se monta justo encima, asi que al
+       terminar de pintar se recorta un ovalo blando en el centro: los cubos
+       entran por los bordes y no pisan «Nereum». Sin eso, la palabra pelea
+       con el fondo y pierde.
+
+   No pinta suelo: el lienzo es transparente y deja ver la malla de debajo.
+   Y no gasta un cuadro cuando no se le ve —la cortina publica su fuerza en
+   «window.__tunel» y aqui se pregunta por ella antes de nada—. */
+(function(){
+  const cv=document.getElementById('shTunel'); if(!cv)return;
+  const ctx=cv.getContext('2d'); if(!ctx)return;
+  const quieto=matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* Los mismos azules de la casa, un paso arriba: esto se ve una vez, al
+     entrar, y tiene que despertar. Y dos claros, pocos, que son los que
+     hacen que el enjambre tenga profundidad en vez de ser una nube. */
+  const PAL=[[58,102,255],[30,72,232],[86,124,255],[22,52,180],[120,162,255],[16,38,150]];
+  const CLAROS=[[228,236,250],[176,196,232]];
+  const HONDO=9.2;
+  let W=0,H=0,vuelo=null,vt=0,raf=0;
+
+  function siembra(){
+    const cuantos = W<760 ? 120 : 250;
+    vuelo=[];
+    for(let i=0;i<cuantos;i++){
+      const cl=Math.random()<0.20;
+      vuelo.push({
+        x:(Math.random()*2-1)*2.3, y:(Math.random()*2-1)*2.3,
+        z:Math.random()*HONDO+0.4,
+        giro:Math.random()*Math.PI, vg:(Math.random()*2-1)*0.45,
+        lado:0.16+Math.random()*0.34,
+        c: cl?CLAROS[(Math.random()*CLAROS.length)|0]:PAL[(Math.random()*PAL.length)|0],
+        a: cl?0.30+Math.random()*0.34 : 0.46+Math.random()*0.54
+      });
+    }
+  }
+  function mide(){
+    const d=(window.__dens?__dens():1);
+    W=cv.clientWidth; H=cv.clientHeight;
+    if(!W||!H)return false;
+    if(window.__mide)__mide(cv,W*d,H*d); else {cv.width=W*d;cv.height=H*d}
+    ctx.setTransform(d,0,0,d,0,0);
+    return true;
+  }
+
+  let ultimo=0;
+  function pinta(dt){
+    ctx.clearRect(0,0,W,H);
+    const cx=W/2, cy=H/2;
+    const foco=Math.min(W,H)*0.95;
+    const vel=1.55*dt;
+    vt+=dt;
+    ctx.globalCompositeOperation='lighter';
+    for(const c of vuelo){
+      const zAntes=c.z;
+      c.z-=vel;
+      if(c.z<0.34){ c.z+=HONDO; c.x=(Math.random()*2-1)*2.3; c.y=(Math.random()*2-1)*2.3 }
+      c.giro+=c.vg*dt;
+      const k=foco/c.z, kA=foco/zAntes;
+      const px=cx+c.x*k, py=cy+c.y*k;
+      const lado=Math.max(1.4, c.lado*k*0.30);
+      if(px<-lado*2||px>W+lado*2||py<-lado*2||py>H+lado*2)continue;
+      const cerca=1-Math.min(1,(c.z-0.34)/HONDO);
+      const a=c.a*cerca*cerca;
+      if(a<0.012)continue;
+      /* la estela: de donde venia a donde esta. Es lo que convierte una nube
+         de cuadrados en velocidad. */
+      const ax=cx+c.x*kA, ay=cy+c.y*kA, dx=px-ax, dy=py-ay;
+      if(dx*dx+dy*dy>4){
+        ctx.strokeStyle='rgba('+c.c.join(',')+','+(a*0.5).toFixed(3)+')';
+        ctx.lineWidth=Math.max(1,lado*0.55);
+        ctx.beginPath(); ctx.moveTo(ax,ay); ctx.lineTo(px,py); ctx.stroke();
+      }
+      ctx.save(); ctx.translate(px,py); ctx.rotate(c.giro);
+      ctx.fillStyle='rgba('+c.c.join(',')+','+a.toFixed(3)+')';
+      ctx.fillRect(-lado/2,-lado/2,lado,lado);
+      ctx.fillStyle='rgba(255,255,255,'+(a*0.45).toFixed(3)+')';
+      ctx.fillRect(-lado/2,-lado/2,lado,Math.max(1,lado*0.16));
+      ctx.restore();
+    }
+    /* EL AGUJERO. Se borra un ovalo blando en el centro para que el lockup
+       tenga donde apoyarse. Va en «destination-out»: no pinta negro encima
+       —eso taparia tambien la malla—, quita lo pintado. */
+    ctx.globalCompositeOperation='destination-out';
+    const rx=Math.min(W*0.34,430), ry=Math.min(H*0.34,270);
+    const g=ctx.createRadialGradient(cx,cy,0,cx,cy,1);
+    g.addColorStop(0,'rgba(0,0,0,1)');
+    g.addColorStop(0.42,'rgba(0,0,0,.90)');
+    g.addColorStop(0.72,'rgba(0,0,0,.42)');
+    g.addColorStop(1,'rgba(0,0,0,0)');
+    ctx.save(); ctx.translate(cx,cy); ctx.scale(rx,ry); ctx.translate(-cx,-cy);
+    ctx.fillStyle=g; ctx.beginPath(); ctx.arc(cx,cy,1,0,Math.PI*2); ctx.fill();
+    ctx.restore();
+    ctx.globalCompositeOperation='source-over';
+  }
+
+  function arranca(){
+    if(!mide())return;
+    siembra();
+    if(quieto){ pinta(0); return }      /* una sola pasada, sin bucle */
+    ultimo=performance.now();
+    (function tick(ahora){
+      raf=requestAnimationFrame(tick);
+      const f=window.__tunel||0;
+      const dt=Math.min(.05,((ahora-ultimo)||16)/1000); ultimo=ahora;
+      if(f<=0.004)return;               /* no se le ve: ni un cuadro */
+      pinta(dt);
+    })(ultimo);
+  }
+  addEventListener('resize',()=>{ if(mide())siembra() },{passive:true});
+  if(document.readyState==='loading')
+    addEventListener('DOMContentLoaded',arranca,{once:true});
+  else arranca();
+})();
+(function(){
     const cv=document.getElementById('burst'),inn=document.querySelector('.hero-in');
     if(!cv||!inn)return;
+    const tunel=document.getElementById('shTunel'); let tunelF=-1;
     const floor=document.querySelector('.glowfloor'),
           slatBox=document.getElementById('slats'),
           mesh=document.querySelector('.sh-mesh'),
@@ -7969,6 +8100,15 @@ const CALM=matchMedia('(prefers-reduced-motion: reduce)').matches;
         t.e=e;t.el.style.setProperty('--e',e.toFixed(3));
       }
       if(mesh)mesh.style.opacity=cl((p-.34)/.20).toFixed(3);
+      /* El corredor entra con la malla y se apaga antes que ella, para no
+         pelearse con el lockup cuando este acaba de montarse. Se publica su
+         fuerza y el corredor decide solo si pinta o no: asi no gasta un
+         cuadro cuando no se le ve. */
+      if(tunel){
+        const tf=cl((p-.36)/.18)*(1-cl((p-.88)/.12));
+        if(Math.abs(tf-tunelF)>.004){ tunelF=tf; tunel.style.opacity=tf.toFixed(3) }
+        window.__tunel=tf;
+      }
       if(edges)edges.style.opacity=(Math.sin(cl(front/1.32)*Math.PI)*.9).toFixed(3);
       /* Aqui se escribia «--sq» en «.hero-in» once veces por segundo. No lo
          lee NADIE: cero usos en toda la hoja. Y como no estaba registrada,
