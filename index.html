@@ -6847,7 +6847,19 @@ window.__mide = function(cv, w, h){
 
   window.requestAnimationFrame = function(cb){
     if(document.hidden) { /* pestaña de fondo: el navegador ya lo para */ }
-    var paso = (Date.now() - activo < CALLADO) ? PASO_ACTIVO : PASO;
+    /* EL CORREDOR DE LA PORTADA CUENTA COMO ACTIVIDAD.
+       El techo baja a 20 cuadros cuando nadie toca nada, y eso vale para lo
+       que se mueve solo —deriva lenta, no se distingue—. Pero la portada es
+       lo unico que se mira QUIETO mientras algo corre de verdad: se para uno
+       a ver el pasillo y ahi los 20 cuadros se notan como un tiron.
+       Mientras el corredor esta en pantalla se usa el paso de «con dedo».
+       No se levanta el techo —el motivo por el que existe sigue en pie y
+       esta escrito arriba—: se le dice cuando la pagina esta viva aunque el
+       dedo este quieto. Y son unos segundos, solo en la portada, con el
+       campo de «#burst» ya apagado debajo. */
+    var vivo = (Date.now() - activo < CALLADO) ||
+               (window.__tunelVivo === true && (window.__tunel||0) > 0.02);
+    var paso = vivo ? PASO_ACTIVO : PASO;
     var mio = id++;
     cola.push([mio, cb]);
     if(!prog){
@@ -7990,8 +8002,8 @@ const CALM=matchMedia('(prefers-reduced-motion: reduce)').matches;
      saca de la fase, que no cambia nunca. Se vera abajo por que importa. */
   function siembra(){
     const {a,b}=medidas();
-    const paso = W<760 ? 0.72 : 0.52;
-    const dz   = W<760 ? 0.76 : 0.50;
+    const paso = W<760 ? 0.84 : 0.52;
+    const dz   = W<760 ? 0.88 : 0.50;
     const filas= Math.ceil(RANGO/dz);
     piezas=[]; t=0;
     const cols=[];
@@ -8006,17 +8018,27 @@ const CALM=matchMedia('(prefers-reduced-motion: reduce)').matches;
           y:c.y+(Math.random()*2-1)*paso*0.16,
           s:(i*dz+desf)%RANGO,                  /* la fase */
           lado:paso*(0.62+Math.random()*0.30),
-          c: claro?CLAROS[(Math.random()*CLAROS.length)|0]:PAL[(Math.random()*PAL.length)|0],
+          ci: claro ? PAL.length+((Math.random()*CLAROS.length)|0)
+                    : ((Math.random()*PAL.length)|0),
           a: claro?0.86+Math.random()*0.14 : 0.80+Math.random()*0.20
         });
       }
     }
     /* ordenadas por fase, UNA vez en la vida */
     piezas.sort((m,n)=>n.s-m.s);
+    if(!TABLA)cueceTabla();
   }
 
   function mide(){
-    const d=(window.__dens?__dens():1);
+    /* EL LIENZO, A MENOS RESOLUCION QUE LA PANTALLA.
+       Esto es un fondo de bloques en movimiento detras de una palabra, no
+       una tipografia: nadie va a contarle los pixeles al canto de un cubo
+       que cruza en medio segundo. Pintarlo al 78 % y dejar que el navegador
+       lo estire cuesta un 40 % menos de relleno —que es en lo que se va una
+       escena como esta, no en la cuenta— y no se distingue.
+       El recorte y el faro se cuecen con esta misma densidad, asi que no hay
+       que tocarlos. */
+    const d=(window.__dens?__dens():1)*0.78;
     W=cv.clientWidth; H=cv.clientHeight;
     if(!W||!H)return false;
     if(window.__mide)__mide(cv,W*d,H*d); else {cv.width=W*d;cv.height=H*d}
@@ -8053,12 +8075,42 @@ const CALM=matchMedia('(prefers-reduced-motion: reduce)').matches;
     return true;
   }
 
-  /* el mismo apagado y la misma niebla que la cara, con otro factor de luz:
-     una cara mas oscura sigue estando en el mismo sitio del pasillo */
-  function sombra(c,luz,nie){
-    return ((c[0]*luz)*(1-nie)+10*nie|0)+','+
-           ((c[1]*luz)*(1-nie)+22*nie|0)+','+
-           ((c[2]*luz)*(1-nie)+72*nie|0);
+  /* ══ LA TABLA DE COLORES ══════════════════════════════════════════════
+     Aqui estaba el tiron, y no en el numero de cubos.
+
+     Cada pieza armaba su color a mano —«'rgba('+(c[0]*luz*(1-nie)+10*nie|0)+…»—
+     y lo hacia UNA VEZ POR CARA: con las tres caras y quinientas piezas salian
+     mil quinientas cadenas nuevas por cuadro, y el navegador tiene que ANALIZAR
+     cada una para saber de que color le hablas. Medido con la CPU al cuarto:
+     84 ms por cuadro, doce imagenes por segundo.
+
+     La cuenta no cambia, cambia CUANDO se hace. La distancia se reparte en
+     catorce escalones y las cuatro caras se cuecen de antemano para cada tono:
+     veintiuna entradas por catorce escalones por cuatro caras, todas al
+     arrancar. Dentro del bucle ya no se construye ni una cadena: se busca en
+     la tabla y la transparencia va por «globalAlpha», que es un numero y no
+     pasa por el analizador. */
+  const FILO='rgb(215,232,255)';
+  const ESCALONES=14, CARAS=[1, 0.50, 0.80, 0.38];   /* cara, costado, arriba, abajo */
+  let TABLA=null;
+  function cueceTabla(){
+    const todos=PAL.concat(CLAROS);
+    TABLA=new Array(todos.length);
+    for(let i=0;i<todos.length;i++){
+      const co=todos[i]; TABLA[i]=new Array(ESCALONES);
+      for(let e=0;e<ESCALONES;e++){
+        const hondo=e/(ESCALONES-1), f=1-hondo;
+        const luz=0.60+hondo*0.40, nie=f*f*0.72;
+        const fila=new Array(CARAS.length);
+        for(let k=0;k<CARAS.length;k++){
+          const m=luz*CARAS[k];
+          fila[k]='rgb('+((co[0]*m)*(1-nie)+10*nie|0)+','+
+                         ((co[1]*m)*(1-nie)+22*nie|0)+','+
+                         ((co[2]*m)*(1-nie)+72*nie|0)+')';
+        }
+        TABLA[i][e]=fila;
+      }
+    }
   }
 
   function pinta(dt){
@@ -8126,15 +8178,9 @@ const CALM=matchMedia('(prefers-reduced-motion: reduce)').matches;
       const sale=Math.min(1,d/0.55);
       const al=q.a*sale;
       if(al<0.012) continue;
-      /* NIEBLA, NO OSCURIDAD.
-         Apagar hacia el negro deja el fondo vacio; apagar hacia un azul de
-         noche mete aire entre las piezas, y el aire es lo que separa un
-         decorado de un sitio con hondura. */
-      const f=1-hondo;                           /* 0 cerca, 1 al fondo */
-      const luz=0.60+hondo*0.40, nie=f*f*0.72;
-      const col=((q.c[0]*luz)*(1-nie)+10*nie|0)+','+
-                ((q.c[1]*luz)*(1-nie)+22*nie|0)+','+
-                ((q.c[2]*luz)*(1-nie)+72*nie|0);
+      /* el escalon de niebla que le toca, y con el sus cuatro caras */
+      const tono=TABLA[q.ci][(hondo*(ESCALONES-1))|0];
+      ctx.globalAlpha=al;
       /* LA ESTELA CRECE CON LA VELOCIDAD, y no solo por moverse mas: se
          mira tres cuadros atras en vez de uno. A paso de entrada apenas se
          nota; lanzado, las piezas de delante se estiran en rayas de luz, que
@@ -8142,9 +8188,11 @@ const CALM=matchMedia('(prefers-reduced-motion: reduce)').matches;
       const kA=foco/(z+vel*(1+emp*2.4)), ax=vx+q.x*kA, ay=vy+q.y*kA;
       const dx=px-ax, dy=py-ay;
       if(dx*dx+dy*dy>6){
-        ctx.strokeStyle='rgba('+col+','+(al*(0.16+emp*0.30)).toFixed(3)+')';
+        ctx.globalAlpha=al*(0.16+emp*0.30);
+        ctx.strokeStyle=tono[0];
         ctx.lineWidth=Math.max(1,lado*0.7);
         ctx.beginPath(); ctx.moveTo(ax,ay); ctx.lineTo(px,py); ctx.stroke();
+        ctx.globalAlpha=al;
       }
       /* ══ LA PIEZA, QUE YA NO ES UN CUADRADO ═══════════════════════════
          Un cuadrado plano nunca sale de la pantalla por mucho que crezca:
@@ -8172,7 +8220,7 @@ const CALM=matchMedia('(prefers-reduced-motion: reduce)').matches;
           const by0=vy+(q.y-hs)*kb, by1=vy+(q.y+hs)*kb;
           /* los costados van ANTES que la cara: estan detras */
           if(q.x>0.02||q.x<-0.02){
-            ctx.fillStyle='rgba('+sombra(q.c,luz*0.50,nie)+','+al.toFixed(3)+')';
+            ctx.fillStyle=tono[1];
             ctx.beginPath();
             if(q.x>0){ ctx.moveTo(fx0,fy0);ctx.lineTo(fx0,fy1);ctx.lineTo(bx0,by1);ctx.lineTo(bx0,by0) }
             else     { ctx.moveTo(fx1,fy0);ctx.lineTo(fx1,fy1);ctx.lineTo(bx1,by1);ctx.lineTo(bx1,by0) }
@@ -8181,24 +8229,27 @@ const CALM=matchMedia('(prefers-reduced-motion: reduce)').matches;
           if(q.y>0.02||q.y<-0.02){
             /* la de abajo mas oscura que la de arriba: la luz viene de arriba,
                como en toda la casa */
-            ctx.fillStyle='rgba('+sombra(q.c,luz*(q.y<0?0.80:0.38),nie)+','+al.toFixed(3)+')';
+            ctx.fillStyle=tono[q.y<0?2:3];
             ctx.beginPath();
             if(q.y>0){ ctx.moveTo(fx0,fy0);ctx.lineTo(fx1,fy0);ctx.lineTo(bx1,by0);ctx.lineTo(bx0,by0) }
             else     { ctx.moveTo(fx0,fy1);ctx.lineTo(fx1,fy1);ctx.lineTo(bx1,by1);ctx.lineTo(bx0,by1) }
             ctx.closePath(); ctx.fill();
           }
-          ctx.fillStyle='rgba('+col+','+al.toFixed(3)+')';
+          ctx.fillStyle=tono[0];
           ctx.fillRect(fx0,fy0,fx1-fx0,fy1-fy0);
-          ctx.fillStyle='rgba(215,232,255,'+(al*0.16*(0.30+hondo*0.70)).toFixed(3)+')';
+          ctx.globalAlpha=al*0.16*(0.30+hondo*0.70);
+          ctx.fillStyle=FILO;
           ctx.fillRect(fx0,fy0,fx1-fx0,Math.max(1,(fy1-fy0)*0.11));
           continue;
         }
       }
-      ctx.fillStyle='rgba('+col+','+al.toFixed(3)+')';
+      ctx.fillStyle=tono[0];
       ctx.fillRect(px-media,py-media,lado,lado);
-      ctx.fillStyle='rgba(215,232,255,'+(al*0.13*(0.30+hondo*0.70)).toFixed(3)+')';
+      ctx.globalAlpha=al*0.13*(0.30+hondo*0.70);
+      ctx.fillStyle=FILO;
       ctx.fillRect(px-media,py-media,lado,Math.max(1,lado*0.12));
     }
+    ctx.globalAlpha=1;
     ctx.restore();
     if(hueco){
       ctx.globalCompositeOperation='destination-out';
@@ -8215,10 +8266,28 @@ const CALM=matchMedia('(prefers-reduced-motion: reduce)').matches;
     (function tick(ahora){
       raf=requestAnimationFrame(tick);
       const dt=Math.min(.05,((ahora-ultimo)||16)/1000); ultimo=ahora;
-      if((window.__tunel||0)<=0.004) return;     /* no se le ve: ni un cuadro */
+      if(!aVista) return;                        /* fuera de pantalla */
+      if((window.__tunel||0)<=0.004) return;     /* aun no ha entrado */
       pinta(dt);
     })(ultimo);
   }
+  /* ══ EL VIGIA ═════════════════════════════════════════════════════════
+     «window.__tunel» dice cuanto ha entrado el corredor, y desde que deja de
+     apagarse al final de la cortina se queda en 1 PARA SIEMPRE. Eso estaba
+     bien para que la portada no volviera a la de antes, y mal para todo lo
+     demas: el corredor seguia pintando con la portada ya fuera de pantalla, y
+     el techo de cuadros se quedaba levantado en toda la pagina —su bateria lo
+     caza: 30 por segundo con la pagina quieta donde el limite es 22—.
+     Cuanto ha entrado y si se le ve son dos preguntas distintas. Esta segunda
+     la contesta el navegador, que para eso sabe lo que hay en pantalla. */
+  let aVista=true;
+  try{
+    new IntersectionObserver(e=>{
+      aVista=e[0].isIntersecting;
+      window.__tunelVivo=aVista;
+    },{threshold:0.01}).observe(cv);
+  }catch(e){ window.__tunelVivo=true }
+
   addEventListener('resize',()=>{ if(mide())siembra() },{passive:true});
   if(FINO) addEventListener('pointermove',e=>{
     raton=(e.clientX/innerWidth-0.5)*2; ratonY=(e.clientY/innerHeight-0.5)*2;
@@ -9293,6 +9362,15 @@ function campoGL(){
     if(muerto)return;
     requestAnimationFrame(frame);
     if(!live){last=ts;return}
+    /* TAPADO: NO HAY NADA QUE PINTAR.
+       La portada ya tiene su campo de bloques aqui, en «#burst». Encima se
+       le puso el corredor, y entre los dos esta «.sh-mesh», que desde el
+       54 % de la cortina es OPACA y tapa este campo por completo. O sea:
+       desde ahi se pintaban ciento veintidos bloques por cuadro PARA NADIE,
+       justo cuando el corredor esta pintando los suyos. En un telefono eso
+       es el doble de trabajo por la mitad de imagen, y es de donde venian
+       los tirones. */
+    if((window.__tunel||0)>0.985){last=ts;return}
     if(vigilando){
       if(!t0Med)t0Med=ts;
       cuadros++;
@@ -9415,6 +9493,15 @@ function campo2D(){
   function frame(ts){
     requestAnimationFrame(frame);
     if(!live){last=ts;return}
+    /* TAPADO: NO HAY NADA QUE PINTAR.
+       La portada ya tiene su campo de bloques aqui, en «#burst». Encima se
+       le puso el corredor, y entre los dos esta «.sh-mesh», que desde el
+       54 % de la cortina es OPACA y tapa este campo por completo. O sea:
+       desde ahi se pintaban ciento veintidos bloques por cuadro PARA NADIE,
+       justo cuando el corredor esta pintando los suyos. En un telefono eso
+       es el doble de trabajo por la mitad de imagen, y es de donde venian
+       los tirones. */
+    if((window.__tunel||0)>0.985){last=ts;return}
     const dt=Math.min(.05,(ts-last)/1000||.016);last=ts;t+=dt;
     M.k+=(M.want-M.k)*Math.min(1,dt*5.2);
     if(M.tx>-1e4){
