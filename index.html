@@ -8599,7 +8599,12 @@ const CALM=matchMedia('(prefers-reduced-motion: reduce)').matches;
      por su cuenta. */
   let corre=false;
   function tick(ahora){
-    if(!aVista){ corre=false; return; }
+    /* durante el vuelo a la seccion siguiente el tunel se congela en su ultimo
+       cuadro: se va a ir de todos modos, y pintandolo a pantalla completa el
+       vuelo iba a su ritmo -8 a 12 cuadros, con saltos de 200 ms-. El lienzo
+       conserva la imagen, asi que se ve el tunel quieto subiendo, no un
+       hueco. Si se vuelve a la portada, su vigia lo enciende de nuevo. */
+    if(!aVista || window.__vuelo){ corre=false; return; }
     raf=requestAnimationFrame(tick);
     const dt=Math.min(.05,((ahora-ultimo)||16)/1000); ultimo=ahora;
     if((window.__tunel||0)<=0.004) return;       /* aun no ha entrado */
@@ -10164,8 +10169,22 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
   }
   mide();
   addEventListener('resize', mide, {passive:true});
-  new IntersectionObserver(function(e){ vivo=e[0].isIntersecting },
-    {rootMargin:'80% 0px 60% 0px',threshold:0}).observe(cv);
+  /* EL COMENTARIO DE ARRIBA DECIA «FUERA DE PANTALLA NO SE PINTA NI UN
+     CUADRO», y el vigia tenia un margen de 80 % de pantalla por arriba y 60 %
+     por abajo: se animaba estando a mas de media pantalla de distancia, que
+     es exactamente mientras se lee la prensa. Medido ahi: 17.000-25.000
+     dibujos por segundo y la pagina a 8-12 cuadros, con la banda asomando
+     por abajo o ni eso.
+     Ahora se ANIMA solo con un tercio de la banda a la vista. Si asoma menos,
+     se pinta UN cuadro quieto -para que no se vea una franja vacia- y se
+     espera: una banda que asoma por el borde no necesita moverse para que se
+     entienda, y quieta no cuesta nada. */
+  var pintada=false;
+  new IntersectionObserver(function(e){
+    var r=e[0].intersectionRatio;
+    vivo = e[0].isIntersecting && r >= 0.33;
+    if(e[0].isIntersecting && !pintada && W){ pintada=true; draw(avanceT); }
+  },{threshold:[0, 0.33]}).observe(cv);
   requestAnimationFrame(pinta);
 })();
 (function(){
@@ -14529,6 +14548,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
     if(y0 >= d - 8){ hecho = true; return; }
     saltando = true; hecho = true;
     if(seco){ pon(d); saltando = false; antes = d; return; }
+    window.__vuelo = true;
     bloquea(true);
     /* 1,1 s y curva de ENTRADA Y SALIDA suaves. Eran 0,64 s con una curva que
        sale a toda velocidad desde el primer cuadro: lo que se notaba era un
@@ -14546,6 +14566,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
       if(k < 1){ requestAnimationFrame(paso); return; }
       pon(dd);
       bloquea(false);
+      window.__vuelo = false;
       saltando = false;
       antes = window.scrollY || 0;
     })(t0);
