@@ -8037,9 +8037,35 @@ var rAF=window.requestAnimationFrame.bind(window);
 var P=CanvasRenderingContext2D.prototype;
 var PINTAN=['fillRect','clearRect','fill','stroke','drawImage','fillText'];
 var lienzo=new WeakMap(), visible=new WeakMap(), actual=null, orig={};
+/* LOS QUE ESPERAN, APARCADOS. Aqui un bucle cuyo lienzo no se veia volvia a
+   pedir el cuadro sin ejecutarse: no dormia, daba vueltas en vacio. Medido
+   con la pagina quieta en la prensa: 659 peticiones de cuadro por segundo,
+   once bucles girando para nadie, y el navegador sin poder descansar nunca.
+   Ahora se guardan en una lista por lienzo y NO piden nada hasta que el
+   vigia avisa de que su lienzo vuelve a asomar. Cero trabajo mientras
+   tanto. */
+var aparcados=new Map();
+function aparca(c, cb){
+  var l=aparcados.get(c); if(!l){ l=[]; aparcados.set(c,l); }
+  if(l.indexOf(cb)<0) l.push(cb);
+}
+function despierta(c){
+  var l=aparcados.get(c); if(!l) return;
+  aparcados.delete(c);
+  for(var i=0;i<l.length;i++) window.requestAnimationFrame(l[i]);
+}
 var ojo=new IntersectionObserver(function(es){
-  for(var i=0;i<es.length;i++) visible.set(es[i].target, es[i].isIntersecting);
+  for(var i=0;i<es.length;i++){
+    visible.set(es[i].target, es[i].isIntersecting);
+    if(es[i].isIntersecting) despierta(es[i].target);
+  }
 },{rootMargin:'120px 0px'});
+/* una pestaña que vuelve a primer plano despierta a los suyos: mientras
+   estaba en segundo plano quedaron aparcados por «document.hidden» */
+document.addEventListener('visibilitychange',function(){
+  if(document.hidden) return;
+  aparcados.forEach(function(l,c){ if(visible.get(c)!==false) despierta(c); });
+});
 PINTAN.forEach(function(m){
   var o=P[m]; if(typeof o!=='function')return; orig[m]=o;
   P[m]=function(){
@@ -8057,8 +8083,8 @@ setTimeout(function(){ PINTAN.forEach(function(m){ if(orig[m])P[m]=orig[m]; }); 
 window.requestAnimationFrame=function(cb){
   return rAF(function(t){
     var c=lienzo.get(cb);
-    if(c && visible.get(c)===false){ window.requestAnimationFrame(cb); return; }
-    if(document.hidden && c){ window.requestAnimationFrame(cb); return; }
+    if(c && visible.get(c)===false){ aparca(c,cb); return; }
+    if(document.hidden && c){ aparca(c,cb); return; }
     var ant=actual; actual=cb;
     try{ return cb(t); } finally{ actual=ant; }
   });
@@ -8556,13 +8582,28 @@ const CALM=matchMedia('(prefers-reduced-motion: reduce)').matches;
     siembra();
     if(quieto){ pinta(0); return }
     ultimo=performance.now();
-    (function tick(ahora){
-      raf=requestAnimationFrame(tick);
-      const dt=Math.min(.05,((ahora-ultimo)||16)/1000); ultimo=ahora;
-      if(!aVista) return;                        /* fuera de pantalla */
-      if((window.__tunel||0)<=0.004) return;     /* aun no ha entrado */
-      pinta(dt);
-    })(ultimo);
+    corre=true;
+    raf=requestAnimationFrame(tick);
+  }
+  /* EL TUNEL SE APAGA AL IRSE. Antes pedia su cuadro PRIMERO y miraba si se
+     le veia DESPUES, asi que fuera de pantalla seguia vivo: 60 vueltas por
+     segundo para decir «no toca». Ahora, si no se le ve, no vuelve a pedir
+     nada: el bucle termina. Lo vuelve a encender el vigia de abajo cuando el
+     lienzo asoma. No depende del repartidor de la cabecera -que solo aprende
+     de que lienzo es cada bucle en los cuatro primeros segundos-: se apaga
+     por su cuenta. */
+  let corre=false;
+  function tick(ahora){
+    if(!aVista){ corre=false; return; }
+    raf=requestAnimationFrame(tick);
+    const dt=Math.min(.05,((ahora-ultimo)||16)/1000); ultimo=ahora;
+    if((window.__tunel||0)<=0.004) return;       /* aun no ha entrado */
+    pinta(dt);
+  }
+  function enciende(){
+    if(corre||quieto||!W) return;
+    corre=true; ultimo=performance.now();
+    raf=requestAnimationFrame(tick);
   }
   /* ══ EL VIGIA ═════════════════════════════════════════════════════════
      «window.__tunel» dice cuanto ha entrado el corredor, y desde que deja de
@@ -8578,6 +8619,7 @@ const CALM=matchMedia('(prefers-reduced-motion: reduce)').matches;
     new IntersectionObserver(e=>{
       aVista=e[0].isIntersecting;
       window.__tunelVivo=aVista;
+      if(aVista) enciende();
     },{threshold:0.01}).observe(cv);
   }catch(e){ window.__tunelVivo=true }
 
