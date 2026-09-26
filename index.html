@@ -7999,9 +7999,8 @@ const CALM=matchMedia('(prefers-reduced-motion: reduce)').matches;
   const CLAROS=[[233,235,237],[186,193,202]];               /* blanco y plata */
   const HONDO=9.6, CERCA=0.42, RANGO=HONDO-CERCA;
   let W=0,H=0,piezas=null,giro=0,raf=0,ultimo=0,t=0,hueco=null,huecoW=0,huecoH=0;
-  let vt=0, faro=null, faroR=0, raton=0, ratonY=0, mira=0, miraY=0, anclaX=0, anclaY=0;
+  let vt=0, raton=0, ratonY=0, mira=0, miraY=0, anclaX=0, anclaY=0;
   const FINO=matchMedia('(hover:hover) and (pointer:fine)').matches;
-  const ANCHA=innerWidth>=900;      /* donde no hay techo de cuadros */
 
   /* El pasillo: media anchura y media altura en unidades del mundo. Se
      estiran con la forma de la pantalla para que las paredes de los lados no
@@ -8083,8 +8082,8 @@ const CALM=matchMedia('(prefers-reduced-motion: reduce)').matches;
        que cruza en medio segundo. Pintarlo al 78 % y dejar que el navegador
        lo estire cuesta un 40 % menos de relleno —que es en lo que se va una
        escena como esta, no en la cuenta— y no se distingue.
-       El recorte y el faro se cuecen con esta misma densidad, asi que no hay
-       que tocarlos. */
+       El recorte se cuece con esta misma densidad, asi que no hay que
+       tocarlo. */
     /* LA NITIDEZ QUE YO MISMO QUITE.
        Bajar el lienzo al 66-78 % fue por rendimiento, y se pago en canto
        borroso —que es justo lo que se nota en un cubo, porque es todo canto—.
@@ -8124,26 +8123,13 @@ const CALM=matchMedia('(prefers-reduced-motion: reduce)').matches;
       const r=lk.getBoundingClientRect(), c=cv.getBoundingClientRect();
       if(r.width){ anclaX=r.left-c.left+r.width/2; anclaY=r.top-c.top+r.height/2 }
     }
-    /* EL FARO DEL FONDO. Un pasillo que no lleva a ninguna parte es un
-       tunel de papel pintado. Una sola luz honda en el punto de fuga le da
-       destino, y con ella las piezas del fondo se recortan en contraluz en
-       vez de desaparecer en negro. Cocida una vez, estampada cada cuadro. */
-    faroR=Math.min(W,H)*0.40;
-    faro=document.createElement('canvas');
-    faro.width=faro.height=Math.max(4,Math.ceil(faroR*2));
-    const fx=faro.getContext('2d');
-    const fg=fx.createRadialGradient(faroR,faroR,0,faroR,faroR,faroR);
-    /* EL FARO, A UNA CUARTA PARTE.
-       Estaba al 50 % sobre un radio de dos tercios de pantalla: eso no es una
-       luz al fondo, es niebla encima de todo, y se llevaba por delante el
-       contraste de los bloques. Una brasa pequeña al fondo hace el mismo
-       trabajo —decir que el pasillo va a algun sitio— sin blanquear nada. */
-    fg.addColorStop(0,'rgba(96,146,255,.15)');
-    fg.addColorStop(0.30,'rgba(40,78,196,.07)');
-    fg.addColorStop(0.66,'rgba(14,30,110,.025)');
-    fg.addColorStop(1,'rgba(6,12,44,0)');
-    fx.fillStyle=fg; fx.fillRect(0,0,faro.width,faro.height);
-
+    /* NI FARO NI HACES.
+       Aqui habia una luz honda en el punto de fuga y cinco cuñas saliendo de
+       ella. La idea era darle destino al pasillo; el efecto real era levantar
+       el negro del fondo y quitarle contraste a los bloques, que es
+       exactamente lo contrario de lo que este sitio necesita. El final del
+       tunel es NEGRO, y lo que lo hace legible como fondo es que los bloques
+       de delante tengan color y los de atras no. Sin luces. */
     return true;
   }
 
@@ -8229,52 +8215,6 @@ const CALM=matchMedia('(prefers-reduced-motion: reduce)').matches;
     const vx=anclaX+Math.sin(vt*0.21)*W*0.008+mira*W*0.016;
     const vy=anclaY+Math.cos(vt*0.17)*H*0.007+miraY*H*0.014;
 
-    if(faro){
-      const fa=(0.30+emp*0.70);
-      ctx.globalAlpha=fa;
-      ctx.drawImage(faro, vx-faroR, vy-faroR, faroR*2, faroR*2);
-      /* ══ LOS HACES ══════════════════════════════════════════════════════
-         Lo que hace que una luz se lea como LUZ y no como una mancha es que
-         se vea de donde sale. Seis cuñas que nacen en el punto de fuga y se
-         abren hacia los bordes, girando muy despacio y a contramano del
-         pasillo: cuando una cuña pasa por detras de una columna de bloques,
-         el ojo lee que hay algo iluminando el fondo.
-         Van ANTES que las piezas —son luz de fondo, no un velo encima— y son
-         seis rellenos por cuadro: al lado de quinientas cajas, nada. */
-      /* ══ LOS HACES ══════════════════════════════════════════════════════
-         Lo que hace que una luz se lea como LUZ y no como una mancha es ver
-         de donde sale. Cinco cuñas que nacen en el punto de fuga y se abren
-         hacia los bordes, girando despacio y a contramano del pasillo: cuando
-         una pasa por detras de una columna de bloques, el ojo lee que hay
-         algo iluminando el fondo.
-         Probe a cocerlas en un lienzo aparte y estamparlo girado: la medida
-         salio peor, pero midiendo tres veces la misma version salen 66, 51 y
-         65 ms, asi que esa comparacion no distinguia nada. Se quedan como
-         estaban, dibujadas a mano, que es lo mas simple.
-         Lo que SI se decide con datos: son cinco rellenos largos con
-         degradado por cuadro, y en un telefono hay un techo de 30 cuadros que
-         existe porque a 60 la pestaña se moria. Ahi no sobra nada, y unos
-         haces al 10 % no valen el riesgo. En escritorio no hay techo —500
-         peticiones por segundo de margen— y ahi si entran. */
-      if(ANCHA){
-      const largo=Math.hypot(W,H)*0.58;
-      ctx.globalAlpha=(0.05+emp*0.10)*(1-salida);
-      for(let i=0;i<5;i++){
-        const an=-giro*0.55+i*(Math.PI*2/5)+Math.sin(vt*0.13+i)*0.10;
-        const ab=0.10+Math.sin(vt*0.21+i*1.7)*0.035;
-        const g=ctx.createLinearGradient(vx,vy,vx+Math.cos(an)*largo,vy+Math.sin(an)*largo);
-        g.addColorStop(0,'rgba(150,190,255,.85)');
-        g.addColorStop(0.45,'rgba(70,120,240,.28)');
-        g.addColorStop(1,'rgba(20,40,120,0)');
-        ctx.fillStyle=g;
-        ctx.beginPath(); ctx.moveTo(vx,vy);
-        ctx.lineTo(vx+Math.cos(an-ab)*largo, vy+Math.sin(an-ab)*largo);
-        ctx.lineTo(vx+Math.cos(an+ab)*largo, vy+Math.sin(an+ab)*largo);
-        ctx.closePath(); ctx.fill();
-      }
-      }
-      ctx.globalAlpha=1;
-    }
     ctx.save();
     ctx.translate(vx,vy); ctx.rotate(giro); ctx.translate(-vx,-vy);
     /* DE LEJOS A CERCA SIN ORDENAR NADA.
