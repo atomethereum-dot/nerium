@@ -14283,5 +14283,72 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
   }
 })();
 </script>
+<script>
+/* ══ EL SALTO AL FINAL DE LA PORTADA ══════════════════════════════════════
+   La portada es un anclado: el tunel se monta mientras bajas y, cuando la
+   animacion termina, todavia queda una pantalla entera de recorrido en la
+   que el tunel se va hacia arriba y no pasa nada mas. Ahi es donde se
+   quedaba uno parado, en medio de la portada, sin escena y sin seccion.
+
+   Al completar el recorrido del tunel, la pagina se va sola a la siguiente
+   seccion. Es un salto de NAVEGACION, no un adorno, asi que se porta como
+   tal:
+
+     · solo BAJANDO. Subiendo desde la prensa no hace nada, o seria
+       imposible volver a mirar el final del tunel
+     · UNA SOLA VEZ. Se rearma al volver arriba del todo, no en cada cuadro
+     · no se pelea con el dedo: mientras el salto esta en marcha no escucha,
+       y al soltar vuelve a escuchar desde donde te haya dejado
+     · con «prefers-reduced-motion» el salto es SECO. Quien pide menos
+       movimiento no quiere que le desplacen la pagina un segundo entero;
+       quiere llegar
+     · y el destino se busca, no se escribe: la primera seccion visible de
+       verdad despues de la portada. Escribir «#press» aqui es el mismo
+       fallo que ya tuvo el boton de bajar el dia que se oculto «#network». */
+(function(){
+  var hold = document.querySelector('.hero-hold');
+  if(!hold) return;
+
+  function siguiente(){
+    var s = [].slice.call(document.querySelectorAll('main>section'));
+    for(var i=0;i<s.length;i++){
+      var c = s[i].getBoundingClientRect();
+      if(c.top + (window.scrollY||window.pageYOffset) > 20 &&
+         getComputedStyle(s[i]).display !== 'none' && c.height > 40) return s[i];
+    }
+    return null;
+  }
+
+  var seco = window.matchMedia &&
+             matchMedia('(prefers-reduced-motion:reduce)').matches;
+  var antes = window.scrollY || 0, saltando = false, hecho = false, temp = null;
+
+  addEventListener('scroll', function(){
+    var y = window.scrollY || window.pageYOffset;
+    var baja = y > antes + 0.5;
+    antes = y;
+    if(saltando) return;
+
+    var recorrido = Math.max(1, hold.offsetHeight - innerHeight);
+    /* por debajo del final del anclado se rearma: asi volver arriba y bajar
+       otra vez vuelve a saltar, que es lo que uno espera */
+    if(y < recorrido - 2){ hecho = false; return; }
+    if(hecho || !baja) return;
+
+    var sig = siguiente(); if(!sig) return;
+    var destino = sig.getBoundingClientRect().top + y;
+    /* si ya estas en la seccion o pasado, no hay nada que saltar */
+    if(y >= destino - 8){ hecho = true; return; }
+
+    hecho = true; saltando = true;
+    try{ sig.scrollIntoView({ behavior: seco ? 'auto' : 'smooth', block:'start' }); }
+    catch(e){ scrollTo(0, destino); }
+    clearTimeout(temp);
+    temp = setTimeout(function(){
+      saltando = false; antes = window.scrollY || window.pageYOffset;
+    }, seco ? 60 : 900);
+  }, {passive:true});
+})();
+</script>
 </body>
 </html>
