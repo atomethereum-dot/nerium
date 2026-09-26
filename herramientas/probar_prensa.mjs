@@ -132,8 +132,17 @@ const vis = await pg.evaluate(() => {
            capa: !!v, imagenes: v ? v.querySelectorAll('img').length : 0,
            rutas: f.map(x => x.getAttribute('data-vista') || '') };
 });
-di(vis.capa && vis.imagenes === vis.conRuta && vis.imagenes === 2,
-   'la vista previa tiene sus dos imagenes, una por fila con archivo (' + vis.imagenes + ')');
+/* Se comprueba la CORRESPONDENCIA, no una cifra: una imagen por fila que
+   declare archivo, ni una mas ni una menos. Tenia el «2» escrito a mano y
+   salto el dia que entro Benzinga, que es justo el dia en que no habia nada
+   roto. Una prueba que hay que tocar cada vez que se añade una fila no
+   defiende la regla, defiende el inventario. */
+di(vis.capa && vis.imagenes === vis.conRuta && vis.conRuta >= 1,
+   'una imagen por fila con archivo, ni una mas ni una menos (' +
+   vis.imagenes + ' de ' + vis.conRuta + ')');
+di(vis.conRuta < vis.rutas.length,
+   'y las filas sin archivo no se inventan ninguna (' +
+   (vis.rutas.length - vis.conRuta) + ' sin imagen)');
 di(vis.rutas.every(r => r === '' || /^img\/medios\/[a-z0-9_-]+\.(png|jpg|jpeg|webp|avif|svg)$/.test(r)),
    'y las rutas son relativas y de dentro de la casa');
 
