@@ -6826,6 +6826,12 @@ main>section.press:not(.claro){
    iba y no pega un salto-. Es global a proposito: la animacion que alguien
    añada mañana en cualquier seccion queda cubierta sin acordarse de esto. */
 .fuera,.fuera *,.fuera *::before,.fuera *::after{animation-play-state:paused !important}
+/* La portada va aparte: la prensa se monta sobre su final y el «.fuera»
+   general, con sus 300 px de margen, la sigue viendo cuando ya se esta
+   leyendo la prensa -medido: veinticinco animaciones del lockup y del
+   pasillo corriendo tapadas-. La marca «.dormida» la pone el mismo
+   observador del tunel, que no cuenta los 80 px que quedan asomando. */
+.hero-hold.dormida *,.hero-hold.dormida *::before,.hero-hold.dormida *::after{animation-play-state:paused !important}
 /* la barra de aviso vive fuera de las secciones: plegada -«ann-fuera»- o
    desplazada fuera de la vista, tambien se pausa. Es la que anima una
    SOMBRA, lo unico de la lista que no puede hacer la tarjeta grafica. */
@@ -8113,6 +8119,9 @@ const CALM=matchMedia('(prefers-reduced-motion: reduce)').matches;
     addEventListener('wheel',e=>{
       if(e.ctrlKey)return;
       e.preventDefault();
+      /* durante el salto de la portada la rueda no cuenta: si se acumulara
+         aqui, al aterrizar la pagina seguiria bajando sola */
+      if(window.__vuelo)return;
       S.t=cl(S.t+e.deltaY*(e.deltaMode===1?18:1),0,maxScroll());
     },{passive:false});
     addEventListener('keydown',e=>{
@@ -8133,7 +8142,10 @@ const CALM=matchMedia('(prefers-reduced-motion: reduce)').matches;
   new ResizeObserver(measure).observe(el);
   let antesT=0;
   function frame(ahora){
-    if(smooth){
+    if(smooth && window.__vuelo){
+      /* el salto coloca la pagina el solo; aqui solo se toma nota */
+      S.t=S.y=scrollY; S.v=0; antesT=ahora||0;
+    }else if(smooth){
       const prev=S.y;
       /* El paso, por TIEMPO y no por cuadro. Antes era un 0,11 fijo por
          cuadro: con cuadros de 34 ms —medido con ruedas de verdad— avanzaba la
@@ -8636,6 +8648,7 @@ const CALM=matchMedia('(prefers-reduced-motion: reduce)').matches;
     new IntersectionObserver(e=>{
       aVista=e[0].isIntersecting;
       window.__tunelVivo=aVista;
+      const hh=cv.closest('.hero-hold'); if(hh) hh.classList.toggle('dormida',!aVista);
       if(aVista) enciende();
     },{threshold:0,rootMargin:'-80px 0px'}).observe(cv);
   }catch(e){ window.__tunelVivo=true }
@@ -9108,6 +9121,8 @@ const CALM=matchMedia('(prefers-reduced-motion: reduce)').matches;
     const measure=()=>{half=lane.scrollWidth/2};
     measure();
     jobs.push({measure,run(){
+      /* una cinta que nadie ve no se mueve: su seccion lleva «.fuera» */
+      if(window.__fuera && window.__fuera(lane)) return;
       x-=0.42+Math.abs(S.v)*0.055;
       if(half&&x<=-half)x+=half;
       lane.style.transform='translate3d('+x.toFixed(1)+'px,0,0)';
@@ -9177,7 +9192,7 @@ const CALM=matchMedia('(prefers-reduced-motion: reduce)').matches;
     /* Y si la tira todavia no esta dibujada —content-visibility— no se
        reintenta en cada cuadro: eso era volver a medir sesenta veces por
        segundo algo que no existe. Se espera un poco entre intentos. */
-    let faltan=cards.length, fichas=null, tiraX=0, proximo=0;
+    let faltan=cards.length, fichas=null, tiraX=0, proximo=0, ultTx='';
     const mideCards=()=>{
       const ahora=performance.now();
       if(ahora<proximo) return;
@@ -9205,8 +9220,14 @@ const CALM=matchMedia('(prefers-reduced-motion: reduce)').matches;
         return;
       }
       const t=cl((S.y-top)/span);
-      strip.style.transform='translate3d('+(-t*dist).toFixed(1)+'px,0,0)';
-      if(fill)fill.style.width=(t*100).toFixed(1)+'%';
+      /* solo si cambia: fuera de su tramo «t» vale 0 o 1 siempre, y escribir
+         el mismo ancho en cada cuadro era una maquetacion de la pagina
+         entera por cuadro, en cualquier parte de la pagina */
+      const tx=(-t*dist).toFixed(1);
+      if(tx!==ultTx){ ultTx=tx;
+        strip.style.transform='translate3d('+tx+'px,0,0)';
+        if(fill)fill.style.width=(t*100).toFixed(1)+'%';
+      }
       if(!faltan)return;
       if(!fichas) mideCards();
       if(!fichas) return;
@@ -9275,9 +9296,13 @@ const CALM=matchMedia('(prefers-reduced-motion: reduce)').matches;
       dist=Math.max(0,track.scrollWidth-innerWidth);
     };
     measure();
+    let ultTx='';
     jobs.push({measure,run(){
       const p=cl((S.y-top)/span);
-      track.style.transform='translate3d('+(-p*dist).toFixed(1)+'px,0,0)';
+      const tx=(-p*dist).toFixed(1);
+      if(tx===ultTx) return;           /* lo mismo que arriba: sin cambio, sin escritura */
+      ultTx=tx;
+      track.style.transform='translate3d('+tx+'px,0,0)';
       if(fill)fill.style.width=(p*100).toFixed(2)+'%';
     }});
   })();
@@ -9290,6 +9315,7 @@ const CALM=matchMedia('(prefers-reduced-motion: reduce)').matches;
     const measure=()=>lanes.forEach(l=>{l.half=l.el.scrollWidth/2});
     measure();
     jobs.push({measure,run(){
+      if(window.__fuera && window.__fuera(lanes[0].el)) return;
       for(const l of lanes){
         l.x-=l.dir*(0.55+Math.abs(S.v)*0.16);
         if(l.half){
@@ -13720,8 +13746,17 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
   addEventListener('nrm:remide', function(){
     torcidos=[].slice.call(document.querySelectorAll(TORCIDOS));
   }, {passive:true});
+  /* Se escribia «--vel» en los cuatro en cada cuadro, se vieran o no, y cada
+     escritura es un recalculo de estilo. Ahora solo si el valor cambia, y a
+     uno que esta fuera de pantalla solo se le pone el cero de reposo. */
+  var puesto=new WeakMap();
   function inclina(n){
-    for(var i=0;i<torcidos.length;i++) torcidos[i].style.setProperty('--vel', n);
+    for(var i=0;i<torcidos.length;i++){
+      var t=torcidos[i];
+      if(n!=='0' && window.__fuera && window.__fuera(t)) continue;
+      if(puesto.get(t)===n) continue;
+      puesto.set(t,n); t.style.setProperty('--vel', n);
+    }
   }
 
   /* Las bandas de papel. El color de la cuña es el de la seccion que tienen
@@ -14550,26 +14585,41 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
     if(seco){ pon(d); saltando = false; antes = d; return; }
     window.__vuelo = true;
     bloquea(true);
-    /* 1,1 s y curva de ENTRADA Y SALIDA suaves. Eran 0,64 s con una curva que
-       sale a toda velocidad desde el primer cuadro: lo que se notaba era un
-       tiron, no un viaje. Ahora arranca despacio, coge velocidad a mitad de
-       camino y frena al llegar. */
-    var t0 = performance.now(), DUR = 1100;
-    (function paso(t){
-      var k = Math.min(1, (t - t0) / DUR);
-      var e = k < 0.5 ? 4*k*k*k : 1 - Math.pow(-2*k + 2, 3) / 2;
-      /* el destino se vuelve a medir en cada cuadro: si algo cambia de alto
-         durante el vuelo -una imagen que termina de cargar-, se aterriza en
-         la seccion y no en el numero que valia al despegar */
+    /* EL VUELO YA NO SE DIBUJA CUADRO A CUADRO. Era un «scrollTo» por cuadro
+       desde el guion, y cada uno despertaba a todo lo que escucha el scroll
+       -medido con la CPU a un cuarto: 15 cuadros por segundo en telefono, con
+       tirones de medio segundo en escritorio-. Y en telefono ademas pasaba
+       por el freno de cuadros de la pagina, que lo dejaba a 30 como mucho.
+       Ahora la pagina se coloca en la prensa DE UNA VEZ -un solo evento de
+       scroll, un solo calculo- y lo que se ve viajar es el <main> entero
+       deslizandose desde donde estaba hasta su sitio: una animacion de
+       «transform» que la hace la tarjeta grafica sola, a su ritmo, aunque el
+       guion este ocupado. Se ve exactamente igual que un scroll: la portada
+       anclada termina justo donde empieza la prensa, asi que el primer
+       cuadro desplazado es identico al ultimo sin desplazar.
+       Misma duracion y misma curva de entrada y salida que antes. */
+    var main = sig.parentElement, dy = d - y0, DUR = 1100, fin = false;
+    pon(d);
+    antes = window.scrollY || 0;
+    function aterriza(){
+      if(fin) return; fin = true;
+      /* si algo cambio de alto durante el viaje, se corrige al llegar */
       var dd = sig.getBoundingClientRect().top + (window.scrollY || 0);
-      pon(y0 + (dd - y0) * e);
-      if(k < 1){ requestAnimationFrame(paso); return; }
-      pon(dd);
+      if(Math.abs((window.scrollY || 0) - dd) > 2) pon(dd);
       bloquea(false);
       window.__vuelo = false;
       saltando = false;
       antes = window.scrollY || 0;
-    })(t0);
+    }
+    var an = null;
+    try{
+      an = main.animate(
+        [{transform:'translate3d(0,'+dy+'px,0)'}, {transform:'translate3d(0,0,0)'}],
+        {duration:DUR, easing:'cubic-bezier(.65,0,.35,1)'});
+      an.onfinish = aterriza; an.oncancel = aterriza;
+    }catch(e){ an = null }
+    /* y por si la animacion no avisa -pestaña oculta, navegador viejo- */
+    setTimeout(aterriza, an ? DUR + 600 : 0);
   }
 
   addEventListener('scroll', function(){
