@@ -7969,6 +7969,8 @@ const CALM=matchMedia('(prefers-reduced-motion: reduce)').matches;
   const CLAROS=[[233,235,237],[186,193,202]];               /* blanco y plata */
   const HONDO=9.6, CERCA=0.42, RANGO=HONDO-CERCA;
   let W=0,H=0,piezas=null,giro=0,raf=0,ultimo=0,t=0,hueco=null,huecoW=0,huecoH=0;
+  let vt=0, faro=null, faroR=0, raton=0, ratonY=0, mira=0, miraY=0;
+  const FINO=matchMedia('(hover:hover) and (pointer:fine)').matches;
 
   /* El pasillo: media anchura y media altura en unidades del mundo. Se
      estiran con la forma de la pantalla para que las paredes de los lados no
@@ -8034,20 +8036,37 @@ const CALM=matchMedia('(prefers-reduced-motion: reduce)').matches;
     hx.save(); hx.translate(rx,ry); hx.scale(rx,ry); hx.translate(-rx,-ry);
     hx.fillStyle=g; hx.beginPath(); hx.arc(rx,ry,1,0,Math.PI*2); hx.fill(); hx.restore();
     huecoW=rx*2; huecoH=ry*2;
+    /* EL FARO DEL FONDO. Un pasillo que no lleva a ninguna parte es un
+       tunel de papel pintado. Una sola luz honda en el punto de fuga le da
+       destino, y con ella las piezas del fondo se recortan en contraluz en
+       vez de desaparecer en negro. Cocida una vez, estampada cada cuadro. */
+    faroR=Math.min(W,H)*0.62;
+    faro=document.createElement('canvas');
+    faro.width=faro.height=Math.max(4,Math.ceil(faroR*2));
+    const fx=faro.getContext('2d');
+    const fg=fx.createRadialGradient(faroR,faroR,0,faroR,faroR,faroR);
+    fg.addColorStop(0,'rgba(120,168,255,.50)');
+    fg.addColorStop(0.28,'rgba(56,102,224,.26)');
+    fg.addColorStop(0.62,'rgba(20,44,140,.10)');
+    fg.addColorStop(1,'rgba(8,16,60,0)');
+    fx.fillStyle=fg; fx.fillRect(0,0,faro.width,faro.height);
     return true;
   }
 
   function pinta(dt){
     ctx.clearRect(0,0,W,H);
     const cx=W/2, cy=H/2, foco=Math.min(W,H)*0.92;
-    /* SE AHONDA AL BAJAR. Quieto en la entrada el pasillo apenas avanza;
-       segun se baja, se entra en el. La velocidad va de 0,55 a 3,1 y el giro
-       la acompaña a la mitad de ese paso, que si no el pasillo rueda mas
-       deprisa de lo que avanza y marea en vez de hundir. */
-    const emp=window.__tunelP||0;
-    const vel=(0.55+emp*2.55)*dt;
+    /* SE AHONDA AL BAJAR, Y NO EN LINEA RECTA.
+       Un numero que sube a ritmo constante no se siente como entrar en un
+       sitio: se siente como un control deslizante. La entrada va suavizada
+       —arranca lenta, se abre por el medio y se dispara al final—, que es
+       como acelera una camara de verdad. */
+    const crudo=window.__tunelP||0;
+    const emp=crudo*crudo*(3-2*crudo);
+    const vel=(0.40+emp*3.30)*dt;
     t=(t+vel)%RANGO;
-    giro+=(0.045+emp*0.085)*dt;
+    vt+=dt;
+    giro+=(0.040+emp*0.075)*dt;
     /* EL PASILLO GIRA UNA VEZ, NO PIEZA A PIEZA.
        Girar cada cuadrado por separado son dos «save/restore» y una rotacion
        por pieza: con quinientas, medio millar de cambios de estado por cuadro.
@@ -8055,8 +8074,24 @@ const CALM=matchMedia('(prefers-reduced-motion: reduce)').matches;
        mismo que girar la escena entera, asi que se gira el lienzo una vez y
        dentro se pinta todo derecho. Medido: es la diferencia entre ir a
        tirones y no ir. */
+    /* LA CAMARA RESPIRA.
+       Con el punto de fuga clavado en el centro exacto el pasillo parece un
+       salvapantallas. Dos senos lentos y desacompasados lo pasean muy poco
+       —un 3 % de la pantalla— y con eso deja de estar clavado. En escritorio
+       se le suma el raton, con retardo: la camara no obedece, se deja
+       llevar. */
+    if(FINO){ mira+=(raton-mira)*Math.min(1,dt*2.2); miraY+=(ratonY-miraY)*Math.min(1,dt*2.2) }
+    const vx=cx+Math.sin(vt*0.21)*W*0.030+mira*W*0.045;
+    const vy=cy+Math.cos(vt*0.17)*H*0.026+miraY*H*0.040;
+
+    if(faro){
+      const fa=(0.30+emp*0.70);
+      ctx.globalAlpha=fa;
+      ctx.drawImage(faro, vx-faroR, vy-faroR, faroR*2, faroR*2);
+      ctx.globalAlpha=1;
+    }
     ctx.save();
-    ctx.translate(cx,cy); ctx.rotate(giro); ctx.translate(-cx,-cy);
+    ctx.translate(vx,vy); ctx.rotate(giro); ctx.translate(-vx,-vy);
     /* DE LEJOS A CERCA SIN ORDENAR NADA.
        Con la z sacada de una fase, la lista ordenada por fase YA esta ordenada
        por profundidad: basta partirla por donde va el reloj. Las de fase menor
@@ -8072,23 +8107,34 @@ const CALM=matchMedia('(prefers-reduced-motion: reduce)').matches;
       let d=q.s-t; if(d<0)d+=RANGO;
       const z=CERCA+d;
       const k=foco/z;
-      const px=cx+q.x*k, py=cy+q.y*k;
+      const px=vx+q.x*k, py=vy+q.y*k;
       const lado=q.lado*k;
       if(lado<1.1) continue;
       /* el lienzo va girado, asi que se recorta por distancia al centro y no
          por los lados: una caja recta aqui dentro se comeria las esquinas */
-      const ex=px-cx, ey=py-cy;
+      const ex=px-vx, ey=py-vy;
       if(ex*ex+ey*ey > (radio+lado)*(radio+lado)) continue;
       const hondo=1-d/RANGO;
       const sale=Math.min(1,d/0.55);
       const al=q.a*sale;
       if(al<0.012) continue;
-      const luz=0.60+hondo*0.40;
-      const col=(q.c[0]*luz|0)+','+(q.c[1]*luz|0)+','+(q.c[2]*luz|0);
-      const kA=foco/(z+vel), ax=cx+q.x*kA, ay=cy+q.y*kA;
+      /* NIEBLA, NO OSCURIDAD.
+         Apagar hacia el negro deja el fondo vacio; apagar hacia un azul de
+         noche mete aire entre las piezas, y el aire es lo que separa un
+         decorado de un sitio con hondura. */
+      const f=1-hondo;                           /* 0 cerca, 1 al fondo */
+      const luz=0.60+hondo*0.40, nie=f*f*0.72;
+      const col=((q.c[0]*luz)*(1-nie)+10*nie|0)+','+
+                ((q.c[1]*luz)*(1-nie)+22*nie|0)+','+
+                ((q.c[2]*luz)*(1-nie)+72*nie|0);
+      /* LA ESTELA CRECE CON LA VELOCIDAD, y no solo por moverse mas: se
+         mira tres cuadros atras en vez de uno. A paso de entrada apenas se
+         nota; lanzado, las piezas de delante se estiran en rayas de luz, que
+         es lo que hace que una velocidad se VEA. */
+      const kA=foco/(z+vel*(1+emp*2.4)), ax=vx+q.x*kA, ay=vy+q.y*kA;
       const dx=px-ax, dy=py-ay;
       if(dx*dx+dy*dy>6){
-        ctx.strokeStyle='rgba('+col+','+(al*0.20).toFixed(3)+')';
+        ctx.strokeStyle='rgba('+col+','+(al*(0.16+emp*0.30)).toFixed(3)+')';
         ctx.lineWidth=Math.max(1,lado*0.7);
         ctx.beginPath(); ctx.moveTo(ax,ay); ctx.lineTo(px,py); ctx.stroke();
       }
@@ -8118,6 +8164,9 @@ const CALM=matchMedia('(prefers-reduced-motion: reduce)').matches;
     })(ultimo);
   }
   addEventListener('resize',()=>{ if(mide())siembra() },{passive:true});
+  if(FINO) addEventListener('pointermove',e=>{
+    raton=(e.clientX/innerWidth-0.5)*2; ratonY=(e.clientY/innerHeight-0.5)*2;
+  },{passive:true});
   if(document.readyState==='loading')
     addEventListener('DOMContentLoaded',arranca,{once:true});
   else arranca();
