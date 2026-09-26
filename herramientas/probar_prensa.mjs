@@ -138,21 +138,18 @@ const hov = await pg.evaluate(() => {
 });
 di(/matrix\(1,/.test(hov.barrido) && !/matrix\(1,/.test(antes.barrido),
    'al pasar por encima el relleno recorre la fila entera');
-/* ESTO ES EL DISEÑO, no un descuido: la tinta del titular NO CAMBIA. Es la
-   misma parada que sobre el azul, y lo que la descubre es el relleno
-   pasando por debajo. Quien la «arregle» subiendola para que se lea en
-   reposo apaga el gesto entero, que es lo unico que hace esta seccion.
-   Va con su precio escrito al lado, abajo. */
+/* El titular NO cambia de color al pasar por encima, y eso si es del video:
+   lo que se mueve es el fondo. La diferencia con el video es que ahi la
+   tinta es negra -1,07:1, invisible hasta que pasas el raton, y en un
+   telefono no hay raton- y aqui es blanca. Asi que se comprueban las dos
+   cosas: que no cambie, y que sea blanca. */
 di(hov.tinta === antes.tinta,
-   'y la tinta del titular es la MISMA: lo que lo revela es el azul, no un cambio de color');
+   'el titular no cambia de color al pasar por encima: lo que se mueve es el fondo');
+di(hov.tinta === 'rgb(255, 255, 255)', 'y es blanco, que es lo que se pidio');
 di(hov.num === 'rgb(255, 255, 255)' && hov.medio === 'rgb(255, 255, 255)',
    'el numero y el medio si pasan a blanco');
-/* El precio, medido y dicho en voz alta: sobre el azul el titular da 3,3:1,
-   por debajo del 4,5 de la norma. Es una decision, y esta comprobacion
-   existe para que sea una decision VIGILADA: si alguien empeora eso todavia
-   mas, salta. */
-di(hov.razon >= 3.1,
-   'contraste del titular sobre el azul: ' + hov.razon + ':1 — POR DEBAJO del 4,5 de la norma, a proposito');
+di(hov.razon >= 4.5,
+   'y se lee sobre el azul (' + hov.razon + ':1, minimo 4,5)');
 /* 45 grados son 0,7071 en la matriz. El cuadro se vuelve rombo, que es la
    marca de la casa: si alguien quita ese giro, la flecha se queda en una caja
    y el gesto deja de decir nada. */

@@ -5215,18 +5215,16 @@ body.light .hud::after{background:radial-gradient(120% 120% at 100% 100%,
      · caja de salida      60x60 px, a 10 px del ultimo filete
      · numero y medio      13,5 px mono, ~9,5 px por caracter
 
-   Y LO QUE HACE QUE LA SECCION FUNCIONE, que es lo que mas cuesta ver:
+   UNA COSA NO SE COPIA, Y A PROPOSITO. En el video el titular es TINTA
+   NEGRA -medido (19,20,25) parado y (13,14,17) sobre el azul: la misma en
+   los dos-. O sea que en reposo no se lee, y lo que lo revela es el relleno
+   pasando por debajo. Es un gesto bonito y cuesta 1,07:1 de contraste:
+   cuatro titulares invisibles hasta que alguien pase el raton, y en un
+   telefono no hay raton que pasar. Va en BLANCO, que es lo unico que
+   funciona en la mitad de las pantallas donde se mira esto. Lo demas
+   -medidas, trama, azul, barrido, rombo- es el video.
 
-   EL TITULAR ES TINTA NEGRA. La misma en reposo y encima del azul -medido
-   (19,20,25) parado y (13,14,17) sobre el relleno-. En reposo queda casi
-   invisible contra el fondo. Lo que lo revela NO es que el texto cambie de
-   color: es el azul pasando por debajo. Por eso el gesto se ve como se ve
-   -no se ilumina una fila, se DESCUBRE- y por eso el video se pasa sus
-   primeros treinta y seis cuadros recorriendo filas una a una: esta
-   enseñando justo eso. Quien suba esa tinta para «que se lea» apaga la
-   seccion entera.
-
-   El numero y el medio SI cambian: pasan a blanco con el mismo tiempo.
+   El numero, el medio y la flecha pasan a blanco al entrar el relleno.
 
    El barrido no es una curva de manual. Medido cuadro a cuadro, lo que
    queda por recorrer se multiplica por 0,69 en cada uno -una exponencial
@@ -5237,7 +5235,7 @@ body.light .hud::after{background:radial-gradient(120% 120% at 100% 100%,
   --pg:12px;                                   /* el canal lateral */
   --prs-trama:rgba(255,255,255,.04);
   --prs-raya:rgba(255,255,255,.14);
-  --prs-tinta:#0E0F14;                         /* la tinta negra del titular */
+  --prs-tit:#FFFFFF;                           /* el titular, en blanco */
   --prs-mid:#797887;                           /* numero y segunda linea */
   --prs-azul:#2057E9;
   --prs-h:clamp(88px,8.38vw,128px);            /* 121 px a 1444 de ancho */
@@ -5255,20 +5253,23 @@ body.light .hud::after{background:radial-gradient(120% 120% at 100% 100%,
 .prs-w{width:calc(100% - var(--pg) * 2);margin-inline:auto;position:relative;z-index:1}
 
 .press-head{display:grid;gap:14px;margin-bottom:clamp(40px,5.2vw,86px)}
-/* la primera linea del titular va en la tinta negra y la segunda en gris:
-   se hace con «::first-line» y no partiendo el texto en dos, porque esa
-   frase es UNA clave del traductor en doce idiomas y partirla en dos la
-   rompe en los que no ordenan las palabras igual */
 /* el titular del video es un 21 % mayor que el de las demas secciones y va
    en una caja mas estrecha -55 %-, que es lo que lo hace partir despues de
    «writing» y no despues de «the». Medido: 60 px de altura de caja alta y
    82 px de una linea base a la siguiente. */
-/* va por «.press .press-h» y no por «.press-h» a secas porque mas abajo hay
+/* En el video este titular va a dos tintas: la primera linea casi invisible
+   y la segunda en gris. Aqui va entero en el gris legible, y no por gusto:
+   la pagina PARTE los titulares en un «span» por palabra para que entren
+   escalonadas, y «::first-line» no atraviesa esos «span» en Chromium. La
+   alternativa era partir la frase en dos claves del traductor, y esa frase
+   esta en doce idiomas que no ordenan las palabras igual. Entre perder la
+   segunda tinta y romper doce traducciones, se pierde la tinta.
+
+   Va por «.press .press-h» y no por «.press-h» a secas porque mas abajo hay
    un «max-width:22ch» -18ch en pantalla ancha- para todos los titulares de
-   la pagina, y esta escrito despues */
+   la pagina, y esta escrito despues. */
 .press .press-h{font-size:clamp(34px,6.16vw,104px);line-height:.92;
   max-width:max(320px,55%);color:var(--prs-mid)}
-.press .press-h::first-line{color:var(--prs-tinta)}
 
 .prs{position:relative;z-index:1;box-shadow:inset 0 1px 0 var(--prs-raya)}
 .prs-f{position:relative;isolation:isolate;display:grid;
@@ -5293,7 +5294,7 @@ body.light .hud::after{background:radial-gradient(120% 120% at 100% 100%,
 .prs-s{grid-column:2 / 4;padding-left:7px;text-transform:uppercase;color:#5380F0}
 .prs-t{grid-column:4 / 12;padding-left:22px;margin:0;
   font-weight:400;font-size:clamp(20px,2.13vw,34px);line-height:1.14;
-  letter-spacing:-.021em;color:var(--prs-tinta)}
+  letter-spacing:-.021em;color:var(--prs-tit)}
 .prs-go{grid-column:12;justify-self:end;margin-right:10px;
   width:clamp(44px,4.16vw,66px);height:clamp(44px,4.16vw,66px);
   display:grid;place-items:center;border:1px solid var(--prs-raya);
@@ -5302,12 +5303,14 @@ body.light .hud::after{background:radial-gradient(120% 120% at 100% 100%,
 /* la flecha gira CON la caja -no al reves-: el cuadro se pone en rombo y la
    flecha queda apuntando arriba a la derecha, que es la salida de siempre */
 .prs-go svg{width:clamp(11px,.97vw,16px);height:auto;display:block;
-  fill:none;stroke:var(--prs-tinta);stroke-width:1.5;
+  fill:none;stroke:var(--prs-mid);stroke-width:1.5;
+  transition:stroke 420ms cubic-bezier(.17,.89,.32,1);
   stroke-linecap:square;stroke-linejoin:miter}
 .prs-f:hover .prs-n,.prs-f:focus-visible .prs-n,
 .prs-f:hover .prs-s,.prs-f:focus-visible .prs-s{color:#fff}
 .prs-f:hover .prs-go,.prs-f:focus-visible .prs-go{
   transform:rotate(-45deg);border-color:rgba(255,255,255,.9)}
+.prs-f:hover .prs-go svg,.prs-f:focus-visible .prs-go svg{stroke:#fff}
 /* el titular y la flecha NO cambian de color: los descubre el azul */
 
 /* la curva medida, para quien entienda «linear()» */
@@ -5356,7 +5359,7 @@ body.light .hud::after{background:radial-gradient(120% 120% at 100% 100%,
 
 /* ── sobre papel: la seccion es oscura, pero si algun dia se invierte ── */
 .claro .press{--prs-trama:rgba(10,60,180,.06);--prs-raya:rgba(10,60,180,.16);
-  --prs-tinta:#0B0E14;--prs-mid:rgba(11,14,20,.62);background:#fff}
+  --prs-tit:#0B0E14;--prs-mid:rgba(11,14,20,.62);background:#fff}
 .claro .prs-s{color:var(--c-azul)}
 
 /* ══ COLOR Y VIDA EN EL PAPEL ═════════════════════════════════════════════

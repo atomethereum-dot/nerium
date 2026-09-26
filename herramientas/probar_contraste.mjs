@@ -67,7 +67,7 @@ const MEDIR = () => {
     }
     return [0,0,0];
   };
-  const malos = [], lienzos = new Set(), aproposito = new Set();
+  const malos = [], lienzos = new Set();
   document.querySelectorAll('body *').forEach(el => {
     const txt = [...el.childNodes].some(n => n.nodeType === 3 && n.textContent.trim().length > 1);
     if (!txt) return;
@@ -87,35 +87,10 @@ const MEDIR = () => {
     /* La placa de color de las tarjetas de prensa estaba nombrada aqui. Esas
        tarjetas ya no existen —la prensa es una tabla— y una excepcion que no
        protege nada es por donde se cuela lo siguiente, asi que se retira. */
-    /* EL TITULAR DE LA PRENSA SE MIDE APARTE, y no para taparlo. Es tinta
-       negra a proposito: en reposo casi no se ve, y lo que lo revela es el
-       relleno azul pasando por debajo al pasar el raton. Medido contra el
-       fondo da 1,15:1 y sobre el azul 3,28:1; las dos cifras estan por
-       debajo de la norma y las dos son una decision, tomada al copiar el
-       video que se pidio. Va a su propio saco para que el numero SE IMPRIMA
-       en cada pasada en vez de desaparecer, y «probar_prensa» vigila que no
-       empeore. Si algun dia se decide que pesa mas leerlo que el gesto, lo
-       que hay que tocar es «--prs-tinta». */
-    if (el.matches('.prs-t')) {
-      const cc = getComputedStyle(el), bb = fondoDe(el, r);
-      if (bb) { const co = sobre(par(cc.color), bb), L1 = lum(co), L2 = lum(bb);
-        aproposito.add('.prs-t ' + (((Math.max(L1,L2)+.05)/(Math.min(L1,L2)+.05)).toFixed(2)) + ':1'); }
-      return;
-    }
-    /* Y el parrafo de la tesis, donde las palabras nacen en gris y se van
-       poniendo en tinta segun bajas: ese gris es el efecto, no un descuido, y
-       cada palabra acaba en negro. Medir la mitad sin revelar dice 2,23:1 de
-       algo que nadie ve quieto. Va nombrado y se dice al final. */
-    if (el.closest('.say')) { lienzos.add((el.className || el.tagName).toString()); return }
-    /* · y el pase de escala, donde la palabra es tinta OSCURA a proposito y
-         solo se lee cuando el lienzo de debajo se enciende: el fondo que de
-         verdad tiene detras lo pinta el canvas pixel a pixel y no esta en
-         ninguna regla, asi que medirla contra el color del padre da 1:1 y es
-         mentira. La excepcion se nombra —no es «lleva un canvas encima»— y se
-         cuenta al final: la primera version decia eso y se tragaba tambien los
-         botones de la portada, que SI tienen fondo propio y SI hay que medir.
-         Una excepcion que se lleva por delante lo que venias a comprobar no es
-         una excepcion, es un agujero. */
+    /* Aqui hubo, durante un rato, una excepcion para el titular de la
+       prensa: en el video es tinta negra y da 1,07:1. Se pidio en blanco,
+       asi que la excepcion se retira en vez de quedarse de adorno —una
+       excepcion que no protege nada es por donde se cuela lo siguiente. */
     const trazo = c.webkitTextStrokeWidth;
     if (trazo && parseFloat(trazo) > 0) return;
     let op = 1, n2 = el;
@@ -135,7 +110,7 @@ const MEDIR = () => {
       cr: +cr.toFixed(2), min, px: Math.round(px),
       txt: el.textContent.trim().slice(0, 30) });
   });
-  return { malos, lienzos: [...lienzos], aproposito: [...aproposito] };
+  return { malos, lienzos: [...lienzos] };
 };
 
 const ctx = await nav.newContext({ viewport:{width:1440,height:900} });
@@ -143,13 +118,12 @@ const pg = await ctx.newPage();
 await pg.goto('http://127.0.0.1:9022/', { waitUntil:'load' });
 await pg.waitForTimeout(2600);
 const alto = await pg.evaluate(() => document.body.scrollHeight);
-const fallos = new Map(), sobreLienzo = new Set(), decidido = new Set();
+const fallos = new Map(), sobreLienzo = new Set();
 for (let y = 0; y < alto - 700; y += 620) {
   await pg.evaluate(v => scrollTo(0, v), y);
   await pg.waitForTimeout(420);
   const paso = await pg.evaluate(MEDIR);
   paso.lienzos.forEach(c => sobreLienzo.add(c));
-  paso.aproposito.forEach(c => decidido.add(c));
   for (const m of paso.malos) {
     const k = m.q + '|' + m.txt;
     if (!fallos.has(k) || fallos.get(k).cr > m.cr) fallos.set(k, m);
@@ -163,8 +137,6 @@ di(lista.length === 0, 'todo el texto de la pagina se lee' +
     : ''));
 if (sobreLienzo.size) console.log('      (sin medir, el fondo no esta en el CSS: ' +
   [...sobreLienzo].join(', ') + ')');
-if (decidido.size) console.log('      (POR DEBAJO DE LA NORMA A PROPOSITO, y se dice: ' +
-  [...decidido].join(', ') + ')');
 lista.slice(0, 80).forEach(m => console.log('      ' + m.cr + ':1 (min ' + m.min + ') ' +
   m.px + 'px  ' + m.q + '  «' + m.txt + '»'));
 await ctx.close();
