@@ -7888,47 +7888,74 @@ const CALM=matchMedia('(prefers-reduced-motion: reduce)').matches;
     requestAnimationFrame(frame);
   }
   /* ══ EL CORREDOR DE LA PORTADA ════════════════════════════════════════════
-   El mismo enjambre de «#xfade», con dos diferencias que vienen del sitio:
+   Un TUNEL, no un enjambre. La diferencia no es de cantidad: es de orden.
 
-     · AQUI VUELA DE FRENTE. En tokenomics el corredor cruza de lado y se
-       mira pasar; en la portada va hacia quien mira. Es la misma cuenta
-       —una z que baja y una perspectiva que la abre— con la camara girada.
-     · AQUI HAY UN AGUJERO. El lockup se monta justo encima, asi que al
-       terminar de pintar se recorta un ovalo blando en el centro: los cubos
-       entran por los bordes y no pisan «Nereum». Sin eso, la palabra pelea
-       con el fondo y pierde.
+   Antes los cubos salian en sitios al azar y volaban de frente; se veia una
+   nube acercandose. Aqui las piezas viven en las CUATRO PAREDES de un pasillo
+   —arriba, abajo, izquierda, derecha— y se reparten en columnas que corren a
+   lo largo de la z. La perspectiva hace el resto: las de delante salen por
+   los bordes de la pantalla, las del fondo convergen en el centro, y en medio
+   queda el hueco negro del pasillo, que es donde se apoya el lockup. El
+   agujero ya no hay que recortarlo: no se pone nada ahi.
 
-   No pinta suelo: el lienzo es transparente y deja ver la malla de debajo.
-   Y no gasta un cuadro cuando no se le ve —la cortina publica su fuerza en
-   «window.__tunel» y aqui se pregunta por ella antes de nada—. */
+   Las piezas son LAS NUESTRAS: rectangulos planos con su filo claro arriba,
+   los mismos de «#xfade». Ni biselados ni brillos de plastico.
+
+   Tres cosas que hacen que parezca un sitio y no una cuadricula:
+     · cada columna arranca con su propia fase, asi que las filas no llegan
+       a la vez y no se ve el aro;
+     · el pasillo gira despacio sobre su eje —ocho grados por vuelta—, que es
+       lo que hace que las paredes se lean como paredes;
+     · una de cada nueve piezas va en el azul claro de la casa, y esas son
+       las que dan la profundidad. */
 (function(){
   const cv=document.getElementById('shTunel'); if(!cv)return;
   const ctx=cv.getContext('2d'); if(!ctx)return;
   const quieto=matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  /* Los mismos azules de la casa, un paso arriba: esto se ve una vez, al
-     entrar, y tiene que despertar. Y dos claros, pocos, que son los que
-     hacen que el enjambre tenga profundidad en vez de ser una nube. */
-  const PAL=[[58,102,255],[30,72,232],[86,124,255],[22,52,180],[120,162,255],[16,38,150]];
-  const CLAROS=[[228,236,250],[176,196,232]];
-  const HONDO=9.2;
-  let W=0,H=0,vuelo=null,vt=0,raf=0;
+  const PAL=[[34,78,236],[22,56,196],[52,104,255],[16,40,156],[70,128,255],[12,32,128]];
+  const CLAROS=[[150,190,255],[206,224,252]];
+  const HONDO=9.6, CERCA=0.42;
+  let W=0,H=0,piezas=null,giro=0,raf=0,ultimo=0;
+
+  /* El pasillo: media anchura y media altura en unidades del mundo. Se
+     estiran con la forma de la pantalla para que las paredes de los lados no
+     se salgan de cuadro en un monitor ancho ni aplasten el hueco en un
+     telefono. */
+  function medidas(){
+    const r=W/Math.max(1,H);
+    /* En una pantalla estrecha el pasillo se cerraba de lado y las paredes
+       se subian encima del lockup: se le pone suelo al ancho. */
+    return { a: Math.max(1.95, 1.55*Math.min(1.7, r)),
+             b: Math.max(1.55, 1.55*Math.min(1.4, 1/r)) };
+  }
 
   function siembra(){
-    const cuantos = W<760 ? 120 : 250;
-    vuelo=[];
-    for(let i=0;i<cuantos;i++){
-      const cl=Math.random()<0.20;
-      vuelo.push({
-        x:(Math.random()*2-1)*2.3, y:(Math.random()*2-1)*2.3,
-        z:Math.random()*HONDO+0.4,
-        giro:Math.random()*Math.PI, vg:(Math.random()*2-1)*0.45,
-        lado:0.16+Math.random()*0.34,
-        c: cl?CLAROS[(Math.random()*CLAROS.length)|0]:PAL[(Math.random()*PAL.length)|0],
-        a: cl?0.30+Math.random()*0.34 : 0.46+Math.random()*0.54
-      });
+    const {a,b}=medidas();
+    const paso = W<760 ? 0.60 : 0.52;          /* separacion entre columnas */
+    const dz   = W<760 ? 0.62 : 0.50;          /* separacion entre filas */
+    const filas= Math.ceil((HONDO-CERCA)/dz);
+    piezas=[];
+    const cols=[];
+    /* las cuatro paredes, recorridas por su borde */
+    for(let x=-a; x<=a+1e-6; x+=paso){ cols.push({x, y:-b}); cols.push({x, y:b}) }
+    for(let y=-b+paso; y<=b-paso+1e-6; y+=paso){ cols.push({x:-a, y}); cols.push({x:a, y}) }
+    for(const c of cols){
+      const fase=Math.random();                 /* cada columna, su desfase */
+      for(let i=0;i<filas;i++){
+        const claro=Math.random()<0.11;
+        piezas.push({
+          x:c.x+(Math.random()*2-1)*paso*0.16,
+          y:c.y+(Math.random()*2-1)*paso*0.16,
+          z:CERCA+((i+fase)%filas)*dz,
+          lado:paso*(0.62+Math.random()*0.30),
+          c: claro?CLAROS[(Math.random()*CLAROS.length)|0]:PAL[(Math.random()*PAL.length)|0],
+          a: claro?0.62+Math.random()*0.34 : 0.50+Math.random()*0.46
+        });
+      }
     }
   }
+
   function mide(){
     const d=(window.__dens?__dens():1);
     W=cv.clientWidth; H=cv.clientHeight;
@@ -7938,50 +7965,67 @@ const CALM=matchMedia('(prefers-reduced-motion: reduce)').matches;
     return true;
   }
 
-  let ultimo=0;
   function pinta(dt){
     ctx.clearRect(0,0,W,H);
-    const cx=W/2, cy=H/2;
-    const foco=Math.min(W,H)*0.95;
-    const vel=1.55*dt;
-    vt+=dt;
-    ctx.globalCompositeOperation='lighter';
-    for(const c of vuelo){
-      const zAntes=c.z;
-      c.z-=vel;
-      if(c.z<0.34){ c.z+=HONDO; c.x=(Math.random()*2-1)*2.3; c.y=(Math.random()*2-1)*2.3 }
-      c.giro+=c.vg*dt;
-      const k=foco/c.z, kA=foco/zAntes;
-      const px=cx+c.x*k, py=cy+c.y*k;
-      const lado=Math.max(1.4, c.lado*k*0.30);
-      if(px<-lado*2||px>W+lado*2||py<-lado*2||py>H+lado*2)continue;
-      const cerca=1-Math.min(1,(c.z-0.34)/HONDO);
-      const a=c.a*cerca*cerca;
-      if(a<0.012)continue;
-      /* la estela: de donde venia a donde esta. Es lo que convierte una nube
-         de cuadrados en velocidad. */
-      const ax=cx+c.x*kA, ay=cy+c.y*kA, dx=px-ax, dy=py-ay;
-      if(dx*dx+dy*dy>4){
-        ctx.strokeStyle='rgba('+c.c.join(',')+','+(a*0.5).toFixed(3)+')';
-        ctx.lineWidth=Math.max(1,lado*0.55);
+    const cx=W/2, cy=H/2, foco=Math.min(W,H)*0.92;
+    const vel=1.35*dt;
+    giro+=0.075*dt;
+    const cg=Math.cos(giro), sg=Math.sin(giro);
+    /* Primero se mueven todas, luego se ordenan de LEJOS a CERCA y se pintan
+       en ese orden: sin eso, una pieza del fondo puede caer encima de una de
+       delante y el pasillo pierde el fondo. */
+    for(const q of piezas){
+      q.zAntes=q.z; q.z-=vel;
+      if(q.z<CERCA) q.z+=HONDO-CERCA;
+    }
+    piezas.sort((m,n)=>n.z-m.z);
+    for(const q of piezas){
+      const zAntes=q.zAntes;
+      /* el pasillo gira sobre su eje: las paredes se leen como paredes */
+      const rx=q.x*cg-q.y*sg, ry=q.x*sg+q.y*cg;
+      const k=foco/q.z;
+      const px=cx+rx*k, py=cy+ry*k;
+      const lado=q.lado*k;
+      if(lado<1.1) continue;
+      if(px<-lado||px>W+lado||py<-lado||py>H+lado) continue;
+      /* se apaga al fondo y tambien justo al pasar de largo, que si no
+         aparecen y desaparecen de golpe en el borde */
+      const hondo=1-Math.min(1,(q.z-CERCA)/(HONDO-CERCA));
+      const sale=Math.min(1,(q.z-CERCA)/0.55);
+      const al=q.a*sale;
+      if(al<0.012) continue;
+      /* La luz se va con la distancia OSCURECIENDO el color, no volviendo la
+         pieza transparente: un bloque del fondo esta lejos, no es un fantasma.
+         Asi las piezas se TAPAN entre ellas, que es lo que le da cuerpo al
+         pasillo; sumando luz —«lighter»— se fundian todas en una mancha. */
+      const luz=0.26+hondo*0.74;
+      const col=(q.c[0]*luz|0)+','+(q.c[1]*luz|0)+','+(q.c[2]*luz|0);
+      const kA=foco/zAntes, ax=cx+rx*kA, ay=cy+ry*kA;
+      const dx=px-ax, dy=py-ay;
+      if(dx*dx+dy*dy>6){
+        ctx.strokeStyle='rgba('+col+','+(al*0.40).toFixed(3)+')';
+        ctx.lineWidth=Math.max(1,lado*0.7);
         ctx.beginPath(); ctx.moveTo(ax,ay); ctx.lineTo(px,py); ctx.stroke();
       }
-      ctx.save(); ctx.translate(px,py); ctx.rotate(c.giro);
-      ctx.fillStyle='rgba('+c.c.join(',')+','+a.toFixed(3)+')';
+      ctx.save(); ctx.translate(px,py); ctx.rotate(giro);
+      ctx.fillStyle='rgba('+col+','+al.toFixed(3)+')';
       ctx.fillRect(-lado/2,-lado/2,lado,lado);
-      ctx.fillStyle='rgba(255,255,255,'+(a*0.45).toFixed(3)+')';
-      ctx.fillRect(-lado/2,-lado/2,lado,Math.max(1,lado*0.16));
+      ctx.fillStyle='rgba(255,255,255,'+(al*0.30*(0.35+hondo*0.65)).toFixed(3)+')';
+      ctx.fillRect(-lado/2,-lado/2,lado,Math.max(1,lado*0.15));
       ctx.restore();
     }
-    /* EL AGUJERO. Se borra un ovalo blando en el centro para que el lockup
-       tenga donde apoyarse. Va en «destination-out»: no pinta negro encima
-       —eso taparia tambien la malla—, quita lo pintado. */
+    /* EL RESPIRO DEL LOCKUP.
+       La geometria ya deja el pasillo negro en el centro, pero su boca no
+       mide siempre lo mismo —depende de la forma de la pantalla— y en un
+       telefono se cerraba sobre la palabra. Esto es una red, no el efecto:
+       un ovalo muy blando, del tamaño del lockup, que APAGA lo pintado
+       encima de el. En «destination-out», que quita en vez de tapar: asi no
+       aparece una mancha negra sobre la malla azul de debajo. */
     ctx.globalCompositeOperation='destination-out';
-    const rx=Math.min(W*0.34,430), ry=Math.min(H*0.34,270);
+    const rx=Math.min(W*0.30,340), ry=Math.min(H*0.17,150);
     const g=ctx.createRadialGradient(cx,cy,0,cx,cy,1);
-    g.addColorStop(0,'rgba(0,0,0,1)');
-    g.addColorStop(0.42,'rgba(0,0,0,.90)');
-    g.addColorStop(0.72,'rgba(0,0,0,.42)');
+    g.addColorStop(0,'rgba(0,0,0,.96)');
+    g.addColorStop(0.60,'rgba(0,0,0,.72)');
     g.addColorStop(1,'rgba(0,0,0,0)');
     ctx.save(); ctx.translate(cx,cy); ctx.scale(rx,ry); ctx.translate(-cx,-cy);
     ctx.fillStyle=g; ctx.beginPath(); ctx.arc(cx,cy,1,0,Math.PI*2); ctx.fill();
@@ -7992,13 +8036,12 @@ const CALM=matchMedia('(prefers-reduced-motion: reduce)').matches;
   function arranca(){
     if(!mide())return;
     siembra();
-    if(quieto){ pinta(0); return }      /* una sola pasada, sin bucle */
+    if(quieto){ pinta(0); return }
     ultimo=performance.now();
     (function tick(ahora){
       raf=requestAnimationFrame(tick);
-      const f=window.__tunel||0;
       const dt=Math.min(.05,((ahora-ultimo)||16)/1000); ultimo=ahora;
-      if(f<=0.004)return;               /* no se le ve: ni un cuadro */
+      if((window.__tunel||0)<=0.004) return;     /* no se le ve: ni un cuadro */
       pinta(dt);
     })(ultimo);
   }
