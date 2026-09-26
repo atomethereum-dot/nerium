@@ -232,7 +232,7 @@ main,.ft{position:relative;z-index:1}
 .tx-hud{position:absolute;left:calc(var(--pad) + 30px);right:calc(var(--pad) + 30px);bottom:36px;display:flex;gap:14px;align-items:center;justify-content:flex-end;color:rgba(255,255,255,.5);pointer-events:none;z-index:2}
 .tx-hud i{display:block;width:160px;height:2px;background:rgba(255,255,255,.14);position:relative;overflow:hidden}
 .tx-hud i b{position:absolute;inset:0;background:var(--blue2);transform-origin:0 50%;transform:scaleX(var(--p,0))}
-.snap-in{animation:snap .9s cubic-bezier(.16,.84,.26,1) both}
+.snap-in{animation:snap .9s cubic-bezier(.16,.84,.26,1) backwards}
 @keyframes snap{0%{opacity:0;transform:translateY(40px);filter:blur(8px)}100%{opacity:1;transform:none;filter:none}}
 
 /* ═══ TOKEN ═══ */
@@ -400,6 +400,49 @@ main,.ft{position:relative;z-index:1}
   .legend{grid-template-columns:1fr}.legend div{border-right:0!important;border-bottom:1px solid var(--line)!important}
 }
 @media (prefers-reduced-motion:reduce){.snap-in,.hx-scroll i,.mq-t,.rk-u i::after,.hd-live i{animation:none}}
+
+/* ══ CAPA LOCA ══════════════════════════════════════════════════════════════ */
+/* la intro: contador y persiana de doce columnas */
+.pre{background:transparent;display:block}
+.pre-cols{position:absolute;inset:0;display:grid;grid-template-columns:repeat(12,1fr)}
+.pre-cols i{background:#05060A;border-right:1px solid rgba(255,255,255,.04)}
+.pre-in{position:absolute;inset:0;display:grid;place-content:center;justify-items:center;gap:18px;color:#fff}
+.pre-in svg{width:30px;height:30px}
+.pre-n{font-size:clamp(90px,16vw,240px);font-weight:500;letter-spacing:-.07em;line-height:.85;font-variant-numeric:tabular-nums}
+.pre-b{width:min(340px,60vw);height:1px;background:rgba(255,255,255,.15)}
+.pre-b b{display:block;height:100%;background:var(--blue2);transform-origin:0 50%;transform:scaleX(0);box-shadow:0 0 12px var(--blue2)}
+.pre-t{color:var(--mut2)}
+/* letras del titular que responden al cursor */
+.hx-h .w{display:inline-block;white-space:nowrap}
+.hx-h .ch{display:inline-block;transform:translateY(calc(var(--p,0) * -.16em)) scaleY(calc(1 + var(--p,0) * .12));transform-origin:50% 100%;transition:transform .6s var(--e),color .6s,text-shadow .6s;
+  color:color-mix(in srgb,var(--blue2) calc(var(--p,0) * 100%),currentColor);text-shadow:0 0 calc(var(--p,0) * 40px) rgba(76,132,255,calc(var(--p,0) * .8))}
+/* rotulos que se descifran */
+.dec{color:var(--blue2)!important}
+/* marquesinas gigantes */
+.bigmq{position:relative;z-index:1;overflow:hidden;margin-top:clamp(80px,12vh,140px);border-block:1px solid var(--line2);padding-block:clamp(10px,2vh,22px);background:var(--bg)}
+.bigmq-r{transform:rotate(-2.2deg) scale(1.06)}
+.bigmq.alt .bigmq-r{transform:rotate(2deg) scale(1.06)}
+.bigmq-t{display:flex;align-items:center;width:max-content;will-change:transform}
+.bigmq span{font-size:clamp(64px,11vw,190px);font-weight:500;letter-spacing:-.065em;line-height:1;padding:0 .12em;color:transparent;-webkit-text-stroke:1px rgba(191,209,255,.35);white-space:nowrap}
+.bigmq span.f{color:var(--ink);-webkit-text-stroke:0}
+.bigmq.alt span.f{color:var(--blue2)}
+.bigmq i{flex:0 0 auto;width:.12em;height:.12em;font-size:clamp(64px,11vw,190px);margin:0 .22em;background:var(--blue2);box-shadow:0 0 30px var(--blue2)}
+/* protocolo en horizontal */
+.gl-pin{position:relative;overflow:hidden}
+.gl-hud{display:none;align-items:center;gap:16px;color:var(--mut2);margin-bottom:16px}
+.gl-hud i{flex:1;height:1px;background:var(--line2);position:relative}
+.gl-hud i b{position:absolute;left:0;top:-1px;height:3px;width:100%;background:var(--blue2);transform-origin:0 50%;transform:scaleX(0)}
+.gr-big{position:absolute;right:-.06em;bottom:-.2em;font-size:clamp(160px,18vw,300px);font-weight:600;letter-spacing:-.08em;line-height:1;color:transparent;-webkit-text-stroke:1px rgba(191,209,255,.12);pointer-events:none;z-index:-1;transition:-webkit-text-stroke-color .5s,transform .8s var(--e)}
+.gr:hover .gr-big{-webkit-text-stroke-color:rgba(255,255,255,.4);transform:translateY(-6%)}
+.gl.hz{display:flex;width:max-content;border-right:0}
+.gl.hz .gr{flex:0 0 min(560px,40vw);min-height:min(64vh,600px);border-right:1px solid var(--line2)!important;border-bottom:0!important}
+.gl.hz .gr h3{font-size:clamp(34px,3.6vw,60px)}
+.gl.hz+.gl-end{display:block}
+@media (min-width:901px){.gl-hud{display:flex}}
+/* foto del explorer: separacion de color al pasar */
+.shot{overflow:hidden}
+.shot img{transition:transform 1s var(--e),filter .6s}
+.pn:hover .shot img{transform:scale(1.04);filter:drop-shadow(3px 0 0 rgba(255,40,80,.35)) drop-shadow(-3px 0 0 rgba(60,140,255,.45))}
 </style>
 </head>
 <body>
@@ -414,7 +457,7 @@ main,.ft{position:relative;z-index:1}
 </svg>
 
 
-<div class="pre" id="pre" aria-hidden="true" style="background:#05060A;color:#fff"><svg id="preLogo"><use href="#logo"/></svg></div>
+<div class="pre" id="pre" aria-hidden="true"><div class="pre-cols"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><div class="pre-in"><svg><use href="#logo"/></svg><span class="pre-n">000</span><div class="pre-b"><b></b></div><span class="m pre-t">Initialising settlement layer</span></div></div>
 
 <!-- la reticula de fondo: doce columnas en linea fina -->
 <div class="grid-bg" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
@@ -484,6 +527,8 @@ main,.ft{position:relative;z-index:1}
   </div>
 </section>
 
+<div class="bigmq" data-dir="1" aria-hidden="true"><div class="bigmq-r"><div class="bigmq-t"><span>Settlement</span><i></i><span class="f">Tokenization</span><i></i><span>Compliance</span><i></i><span class="f">Liquidity</span><i></i></div></div></div>
+
 <!-- ═══ PRODUCTOS ═══ -->
 <section class="sec" id="products"><div class="wrap">
   <div class="sh"><div class="sh-k m"><b>[01]</b><span>Products</span><i></i><span>03 items</span></div><h2 class="split">Three pieces, <em>two already running.</em></h2><p>A chain built for regulated assets, the interface to issue them, and real infrastructure behind the token.</p></div>
@@ -540,12 +585,12 @@ main,.ft{position:relative;z-index:1}
 <!-- ═══ PROTOCOLO ═══ -->
 <section class="sec" id="why"><div class="wrap">
   <div class="sh"><div class="sh-k m"><b>[02]</b><span>Protocol</span><i></i><span>04 guarantees</span></div><h2 class="split">Four guarantees, <em>written into the protocol.</em></h2><p>When value moves, the rules move with it. On Nereum they travel with the asset and hold at machine speed.</p></div>
-  <div class="gl">
-    <div class="gr rv"><span class="n m">G—01</span><span class="ic"><svg viewBox="0 0 24 24"><path d="M5 12l4 4 10-10"/></svg></span><h3>All-or-nothing settlement</h3><p>Every leg settles, or none does.</p></div>
-    <div class="gr rv"><span class="n m">G—02</span><span class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12Z"/></svg></span><h3>Controlled visibility</h3><p>A public register, with the policy travelling with the asset.</p></div>
-    <div class="gr rv"><span class="n m">G—03</span><span class="ic"><svg viewBox="0 0 24 24"><path d="M12 3.5 5.2 6.4v4.8c0 4 2.8 6.8 6.8 7.6 4-.8 6.8-3.6 6.8-7.6V6.4L12 3.5Z"/></svg></span><h3>Always-on security</h3><p>Checked before anything is written, not after.</p></div>
-    <div class="gr rv"><span class="n m">G—04</span><span class="ic"><svg viewBox="0 0 24 24"><path d="M13 2 4 14h7l-1 8 9-12h-7l1-8Z"/></svg></span><h3>Performance under load</h3><p>Seconds, not days, and no manual checks to scale.</p></div>
-  </div>
+  <div class="gl-pin"><div class="gl-hud m"><span>Scroll · 04 guarantees</span><i><b id="glB"></b></i></div><div class="gl">
+    <div class="gr rv"><span class="gr-big" aria-hidden="true">01</span><span class="n m">G—01</span><span class="ic"><svg viewBox="0 0 24 24"><path d="M5 12l4 4 10-10"/></svg></span><h3>All-or-nothing settlement</h3><p>Every leg settles, or none does.</p></div>
+    <div class="gr rv"><span class="gr-big" aria-hidden="true">02</span><span class="n m">G—02</span><span class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12Z"/></svg></span><h3>Controlled visibility</h3><p>A public register, with the policy travelling with the asset.</p></div>
+    <div class="gr rv"><span class="gr-big" aria-hidden="true">03</span><span class="n m">G—03</span><span class="ic"><svg viewBox="0 0 24 24"><path d="M12 3.5 5.2 6.4v4.8c0 4 2.8 6.8 6.8 7.6 4-.8 6.8-3.6 6.8-7.6V6.4L12 3.5Z"/></svg></span><h3>Always-on security</h3><p>Checked before anything is written, not after.</p></div>
+    <div class="gr rv"><span class="gr-big" aria-hidden="true">04</span><span class="n m">G—04</span><span class="ic"><svg viewBox="0 0 24 24"><path d="M13 2 4 14h7l-1 8 9-12h-7l1-8Z"/></svg></span><h3>Performance under load</h3><p>Seconds, not days, and no manual checks to scale.</p></div>
+  </div></div>
 </div></section>
 
 <!-- ═══ 85 % ═══ -->
@@ -622,6 +667,8 @@ main,.ft{position:relative;z-index:1}
   </div>
 </div></section>
 
+<div class="bigmq alt" data-dir="-1" aria-hidden="true"><div class="bigmq-r"><div class="bigmq-t"><span class="f">Registered</span><i></i><span>Audited</span><i></i><span class="f">Onchain</span><i></i><span>Built in the open</span><i></i></div></div></div>
+
 <!-- ═══ ESCENA: logo ═══ -->
 <section class="tx" id="tx-logo" data-tx="logo" style="height:260vh" aria-label="Nereum, built in the open">
   <div class="tx-st"><div class="tx-vig"></div><div class="tx-frame" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
@@ -672,10 +719,10 @@ var hasG = !!window.gsap && !!window.ScrollTrigger;
 if(hasG) gsap.registerPlugin(ScrollTrigger);
 var AZULES=['#0C33B4','#1244DC','#1A5BF0','#3E7BFF','#2E62C8'], BLANCOS=['#E9EDF6','#C3CCDD','#BFD4FF'], _rgb={};
 
-var lenis=null, VELZ=0;
+var lenis=null, VELZ=0, VEL=0;
 if(!CALMA && window.Lenis && hasG){
   lenis=new Lenis({lerp:.09,smoothWheel:true});
-  lenis.on('scroll',function(e){ ScrollTrigger.update(); VELZ=Math.min(.12,Math.abs(e.velocity||0)*.004) });
+  lenis.on('scroll',function(e){ ScrollTrigger.update(); VELZ=Math.min(.12,Math.abs(e.velocity||0)*.004); VEL=e.velocity||0 });
   gsap.ticker.add(function(t){ lenis.raf(t*1000); VELZ*=.9 }); gsap.ticker.lagSmoothing(0);
 }
 var sheet=$('#sheet'), menuB=$('#menuB');
@@ -1209,6 +1256,62 @@ if(matchMedia('(hover:hover) and (pointer:fine)').matches && hasG && !CALMA){
   if(!CALMA) setInterval(function(){ n+=1; blk.textContent=n.toLocaleString('en-US') },2000);
 })();
 
+
+/* ═══ CAPA LOCA ═══════════════════════════════════════════════════════════ */
+/* el titular, letra a letra; las cercanas al cursor se levantan y se encienden */
+var LETRAS=[];
+$$('.hx-h .ln>span').forEach(function(sp){
+  sp.innerHTML=sp.textContent.split(' ').map(function(w){ return '<span class="w">'+w.split('').map(function(c){ return '<span class="ch">'+c+'</span>' }).join('')+'</span>' }).join(' ');
+});
+LETRAS=$$('.hx-h .ch');
+if(matchMedia('(hover:hover) and (pointer:fine)').matches && !CALMA){
+  var cajas=null, lx=0, ly=0, lped=false, hst=$('#hxSt');
+  function medir(){ cajas=LETRAS.map(function(l){ var r=l.getBoundingClientRect(); return [r.left+r.width/2,r.top+r.height/2] }) }
+  addEventListener('resize',function(){ cajas=null }); addEventListener('scroll',function(){ cajas=null },{passive:true});
+  hst.addEventListener('pointermove',function(e){ lx=e.clientX; ly=e.clientY; if(lped) return; lped=true;
+    requestAnimationFrame(function(){ lped=false; if(!cajas) medir();
+      for(var i=0;i<LETRAS.length;i++){ var c=cajas[i], d=Math.hypot(lx-c[0],(ly-c[1])*1.4); LETRAS[i].style.setProperty('--p',Math.max(0,1-d/220).toFixed(3)) } }) },{passive:true});
+  hst.addEventListener('pointerleave',function(){ LETRAS.forEach(function(l){ l.style.setProperty('--p',0) }) });
+}
+
+/* rotulos en mono que se descifran al entrar */
+var SIG='▮▯/\\<>_#%01';
+function descifra(el){
+  var nodos=[]; (function rec(n){ for(var c=n.firstChild;c;c=c.nextSibling){ if(c.nodeType===3&&c.data.trim()) nodos.push(c); else if(c.nodeType===1&&c.tagName!=='svg') rec(c) } })(el);
+  el.classList.add('dec');
+  nodos.forEach(function(n){ var fin=n.data, t0=performance.now(), dur=500+fin.length*22;
+    (function paso(t){ var k=Math.min(1,(t-t0)/dur), h=Math.floor(k*fin.length), o='';
+      for(var i=0;i<fin.length;i++){ var ch=fin[i]; o+=(i<h||ch===' ')?ch:SIG[(Math.random()*SIG.length)|0] }
+      n.data=o; if(k<1) requestAnimationFrame(paso); else { n.data=fin; el.classList.remove('dec') } })(t0) });
+}
+if(!CALMA && 'IntersectionObserver' in window){
+  var ioD=new IntersectionObserver(function(es){ es.forEach(function(e){ if(!e.isIntersecting) return; ioD.unobserve(e.target); descifra(e.target) }) },{threshold:.6});
+  $$('.sh-k span, .pn-bar span, .tx-top .m, .tx-bot .m, .cert-top span, .ph .n, .nw b, .fig span, .gr .n, .cta-k span, .ft-cols h4, .gl-hud span').forEach(function(el){ ioD.observe(el) });
+}
+
+if(hasG && !CALMA){
+  /* marquesinas gigantes: avanzan solas y se disparan con la velocidad del scroll */
+  var MQS=$$('.bigmq').map(function(m){ var t=$('.bigmq-t',m); t.innerHTML+=t.innerHTML; return {t:t,d:+m.dataset.dir||1,x:0,w:0} });
+  function anchoMQ(){ MQS.forEach(function(o){ o.w=o.t.scrollWidth/2 }) } anchoMQ(); addEventListener('resize',anchoMQ); addEventListener('load',anchoMQ);
+  /* bloques que se inclinan con la velocidad */
+  var SKW=$$('.sh h2, .figs, .certs, .phs, .news, .odo, .cta h2, .stack'), sk=0;
+  gsap.ticker.add(function(){
+    var v=Math.max(-40,Math.min(40,VEL)); VEL*=.92;
+    MQS.forEach(function(o){ o.x-=o.d*(1.1+Math.abs(v)*.45); if(o.w){ o.x=((o.x%o.w)+o.w)%o.w } o.t.style.transform='translate3d('+(-o.x).toFixed(1)+'px,0,0)' });
+    var obj=v*.07; sk+=(obj-sk)*.1;
+    if(Math.abs(sk)>.005) SKW.forEach(function(e){ e.style.transform='skewY('+sk.toFixed(3)+'deg)' });
+    else if(sk!==0){ sk=0; SKW.forEach(function(e){ e.style.transform='' }) }
+  });
+  /* el protocolo en horizontal: la seccion se fija y las garantias pasan de lado */
+  gsap.matchMedia().add('(min-width:901px)',function(){
+    var pin=$('.gl-pin'), gl=$('.gl'), bb=$('#glB'); gl.classList.add('hz');
+    function dist(){ return Math.max(0,gl.scrollWidth-pin.clientWidth) }
+    gsap.to(gl,{x:function(){ return -dist() },ease:'none',scrollTrigger:{trigger:pin,start:'top top+=96',end:function(){ return '+='+dist() },pin:true,scrub:.8,invalidateOnRefresh:true,refreshPriority:1,
+      onUpdate:function(s){ bb.style.transform='scaleX('+s.progress.toFixed(3)+')' }}});
+    return function(){ gl.classList.remove('hz'); gsap.set(gl,{clearProps:'transform'}) };
+  });
+}
+
 /* ═══ TOKEN ═══ */
 var ALLOC=[['Private sale',50,'#1A5BF0'],['CEX listing',15,'#3E7BFF'],['Marketing',10,'#0E3AC4'],['Reserve',5,'#8FB0FF'],['Team (locked)',5,'#2A3550'],['Advisors',5,'#5B6475'],['Development',5,'#C9D6F5'],['Airdrop',5,'#2E62C8']];
 var bar=$('#bar'), leg=$('#legend');
@@ -1234,11 +1337,14 @@ $('#copy').addEventListener('click',function(){ var b=this; (navigator.clipboard
 function entrar(){
   var pre=$('#pre');
   if(!hasG || CALMA){ GLOBO.inn=1; if(pre) pre.remove(); return }
-  var tl=gsap.timeline();
-  tl.to(pre,{opacity:0,duration:.6,delay:.2,ease:'power2.out'})
-    .to(GLOBO,{inn:1,duration:2.8,ease:'power2.out'},'<')
-    .from('.hx-h .ln>span',{yPercent:115,duration:1.3,ease:'expo.out',stagger:.09},'<.1')
-    .from('.hx-k, .hx-row, .hx-bot, #hd',{y:24,opacity:0,duration:1.1,ease:'expo.out',stagger:.07},'<.25')
+  var o={v:0}, n=$('.pre-n'), bar=$('.pre-b b'), tl=gsap.timeline();
+  tl.to(o,{v:100,duration:1.5,ease:'power2.inOut',onUpdate:function(){ n.textContent=String(Math.round(o.v)).padStart(3,'0'); bar.style.transform='scaleX('+(o.v/100).toFixed(3)+')' }})
+    .to('.pre-in',{opacity:0,y:-40,filter:'blur(10px)',duration:.5,ease:'power2.in'})
+    .to('.pre-cols i',{yPercent:-100,duration:1,ease:'expo.inOut',stagger:{each:.04,from:'center'}},'-=.15')
+    .to(GLOBO,{inn:1,duration:2.8,ease:'power2.out'},'<.25')
+    .from('.hx-h .w',{yPercent:120,rotate:6,opacity:0,duration:1.2,ease:'expo.out',stagger:.07},'<.15')
+    .from('.hx-k, .hx-row, .hx-bot, #hd, .hx-frame',{y:24,opacity:0,duration:1.1,ease:'expo.out',stagger:.07},'<.35')
+    .add(function(){ $$('.hx-k span, .hx-bot .hx-scroll').forEach(descifra) },'<')
     .add(function(){ if(pre) pre.remove() });
 }
 if(document.readyState==='complete') entrar(); else addEventListener('load',entrar);
