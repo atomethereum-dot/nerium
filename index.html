@@ -7938,10 +7938,27 @@ const CALM=matchMedia('(prefers-reduced-motion: reduce)').matches;
   const ctx=cv.getContext('2d'); if(!ctx)return;
   const quieto=matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  const PAL=[[34,78,236],[22,56,196],[52,104,255],[16,40,156],[70,128,255],[12,32,128]];
-  const CLAROS=[[112,158,255],[150,186,244]];
-  const HONDO=9.6, CERCA=0.42;
-  let W=0,H=0,piezas=null,giro=0,raf=0,ultimo=0;
+  /* LA MISMA PALETA QUE «#xfade», la de las secciones de abajo.
+     La de aqui eran seis azules saturados y la portada salia de un azul que
+     no se repite en ningun otro sitio de la pagina. Esta trae dos azules
+     vivos, dos apagados y dos casi negros —y esos ultimos son los que hacen
+     el trabajo: sin piezas oscuras un pasillo no tiene sombra, tiene color.
+     Los claros van en el gris plata de la casa, no en blanco: en «#xfade» se
+     pinta sumando luz y un claro se apaga solo; aqui se pinta solido y un
+     blanco seria una mancha. */
+  /* EL AZUL DE «#xfade», PERO PARA PINTAR SOLIDO.
+     Copiar su paleta tal cual no valia, y el motivo es el modo de pintado:
+     alli se SUMA luz sobre negro, asi que un [28,46,140] apagado acaba
+     saliendo azul electrico al superponerse con sus vecinos. Aqui se pinta
+     solido, y ese mismo numero sale tal como es —gris azulado— y lava la
+     escena entera.
+     Asi que lo que se copia no son los numeros sino el RESULTADO: el mismo
+     azul hondo y saturado que se ve alli, ya sumado, con dos marinos casi
+     negros para la sombra. Cero grises: eran ellos los que descoloraban. */
+  const PAL=[[22,52,232],[12,30,180],[30,68,255],[16,40,205],[8,18,120],[4,10,72]];
+  const CLAROS=[[126,158,214],[96,126,184]];
+  const HONDO=9.6, CERCA=0.42, RANGO=HONDO-CERCA;
+  let W=0,H=0,piezas=null,giro=0,raf=0,ultimo=0,t=0,hueco=null,huecoW=0,huecoH=0;
 
   /* El pasillo: media anchura y media altura en unidades del mundo. Se
      estiran con la forma de la pantalla para que las paredes de los lados no
@@ -7955,30 +7972,35 @@ const CALM=matchMedia('(prefers-reduced-motion: reduce)').matches;
              b: Math.max(1.55, 1.55*Math.min(1.4, 1/r)) };
   }
 
+  /* Cada pieza guarda su FASE, no su z. La z sale de un solo reloj:
+       z = CERCA + ((fase - t) modulo recorrido)
+     Con eso no hay que mover nada ni reordenar nada: el orden de pintado se
+     saca de la fase, que no cambia nunca. Se vera abajo por que importa. */
   function siembra(){
     const {a,b}=medidas();
-    const paso = W<760 ? 0.60 : 0.52;          /* separacion entre columnas */
-    const dz   = W<760 ? 0.62 : 0.50;          /* separacion entre filas */
-    const filas= Math.ceil((HONDO-CERCA)/dz);
-    piezas=[];
+    const paso = W<760 ? 0.72 : 0.52;
+    const dz   = W<760 ? 0.76 : 0.50;
+    const filas= Math.ceil(RANGO/dz);
+    piezas=[]; t=0;
     const cols=[];
-    /* las cuatro paredes, recorridas por su borde */
     for(let x=-a; x<=a+1e-6; x+=paso){ cols.push({x, y:-b}); cols.push({x, y:b}) }
     for(let y=-b+paso; y<=b-paso+1e-6; y+=paso){ cols.push({x:-a, y}); cols.push({x:a, y}) }
     for(const c of cols){
-      const fase=Math.random();                 /* cada columna, su desfase */
+      const desf=Math.random()*dz;              /* cada columna, su desfase */
       for(let i=0;i<filas;i++){
-        const claro=Math.random()<0.05;
+        const claro=Math.random()<0.04;
         piezas.push({
           x:c.x+(Math.random()*2-1)*paso*0.16,
           y:c.y+(Math.random()*2-1)*paso*0.16,
-          z:CERCA+((i+fase)%filas)*dz,
+          s:(i*dz+desf)%RANGO,                  /* la fase */
           lado:paso*(0.62+Math.random()*0.30),
           c: claro?CLAROS[(Math.random()*CLAROS.length)|0]:PAL[(Math.random()*PAL.length)|0],
           a: claro?0.86+Math.random()*0.14 : 0.80+Math.random()*0.20
         });
       }
     }
+    /* ordenadas por fase, UNA vez en la vida */
+    piezas.sort((m,n)=>n.s-m.s);
   }
 
   function mide(){
@@ -7987,6 +8009,21 @@ const CALM=matchMedia('(prefers-reduced-motion: reduce)').matches;
     if(!W||!H)return false;
     if(window.__mide)__mide(cv,W*d,H*d); else {cv.width=W*d;cv.height=H*d}
     ctx.setTransform(d,0,0,d,0,0);
+    /* EL RESPIRO DEL LOCKUP, COCIDO UNA VEZ.
+       Era un degradado radial creado de cero en cada cuadro, con su arco y su
+       relleno. Ahora se cuece en un lienzo aparte al cambiar de tamaño y cada
+       cuadro solo lo estampa: un «drawImage» en vez de un degradado nuevo. */
+    const rx=Math.min(W*0.30,340), ry=Math.min(H*0.17,150);
+    hueco=document.createElement('canvas');
+    hueco.width=Math.max(2,Math.ceil(rx*2)); hueco.height=Math.max(2,Math.ceil(ry*2));
+    const hx=hueco.getContext('2d');
+    const g=hx.createRadialGradient(rx,ry,0,rx,ry,1);
+    g.addColorStop(0,'rgba(0,0,0,.96)');
+    g.addColorStop(0.60,'rgba(0,0,0,.72)');
+    g.addColorStop(1,'rgba(0,0,0,0)');
+    hx.save(); hx.translate(rx,ry); hx.scale(rx,ry); hx.translate(-rx,-ry);
+    hx.fillStyle=g; hx.beginPath(); hx.arc(rx,ry,1,0,Math.PI*2); hx.fill(); hx.restore();
+    huecoW=rx*2; huecoH=ry*2;
     return true;
   }
 
@@ -7994,71 +8031,63 @@ const CALM=matchMedia('(prefers-reduced-motion: reduce)').matches;
     ctx.clearRect(0,0,W,H);
     const cx=W/2, cy=H/2, foco=Math.min(W,H)*0.92;
     const vel=1.35*dt;
+    t=(t+vel)%RANGO;
     giro+=0.075*dt;
-    const cg=Math.cos(giro), sg=Math.sin(giro);
-    /* Primero se mueven todas, luego se ordenan de LEJOS a CERCA y se pintan
-       en ese orden: sin eso, una pieza del fondo puede caer encima de una de
-       delante y el pasillo pierde el fondo. */
-    for(const q of piezas){
-      q.zAntes=q.z; q.z-=vel;
-      if(q.z<CERCA) q.z+=HONDO-CERCA;
-    }
-    piezas.sort((m,n)=>n.z-m.z);
-    for(const q of piezas){
-      const zAntes=q.zAntes;
-      /* el pasillo gira sobre su eje: las paredes se leen como paredes */
-      const rx=q.x*cg-q.y*sg, ry=q.x*sg+q.y*cg;
-      const k=foco/q.z;
-      const px=cx+rx*k, py=cy+ry*k;
+    /* EL PASILLO GIRA UNA VEZ, NO PIEZA A PIEZA.
+       Girar cada cuadrado por separado son dos «save/restore» y una rotacion
+       por pieza: con quinientas, medio millar de cambios de estado por cuadro.
+       Girar la posicion y girar la pieza el mismo angulo es exactamente lo
+       mismo que girar la escena entera, asi que se gira el lienzo una vez y
+       dentro se pinta todo derecho. Medido: es la diferencia entre ir a
+       tirones y no ir. */
+    ctx.save();
+    ctx.translate(cx,cy); ctx.rotate(giro); ctx.translate(-cx,-cy);
+    /* DE LEJOS A CERCA SIN ORDENAR NADA.
+       Con la z sacada de una fase, la lista ordenada por fase YA esta ordenada
+       por profundidad: basta partirla por donde va el reloj. Las de fase menor
+       que «t» son las de mas atras —han dado la vuelta— y van primero. Una
+       busqueda binaria por cuadro en vez de un «sort» de quinientos. */
+    const n=piezas.length;
+    let lo=0, hi=n;
+    while(lo<hi){ const m=(lo+hi)>>1; if(piezas[m].s>=t) lo=m+1; else hi=m }
+    const corte=lo;
+    const radio=Math.hypot(W,H)*0.5;
+    for(let i=0;i<n;i++){
+      const q=piezas[i<n-corte ? corte+i : i-(n-corte)];
+      let d=q.s-t; if(d<0)d+=RANGO;
+      const z=CERCA+d;
+      const k=foco/z;
+      const px=cx+q.x*k, py=cy+q.y*k;
       const lado=q.lado*k;
       if(lado<1.1) continue;
-      if(px<-lado||px>W+lado||py<-lado||py>H+lado) continue;
-      /* se apaga al fondo y tambien justo al pasar de largo, que si no
-         aparecen y desaparecen de golpe en el borde */
-      const hondo=1-Math.min(1,(q.z-CERCA)/(HONDO-CERCA));
-      const sale=Math.min(1,(q.z-CERCA)/0.55);
+      /* el lienzo va girado, asi que se recorta por distancia al centro y no
+         por los lados: una caja recta aqui dentro se comeria las esquinas */
+      const ex=px-cx, ey=py-cy;
+      if(ex*ex+ey*ey > (radio+lado)*(radio+lado)) continue;
+      const hondo=1-d/RANGO;
+      const sale=Math.min(1,d/0.55);
       const al=q.a*sale;
       if(al<0.012) continue;
-      /* La luz se va con la distancia OSCURECIENDO el color, no volviendo la
-         pieza transparente: un bloque del fondo esta lejos, no es un fantasma.
-         Asi las piezas se TAPAN entre ellas, que es lo que le da cuerpo al
-         pasillo; sumando luz —«lighter»— se fundian todas en una mancha. */
-      const luz=0.26+hondo*0.74;
+      const luz=0.56+hondo*0.44;
       const col=(q.c[0]*luz|0)+','+(q.c[1]*luz|0)+','+(q.c[2]*luz|0);
-      const kA=foco/zAntes, ax=cx+rx*kA, ay=cy+ry*kA;
+      const kA=foco/(z+vel), ax=cx+q.x*kA, ay=cy+q.y*kA;
       const dx=px-ax, dy=py-ay;
       if(dx*dx+dy*dy>6){
         ctx.strokeStyle='rgba('+col+','+(al*0.20).toFixed(3)+')';
         ctx.lineWidth=Math.max(1,lado*0.7);
         ctx.beginPath(); ctx.moveTo(ax,ay); ctx.lineTo(px,py); ctx.stroke();
       }
-      ctx.save(); ctx.translate(px,py); ctx.rotate(giro);
       ctx.fillStyle='rgba('+col+','+al.toFixed(3)+')';
-      ctx.fillRect(-lado/2,-lado/2,lado,lado);
-      /* el filo de arriba es un canto, no una lampara: se queda en un decimo
-         y solo asoma en las piezas del fondo, que es donde hace falta para
-         separarlas unas de otras */
+      ctx.fillRect(px-lado/2,py-lado/2,lado,lado);
       ctx.fillStyle='rgba(215,232,255,'+(al*0.13*(0.30+hondo*0.70)).toFixed(3)+')';
-      ctx.fillRect(-lado/2,-lado/2,lado,Math.max(1,lado*0.12));
-      ctx.restore();
+      ctx.fillRect(px-lado/2,py-lado/2,lado,Math.max(1,lado*0.12));
     }
-    /* EL RESPIRO DEL LOCKUP.
-       La geometria ya deja el pasillo negro en el centro, pero su boca no
-       mide siempre lo mismo —depende de la forma de la pantalla— y en un
-       telefono se cerraba sobre la palabra. Esto es una red, no el efecto:
-       un ovalo muy blando, del tamaño del lockup, que APAGA lo pintado
-       encima de el. En «destination-out», que quita en vez de tapar: asi no
-       aparece una mancha negra sobre la malla azul de debajo. */
-    ctx.globalCompositeOperation='destination-out';
-    const rx=Math.min(W*0.30,340), ry=Math.min(H*0.17,150);
-    const g=ctx.createRadialGradient(cx,cy,0,cx,cy,1);
-    g.addColorStop(0,'rgba(0,0,0,.96)');
-    g.addColorStop(0.60,'rgba(0,0,0,.72)');
-    g.addColorStop(1,'rgba(0,0,0,0)');
-    ctx.save(); ctx.translate(cx,cy); ctx.scale(rx,ry); ctx.translate(-cx,-cy);
-    ctx.fillStyle=g; ctx.beginPath(); ctx.arc(cx,cy,1,0,Math.PI*2); ctx.fill();
     ctx.restore();
-    ctx.globalCompositeOperation='source-over';
+    if(hueco){
+      ctx.globalCompositeOperation='destination-out';
+      ctx.drawImage(hueco, cx-huecoW/2, cy-huecoH/2, huecoW, huecoH);
+      ctx.globalCompositeOperation='source-over';
+    }
   }
 
   function arranca(){
