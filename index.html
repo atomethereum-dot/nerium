@@ -7995,7 +7995,7 @@ const CALM=matchMedia('(prefers-reduced-motion: reduce)').matches;
   const CLAROS=[[233,235,237],[186,193,202]];               /* blanco y plata */
   const HONDO=9.6, CERCA=0.42, RANGO=HONDO-CERCA;
   let W=0,H=0,piezas=null,giro=0,raf=0,ultimo=0,t=0,hueco=null,huecoW=0,huecoH=0;
-  let vt=0, faro=null, faroR=0, raton=0, ratonY=0, mira=0, miraY=0;
+  let vt=0, faro=null, faroR=0, raton=0, ratonY=0, mira=0, miraY=0, anclaX=0, anclaY=0;
   const FINO=matchMedia('(hover:hover) and (pointer:fine)').matches;
 
   /* El pasillo: media anchura y media altura en unidades del mundo. Se
@@ -8020,9 +8020,29 @@ const CALM=matchMedia('(prefers-reduced-motion: reduce)').matches;
     const dz   = W<760 ? 0.92 : 0.50;
     const filas= Math.ceil(RANGO/dz);
     piezas=[]; t=0;
+    /* ══ LA PARED SE RECORRE, NO SE SUMA ═════════════════════════════════
+       Antes las cuatro paredes se generaban cada una por su lado, sumando
+       «paso» desde un extremo hasta el otro. Eso solo cierra si el largo de
+       la pared es multiplo exacto del paso, y casi nunca lo es: la ultima
+       columna se queda corta y falta un trozo de pared. En perspectiva una
+       columna que falta no es un hueco pequeño —es una RECTA NEGRA que sale
+       del centro y cruza la pantalla entera, porque esa columna falta a TODAS
+       las profundidades a la vez. Dos de esas se veian.
+
+       Ahora el perimetro se recorre como lo que es: una vuelta cerrada. Se
+       mide su largo, se decide cuantas columnas caben y se reparten a
+       distancia igual a lo largo de la vuelta. Cierra siempre, sea cual sea
+       la forma de la pantalla, y las esquinas no se cuentan dos veces. */
     const cols=[];
-    for(let x=-a; x<=a+1e-6; x+=paso){ cols.push({x, y:-b}); cols.push({x, y:b}) }
-    for(let y=-b+paso; y<=b-paso+1e-6; y+=paso){ cols.push({x:-a, y}); cols.push({x:a, y}) }
+    const vuelta=4*a+4*b;                       /* 2·(2a) + 2·(2b) */
+    const cuantas=Math.max(8, Math.round(vuelta/paso));
+    for(let i=0;i<cuantas;i++){
+      const d=i*vuelta/cuantas;
+      if(d < 2*a)            cols.push({x:-a+d,           y:-b});
+      else if(d < 2*a+2*b)   cols.push({x:a,              y:-b+(d-2*a)});
+      else if(d < 4*a+2*b)   cols.push({x:a-(d-2*a-2*b),  y:b});
+      else                   cols.push({x:-a,             y:b-(d-4*a-2*b)});
+    }
     for(const c of cols){
       const desf=Math.random()*dz;              /* cada columna, su desfase */
       for(let i=0;i<filas;i++){
@@ -8072,6 +8092,19 @@ const CALM=matchMedia('(prefers-reduced-motion: reduce)').matches;
     hx.save(); hx.translate(rx,ry); hx.scale(rx,ry); hx.translate(-rx,-ry);
     hx.fillStyle=g; hx.beginPath(); hx.arc(rx,ry,1,0,Math.PI*2); hx.fill(); hx.restore();
     huecoW=rx*2; huecoH=ry*2;
+    /* EL FINAL DEL PASILLO, DONDE ESTA LA PALABRA.
+       El punto de fuga estaba en el centro geometrico del lienzo y el lockup
+       no esta ahi: va desplazado media eme y pico a la izquierda para que el
+       conjunto —barra y palabra— quede optico. Encima yo lo paseaba con la
+       «respiracion» de la camara un 3 %. Resultado: el fondo del tunel caia a
+       un lado del texto.
+       Se mide donde esta el lockup de verdad y el pasillo se apunta ahi. */
+    anclaX=W/2; anclaY=H/2;
+    const lk=document.getElementById('lockup');
+    if(lk){
+      const r=lk.getBoundingClientRect(), c=cv.getBoundingClientRect();
+      if(r.width){ anclaX=r.left-c.left+r.width/2; anclaY=r.top-c.top+r.height/2 }
+    }
     /* EL FARO DEL FONDO. Un pasillo que no lleva a ninguna parte es un
        tunel de papel pintado. Una sola luz honda en el punto de fuga le da
        destino, y con ella las piezas del fondo se recortan en contraluz en
@@ -8155,15 +8188,16 @@ const CALM=matchMedia('(prefers-reduced-motion: reduce)').matches;
        mismo que girar la escena entera, asi que se gira el lienzo una vez y
        dentro se pinta todo derecho. Medido: es la diferencia entre ir a
        tirones y no ir. */
-    /* LA CAMARA RESPIRA.
-       Con el punto de fuga clavado en el centro exacto el pasillo parece un
-       salvapantallas. Dos senos lentos y desacompasados lo pasean muy poco
-       —un 3 % de la pantalla— y con eso deja de estar clavado. En escritorio
-       se le suma el raton, con retardo: la camara no obedece, se deja
-       llevar. */
-    if(FINO){ mira+=(raton-mira)*Math.min(1,dt*2.2); miraY+=(ratonY-miraY)*Math.min(1,dt*2.2) }
-    const vx=cx+Math.sin(vt*0.21)*W*0.030+mira*W*0.045;
-    const vy=cy+Math.cos(vt*0.17)*H*0.026+miraY*H*0.040;
+    /* LA CAMARA RESPIRA, PERO SIN MOVERSE DE SITIO.
+       La respiracion era de un 3 % y el raton de otro 4,5 %: entre las dos
+       llevaban el fondo del pasillo a un lado del texto, que es justo lo que
+       no puede pasar —el final del tunel ES donde esta la palabra—. Se queda
+       un balanceo de menos de un uno por ciento, que se nota como vida y no
+       como descentrado, y el raton a la mitad. El giro sigue entero: rodar no
+       descentra nada. */
+    if(FINO){ mira+=(raton-mira)*Math.min(1,dt*2.0); miraY+=(ratonY-miraY)*Math.min(1,dt*2.0) }
+    const vx=anclaX+Math.sin(vt*0.21)*W*0.008+mira*W*0.016;
+    const vy=anclaY+Math.cos(vt*0.17)*H*0.007+miraY*H*0.014;
 
     if(faro){
       const fa=(0.30+emp*0.70);
@@ -8274,7 +8308,7 @@ const CALM=matchMedia('(prefers-reduced-motion: reduce)').matches;
     ctx.restore();
     if(hueco){
       ctx.globalCompositeOperation='destination-out';
-      ctx.drawImage(hueco, cx-huecoW/2, cy-huecoH/2, huecoW, huecoH);
+      ctx.drawImage(hueco, anclaX-huecoW/2, anclaY-huecoH/2, huecoW, huecoH);
       ctx.globalCompositeOperation='source-over';
     }
   }
