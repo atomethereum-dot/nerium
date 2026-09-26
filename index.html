@@ -5337,8 +5337,12 @@ body.light .hud::after{background:radial-gradient(120% 120% at 100% 100%,
   width:var(--v);height:var(--v);
   margin-left:calc(var(--v) / -2);margin-top:calc(var(--v) / -2);
   will-change:transform}
+/* Las puntas redondas van por CSS y no recortadas en los archivos: el 10,5 %
+   es el radio que ya trae el logotipo de Benzinga -48 px sobre 460, medido-,
+   asi que los tres quedan con la misma curva y el suyo no sale redondeado
+   dos veces. Y el que llegue mañana la hereda sin prepararlo. */
 .prs-vis img{position:absolute;inset:0;width:100%;height:100%;
-  object-fit:cover;display:block;
+  object-fit:cover;display:block;border-radius:10.5%;
   opacity:0;transform:scale(.84);
   transition:opacity 420ms cubic-bezier(.17,.89,.32,1),
              transform 420ms cubic-bezier(.17,.89,.32,1)}

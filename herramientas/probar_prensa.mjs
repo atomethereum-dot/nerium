@@ -143,6 +143,15 @@ di(vis.capa && vis.imagenes === vis.conRuta && vis.conRuta >= 1,
 di(vis.conRuta < vis.rutas.length,
    'y las filas sin archivo no se inventan ninguna (' +
    (vis.rutas.length - vis.conRuta) + ' sin imagen)');
+/* Las puntas redondas van por CSS y no recortadas en cada archivo: asi los
+   tres llevan la MISMA curva y el que llegue mañana la hereda sin
+   prepararlo. Se comprueba que sea una sola, porque el dia que alguien se
+   la recorte a uno en el archivo dejarian de casar y eso, en tres cuadros
+   que se ven de uno en uno, no lo nota nadie mirando. */
+const curva = await pg.evaluate(() => [...document.querySelectorAll('#press .prs-vis img')]
+  .map(i => getComputedStyle(i).borderRadius));
+di(curva.length > 0 && new Set(curva).size === 1 && !/^0/.test(curva[0]),
+   'las tres imagenes llevan la misma punta redonda (' + curva[0] + ')');
 di(vis.rutas.every(r => r === '' || /^img\/medios\/[a-z0-9_-]+\.(png|jpg|jpeg|webp|avif|svg)$/.test(r)),
    'y las rutas son relativas y de dentro de la casa');
 
