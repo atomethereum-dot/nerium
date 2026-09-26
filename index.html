@@ -5284,7 +5284,8 @@ body.light .hud::after{background:radial-gradient(120% 120% at 100% 100%,
   background:var(--prs-azul);
   transform:scaleX(0);transform-origin:left center;
   transition:transform 420ms cubic-bezier(.17,.89,.32,1)}
-.prs-f:hover::before,.prs-f:focus-visible::before{transform:scaleX(1)}
+.prs-f:hover::before,.prs-f:focus-visible::before,
+.prs-f.sel::before{transform:scaleX(1)}
 
 .prs-n,.prs-s{font-family:var(--m);font-style:normal;
   font-size:clamp(11px,.935vw,15px);letter-spacing:.105em;line-height:1;
@@ -5306,16 +5307,33 @@ body.light .hud::after{background:radial-gradient(120% 120% at 100% 100%,
   fill:none;stroke:var(--prs-mid);stroke-width:1.5;
   transition:stroke 420ms cubic-bezier(.17,.89,.32,1);
   stroke-linecap:square;stroke-linejoin:miter}
-.prs-f:hover .prs-n,.prs-f:focus-visible .prs-n,
-.prs-f:hover .prs-s,.prs-f:focus-visible .prs-s{color:#fff}
-.prs-f:hover .prs-go,.prs-f:focus-visible .prs-go{
+.prs-f:hover .prs-n,.prs-f:focus-visible .prs-n,.prs-f.sel .prs-n,
+.prs-f:hover .prs-s,.prs-f:focus-visible .prs-s,.prs-f.sel .prs-s{color:#fff}
+.prs-f:hover .prs-go,.prs-f:focus-visible .prs-go,.prs-f.sel .prs-go{
   transform:rotate(-45deg);border-color:rgba(255,255,255,.9)}
-.prs-f:hover .prs-go svg,.prs-f:focus-visible .prs-go svg{stroke:#fff}
+.prs-f:hover .prs-go svg,.prs-f:focus-visible .prs-go svg,
+.prs-f.sel .prs-go svg{stroke:#fff}
+
+/* ── el logotipo del medio, en la columna que el video deja vacia ──
+   Aparece SOLO con la fila abierta, y no empuja a nadie: vive en la tercera
+   columna, que en reposo esta vacia. Va forzado a blanco -los logotipos
+   vienen en su color de marca y sobre el azul cada uno tiraria por su lado-.
+   Si el archivo no esta, el hueco no existe: el guion solo lo mete cuando la
+   imagen ha cargado de verdad, asi que no hay marco roto ni sitio guardado
+   para algo que no va a venir. */
+.prs-logo{grid-column:3;justify-self:start;align-self:center;padding-left:7px;
+  display:block;opacity:0;transform:translateX(-8px);pointer-events:none;
+  transition:opacity 420ms cubic-bezier(.17,.89,.32,1),
+             transform 420ms cubic-bezier(.17,.89,.32,1)}
+.prs-logo img{display:block;width:auto;height:clamp(13px,1.2vw,19px);
+  filter:brightness(0) invert(1)}
+.prs-f:hover .prs-logo,.prs-f:focus-visible .prs-logo,
+.prs-f.sel .prs-logo{opacity:1;transform:none}
 /* el titular y la flecha NO cambian de color: los descubre el azul */
 
 /* la curva medida, para quien entienda «linear()» */
 @supports (transition-timing-function:linear(0,1)){
-  .prs-f::before,.prs-n,.prs-s,.prs-go{
+  .prs-f::before,.prs-n,.prs-s,.prs-go,.prs-logo{
     transition-timing-function:linear(0,.375 6.5%,.567 15.9%,.7 25.2%,
       .793 34.6%,.857 43.9%,.903 53.3%,.937 62.6%,.963 72%,.982 81.3%,
       .995 90.7%,1)}
@@ -5341,7 +5359,7 @@ body.light .hud::after{background:radial-gradient(120% 120% at 100% 100%,
 .prs-ret.on{opacity:1}
 
 @media(prefers-reduced-motion:reduce){
-  .prs-f::before,.prs-n,.prs-s,.prs-go{transition:none}
+  .prs-f::before,.prs-n,.prs-s,.prs-go,.prs-logo{transition:none}
   .prs-ret{display:none}
 }
 
@@ -5351,6 +5369,7 @@ body.light .hud::after{background:radial-gradient(120% 120% at 100% 100%,
     align-items:start;padding-block:18px;min-height:0}
   .prs-n{grid-row:1;grid-column:1}
   .prs-s{grid-row:1;grid-column:2;padding-left:0}
+  .prs-logo{grid-row:1;grid-column:2;justify-self:end;padding-left:0}
   .prs-go{grid-row:1;grid-column:3;align-self:center;margin-right:0}
   .prs-t{grid-row:2;grid-column:1 / -1;padding-left:0;font-size:19px}
   .prs-tr{background:repeating-linear-gradient(90deg,
@@ -7247,25 +7266,25 @@ window.__mide = function(cv, w, h){
     <h2 class="press-h">What they are writing about the chain.</h2>
   </div>
   <div class="prs-w prs">
-    <a class="prs-f rv" href="https://www.benzinga.com/" target="_blank" rel="noopener">
+    <a class="prs-f rv" data-medio="benzinga" href="https://www.benzinga.com/" target="_blank" rel="noopener">
       <i class="prs-n">P-01</i>
       <i class="prs-s">Benzinga</i>
       <h3 class="prs-t">Nereum settlement on the markets desk watchlist</h3>
       <i class="prs-go"><svg viewBox="0 0 16 10" aria-hidden="true"><path d="M0 5h13.4M11 2.6 14 5l-3 2.4"/></svg></i>
     </a>
-    <a class="prs-f rv" href="https://www.marketwatch.com/" target="_blank" rel="noopener">
+    <a class="prs-f rv" data-medio="marketwatch" href="https://www.marketwatch.com/" target="_blank" rel="noopener">
       <i class="prs-n">P-02</i>
       <i class="prs-s">MarketWatch</i>
       <h3 class="prs-t">Why finality, not throughput, is the next infrastructure race</h3>
       <i class="prs-go"><svg viewBox="0 0 16 10" aria-hidden="true"><path d="M0 5h13.4M11 2.6 14 5l-3 2.4"/></svg></i>
     </a>
-    <a class="prs-f rv" href="https://www.morningstar.com/" target="_blank" rel="noopener">
+    <a class="prs-f rv" data-medio="morningstar" href="https://www.morningstar.com/" target="_blank" rel="noopener">
       <i class="prs-n">P-03</i>
       <i class="prs-s">Morningstar</i>
       <h3 class="prs-t">Nereum instruments added to tokenized asset coverage</h3>
       <i class="prs-go"><svg viewBox="0 0 16 10" aria-hidden="true"><path d="M0 5h13.4M11 2.6 14 5l-3 2.4"/></svg></i>
     </a>
-    <a class="prs-f rv" href="https://nereum.xyz/whitepaper#/press" target="_blank" rel="noopener">
+    <a class="prs-f rv" data-medio="nereum" href="https://nereum.xyz/whitepaper#/press" target="_blank" rel="noopener">
       <i class="prs-n">P-04</i>
       <i class="prs-s">Announcement</i>
       <h3 class="prs-t">Settlement layer opens to third-party issuers</h3>
@@ -13986,6 +14005,92 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
    Solo con raton de verdad: en una pantalla tactil no hay puntero al que
    seguir, y quien haya pedido menos movimiento no la ve. Y el bucle se
    apaga solo cuando alcanza al puntero, asi que no deja nada girando. */
+/* ══ LA PRENSA SE VA ABRIENDO SOLA ════════════════════════════════════════
+   Con raton, la fila se abre al pasarle por encima. En un telefono no hay
+   raton que pasar, asi que las cuatro filas se quedaban cerradas para
+   siempre: el gesto que sostiene la seccion no existia en la mitad de las
+   pantallas donde se mira. Ahora se abre la fila que cruza el centro de la
+   pantalla, en el telefono y en el escritorio.
+
+   Va con un observador y NO con un oyente de scroll. El «rootMargin» de
+   «-50% 0px -50%» deja el area de observacion en una LINEA sin altura en
+   mitad de la pantalla: el navegador avisa cuando una fila la cruza, y como
+   las filas van pegadas solo hay una cruzandola a la vez. Cero trabajo por
+   cuadro, que en esta pagina importa: el telefono lleva un tope de imagenes
+   por segundo puesto a proposito -a 60 la pestaña se moria- y un oyente de
+   scroll aqui se lo comeria entero.
+
+   Con raton, mandar manda el raton: mientras el puntero esta dentro de la
+   lista se quita la seleccion automatica, para que no haya dos filas
+   abiertas discutiendo. Al salir, vuelve la que toque. */
+(function(){
+  var lista = document.querySelector('#press .prs');
+  if(!lista || !('IntersectionObserver' in window)) return;
+  var filas = [].slice.call(lista.querySelectorAll('.prs-f'));
+  if(!filas.length) return;
+
+  var actual = null, raton = false;
+
+  function pinta(){
+    filas.forEach(function(f){
+      f.classList.toggle('sel', !raton && f === actual);
+    });
+  }
+
+  var ob = new IntersectionObserver(function(entradas){
+    entradas.forEach(function(e){
+      if(e.isIntersecting) actual = e.target;
+      else if(e.target === actual) actual = null;
+    });
+    pinta();
+  }, { rootMargin:'-50% 0px -50% 0px', threshold:0 });
+  filas.forEach(function(f){ ob.observe(f) });
+
+  if(window.matchMedia && matchMedia('(pointer:fine)').matches){
+    lista.addEventListener('pointerover', function(e){
+      if(e.pointerType && e.pointerType !== 'mouse') return;
+      if(!raton){ raton = true; pinta(); }
+    }, {passive:true});
+    lista.addEventListener('pointerleave', function(e){
+      if(e.pointerType && e.pointerType !== 'mouse') return;
+      raton = false; pinta();
+    }, {passive:true});
+  }
+})();
+
+/* ══ EL LOGOTIPO DEL MEDIO ════════════════════════════════════════════════
+   Solo entra si el archivo existe. Se pide primero con un «Image» suelto y
+   la etiqueta se crea cuando esa peticion ha terminado BIEN; si el archivo
+   no esta, no se crea nada: ni marco roto, ni hueco guardado para algo que
+   no va a llegar, ni una columna que se mueve el dia que aparezca.
+
+   Los archivos van en «img/medios/» con el nombre que lleva cada fila en
+   «data-medio»: benzinga.svg, marketwatch.svg, morningstar.svg y
+   nereum.svg. Mientras no esten, la seccion funciona exactamente igual que
+   ahora; el dia que se dejen caer ahi, aparecen solos. */
+(function(){
+  var filas = document.querySelectorAll('#press .prs-f[data-medio]');
+  if(!filas.length) return;
+  Array.prototype.forEach.call(filas, function(f){
+    var slug = f.getAttribute('data-medio');
+    if(!/^[a-z0-9-]+$/.test(slug)) return;
+    var ruta = 'img/medios/' + slug + '.svg';
+    var prueba = new Image();
+    prueba.onload = function(){
+      if(f.querySelector('.prs-logo')) return;
+      var i = document.createElement('i');
+      i.className = 'prs-logo'; i.setAttribute('aria-hidden','true');
+      var img = document.createElement('img');
+      img.src = ruta; img.alt = ''; img.decoding = 'async';
+      i.appendChild(img);
+      /* delante del titular, que es donde esta su columna */
+      var t = f.querySelector('.prs-t');
+      t ? f.insertBefore(i, t) : f.appendChild(i);
+    };
+    prueba.src = ruta;
+  });
+})();
+
 (function(){
   var sec = document.getElementById('press');
   if(!sec) return;

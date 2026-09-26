@@ -138,7 +138,38 @@ di(exc.img === 'none' && exc.col === 'rgb(3, 4, 9)',
 di(exc.canal === 12 && exc.wraps === 0,
    'y la seccion vive fuera de la columna de la pagina, a 12 px del filo (' + exc.canal + ')');
 
+/* ── LA FILA SE ABRE SOLA AL BAJAR ──
+   En un telefono no hay raton que pasar, asi que sin esto las cuatro filas
+   se quedan cerradas y el gesto que sostiene la seccion no existe en la
+   mitad de las pantallas. Se comprueba colocando cada fila en el centro de
+   la pantalla y mirando que se abra ELLA y solo ella: dos filas abiertas a
+   la vez es el fallo que se busca, no una menos. */
+for (const i of [0, 1, 2, 3]) {
+  await pg.evaluate(k => {
+    const f = document.querySelectorAll('.prs-f')[k], c = f.getBoundingClientRect();
+    scrollTo(0, scrollY + c.top + c.height / 2 - innerHeight / 2);
+  }, i);
+  await pg.waitForTimeout(420);
+  const s = await pg.evaluate(() => [...document.querySelectorAll('.prs-f')]
+    .map(f => f.classList.contains('sel')));
+  di(s.filter(Boolean).length === 1 && s[i],
+     'al bajar, la fila ' + (i + 1) + ' se abre sola al cruzar el centro [' +
+     s.map(v => v ? '1' : '0').join('') + ']');
+}
+
 // ── al pasar por encima: la fila se DESCUBRE, no se ilumina ──
+/* Se mete el raton en la lista ANTES de medir el reposo. Si no, la que se
+   abrio sola al bajar sigue abierta y «antes» mide una fila ya encendida:
+   la comprobacion pasaria sin comprobar nada, y solo por donde haya caido
+   el scroll. Ademas esto mismo afirma la otra mitad de la regla: mientras
+   el raton esta dentro, manda el raton y la seleccion automatica se va. */
+await pg.mouse.move(40, 40);
+await pg.locator('.prs-f').nth(0).hover();
+await pg.waitForTimeout(600);
+const soloRaton = await pg.evaluate(() => [...document.querySelectorAll('.prs-f')]
+  .map(f => f.classList.contains('sel')).filter(Boolean).length);
+di(soloRaton === 0, 'con el raton dentro manda el raton: no quedan dos filas abiertas');
+
 const antes = await pg.evaluate(() => {
   const f = document.querySelectorAll('.prs-f')[2];
   return { tinta: getComputedStyle(f.querySelector('.prs-t')).color,
