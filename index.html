@@ -345,6 +345,17 @@ main>section.dark,main>section.stack{background:var(--wash)}
    centro para que «Nereum» no compita con nada. */
 .sh-tunel{position:absolute;inset:0;width:100%;height:100%;opacity:0;
   pointer-events:none;z-index:1;will-change:opacity}
+/* EL SUELO, NEGRO.
+   Debajo del corredor esta «.sh-mesh»: un suelo opaco con cuatro manchas
+   azules encima que se mueven muy despacio. Eran el fondo de la cortina
+   cuando no habia nada mas; con el pasillo delante lo unico que hacen es
+   levantar el negro a un gris azulado y comerse el contraste de los bloques
+   —un cubo azul sobre gris azul no es un cubo, es una forma—. Con el
+   corredor puesto las manchas se apagan y queda el suelo, que es negro. Y de
+   paso el navegador deja de componer cuatro degradados a pantalla completa
+   en cada cuadro. */
+body.tunel-on .sh-mesh i{opacity:0}
+.sh-mesh i{transition:opacity .5s ease}
 .sh-mesh i:nth-child(1){left:-4%;top:4%;width:62%;height:76%;
   background:radial-gradient(circle,rgba(16,44,120,.30) 0%,rgba(16,44,120,.22) 34%,rgba(16,44,120,.06) 58%,rgba(16,44,120,0) 78%)}
 .sh-mesh i:nth-child(2){right:-6%;top:-10%;width:58%;height:70%;
@@ -7974,8 +7985,11 @@ const CALM=matchMedia('(prefers-reduced-motion: reduce)').matches;
     [4,64,231],  [4,64,231],  [4,64,231],  [4,64,231],     /* azul fuerte    */
     [12,80,182], [12,80,182], [12,80,182],                  /* azul hondo     */
     [61,132,255],[61,132,255],[61,132,255],                 /* azul claro     */
-    [66,75,87],  [66,75,87],                                /* pizarra        */
-    [36,44,61],                                             /* pizarra oscura */
+    /* UNA sola pizarra, y ninguna oscura. Con las caras laterales al 50 %
+       de luz y el fondo yendose a negro, cada gris de la paleta se multiplica
+       por tres —cara, costado y techo— y el pasillo acaba siendo gris con
+       algo de azul en vez de azul con algo de gris. */
+    [66,75,87],                                             /* pizarra        */
     [3,21,78],   [3,21,78]                                  /* marino, sombra */
   ];
   const CLAROS=[[233,235,237],[186,193,202]];               /* blanco y plata */
@@ -8002,8 +8016,8 @@ const CALM=matchMedia('(prefers-reduced-motion: reduce)').matches;
      saca de la fase, que no cambia nunca. Se vera abajo por que importa. */
   function siembra(){
     const {a,b}=medidas();
-    const paso = W<760 ? 0.84 : 0.52;
-    const dz   = W<760 ? 0.88 : 0.50;
+    const paso = W<760 ? 0.88 : 0.52;
+    const dz   = W<760 ? 0.92 : 0.50;
     const filas= Math.ceil(RANGO/dz);
     piezas=[]; t=0;
     const cols=[];
@@ -8012,7 +8026,7 @@ const CALM=matchMedia('(prefers-reduced-motion: reduce)').matches;
     for(const c of cols){
       const desf=Math.random()*dz;              /* cada columna, su desfase */
       for(let i=0;i<filas;i++){
-        const claro=Math.random()<0.10;
+        const claro=Math.random()<0.05;
         piezas.push({
           x:c.x+(Math.random()*2-1)*paso*0.16,
           y:c.y+(Math.random()*2-1)*paso*0.16,
@@ -8038,7 +8052,7 @@ const CALM=matchMedia('(prefers-reduced-motion: reduce)').matches;
        escena como esta, no en la cuenta— y no se distingue.
        El recorte y el faro se cuecen con esta misma densidad, asi que no hay
        que tocarlos. */
-    const d=(window.__dens?__dens():1)*0.78;
+    const d=(window.__dens?__dens():1)*(innerWidth<760?0.66:0.78);
     W=cv.clientWidth; H=cv.clientHeight;
     if(!W||!H)return false;
     if(window.__mide)__mide(cv,W*d,H*d); else {cv.width=W*d;cv.height=H*d}
@@ -8062,15 +8076,20 @@ const CALM=matchMedia('(prefers-reduced-motion: reduce)').matches;
        tunel de papel pintado. Una sola luz honda en el punto de fuga le da
        destino, y con ella las piezas del fondo se recortan en contraluz en
        vez de desaparecer en negro. Cocida una vez, estampada cada cuadro. */
-    faroR=Math.min(W,H)*0.62;
+    faroR=Math.min(W,H)*0.40;
     faro=document.createElement('canvas');
     faro.width=faro.height=Math.max(4,Math.ceil(faroR*2));
     const fx=faro.getContext('2d');
     const fg=fx.createRadialGradient(faroR,faroR,0,faroR,faroR,faroR);
-    fg.addColorStop(0,'rgba(120,168,255,.50)');
-    fg.addColorStop(0.28,'rgba(56,102,224,.26)');
-    fg.addColorStop(0.62,'rgba(20,44,140,.10)');
-    fg.addColorStop(1,'rgba(8,16,60,0)');
+    /* EL FARO, A UNA CUARTA PARTE.
+       Estaba al 50 % sobre un radio de dos tercios de pantalla: eso no es una
+       luz al fondo, es niebla encima de todo, y se llevaba por delante el
+       contraste de los bloques. Una brasa pequeña al fondo hace el mismo
+       trabajo —decir que el pasillo va a algun sitio— sin blanquear nada. */
+    fg.addColorStop(0,'rgba(96,146,255,.15)');
+    fg.addColorStop(0.30,'rgba(40,78,196,.07)');
+    fg.addColorStop(0.66,'rgba(14,30,110,.025)');
+    fg.addColorStop(1,'rgba(6,12,44,0)');
     fx.fillStyle=fg; fx.fillRect(0,0,faro.width,faro.height);
     return true;
   }
@@ -8100,13 +8119,15 @@ const CALM=matchMedia('(prefers-reduced-motion: reduce)').matches;
       const co=todos[i]; TABLA[i]=new Array(ESCALONES);
       for(let e=0;e<ESCALONES;e++){
         const hondo=e/(ESCALONES-1), f=1-hondo;
-        const luz=0.60+hondo*0.40, nie=f*f*0.72;
+        const luz=0.66+hondo*0.34, nie=f*f*0.80;
         const fila=new Array(CARAS.length);
         for(let k=0;k<CARAS.length;k++){
           const m=luz*CARAS[k];
-          fila[k]='rgb('+((co[0]*m)*(1-nie)+10*nie|0)+','+
-                         ((co[1]*m)*(1-nie)+22*nie|0)+','+
-                         ((co[2]*m)*(1-nie)+72*nie|0)+')';
+          /* el fondo se va a NEGRO, no a azul: la niebla azul metia aire
+             pero tambien levantaba el suelo y aplanaba el contraste */
+          fila[k]='rgb('+((co[0]*m)*(1-nie)+3*nie|0)+','+
+                         ((co[1]*m)*(1-nie)+7*nie|0)+','+
+                         ((co[2]*m)*(1-nie)+24*nie|0)+')';
         }
         TABLA[i][e]=fila;
       }
@@ -8299,7 +8320,7 @@ const CALM=matchMedia('(prefers-reduced-motion: reduce)').matches;
 (function(){
     const cv=document.getElementById('burst'),inn=document.querySelector('.hero-in');
     if(!cv||!inn)return;
-    const tunel=document.getElementById('shTunel'); let tunelF=-1;
+    const tunel=document.getElementById('shTunel'); let tunelF=-1, tunelOn=false;
     const floor=document.querySelector('.glowfloor'),
           slatBox=document.getElementById('slats'),
           mesh=document.querySelector('.sh-mesh'),
@@ -8401,6 +8422,8 @@ const CALM=matchMedia('(prefers-reduced-motion: reduce)').matches;
            baja, mas adentro se va. Es el mismo numero que ya gobierna la
            cortina, no uno nuevo. */
         window.__tunelP=p;
+        const on=tf>0.55;
+        if(on!==tunelOn){ tunelOn=on; document.body.classList.toggle('tunel-on',on) }
       }
       if(edges)edges.style.opacity=(Math.sin(cl(front/1.32)*Math.PI)*.9).toFixed(3);
       /* Aqui se escribia «--sq» en «.hero-in» once veces por segundo. No lo
