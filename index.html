@@ -7290,8 +7290,8 @@ main>section.sx#security{background:#030409 !important;background-image:none !im
   /* FIJA: «dvh» sigue a las barras de Safari, y al recogerse o desplegarse
      la tarjeta se estiraba y se encogia mientras se bajaba. «lvh» es la
      pantalla con las barras recogidas -la que se ve al bajar- y NO cambia.
-     Las pestañas a 44 px de arriba; la tarjeta, hasta 24 px del pie. */
-  .sx-stage{height:100svh;height:100lvh;padding:44px 0 calc(var(--hud-b,14px) + 68px);align-items:stretch}
+     Las pestañas a 64 px de arriba; la tarjeta, hasta 24 px del pie. */
+  .sx-stage{height:100svh;height:100lvh;padding:64px 0 calc(var(--hud-b,14px) + 68px);align-items:stretch}
   .sx-grid{display:flex;flex-direction:column;width:100%;gap:20px;height:100%}
   .sx-rail{display:block;padding:0;flex:none}
   .sx-list{flex-direction:row;gap:0;margin:0;padding:0;border-left:0;border-bottom:1px solid rgba(255,255,255,.08)}
@@ -7344,7 +7344,7 @@ main>section.sx#security{background:#030409 !important;background-image:none !im
   .sx-sello{width:88px}
 }
 /* telefonos muy altos: un punto mas, para que el reparto no deje huecos grandes */
-@media (max-width:899px) and (min-height:880px){
+@media (max-width:899px) and (min-height:920px){
   .sx-it b{font-size:21px}
   .sx-card{padding:24px 20px 20px}
   .sx-cat,.sx-pill{font-size:10.5px}
@@ -7361,14 +7361,16 @@ main>section.sx#security{background:#030409 !important;background-image:none !im
 }
 /* pantallas bajas: fuera lo que se puede perder sin perder la prueba */
 @media (max-width:899px) and (max-height:760px){
+  /* aqui no caben los 64 px de arriba: el boton pisaba la fuente */
+  .sx-stage{padding-top:28px}
   .sx-ic{display:none}
   .sx-sello{top:40px;width:70px}
   /* sin icono, un titular de una linea deja el parrafo bajo el sello: el
      titular guarda el alto del sello */
   .sx-t{min-height:64px}
   #security .sx-p{font-size:12.5px;line-height:1.4}
-  .sx-kv>div{min-height:27px}
-  .sx-log li{padding:3px 0}
+  .sx-kv>div{min-height:25px}
+  .sx-log li{padding:2px 0}
   .sx-foot .sx-3p{display:none}
 }
 @media (max-width:899px) and (max-height:620px){
