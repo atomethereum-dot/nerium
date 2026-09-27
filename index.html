@@ -7290,9 +7290,8 @@ main>section.sx#security{background:#030409 !important;background-image:none !im
   /* FIJA: «dvh» sigue a las barras de Safari, y al recogerse o desplegarse
      la tarjeta se estiraba y se encogia mientras se bajaba. «lvh» es la
      pantalla con las barras recogidas -la que se ve al bajar- y NO cambia.
-     BAJADA DE VERDAD: las pestañas al 12 % del alto -112 px en un telefono de
-     932- y la tarjeta hasta 14 px del pie. 20 px no se notaban. */
-  .sx-stage{height:100svh;height:100lvh;padding:12svh 0 calc(var(--hud-b,14px) + 58px);padding-top:12lvh;align-items:stretch}
+     Las pestañas a 64 px de arriba; la tarjeta, hasta 24 px del pie. */
+  .sx-stage{height:100svh;height:100lvh;padding:64px 0 calc(var(--hud-b,14px) + 68px);align-items:stretch}
   .sx-grid{display:flex;flex-direction:column;width:100%;gap:20px;height:100%}
   .sx-rail{display:block;padding:0;flex:none}
   .sx-list{flex-direction:row;gap:0;margin:0;padding:0;border-left:0;border-bottom:1px solid rgba(255,255,255,.08)}
@@ -7344,15 +7343,8 @@ main>section.sx#security{background:#030409 !important;background-image:none !im
   .sx-go{font-size:14.5px;margin-top:14px}
   .sx-sello{width:88px}
 }
-/* telefonos de 800 a 879 de alto (390x844): con el 12 % de arriba el
-   reparto va justo, las filas se aprietan un pelo */
-@media (max-width:899px) and (min-height:800px) and (max-height:879px){
-  .sx-kv>div{min-height:32px}
-  .sx-log li{padding:5px 0}
-  #security .sx-p{font-size:14px;line-height:1.45}
-}
 /* telefonos muy altos: un punto mas, para que el reparto no deje huecos grandes */
-@media (max-width:899px) and (min-height:1100px){
+@media (max-width:899px) and (min-height:920px){
   .sx-it b{font-size:21px}
   .sx-card{padding:24px 20px 20px}
   .sx-cat,.sx-pill{font-size:10.5px}
@@ -7369,7 +7361,7 @@ main>section.sx#security{background:#030409 !important;background-image:none !im
 }
 /* pantallas bajas: fuera lo que se puede perder sin perder la prueba */
 @media (max-width:899px) and (max-height:760px){
-  /* aqui no cabe el 12 % de arriba: el boton pisaria la fuente */
+  /* aqui no caben los 64 px de arriba: el boton pisaba la fuente */
   .sx-stage{padding-top:28px}
   .sx-ic{display:none}
   .sx-sello{top:40px;width:70px}

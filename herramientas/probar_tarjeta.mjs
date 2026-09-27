@@ -56,7 +56,7 @@ for (const [W, H, movil] of [[440,956,1],[430,932,1],[414,896,1],[390,844,1],[37
                sale: rc.bottom > area.bottom + 1 || rc.top < area.top - 1 || rc.bottom > innerHeight,
                hueco: Math.round(go.top - encima), base: Math.max(...bases),
                /* en telefono el conjunto ocupa la pantalla entera: las pestañas a
-                  al 12 % del alto y la tarjeta a 14 px del pie fijo */
+                  64 px de arriba y la tarjeta a 24 px del pie fijo */
                arriba: Math.round(document.querySelector('#security .sx-list').getBoundingClientRect().top),
                abajo: Math.round(document.querySelector('#subir').getBoundingClientRect().top - rc.bottom) };
     });
@@ -68,8 +68,8 @@ for (const [W, H, movil] of [[440,956,1],[430,932,1],[414,896,1],[390,844,1],[37
     if (movil) {
       /* en telefono el sobrante se reparte entre los bloques a proposito; lo
          que se exige es que el conjunto llene la pantalla, simetrico */
-      /* 12 % del alto arriba; en pantallas bajas -760 o menos- 28, que alli no cabe */
-      if (Math.abs(r.arriba - (H <= 760 ? 28 : Math.round(H * 0.12))) > 4 || Math.abs(r.abajo - 14) > 4)
+      /* 64 px arriba; en pantallas bajas -760 o menos- 28, que alli no caben */
+      if (Math.abs(r.arriba - (H <= 760 ? 28 : 64)) > 4 || Math.abs(r.abajo - 24) > 4)
         fallos.push('«' + r.t + '» no llena la pantalla simetrico (arriba ' + r.arriba + ', abajo ' + r.abajo + ')');
     } else if (r.hueco > 32) fallos.push('«' + r.t + '» deja ' + r.hueco + ' px entre el ultimo dato y el boton');
     if (r.base > 2.5) fallos.push('«' + r.t + '» rotulo y dato fuera de linea (' + r.base.toFixed(1) + ' px)');
