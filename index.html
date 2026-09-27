@@ -7327,7 +7327,8 @@ main>section.sx#security{background:#030409 !important;background-image:none !im
   .sx-main,.sx-side{display:contents}
   .sx-ic svg{width:34px}
   .sx-t{font-size:clamp(26px,7.6vw,32px);margin-top:8px;max-width:calc(100% - 92px)}
-  .sx-sello{position:absolute;top:50px;right:14px;width:80px;margin:0}
+  /* el sello, 14 px bajo la pildora -antes la rozaba- */
+  .sx-sello{position:absolute;top:56px;right:14px;width:80px;margin:0}
   .sx-arco{font-size:13px}
   #security .sx-p{font-size:13.5px;line-height:1.45;margin-top:8px}
   .sx-kv{margin-top:8px}
@@ -7344,13 +7345,15 @@ main>section.sx#security{background:#030409 !important;background-image:none !im
 @media (max-width:899px) and (min-height:800px){
   .sx-it b{font-size:19px}
   .sx-card{padding:20px 18px 18px}
-  .sx-t{font-size:clamp(30px,8.4vw,36px)}
+  /* un titular de una linea guarda el alto del sello: si no, el parrafo
+     se metia debajo */
+  .sx-t{font-size:clamp(30px,8.4vw,36px);min-height:50px}
   #security .sx-p{font-size:14.5px;line-height:1.5}
   .sx-kv>div{min-height:36px}
   #security .sx-kv dd{font-size:14.5px}
   .sx-log li{padding:7px 0;font-size:11px}
   .sx-go{font-size:14.5px;margin-top:14px}
-  .sx-sello{width:88px}
+  .sx-sello{top:60px;width:88px}
 }
 /* telefonos muy altos: un punto mas, para que el reparto no deje huecos grandes */
 @media (max-width:899px) and (min-height:920px){
@@ -7358,14 +7361,14 @@ main>section.sx#security{background:#030409 !important;background-image:none !im
   .sx-card{padding:24px 20px 20px}
   .sx-cat,.sx-pill{font-size:10.5px}
   .sx-ic svg{width:40px}
-  .sx-t{font-size:clamp(34px,9.4vw,42px)}
+  .sx-t{font-size:clamp(34px,9.4vw,42px);min-height:54px}
   #security .sx-p{font-size:16px;line-height:1.5}
   .sx-kv>div{min-height:40px}
   #security .sx-kv dt{font-size:11px}
   #security .sx-kv dd{font-size:16px}
   .sx-log li{padding:8px 0;font-size:12px}
   .sx-go{font-size:16px}
-  .sx-sello{width:100px}
+  .sx-sello{top:66px;width:100px}
   .sx-foot{font-size:10px}
 }
 /* pantallas bajas: fuera lo que se puede perder sin perder la prueba */
@@ -7374,7 +7377,7 @@ main>section.sx#security{background:#030409 !important;background-image:none !im
   .sx-stage{padding-top:4.5lvh}
   .sx-grid{gap:3.6lvh}
   .sx-ic{display:none}
-  .sx-sello{top:40px;width:70px}
+  .sx-sello{top:54px;width:70px}
   /* sin icono, un titular de una linea deja el parrafo bajo el sello: el
      titular guarda el alto del sello */
   .sx-t{min-height:64px}
@@ -7769,8 +7772,8 @@ main>section.sx#security{background:#030409 !important;background-image:none !im
             <circle cx="100" cy="100" r="97" fill="#0F1526"/><circle cx="100" cy="100" r="97" fill="url(#sxP0)"/>
             <circle cx="100" cy="100" r="96.5" fill="none" stroke="rgba(46,134,255,.28)"/>
             <circle cx="100" cy="100" r="64" fill="#080C18" stroke="#2E86FF" stroke-width="1.8"/>
-            <text class="sx-tag" x="100" y="97" text-anchor="middle">REG</text>
-            <path class="sx-chk" pathLength="1" d="M83 106l12 12 23-25"/>
+            <text class="sx-tag" x="100" y="88" text-anchor="middle">REG</text>
+            <path class="sx-chk" pathLength="1" d="M84 114l11 11 22-24"/>
           </svg><svg class="sx-anillo" viewBox="0 0 200 200" data-no-traducir><defs><path id="sxA0" d="M100,100 m-83,0 a83,83 0 1,1 166,0 a83,83 0 1,1 -166,0"/></defs><text class="sx-arco"><textPath href="#sxA0" textLength="515">NEREUM LABS · INDEPENDENTLY VERIFIED · REG · 2026 · </textPath></text></svg></div>
             <ul class="sx-log"><li><i aria-hidden="true">&#8250;</i><span class="sx-l">Query Florida state registry</span><b>OK</b></li><li><i aria-hidden="true">&#8250;</i><span class="sx-l">Entity match · Nereum Labs LLC</span><b>OK</b></li><li><i aria-hidden="true">&#8250;</i><span class="sx-l">Document L26000341887 on file</span><b>OK</b></li><li><i aria-hidden="true">&#8250;</i><span class="sx-l">Filing status · Active</span><b>OK</b></li></ul>
           </div>
@@ -7796,8 +7799,8 @@ main>section.sx#security{background:#030409 !important;background-image:none !im
             <circle cx="100" cy="100" r="97" fill="#0F1526"/><circle cx="100" cy="100" r="97" fill="url(#sxP1)"/>
             <circle cx="100" cy="100" r="96.5" fill="none" stroke="rgba(46,134,255,.28)"/>
             <circle cx="100" cy="100" r="64" fill="#080C18" stroke="#2E86FF" stroke-width="1.8"/>
-            <text class="sx-tag" x="100" y="97" text-anchor="middle">AUD</text>
-            <path class="sx-chk" pathLength="1" d="M83 106l12 12 23-25"/>
+            <text class="sx-tag" x="100" y="88" text-anchor="middle">AUD</text>
+            <path class="sx-chk" pathLength="1" d="M84 114l11 11 22-24"/>
           </svg><svg class="sx-anillo" viewBox="0 0 200 200" data-no-traducir><defs><path id="sxA1" d="M100,100 m-83,0 a83,83 0 1,1 166,0 a83,83 0 1,1 -166,0"/></defs><text class="sx-arco"><textPath href="#sxA1" textLength="515">NEREUM LABS · INDEPENDENTLY VERIFIED · AUD · 2026 · </textPath></text></svg></div>
             <ul class="sx-log"><li><i aria-hidden="true">&#8250;</i><span class="sx-l">Load report · Halborn Security</span><b>OK</b></li><li><i aria-hidden="true">&#8250;</i><span class="sx-l">Scope · Sale, vesting, treasury</span><b>OK</b></li><li><i aria-hidden="true">&#8250;</i><span class="sx-l">Critical findings · 0</span><b>OK</b></li><li><i aria-hidden="true">&#8250;</i><span class="sx-l">High findings · 0</span><b>OK</b></li></ul>
           </div>
@@ -7823,8 +7826,8 @@ main>section.sx#security{background:#030409 !important;background-image:none !im
             <circle cx="100" cy="100" r="97" fill="#0F1526"/><circle cx="100" cy="100" r="97" fill="url(#sxP2)"/>
             <circle cx="100" cy="100" r="96.5" fill="none" stroke="rgba(46,134,255,.28)"/>
             <circle cx="100" cy="100" r="64" fill="#080C18" stroke="#2E86FF" stroke-width="1.8"/>
-            <text class="sx-tag" x="100" y="97" text-anchor="middle">KYC</text>
-            <path class="sx-chk" pathLength="1" d="M83 106l12 12 23-25"/>
+            <text class="sx-tag" x="100" y="88" text-anchor="middle">KYC</text>
+            <path class="sx-chk" pathLength="1" d="M84 114l11 11 22-24"/>
           </svg><svg class="sx-anillo" viewBox="0 0 200 200" data-no-traducir><defs><path id="sxA2" d="M100,100 m-83,0 a83,83 0 1,1 166,0 a83,83 0 1,1 -166,0"/></defs><text class="sx-arco"><textPath href="#sxA2" textLength="515">NEREUM LABS · INDEPENDENTLY VERIFIED · KYC · 2026 · </textPath></text></svg></div>
             <ul class="sx-log"><li><i aria-hidden="true">&#8250;</i><span class="sx-l">Provider · Assure DeFi</span><b>OK</b></li><li><i aria-hidden="true">&#8250;</i><span class="sx-l">Treasury signers verified · 4 / 4</span><b>OK</b></li><li><i aria-hidden="true">&#8250;</i><span class="sx-l">Documents held in escrow</span><b>OK</b></li><li><i aria-hidden="true">&#8250;</i><span class="sx-l">Renewal · annual</span><b>OK</b></li></ul>
           </div>
