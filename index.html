@@ -7282,7 +7282,10 @@ main>section.sx#security{background:#030409 !important;background-image:none !im
      hueco debajo -visto en un iPhone-. «dvh» sigue a la pantalla de verdad,
      y las pestañas y la tarjeta van JUNTAS en el centro del hueco que deja el
      pie fijo de la pagina. */
-  .sx-stage{height:100svh;height:100dvh;padding:14px 0 calc(var(--hud-b,14px) + 56px);align-items:center}
+  /* ABAJO, NO EN EL CENTRO. Centrado, el conjunto seguia viendose alto y con
+     hueco debajo: la tarjeta se apoya a 24 px del pie fijo -que ocupa los
+     ultimos 58 px- y el aire que sobre queda arriba, sobre las pestañas. */
+  .sx-stage{height:100svh;height:100dvh;padding:14px 0 calc(var(--hud-b,14px) + 68px);align-items:flex-end}
   .sx-grid{display:flex;flex-direction:column;width:100%;gap:18px;height:auto;max-height:100%}
   .sx-rail{display:block;padding:0;flex:none}
   .sx-list{flex-direction:row;gap:0;margin:0;padding:0;border-left:0;border-bottom:1px solid rgba(255,255,255,.08)}
