@@ -1223,6 +1223,22 @@ body.light .srail{color:#E3E6EE}
 /* sin relleno abajo: el escenario acaba en el azul de la ronda y la
    seccion de compra empieza justo debajo, sin franja oscura entre medias */
 #stack{padding-bottom:0 !important}
+/* DEL TUNEL DIRECTO A LA COMPRA. Al acabar el tunel todo era azul y habia que
+   seguir bajando una pantalla entera de azul vacio hasta que asomaba la
+   compra. Ahora la compra sube POR DEBAJO del escenario durante su ultima
+   pantalla -el mismo truco que usaba el umbral- y, al terminar el azul, el
+   escenario se desvanece y la deja al descubierto. La ultima pantalla de la
+   seccion NO se pinta -es donde vive la compra por debajo- y el resto del
+   fondo pasa del negro al azul de la ronda en el momento en que el tunel ya
+   es todo azul, asi que el cambio no se ve y lo que asoma por encima del
+   borde de la compra es la ronda, no una franja negra. Y no se come ningun
+   clic: aqui no hay nada que pulsar. */
+main>section#stack{position:relative;z-index:3;margin-bottom:-100vh;pointer-events:none;
+  background-color:transparent !important;
+  background-image:linear-gradient(180deg,var(--stk-fondo,#0A0D14) calc(100% - 100vh),transparent calc(100% - 100vh)) !important}
+/* el escenario es opaco: la compra, que ya esta debajo, no se transparenta
+   entre los cubos del tunel antes de tiempo */
+#stack .stk-stage{background:#0A0D14}
 .stk-stage{position:sticky;top:0;height:100dvh;display:flex;flex-direction:column;
   align-items:center;justify-content:center;overflow:hidden}
 .stk-cv{position:absolute;inset:0;width:100%;height:100%}
@@ -11195,8 +11211,8 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
     const tun=sube((p-.50)/.16);              /* los cubos a las paredes */
     const vel=clm((p-.52)/.48);               /* la aceleracion */
     const estela=QUIETO?0:sube((p-.58)/.14);  /* las estelas de velocidad */
-    const luz=sube((p-.62)/.28);              /* la luz del final */
-    const bano=sube((p-.88)/.10);             /* todo se vuelve el azul de la ronda */
+    const luz=sube((p-.60)/.24);              /* la luz del final */
+    const bano=sube((p-.80)/.08);             /* todo se vuelve el azul de la ronda */
     const rotuloVa=1-sube((p-.48)/.08);       /* el rotulo se retira al entrar */
     /* la camara: avanza con el scroll de la seccion y, ademas, a paso lento
        con el reloj, para que el campo siga vivo aunque nadie baje; en el
@@ -11323,7 +11339,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
      se llena hasta la cifra, luego la linea de abajo. Y la flecha de seguir
      bajando se ve hasta casi el final del tramo. */
   const ronda=document.getElementById('stkRonda'), escena=cv.parentElement;
-  let rondaP=-1, flecha=null;
+  let rondaP=-1, flecha=null, fondoAzul=null;
   function rotulo(p){
     if(Math.abs(p-rondaP)<.0005) return; rondaP=p;
     if(ronda){
@@ -11336,6 +11352,11 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
     }
     const va=p<.47;
     if(va!==flecha){ flecha=va; escena.classList.toggle('go',va) }
+    /* y al final el escenario se desvanece: debajo ya esta la compra. El
+       fondo de la seccion se vuelve azul cuando el tunel ya lo es */
+    escena.style.opacity=(1-sube((p-.885)/.075)).toFixed(3);
+    const azul=p>=.875;
+    if(azul!==fondoAzul){ fondoAzul=azul; hold.style.setProperty('--stk-fondo',azul?'#0E3AC4':'#0A0D14') }
   }
   let paso=-1;
   (function tick(){

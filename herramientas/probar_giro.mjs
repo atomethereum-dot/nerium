@@ -200,8 +200,14 @@ const suelos = await pg.evaluate(() => {
      comparar dos secciones que no se tocan. */
   let v = document.getElementById('security').nextElementSibling;
   while (v && (v.tagName !== 'SECTION' || v.hidden || getComputedStyle(v).display === 'none')) v = v.nextElementSibling;
+  /* La seccion del tunel pinta su suelo con un degradado y no con el color
+     de fondo: su ultima pantalla es transparente porque debajo vive la
+     compra. Lo que pinta es el primer color de ese degradado. */
+  const pinta = e => { const c = getComputedStyle(e);
+    if (!/rgba\(0, 0, 0, 0\)|transparent/.test(c.backgroundColor)) return c.backgroundColor;
+    const m = c.backgroundImage.match(/rgba?\([^)]*\)/); return m ? m[0] : c.backgroundColor };
   return { network: lee('network'), press: lee('press'),
-           security: lee('security'), tras: { css: getComputedStyle(v).backgroundColor, dice: v.getAttribute('data-bg'), id: v.id },
+           security: lee('security'), tras: { css: pinta(v), dice: v.getAttribute('data-bg'), id: v.id },
            team: lee('team'), join: lee('join') };
 });
 /* Lee hex Y rgb(): la primera version tiraba de match(/\d+/g) para las dos, y
@@ -710,13 +716,31 @@ di(cuadros[1].desv >= 0.010 || cuadros[2].desv >= 0.010,
     return { centro: px(.5, .5), esquinas: [px(.03, .03), px(.97, .03), px(.03, .97), px(.97, .97)], bg };
   }, p);
   const luz = c => (0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2]) / 255;
-  const antes = await tunel(0.30), dentro = await tunel(0.80), fin = await tunel(1);
+  const antes = await tunel(0.30), dentro = await tunel(0.76), fin = await tunel(0.885);
   di(luz(dentro.centro) > luz(antes.centro) + 0.25,
      'en el tunel se enciende la luz del fondo (' + luz(antes.centro).toFixed(2) + ' → ' + luz(dentro.centro).toFixed(2) + ')');
   const lejos = fin.esquinas.concat([fin.centro]).map(c => Math.max(...[0, 1, 2].map(k => Math.abs(c[k] - fin.bg[k]))));
   di(Math.max(...lejos) <= 14 && fin.centro[3] > 240,
      'y se sale al azul de la ronda: el final del tunel es el mismo color con el que empieza la compra (' +
      fin.bg.slice(0, 3).join(',') + ', se aparta ' + Math.max(...lejos) + ')');
+  /* Y se CAE en la compra: sin pantalla azul vacia. La compra sube por debajo
+     del escenario y, al acabar el azul, el escenario se desvanece; lo que
+     asoma por encima de su borde es azul, no una franja negra. */
+  const cae = await pg.evaluate(async () => {
+    const h = document.getElementById('stack'), top0 = h.getBoundingClientRect().top + scrollY;
+    const run = h.offsetHeight - innerHeight;
+    const mira = async p => { scrollTo(0, Math.round(top0 + p * run)); await new Promise(s => setTimeout(s, 700));
+      const st = document.querySelector('.stk-stage'), t = document.querySelector('#presale h2') || document.querySelector('#presale');
+      return { op: +getComputedStyle(st).opacity, tit: Math.round(t.getBoundingClientRect().top),
+               fondo: getComputedStyle(h).getPropertyValue('--stk-fondo').trim(),
+               borde: Math.round(document.getElementById('presale').getBoundingClientRect().top), vh: innerHeight } };
+    return { antes: await mira(0.80), medio: await mira(0.93), fin: await mira(0.97) };
+  });
+  di(cae.antes.op > 0.99, 'mientras dura el tunel, el escenario tapa la compra que ya esta debajo (opacidad ' + cae.antes.op + ')');
+  di(cae.fin.op < 0.1 && cae.fin.tit > 0 && cae.fin.tit < cae.fin.vh * 0.7,
+     'y al acabar se cae directo en la compra: el escenario se ha ido y su titular esta en pantalla (' + cae.fin.tit + ' px)');
+  di(cae.medio.borde > 0 && /0e3ac4/i.test(cae.medio.fondo),
+     'y lo que asoma por encima del borde de la compra es el azul de la ronda, no una franja negra (' + cae.medio.fondo + ')');
 }
 /* ── 3 · la cifra, la misma en los cuatro sitios ──────────────────────────── */
 const cifras = await pg.evaluate(() => {
