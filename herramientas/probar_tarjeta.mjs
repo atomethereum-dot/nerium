@@ -53,16 +53,25 @@ for (const [W, H, movil] of [[440,956,1],[430,932,1],[414,896,1],[390,844,1],[37
       return { i:c.dataset.i, t:c.querySelector('.sx-t').textContent.trim(),
                corta: pie.bottom > rc.bottom - 4 || go.bottom > rc.bottom - 4,
                sale: rc.bottom > area.bottom + 1 || rc.top < area.top - 1 || rc.bottom > innerHeight,
-               hueco: Math.round(go.top - encima), base: Math.max(...bases) };
+               hueco: Math.round(go.top - encima), base: Math.max(...bases),
+               /* en telefono el conjunto ocupa la pantalla entera: las pestañas a
+                  24 px de arriba y la tarjeta a 24 px del pie fijo */
+               arriba: Math.round(document.querySelector('#security .sx-list').getBoundingClientRect().top),
+               abajo: Math.round(document.querySelector('#subir').getBoundingClientRect().top - rc.bottom) };
     });
     if (!r) { fallos.push('paso ' + k + ': sin tarjeta activa'); continue; }
     if (String(r.i) !== String(k)) fallos.push('paso ' + k + ': esta activa la ' + r.i);
     if (r.corta) fallos.push('«' + r.t + '» se corta por dentro');
     if (r.sale) fallos.push('«' + r.t + '» se sale de su hueco o de la pantalla');
-    if (r.hueco > 32) fallos.push('«' + r.t + '» deja ' + r.hueco + ' px entre el ultimo dato y el boton');
+    if (movil) {
+      /* en telefono el sobrante se reparte entre los bloques a proposito; lo
+         que se exige es que el conjunto llene la pantalla, simetrico */
+      if (Math.abs(r.arriba - 24) > 4 || Math.abs(r.abajo - 24) > 4)
+        fallos.push('«' + r.t + '» no llena la pantalla simetrico (arriba ' + r.arriba + ', abajo ' + r.abajo + ')');
+    } else if (r.hueco > 32) fallos.push('«' + r.t + '» deja ' + r.hueco + ' px entre el ultimo dato y el boton');
     if (r.base > 2.5) fallos.push('«' + r.t + '» rotulo y dato fuera de linea (' + r.base.toFixed(1) + ' px)');
   }
-  di(fallos.length === 0, W + 'x' + H + ' · las tres tarjetas caben, sin hueco y con sus filas en linea' +
+  di(fallos.length === 0, W + 'x' + H + (movil ? ' · las tres llenan la pantalla, simetricas, sin cortarse' : ' · las tres tarjetas caben, sin hueco') + ' y con sus filas en linea' +
      (fallos.length ? ' — ' + fallos.join('; ') : ''));
   await ctx.close();
 }
