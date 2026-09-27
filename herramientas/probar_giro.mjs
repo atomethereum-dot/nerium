@@ -716,7 +716,7 @@ di(cuadros[1].desv >= 0.010 || cuadros[2].desv >= 0.010,
     return { centro: px(.5, .5), esquinas: [px(.03, .03), px(.97, .03), px(.03, .97), px(.97, .97)], bg };
   }, p);
   const luz = c => (0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2]) / 255;
-  const antes = await tunel(0.30), dentro = await tunel(0.76), fin = await tunel(0.885);
+  const antes = await tunel(0.30), dentro = await tunel(0.70), fin = await tunel(0.797);
   di(luz(dentro.centro) > luz(antes.centro) + 0.25,
      'en el tunel se enciende la luz del fondo (' + luz(antes.centro).toFixed(2) + ' → ' + luz(dentro.centro).toFixed(2) + ')');
   const lejos = fin.esquinas.concat([fin.centro]).map(c => Math.max(...[0, 1, 2].map(k => Math.abs(c[k] - fin.bg[k]))));
@@ -734,11 +734,11 @@ di(cuadros[1].desv >= 0.010 || cuadros[2].desv >= 0.010,
       return { op: +getComputedStyle(st).opacity, tit: Math.round(t.getBoundingClientRect().top),
                fondo: getComputedStyle(h).getPropertyValue('--stk-fondo').trim(),
                borde: Math.round(document.getElementById('presale').getBoundingClientRect().top), vh: innerHeight } };
-    return { antes: await mira(0.80), medio: await mira(0.93), fin: await mira(0.97) };
+    return { antes: await mira(0.72), medio: await mira(0.80), fin: await mira(0.83) };
   });
   di(cae.antes.op > 0.99, 'mientras dura el tunel, el escenario tapa la compra que ya esta debajo (opacidad ' + cae.antes.op + ')');
-  di(cae.fin.op < 0.1 && cae.fin.tit > 0 && cae.fin.tit < cae.fin.vh * 0.7,
-     'y al acabar se cae directo en la compra: el escenario se ha ido y su titular esta en pantalla (' + cae.fin.tit + ' px)');
+  di(cae.fin.op < 0.1 && cae.fin.borde <= 0 && cae.fin.tit > 0 && cae.fin.tit < cae.fin.vh * 0.7,
+     'y al acabar se cae directo en la compra: el escenario se ha ido, la compra llena la pantalla desde arriba y su titular esta a la vista (' + cae.fin.tit + ' px)');
   di(cae.medio.borde > 0 && /0e3ac4/i.test(cae.medio.fondo),
      'y lo que asoma por encima del borde de la compra es el azul de la ronda, no una franja negra (' + cae.medio.fondo + ')');
 }

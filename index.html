@@ -1219,7 +1219,7 @@ body.light .srail{color:#E3E6EE}
 .hero h1 .wd,.hero h1 .wdw{display:inline-block;white-space:nowrap}
 .hero h1{overflow-wrap:normal;word-break:keep-all;text-wrap:balance}
 .hero h1 .sp{display:inline-block;width:.26em}
-.stk-hold{position:relative;height:520vh}
+.stk-hold{position:relative;height:620vh}
 /* sin relleno abajo: el escenario acaba en el azul de la ronda y la
    seccion de compra empieza justo debajo, sin franja oscura entre medias */
 #stack{padding-bottom:0 !important}
@@ -1233,9 +1233,13 @@ body.light .srail{color:#E3E6EE}
    es todo azul, asi que el cambio no se ve y lo que asoma por encima del
    borde de la compra es la ronda, no una franja negra. Y no se come ningun
    clic: aqui no hay nada que pulsar. */
-main>section#stack{position:relative;z-index:3;margin-bottom:-100vh;pointer-events:none;
+/* El solape es de DOS pantallas: asi la compra ya esta pegada arriba -y
+   ocupando la pantalla entera- justo cuando el escenario se desvanece, y no
+   asoma a media altura con azul por encima. Despues de desvanecerse el
+   escenario sigue fijo pero invisible, y se baja por la compra con normalidad. */
+main>section#stack{position:relative;z-index:3;margin-bottom:-200vh;pointer-events:none;
   background-color:transparent !important;
-  background-image:linear-gradient(180deg,var(--stk-fondo,#0A0D14) calc(100% - 100vh),transparent calc(100% - 100vh)) !important}
+  background-image:linear-gradient(180deg,var(--stk-fondo,#0A0D14) calc(100% - 200vh),transparent calc(100% - 200vh)) !important}
 /* el escenario es opaco: la compra, que ya esta debajo, no se transparenta
    entre los cubos del tunel antes de tiempo */
 #stack .stk-stage{background:#0A0D14}
@@ -11209,10 +11213,10 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
     if(!cubos)siembra();
     const f=Math.max(W,H)*.62, mx=W/(2*f), my=H/(2*f);
     const tun=sube((p-.50)/.16);              /* los cubos a las paredes */
-    const vel=clm((p-.52)/.48);               /* la aceleracion */
-    const estela=QUIETO?0:sube((p-.58)/.14);  /* las estelas de velocidad */
-    const luz=sube((p-.60)/.24);              /* la luz del final */
-    const bano=sube((p-.80)/.08);             /* todo se vuelve el azul de la ronda */
+    const vel=clm((p-.50)/.31);               /* la aceleracion */
+    const estela=QUIETO?0:sube((p-.55)/.12);  /* las estelas de velocidad */
+    const luz=sube((p-.58)/.19);              /* la luz del final */
+    const bano=sube((p-.745)/.05);            /* todo se vuelve el azul de la ronda */
     const rotuloVa=1-sube((p-.48)/.08);       /* el rotulo se retira al entrar */
     /* la camara: avanza con el scroll de la seccion y, ademas, a paso lento
        con el reloj, para que el campo siga vivo aunque nadie baje; en el
@@ -11340,6 +11344,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
      bajando se ve hasta casi el final del tramo. */
   const ronda=document.getElementById('stkRonda'), escena=cv.parentElement;
   let rondaP=-1, flecha=null, fondoAzul=null;
+  const compra=document.getElementById('presale');
   function rotulo(p){
     if(Math.abs(p-rondaP)<.0005) return; rondaP=p;
     if(ronda){
@@ -11354,8 +11359,14 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
     if(va!==flecha){ flecha=va; escena.classList.toggle('go',va) }
     /* y al final el escenario se desvanece: debajo ya esta la compra. El
        fondo de la seccion se vuelve azul cuando el tunel ya lo es */
-    escena.style.opacity=(1-sube((p-.885)/.075)).toFixed(3);
-    const azul=p>=.875;
+    /* justo cuando el borde de arriba de la compra llega al de la pantalla:
+       se mide el borde de verdad -y no un punto del recorrido- porque en el
+       telefono la barra del navegador cambia el alto y el punto se mueve. El
+       escenario se va mientras la compra recorre el ultimo 5 % hasta arriba,
+       asi que nunca queda azul por encima de ella. */
+    const borde=compra?compra.getBoundingClientRect().top:0;
+    escena.style.opacity=(p<.7?1:sube(borde/(vh*.05))).toFixed(3);
+    const azul=p>=.795;
     if(azul!==fondoAzul){ fondoAzul=azul; hold.style.setProperty('--stk-fondo',azul?'#0E3AC4':'#0A0D14') }
   }
   let paso=-1;
