@@ -7479,97 +7479,92 @@ main>section.sx#security{background:#030409 !important;background-image:none !im
   .sx-sello{transition:opacity .3s}
 }
 </style>
-<style id="pz-css">
-/* ══ 06 · LOS PROYECTOS SOBRE UN EJE ═══════════════════════════════════════
-   Negro puro, el mismo del globo de arriba y de la ruta. Un escenario fijo mientras se baja: arriba
-   la cabecera, en medio las tres piezas flotando sobre un eje horizontal en
-   perspectiva, abajo el indice. El script solo mueve la posicion del eje. */
+<style id="ac-css">
+/* ══ 06 · LOS PROYECTOS COMO ACORDEON DE MATERIALES ═══════════════════════
+   Negro puro, el mismo del globo de arriba. Escenario fijo mientras se baja:
+   arriba la cabecera, debajo tres paneles altos; cada panel es un shader vivo
+   pintado en UN solo lienzo (un recorte por panel). El guion reparte el ancho
+   con un muelle: el elegido se abre, los otros quedan como tiras con su
+   nombre en vertical. En el telefono los paneles se apilan. */
 main>section#builds{background:#000 !important;background-image:none !important;
   padding:0 !important;content-visibility:visible;overflow:visible !important}
-#builds .pz-hold{position:relative;height:320vh}
-#builds .pz-stage{position:sticky;top:0;height:100vh;height:100svh;overflow:hidden;
-  display:flex;flex-direction:column;padding-top:clamp(64px,9vh,110px)}
-#builds .builds-head{margin-bottom:0;position:relative;z-index:3}
-#builds .pz-escena{position:relative;flex:1;min-height:0;perspective:1400px;perspective-origin:50% 45%}
-/* el eje: una linea fina de lado a lado, a la altura del centro de las piezas,
-   con un brillo que se desliza hasta la elegida */
-#builds .pz-eje{position:absolute;left:0;right:0;top:55%;height:1px;z-index:0;
-  background:linear-gradient(90deg,rgba(255,255,255,0),rgba(255,255,255,.12) 18%,rgba(255,255,255,.12) 82%,rgba(255,255,255,0))}
-#builds .pz-eje i{position:absolute;left:50%;top:-1px;width:min(560px,70vw);height:3px;transform:translateX(-50%);
-  background:radial-gradient(closest-side,rgba(99,169,255,.9),rgba(99,169,255,0));filter:blur(.3px)}
-#builds .pz-card{position:absolute;left:50%;top:55%;width:min(460px,34vw);z-index:1;
-  transform-style:preserve-3d;will-change:transform,opacity;margin:0}
-#builds .pz-flota{transform:translate(-50%,-50%);border-radius:22px;padding:14px;
-  background:linear-gradient(180deg,#121724,#0C0F18);border:1px solid rgba(255,255,255,.08);
-  box-shadow:0 40px 90px -40px rgba(0,0,0,.9);transition:border-color .5s,box-shadow .5s;position:relative}
-#builds .pz-card::after{content:"";position:absolute;inset:0;pointer-events:none}
-#builds .pz-card.on .pz-flota{border-color:rgba(99,169,255,.34);
-  box-shadow:0 40px 90px -40px rgba(0,0,0,.9),0 0 0 1px rgba(99,169,255,.08),0 30px 120px -40px rgba(46,106,245,.55)}
-/* flotan: un vaiven lento, cada una a su ritmo */
-@keyframes pzVaiven{from{translate:0 -6px}to{translate:0 6px}}
-#builds .pz-card .pz-flota{animation:pzVaiven 5.5s ease-in-out infinite alternate}
-#builds .pz-card[data-i="1"] .pz-flota{animation-duration:6.4s;animation-delay:-2s}
-#builds .pz-card[data-i="2"] .pz-flota{animation-duration:5.9s;animation-delay:-4s}
-#builds .pz-art{position:relative;aspect-ratio:1.9;border-radius:14px;overflow:hidden;background:#0A1024}
-#builds .pz-art .bcd-plate{position:absolute;inset:0;width:100%;height:100%;border-radius:0}
-#builds .pz-art .bcd-shot{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 0}
-#builds .pz-txt{padding:16px 8px 6px}
-#builds .pz-tag{display:flex;align-items:center;gap:10px;font-family:var(--m);font-size:11px;
-  letter-spacing:.2em;text-transform:uppercase;color:#8A90A0}
-#builds .pz-tag .bcd-dot{width:6px;height:6px;border-radius:50%;flex:0 0 auto}
-#builds .pz-tag .bcd-dot.obra{background:#E0A04A}
-#builds .pz-t{margin:10px 0 0;font-family:var(--f);font-weight:400;font-size:clamp(22px,2.1vw,30px);
-  letter-spacing:-.035em;line-height:1.1;color:#F4F5F9}
-#builds .pz-d{margin:10px 0 0;font-size:clamp(13.5px,1.1vw,15px);line-height:1.6;color:#9AA0AA !important;max-width:none}
-#builds .pz-go{display:inline-flex;gap:8px;margin-top:14px;font-family:var(--m);font-size:11px;letter-spacing:.2em;
-  text-transform:uppercase;color:#63A9FF;text-decoration:none;transition:gap .3s}
-#builds .pz-go:hover{gap:13px}
-/* el indice: las tres piezas con su linea de avance, y el whitepaper */
-#builds .pz-indice{position:relative;z-index:3;display:flex;align-items:center;gap:clamp(12px,2vw,28px);
-  padding-bottom:clamp(26px,5vh,54px)}
-#builds .pz-nodo{flex:1;display:flex;flex-direction:column;align-items:flex-start;gap:8px;padding:14px 0 0;
-  background:none;border:0;border-top:1px solid rgba(255,255,255,.12);color:#8A8E9B;cursor:pointer;
-  text-align:left;font:inherit;position:relative;transition:color .4s}
-#builds .pz-nodo::before{content:"";position:absolute;left:0;top:-1px;height:1px;width:calc(var(--k,0)*100%);background:#63A9FF}
-#builds .pz-nodo b{font-family:var(--m);font-weight:400;font-size:11px;letter-spacing:.2em}
-#builds .pz-nodo span{font-family:var(--f);font-size:clamp(14px,1.2vw,17px);letter-spacing:-.01em}
-#builds .pz-nodo.on{color:#F4F5F9}
-#builds .pz-nodo.on b{color:#63A9FF}
-#builds .pz-papel{flex:none;font-family:var(--m);font-size:11px;letter-spacing:.2em;text-transform:uppercase;
-  color:#63A9FF;text-decoration:none;align-self:flex-end;padding-bottom:2px}
+#builds .ac-hold{position:relative;height:380vh}
+#builds .ac-stage{position:sticky;top:0;height:100vh;height:100svh;overflow:hidden;background:#000;
+  display:flex;flex-direction:column;padding:clamp(56px,8vh,96px) 0 calc(var(--hud-b,14px) + 60px)}
+#builds .ac-cab{display:flex;justify-content:space-between;align-items:flex-end;gap:24px;margin-bottom:0;position:relative;z-index:3}
+#builds .ac-cab>div:first-child{flex:1;min-width:0}
+#builds .ac-cab .builds-h{font-size:clamp(30px,3.3vw,50px);letter-spacing:-.042em;line-height:1;margin-top:14px}
+#builds .ac-lado{display:grid;justify-items:end;gap:10px;padding-bottom:4px;flex:none}
+#builds .ac-cuenta{font-family:var(--m);font-weight:400;font-size:13px;letter-spacing:.14em;color:#fff}
+#builds .ac-marcas{display:flex;gap:6px}
+#builds .ac-marcas i{width:26px;height:2px;background:rgba(255,255,255,.16);position:relative;overflow:hidden}
+#builds .ac-marcas i::after{content:"";position:absolute;inset:0;background:#fff;transform:scaleX(var(--k,0));transform-origin:0 50%;transition:transform .5s}
+#builds .ac-papel{font-family:var(--m);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:#63A9FF;text-decoration:none;margin-top:6px}
+#builds .ac-acc{position:relative;flex:1;min-height:0;margin-top:clamp(20px,3.4vh,40px)}
+#builds .ac-gl{position:absolute;left:0;top:0;width:100%;height:100%;display:block}
+#builds .ac-pn{position:absolute;left:0;top:0;height:100%;width:33%;border-radius:14px;overflow:hidden;will-change:transform,width;contain:layout paint}
+#builds .ac-velo{position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(0deg,rgba(0,0,0,.86) 0%,rgba(0,0,0,.55) 30%,rgba(0,0,0,0) 60%),linear-gradient(180deg,rgba(0,0,0,.5),rgba(0,0,0,0) 22%)}
+#builds .ac-cuerpo{position:absolute;left:0;top:0;bottom:0;width:var(--ew,900px);padding:28px 40px 34px;display:flex;flex-direction:column;justify-content:space-between}
+#builds .ac-meta{font-family:var(--m);font-size:11px;letter-spacing:.2em;color:#C9CDD6}
+#builds .ac-meta em{font-style:normal;color:#63A9FF}
+#builds .ac-pn[data-i="2"] .ac-meta em{color:#FFD58A}
+#builds .ac-nom{margin:0;font-family:var(--f);font-weight:400;font-size:clamp(46px,5.8vw,92px);letter-spacing:-.055em;line-height:.92;color:#fff;
+  text-shadow:0 2px 40px rgba(0,0,0,.45)}
+#builds .ac-ds{margin:20px 0 0;max-width:46ch;color:#C4C9D3 !important;font-size:16px;line-height:1.6;text-shadow:0 1px 16px rgba(0,0,0,.7)}
+#builds .ac-fila{display:flex;align-items:center;gap:14px 28px;margin-top:26px;flex-wrap:wrap}
+#builds .ac-est{display:inline-flex;align-items:center;gap:10px;font-family:var(--m);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:#E6E8EE}
+#builds .ac-est .bcd-dot.obra{background:#E0A04A}
+#builds .ac-barra{display:inline-block;width:120px;height:2px;background:rgba(255,255,255,.18);position:relative;margin-left:6px}
+#builds .ac-barra i{position:absolute;left:0;top:0;bottom:0;width:75%;background:#fff}
+#builds .ac-btn{display:inline-flex;align-items:center;height:46px;padding:0 22px;border-radius:99px;background:rgba(255,255,255,.94);color:#05070E;
+  font-family:var(--f);font-size:15px;letter-spacing:-.01em;text-decoration:none;transition:transform .5s cubic-bezier(.2,.8,.2,1),background .3s}
+#builds .ac-btn:hover{background:#fff;transform:translateY(-2px)}
+#builds .ac-tira{all:unset;position:absolute;inset:0;cursor:pointer;display:block}
+#builds .ac-tira:focus-visible{outline:1px solid #fff;outline-offset:-6px;border-radius:14px}
+#builds .ac-vl{position:absolute;left:50%;bottom:30px;writing-mode:vertical-rl;transform:translateX(-50%) rotate(180deg);white-space:nowrap;
+  font:400 12px var(--m);letter-spacing:.26em;text-transform:uppercase;color:#E9ECF2;display:flex;align-items:center;gap:16px}
+#builds .ac-vl b{font-weight:400;color:#63A9FF}
+#builds .ac-pn[data-i="2"] .ac-vl b{color:#FFD58A}
+#builds .ac-mas{position:absolute;left:50%;top:24px;transform:translateX(-50%);width:34px;height:34px;border-radius:50%;border:1px solid rgba(255,255,255,.28);
+  display:grid;place-items:center;color:#fff;font:300 18px var(--f);background:rgba(0,0,0,.25);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+#builds .ac-pto{position:absolute;left:50%;top:76px;transform:translateX(-50%)}
+#builds .ac-pto.obra{background:#E0A04A}
+/* sin WebGL: cada panel lleva su degradado y todo lo demas igual */
+#builds.ac-nogl .ac-pn[data-i="0"]{background:radial-gradient(80% 60% at 50% 40%,#123C8A,#02060F)}
+#builds.ac-nogl .ac-pn[data-i="1"]{background:linear-gradient(160deg,#C9D6EA,#3A4A66 45%,#0B111D)}
+#builds.ac-nogl .ac-pn[data-i="2"]{background:radial-gradient(60% 40% at 50% 28%,#FFD58A,#E0A04A 30%,#2A1606 70%,#05070E)}
 @media(max-width:899px){
-  #builds .pz-hold{height:300vh}
-  #builds .pz-stage{padding-top:clamp(56px,8vh,80px)}
-  #builds .pz-card{width:90vw;top:47%}
-  #builds .pz-eje{top:47%}
-  #builds .pz-flota{padding:11px;border-radius:20px}
-  #builds .pz-art{border-radius:11px}
-  #builds .pz-txt{padding:14px 8px 6px}
-  #builds .pz-t{font-size:clamp(24px,6.6vw,30px)}
-  #builds .pz-d{font-size:14.5px;line-height:1.58}
-  #builds .pz-nodo span{display:none}
-  #builds .pz-nodo{align-items:center}
-  #builds .pz-papel{display:none}
+  #builds .ac-hold{height:340vh}
+  #builds .ac-stage{padding-top:clamp(48px,7vh,72px)}
+  #builds .ac-cab .builds-h{font-size:clamp(26px,7vw,34px);max-width:15ch;margin-top:10px}
+  #builds .ac-lado{display:none}
+  #builds .ac-acc{margin-top:18px}
+  #builds .ac-pn{width:100%;height:33%;border-radius:12px}
+  #builds .ac-cuerpo{right:0;width:auto;bottom:auto;height:var(--eh,400px);padding:18px 20px 20px}
+  #builds .ac-nom{font-size:clamp(34px,10.4vw,44px)}
+  #builds .ac-ds{font-size:14px;line-height:1.55;margin-top:12px}
+  #builds .ac-fila{gap:12px 18px;margin-top:16px}
+  #builds .ac-barra{display:none}
+  #builds .ac-btn{height:42px;font-size:14px;padding:0 18px}
+  #builds .ac-vl{writing-mode:horizontal-tb;transform:translateY(-50%);left:20px;top:50%;bottom:auto;font-size:11px}
+  #builds .ac-mas{left:auto;right:14px;top:50%;transform:translateY(-50%);width:30px;height:30px;font-size:16px}
+  #builds .ac-pto{left:auto;right:58px;top:50%;transform:translateY(-50%)}
 }
-/* portatiles bajos: todo un punto mas compacto para que la pieza no choque
-   con el indice */
-@media(min-width:900px) and (max-height:800px){
-  #builds .pz-stage{padding-top:clamp(40px,6vh,64px)}
-  #builds .builds-h{font-size:clamp(30px,3.4vw,46px)}
-  #builds .pz-card{width:min(380px,28vw);top:50%}
-  #builds .pz-eje{top:50%}
-  #builds .pz-d{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-  #builds .pz-txt{padding-top:12px}
-  #builds .pz-indice{padding-bottom:18px}
-}
-/* telefonos bajos */
+/* telefonos bajos: la descripcion se recorta para que el boton quepa */
 @media(max-width:899px) and (max-height:720px){
-  #builds .pz-stage{padding-top:44px}
-  #builds .pz-card{width:84vw;top:48%}
-  #builds .pz-eje{top:48%}
-  #builds .pz-d{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+  #builds .ac-ds{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+  #builds .ac-nom{font-size:clamp(30px,9vw,38px)}
 }
-@media(prefers-reduced-motion:reduce){#builds .pz-card .pz-flota{animation:none}}
+/* portatiles bajos */
+@media(min-width:900px) and (max-height:800px){
+  #builds .ac-stage{padding-top:clamp(40px,6vh,64px)}
+  #builds .ac-nom{font-size:clamp(40px,5vw,70px)}
+  #builds .ac-ds{font-size:15px;margin-top:14px}
+  #builds .ac-fila{margin-top:18px}
+  #builds .ac-cuerpo{padding:22px 32px 26px}
+}
+@media(prefers-reduced-motion:reduce){#builds .ac-btn,#builds .ac-marcas i::after{transition:none}}
 </style>
 </head>
 <body class="ann-fuera">
@@ -8237,86 +8232,78 @@ main>section#builds{background:#000 !important;background-image:none !important;
 
 
 <section class="builds" id="builds" data-bg="#000000" data-acc="#63A9FF"><i class="via" aria-hidden="true"></i>
-  <!-- LOS PROYECTOS SOBRE UN EJE. Tres piezas que flotan sobre una linea
-       horizontal en perspectiva; al bajar, el eje avanza y se elige una cada
-       vez: la elegida viene al frente, nitida y con su halo; las otras se
-       quedan detras, giradas y en penumbra. Abajo, el indice de las tres. -->
-  <div class="pz-hold" id="pzHold">
-    <div class="pz-stage" id="pzStage">
-      <div class="wrap builds-head">
-        <div class="k sk rv"><i class="sk-n">06</i>What we are building</div>
-        <h2 class="builds-h">Three pieces, two already running.</h2>
+  <!-- LOS PROYECTOS COMO ACORDEON DE MATERIALES. Tres paneles altos, cada uno
+       un shader vivo que cuenta su proyecto: 01 bloques enlazados que corren
+       por carriles, 02 cromo liquido que se rompe en un teselado de rombos, 03
+       un sol ambar con calima sobre racks. Al bajar se abre uno cada vez con un
+       muelle; en escritorio tambien al pasar el raton. Un solo lienzo WebGL,
+       un recorte por panel. Sin WebGL, cada panel lleva su degradado. -->
+  <div class="ac-hold" id="acHold">
+    <div class="ac-stage" id="acStage">
+      <div class="wrap builds-head ac-cab">
+        <div>
+          <div class="k sk rv"><i class="sk-n">06</i>What we are building</div>
+          <h2 class="builds-h">Three pieces, two already running.</h2>
+        </div>
+        <div class="ac-lado">
+          <b class="ac-cuenta" id="acCuenta" data-no-traducir>01 / 03</b>
+          <span class="ac-marcas" id="acMarcas" aria-hidden="true"><i></i><i></i><i></i></span>
+          <a class="ac-papel" href="https://nereum.xyz/whitepaper">Read the whitepaper &#8594;</a>
+        </div>
       </div>
-      <div class="pz-escena">
-        <i class="pz-eje" aria-hidden="true"><i></i></i>
-        <article class="pz-card" data-i="0">
-          <div class="pz-flota">
-            <div class="pz-art">
-              <div class="bcd-plate bcd-foto">
-            <img class="bcd-shot" src="img/explorer-overview.webp" width="1500" height="789"
-                 alt="The Nereum explorer: block height, tokenized assets and live block production" loading="lazy" decoding="async">
-          </div>
-            </div>
-            <div class="pz-txt">
-              <div class="pz-tag"><i class="bcd-dot"></i>Testnet · 75% to mainnet</div>
-              <h3 class="pz-t">The chain</h3>
-              <p class="pz-d">Own validators, own consensus, EVM-compatible. Every
+      <div class="wrap ac-acc" id="acAcc">
+        <canvas class="ac-gl" id="acGl" aria-hidden="true"></canvas>
+        <article class="ac-pn" data-i="0">
+          <div class="ac-velo"></div>
+          <div class="ac-cuerpo">
+            <div class="ac-meta" data-no-traducir><em>01</em> / 03</div>
+            <div class="ac-bajo">
+              <h3 class="ac-nom">The chain</h3>
+              <p class="ac-ds">Own validators, own consensus, EVM-compatible. Every
         transfer is cleared against the asset's policy before it is written —
         in the protocol, not in a contract on top.</p>
-              <a class="pz-go" href="https://nereum.xyz/explorer">Open the explorer &#8594;</a>
+              <div class="ac-fila">
+                <span class="ac-est"><i class="bcd-dot"></i>Testnet · 75% to mainnet<span class="ac-barra" aria-hidden="true"><i></i></span></span>
+                <a class="ac-btn" href="https://nereum.xyz/explorer">Open the explorer &#8594;</a>
+              </div>
             </div>
           </div>
+          <button type="button" class="ac-tira"><span class="ac-mas" aria-hidden="true">+</span><i class="bcd-dot ac-pto"></i><span class="ac-vl"><b data-no-traducir>01</b><span>The chain</span></span></button>
         </article>
-        <article class="pz-card" data-i="1">
-          <div class="pz-flota">
-            <div class="pz-art">
-              <div class="bcd-plate bcd-foto">
-            <img class="bcd-shot" src="img/explorer-tokenize.webp" width="1500" height="789"
-                 alt="Issuing an asset on Nereum: name, symbol, type, units and declared value" loading="lazy" decoding="async">
-          </div>
-            </div>
-            <div class="pz-txt">
-              <div class="pz-tag"><i class="bcd-dot"></i>Testnet · 75% to mainnet</div>
-              <h3 class="pz-t">Asset tokenization</h3>
-              <p class="pz-d">Describe the asset, attach its documentation, choose the
+        <article class="ac-pn" data-i="1">
+          <div class="ac-velo"></div>
+          <div class="ac-cuerpo">
+            <div class="ac-meta" data-no-traducir><em>02</em> / 03</div>
+            <div class="ac-bajo">
+              <h3 class="ac-nom">Asset tokenization</h3>
+              <p class="ac-ds">Describe the asset, attach its documentation, choose the
         conditions that travel with it, and issue. No custom contract to write
         and no audit to commission for every issuance.</p>
-              <a class="pz-go" href="https://nereum.xyz/explorer/#/tokenize">Tokenize an asset &#8594;</a>
+              <div class="ac-fila">
+                <span class="ac-est"><i class="bcd-dot"></i>Testnet · 75% to mainnet<span class="ac-barra" aria-hidden="true"><i></i></span></span>
+                <a class="ac-btn" href="https://nereum.xyz/explorer/#/tokenize">Tokenize an asset &#8594;</a>
+              </div>
             </div>
           </div>
+          <button type="button" class="ac-tira"><span class="ac-mas" aria-hidden="true">+</span><i class="bcd-dot ac-pto"></i><span class="ac-vl"><b data-no-traducir>02</b><span>Asset tokenization</span></span></button>
         </article>
-        <article class="pz-card" data-i="2">
-          <div class="pz-flota">
-            <div class="pz-art">
-              <div class="bcd-plate bcd-sol">
-            <div class="bcd-mark">
-              <svg viewBox="0 0 24 24" aria-hidden="true" fill="none"
-                   stroke="currentColor" stroke-width="1.4" stroke-linecap="round">
-                <circle cx="12" cy="8.4" r="3.1"/>
-                <path d="M12 2.2v1.6M12 13v1.4M6.5 8.4H5M19 8.4h-1.5M8.1 4.5 7 3.4M17 3.4l-1.1 1.1M8.1 12.3 7 13.4M17 13.4l-1.1-1.1"/>
-                <path d="M3.4 20.6h17.2M5.6 17.6h12.8M7.2 20.6l1.1-3M16.8 20.6l-1.1-3"/>
-              </svg>
-              Solar mining
-            </div>
-          </div>
-            </div>
-            <div class="pz-txt">
-              <div class="pz-tag"><i class="bcd-dot obra"></i>In development</div>
-              <h3 class="pz-t">Bitcoin mining</h3>
-              <p class="pz-d">Physical servers we own and operate, powered by solar.
+        <article class="ac-pn" data-i="2">
+          <div class="ac-velo"></div>
+          <div class="ac-cuerpo">
+            <div class="ac-meta" data-no-traducir><em>03</em> / 03</div>
+            <div class="ac-bajo">
+              <h3 class="ac-nom">Bitcoin mining</h3>
+              <p class="ac-ds">Physical servers we own and operate, powered by solar.
         Not rented hashrate and not a reseller's contract: machines in racks,
         with their own energy behind them.</p>
-              
+              <div class="ac-fila">
+                <span class="ac-est"><i class="bcd-dot obra"></i>In development</span>
+              </div>
             </div>
           </div>
+          <button type="button" class="ac-tira"><span class="ac-mas" aria-hidden="true">+</span><i class="bcd-dot obra ac-pto"></i><span class="ac-vl"><b data-no-traducir>03</b><span>Bitcoin mining</span></span></button>
         </article>
       </div>
-      <nav class="wrap pz-indice" aria-label="Projects">
-        <button type="button" class="pz-nodo" data-i="0"><b>01</b><span>The chain</span></button>
-        <button type="button" class="pz-nodo" data-i="1"><b>02</b><span>Asset tokenization</span></button>
-        <button type="button" class="pz-nodo" data-i="2"><b>03</b><span>Bitcoin mining</span></button>
-        <a class="pz-papel" href="https://nereum.xyz/whitepaper">Read the whitepaper &#8594;</a>
-      </nav>
     </div>
   </div>
 </section>
@@ -10772,6 +10759,9 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
               && sec.id!=='press'                        /* tambien a tamaño fijo: al
                                                             encogerse dejaba ver el fondo
                                                             gris de atras como una franja */
+              && sec.id!=='builds'                       /* lleva un anclado largo: se
+                                                            quedaba encogida y con el velo
+                                                            puesto mientras se elegia */
               && !sec.querySelector('.hero-hold, .hpin-stage'))
     .map(sec=>{
       sec.classList.add('depth');
@@ -15383,68 +15373,271 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
 })();
 </script>
 <script>
-/* ── 06 · el eje de los proyectos: al bajar se elige una pieza cada vez ── */
+/* ── 06 · acordeon de materiales: cada proyecto es un shader vivo y al bajar
+   se abre uno cada vez (en escritorio tambien al pasar el raton) ── */
 (function(){
-  var hold=document.getElementById('pzHold'), stage=document.getElementById('pzStage');
-  if(!hold||!stage) return;
-  var cards=[].slice.call(hold.querySelectorAll('.pz-card')), nodos=[].slice.call(hold.querySelectorAll('.pz-nodo'));
-  var brillo=hold.querySelector('.pz-eje i');
+  var sec=document.getElementById('builds'), hold=document.getElementById('acHold'),
+      acc=document.getElementById('acAcc'), cv=document.getElementById('acGl');
+  if(!sec||!hold||!acc||!cv) return;
   var QUIETO=matchMedia('(prefers-reduced-motion:reduce)').matches;
-  function clm(v){ return v<0?0:v>1?1:v }
-  function sube(t){ t=clm(t); return t*t*(3-2*t) }
+  var cl=function(v,a,b){ return Math.min(b,Math.max(a,v)) };
+  var PN=[].map.call(acc.querySelectorAll('.ac-pn'),function(el){
+    return {el:el,cuerpo:el.querySelector('.ac-cuerpo'),velo:el.querySelector('.ac-velo'),tira:el.querySelector('.ac-tira'),
+            enl:[].slice.call(el.querySelectorAll('.ac-cuerpo a'))} });
+  var cuenta=document.getElementById('acCuenta'), marcas=[].slice.call(document.getElementById('acMarcas').children);
+
+  /* ---------- medidas ---------- */
+  var AW=1,AH=1,D=1,ESC=1,MOB=false,GAP=10,SM=.13,BG=.74,cw=1,ch=1,sucio=true;
+  function medidas(){
+    var r=acc.getBoundingClientRect(); AW=r.width; AH=r.height; MOB=innerWidth<900;
+    D=Math.min(MOB?1.25:1.5,window.devicePixelRatio||1)*ESC; GAP=MOB?8:10;
+    cw=Math.max(1,Math.round(AW*D)); ch=Math.max(1,Math.round(AH*D)); cv.width=cw; cv.height=ch;
+    var tot=(MOB?AH:AW)-2*GAP;
+    if(MOB){ SM=Math.min(.16,62/tot); BG=1-2*SM } else { SM=.13; BG=.74 }
+    acc.style.setProperty('--ew',Math.round(tot*BG)+'px'); acc.style.setProperty('--eh',Math.round(tot*BG)+'px'); sucio=true;
+  }
   var top=0, run=1;
-  function mide(){ var y=0,n=hold; while(n){ y+=n.offsetTop; n=n.offsetParent } top=y; run=Math.max(1,hold.offsetHeight-innerHeight) }
-  /* el avance del scroll se convierte en la posicion del eje, con MESETAS:
-     cada pieza se queda quieta al frente un buen tramo antes de ceder el
-     sitio a la siguiente */
-  function eje(p){ return sube((p-.24)/.16)+sube((p-.60)/.16) }
-  var suave=-1, antT=0, ultimo=-1, elegida=-1;
-  function pinta(f){
-    var ancho=innerWidth, movil=ancho<900, paso=movil?ancho*.8:Math.min(ancho*.31,500);
-    for(var i=0;i<cards.length;i++){
-      var o=i-f, a=Math.abs(o), s=1-Math.min(a,1.6)*.14;
-      var tf='translate3d('+(o*paso).toFixed(1)+'px,0,'+(-a*220).toFixed(1)+'px) rotateY('+(-o*30).toFixed(2)+'deg) scale('+s.toFixed(3)+')';
-      cards[i].style.transform=tf;
-      cards[i].style.opacity=(1-Math.min(a,1.5)*.5).toFixed(3);
-      cards[i].style.zIndex=String(10-Math.round(a*3));
-      cards[i].style.pointerEvents=a<.5?'':'none';
-      /* en el telefono de las de los lados solo asoma la imagen: el texto se
-         enciende cuando la pieza esta ya casi en el centro, y asi no pasa
-         letra por debajo del indice del borde mientras entra */
-      var tx=cards[i].querySelector('.pz-txt');
-      tx.style.opacity=movil?clm(1-a*10).toFixed(3):'';
-      tx.style.visibility=movil&&a>=.1?'hidden':'';
-    }
-    var k=Math.round(f);
-    if(k!==elegida){ elegida=k;
-      cards.forEach(function(c,i){ c.classList.toggle('on',i===k) });
-      nodos.forEach(function(n,i){ n.classList.toggle('on',i===k); n.setAttribute('aria-current',i===k?'true':'false') }); }
-    /* la linea de cada nodo se llena mientras su pieza esta al frente */
-    nodos.forEach(function(n,i){ n.style.setProperty('--k',clm(f-i+1).toFixed(3)) });
+  function mide(){ var y=0,n=hold; while(n){ y+=n.offsetTop; n=n.offsetParent } top=y; run=Math.max(1,hold.offsetHeight-innerHeight); medidas() }
+
+  /* ---------- scroll, raton y estado ---------- */
+  var pRaw=0, ps=-1, hov=-1, hovC=-1, hovT=0, act=-1, vel=0;
+  function lee(){ pRaw=cl((window.scrollY-top)/run,0,1) }
+  /* cada proyecto se queda abierto un buen tramo antes de ceder el sitio */
+  function cual(p){ return p<.34?0:p<.66?1:2 }
+  var CENTRO=[.16,.5,.84];
+  PN.forEach(function(o,i){ o.tira.addEventListener('click',function(){ hov=-1; mide();
+    window.scrollTo({top:top+CENTRO[i]*run,behavior:QUIETO?'auto':'smooth'}) }) });
+  var X=[SM,BG,SM], V=[0,0,0], mx=-1e4, my=-1e4, mIn=0, LR=[];
+  acc.addEventListener('pointermove',function(e){ if(e.pointerType!=='mouse') return;
+    var r=acc.getBoundingClientRect(); mx=e.clientX-r.left; my=e.clientY-r.top; mIn=1;
+    var i=2; for(var k=0;k<3;k++){ var q=LR[k]; if(q&&mx<q.x+q.w+GAP/2){ i=k; break } }
+    if(i!==hovC){ hovC=i; clearTimeout(hovT); hovT=setTimeout(function(){ hov=hovC; arranca() },90) } arranca() });
+  acc.addEventListener('pointerleave',function(){ clearTimeout(hovT); hov=-1; hovC=-1; mIn=0; arranca() });
+  function marca(i){ act=i; cuenta.textContent='0'+(i+1)+' / 03';
+    marcas.forEach(function(t,k){ t.style.setProperty('--k',k<=i?1:0) });
+    PN.forEach(function(o,k){ o.el.classList.toggle('on',k===i); o.tira.setAttribute('aria-expanded',k===i?'true':'false') }) }
+
+  /* ---------- WebGL ---------- */
+  var gl=null; try{ gl=cv.getContext('webgl',{antialias:false,alpha:false,preserveDrawingBuffer:false,powerPreference:'high-performance'}) }catch(e){}
+  var progs=null;
+var HEAD=`precision highp float;
+uniform vec2 uR,uO;uniform float uT,uE,uD,uV;uniform vec3 uM;
+float h1(float n){return fract(sin(n*127.1)*43758.5453);}
+float h2(vec2 p){p=fract(p*vec2(123.34,456.21));p+=dot(p,p+45.32);return fract(p.x*p.y);}
+float vn(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(h2(i),h2(i+vec2(1,0)),f.x),mix(h2(i+vec2(0,1)),h2(i+1.),f.x),f.y);}
+float fbm(vec2 p){float s=0.,a=.5;mat2 m=mat2(1.6,1.2,-1.2,1.6);for(int i=0;i<4;i++){s+=a*vn(p);p=m*p;a*=.5;}return s;}
+float fbm3(vec2 p){float s=0.,a=.5;mat2 m=mat2(1.6,1.2,-1.2,1.6);for(int i=0;i<3;i++){s+=a*vn(p);p=m*p;a*=.5;}return s/.875;}
+float rbox(vec2 p,vec2 b,float r){vec2 q=abs(p)-b+r;return length(max(q,0.))+min(max(q.x,q.y),0.)-r;}
+vec3 mat(vec2 lp);
+void main(){vec2 lp=gl_FragCoord.xy-uO;vec3 c=mat(lp);
+ c=1.-exp(-c*1.15);
+ vec2 u=lp/uR;c*=mix(.62,1.,smoothstep(0.,.35,u.x)*smoothstep(1.,.65,u.x)*.5+.5);
+ c*=mix(.5,1.,uE);
+ c+=(h2(lp+fract(uT*.37)*vec2(91.,37.))-.5)*.04;
+ float d=rbox(lp-.5*uR,.5*uR,14.*uD);
+ c+=vec3(.75,.85,1.)*.14*clamp(1.-abs(d+1.2*uD)/(.9*uD),0.,1.);
+ gl_FragColor=vec4(max(c,0.)*clamp(.5-d,0.,1.),1.);}
+`;
+/* 01 · THE CHAIN — corridor of linked blocks flowing in lanes */
+var F0=`vec3 mat(vec2 lp){
+ vec2 p=(lp-.5*uR)/uR.y;float t=uT;
+ p.x+=(uM.x/uR.x-.5)*.08*uM.z;
+ float hz=.15+(uM.y/uR.y-.5)*.05*uM.z;
+ float dy=p.y-hz,ad=max(abs(dy),.003),fl=step(dy,0.);
+ float z=.3/ad;vec2 q=vec2(p.x*z,z);
+ float L=.42,C=.6;
+ float lx=q.x/L+.5,li=floor(lx),fx=(fract(lx)-.5)*L;
+ float sp=.45+h1(li*3.1+fl*17.)*1.2;
+ float zc=q.y/C-t*sp*(1.+uV*6.)-h1(li+fl*9.)*9.;
+ float ci=floor(zc),fz=(fract(zc)-.5)*C;
+ vec2 so=fl*vec2(19.,7.);
+ float r=h2(vec2(li,ci)+so),rn=h2(vec2(li,ci+1.)+so),rp=h2(vec2(li,ci-1.)+so);
+ float th=.36,has=step(th,r),nxt=fz>0.?step(th,rn):step(th,rp);
+ float aa=max(z/uR.y,.3/(ad*ad)/uR.y*.5)*1.2;
+ vec2 bh=vec2(L*.31,C*.33);
+ float d=rbox(vec2(fx,fz),bh,.035);
+ float blk=has*smoothstep(aa,-aa,d);
+ float rim=has*smoothstep(aa+.008,0.,abs(d+.014));
+ float halo=has*exp(-max(d,0.)*22.);
+ float lnk=has*nxt*smoothstep(.007+aa,.004,abs(fx))*step(bh.y,abs(fz));
+ float pul=fract(ci*.071+li*.137-t*.16);
+ float fla=smoothstep(.93,1.,pul)+smoothstep(.97,1.,fract(ci*.31-li*.07-t*.21))*.6;
+ float val=step(.93,r);
+ vec3 bl=vec3(.16,.5,1.),pa=vec3(.6,.8,1.);
+ vec3 face=bl*(.10+.22*smoothstep(-bh.y,bh.y,fz))+pa*.12*smoothstep(bh.x,0.,abs(fx))*smoothstep(-bh.y,bh.y,fz);
+ vec3 col=face*blk*(1.+fla*3.);
+ col+=mix(bl*1.25,vec3(1.),clamp(fla+val*.7,0.,1.))*rim*(1.2+fla*2.2+val);
+ col+=bl*halo*.28*(1.+fla*2.5);
+ col+=mix(bl,pa,fla)*lnk*(.9+fla*1.5);
+ col+=vec3(.25,.45,.9)*smoothstep(aa+.003,0.,abs(abs(fx)-L*.5))*.09;
+ float fog=exp(-max(z-.4,0.)*.11);
+ col*=fog*mix(.42,1.,fl);
+ col+=bl*.55*exp(-ad*12.)+vec3(.75,.88,1.)*.35*exp(-ad*70.);
+ col+=bl*.08*exp(-length(p-vec2(0.,hz))*3.);
+ return col;}`;
+/* 02 · ASSET TOKENIZATION — liquid chrome fracturing into a rhombille lattice */
+var F1=`
+float Hh(vec2 p,float t){vec2 w=vec2(fbm3(p*1.1+vec2(0.,t*.07)),fbm3(p*1.1+vec2(5.2,1.3)-t*.05));return fbm(p*1.6+w*1.7+vec2(t*.03,-t*.05));}
+vec3 env(vec3 r){float y=r.y;
+ vec3 c=mix(vec3(.004,.006,.014),vec3(.3,.38,.52),smoothstep(-.1,.9,y));
+ c+=vec3(.85,.9,1.)*.9*exp(-abs(y-.06)*34.);
+ c+=vec3(.6,.72,.95)*.5*exp(-abs(y+.32)*40.);
+ c+=vec3(.9,.95,1.)*.7*exp(-abs(y-.42)*28.);
+ vec2 sb=vec2(-.3+(uM.x/uR.x-.5)*.9*uM.z,.52+(uM.y/uR.y-.5)*.3*uM.z);
+ c+=vec3(1.)*2.2*smoothstep(.36,.16,length((r.xy-sb)*vec2(1.,1.9)));
+ c+=vec3(.18,.48,1.)*1.4*exp(-length(r.xy-vec2(.6,-.28))*3.2);
+ c+=vec3(.7,.8,1.)*.8*smoothstep(.07,0.,abs(r.x+.78))*smoothstep(-.2,.3,y);
+ return c;}
+float ray(vec2 p,vec2 d){float k=max(dot(p,d),0.);return length(p-d*k);}
+vec3 mat(vec2 lp){
+ vec2 p=(lp-.5*uR)/uR.y;float t=uT;
+ float e=2./uR.y,h=Hh(p,t),hx=Hh(p+vec2(e,0),t),hy=Hh(p+vec2(0,e),t);
+ vec3 nl=normalize(vec3(-(hx-h)/e*.55,-(hy-h)/e*.55,1.));
+ vec3 Vv=vec3(0,0,-1);
+ vec3 liq=env(reflect(Vv,nl))*vec3(.82,.88,1.)*(.9+pow(1.-nl.z,1.5)*1.5);
+ float sc=9.5;vec2 hp=p*sc,s=vec2(1.,1.7320508),hs=s*.5;
+ vec2 a=mod(hp,s)-hs,b=mod(hp-hs,s)-hs,g=dot(a,a)<dot(b,b)?a:b,id0=hp-g;vec2 id=floor(vec2(id0.x*2.,id0.y/.8660254)+.5);vec2 cid=vec2(id.x*.5,id.y*.8660254)/sc;
+ float rnd=h2(id*.37+.1);
+ float fld=.6*(.5+.5*sin(dot(cid,vec2(1.2,1.8))*1.7-t*.32))+.75*fbm3(cid*1.4+vec2(t*.05,0.))-.28+uE*.14;
+ float ft=clamp((fld-(.34+.3*rnd))*5.,0.,1.);ft=ft*ft*(3.-2.*ft);
+ vec2 aq=abs(g);float hexd=.5-max(dot(aq,vec2(.5,.8660254)),aq.x);
+ float ang=atan(g.y,g.x);vec3 nf;float sh;
+ if(ang>.5236&&ang<2.618){nf=vec3(0.,.6,.8);sh=1.1;}
+ else if(ang>=2.618||ang<-1.5708){nf=vec3(-.62,-.34,.71);sh=.82;}
+ else{nf=vec3(.62,-.34,.71);sh=.6;}
+ float ie=min(min(ray(g,vec2(.866,.5)),ray(g,vec2(-.866,.5))),ray(g,vec2(0.,-1.)));
+ nf=normalize(nf+vec3(rnd-.5,h2(id+3.1)-.5,0.)*.3+(nl-vec3(0,0,1))*.5);
+ vec3 tile=(env(reflect(Vv,nf))*vec3(.82,.88,1.)+vec3(.05,.08,.14))*sh;
+ tile+=vec3(.2,.5,1.)*.25*sh*smoothstep(.3,0.,hexd);
+ float px=sc/uR.y;
+ float gap=ft*(.05+.03*rnd);
+ float inner=smoothstep(gap,gap+px*1.3,hexd);
+ vec3 seam=vec3(.08,.3,1.)*(.35+1.2*exp(-(hexd)*30.))*ft;
+ vec3 col=mix(liq,tile,ft);
+ col=mix(seam,col,mix(1.,inner,ft));
+ col+=vec3(.75,.85,1.)*smoothstep(px*1.4,0.,ie)*ft*.35*inner;
+ col+=vec3(.35,.65,1.)*ft*(1.-ft)*2.2;
+ return col*.95;}`;
+/* 03 · BITCOIN MINING — solar plasma, heat haze, racks and LEDs */
+var F2=`vec3 mat(vec2 lp){
+ vec2 p=(lp-.5*uR)/uR.y;float t=uT;
+ float hzn=fbm3(vec2(p.x*7.,p.y*3.5-t*1.1))-.5;
+ vec2 pd=p+vec2(hzn*.014,hzn*.006)*(1.+uE*.6+uV*4.);
+ vec2 sc=vec2((uM.x/uR.x-.5)*.05*uM.z,.29);
+ vec2 sp=pd-sc;float r=length(sp);
+ vec2 w=vec2(fbm3(pd*2.2+vec2(t*.09,-t*.2)),fbm3(pd*2.2+vec2(4.1,-t*.17)));
+ float pl=fbm(pd*3.2+w*1.8+vec2(0.,-t*.22));
+ vec3 am=vec3(.88,.55,.2),go=vec3(1.,.84,.55),dp=vec3(.45,.13,.03);
+ vec3 col=vec3(.01,.014,.03)+vec3(.02,.03,.07)*smoothstep(.5,-.5,p.y);
+ float R0=.15;
+ float gw=exp(-max(r-R0,0.)*5.);
+ col+=mix(dp,am,gw)*gw*(.55+1.1*pl)*1.1;
+ float cor=pow(pl,2.2)*smoothstep(.75,.12,r)*(1.-smoothstep(R0,R0-.01,r));
+ col+=am*cor*1.6;
+ float disc=smoothstep(R0+.004,R0-.004,r);
+ float gr=vn(sp*90.+w*6.)*.5+vn(sp*45.-t*.3)*.5;
+ float mu=sqrt(max(1.-r*r/(R0*R0),0.));
+ vec3 sun=mix(vec3(.95,.34,.05),vec3(1.5,.86,.32),pow(mu,.55))*(.78+.32*gr+.2*pl)+go*pow(mu,5.)*.7;
+ col=mix(col,sun,disc);
+ float an=atan(sp.y,sp.x);
+ float ray=pow(vn(vec2(an*9.,t*.25))*vn(vec2(an*23.,-t*.2)),1.5);
+ col+=am*ray*1.6*exp(-max(r-R0,0.)*9.)*(1.-disc);
+ col+=go*.5*exp(-abs(r-R0)*110.)*(1.-disc*.6);
+ float rw=.062;float rx=pd.x/rw;float ri=floor(rx+.5);float fx=(rx-ri)*rw;
+ float top=-.02+h1(ri*1.7)*.03;
+ float inR=smoothstep(top+.01,top-.03,pd.y);
+ float aa=1.3/uR.y;
+ float ln=smoothstep(aa,0.,abs(fx))*(.12+.55*inR);
+ col+=mix(vec3(.35,.4,.55),am,.5)*ln*(.45+gw*1.5);
+ float ry=pd.y/.028;float rj=floor(ry);float fy=(fract(ry)-.5)*.028;
+ float sh=smoothstep(aa,0.,abs(fract(pd.y/.112)-.5)*.112-.056+aa)*inR;
+ col+=vec3(.3,.34,.45)*.06*sh*step(abs(fx),rw*.46);
+ vec2 lc=vec2(fx-rw*.22,fy);
+ float on=step(.45,h2(vec2(ri,rj)+floor(t*(2.+5.*h1(ri*2.3+rj))) ));
+ float kind=h2(vec2(ri*1.3,rj*.7));
+ vec3 lcol=kind<.62?vec3(1.,.66,.25):kind<.9?vec3(.24,.86,.52):vec3(.3,.55,1.);
+ float ld=length(lc);
+ float led=on*inR*(smoothstep(.0032,.0015,ld)*1.8+exp(-ld*260.)*.5);
+ col+=lcol*led;
+ float ld2=length(vec2(fx+rw*.2,fy));
+ col+=vec3(.25,.3,.4)*.25*inR*smoothstep(.0026,.0012,ld2);
+ col+=am*.14*smoothstep(-.1,-.55,p.y)*(.5+.5*pl);
+ col+=am*.35*exp(-abs(pd.y-top+.01)*60.)*smoothstep(.6,0.,abs(pd.x-sc.x));
+ float emb=smoothstep(.985,1.,vn(vec2(pd.x*40.,pd.y*14.-t*2.5)))*smoothstep(-.3,.2,p.y)*smoothstep(.55,.2,r);
+ col+=go*emb*1.2;
+ return col;}`;
+
+  function mk(fs){
+    function c(tp,s){ var o=gl.createShader(tp); gl.shaderSource(o,s); gl.compileShader(o); return gl.getShaderParameter(o,gl.COMPILE_STATUS)?o:null }
+    var vs=c(gl.VERTEX_SHADER,'attribute vec2 a;void main(){gl_Position=vec4(a,0.,1.);}'), f=c(gl.FRAGMENT_SHADER,HEAD+fs);
+    if(!vs||!f) return null;
+    var pr=gl.createProgram(); gl.attachShader(pr,vs); gl.attachShader(pr,f); gl.bindAttribLocation(pr,0,'a'); gl.linkProgram(pr);
+    if(!gl.getProgramParameter(pr,gl.LINK_STATUS)) return null;
+    var U={}; ['uR','uO','uT','uE','uD','uV','uM'].forEach(function(n){ U[n]=gl.getUniformLocation(pr,n) }); return {pr:pr,U:U} }
+  function prepara(){
+    if(!gl) return;
+    progs=[mk(F0),mk(F1),mk(F2)];
+    if(progs.some(function(p){ return !p })){ progs=null; return }
+    var b=gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER,b); gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,3,-1,-1,3]),gl.STATIC_DRAW);
+    gl.enableVertexAttribArray(0); gl.vertexAttribPointer(0,2,gl.FLOAT,false,0,0);
   }
-  function tick(){
-    if(!corre) return;
-    var p=clm((window.scrollY-top)/run), ahora=performance.now()/1000, dt=Math.min(.1,antT?ahora-antT:.016); antT=ahora;
-    var f=eje(p);
-    if(suave<0||QUIETO||Math.abs(f-suave)>1.2) suave=f; else suave+=(f-suave)*(1-Math.exp(-dt*8));
-    if(Math.abs(suave-ultimo)>.0005){ ultimo=suave; pinta(suave) }
-    requestAnimationFrame(tick);
+  var HS=[0,0,0];
+  function pinta(t,rects,E){
+    gl.disable(gl.SCISSOR_TEST); gl.viewport(0,0,cw,ch); gl.clearColor(0,0,0,1); gl.clear(gl.COLOR_BUFFER_BIT); gl.enable(gl.SCISSOR_TEST);
+    for(var i=0;i<3;i++){ var r=rects[i], x=Math.round(r.x*D), y=Math.round(r.y*D), w=Math.max(1,Math.round(r.w*D)), h=Math.max(1,Math.round(r.h*D)), gy=ch-y-h;
+      var g=progs[i]; gl.useProgram(g.pr); gl.viewport(x,gy,w,h); gl.scissor(x,gy,w,h);
+      gl.uniform2f(g.U.uR,w,h); gl.uniform2f(g.U.uO,x,gy); gl.uniform1f(g.U.uT,t+i*17.3); gl.uniform1f(g.U.uE,E[i]); gl.uniform1f(g.U.uD,D); gl.uniform1f(g.U.uV,Math.min(vel,.4));
+      var dentro=mx>=r.x&&mx<=r.x+r.w&&my>=r.y&&my<=r.y+r.h; HS[i]+=((dentro&&mIn?1:0)-HS[i])*.08;
+      gl.uniform3f(g.U.uM,mx*D-x,(AH-my)*D-gy,HS[i]);
+      gl.drawArrays(gl.TRIANGLES,0,3) } }
+
+  /* ---------- bucle ---------- */
+  var last=0, T=0, visto=false, raf=0, lentos=0, cuadros=0;
+  function ssm(x){ return x*x*(3-2*x) }
+  function cuadro(now){
+    raf=0; var dt=Math.min(.05,last?(now-last)/1000:.016); last=now; lee();
+    var pp=ps; if(ps<0||QUIETO) ps=pRaw; else ps+=(pRaw-ps)*(1-Math.exp(-dt*7));
+    vel+=((Math.abs(ps-pp)/Math.max(dt,.001))-vel)*.1;
+    var ai=hov>=0?hov:cual(ps); if(ai!==act) marca(ai);
+    var k, tg=[0,1,2].map(function(k){ return k===ai?BG:SM });
+    if(QUIETO){ for(k=0;k<3;k++){ X[k]=tg[k]; V[k]=0 } }
+    else { var n=3,h=dt/n; for(var s=0;s<n;s++) for(k=0;k<3;k++){ var a=150*(tg[k]-X[k])-15*V[k]; V[k]+=a*h; X[k]+=V[k]*h } }
+    var S=X[0]+X[1]+X[2], tot=(MOB?AH:AW)-2*GAP, rects=[], E=[], o=0;
+    for(k=0;k<3;k++){ var sz=Math.max(8,X[k]/S*tot), e=cl((X[k]-SM)/(BG-SM),0,1); E.push(e);
+      var r=MOB?{x:0,y:o,w:AW,h:sz}:{x:o,y:0,w:sz,h:AH}; rects.push(r); o+=sz+GAP;
+      var q=PN[k], st=q.el.style;
+      if(MOB){ st.transform='translate3d(0,'+r.y.toFixed(2)+'px,0)'; st.height=sz.toFixed(2)+'px'; st.width='100%' }
+      else { st.transform='translate3d('+r.x.toFixed(2)+'px,0,0)'; st.width=sz.toFixed(2)+'px'; st.height='100%' }
+      var eb=ssm(cl((e-.45)/.55,0,1)), es=cl(1-e*2.2,0,1);
+      q.cuerpo.style.opacity=eb.toFixed(3); q.cuerpo.style.transform='translate3d(0,'+((1-eb)*18).toFixed(1)+'px,0)';
+      q.cuerpo.style.visibility=eb<.01?'hidden':'visible';
+      q.enl.forEach(function(a){ a.tabIndex=e>.5?0:-1 });
+      q.velo.style.opacity=(.35+.65*e).toFixed(3);
+      q.tira.style.opacity=es.toFixed(3); q.tira.style.pointerEvents=e<.5?'auto':'none'; q.tira.tabIndex=e<.5?0:-1 }
+    LR=rects;
+    if(progs&&(!QUIETO||sucio)){ if(!QUIETO) T+=dt; pinta(QUIETO?14:T,rects,E) }
+    sucio=false;
+    /* si el equipo no llega, se baja la resolucion del lienzo (hasta la mitad) */
+    if(progs&&!QUIETO&&dt>0){ cuadros++; if(dt>.026) lentos++;
+      if(cuadros>=40){ if(lentos>14&&ESC>.55){ ESC*=.8; medidas() } cuadros=0; lentos=0 } }
+    var quieto=Math.abs(ps-pRaw)<.0005&&V.every(function(v){ return Math.abs(v)<.001 });
+    if(visto&&(!QUIETO||!quieto)) raf=requestAnimationFrame(cuadro);
   }
-  var corre=false;
-  /* la etiqueta de la seccion va dentro del escenario fijo, y la red de
-     seguridad de las entradas -que guarda la posicion de cada pieza- no la ve
-     cuando se llega de un salto: se enciende aqui al asomar el escenario */
-  new IntersectionObserver(function(es){ var antes=corre; corre=es[0].isIntersecting;
-    if(corre){ [].forEach.call(hold.querySelectorAll('.rv:not(.in)'),function(e){ e.classList.add('in') });
-      [].forEach.call(hold.querySelectorAll('[data-tit]:not(.vis)'),function(e){ e.classList.add('vis') }) }
-    if(corre&&!antes){ mide(); requestAnimationFrame(tick) } },{rootMargin:'10% 0px'}).observe(hold);
-  addEventListener('resize',function(){ mide(); ultimo=-1 },{passive:true});
+  function arranca(){ if(!raf&&visto){ last=0; raf=requestAnimationFrame(cuadro) } }
+  /* la etiqueta de la seccion va dentro del escenario fijo y la red de
+     seguridad de las entradas no la ve al llegar de un salto: se enciende aqui */
+  new IntersectionObserver(function(es){ var antes=visto; visto=es[0].isIntersecting;
+    if(visto){ [].forEach.call(hold.querySelectorAll('.rv:not(.in)'),function(e){ e.classList.add('in') });
+      [].forEach.call(hold.querySelectorAll('[data-tit]:not(.vis)'),function(e){ e.classList.add('vis') });
+      if(!antes){ if(gl&&!progs&&!sec.classList.contains('ac-nogl')){ prepara(); if(!progs) sec.classList.add('ac-nogl') } mide(); arranca() } }
+  },{rootMargin:'10% 0px'}).observe(hold);
+  if(!gl) sec.classList.add('ac-nogl');
+  if(gl) cv.addEventListener('webglcontextlost',function(e){ e.preventDefault(); progs=null; sec.classList.add('ac-nogl') });
+  addEventListener('scroll',arranca,{passive:true});
+  addEventListener('resize',function(){ mide(); arranca() },{passive:true});
   addEventListener('load',function(){ setTimeout(mide,600) });
   addEventListener('nrm:remide',mide,{passive:true});
-  /* un nodo del indice lleva a su pieza */
-  var CENTRO=[.12,.5,.88];
-  nodos.forEach(function(n,i){ n.addEventListener('click',function(){ mide(); window.scrollTo({top:top+CENTRO[i]*run,behavior:QUIETO?'auto':'smooth'}) }) });
-  mide(); pinta(0);
+  mide(); marca(0);
 })();
 </script>
 </body>
