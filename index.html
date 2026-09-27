@@ -11061,123 +11061,37 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
   const ease=t=>t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;
   const dTop=n=>{let y=0;while(n){y+=n.offsetTop;n=n.offsetParent}return y};
   let W=0,H=0,top=0,hh=0,vh=innerHeight,last=-1;
-  let dirty=true, lastT=0;
+  let dirty=true, lastT=0, cubos=null;
   function size(){
     const d=__dens();
     W=cv.clientWidth;H=cv.clientHeight;
     __mide(cv, W*d, H*d); ctx.setTransform(d,0,0,d,0,0);
     top=dTop(hold);hh=hold.offsetHeight;vh=innerHeight;
     dirty=true;
+    /* el numero de cubos depende del ancho: al cruzar el del telefono se
+       vuelven a sembrar */
+    if(cubos && (cubos.length===130)!==(W<760)) cubos=null;
   }
   size();
   addEventListener('resize',size,{passive:true});
   addEventListener('load',()=>setTimeout(size,600));
-  new IntersectionObserver(es=>{if(es[0].isIntersecting){size()}},
-    {rootMargin:'40% 0px'}).observe(hold);
-  function plate(cx,cy,w,h,lift,a,lit){
-    ctx.beginPath();
-    ctx.moveTo(cx,cy-h/2-lift);
-    ctx.lineTo(cx+w/2,cy-lift);
-    ctx.lineTo(cx,cy+h/2-lift);
-    ctx.lineTo(cx-w/2,cy-lift);
-    ctx.closePath();
-    const g=ctx.createLinearGradient(cx,cy-h/2-lift,cx,cy+h/2-lift);
-    g.addColorStop(0,'rgba(194,196,202,'+(.26*a*(.55+lit*.45)).toFixed(3)+')');
-    g.addColorStop(1,'rgba(137,138,143,'+(.06*a).toFixed(3)+')');
-    ctx.fillStyle=g;ctx.fill();
-    ctx.strokeStyle='rgba(208,211,217,'+(.34*a*(.4+lit*.6)).toFixed(3)+')';
-    ctx.lineWidth=1.2;ctx.stroke();
-  }
-  /* LAS PUNTAS. El rombo se armaba rasterizando su ruta sobre una rejilla
-     recta, y eso deja los cantos en escalera y las puntas deshilachadas: la
-     rejilla y la figura no comparten ejes, asi que cada fila muerde el filo
-     por un sitio distinto.
+  /* ══ EL CAMPO DE CUBOS, COMO EN EL VIDEO ════════════════════════════════
+     Antes la seccion era un muro denso de 256 cubos que al bajar se juntaban
+     en el rombo de la marca y la hacian girar. Se pidio como el video de
+     referencia: un campo DISPERSO de cubos sueltos flotando en un espacio
+     hondo, cada uno girando despacio sobre su propio eje, y la camara
+     avanzando entre ellos -los lejanos chicos y apagados, de vez en cuando
+     uno enorme que pasa rozando-. Azules, plata y alguno de cristal. Los
+     colores son los de nuestros cubos de siempre: la misma paleta TONES.
 
-     Se da la vuelta al problema. El rombo ES un cuadrado girado 45 grados,
-     asi que se tesela el CUADRADO —donde cada celda cae entera dentro o
-     entera fuera, sin umbral ni medias tintas— y se gira la rejilla al
-     colocarla. Los cantos salen rectos y las cuatro puntas, cuadradas.
-
-     Tampoco hace falta rasterizar nada: el cuadrado llena la rejilla entera y
-     la banda blanca es su 18,5 % de abajo, la misma fraccion que usa
-     herramientas/logo/logo.py para dibujar el vector. Aritmetica, no pixeles. */
-  const BANDA=0.185;
-  const GIRO=-Math.PI/4, GC=Math.cos(GIRO), GS=Math.sin(GIRO);
-  /* La paleta de la pila va en HSL y por eso el paso a plata no la alcanzo:
-     el conversor buscaba azules en RGB. Se desatura -de 100 a 8-14 de
-     saturacion, lo justo para que el metal no sea gris muerto sino que
-     refleje algo frio- y se reparte el brillo para que las caras del cubo
-     sigan distinguiendose unas de otras. */
-  /* Azul Y BLANCO, que es lo que se pidio: no todos los cubos azules -eso era
-     lo de antes- ni todos de plata -eso fue el paso intermedio-. Tres tonos
-     con azul de verdad, uno casi blanco y dos hondos para que el cubo tenga
-     caras distinguibles. */
-  /* LOS BLANCOS VUELVEN, Y EL AZUL SUBE. La paleta se habia quedado en seis
-     tonos de los que ninguno pasaba de 44 de luz: un campo de cubos azul
-     oscuro sobre negro, sin un punto donde se apoye el ojo. Vuelven los dos
-     blancos —92 y 76 de luz, con una pizca de frio para que sean metal y no
-     papel— y los azules suben de 44/34 a 56/46 y se les añade un electrico de
-     62. Ocho tonos: dos blancos, cuatro azules de verdad y dos hondos para
-     que el cubo tenga caras que se distingan unas de otras. */
+     La escena es FUNCION de la posicion de la camara y del reloj, no un
+     estado que se va acumulando: subir y bajar da siempre lo mismo. Cada
+     cubo vive en un tramo de profundidad que se repite; al cruzar la camara
+     vuelve a nacer al fondo -invisible, dentro de la niebla- en otro sitio
+     de la pantalla, asi que el campo no se acaba nunca. */
   const TONES=[{h:219,s:100,l:56},{h:224,s:97,l:46},{h:216,s:88,l:38},
                {h:214,s:14,l:30},{h:220,s:26,l:19},{h:226,s:92,l:16},
                {h:210,s:10,l:92},{h:213,s:13,l:76},{h:218,s:100,l:62}];
-  /* El color de la marca ya montada. Era blanco con fichas azules, que es el
-     logotipo viejo. El rombo es PLATA con la banda casi blanca: 71 de luz
-     para la cara y 99 para la banda. Se subio de 71 a 82: a 71 la plata
-     quedaba apagada sobre el negro de la seccion, y esta marca es metal, no
-     hormigon. La banda se lee por contraste con la cara, igual que en la
-     marca de verdad, y no por ser de otro color. */
-  const OWN={body:{h:224,s:12,l:82}, chip:{h:210,s:8,l:99}};
-  const mixTone=(a,b,k)=>({h:a.h+(b.h-a.h)*k, s:a.s+(b.s-a.s)*k, l:a.l+(b.l-a.l)*k});
-  /* 16 por lado. Teselando el cuadrado ya no se pierde ninguna celda —antes
-     el rombo tiraba la mitad de la rejilla—, asi que 16 dan 256 cubos: los
-     218 de la marca anterior con algo de holgura. */
-  const NV=16;
-  let vox=null;
-  function bakeVox(){
-    vox=[];
-    const cg=(NV-1)/2;
-    for(let y=0;y<NV;y++)for(let x=0;x<NV;x++){
-      /* Todas las celdas son cuerpo; las de abajo, banda. */
-      const isChip = y >= NV*(1-BANDA);
-      let tone;
-      if(isChip){ tone=((x+y)%2)?TONES[0]:TONES[1] }
-      else{
-        /* Uno de cada seis va en blanco, y no dos seguidos: repartidos por
-           ruido, el blanco cae disperso y es lo que le da chispa al campo. */
-        const r=Math.sin(x*127.1+y*311.7)*43758.5453, u=r-Math.floor(r);
-        tone = u<.20?TONES[3] : u<.36?TONES[4] : u<.52?TONES[2]
-             : u<.66?TONES[0] : u<.74?TONES[8] : u<.82?TONES[1]
-             : u<.90?TONES[6] : u<.96?TONES[7] : TONES[5];
-      }
-      const h1=Math.sin(x*57.13+y*91.7)*43758.5453,  u1=h1-Math.floor(h1);
-      const h2=Math.sin(x*13.7+y*217.3)*24634.6345,  u2=h2-Math.floor(h2);
-      const h3=Math.sin(x*39.7+y*74.3)*13571.2468,   u3=h3-Math.floor(h3);
-      const h4=Math.sin(x*91.1+y*33.9)*57231.7531,   u4=h4-Math.floor(h4);
-      /* La rejilla se gira aqui, una vez, al hornearla: colocar cada cubo ya
-         girado sale gratis y deja el resto del dibujo sin enterarse. */
-      const rx=x-cg, ry=y-cg;
-      vox.push({gx:rx*GC-ry*GS, gy:rx*GS+ry*GC, tone, own:isChip?OWN.chip:OWN.body,
-        u1,u2,u3,
-        dsp:.16+u4*.42, dph:u1*6.283, dr:.5+u2*.9,
-        st:(u3*.3), sp:.55+u3*1.6});
-    }
-    for(let i=vox.length-1;i>0;i--){
-      const j=Math.floor((Math.sin(i*12.9898)*43758.5453%1+1)%1*(i+1));
-      const t=vox[i];vox[i]=vox[j];vox[j]=t;
-    }
-    const cols=Math.max(1,Math.round(Math.sqrt(vox.length*1.7)));
-    const rows=Math.ceil(vox.length/cols);
-    vox.forEach((v,i)=>{
-      const cxi=i%cols, cyi=(i/cols)|0;
-      v.sx=((cxi+.5+(v.u1-.5)*.85)/cols)*2-1;
-      v.sy=((cyi+.5+(v.u2-.5)*.85)/rows)*2-1;
-      v.sz=(v.u3-.5)*1.5;
-    });
-  }
-  const FOV=780;
-  let cy_=1,sy_=0,cp_=1,sp_=0,AX=[1,0,0],AY=[0,1,0],AZ=[0,0,1],VIS=[],queue=[];
   const FACES=[
     [[0,0,1],[[-1,-1,1],[1,-1,1],[1,1,1],[-1,1,1]]],
     [[0,0,-1],[[1,-1,-1],[-1,-1,-1],[-1,1,-1],[1,1,-1]]],
@@ -11186,263 +11100,121 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
     [[0,-1,0],[[-1,-1,-1],[1,-1,-1],[1,-1,1],[-1,-1,1]]],
     [[0,1,0],[[-1,1,1],[1,1,1],[1,1,-1],[-1,1,-1]]]];
   const LIGHT=[.34,-.42,-.84];
-  const cstr=(h,sa,l,a)=>'hsla('+(h|0)+','+(sa|0)+'%,'+l.toFixed(1)+'%,'+a.toFixed(2)+')';
-  function vrot(x,y,z){
-    const x1=x*cy_+z*sy_, z1=-x*sy_+z*cy_;
-    return [x1, y*cp_-z1*sp_, y*sp_+z1*cp_];
-  }
-  function vprep(yaw,pitch){
-    cy_=Math.cos(yaw);sy_=Math.sin(yaw);cp_=Math.cos(pitch);sp_=Math.sin(pitch);
-    AX=vrot(1,0,0);AY=vrot(0,1,0);AZ=vrot(0,0,1);
-    VIS=[];
-    for(const [nrm,pts] of FACES){
-      const n=[nrm[0]*AX[0]+nrm[1]*AY[0]+nrm[2]*AZ[0],
-               nrm[0]*AX[1]+nrm[1]*AY[1]+nrm[2]*AZ[1],
-               nrm[0]*AX[2]+nrm[1]*AY[2]+nrm[2]*AZ[2]];
-      if(n[2]>=0)continue;
-      const lam=clm(n[0]*LIGHT[0]+n[1]*LIGHT[1]+n[2]*LIGHT[2]);
-      VIS.push({pts,lit:.24+lam*.88});
+  const cstr=(h,sa,l,a)=>'hsla('+(h|0)+','+(sa|0)+'%,'+l.toFixed(1)+'%,'+a.toFixed(3)+')';
+  const QUIETO=matchMedia('(prefers-reduced-motion:reduce)').matches;
+  const azar=(i,k)=>{ const r=Math.sin(i*127.1+k*311.7+.5)*43758.5453; return r-Math.floor(r) };
+  const CERCA=.34, LEJOS=7.2, TRAMO=LEJOS-CERCA;
+  function siembra(){
+    const n=W<760?130:190;
+    cubos=[];
+    for(let i=0;i<n;i++){
+      const u=azar(i,1), v=azar(i,2), w=azar(i,3);
+      /* el tono: azules casi la mitad, plata y blanco un cuarto, grises
+         hondos y el azul profundo el resto */
+      const t=azar(i,4);
+      const tone = t<.16?TONES[0] : t<.28?TONES[1] : t<.38?TONES[2] : t<.46?TONES[8]
+                 : t<.60?TONES[7] : t<.70?TONES[6] : t<.82?TONES[3] : t<.91?TONES[4] : TONES[5];
+      /* el eje de giro, cualquiera, y una velocidad lenta */
+      let ax=azar(i,5)-.5, ay=azar(i,6)-.5, az=azar(i,7)-.5; const m=Math.hypot(ax,ay,az)||1;
+      const grande=azar(i,8)<.045;
+      cubos.push({z0:u*TRAMO, tone, ax:ax/m, ay:ay/m, az:az/m,
+        a0:v*6.283, gv:(.18+w*.42)*(azar(i,9)<.5?-1:1),
+        lado:grande ? .32+azar(i,10)*.16 : .075+Math.pow(azar(i,10),1.7)*.19,
+        cristal:azar(i,11)<.14, i});
     }
   }
-  function vcube(x,y,z,sz,tone,a,cxp,cyp,flat){
-    const c=vrot(x,y,z);
-    const f=FOV/Math.max(FOV*.42,FOV+c[2]);
-    let px=cxp+c[0]*f, py=cyp+c[1]*f;
-    const r=sz*f*1.3+4;
-    let cx=c[0], cy=c[1];
-    if(px<r)      cx+=(r-px)/f;
-    else if(px>W-r) cx-=(px-(W-r))/f;
-    if(py<r)      cy+=(r-py)/f;
-    else if(py>H-r) cy-=(py-(H-r))/f;
-    queue.push({z:c[2],cx,cy,cz:c[2],s:sz,tone,a,cxp,cyp,r:r,fl:flat||0});
-  }
-  function vflush(){
-    queue.sort((a,b)=>b.z-a.z);
-    const FLAT=VIS.length?VIS[0].lit:1;
-    for(const q of queue){
-      if(q.r<5){
-        const f=FOV/Math.max(FOV*.42,FOV+q.cz);
-        const px=q.cxp+q.cx*f, py=q.cyp+q.cy*f, sz=q.s*f*.9;
-        let L=clm(q.tone.l*(.46+FLAT*.74),3,100);
-        L+=(q.tone.l-L)*q.fl;
-        ctx.fillStyle=cstr(q.tone.h,q.tone.s,clm(L,3,100),q.a);
-        ctx.fillRect(px-sz/2,py-sz/2,sz,sz);
-        continue;
-      }
-      const h=q.s/2;
-      for(const F of VIS){
-        ctx.beginPath();
-        for(let i=0;i<4;i++){
-          const v=F.pts[i];
-          const wx=q.cx+v[0]*h*AX[0]+v[1]*h*AY[0]+v[2]*h*AZ[0];
-          const wy=q.cy+v[0]*h*AX[1]+v[1]*h*AY[1]+v[2]*h*AZ[1];
-          const wz=q.cz+v[0]*h*AX[2]+v[1]*h*AY[2]+v[2]*h*AZ[2];
-          const f=FOV/Math.max(FOV*.42,FOV+wz);
-          const sxp=q.cxp+wx*f, syp=q.cyp+wy*f;
-          i?ctx.lineTo(sxp,syp):ctx.moveTo(sxp,syp);
-        }
-        ctx.closePath();
-        /* El sombreado multiplicaba por 0,46-1,20. A un cubo blanco de 92 eso
-           le dejaba la cara oscura en 42: gris. Se sube el ambiente a 0,58 y
-           se le añade un termino que NO multiplica, asi que los claros se
-           quedan claros y los hondos siguen hondos. */
-        let L=clm(q.tone.l*(.58+F.lit*.62)+F.lit*10,3,100);
-        L+=(q.tone.l-L)*q.fl;
-        ctx.fillStyle=cstr(q.tone.h,q.tone.s,clm(L,3,100),q.a);
-        ctx.fill();
-      }
-      /* El canto encendido: sin el, un cubo es un poligono relleno; con el es
-         una pieza con grosor. Sube de .10 a .20 y se le da mas a los claros,
-         que es donde de verdad se ve el filo. */
-      if(q.r>5&&q.fl<.9){
-        var fil=.20*(1-q.fl)*(0.55+q.tone.l/150);
-        ctx.strokeStyle='rgba(226,236,255,'+fil.toFixed(3)+')';ctx.lineWidth=1;ctx.stroke()}
-    }
-    queue.length=0;
-  }
-  /* LA PLACA. Los cubos sirven para VENIR; no para quedarse. Amontonados
-     dejan la marca en escalera —una tesela es una tesela, por pequeña que
-     sea— y lo que tiene que quedar al final es el logotipo, liso.
-
-     Asi que al cerrarse la formacion los cubos se apagan y debajo aparece
-     esto: la marca dibujada con sus rutas, no con celdas. Y en volumen de
-     verdad, no pintado: una lamina con seis caras que se proyecta con la
-     MISMA camara que los cubos —el mismo vrot, la misma distancia focal—,
-     asi que hereda el trompo sin que haya que girarla aparte.
-
-     Las medidas salen de las mismas constantes que el vector: la banda es el
-     18,5 % de abajo y el grosor, el 6 % del lado. */
-  const PLATA_A='#C6CAD7', PLATA_B='#9498A1', BANDA_COL='#FCFCFC', CANTO_COL='#57595E';
-  const GRUESO=0.06;
-  function mezcla(hex,k){                      /* hacia negro (k<1) o blanco */
-    const n=parseInt(hex.slice(1),16);
-    let r=(n>>16)&255, g=(n>>8)&255, b=n&255;
-    if(k<=1){ r*=k; g*=k; b*=k }
-    else { r+=(255-r)*(k-1); g+=(255-g)*(k-1); b+=(255-b)*(k-1) }
-    return 'rgb('+(r|0)+','+(g|0)+','+(b|0)+')';
-  }
-  function placa(cxp,cyp,A,a){
-    if(a<=0.002)return;
-    const h=A/2, t=A*GRUESO/2;
-    /* las cuatro esquinas del cuadrado, ya giradas a rombo */
-    const gira=(x,y)=>[x*GC-y*GS, x*GS+y*GC];
-    const ESQ=[gira(-h,-h),gira(h,-h),gira(h,h),gira(-h,h)];
-    const yB=h-A*BANDA;                        /* donde empieza la banda */
-    const BND=[gira(-h,yB),gira(h,yB),gira(h,h),gira(-h,h)];
-    const P=(q,z)=>{
-      const c=vrot(q[0],q[1],z);
-      const f=FOV/Math.max(FOV*.42,FOV+c[2]);
-      return [cxp+c[0]*f, cyp+c[1]*f, c[2]];
-    };
-    const ruta=pts=>{ ctx.beginPath();
-      pts.forEach((q,i)=>i?ctx.lineTo(q[0],q[1]):ctx.moveTo(q[0],q[1]));
-      ctx.closePath(); };
-    const zMed=pts=>pts.reduce((s,q)=>s+q[2],0)/pts.length;
-    /* Cada cara con SU luz, no todas con la del frente. Con una sola, al
-       girar la lamina y verse por detras salia una losa gris plana: el dorso
-       de esta marca es el mismo metal, y tiene que comportarse como tal. */
-    const ilum=(nx,ny,nz)=>{
-      const n=[nx*AX[0]+ny*AY[0]+nz*AZ[0],
-               nx*AX[1]+ny*AY[1]+nz*AZ[1],
-               nx*AX[2]+ny*AY[2]+nz*AZ[2]];
-      return clm(n[0]*LIGHT[0]+n[1]*LIGHT[1]+n[2]*LIGHT[2]);
-    };
-    const caras=[];
-    const frente=ESQ.map(q=>P(q,-t)), detras=ESQ.map(q=>P(q,t));
-    caras.push({z:zMed(detras), pts:detras, tipo:'atras', luz:0.52+ilum(0,0,1)*0.58});
-    for(let i=0;i<4;i++){
-      const j=(i+1)%4;
-      /* la normal del canto: la perpendicular al lado, hacia afuera */
-      let nx=ESQ[j][1]-ESQ[i][1], ny=-(ESQ[j][0]-ESQ[i][0]);
-      const mx=(ESQ[i][0]+ESQ[j][0])/2, my=(ESQ[i][1]+ESQ[j][1])/2;
-      if(nx*mx+ny*my<0){ nx=-nx; ny=-ny }
-      const m=Math.hypot(nx,ny)||1;
-      caras.push({z:zMed([frente[i],frente[j],detras[j],detras[i]]),
-                  pts:[frente[i],frente[j],detras[j],detras[i]], tipo:'canto',
-                  luz:0.80+ilum(nx/m,ny/m,0)*0.70});
-    }
-    caras.push({z:zMed(frente), pts:frente, tipo:'frente', luz:0.62+ilum(0,0,-1)*0.62});
-    caras.sort((x,y)=>y.z-x.z);
-    ctx.save(); ctx.globalAlpha=a;
-    for(const c of caras){
-      ruta(c.pts);
-      if(c.tipo==='canto'){ ctx.fillStyle=mezcla(CANTO_COL,c.luz); ctx.fill(); continue }
-      const g=ctx.createLinearGradient(c.pts[0][0],c.pts[0][1],c.pts[2][0],c.pts[2][1]);
-      g.addColorStop(0,mezcla(PLATA_A,c.luz)); g.addColorStop(1,mezcla(PLATA_B,c.luz));
-      ctx.fillStyle=g; ctx.fill();
-      /* La banda va SOLO en la cara buena. El dorso de una lamina no lleva lo
-         que lleva el frente, y ponerselo delata que no hay volumen. */
-      if(c.tipo==='frente'){
-        ctx.save(); ctx.clip();
-        ruta(BND.map(q=>P(q,-t)));
-        ctx.fillStyle=mezcla(BANDA_COL,Math.min(1,c.luz)); ctx.fill();
-        ctx.restore();
-      }
-    }
-    ctx.restore();
-  }
-
-  function draw(p){
+  function draw(p,T){
     ctx.clearRect(0,0,W,H);
-    if(!vox)bakeVox();
-    const bar=parseFloat(getComputedStyle(document.documentElement)
-                .getPropertyValue('--bar'))||56;
-    const bandTop=bar+26;
-    const copyEl=cv.parentElement.querySelector('.stk-copy');
-    const cvTop=cv.getBoundingClientRect().top;
-    const copyTop=copyEl?copyEl.getBoundingClientRect().top-cvTop:H*.62;
-    const bandBot=Math.max(bandTop+140, copyTop-16);
-    /* El divisor reparte la franja entre la marca y su aire. Estaba en 1,72
-       -la marca ocupaba el 58 % de lo que tiene- y con el texto centrado y
-       pegado abajo la franja es ancha, asi que sobra sitio: a 1,45 la marca
-       usa el 69 % y deja noventa pixeles por arriba y por abajo. En el
-       telefono no cambia nada porque ahi manda el tope de ancho, no el de
-       alto. */
-    /* Mas grande: la marca pasa de usar el 30 % del ancho al 36, y de dejar
-       el 45 % de la franja en aire a dejar el 25. */
-    const S=Math.min(W*(W<760?.68:.36), (bandBot-bandTop)/1.25);
-    /* Girada 45 grados, la rejilla mide NV·raiz(2) celdas de punta a punta:
-       si U siguiera siendo S/NV, el rombo se saldria por los cuatro lados.
-       Asi que U —la SEPARACION entre cubos— encoge en raiz de dos.
-
-       Pero el TAMAÑO del cubo no puede encoger con ella. Los cubos siguen
-       rectos mientras la rejilla va girada, asi que sus vecinos ya no caen a
-       un lado sino en diagonal, y un cubo de lado U deja un agujero entre
-       cada cuatro: la marca se lee como una rejilla de mosquitera y no como
-       una pieza. Con el lado en U·raiz(2) las caras vuelven a taparse unas
-       con otras y solo queda la junta. */
-    const U=S/(NV*Math.SQRT2), UC=U*Math.SQRT2;
-    const cxp=W*.5, cyp=(bandTop+bandBot)*.5;
-    const k=1-ease(clm(p));            /* 1 disperso → 0 en su sitio */
-    /* EL TROMPO. Montada la marca, el ultimo tramo de scroll la hace girar
-       sobre su eje vertical. Se aprovecha que vprep gira TODO —las posiciones
-       de los cubos y las caras de cada uno— con la misma matriz: no hay que
-       montar nada aparte, la pila entera es un solo solido.
-
-       Dos vueltas exactas y no una y media: el rombo es una lamina, y media
-       vuelta lo deja de espaldas, con la banda blanca en el canto que no le
-       toca. Con un numero entero de vueltas acaba mirando como empezo.
-
-       El suavizado es el mismo del resto (ease): arranca despacio, coge
-       velocidad y se para sola, que es justo lo que hace un trompo. Y como al
-       pasar de canto la lamina se ve de perfil, la inclinacion que ya traia
-       —que nunca es cero— deja una rendija en vez de una linea. */
-    const trompo = ease(clm((p-.70)/.30)) * Math.PI*4;
-    vprep(.20-p*.30+trompo, -.30+p*.14);
-    const T=performance.now()/1000;
-    const FREE=Math.max(UC*1.25, Math.min(W,H)*.038);
-    const BIG=FREE, RZ=S*.75;
-    const WOB=S*.16*1.4;
-    const inset=BIG*.30;
-    const RX=Math.max(40,W*.5-inset), RY=Math.max(40,H*.5-inset);
-    /* El relevo. La placa entra mientras los ultimos cubos se cierran y esta
-       entera justo antes de que empiece el giro: lo que da la vuelta es el
-       logotipo liso, no un monton de teselas. */
-    const placaA=clm((0.32-k)/0.212);
-    for(const v of vox){
-      const own=clm(k*1.3-v.st);
-      const e=own*own;
-      const wob=own*S*.16;
-      const dx=v.sx*RX + Math.cos(T*v.dsp+v.dph)*wob*v.dr;
-      const dy=v.sy*RY + Math.sin(T*v.dsp*1.31+v.dph)*wob*v.dr;
-      const dz=v.sz*RZ + Math.cos(T*v.dsp*.83+v.dph*1.7)*wob*v.dr;
-      const col=mixTone(v.own, v.tone, clm(own*2.2));
-      /* PROFUNDIDAD POR TAMAÑO. Sueltos, todos los cubos median exactamente
-         lo mismo, asi que el campo se leia plano: una capa de confeti a una
-         sola distancia. Con un multiplicador propio entre 0,66 y 1,62 —fijo
-         por cubo, no animado— unos quedan delante y otros al fondo, y el
-         campo pasa a tener volumen. Al montarse la marca el multiplicador se
-         va a 1 con «own», asi que la rejilla final sigue siendo exacta. */
-      const mul = 1 + (0.66 + v.u2*0.96 - 1)*own;
-      vcube(v.gx*U*(1-e)+dx*e, v.gy*U*(1-e)+dy*e, dz*e,
-            (UC*.92+own*(FREE-UC*.92))*mul, col, clm(1.05-own*.15)*(1-placaA), cxp, cyp,
-            1-clm(own*2.4));
+    if(!cubos)siembra();
+    const f=Math.max(W,H)*.62, mx=W/(2*f), my=H/(2*f);
+    /* la camara: avanza con el scroll de la seccion y, ademas, a paso lento
+       con el reloj, para que el campo siga vivo aunque nadie baje */
+    const cam=p*5.4 + (QUIETO?0:T*.16);
+    const lista=[];
+    for(const c of cubos){
+      const d=c.z0-cam, k=Math.floor(d/TRAMO);
+      const zr=CERCA+(d-k*TRAMO);
+      /* cada vuelta nace en otro sitio: repartido por la pantalla a la
+         profundidad del fondo, y desde ahi se abre hacia los bordes */
+      const nx=azar(c.i,20+k*2)*2-1, ny=azar(c.i,21+k*2)*2-1;
+      const x=nx*mx*LEJOS*.62, y=ny*my*LEJOS*.62;
+      const r=c.lado*f/zr;
+      const sx=W/2+x/zr*f, sy=H/2+y/zr*f;
+      if(sx<-r*1.8||sx>W+r*1.8||sy<-r*1.8||sy>H+r*1.8) continue;
+      /* niebla: nace en el fondo y se apaga al cruzar la camara */
+      const hondo=(zr-CERCA)/TRAMO;
+      const aparece=clm((1-hondo)/.22), sePasa=clm((zr-CERCA)/.45);
+      const a=aparece*sePasa;
+      if(a<.01) continue;
+      lista.push({c,x,y,zr,hondo,a});
     }
-    /* El resplandor de detras, fuera. Era un degradado radial que se encendia
-       al montarse la marca y le ponia un halo blanco al fondo. Con la marca
-       ya en plata clara no suma luz: suma niebla, y le come el canto a los
-       cubos de los bordes, que es justo donde se ven las puntas. */
-    vflush();
-    placa(cxp, cyp, NV*U, placaA);
+    lista.sort((p1,p2)=>p2.zr-p1.zr);
+    for(const q of lista){
+      const c=q.c, h=c.lado/2;
+      /* la matriz de giro de ESTE cubo (Rodrigues) */
+      const ang=c.a0+(QUIETO?0:T*c.gv)+p*1.6*Math.sign(c.gv);
+      const co=Math.cos(ang), si=Math.sin(ang), t1=1-co, X=c.ax, Y=c.ay, Z=c.az;
+      const R=[[co+X*X*t1, X*Y*t1-Z*si, X*Z*t1+Y*si],
+               [Y*X*t1+Z*si, co+Y*Y*t1, Y*Z*t1-X*si],
+               [Z*X*t1-Y*si, Z*Y*t1+X*si, co+Z*Z*t1]];
+      const rot=v=>[R[0][0]*v[0]+R[0][1]*v[1]+R[0][2]*v[2],
+                    R[1][0]*v[0]+R[1][1]*v[1]+R[1][2]*v[2],
+                    R[2][0]*v[0]+R[2][1]*v[1]+R[2][2]*v[2]];
+      /* lo hondo se apaga hacia el fondo de la seccion */
+      const apaga=1-q.hondo*.55;
+      const caras=[];
+      for(const [nrm,pts] of FACES){
+        const n=rot(nrm);
+        /* se ve si mira a la camara, con la perspectiva de verdad */
+        const cx=q.x+n[0]*h, cy=q.y+n[1]*h, cz=q.zr+n[2]*h;
+        if(n[0]*cx+n[1]*cy+n[2]*cz>=0) continue;
+        const lam=clm(n[0]*LIGHT[0]+n[1]*LIGHT[1]+n[2]*LIGHT[2]);
+        const P=pts.map(v=>{ const w=rot(v);
+          const zz=Math.max(.05,q.zr+w[2]*h);
+          return [W/2+(q.x+w[0]*h)/zz*f, H/2+(q.y+w[1]*h)/zz*f] });
+        caras.push({P,lit:.24+lam*.88});
+      }
+      for(const F of caras){
+        ctx.beginPath();
+        ctx.moveTo(F.P[0][0],F.P[0][1]);
+        for(let i=1;i<4;i++) ctx.lineTo(F.P[i][0],F.P[i][1]);
+        ctx.closePath();
+        const tn=c.tone;
+        if(c.cristal){
+          ctx.fillStyle=cstr(tn.h,tn.s,clm(62+F.lit*26,3,100),(.10+F.lit*.07)*q.a);
+          ctx.fill();
+          ctx.strokeStyle='rgba(226,236,255,'+(.46*q.a*apaga).toFixed(3)+')';
+          ctx.lineWidth=1; ctx.stroke();
+        }else{
+          const L=clm((tn.l*(.58+F.lit*.62)+F.lit*10)*apaga,3,100);
+          ctx.fillStyle=cstr(tn.h,tn.s,L,q.a);
+          ctx.fill();
+          ctx.strokeStyle='rgba(226,236,255,'+(.14*q.a*apaga*(.55+tn.l/150)).toFixed(3)+')';
+          ctx.lineWidth=1; ctx.stroke();
+        }
+      }
+    }
   }
+  let cerca=false;
+  new IntersectionObserver(es=>{ cerca=es[0].isIntersecting; if(cerca){ size() } },
+    {rootMargin:'20% 0px'}).observe(hold);
+  let paso=-1;
   (function tick(){
+    requestAnimationFrame(tick);
+    if(!cerca||document.hidden) return;
     const run=Math.max(1,hh-vh);
     const p=clm((__y-top)/run);
-    const moving=p<.80;
-    const now=performance.now();
-    const due=moving && now-lastT>24;
-    if(dirty||due||Math.abs(p-last)>.0015){
-      dirty=false; last=p; lastT=now;
-      draw(p);
-      const step=p<.34?0:p<.68?1:2;
+    if(QUIETO && !dirty && Math.abs(p-last)<=.0015) return;
+    dirty=false; last=p;
+    draw(p,performance.now()/1000);
+    const step=p<.34?0:p<.68?1:2;
+    if(step!==paso){ paso=step;
       titles.forEach((t,i)=>t.classList.toggle('on',i===step));
-      subs.forEach((t,i)=>t.classList.toggle('on',i===step));
-      bars.forEach((b,i)=>{
-        const seg=clm((p-i*.34)/.34);
-        b.style.width=(seg*100).toFixed(1)+'%';
-      });
-    }
-    requestAnimationFrame(tick);
+      subs.forEach((t,i)=>t.classList.toggle('on',i===step)); }
+    bars.forEach((b,i)=>{
+      const seg=clm((p-i*.34)/.34);
+      b.style.width=(seg*100).toFixed(1)+'%';
+    });
   })();
 })();
 (function(){

@@ -116,123 +116,80 @@ di(calma.clip === 'none', 'ni tapado por una mascara');
 di(calma.tits === 0, 'y los titulares ni se marcan');
 await ctx2.close();
 
-// ── 7 · la marca de «the stack» se arma a tamano legible ──
+// ── 7 · «the stack» es un campo de cubos vivo, como el video ──
 //
-// El tercer paso de la seccion arma las teselas en la marca de Nereum: el
-// rombo y la banda blanca de su canto de abajo. (Antes eran el disco, el
-// escalon y los dos cuadros azules del logotipo anterior.) La escena se
-// dimensiona con la franja que queda entre la cabecera y el texto, asi que en
-// una pantalla ANCHA Y BAJA -donde el texto sube- esa franja se estrecha y la
-// marca encoge sola. Medido en 1523x772 salia a 84 px: con 18 teselas por
-// lado eso son 4,7 px cada una, y a ese tamano el escalon y los cuadros no
-// resuelven. Lo que se veia no era la marca, era un disco mordido. En el
-// telefono salia a 210 px y se leia perfecta, que es la prueba de que el
-// dibujo estaba bien y el tamano no.
-//
-// No se comprueba la formula, se comprueba el DIBUJO: se mide la caja de lo
-// que el lienzo pinta de verdad. Asi la prueba sigue valiendo si manana la
-// escena se dimensiona de otra manera.
-//
-// La historia del numero: con la copia sacada al margen izquierdo y metida
-// en el flujo, la marca salia a 84 px; bajando la copia con un margen, a
-// 165; devuelta la seccion a su estado CENTRADO -copia pegada al canto de
-// abajo, que es como estaba y como se ha quedado- la franja es ancha y la
-// marca sale a 315. El limite sube a 240: por debajo, alguien ha vuelto a
-// ahogar la franja, que es justo lo que no puede repetirse.
+// La seccion era un muro de cubos que se juntaba en el rombo de la marca y
+// lo hacia girar. Se pidio como el video de referencia: un campo DISPERSO de
+// cubos sueltos, cada uno girando sobre su eje, con la camara avanzando
+// entre ellos, y con nuestros colores. Se comprueba el DIBUJO, no la formula:
+// se lee lo que el lienzo pinta de verdad.
 const ctx3 = await nav.newContext({ viewport:{width:1523,height:772} });
 const w = await ctx3.newPage();
 await w.goto('http://127.0.0.1:9017/', { waitUntil:'load' }); await w.waitForTimeout(2400);
-// La caja de lo que el lienzo pinta de verdad, en el punto del recorrido que
-// se le pida. Se mide en varios sitios porque el tramo final ya no es quieto:
-// la marca gira.
-const caja = (p) => w.evaluate(async (p) => {
+const lee = (p, espera) => w.evaluate(async ({p, espera}) => {
   const sec = document.querySelector('.stack');
   const r = sec.getBoundingClientRect();
   scrollTo(0, Math.round(r.top + scrollY + p * (r.height - innerHeight)));
-  await new Promise(s => setTimeout(s, 900));
+  await new Promise(s => setTimeout(s, espera));
   const cv = document.getElementById('stkCv');
-  const c = document.createElement('canvas'); c.width = cv.width; c.height = cv.height;
-  c.getContext('2d').drawImage(cv, 0, 0);
-  const d = c.getContext('2d').getImageData(0, 0, c.width, c.height).data;
-  let y0 = 1e9, y1 = -1, x0 = 1e9, x1 = -1;
-  for (let y = 0; y < c.height; y++) for (let x = 0; x < c.width; x++) {
-    const i = (y * c.width + x) * 4;
-    // solo tesela, no el halo: el resplandor de fondo es tenue y translucido
-    if (d[i+3] < 150) continue;
-    const L = (0.2126*d[i] + 0.7152*d[i+1] + 0.0722*d[i+2]) / 255;
-    if (L < 0.30) continue;
-    if (y < y0) y0 = y; if (y > y1) y1 = y;
-    if (x < x0) x0 = x; if (x > x1) x1 = x;
+  // se lee a un cuarto de resolucion: sobra para contar manchas y colores
+  const c = document.createElement('canvas'); c.width = cv.width >> 2; c.height = cv.height >> 2;
+  const g = c.getContext('2d'); g.drawImage(cv, 0, 0, c.width, c.height);
+  const d = g.getImageData(0, 0, c.width, c.height).data;
+  // solo la franja de arriba: la de abajo la oscurece a proposito el texto
+  const alto = Math.round(c.height * 0.6);
+  let pintado = 0, azul = 0, claro = 0; const firma = [];
+  const marca = new Uint8Array(c.width * alto);
+  for (let y = 0; y < alto; y++) for (let x = 0; x < c.width; x++) {
+    const i = (y * c.width + x) * 4, a = d[i+3];
+    if (a < 60) continue;
+    pintado++; marca[y * c.width + x] = 1;
+    const R = d[i], G = d[i+1], B = d[i+2];
+    if (B > 150 && B > R * 1.6 && B > G * 1.2) azul++;
+    if (R > 150 && G > 150 && B > 150) claro++;
   }
-  const esc = c.height / cv.getBoundingClientRect().height;
-  return { alto: y1 < 0 ? 0 : Math.round((y1 - y0 + 1) / esc),
-           ancho: x1 < 0 ? 0 : Math.round((x1 - x0 + 1) / esc) };
-}, p);
+  for (let k = 0; k < d.length; k += 4 * 97) firma.push(d[k] + d[k+1] + d[k+2] + d[k+3]);
+  // cuantas manchas separadas: relleno por inundacion sobre la mascara
+  let manchas = 0; const pila = [];
+  for (let q = 0; q < marca.length; q++) {
+    if (marca[q] !== 1) continue;
+    manchas++; marca[q] = 2; pila.push(q);
+    while (pila.length) { const e = pila.pop(), ex = e % c.width;
+      for (const v of [e - 1, e + 1, e - c.width, e + c.width]) {
+        if (v < 0 || v >= marca.length) continue;
+        if ((v === e - 1 && ex === 0) || (v === e + 1 && ex === c.width - 1)) continue;
+        if (marca[v] === 1) { marca[v] = 2; pila.push(v) } } }
+  }
+  return { cubre: pintado / (c.width * alto), azul, claro, manchas, firma };
+}, {p, espera});
+const dif = (a, b) => a.firma.reduce((s, v, i) => s + (v !== b.firma[i] ? 1 : 0), 0) / a.firma.length;
 
-// Al 70 % la marca ya esta montada y todavia no ha empezado a girar: ese es
-// el momento en que se mide si se lee. Antes se media al 80, que hoy cae
-// dentro del giro y devolvia una rendija.
-const quieta = await caja(0.70);
-di(quieta.alto >= 240, 'en 1523x772 la marca del tercer paso se arma a tamano legible (' +
-   quieta.alto + ' px de alto, limite 240)');
-di(quieta.ancho >= 240, 'y no es un hilo: tambien tiene cuerpo a lo ancho (' +
-   quieta.ancho + ' px)');
-
-// El trompo. No se comprueba la formula, se comprueba que la lamina se pone
-// DE CANTO por el camino y vuelve de frente al final: si alguien quita el
-// giro, la primera salta; si lo deja a medias y la marca se queda de perfil,
-// salta la segunda.
-const canto = await caja(0.80);
-di(canto.ancho < quieta.ancho * 0.6,
-   'y a mitad de giro se pone de canto (' + canto.ancho + ' px contra ' + quieta.ancho + ')');
-const final = await caja(1.00);
-di(final.ancho >= quieta.ancho * 0.9,
-   'y acaba de frente otra vez, no de perfil (' + final.ancho + ' px)');
-
-// ── y que lo que queda NO este pixelado ──
-// Los cubos sirven para venir; lo que se queda es el logotipo liso. La
-// diferencia se mide en el CANTO: una escalera de teselas se separa de la
-// recta en media tesela, un filo vectorial no se separa de nada. Se recorre
-// el borde de arriba a la izquierda, se le ajusta una recta por minimos
-// cuadrados y se mira cuanto se aparta el punto que mas se aparta.
-const filo = await w.evaluate(async () => {
-  const sec = document.querySelector('.stack');
-  const r = sec.getBoundingClientRect();
-  scrollTo(0, Math.round(r.top + scrollY + 0.75 * (r.height - innerHeight)));
-  await new Promise(s => setTimeout(s, 900));
-  const cv = document.getElementById('stkCv');
-  const c = document.createElement('canvas'); c.width = cv.width; c.height = cv.height;
-  c.getContext('2d').drawImage(cv, 0, 0);
-  const d = c.getContext('2d').getImageData(0, 0, c.width, c.height).data;
-  const pinta = (x, y) => {
-    const i = (y * c.width + x) * 4;
-    if (d[i+3] < 150) return false;
-    return (0.2126*d[i] + 0.7152*d[i+1] + 0.0722*d[i+2]) / 255 >= 0.30;
-  };
-  let y0 = 1e9, y1 = -1;
-  for (let y = 0; y < c.height; y++) for (let x = 0; x < c.width; x++)
-    if (pinta(x, y)) { if (y < y0) y0 = y; if (y > y1) y1 = y; break; }
-  if (y1 < 0) return { n: 0, desvio: 1e9 };
-  // solo el tramo recto de arriba a la izquierda, lejos de las dos puntas
-  const ini = Math.round(y0 + (y1 - y0) * 0.18), fin = Math.round(y0 + (y1 - y0) * 0.42);
-  const P = [];
-  for (let y = ini; y <= fin; y++)
-    for (let x = 0; x < c.width; x++) if (pinta(x, y)) { P.push([x, y]); break; }
-  if (P.length < 8) return { n: P.length, desvio: 1e9 };
-  const n = P.length;
-  const sy = P.reduce((s, q) => s + q[1], 0) / n, sx = P.reduce((s, q) => s + q[0], 0) / n;
-  let num = 0, den = 0;
-  for (const q of P) { num += (q[1]-sy)*(q[0]-sx); den += (q[1]-sy)*(q[1]-sy); }
-  const m = den ? num/den : 0;
-  let peor = 0;
-  for (const q of P) peor = Math.max(peor, Math.abs(q[0] - (sx + m*(q[1]-sy))));
-  const esc = c.height / cv.getBoundingClientRect().height;
-  return { n, desvio: +(peor/esc).toFixed(2) };
-});
-di(filo.n >= 8, 'el canto de la marca se puede medir (' + filo.n + ' filas)');
-di(filo.desvio <= 3, 'y es una recta, no una escalera de teselas (se aparta ' +
-   filo.desvio + ' px, limite 3)');
+const f1 = await lee(0.30, 900);
+di(f1.manchas >= 25, 'el campo son muchos cubos sueltos (' + f1.manchas + ' manchas)');
+di(f1.cubre < 0.45, 'y disperso, no un muro: cubre el ' + Math.round(f1.cubre * 100) + ' % (tope 45)');
+di(f1.azul > 40 && f1.claro > 20, 'con nuestros azules y la plata (' + f1.azul + ' px azules, ' + f1.claro + ' claros)');
+const f2 = await lee(0.30, 700);
+di(dif(f1, f2) > 0.02, 'y esta VIVO: sin tocar el scroll, los cubos giran y la camara avanza (' +
+   Math.round(dif(f1, f2) * 100) + ' % cambia)');
+const f3 = await lee(0.70, 900);
+di(dif(f2, f3) > 0.05, 'y al bajar, la camara entra en el campo (' + Math.round(dif(f2, f3) * 100) + ' % cambia)');
 await ctx3.close();
+
+// con movimiento reducido el campo se queda quieto si nadie baja
+const ctx4 = await nav.newContext({ viewport:{width:1523,height:772}, reducedMotion:'reduce' });
+{
+  const w2 = await ctx4.newPage();
+  await w2.goto('http://127.0.0.1:9017/', { waitUntil:'load' }); await w2.waitForTimeout(1600);
+  const foto = () => w2.evaluate(async () => {
+    const sec = document.querySelector('.stack'); const r = sec.getBoundingClientRect();
+    scrollTo(0, Math.round(r.top + scrollY + 0.4 * (r.height - innerHeight)));
+    await new Promise(s => setTimeout(s, 800));
+    return document.getElementById('stkCv').toDataURL().length + ':' + document.getElementById('stkCv').toDataURL().slice(-400);
+  });
+  const q1 = await foto(), q2 = await foto();
+  di(q1 === q2, 'y con movimiento reducido, quieto mientras nadie baja');
+}
+await ctx4.close();
 
 console.log(mal ? `\n${ok} bien, ${mal} MAL` : `\n${ok}/${ok} correctas`);
 await nav.close(); srv.close();
