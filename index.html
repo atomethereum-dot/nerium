@@ -7167,7 +7167,7 @@ main>section.sx#security{background:#030409 !important;background-image:none !im
    un hueco. Ahora un script mide el conjunto y lo escala entero -con su
    margen arriba y abajo- para que quepa siempre y llene lo que debe. */
 .sx-stage.sx-encaja{padding-top:0}
-.sx-stage.sx-encaja .sx-grid{transform-origin:50% 0}
+.sx-stage.sx-encaja .sx-grid{transform-origin:50% 0;flex:none;max-width:none}
 
 /* ── la columna de la izquierda ── */
 .sx-rail{position:relative;display:flex;flex-direction:column;justify-content:space-between;padding-bottom:clamp(8px,1.1vw,20px)}
@@ -14995,25 +14995,39 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
   }
   /* ── escritorio: el conjunto se escala para caber en la pantalla ── */
   var stage=sec.querySelector('.sx-stage'), grid=sec.querySelector('.sx-grid');
+  /* ANCHO Y ALTO A LA VEZ. Escalar sin mas encogia tambien el ancho y, en un
+     portatil, el conjunto quedaba en el centro con dos huecos grandes a los
+     lados. Ahora el conjunto ocupa todo el ancho util -de lado a lado, sin
+     llegar al boton de subir- y, para que aun asi quepa en alto, se maqueta
+     mas ancho antes de escalar: las lineas se alargan, la tarjeta pierde
+     alto y la escala que hace falta es menor. Se ajusta en tres pasadas. */
+  var ocupado=false;
   function encaja(){
-    if(!stage||!grid) return;
-    if(!ANCHO.matches){ stage.classList.remove('sx-encaja'); grid.style.transform=''; return }
+    if(!stage||!grid||ocupado) return;
+    if(!ANCHO.matches){ stage.classList.remove('sx-encaja'); grid.style.transform=''; grid.style.width=''; grid.style.marginLeft=''; grid.style.marginRight=''; return }
+    ocupado=true;
     stage.classList.add('sx-encaja');
-    var vh=innerHeight, vw=innerWidth, h=grid.offsetHeight, w=grid.offsetWidth;
-    if(!h||!w) return;
-    var arriba=Math.max(28,vh*.07), abajo=Math.max(28,vh*.06);
-    var s=Math.min(1.4,(vh-arriba-abajo)/h,(vw-64)/w);
-    /* el boton de subir vive abajo a la derecha: si la tarjeta llegaria
-       debajo, o se estrecha para acabar antes que el, o acaba por encima de
-       el -lo que la deje mas grande- */
-    if(vw/2+s*w/2>vw-84){
-      var porAncho=Math.min(s,(vw-168)/w), porAlto=Math.min(s,(vh-arriba-112)/h);
-      if(porAlto>porAncho){ abajo=Math.max(abajo,112); s=porAlto } else s=porAncho;
+    var vh=innerHeight, vw=stage.clientWidth||innerWidth;
+    var arriba=Math.max(28,vh*.07), abajo=Math.max(28,vh*.06), alto=vh-arriba-abajo;
+    /* de lado a lado, dejando libre la franja del boton de subir */
+    var ancho=vw-168, L=Math.min(1700,ancho), s=1, h=0;
+    for(var k=0;k<3;k++){
+      grid.style.width=L+'px'; grid.style.marginLeft=((vw-L)/2)+'px'; grid.style.marginRight='0';
+      h=grid.offsetHeight; if(!h) break;
+      s=Math.min(1.4,alto/h,ancho/L);
+      var L2=Math.min(1700,Math.max(700,ancho/s));
+      if(Math.abs(L2-L)<2) break;
+      L=L2;
     }
-    var y=arriba+Math.max(0,(vh-arriba-abajo-s*h)/2);
+    s=Math.min(1.4,alto/h,ancho/L);
+    var y=arriba+Math.max(0,(alto-s*h)/2);
     grid.style.transform='translateY('+y.toFixed(1)+'px) scale('+s.toFixed(4)+')';
+    marca(cur);
+    ocupado=false;
   }
-  if(window.ResizeObserver && grid) new ResizeObserver(encaja).observe(grid);
+  if(window.ResizeObserver && grid){
+    new ResizeObserver(function(){ if(!ocupado) requestAnimationFrame(encaja) }).observe(grid);
+  }
   if(document.fonts && document.fonts.ready) document.fonts.ready.then(encaja);
   function modo(){
     mide(); encaja();

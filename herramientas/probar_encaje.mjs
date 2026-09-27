@@ -32,7 +32,7 @@ for(const [W,H] of VS){
   const pisa=res.some(r=>r.R>r.sL-8&&r.bot>r.sT-8);
   const bien = top >= 24 && H - bot >= 24 && !pisa && res[0].railL >= 60;
   total++; if (bien) ok++;
-  console.log('  ' + (bien ? 'ok ' : 'MAL') + ' ' + W + 'x' + H + ' · escala ' + res[0].tr + ', ' + top + ' px arriba, ' + (H - bot) + ' px abajo' + (pisa ? ', PISA EL BOTON DE SUBIR' : ''));
+  console.log('  ' + (bien ? 'ok ' : 'MAL') + ' ' + W + 'x' + H + ' · escala ' + res[0].tr + ', ' + top + ' px arriba, ' + (H - bot) + ' px abajo, lados ' + res[0].railL + '/' + (W - res[0].R) + (pisa ? ', PISA EL BOTON DE SUBIR' : ''));
   await ctx.close();
 }
 await nav.close();srv.close();
