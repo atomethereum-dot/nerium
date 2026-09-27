@@ -21,6 +21,12 @@ const srv = http.createServer((q, r) => {
   r.end(fs.readFileSync(p));
 }).listen(8987);
 const nav = await chromium.launch({ executablePath:'/opt/pw-browsers/chromium-1194/chrome-linux/chrome', args:['--no-sandbox'] });
+
+/* La ronda puede estar en espera (NRM_PRONTO en index.html: «Starts soon» y la
+   privada sin sumar). Esta prueba comprueba la CUENTA, asi que carga la pagina
+   con la espera apagada. La espera tiene su propia prueba: probar_pronto. */
+{ const nc = nav.newContext.bind(nav);
+  nav.newContext = async o => { const c = await nc(o); await c.addInitScript(() => { window.NRM_PRONTO = false }); return c } }
 let ok = 0, mal = 0;
 const masaneable = m => m.cantoCifra[1] > m.cantoCifra[0] && m.cantoBarra[1] > m.cantoBarra[0];
 const di = (b, t) => { if (b) { ok++; console.log('  ok  ' + t) } else { mal++; console.log('  MAL ' + t) } };

@@ -1430,7 +1430,11 @@
   /* Lo levantado antes de que existiera el contrato. No vive en ninguna cadena
      —es la ronda privada, cerrada fuera de aquí— así que va escrito, y encima
      se suma lo que entra por Ethereum y BNB Chain. */
-  var PRIVADA_USD = 13616000;
+  var PRIVADA_BASE = 13616000;
+  /* Con la ronda en espera (NRM_PRONTO, en index.html) no se suma la privada:
+     la barra enseña solo lo que entra por la cadena. El objetivo sigue
+     contando con ella, para que la meta no cambie. */
+  var PRIVADA_USD = window.NRM_PRONTO ? 0 : PRIVADA_BASE;
 
   var barra = document.getElementById('saleFill'),
       globo = document.getElementById('saleTip'),
@@ -1458,7 +1462,7 @@
         t += Number(e.tope * e.precioUsd / 1000000000000000000n) / 1e8;
       }
     });
-    return hay ? PRIVADA_USD + t : OBJETIVO_USD;
+    return hay ? PRIVADA_BASE + t : OBJETIVO_USD;
   }
 
   function pintarBarra() {

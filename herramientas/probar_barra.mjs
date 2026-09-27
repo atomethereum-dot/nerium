@@ -19,6 +19,12 @@ function tabla(vendidos, tope=0n){return {
  '0x3acd1572':'0x'+w(1000000000000n),'0xdd62ed3e':'0x'+w(0)};}
 
 const nav=await chromium.launch({executablePath:'/opt/pw-browsers/chromium-1194/chrome-linux/chrome',args:['--no-sandbox']});
+
+/* La ronda puede estar en espera (NRM_PRONTO en index.html: «Starts soon» y la
+   privada sin sumar). Esta prueba comprueba la CUENTA, asi que carga la pagina
+   con la espera apagada. La espera tiene su propia prueba: probar_pronto. */
+{ const nc = nav.newContext.bind(nav);
+  nav.newContext = async o => { const c = await nc(o); await c.addInitScript(() => { window.NRM_PRONTO = false }); return c } }
 const Rs=[]; const chk=(n,a,b)=>Rs.push({n,ok:String(a)===String(b),a,b});
 // Tres redes, tres tablas. Con dos, el RPC de Robinhood caia en el «else» y
 // se le servia la tabla de Ethereum: la pagina contaba las ventas de Ethereum
