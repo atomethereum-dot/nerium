@@ -1317,8 +1317,8 @@ main>section#stack{position:relative;z-index:3;margin-bottom:-200vh;pointer-even
 }
 @media(max-width:899px){
 }
-.xf{position:relative;height:158vh}
-@media(max-width:899px){.xf{height:136vh}}
+.xf{position:relative;height:340vh}
+@media(max-width:899px){.xf{height:300vh}}
 .xf-stage{position:sticky;top:0;height:100dvh;overflow:hidden;background:var(--suelo)}
 .xf-cv{position:absolute;inset:0;width:100%;height:100%;display:block}
 .xf-word{position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);z-index:2;
@@ -1830,6 +1830,7 @@ body.light .hud-band i{background:var(--blue-d)}
 @media(max-width:899px){
   .hud>i.tl,.hud>i.tr{top:calc(var(--bar) + 38px)}
 }
+.xf-txt[hidden]{display:none !important}
 .xf-txt{position:absolute;inset:0;z-index:4;pointer-events:none;
   display:flex;align-items:center;justify-content:center;
   padding:0 clamp(22px,7vw,120px);
@@ -8120,7 +8121,8 @@ main>section.sx#security{background:#030409 !important;background-image:none !im
 <section class="xf" id="xfade" data-bg="#0A0D14" data-acc="#1A7AFF"><i class="emb" aria-hidden="true" style="--emb:#0B0D13"></i>
   <div class="xf-stage" id="xfStage">
     <canvas class="xf-cv" id="xfCv"></canvas>
-    <div class="xf-txt" id="xfEsq" aria-hidden="true">
+    <!-- el rotulo de entrada se esconde: la escena es el globo -->
+    <div class="xf-txt" id="xfEsq" aria-hidden="true" hidden>
       <span class="xf-agua">Nereum</span>
       <p class="xf-tit">One chain, four layers.</p>
     </div>
@@ -11456,156 +11458,270 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
   addEventListener('load',()=>setTimeout(boot,500));
 })();
 (function(){
+  /* ══ EL GLOBO QUE ESTALLA EN CUBOS ══════════════════════════════════════
+     Antes aqui habia unas barras que se cerraban como una cortina y un vuelo
+     de cuadrados planos. Se pidio un GLOBO con sus paises -oscuro, el mar
+     negro y la tierra en gris-, con NODOS, y que al bajar la seccion estalle
+     y se vuelva cubos 3D, con el rotulo en medio del cubo.
+
+     Asi que el recorrido tiene cinco tiempos, todos funcion del scroll
+     -subiendo, se desanda-:
+       0-.42  el globo gira; los nodos laten y los arcos entre ellos llevan
+              destellos, como transacciones.
+       .40-.52 la tierra se vuelve cubos: aparecen sobre los paises mientras
+              el relleno se apaga.
+       .50-.66 estalla: los cubos salen disparados, girando, con un destello.
+       .64-.84 se reunen en las aristas y las caras de un cubo grande que gira.
+       .74-1   el rotulo, en el centro de ese cubo.
+     El mapa -d3-geo y los paises de Natural Earth- se sirve desde el propio
+     sitio y solo se pide cuando la seccion se acerca. */
   const esq=document.getElementById('xfEsq');
   const sec=document.getElementById('xfade'), stage=document.getElementById('xfStage'),
         cv=document.getElementById('xfCv');
   if(!sec||!cv)return;
   const ctx=cv.getContext('2d',{alpha:false});
-  const rnd=(a,b)=>a+Math.random()*(b-a);
-  let W=0,H=0,bars=[],raf=0,last=-1;
-  const st={n:0};
+  const clm=(v,a=0,b=1)=>Math.min(b,Math.max(a,v));
+  const sube=t=>{ t=clm(t); return t*t*(3-2*t) };
+  const dTop=nn=>{let y=0;while(nn){y+=nn.offsetTop;nn=nn.offsetParent}return y};
+  const QUIETO=matchMedia('(prefers-reduced-motion:reduce)').matches;
+  const azar=(i,k)=>{ const r=Math.sin(i*127.1+k*311.7+.5)*43758.5453; return r-Math.floor(r) };
+  let W=0,H=0,last=-1,dirty=true;
   function build(){
     const d=__dens();
     W=cv.clientWidth;H=cv.clientHeight;
     __mide(cv, W*d, H*d); ctx.setTransform(d,0,0,d,0,0);
-    st.n=Math.max(6,Math.round(W/108));
-    last=-1;
+    last=-1; dirty=true;
   }
-  const clm=(v,a=0,b=1)=>Math.min(b,Math.max(a,v));
-  const ease=t=>1-Math.pow(1-t,3);
-  const dTop=nn=>{let y=0;while(nn){y+=nn.offsetTop;nn=nn.offsetParent}return y};
-  const eOut=t=>1-Math.pow(1-t,3);
-  const PAL=[[24,59,246],[8,28,196],[28,46,140],[48,53,128],[26,25,60],[4,13,104]];
-  /* La escena mas oscura de las tres: seis azules hondos, ninguno claro, y
-     encima sobre suelo negro. Entran los mismos dos claros que en las otras
-     —es la misma lengua o no es nada—, pero con MENOS opacidad que alli: aqui
-     se pinta en modo «lighter», donde los colores se suman, y un blanco a
-     opacidad normal no seria un cubo sino una lampara. */
-  const CLAROS=[[228,234,246],[176,187,208]];
-  let vuelo=null, vt=0, vlast=0;
-  const HONDO=9;          /* profundidad del corredor */
-  function haceVuelo(){
-    vuelo=[];
-    const cuantos=W<760?100:186;
-    for(let i=0;i<cuantos;i++){
-      const cl=Math.random()<0.16;
-      vuelo.push({
-        x:(Math.random()*2-1)*1.5, y:(Math.random()*2-1)*1.5,
-        z:Math.random()*HONDO+0.35,
-        giro:Math.random()*Math.PI,
-        vg:(Math.random()*2-1)*0.5,
-        lado:0.12+Math.random()*0.30,
-        claro:cl,
-        c:cl?CLAROS[(Math.random()*CLAROS.length)|0]:PAL[(Math.random()*PAL.length)|0],
-        a:cl?0.20+Math.random()*0.30 : 0.30+Math.random()*0.7
-      });
+
+  /* ── el mapa, cuando la seccion se acerca ── */
+  let G=null, tierra=null, suelo=null, fronteras=null, reticula=null, pedido=false;
+  function carga(){
+    if(pedido) return; pedido=true;
+    const s=document.createElement('script'); s.src='assets/globo.js';
+    s.onload=()=>{
+      fetch('assets/paises-110m.json').then(r=>r.json()).then(topo=>{
+        G=window.NereumGlobo;
+        tierra=G.feature(topo,topo.objects.countries);
+        suelo=G.feature(topo,topo.objects.land);
+        fronteras=G.mesh(topo,topo.objects.countries,(a,b)=>a!==b);
+        reticula=G.geoGraticule10();
+        siembra(); dirty=true;
+      }).catch(()=>{});
+    };
+    document.head.appendChild(s);
+  }
+  if('IntersectionObserver' in window)
+    new IntersectionObserver(es=>{ if(es[0].isIntersecting) carga() },{rootMargin:'150% 0px'}).observe(sec);
+  else carga();
+
+  /* ── los nodos: plazas financieras, y los arcos que las unen ── */
+  const NODOS=[[-74,40.7],[-0.1,51.5],[8.7,50.1],[8.5,47.4],[55.3,25.2],[103.8,1.35],[114.2,22.3],
+    [139.7,35.7],[127,37.6],[-46.6,-23.5],[-99.1,19.4],[-79.4,43.7],[3.4,6.5],[28,-26.2],[72.9,19.1],
+    [151.2,-33.9],[-122.4,37.8],[2.35,48.9],[-58.4,-34.6],[36.8,-1.3],[121.5,31.2],[-87.6,41.9]];
+  const ARCOS=[[0,1],[1,2],[2,4],[4,5],[5,6],[6,7],[7,8],[0,16],[0,9],[9,18],[1,12],[12,13],
+    [4,14],[14,5],[5,15],[1,3],[0,10],[11,0],[17,1],[19,4],[20,6],[21,0],[16,7]];
+
+  /* ── la rotacion del globo, la misma que usa d3 (rotate [λ, φ]) ── */
+  const RAD=Math.PI/180;
+  let rl=0, rp=0, cdl=1, sdl=0;
+  function a3(lon,lat){                     /* → [x, y, z] con z hacia quien mira */
+    const la=lat*RAD, lo=(lon+rl)*RAD;
+    const x=Math.cos(la)*Math.cos(lo), y=Math.cos(la)*Math.sin(lo), z=Math.sin(la);
+    return [y, -(z*cdl + x*sdl), x*cdl - z*sdl];
+  }
+
+  /* ── los cubos: sobre la tierra, y los nodos en azul ── */
+  const TONES=[{h:219,s:100,l:56},{h:224,s:97,l:46},{h:216,s:88,l:38},{h:214,s:14,l:30},
+               {h:220,s:26,l:19},{h:210,s:10,l:92},{h:213,s:13,l:76},{h:218,s:100,l:62}];
+  const GRIS=[TONES[3],TONES[6],TONES[5],TONES[3],TONES[6],TONES[4]];
+  let cubos=null;
+  function siembra(){
+    /* el cubo grande es SOLO sus 12 aristas -un cubo de alambre hecho de
+       cubos-, asi que su forma se lee y el centro queda limpio para el
+       rotulo. Tantos cubos como puntos tengan las aristas. */
+    const PA=W<760?14:17, obj=[];
+    const V=[[-1,-1,-1],[1,-1,-1],[1,1,-1],[-1,1,-1],[-1,-1,1],[1,-1,1],[1,1,1],[-1,1,1]];
+    const AR=[[0,1],[1,2],[2,3],[3,0],[4,5],[5,6],[6,7],[7,4],[0,4],[1,5],[2,6],[3,7]];
+    for(const v of V) obj.push(v);
+    for(const [a,b] of AR) for(let k=1;k<PA;k++){ const t=k/PA;
+      obj.push([V[a][0]+(V[b][0]-V[a][0])*t, V[a][1]+(V[b][1]-V[a][1])*t, V[a][2]+(V[b][2]-V[a][2])*t]) }
+    const tope=obj.length-NODOS.length, tierraPts=[];
+    /* espiral de Fibonacci sobre la esfera: puntos repartidos por igual, y de
+       los que caen en tierra se toman repartidos por todo el globo */
+    const N=2200, oro=Math.PI*(3-Math.sqrt(5));
+    for(let i=0;i<N;i++){
+      const y=1-2*(i+.5)/N, r=Math.sqrt(1-y*y), th=oro*i;
+      const lon=Math.atan2(Math.sin(th)*r,Math.cos(th)*r)/RAD, lat=Math.asin(y)/RAD;
+      if(G.geoContains(suelo,[lon,lat])) tierraPts.push([lon,lat,0]);
+    }
+    const pts=[];
+    for(let k=0;k<tope;k++) pts.push(tierraPts[Math.floor(k*tierraPts.length/tope)]);
+    for(const n of NODOS) pts.push([n[0],n[1],1]);
+    /* los destinos, barajados: cada cubo viaja a un sitio cualquiera del
+       cubo grande, no al de al lado */
+    for(let i=obj.length-1;i>0;i--){ const j=Math.floor(azar(i,21)*(i+1)); const t=obj[i]; obj[i]=obj[j]; obj[j]=t }
+    cubos=pts.map((q,i)=>{
+      let ax=azar(i,5)-.5, ay=azar(i,6)-.5, az=azar(i,7)-.5; const m=Math.hypot(ax,ay,az)||1;
+      return { lon:q[0], lat:q[1], nodo:q[2]===1, obj:obj[i],
+        tono:q[2]===1?TONES[i%3===0?7:i%3===1?0:1]:GRIS[i%GRIS.length],
+        ax:ax/m, ay:ay/m, az:az/m, a0:azar(i,8)*6.28, gv:.6+azar(i,9)*1.4,
+        sale:1.1+azar(i,10)*1.7, jx:azar(i,11)-.5, jy:azar(i,12)-.5, jz:azar(i,13)-.5 };
+    });
+  }
+
+  const FACES=[
+    [[0,0,1],[[-1,-1,1],[1,-1,1],[1,1,1],[-1,1,1]]],
+    [[0,0,-1],[[1,-1,-1],[-1,-1,-1],[-1,1,-1],[1,1,-1]]],
+    [[1,0,0],[[1,-1,1],[1,-1,-1],[1,1,-1],[1,1,1]]],
+    [[-1,0,0],[[-1,-1,-1],[-1,-1,1],[-1,1,1],[-1,1,-1]]],
+    [[0,-1,0],[[-1,-1,-1],[1,-1,-1],[1,-1,1],[-1,-1,1]]],
+    [[0,1,0],[[-1,1,1],[1,1,1],[1,1,-1],[-1,1,-1]]]];
+  const LIGHT=[.34,-.42,.84];
+  const cstr=(h,s,l,a)=>'hsla('+(h|0)+','+(s|0)+'%,'+l.toFixed(1)+'%,'+a.toFixed(3)+')';
+  function giro(ax,ay,az,ang){
+    const co=Math.cos(ang), si=Math.sin(ang), t=1-co;
+    return [[co+ax*ax*t, ax*ay*t-az*si, ax*az*t+ay*si],
+            [ay*ax*t+az*si, co+ay*ay*t, ay*az*t-ax*si],
+            [az*ax*t-ay*si, az*ay*t+ax*si, co+az*az*t]];
+  }
+  const mul=(M,v)=>[M[0][0]*v[0]+M[0][1]*v[1]+M[0][2]*v[2],M[1][0]*v[0]+M[1][1]*v[1]+M[1][2]*v[2],M[2][0]*v[0]+M[2][1]*v[1]+M[2][2]*v[2]];
+  /* un cubo en (x,y,z) -px, z hacia quien mira- con perspectiva suave */
+  function cubo(cx,cy,foco,x,y,z,lado,M,tono,a){
+    const h=lado/2;
+    for(const [nrm,pts] of FACES){
+      const n=mul(M,nrm);
+      /* se ve si mira hacia la camara (que esta en z = +foco) */
+      const px=x+n[0]*h, py=y+n[1]*h, pz=z+n[2]*h;
+      if(n[0]*(-px)+n[1]*(-py)+n[2]*(foco-pz)<=0) continue;
+      const lam=clm(n[0]*LIGHT[0]+n[1]*LIGHT[1]+n[2]*LIGHT[2]), lit=.24+lam*.88;
+      ctx.beginPath();
+      for(let i=0;i<4;i++){
+        const w=mul(M,pts[i]), X=x+w[0]*h, Y=y+w[1]*h, Z=z+w[2]*h, k=foco/Math.max(foco*.2,foco-Z);
+        i?ctx.lineTo(cx+X*k,cy+Y*k):ctx.moveTo(cx+X*k,cy+Y*k);
+      }
+      ctx.closePath();
+      ctx.fillStyle=cstr(tono.h,tono.s,clm(tono.l*(.58+lit*.62)+lit*10,3,100),a); ctx.fill();
+      ctx.strokeStyle='rgba(226,236,255,'+(.16*a).toFixed(3)+')'; ctx.lineWidth=1; ctx.stroke();
     }
   }
-  function pintaVuelo(fuerza){
-    if(!vuelo)haceVuelo();
-    const ahora=performance.now()/1000;
-    const dt=Math.min(.05,(ahora-vlast)||.016); vlast=ahora; vt+=dt;
-    const cx=W/2, cy=H/2;
-    const foco=Math.min(W,H)*0.92;
-    const vel=(0.9+fuerza*3.4)*dt;
-    ctx.globalCompositeOperation='lighter';
-    /* sin lavado de fondo: el suelo de esta seccion es negro */
-    for(const c of vuelo){
-      const zAntes=c.z;
-      c.z-=vel;
-      if(c.z<0.30){                       /* ha pasado de largo: vuelve al fondo */
-        c.z+=HONDO; c.x=(Math.random()*2-1)*1.5; c.y=(Math.random()*2-1)*1.5;
+
+  function draw(p,T){
+    ctx.fillStyle='#06070A'; ctx.fillRect(0,0,W,H);
+    const cx=W/2, cy=H/2, R=Math.min(W*.42,H*.34), foco=R*3.2;
+    const globo=1-sube((p-.46)/.10);          /* el globo, hasta que es cubos */
+    const aparecen=sube((p-.40)/.08);         /* los cubos sobre la tierra */
+    const estalla=sube((p-.50)/.16);
+    const reune=sube((p-.64)/.20);
+    const fogon=Math.exp(-Math.pow((p-.53)/.035,2));
+    rl=-20+(QUIETO?0:T*5)+p*110; rp=-16; cdl=Math.cos(rp*RAD); sdl=Math.sin(rp*RAD);
+
+    /* ── el globo ── */
+    if(globo>.01){
+      ctx.save(); ctx.globalAlpha=globo;
+      /* la atmosfera: un halo azul fino alrededor */
+      const at=ctx.createRadialGradient(cx,cy,R*.9,cx,cy,R*1.35);
+      at.addColorStop(0,'rgba(46,106,245,.22)'); at.addColorStop(1,'rgba(46,106,245,0)');
+      ctx.fillStyle=at; ctx.beginPath(); ctx.arc(cx,cy,R*1.35,0,6.2832); ctx.fill();
+      /* el mar: oscuro, con un poco de volumen */
+      const mar=ctx.createRadialGradient(cx-R*.35,cy-R*.4,R*.1,cx,cy,R);
+      mar.addColorStop(0,'#111827'); mar.addColorStop(1,'#06080E');
+      ctx.fillStyle=mar; ctx.beginPath(); ctx.arc(cx,cy,R,0,6.2832); ctx.fill();
+      if(G){
+        const proj=G.geoOrthographic().scale(R).translate([cx,cy]).rotate([rl,rp]).clipAngle(90);
+        const path=G.geoPath(proj,ctx);
+        ctx.beginPath(); path(reticula); ctx.strokeStyle='rgba(160,180,220,.05)'; ctx.lineWidth=.6; ctx.stroke();
+        /* la tierra en gris, que se apaga al volverse cubos */
+        ctx.beginPath(); path(tierra);
+        const gt=ctx.createLinearGradient(cx-R,cy-R,cx+R,cy+R);
+        gt.addColorStop(0,'#4A515E'); gt.addColorStop(1,'#2A2F39');
+        ctx.globalAlpha=globo*(1-aparecen*.85); ctx.fillStyle=gt; ctx.fill();
+        ctx.globalAlpha=globo;
+        ctx.beginPath(); path(fronteras); ctx.strokeStyle='rgba(12,15,22,.9)'; ctx.lineWidth=.7; ctx.stroke();
+        /* los arcos: suben sobre la superficie y los recorre un destello */
+        const interp=G.geoInterpolate;
+        for(let i=0;i<ARCOS.length;i++){
+          const A=NODOS[ARCOS[i][0]], B=NODOS[ARCOS[i][1]], f=interp(A,B);
+          const alto=.08+G.geoDistance(A,B)*.12, trazo=[];
+          for(let k=0;k<=24;k++){
+            const t=k/24, q=f(t), v=a3(q[0],q[1]), s=1+alto*Math.sin(Math.PI*t);
+            const vis=v[2]>0 || s*s*(1-v[2]*v[2])>1;
+            trazo.push(vis?[cx+v[0]*R*s, cy+v[1]*R*s]:null);
+          }
+          ctx.strokeStyle='rgba(70,130,255,.35)'; ctx.lineWidth=1; ctx.beginPath();
+          let dentro=false;
+          for(const q of trazo){ if(!q){dentro=false;continue} dentro?ctx.lineTo(q[0],q[1]):ctx.moveTo(q[0],q[1]); dentro=true }
+          ctx.stroke();
+          if(!QUIETO){
+            const u=((T*.35+i*.137)%1), q=trazo[Math.round(u*24)];
+            if(q){ ctx.fillStyle='rgba(190,215,255,.9)'; ctx.beginPath(); ctx.arc(q[0],q[1],1.8,0,6.2832); ctx.fill() }
+          }
+        }
       }
-      c.giro+=c.vg*dt;
-      const k=foco/c.z, kA=foco/zAntes;
-      const px=cx+c.x*k, py=cy+c.y*k;
-      const lado=Math.max(1.4, c.lado*k*0.30);
-      if(px<-lado*2||px>W+lado*2||py<-lado*2||py>H+lado*2)continue;
-      const cerca=1-Math.min(1,(c.z-0.30)/HONDO);
-      let a=c.a*cerca*cerca*fuerza;
-      if(a<0.012)continue;
-      const ax=cx+c.x*kA, ay=cy+c.y*kA;
-      const dx=px-ax, dy=py-ay;
-      if(dx*dx+dy*dy>4){
-        ctx.strokeStyle='rgba('+c.c.join(',')+','+(a*0.55).toFixed(3)+')';
-        ctx.lineWidth=Math.max(1,lado*0.6);
-        ctx.beginPath(); ctx.moveTo(ax,ay); ctx.lineTo(px,py); ctx.stroke();
+      /* el borde del globo */
+      ctx.strokeStyle='rgba(46,134,255,.35)'; ctx.lineWidth=1; ctx.beginPath(); ctx.arc(cx,cy,R,0,6.2832); ctx.stroke();
+      /* los nodos, latiendo */
+      for(let i=0;i<NODOS.length;i++){
+        const v=a3(NODOS[i][0],NODOS[i][1]); if(v[2]<=0.02) continue;
+        const x=cx+v[0]*R, y=cy+v[1]*R, lat=QUIETO?0:(T*.8+i*.23)%1;
+        ctx.fillStyle='rgba(46,134,255,'+(.25*(1-lat)).toFixed(3)+')';
+        ctx.beginPath(); ctx.arc(x,y,3+lat*9,0,6.2832); ctx.fill();
+        ctx.fillStyle='#8FB6FF'; ctx.beginPath(); ctx.arc(x,y,2.2,0,6.2832); ctx.fill();
       }
-      ctx.save();
-      ctx.translate(px,py);
-      ctx.rotate(c.giro);
-      ctx.fillStyle='rgba('+c.c.join(',')+','+a.toFixed(3)+')';
-      ctx.fillRect(-lado/2,-lado/2,lado,lado);
-      ctx.fillStyle='rgba(255,255,255,'+(a*0.5).toFixed(3)+')';
-      ctx.fillRect(-lado/2,-lado/2,lado,Math.max(1,lado*0.16));
       ctx.restore();
     }
-    ctx.globalCompositeOperation='source-over';
-  }
-  function draw(p){
-    ctx.fillStyle='#06070A';ctx.fillRect(0,0,W,H);
-    const entrada=clm((0.34-p)/0.26);
-    if(esq)esq.style.opacity=entrada.toFixed(3);
-    const n=st.n;
-    const close=clm(p/.80);
-    for(let i=0;i<n;i++){
-      const w=W/n, x=i*w;
-      const d=Math.abs(i-(n-1)/2)/Math.max(1,(n-1)/2);
-      const t0=(1-d)*.34;
-      const k=Math.min(1, eOut(clm((close-t0)/(1-t0)))*1.06);
-      if(k<=0)continue;
-      const h=H*k, down=i%2===0, y=down?0:H-h;
-      ctx.fillStyle='#000000';
-      ctx.fillRect(x-.5,y,w+1,h);
-      const fadeEdge=1-clm((k-.86)/.14);
-      if(fadeEdge>.02){
-        const ey=down?y+h:y;
-        const g=ctx.createLinearGradient(0,ey-(down?28:0),0,ey+(down?0:28));
-        g.addColorStop(down?0:1,'rgba(157,159,164,0)');
-        g.addColorStop(down?1:0,'rgba(157,159,164,'+(.85*fadeEdge).toFixed(3)+')');
-        ctx.fillStyle=g;ctx.fillRect(x,down?ey-28:ey,w,28);
-        ctx.fillStyle='rgba(230,242,255,'+(.92*fadeEdge).toFixed(3)+')';
-        ctx.fillRect(x,ey-(down?1.5:0),w,1.5);
+
+    /* ── los cubos: sobre la tierra, estallando, y el cubo grande ── */
+    if(cubos && aparecen>0){
+      /* que el cubo, girado y con perspectiva, quepa a lo ancho y a lo alto */
+      const big=Math.min(R*.88,W*.26,H*.22), Mb=giro(.35,.9,.25,(QUIETO?0:T*.22)+p*2.2), lista=[];
+      for(let i=0;i<cubos.length;i++){
+        const c=cubos[i], v=a3(c.lon,c.lat);
+        /* en la superficie, antes de estallar solo se ven los de la cara visible */
+        let x=v[0]*R, y=v[1]*R, z=v[2]*R;
+        const d=c.sale*estalla;
+        x=x*(1+d)+c.jx*R*estalla; y=y*(1+d)+c.jy*R*estalla; z=z*(1+d)+c.jz*R*estalla;
+        const t=mul(Mb,c.obj); x+=(t[0]*big-x)*reune; y+=(t[1]*big-y)*reune; z+=(t[2]*big-z)*reune;
+        if(estalla<.02 && v[2]<0) continue;
+        lista.push({c,x,y,z});
+      }
+      lista.sort((a,b)=>a.z-b.z);
+      const paso=2*big/(W<760?14:17), lado0=R*(W<760?.07:.055), ladoF=paso*.6;
+      for(const q of lista){
+        const c=q.c, lado=(c.nodo?1.4:1)*(lado0+(ladoF-lado0)*reune)*(.35+.65*aparecen);
+        const M=giro(c.ax,c.ay,c.az,c.a0+(QUIETO?0:T*c.gv*(.3+estalla*1.2))+estalla*3*c.gv);
+        cubo(cx,cy,foco,q.x,q.y,q.z,lado,M,c.tono,aparecen);
       }
     }
-    const lleno=clm((p-.46)/.20);   /* antes .58: quedaba un tramo negro al 50-60% */
-    if(lleno>.01)pintaVuelo(lleno);
-    stage.classList.toggle('lit', p>.46 && p<.95);
-    stage.classList.toggle('go', p<.80);
+
+    /* ── el destello de la explosion ── */
+    if(fogon>.01){
+      const g=ctx.createRadialGradient(cx,cy,0,cx,cy,R*1.8);
+      g.addColorStop(0,'rgba(220,232,255,'+(.55*fogon).toFixed(3)+')');
+      g.addColorStop(.35,'rgba(46,106,245,'+(.28*fogon).toFixed(3)+')');
+      g.addColorStop(1,'rgba(46,106,245,0)');
+      ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+    }
+    stage.classList.toggle('lit', p>.74);
+    stage.classList.toggle('go', p<.9);
   }
-  /* EL SITIO DE LA SECCION NO CAMBIA AL BAJAR, ASI QUE NO SE PREGUNTA POR EL.
-     Este bucle abria cada cuadro con «dTop(sec)» y «sec.offsetHeight»: dos
-     lecturas de maquetacion por cuadro, y en un cuadro donde otros ya han
-     escrito estilos cada una obliga al navegador a rehacerla entera. Medido,
-     entre las dos escenas que hacian esto salian 2.467 lecturas de
-     «offsetTop» en una bajada. Se miden con el resto, en «build», que ya se
-     rehace al cambiar de tamaño, y se añade «nrm:remide» por si algo de
-     arriba crece. */
+
   let topSec=0, runSec=1;
   const sitio=()=>{ topSec=dTop(sec); runSec=Math.max(1,sec.offsetHeight-innerHeight) };
   build(); sitio();
-  addEventListener('resize',()=>{build();sitio();last=-1},{passive:true});
+  addEventListener('resize',()=>{ const era=W<760; build(); sitio(); if((W<760)!==era && G) siembra() },{passive:true});
   addEventListener('nrm:remide',sitio,{passive:true});
-  /* EL BUCLE SOLO CORRE CON LA ESCENA A LA VISTA. Antes arrancaba al cargar
-     y no paraba nunca, y fuera de su tramo -antes de llegar y despues de
-     irse- el avance se queda clavado en 0 o en 1, que es justo donde la
-     condicion de abajo manda repintar SIEMPRE. O sea: repintaba en cada
-     cuadro cuando menos falta hacia. Medido, seguia pintando 6.000 veces
-     por segundo con la escena ya fuera de pantalla. */
+  addEventListener('load',()=>setTimeout(()=>{sitio();dirty=true},500));
+  /* el bucle solo corre con el lienzo a la vista */
   let corre=false;
   function tick(){
     if(!corre) return;
-    const top=topSec, run=runSec;
-    const p=clm((__y-top)/run);
-    if(Math.abs(p-last)>.0015 || p>.46 || p<.30){last=p;draw(p)}
-    raf=requestAnimationFrame(tick);
+    const p=clm((__y-topSec)/runSec);
+    if(!QUIETO || dirty || Math.abs(p-last)>.0015){ last=p; dirty=false; draw(p,performance.now()/1000) }
+    requestAnimationFrame(tick);
   }
   new IntersectionObserver(es=>es.forEach(e=>{
     const antes=corre; corre=e.isIntersecting;
-    if(corre&&!antes){ last=-1; raf=requestAnimationFrame(tick); }
-  /* el LIENZO y no la seccion: el lienzo va anclado y la seccion es mas
-     alta, asi que la seccion seguia asomando cuando el lienzo ya se habia
-     ido, y con ella el bucle -7.800 llamadas por segundo sin verse- */
+    if(corre&&!antes){ last=-1; requestAnimationFrame(tick); }
   }),{rootMargin:'0px'}).observe(cv);
 })();
 (function(){
