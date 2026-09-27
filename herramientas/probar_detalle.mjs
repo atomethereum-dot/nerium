@@ -142,7 +142,8 @@ const lee = (p, espera) => w.evaluate(async ({p, espera}) => {
   const marca = new Uint8Array(c.width * alto);
   for (let y = 0; y < alto; y++) for (let x = 0; x < c.width; x++) {
     const i = (y * c.width + x) * 4, a = d[i+3];
-    if (a < 60) continue;
+    /* el lienzo pinta su propio fondo -#0A0D14-: cuenta lo que se aparta de el */
+    if (a < 60 || Math.abs(d[i] - 10) + Math.abs(d[i+1] - 13) + Math.abs(d[i+2] - 20) < 30) continue;
     pintado++; marca[y * c.width + x] = 1;
     const R = d[i], G = d[i+1], B = d[i+2];
     if (B > 150 && B > R * 1.6 && B > G * 1.2) azul++;

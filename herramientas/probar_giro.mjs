@@ -716,31 +716,41 @@ di(cuadros[1].desv >= 0.010 || cuadros[2].desv >= 0.010,
     return { centro: px(.5, .5), esquinas: [px(.03, .03), px(.97, .03), px(.03, .97), px(.97, .97)], bg };
   }, p);
   const luz = c => (0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2]) / 255;
-  const antes = await tunel(0.30), dentro = await tunel(0.70), fin = await tunel(0.797);
+  const antes = await tunel(0.30), dentro = await tunel(0.66);
   di(luz(dentro.centro) > luz(antes.centro) + 0.25,
      'en el tunel se enciende la luz del fondo (' + luz(antes.centro).toFixed(2) + ' → ' + luz(dentro.centro).toFixed(2) + ')');
-  const lejos = fin.esquinas.concat([fin.centro]).map(c => Math.max(...[0, 1, 2].map(k => Math.abs(c[k] - fin.bg[k]))));
-  di(Math.max(...lejos) <= 14 && fin.centro[3] > 240,
-     'y se sale al azul de la ronda: el final del tunel es el mismo color con el que empieza la compra (' +
-     fin.bg.slice(0, 3).join(',') + ', se aparta ' + Math.max(...lejos) + ')');
-  /* Y se CAE en la compra: sin pantalla azul vacia. La compra sube por debajo
-     del escenario y, al acabar el azul, el escenario se desvanece; lo que
-     asoma por encima de su borde es azul, no una franja negra. */
-  const cae = await pg.evaluate(async () => {
+  /* LA LLEGADA NO ES UN CORTE. La dapp sube por debajo del escenario y el
+     tunel se disuelve sobre ella siguiendo su borde -la mascara del lienzo
+     va en --b-, con una linea de luz por el borde. Por encima del borde
+     sigue el tunel: nunca queda nada vacio arriba. */
+  const llega = await pg.evaluate(async () => {
     const h = document.getElementById('stack'), top0 = h.getBoundingClientRect().top + scrollY;
-    const run = h.offsetHeight - innerHeight;
+    const run = h.offsetHeight - innerHeight, st = document.querySelector('.stk-stage');
     const mira = async p => { scrollTo(0, Math.round(top0 + p * run)); await new Promise(s => setTimeout(s, 700));
-      const st = document.querySelector('.stk-stage'), t = document.querySelector('#presale h2') || document.querySelector('#presale');
-      return { op: +getComputedStyle(st).opacity, tit: Math.round(t.getBoundingClientRect().top),
-               fondo: getComputedStyle(h).getPropertyValue('--stk-fondo').trim(),
-               borde: Math.round(document.getElementById('presale').getBoundingClientRect().top), vh: innerHeight } };
-    return { antes: await mira(0.72), medio: await mira(0.80), fin: await mira(0.83) };
+      const borde = document.getElementById('presale').getBoundingClientRect().top;
+      const t = document.querySelector('#presale h2') || document.getElementById('presale');
+      const cv = document.getElementById('stkCv'), c = document.createElement('canvas');
+      c.width = cv.width >> 3; c.height = cv.height >> 3;
+      const g = c.getContext('2d'); g.drawImage(cv, 0, 0, c.width, c.height);
+      /* lo que pinta el lienzo por encima del borde: si es tunel, varia */
+      const alto = Math.max(1, Math.min(c.height, Math.floor(c.height * borde / innerHeight) - 2));
+      const d = g.getImageData(0, 0, c.width, alto).data; let m = 0, m2 = 0, n = 0;
+      for (let k = 0; k < d.length; k += 4) { const L = d[k] + d[k+1] + d[k+2]; m += L; m2 += L * L; n++ }
+      const desv = Math.sqrt(Math.max(0, m2 / n - (m / n) ** 2));
+      return { borde: Math.round(borde), b: parseFloat(st.style.getPropertyValue('--b')),
+               velo: parseFloat(st.style.getPropertyValue('--velo')) || 0, op: +getComputedStyle(st).opacity,
+               tit: Math.round(t.getBoundingClientRect().top), vh: innerHeight, desv: Math.round(desv) } };
+    return { lejos: await mira(0.60), medio: await mira(0.78), fin: await mira(0.87) };
   });
-  di(cae.antes.op > 0.99, 'mientras dura el tunel, el escenario tapa la compra que ya esta debajo (opacidad ' + cae.antes.op + ')');
-  di(cae.fin.op < 0.1 && cae.fin.borde <= 0 && cae.fin.tit > 0 && cae.fin.tit < cae.fin.vh * 0.7,
-     'y al acabar se cae directo en la compra: el escenario se ha ido, la compra llena la pantalla desde arriba y su titular esta a la vista (' + cae.fin.tit + ' px)');
-  di(cae.medio.borde > 0 && /0e3ac4/i.test(cae.medio.fondo),
-     'y lo que asoma por encima del borde de la compra es el azul de la ronda, no una franja negra (' + cae.medio.fondo + ')');
+  di(llega.lejos.b >= llega.lejos.vh,
+     'mientras dura el tunel, tapa entero la dapp que sube por debajo (borde a ' + llega.lejos.b + ' px)');
+  di(Math.abs(llega.medio.b - llega.medio.borde) <= 4 && llega.medio.velo > 0.5 && llega.medio.borde > 0,
+     'a mitad de la llegada el tunel se disuelve siguiendo el borde de la dapp, con la linea de luz encendida (' +
+     llega.medio.b + ' px, luz ' + llega.medio.velo + ')');
+  di(llega.medio.desv > 12,
+     'y por encima del borde sigue el tunel, no un azul vacio (variacion ' + llega.medio.desv + ')');
+  di(llega.fin.b <= 0 && llega.fin.velo < 0.05 && llega.fin.tit > 0 && llega.fin.tit < llega.fin.vh,
+     'y al final se esta en la dapp: el tunel se ha disuelto y el titular de la compra esta en pantalla (' + llega.fin.tit + ' px)');
 }
 /* ── 3 · la cifra, la misma en los cuatro sitios ──────────────────────────── */
 const cifras = await pg.evaluate(() => {
