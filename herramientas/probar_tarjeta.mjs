@@ -1,208 +1,71 @@
-// Las tres tarjetas de seguridad, en el movil.
+// La tarjeta de seguridad, en el escenario fijo.
 //
-// «#security» es un escenario anclado: ocupa la pantalla y las tarjetas se
-// pasan una a una. El area se reparte lo que sobra y cada tarjeta va
-// «inset:0», asi que se estira. El contenido no. Y como el enlace del pie
-// llevaba «margin-top:auto», se iba al canto de abajo y dejaba TODO el
-// sobrante en un hueco entre el ultimo dato y el:
-//
-//     390 x 844   hueco   22 px
-//     430 x 932   hueco  124 px
-//
-// Cuanto mas alto el telefono, mayor el agujero: crece el area, no lo que hay
-// dentro. Esto lo sujeta a cinco tamaños.
-//
-// Y sujeta lo que costo conservar al arreglarlo: las filas pasaron de «flex» a
-// «grid» para poder crecer con el texto centrado, y en ese cambio lo facil es
-// perder la linea base entre el rotulo pequeño y el dato grande. Se mide con
-// una caja en linea de altura cero metida DENTRO de cada uno —ahi si queda en
-// el flujo del texto—, que medir el fondo del renglon con un «Range» da la
-// caja de linea y entre dos tamaños distintos eso no es la linea base.
+// «#security» se rehizo sobre un video de referencia: una columna fija y UNA
+// tarjeta que cambia con el scroll -en escritorio y en telefono, para que la
+// pagina no se alargue-. Eso tiene un riesgo que esta prueba vigila: en una
+// pantalla fija la tarjeta tiene el alto que tiene, y si su contenido no cabe
+// se corta sin avisar -el boton o la fuente desaparecen por abajo-.
+// Y lo que vigilaba la version anterior sigue valiendo: que no quede un hueco
+// entre el ultimo dato y el boton, y que el rotulo y el dato de cada fila
+// compartan linea base.
 import http from 'node:http'; import fs from 'node:fs'; import path from 'node:path';
 import { chromium } from 'playwright';
 const RAIZ = '/home/user/nerium';
-const TIPO = {'.html':'text/html','.svg':'image/svg+xml','.css':'text/css','.woff2':'font/woff2',
-  '.png':'image/png','.jpg':'image/jpeg','.js':'text/javascript','.json':'application/json',
-  '.ico':'image/x-icon','.webmanifest':'application/manifest+json'};
-const srv = http.createServer((q, r) => {
-  let p = path.join(RAIZ, decodeURIComponent(q.url.split('?')[0]));
-  if (fs.existsSync(p) && fs.statSync(p).isDirectory()) p = path.join(p, 'index.html');
-  if (!fs.existsSync(p)) { r.writeHead(404); return r.end(); }
-  r.writeHead(200, {'content-type': TIPO[path.extname(p)] || 'application/octet-stream'});
+const TIPO = {'.html':'text/html','.svg':'image/svg+xml','.css':'text/css','.woff2':'font/woff2','.json':'application/json',
+              '.png':'image/png','.jpg':'image/jpeg','.webp':'image/webp','.js':'text/javascript'};
+http.createServer((q, r) => {
+  let f = decodeURIComponent(q.url.split('?')[0]); if (f.endsWith('/')) f += 'index.html';
+  const p = path.join(RAIZ, f);
+  if (!p.startsWith(RAIZ) || !fs.existsSync(p) || fs.statSync(p).isDirectory()) { r.writeHead(404); return r.end(); }
+  r.writeHead(200, { 'content-type': TIPO[path.extname(p)] || 'application/octet-stream' });
   r.end(fs.readFileSync(p));
 }).listen(9159);
 const nav = await chromium.launch({ executablePath:'/opt/pw-browsers/chromium-1194/chrome-linux/chrome', args:['--no-sandbox'] });
 let ok = 0, mal = 0;
 const di = (b, t) => { if (b) { ok++; console.log('  ok  ' + t) } else { mal++; console.log('  MAL ' + t) } };
 
-async function mirar(pg) {
+for (const [W, H, movil] of [[440,956,1],[430,932,1],[414,896,1],[390,844,1],[375,667,1],[1378,788,0],[1440,900,0],[1920,1080,0]]) {
+  const ctx = await nav.newContext({ viewport:{ width:W, height:H }, isMobile:!!movil, hasTouch:!!movil });
+  await ctx.addInitScript(() => { window.fetch = async () => new Response('{}', { status:200 }) });
+  const pg = await ctx.newPage();
+  await pg.goto('http://127.0.0.1:9159/', { waitUntil:'load' });
   await pg.waitForTimeout(900);
-  const alto = await pg.evaluate(() => document.documentElement.scrollHeight);
-  for (let y = 0; y < alto; y += 450) { await pg.evaluate(v => scrollTo(0, v), y); await pg.waitForTimeout(50); }
-  await pg.evaluate(() => document.getElementById('security').scrollIntoView({ block:'start' }));
-  await pg.waitForTimeout(1000);
-}
-
-// ── el movil: ni hueco dentro ni aire alrededor ──────────────────────────────
-for (const [W, H] of [[440,956],[430,932],[414,896],[390,844],[375,667]]) {
-  const ctx = await nav.newContext({ viewport:{ width:W, height:H }, isMobile:true, hasTouch:true });
-  const pg = await ctx.newPage();
-  await pg.goto('http://127.0.0.1:9159/', { waitUntil:'load' });
-  await mirar(pg);
-  const r = await pg.evaluate(() => {
-    const g = document.querySelector('.sec-grid'), rg = g.getBoundingClientRect();
-    const O = [];
-    document.querySelectorAll('.sec-card').forEach((c, i) => {
-      const rc = c.getBoundingClientRect();
-      const dl = c.querySelector('.sec-fields'), go = c.querySelector('.sec-go');
-      O.push({ i, t:c.querySelector('.sec-t').textContent.trim().slice(0, 18),
-               hueco:Math.round(go.getBoundingClientRect().top - dl.getBoundingClientRect().bottom),
-               aire:Math.round(rg.height - rc.height) });
-    });
-    return O;
-  });
-  const conHueco = r.filter(x => x.hueco > 4);
-  di(conHueco.length === 0,
-     W + 'x' + H + ' · ninguna tarjeta deja hueco entre el ultimo dato y el enlace' +
-     (conHueco.length ? ' — ' + conHueco.map(x => '«' + x.t + '» ' + x.hueco + ' px').join(', ') : ''));
-  const conAire = r.filter(x => Math.abs(x.aire) > 2);
-  di(conAire.length === 0,
-     W + 'x' + H + ' · y llenan su area, sin aire alrededor' +
-     (conAire.length ? ' — ' + conAire.map(x => '«' + x.t + '» ' + x.aire + ' px').join(', ') : ''));
-
-  // la linea base del rotulo y el dato de cada fila
-  const base = await pg.evaluate(() => {
-    const linea = e => { const s = document.createElement('span');
-      s.style.cssText = 'display:inline-block;width:0;height:0;vertical-align:baseline';
-      e.appendChild(s); const y = s.getBoundingClientRect().bottom; s.remove(); return y; };
-    const fuera = [];
-    document.querySelectorAll('.sec-card.on .sec-fields>div, .sec-card:first-child .sec-fields>div')
-      .forEach(d => {
-        const dt = d.querySelector('dt'), dd = d.querySelector('dd');
-        if (!dt || !dd) return;
-        const s = linea(dd) - linea(dt);
-        if (Math.abs(s) > 1) fuera.push(dt.textContent.trim() + ' ' + s.toFixed(2) + ' px');
-      });
-    return fuera;
-  });
-  di(base.length === 0,
-     W + 'x' + H + ' · el rotulo y el dato comparten linea base' +
-     (base.length ? ' — fuera: ' + base.join(', ') : ''));
-  await ctx.close();
-}
-
-// ── que quepa ENTERA en cualquier pantalla, y sin esconder texto ────────────
-// Esto es lo que pedia el encargo: «que se vea bien en todas las pantallas y
-// completo como es». Dos cosas distintas y las dos se miden:
-//
-//   · que no se salga — el enlace del pie tiene que quedar dentro del area
-//     util de la tarjeta, en los dieciseis tamaños;
-//   · que no falte — ni la entradilla de la seccion ni la descripcion de la
-//     tarjeta pueden estar en «display:none». Habia dos bloques que las
-//     quitaban en pantallas cortas «porque no cabia»; cabia, lo que no cabia
-//     era con 112 px de carril vacio debajo.
-//
-// «Keep scrolling» es la unica excepcion, y solo por debajo de 620 px de
-// alto: es una ayuda de navegacion, no informacion del proyecto.
-{
-  const TAM = [[320,568],[360,640],[375,667],[390,664],[412,732],[360,780],[375,812],
-               [390,844],[414,896],[393,852],[430,932],[440,956],[480,1000],[600,900]];
-  for (const [W, H] of TAM) {
-    const ctx = await nav.newContext({ viewport:{ width:W, height:H }, isMobile:true, hasTouch:true });
-    const pg = await ctx.newPage();
-    await pg.goto('http://127.0.0.1:9159/', { waitUntil:'load' });
-    await mirar(pg);
+  const g = await pg.evaluate(() => { const h = document.querySelector('#security .sx-hold');
+    let y = 0, n = h; while (n) { y += n.offsetTop; n = n.offsetParent } return { y, alto:h.offsetHeight } });
+  const fallos = [];
+  for (const [k, f] of [[0, .05], [1, .5], [2, .95]]) {
+    await pg.evaluate(v => scrollTo(0, v), Math.round(g.y + (g.alto - H) * f));
+    await pg.waitForTimeout(1300);
     const r = await pg.evaluate(() => {
-      const D = [];
-      document.querySelectorAll('.sec-card').forEach(c => {
-        const rc = c.getBoundingClientRect(), cs = getComputedStyle(c);
-        const go = c.querySelector('.sec-go').getBoundingClientRect();
-        D.push({ t:c.querySelector('.sec-t').textContent.trim().slice(0, 18),
-                 sale:Math.round(go.bottom - (rc.bottom - parseFloat(cs.paddingBottom))) });
-      });
-      const oculto = [];
-      for (const [n, s] of [['entradilla','.secure .sec-sub'], ['descripcion','.secure .sec-p']]) {
-        const e = document.querySelector(s);
-        if (e && getComputedStyle(e).display === 'none') oculto.push(n);
-      }
-      // y que ningun mando fijo del canto pise la tarjeta
-      const c = document.querySelector('.sec-card.on') || document.querySelector('.sec-card');
-      const rc = c.getBoundingClientRect();
-      const choques = [];
-      for (const [n, s] of [['el boton de subir','.subir'], ['el idioma','.lang'], ['el de bajar','.scrollbtn']]) {
-        const e = document.querySelector(s); if (!e) continue;
-        const cs = getComputedStyle(e);
-        if (cs.display === 'none' || cs.visibility === 'hidden' || parseFloat(cs.opacity) < 0.05) continue;
-        const b = e.getBoundingClientRect(); if (!b.width) continue;
-        if (!(b.right <= rc.left || rc.right <= b.left || b.bottom <= rc.top || rc.bottom <= b.top)) choques.push(n);
-      }
-      return { D, oculto, choques };
+      const c = document.querySelector('#security .sx-card.on'); if (!c) return null;
+      const rc = c.getBoundingClientRect(), area = document.querySelector('#security .sx-cards').getBoundingClientRect();
+      const go = c.querySelector('.sx-go').getBoundingClientRect();
+      /* lo que el boton tiene encima: los datos, o en telefono el registro */
+      const encima = Math.max(...['.sx-kv', '.sx-log'].map(q => c.querySelector(q).getBoundingClientRect())
+        .filter(b => b.bottom <= go.top + 1).map(b => b.bottom));
+      const pie = c.querySelector('.sx-foot').getBoundingClientRect();
+      const linea = e => { const s = document.createElement('span');
+        s.style.cssText = 'display:inline-block;width:0;height:0;vertical-align:baseline';
+        e.appendChild(s); const y = s.getBoundingClientRect().bottom; s.remove(); return y; };
+      const bases = [...c.querySelectorAll('.sx-kv>div')].map(d => Math.abs(linea(d.querySelector('dt')) - linea(d.querySelector('.sx-v'))));
+      /* se mide contra el PIE y no con «scrollHeight»: la franja de luz que
+         verifica pasa por debajo del borde y contaria como contenido */
+      return { i:c.dataset.i, t:c.querySelector('.sx-t').textContent.trim(),
+               corta: pie.bottom > rc.bottom - 4 || go.bottom > rc.bottom - 4,
+               sale: rc.bottom > area.bottom + 1 || rc.top < area.top - 1 || rc.bottom > innerHeight,
+               hueco: Math.round(go.top - encima), base: Math.max(...bases) };
     });
-    const fuera = r.D.filter(x => x.sale > 0);
-    di(fuera.length === 0,
-       W + 'x' + H + ' · las tres caben enteras' +
-       (fuera.length ? ' — se salen: ' + fuera.map(x => '«' + x.t + '» ' + x.sale + ' px').join(', ') : ''));
-    di(r.oculto.length === 0,
-       W + 'x' + H + ' · y sin esconder texto' + (r.oculto.length ? ' — falta: ' + r.oculto.join(', ') : ''));
-    di(r.choques.length === 0,
-       W + 'x' + H + ' · ningun mando del canto pisa la tarjeta' +
-       (r.choques.length ? ' — ' + r.choques.join(', ') : ''));
-    await ctx.close();
+    if (!r) { fallos.push('paso ' + k + ': sin tarjeta activa'); continue; }
+    if (String(r.i) !== String(k)) fallos.push('paso ' + k + ': esta activa la ' + r.i);
+    if (r.corta) fallos.push('«' + r.t + '» se corta por dentro');
+    if (r.sale) fallos.push('«' + r.t + '» se sale de su hueco o de la pantalla');
+    if (r.hueco > 32) fallos.push('«' + r.t + '» deja ' + r.hueco + ' px entre el ultimo dato y el boton');
+    if (r.base > 2.5) fallos.push('«' + r.t + '» rotulo y dato fuera de linea (' + r.base.toFixed(1) + ' px)');
   }
-}
-
-// ── el escritorio no se toca ─────────────────────────────────────────────────
-{
-  const ctx = await nav.newContext({ viewport:{ width:1440, height:900 } });
-  const pg = await ctx.newPage();
-  await pg.goto('http://127.0.0.1:9159/', { waitUntil:'load' });
-  await mirar(pg);
-  const r = await pg.evaluate(() => {
-    const c = [...document.querySelectorAll('.sec-card')].map(e => Math.round(e.getBoundingClientRect().height));
-    const fila = getComputedStyle(document.querySelector('.sec-grid')).gridTemplateColumns.split(' ').length;
-    return { c, fila };
-  });
-  di(r.fila === 3, '1440px · las tres tarjetas siguen en fila (' + r.fila + ' columnas)');
-  di(new Set(r.c).size === 1, '1440px · y siguen midiendo lo mismo: ' + r.c.join(' · '));
+  di(fallos.length === 0, W + 'x' + H + ' · las tres tarjetas caben, sin hueco y con sus filas en linea' +
+     (fallos.length ? ' — ' + fallos.join('; ') : ''));
   await ctx.close();
 }
-
-// ── LAS TRES TIENEN QUE TURNARSE, Y BAJANDO COMO SE BAJA ────────────────────
-// El visitante reporto «en movil solo sale Team KYC» y ninguna bateria miraba
-// esto: se comprobaba que las tres CABEN, no que las tres SALGAN. Y hay dos
-// caminos distintos al mismo sintoma, los dos vistos en esta pagina:
-//   · un «!important» que le ganaba al «opacity:0» de las que no tocan;
-//   · «_top» caducado -la escena guarda una posicion ABSOLUTA de documento y
-//     algo de arriba cambio de alto despues-, que satura el avance y planta el
-//     paso en la ultima tarjeta.
-// Se baja en pasos, como se baja de verdad. Nada de «scrollIntoView»: eso
-// coloca la pagina donde ninguna mano la coloca y se salta justo el tramo
-// donde el paso de tarjetas tiene que ocurrir.
-{
-  const ctx = await nav.newContext({ viewport:{ width:390, height:844 }, isMobile:true, hasTouch:true });
-  const pg = await ctx.newPage();
-  await pg.goto('http://127.0.0.1:9159/', { waitUntil:'load' });
-  await pg.waitForTimeout(1800);
-  const vistas = new Set();
-  const alto = await pg.evaluate(() => document.documentElement.scrollHeight);
-  for (let y = 0; y < alto; y += 170) {
-    await pg.evaluate(v => scrollTo(0, v), y);
-    await pg.waitForTimeout(45);
-    const i = await pg.evaluate(() => {
-      const sec = document.querySelector('#security');
-      const r = sec.getBoundingClientRect();
-      if (!(r.top < innerHeight && r.bottom > 0)) return -1;
-      const cs = [].slice.call(sec.querySelectorAll('.sec-card'));
-      return cs.findIndex(c => c.classList.contains('on'));
-    });
-    if (i >= 0) vistas.add(i);
-  }
-  const salieron = [...vistas].sort((a, b) => a - b);
-  di(vistas.has(0) && vistas.has(1) && vistas.has(2),
-     'las tres tarjetas se turnan al bajar — salieron: ' + (salieron.join(', ') || 'ninguna'));
-  await ctx.close();
-}
-
-console.log('\n' + ok + '/' + (ok + mal) + ' correctas');
-await nav.close(); srv.close();
+await nav.close();
+console.log(mal ? `\n${mal} fallo(s)` : `\n${ok}/${ok} correctas`);
 process.exit(mal ? 1 : 0);

@@ -91,6 +91,15 @@ const MEDIR = () => {
        prensa: en el video es tinta negra y da 1,07:1. Se pidio en blanco,
        asi que la excepcion se retira en vez de quedarse de adorno —una
        excepcion que no protege nada es por donde se cuela lo siguiente. */
+    /* Seguridad, copiada del video, lleva dos estados apagados A PROPOSITO:
+       · la columna marca la prueba que se esta viendo y deja las otras dos
+         en gris: es un indicador de pasos, y el paso que no esta activo es un
+         componente inactivo -WCAG 1.4.3 lo exime-;
+       · el registro de la tarjeta, antes de verificarse, es un fantasma al
+         13 %: el texto de verdad es el que se escribe despues, con su OK.
+         Es el «antes» de una animacion, igual que lo que esta a medio
+         desvanecer. */
+    if (el.closest('.sx-it:not(.on), .sx-log li.pend')) return;
     const trazo = c.webkitTextStrokeWidth;
     if (trazo && parseFloat(trazo) > 0) return;
     let op = 1, n2 = el;

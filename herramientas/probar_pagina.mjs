@@ -32,13 +32,15 @@ await pg.waitForTimeout(2600);
    sin degradados y sin grano-, copiado del video. Las demas siguen teniendo
    que llevar luz y grano, que es lo que esto defiende. Que la prensa sea
    plana se afirma en «probar_prensa». */
-const papel = await pg.evaluate(() => ['.paper', '.paper2', '.secure', '.sale', '.tkp', '.join']
+/* Y «.secure» tampoco: seguridad se rehizo sobre otro video y su fondo es
+   el negro plano de la referencia, #0B0C11, como la prensa. */
+const papel = await pg.evaluate(() => ['.paper', '.paper2', '.sale', '.tkp', '.join']
   .map(s => { const e = document.querySelector(s); if (!e) return null;
     const c = getComputedStyle(e);
     return { sel: s, claro: e.classList.contains('claro'), col: c.backgroundColor,
              img: c.backgroundImage, capas: c.backgroundImage.split(/,(?![^()]*\))/).length }; })
   .filter(Boolean));
-di(papel.length >= 6, 'estan las secciones claras (' + papel.length + ')');
+di(papel.length >= 5, 'estan las secciones claras (' + papel.length + ')');
 di(papel.every(p => p.img !== 'none'),
    'ninguna es ya un color plano: todas llevan luz encima');
 di(papel.every(p => /feTurbulence/.test(p.img)),
@@ -99,7 +101,9 @@ di(papel.every(p => /gradient/.test(p.img)),
    perfecto y el resultado no, si algo se le ponia encima. Se fotografia una
    seccion clara y se mide ahi. */
 const suelo = await (async () => {
-  const sec = await pg.$('.secure');
+  /* el suelo de metal se fotografia en Tokenomics: seguridad era la que se
+     usaba y ya es negro plano */
+  const sec = await pg.$('.tkp');
   const caja = sec ? await sec.boundingBox() : null;
   if (!caja) return { rango: 0, rincon: 1, resto: 0, frio: 0 };
   await pg.evaluate(y => scrollTo(0, y), Math.round(caja.y + 40));
@@ -111,7 +115,7 @@ const suelo = await (async () => {
      hay texto; midiendo lo pintado hay que quitarlo a mano. Se usa
      «visibility», que no toca la maquetacion ni los fondos. */
   const tapa = await pg.addStyleTag({ content:
-    '.secure .wrap,.secure .sec-head,.secure .sec-grid,.secure .sec-stage>*{visibility:hidden!important}' });
+    '.tkp *{visibility:hidden!important}' });
   await pg.waitForTimeout(350);
   const b64 = (await pg.screenshot()).toString('base64');
   await pg.evaluate(() => { const s=[...document.querySelectorAll('style')].pop(); if(s) s.remove(); });

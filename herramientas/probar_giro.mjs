@@ -194,8 +194,14 @@ const suelos = await pg.evaluate(() => {
     const s = document.getElementById(id) || document.querySelector('.' + id);
     return { css: getComputedStyle(s).backgroundColor, dice: s.getAttribute('data-bg') };
   };
+  /* La que va DESPUES de seguridad se busca: estaba escrita «token», y desde
+     que Seed Round volvio a verse la vecina de verdad es Seed Round -azul, que
+     es justo lo que hay detras en el video de referencia-. Escribirla a mano es
+     comparar dos secciones que no se tocan. */
+  let v = document.getElementById('security').nextElementSibling;
+  while (v && (v.tagName !== 'SECTION' || v.hidden || getComputedStyle(v).display === 'none')) v = v.nextElementSibling;
   return { network: lee('network'), press: lee('press'),
-           security: lee('security'), token: lee('token'),
+           security: lee('security'), tras: { css: getComputedStyle(v).backgroundColor, dice: v.getAttribute('data-bg'), id: v.id },
            team: lee('team'), join: lee('join') };
 });
 /* Lee hex Y rgb(): la primera version tiraba de match(/\d+/g) para las dos, y
@@ -209,7 +215,7 @@ const rgb01 = t => {
 };
 const claro01 = t => { const m = rgb01(t);
                        return (0.2126*m[0] + 0.7152*m[1] + 0.0722*m[2]) / 255 };
-const PEGADAS = [['network','press'], ['security','token'], ['team','join']];
+const PEGADAS = [['network','press'], ['security','tras'], ['team','join']];
 for (const [a, b] of PEGADAS) {
   /* Se compara por RAZON y no por diferencia. Con los suelos claros de antes
      -#E4EAF4 contra #D6DEEE- el salto absoluto de luminancia era 0,03 y se

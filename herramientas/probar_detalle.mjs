@@ -47,7 +47,7 @@ const abre = await pg.evaluate(() => {
   /* El de SEGURIDAD, no el primero que haya: desde que Garantias tiene su
      titular, «.sec-h» a secas devuelve el de la seccion anterior, que a esta
      altura de la pagina sigue —con razon— tapado. */
-  const h = document.querySelector('#security .sec-h');
+  const h = document.querySelector('#security h2');
   return { vis: h.classList.contains('vis'), clip: getComputedStyle(h).clipPath };
 });
 di(abre.vis, 'al llegar a la seccion, el titular se descubre');

@@ -29,7 +29,10 @@ await pg.goto('http://127.0.0.1:9133/', { waitUntil:'load' });
 await pg.waitForTimeout(2600);
 
 const f = await pg.evaluate(() => {
-  const s = document.querySelector('.secure'), c = getComputedStyle(s);
+  /* la seccion clara se busca: estaba escrita «.secure», y seguridad se rehizo
+     en negro. Vale la primera clara que se vea. */
+  const s = [...document.querySelectorAll('main>section.claro')].find(x => !x.hidden && getComputedStyle(x).display !== 'none'),
+        c = getComputedStyle(s);
   const r = s.getBoundingClientRect();
   return { img:c.backgroundImage, size:c.backgroundSize, rep:c.backgroundRepeat,
            ancho:Math.round(r.width) };
@@ -47,7 +50,7 @@ const f = await pg.evaluate(() => {
    vale igual si manana el suelo vuelve a ser un bitmap, un degradado o otra
    cosa. */
 {
-  const sec = await pg.$('.secure');
+  const sec = await pg.evaluateHandle(() => [...document.querySelectorAll('main>section.claro')].find(x => !x.hidden && getComputedStyle(x).display !== 'none') || null).then(h => h.asElement());
   const caja = sec ? await sec.boundingBox() : null;
   di(!!caja, 'hay una seccion clara en la que mirar el suelo');
   if (caja) {

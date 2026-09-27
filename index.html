@@ -7141,20 +7141,22 @@ window.__mide = function(cv, w, h){
    topes, para que a cualquier ancho guarde las mismas proporciones.
    Colores leidos del video en crudo:
      fondo #0B0C11 · blanco #F9FAFD · gris del titular #767B8F
-     entradilla #B0AFBE · etiquetas #707483 · valores #F2F3F8
+     entradilla #B0AFBE · etiquetas #7B7F90 · valores #F2F3F8
      verde #42E69A (sello, aro) · verde de estado #7CF3B8 · azul #5382FF */
 main>section.sx#security{background:#0B0C11 !important;background-image:none !important;color:#F2F3F8;
   padding:clamp(80px,8.5vw,140px) 0 clamp(40px,4vw,70px) !important;height:auto !important;box-shadow:none}
 #security .wrap.sx-in{width:min(1400px,100% - 6.4vw)}
 .sx-head{position:relative;z-index:1}
-.sx-h{font-family:var(--f);font-weight:600;font-size:clamp(46px,6.85vw,118px);line-height:.92;
-  letter-spacing:-.058em;color:#F9FAFD;max-width:7.4em;margin:clamp(14px,1.4vw,22px) 0 0}
+/* la LETRA DE LA PRENSA: Switzer ligera en lo grande -como «What they are
+   writing about the chain.»- y normal en lo mediano -como sus filas- */
+.sx-h{font-family:var(--f);font-weight:300;font-size:clamp(34px,6.16vw,104px);line-height:.92;
+  letter-spacing:-.052em;color:#F9FAFD;max-width:7.4em;margin:clamp(14px,1.4vw,22px) 0 0}
 .sx-h .sx-gris{color:#767B8F}
 .sx-sub{font-size:clamp(16px,1.52vw,22px);line-height:1.8;color:#B0AFBE;max-width:29.6em;
   margin:clamp(20px,2.4vw,40px) 0 0;letter-spacing:-.005em}
 
 /* el escenario: la columna y la tarjeta quedan fijas mientras se baja */
-.sx-hold{position:relative;height:calc(100vh + 180vh);margin-top:clamp(36px,4.4vw,70px)}
+.sx-hold{position:relative;height:calc(100vh + 130vh);margin-top:clamp(36px,4.4vw,70px)}
 .sx-stage{position:sticky;top:0;height:100vh;display:flex;align-items:flex-start;
   padding-top:max(0px,calc((100vh - 790px)/2));box-sizing:border-box}
 .sx-grid{display:grid;grid-template-columns:31% 69%;align-items:stretch}
@@ -7168,13 +7170,13 @@ main>section.sx#security{background:#0B0C11 !important;background-image:none !im
 .sx-it{display:grid;grid-template-columns:clamp(28px,2.7vw,40px) 1fr;row-gap:4px;cursor:default}
 .sx-it .sx-n{grid-row:1;font-family:var(--m);font-style:normal;font-size:clamp(11px,.95vw,14px);letter-spacing:.06em;
   color:#40434E;align-self:center;transition:color .5s}
-.sx-it b{grid-column:2;font-family:var(--f);font-weight:600;font-size:clamp(22px,2.1vw,32px);line-height:1.05;
+.sx-it b{grid-column:2;font-family:var(--f);font-weight:400;font-size:clamp(22px,2.1vw,32px);line-height:1.05;
   letter-spacing:-.04em;color:#6C6D72;transition:color .5s}
 .sx-it>span{grid-column:2;font-size:clamp(13px,1.16vw,17px);color:#494B55;letter-spacing:-.005em;transition:color .5s}
 #security .sx-it em{grid-column:2;font-style:normal;display:flex;align-items:center;gap:10px;margin-top:clamp(6px,.7vw,10px);
   font-family:var(--m);font-size:clamp(11px,.98vw,14px);letter-spacing:.14em;text-transform:uppercase;color:#3A6557 !important;transition:color .5s}
 .sx-it em i{width:6px;height:6px;border-radius:50%;background:currentColor;transition:box-shadow .5s}
-.sx-it.on .sx-n{color:#456FD7}
+.sx-it.on .sx-n{color:#5A83EC}
 .sx-it.on b{color:#FFFFFF}
 .sx-it.on>span{color:#B9BAC4}
 #security .sx-it.on em{color:#7CF3B8 !important}
@@ -7208,7 +7210,7 @@ main>section.sx#security{background:#0B0C11 !important;background-image:none !im
   background:linear-gradient(180deg,rgba(70,100,230,0) 0%,rgba(84,112,236,.16) 50%,rgba(150,172,255,.5) 90%,rgba(236,241,255,.9) 100%)}
 
 .sx-top{display:flex;justify-content:space-between;align-items:center;gap:16px}
-.sx-cat{font-family:var(--m);font-size:clamp(11px,.98vw,14px);letter-spacing:.12em;text-transform:uppercase;color:#707483}
+.sx-cat{font-family:var(--m);font-size:clamp(11px,.98vw,14px);letter-spacing:.12em;text-transform:uppercase;color:#7B7F90}
 .sx-pill{display:inline-flex;align-items:center;gap:9px;padding:.5em 1em;border-radius:999px;
   font-family:var(--m);font-size:clamp(11px,.98vw,14px);letter-spacing:.12em;text-transform:uppercase;color:#99C9B4;
   border:1px solid rgba(66,230,154,.3);background:rgba(66,230,154,.05)}
@@ -7218,14 +7220,14 @@ main>section.sx#security{background:#0B0C11 !important;background-image:none !im
 .sx-main{display:flex;flex-direction:column;min-width:0}
 .sx-ic{display:block;margin-left:-4px}
 .sx-ic svg{display:block;width:clamp(44px,4.3vw,62px);height:auto;fill:none;stroke:#5382FF;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
-.sx-t{font-family:var(--f);font-weight:600;font-size:clamp(34px,3.85vw,60px);line-height:.98;letter-spacing:-.05em;
+.sx-t{font-family:var(--f);font-weight:300;font-size:clamp(34px,3.85vw,60px);line-height:.98;letter-spacing:-.045em;
   color:#F9FAFD;margin:clamp(12px,1.35vw,20px) 0 0;max-width:7.5em}
 #security .sx-p{font-size:clamp(15px,1.38vw,20px);line-height:1.58;color:#A9A9B3 !important;margin:clamp(14px,1.5vw,22px) 0 0;letter-spacing:-.005em}
 .sx-kv{margin:clamp(12px,1.4vw,20px) 0 0}
 .sx-kv>div{display:flex;justify-content:space-between;align-items:center;gap:16px;
   min-height:clamp(40px,3.74vw,56px);border-bottom:1px solid rgba(255,255,255,.07)}
-#security .sx-kv dt{color:#707483 !important;font-family:var(--m);font-size:clamp(11px,.98vw,14px);letter-spacing:.12em;text-transform:uppercase;color:#707483}
-#security .sx-kv dd{margin:0;text-align:right;font-weight:600;font-size:clamp(14px,1.3vw,19px);letter-spacing:-.02em;color:#F2F3F8 !important}
+#security .sx-kv dt{color:#7B7F90 !important;font-family:var(--m);font-size:clamp(11px,.98vw,14px);letter-spacing:.12em;text-transform:uppercase;color:#7B7F90}
+#security .sx-kv dd{margin:0;text-align:right;font-weight:400;font-size:clamp(14px,1.3vw,19px);letter-spacing:-.021em;color:#F2F3F8 !important}
 .sx-v,.sx-l{position:relative;display:inline-block}
 .sx-f,.sx-lf{position:absolute;inset:0;white-space:pre;pointer-events:none}
 .sx-f{text-align:right;white-space:nowrap;right:0;left:auto}
@@ -7235,7 +7237,7 @@ main>section.sx#security{background:#0B0C11 !important;background-image:none !im
 .sx-l.teclea>.sx-lf{color:#E0E1E6;white-space:normal}
 .sx-go{display:inline-flex;align-items:center;gap:1em;align-self:flex-start;margin-top:clamp(14px,1.3vw,20px);
   padding:.56em 1.3em;border-radius:999px;border:1px solid rgba(255,255,255,.16);color:#F4F5F9;
-  font-weight:600;font-size:clamp(14px,1.3vw,19px);letter-spacing:-.025em;text-decoration:none;
+  font-weight:400;font-size:clamp(14px,1.3vw,19px);letter-spacing:-.021em;text-decoration:none;
   transition:border-color .3s,background .3s}
 #security .sx-go i{font-style:normal;color:#F4F5F9 !important;font-weight:400}
 .sx-go:hover{border-color:rgba(255,255,255,.4);background:rgba(255,255,255,.04)}
@@ -7247,7 +7249,7 @@ main>section.sx#security{background:#0B0C11 !important;background-image:none !im
 .sx-arco{font-family:var(--m);font-size:11.5px;letter-spacing:.2em;fill:#42E69A}
 .sx-gira{transform-origin:100px 100px;animation:sxGira 26s linear infinite}
 @keyframes sxGira{to{transform:rotate(360deg)}}
-.sx-tag{font-family:var(--f);font-weight:600;font-size:27px;letter-spacing:-.02em;fill:#fff}
+.sx-tag{font-family:var(--f);font-weight:400;font-size:27px;letter-spacing:-.02em;fill:#fff}
 .sx-chk{fill:none;stroke:#42E69A;stroke-width:5.5;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:1;stroke-dashoffset:1;
   transition:stroke-dashoffset .5s cubic-bezier(.65,0,.35,1) .35s}
 .sx-sello.on .sx-chk{stroke-dashoffset:0}
@@ -7262,28 +7264,68 @@ main>section.sx#security{background:#0B0C11 !important;background-image:none !im
 .sx-log li.pend>i{color:rgba(79,117,220,.25)}
 .sx-log li.pend>b{opacity:0}
 .sx-foot{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;margin-top:clamp(18px,2vw,30px);
-  font-family:var(--m);font-size:clamp(10.5px,.98vw,14px);letter-spacing:.12em;text-transform:uppercase;color:#707483}
+  font-family:var(--m);font-size:clamp(10.5px,.98vw,14px);letter-spacing:.12em;text-transform:uppercase;color:#7B7F90}
 .sx-3p{color:#5BE3A5}
 
-/* ── telefono y tableta: sin escenario fijo, las tres una debajo de otra ── */
+/* ── telefono y tableta: EL MISMO ESCENARIO FIJO, en compacto ──
+   Apiladas eran tres pantallas y media de pagina. Fijas, la tarjeta se queda
+   quieta y el scroll la cambia, como en escritorio. Arriba la columna se
+   vuelve tres pestañas con su marcador debajo; la tarjeta se reordena para
+   caber en la pantalla: el sello pasa a la esquina, el registro va detras de
+   los datos y el boton al final. */
 @media (max-width:899px){
-  .sx-h{font-size:clamp(40px,11.2vw,72px)}
-  .sx-hold{height:auto;margin-top:36px}
-  .sx-stage{position:relative;height:auto;display:block}
-  .sx-grid{display:flex;flex-direction:column-reverse;height:auto;gap:28px}
-  .sx-rail{display:block;padding:0}
-  .sx-list{display:none}
-  .sx-cards{display:flex;flex-direction:column;gap:18px}
-  .sx-card{position:relative;opacity:1;visibility:visible;transform:none;filter:none;
-    padding:24px 20px 22px;border-radius:28px}
-  .sx-card.sale{opacity:1;filter:none}
-  .sx-body{display:flex;flex-direction:column;margin-top:18px}
-  .sx-side{margin-top:24px}
-  .sx-sello{width:150px;margin-top:0}
-  .sx-log{margin-top:20px}
-  .sx-foot{flex-direction:column;gap:8px}
-  .sx-cat{font-size:10px;letter-spacing:.08em}
-  .sx-pill{white-space:nowrap;font-size:10px;letter-spacing:.08em;flex:none}
+  .sx-h{letter-spacing:-.042em;line-height:1.02}
+  .sx-hold{height:calc(100svh + 120svh);margin-top:28px}
+  .sx-stage{height:100svh;padding:10px 0 calc(var(--hud-b,14px) + 52px);align-items:stretch}
+  .sx-grid{display:flex;flex-direction:column;width:100%;gap:12px;height:100%}
+  .sx-rail{display:block;padding:0;flex:none}
+  .sx-list{flex-direction:row;gap:0;margin:0;padding:0;border-left:0;border-bottom:1px solid rgba(255,255,255,.08)}
+  .sx-bar{top:auto;bottom:-1px;left:0;height:1px !important;width:0;
+    transition:transform .6s cubic-bezier(.16,.84,.26,1),width .6s cubic-bezier(.16,.84,.26,1)}
+  .sx-it{flex:1;grid-template-columns:auto 1fr;column-gap:8px;row-gap:2px;padding:0 0 10px}
+  .sx-it b{font-size:17px}
+  .sx-it .sx-n{font-size:10px}
+  .sx-it>span{display:none}
+  #security .sx-it em{grid-column:1 / -1;margin-top:2px;font-size:9px;letter-spacing:.1em;gap:6px}
+  .sx-it em i{width:5px;height:5px}
+  .sx-cnt{display:none}
+  /* la tarjeta mide lo que su contenido y se centra en el hueco: estirada a
+     toda la altura dejaba un vacio entre el boton y la fuente */
+  .sx-cards{flex:1;min-height:0;display:grid;align-items:center}
+  .sx-card{grid-area:1/1;max-height:100%;padding:16px 16px 14px;border-radius:24px}
+  .sx-top{gap:10px}
+  .sx-cat{font-size:9.5px;letter-spacing:.08em}
+  .sx-pill{white-space:nowrap;font-size:9.5px;letter-spacing:.08em;flex:none;padding:.45em .85em}
+  .sx-body{display:flex;flex-direction:column;margin-top:12px;min-height:0}
+  .sx-main,.sx-side{display:contents}
+  .sx-ic svg{width:34px}
+  .sx-t{font-size:clamp(26px,7.6vw,32px);margin-top:8px;max-width:calc(100% - 92px)}
+  .sx-sello{position:absolute;top:50px;right:14px;width:80px;margin:0}
+  .sx-arco{font-size:13px}
+  #security .sx-p{font-size:13.5px;line-height:1.45;margin-top:8px}
+  .sx-kv{margin-top:8px}
+  .sx-kv>div{min-height:31px}
+  #security .sx-kv dt{font-size:10px}
+  #security .sx-kv dd{font-size:13.5px}
+  .sx-log{order:5;margin-top:10px}
+  .sx-log li{padding:5px 0;font-size:10.5px;letter-spacing:.02em}
+  .sx-go{order:6;margin-top:10px;font-size:13.5px;padding:.5em 1.1em}
+  .sx-foot{margin-top:14px;flex-direction:column;gap:4px;font-size:9px;letter-spacing:.08em}
+}
+/* pantallas bajas: fuera lo que se puede perder sin perder la prueba */
+@media (max-width:899px) and (max-height:760px){
+  .sx-ic{display:none}
+  .sx-sello{top:40px;width:70px}
+  /* sin icono, un titular de una linea deja el parrafo bajo el sello: el
+     titular guarda el alto del sello */
+  .sx-t{min-height:64px}
+  #security .sx-p{font-size:12.5px;line-height:1.4}
+  .sx-kv>div{min-height:27px}
+  .sx-log li{padding:3px 0}
+  .sx-foot .sx-3p{display:none}
+}
+@media (max-width:899px) and (max-height:620px){
+  #security .sx-p{display:none}
 }
 @media (prefers-reduced-motion:reduce){
   .sx-card,.sx-card.on,.sx-card.sale{transition:opacity .3s ease;transform:none !important;filter:none !important}
@@ -14758,9 +14800,10 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
 </script>
 <script>
 /* ══ 03 SECURITY · LAS TRES PRUEBAS ═════════════════════════════════════════
-   Escritorio: la columna y la tarjeta quedan fijas y el scroll pasa de una
-   prueba a la siguiente. La que sale se DESENFOCA donde esta; la que entra
-   sube desde abajo enfocandose. Telefono: las tres una debajo de otra.
+   La columna y la tarjeta quedan fijas y el scroll pasa de una prueba a la
+   siguiente -en escritorio y en telefono, para que la pagina no se alargue-.
+   La que sale se DESENFOCA donde esta; la que entra sube desde abajo
+   enfocandose. En telefono la columna es una fila de tres pestañas.
    Cada tarjeta, al entrar, se verifica delante de quien la mira:
      · una franja de luz la barre de arriba abajo, y a su paso los datos de la
        tabla se descifran -cifras al azar que se asientan de izquierda a
@@ -14823,7 +14866,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
     vivas=vivas.filter(function(v){
       var c=v.c, t=ahora-v.t0, k=cards.indexOf(c);
       if(t>=T_BARRE && !v.barrio){ v.barrio=true;
-        if(ANCHO.matches && c.classList.contains('on')) marca(k);
+        if(c.classList.contains('on')) marca(k);
         try{ c.__scan.animate([{transform:'translateY(-100%)',opacity:1},{transform:'translateY('+(c.offsetHeight*1.02)+'px)',opacity:1}],
           {duration:T_FRANJA,easing:'cubic-bezier(.45,0,.25,1)'}) }catch(e){} }
       /* los datos, cuando la franja pasa por su fila */
@@ -14852,7 +14895,10 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
   function marca(k){
     items.forEach(function(it,i){ it.classList.toggle('on',i===k) });
     var it=items[k]; if(!it||!bar) return;
-    bar.style.height=it.offsetHeight+'px'; bar.style.transform='translateY('+it.offsetTop+'px)';
+    /* en escritorio el marcador baja por la columna; en telefono corre por
+       debajo de las pestañas */
+    if(ANCHO.matches){ bar.style.width=''; bar.style.height=it.offsetHeight+'px'; bar.style.transform='translateY('+it.offsetTop+'px)' }
+    else { bar.style.height=''; bar.style.width=it.offsetWidth+'px'; bar.style.transform='translateX('+it.offsetLeft+'px)' }
   }
 
   /* ── escritorio: el scroll elige la tarjeta ── */
@@ -14869,14 +14915,12 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
     cur=k; verifica(nueva);
   }
   function alScroll(){
-    if(!ANCHO.matches) return;
     var p=(scrollY-top)/rec, k=p<.34?0:p<.67?1:2;
     muestra(k);
   }
   function modo(){
     mide();
-    if(ANCHO.matches){ cards.forEach(function(c,i){ c.classList.toggle('on',i===cur) }); marca(cur) }
-    else cards.forEach(function(c){ c.classList.remove('sale','desde-arriba') });
+    cards.forEach(function(c,i){ c.classList.toggle('on',i===cur) }); marca(cur);
   }
   addEventListener('scroll',alScroll,{passive:true});
   addEventListener('resize',function(){ modo(); alScroll() },{passive:true});
@@ -14885,19 +14929,12 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
   if(ANCHO.addEventListener) ANCHO.addEventListener('change',modo);
   modo();
 
-  /* la primera se verifica al llegar a la seccion; en telefono, cada una al
-     asomar un tercio */
+  /* la primera se verifica al llegar a la seccion */
   if('IntersectionObserver' in window){
     new IntersectionObserver(function(es){
-      es.forEach(function(e){ if(!e.isIntersecting) return;
-        if(ANCHO.matches){ if(!arrancada){ arrancada=true; mide(); verifica(cards[cur]) } }
-      });
+      es.forEach(function(e){ if(!e.isIntersecting || arrancada) return;
+        arrancada=true; mide(); marca(cur); verifica(cards[cur]) });
     },{threshold:.35}).observe(sec.querySelector('.sx-stage'));
-    var ioM=new IntersectionObserver(function(es){
-      es.forEach(function(e){ if(ANCHO.matches||!e.isIntersecting) return; var c=e.target;
-        if(!c.__hecho && !vivas.some(function(v){ return v.c===c })) verifica(c) });
-    },{threshold:.35});
-    cards.forEach(function(c){ ioM.observe(c) });
   } else cards.forEach(final);
 })();
 </script>
