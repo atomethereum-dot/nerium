@@ -7160,6 +7160,14 @@ main>section.sx#security{background:#030409 !important;background-image:none !im
 .sx-stage{position:sticky;top:0;height:100vh;display:flex;align-items:flex-start;
   padding-top:max(0px,calc((100vh - 790px)/2));box-sizing:border-box}
 .sx-grid{display:grid;grid-template-columns:31% 69%;align-items:stretch}
+/* ESCRITORIO: EL CONJUNTO ENCAJA EN LA PANTALLA. La columna y la tarjeta
+   median lo mismo en un portatil de 768 de alto que en un monitor de 1440: en
+   el primero la tarjeta tocaba el borde de arriba, se cortaba por abajo y
+   quedaba bajo el boton de subir; en el segundo flotaba pequeña en medio de
+   un hueco. Ahora un script mide el conjunto y lo escala entero -con su
+   margen arriba y abajo- para que quepa siempre y llene lo que debe. */
+.sx-stage.sx-encaja{padding-top:0}
+.sx-stage.sx-encaja .sx-grid{transform-origin:50% 0}
 
 /* ── la columna de la izquierda ── */
 .sx-rail{position:relative;display:flex;flex-direction:column;justify-content:space-between;padding-bottom:clamp(8px,1.1vw,20px)}
@@ -14985,8 +14993,30 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
     var p=(scrollY-top)/rec, k=p<.34?0:p<.67?1:2;
     muestra(k);
   }
+  /* ── escritorio: el conjunto se escala para caber en la pantalla ── */
+  var stage=sec.querySelector('.sx-stage'), grid=sec.querySelector('.sx-grid');
+  function encaja(){
+    if(!stage||!grid) return;
+    if(!ANCHO.matches){ stage.classList.remove('sx-encaja'); grid.style.transform=''; return }
+    stage.classList.add('sx-encaja');
+    var vh=innerHeight, vw=innerWidth, h=grid.offsetHeight, w=grid.offsetWidth;
+    if(!h||!w) return;
+    var arriba=Math.max(28,vh*.07), abajo=Math.max(28,vh*.06);
+    var s=Math.min(1.4,(vh-arriba-abajo)/h,(vw-64)/w);
+    /* el boton de subir vive abajo a la derecha: si la tarjeta llegaria
+       debajo, o se estrecha para acabar antes que el, o acaba por encima de
+       el -lo que la deje mas grande- */
+    if(vw/2+s*w/2>vw-84){
+      var porAncho=Math.min(s,(vw-168)/w), porAlto=Math.min(s,(vh-arriba-112)/h);
+      if(porAlto>porAncho){ abajo=Math.max(abajo,112); s=porAlto } else s=porAncho;
+    }
+    var y=arriba+Math.max(0,(vh-arriba-abajo-s*h)/2);
+    grid.style.transform='translateY('+y.toFixed(1)+'px) scale('+s.toFixed(4)+')';
+  }
+  if(window.ResizeObserver && grid) new ResizeObserver(encaja).observe(grid);
+  if(document.fonts && document.fonts.ready) document.fonts.ready.then(encaja);
   function modo(){
-    mide();
+    mide(); encaja();
     cards.forEach(function(c,i){ c.classList.toggle('on',i===cur) }); marca(cur);
   }
   addEventListener('scroll',alScroll,{passive:true});
