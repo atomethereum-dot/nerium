@@ -1321,6 +1321,12 @@ main>section#stack{position:relative;z-index:3;margin-bottom:-200vh;pointer-even
 @media(max-width:899px){.xf{height:380vh}}
 .xf-stage{position:sticky;top:0;height:100dvh;overflow:hidden;background:var(--suelo)}
 .xf-cv{position:absolute;inset:0;width:100%;height:100%;display:block}
+/* CINE: una vineta que oscurece los bordes y un grano de pelicula muy fino,
+   por encima del lienzo y por debajo del rotulo */
+.xf-stage::after{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;
+  background:radial-gradient(ellipse 75% 70% at 50% 50%,rgba(0,0,0,0) 55%,rgba(0,0,0,.62) 100%),var(--grano-claro,none);
+  background-repeat:no-repeat,repeat;opacity:.95}
+.xf-stage.lit .xf-word{text-shadow:0 0 18px rgba(200,220,255,.35)}
 .xf-word{position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);z-index:2;
   text-align:center;pointer-events:none;font-family:var(--m);font-size:clamp(10px,1.1vw,12px);
   letter-spacing:.42em;text-transform:uppercase;color:rgba(255,255,255,.0);
@@ -11370,7 +11376,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
      se llena hasta la cifra, luego la linea de abajo. Y la flecha de seguir
      bajando se ve hasta casi el final del tramo. */
   const ronda=document.getElementById('stkRonda'), escena=cv.parentElement;
-  let rondaP=-1, flecha=null;
+  let rondaP=-1, flecha=null, oculto=false;
   const compra=document.getElementById('presale');
   function rotulo(p,borde){
     if(Math.abs(p-rondaP)<.0005) return; rondaP=p;
@@ -11406,7 +11412,13 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
     dirty=false; last=p;
     /* el borde de arriba de la dapp, medido en el lienzo */
     const borde=compra?compra.getBoundingClientRect().top-cv.getBoundingClientRect().top:vh*3;
-    draw(p,performance.now()/1000,borde);
+    /* disuelto del todo sobre la dapp, el tunel ya no se ve: no se dibuja y
+       el escenario se oculta. Seguia pintando el tunel entero en cada cuadro
+       para luego borrarlo, encima de la compra -la mitad de los cuadros del
+       telefono se iban ahi- */
+    const ido=borde<=-vh*.42;
+    if(ido!==oculto){ oculto=ido; escena.style.visibility=ido?'hidden':'' }
+    if(!ido) draw(p,performance.now()/1000,borde);
     rotulo(p,borde);
     const step=p<.34?0:p<.68?1:2;
     if(step!==paso){ paso=step;
@@ -11586,7 +11598,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
       return { lon:q[0], lat:q[1], nodo:q[2]===1, obj:obj[i].v, fin:obj[i].tono,
         tono:q[2]===1?TONES[i%3===0?7:i%3===1?0:1]:GRIS[i%GRIS.length],
         ax:ax/m, ay:ay/m, az:az/m, a0:azar(i,8)*6.28, gv:.6+azar(i,9)*1.4,
-        sale:1.1+azar(i,10)*1.7, jx:azar(i,11)-.5, jy:azar(i,12)-.5, jz:azar(i,13)-.5 };
+        sale:.55+azar(i,10)*1.05, jx:azar(i,11)-.5, jy:azar(i,12)-.5, jz:azar(i,13)-.5 };
     });
   }
 
@@ -11607,22 +11619,35 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
   }
   const mul=(M,v)=>[M[0][0]*v[0]+M[0][1]*v[1]+M[0][2]*v[2],M[1][0]*v[0]+M[1][1]*v[1]+M[1][2]*v[2],M[2][0]*v[0]+M[2][1]*v[1]+M[2][2]*v[2]];
   /* un cubo en (x,y,z) -px, z hacia quien mira- con perspectiva suave */
-  function cubo(cx,cy,foco,x,y,z,lado,M,tono,a){
+  /* MAS LIGERO: las 8 esquinas se giran y proyectan UNA vez por cubo -antes
+     cada cara giraba sus 4 esquinas, 24 giros por cubo-, y el canto claro
+     solo se traza en los cubos grandes, donde se ve. «extra» suma luz: es el
+     barrido que recorre la marca. */
+  const ESQ=[[-1,-1,-1],[1,-1,-1],[1,1,-1],[-1,1,-1],[-1,-1,1],[1,-1,1],[1,1,1],[-1,1,1]];
+  const CARAS=[[[0,0,1],[4,5,6,7]],[[0,0,-1],[1,0,3,2]],[[1,0,0],[5,1,2,6]],
+               [[-1,0,0],[0,4,7,3]],[[0,-1,0],[0,1,5,4]],[[0,1,0],[7,6,2,3]]];
+  const PX=new Float32Array(16);
+  function cubo(cx,cy,foco,x,y,z,lado,M,tono,a,extra){
     const h=lado/2;
-    for(const [nrm,pts] of FACES){
+    for(let i=0;i<8;i++){
+      const e=ESQ[i], X=x+(M[0][0]*e[0]+M[0][1]*e[1]+M[0][2]*e[2])*h,
+            Y=y+(M[1][0]*e[0]+M[1][1]*e[1]+M[1][2]*e[2])*h,
+            Z=z+(M[2][0]*e[0]+M[2][1]*e[1]+M[2][2]*e[2])*h, k=foco/Math.max(foco*.2,foco-Z);
+      PX[i*2]=cx+X*k; PX[i*2+1]=cy+Y*k;
+    }
+    const canto=lado>9;
+    for(const [nrm,idx] of CARAS){
       const n=mul(M,nrm);
       /* se ve si mira hacia la camara (que esta en z = +foco) */
       const px=x+n[0]*h, py=y+n[1]*h, pz=z+n[2]*h;
       if(n[0]*(-px)+n[1]*(-py)+n[2]*(foco-pz)<=0) continue;
       const lam=clm(n[0]*LIGHT[0]+n[1]*LIGHT[1]+n[2]*LIGHT[2]), lit=.24+lam*.88;
       ctx.beginPath();
-      for(let i=0;i<4;i++){
-        const w=mul(M,pts[i]), X=x+w[0]*h, Y=y+w[1]*h, Z=z+w[2]*h, k=foco/Math.max(foco*.2,foco-Z);
-        i?ctx.lineTo(cx+X*k,cy+Y*k):ctx.moveTo(cx+X*k,cy+Y*k);
-      }
+      ctx.moveTo(PX[idx[0]*2],PX[idx[0]*2+1]); ctx.lineTo(PX[idx[1]*2],PX[idx[1]*2+1]);
+      ctx.lineTo(PX[idx[2]*2],PX[idx[2]*2+1]); ctx.lineTo(PX[idx[3]*2],PX[idx[3]*2+1]);
       ctx.closePath();
-      ctx.fillStyle=cstr(tono.h,tono.s,clm(tono.l*(.58+lit*.62)+lit*10,3,100),a); ctx.fill();
-      ctx.strokeStyle='rgba(226,236,255,'+(.16*a).toFixed(3)+')'; ctx.lineWidth=1; ctx.stroke();
+      ctx.fillStyle=cstr(tono.h,tono.s,clm(tono.l*(.58+lit*.62)+lit*10+(extra||0),3,100),a); ctx.fill();
+      if(canto){ ctx.strokeStyle='rgba(226,236,255,'+(.16*a).toFixed(3)+')'; ctx.lineWidth=1; ctx.stroke() }
     }
   }
 
@@ -11650,34 +11675,64 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
       }
     }
   }
+  /* EL POLVO: motas quietas a distintas profundidades que se desplazan con
+     el scroll a velocidades distintas -paralaje-: da fondo y escala al
+     globo sin costar nada */
+  const POLVO=Array.from({length:70},(_,i)=>({x:azar(i,40)*2-1, y:azar(i,41)*2-1, z:.25+azar(i,42)*.75, t:azar(i,43)*6.28}));
+  let hornoG=null;
+  function fondoGlobo(){
+    if(hornoG) return hornoG;
+    const L=512, c=L/2, r=L/2.7, o=document.createElement('canvas'); o.width=o.height=L;
+    const g=o.getContext('2d');
+    const at=g.createRadialGradient(c,c,r*.9,c,c,r*1.35);
+    at.addColorStop(0,'rgba(232,238,252,.16)'); at.addColorStop(1,'rgba(232,238,252,0)');
+    g.fillStyle=at; g.fillRect(0,0,L,L);
+    const mar=g.createRadialGradient(c-r*.35,c-r*.4,r*.1,c,c,r);
+    mar.addColorStop(0,'#111827'); mar.addColorStop(1,'#06080E');
+    g.fillStyle=mar; g.beginPath(); g.arc(c,c,r,0,6.2832); g.fill();
+    const bri=g.createRadialGradient(c-r*.42,c-r*.46,0,c-r*.42,c-r*.46,r*.7);
+    bri.addColorStop(0,'rgba(236,242,255,.10)'); bri.addColorStop(1,'rgba(236,242,255,0)');
+    g.fillStyle=bri; g.beginPath(); g.arc(c,c,r,0,6.2832); g.fill();
+    return hornoG=o;
+  }
   function draw(p,T){
     ctx.fillStyle='#06070A'; ctx.fillRect(0,0,W,H);
     /* 1 · LA ENTRADA, como estaba: «One chain, four layers.» con «Nereum»
        detras, y las persianas que se cierran */
     const q=clm(p/.21);
     if(esq) esq.style.opacity=clm((0.34-q*.8)/0.26).toFixed(3);
-    persianas(q);
+    if(q<1) persianas(q); else { ctx.fillStyle='#000'; ctx.fillRect(0,0,W,H) }
     const entra=sube((p-.185)/.08);           /* 2 · de las persianas sale el globo */
+    /* la camara: se acerca despacio al globo mientras gira, antes de estallar */
+    const acerca=1+.14*sube((p-.26)/.30);
     /* mas grande: casi todo el ancho en el telefono y buena parte del alto en escritorio */
-    const cx=W/2, cy=H/2, R=Math.min(W*.47,H*.42)*(.9+.1*entra), foco=R*3.2;
+    const cx=W/2, cy=H/2, R0=Math.min(W*.47,H*.42), R=R0*(.9+.1*entra)*acerca, foco=R0*3.2;
+    if(entra>0){
+      /* el polvo, con paralaje */
+      const dy=p*H*.9;
+      ctx.fillStyle='#DCE6FF';
+      for(const m of POLVO){
+        const yy=((m.y*H*.6+cy - dy*m.z)%(H*1.2)+H*1.2)%(H*1.2)-H*.1, xx=cx+m.x*W*.55;
+        ctx.globalAlpha=(.1+.28*m.z)*entra;
+        ctx.fillRect(xx,yy,m.z*1.7,m.z*1.7);
+      }
+      ctx.globalAlpha=1;
+    }
     const globo=entra*(1-sube((p-.54)/.08));  /* el globo, hasta que es cubos */
     const aparecen=sube((p-.48)/.08);         /* 3 · los cubos sobre la tierra */
-    const estalla=sube((p-.57)/.14);          /* 4 · estalla */
-    const reune=sube((p-.70)/.18);            /* 5 · el cubo grande */
+    const estalla=sube((p-.57)/.12);          /* 4 · estalla */
+    const reune=sube((p-.655)/.2);            /* 5 · la marca: se reune sin dejar la pantalla vacia */
     const fogon=Math.exp(-Math.pow((p-.60)/.03,2));
     rl=-20+(QUIETO?0:T*6)+p*110; rp=-16; cdl=Math.cos(rp*RAD); sdl=Math.sin(rp*RAD);
 
     /* ── el globo ── */
     if(globo>.01){
       ctx.save(); ctx.globalAlpha=globo;
-      /* la atmosfera: un halo azul fino alrededor */
-      const at=ctx.createRadialGradient(cx,cy,R*.9,cx,cy,R*1.35);
-      at.addColorStop(0,'rgba(232,238,252,.16)'); at.addColorStop(1,'rgba(232,238,252,0)');
-      ctx.fillStyle=at; ctx.beginPath(); ctx.arc(cx,cy,R*1.35,0,6.2832); ctx.fill();
-      /* el mar: oscuro, con un poco de volumen */
-      const mar=ctx.createRadialGradient(cx-R*.35,cy-R*.4,R*.1,cx,cy,R);
-      mar.addColorStop(0,'#111827'); mar.addColorStop(1,'#06080E');
-      ctx.fillStyle=mar; ctx.beginPath(); ctx.arc(cx,cy,R,0,6.2832); ctx.fill();
+      /* el halo blanco, el mar oscuro con volumen y el reflejo de luz: tres
+         degradados grandes que no cambian, horneados UNA vez en una imagen
+         y pintados escalados -rehacerlos en cada cuadro era lo que mas
+         pesaba en el telefono- */
+      ctx.drawImage(fondoGlobo(), cx-R*1.35, cy-R*1.35, R*2.7, R*2.7);
       if(G){
         const proj=G.geoOrthographic().scale(R).translate([cx,cy]).rotate([rl,rp]).clipAngle(90);
         const path=G.geoPath(proj,ctx);
@@ -11731,7 +11786,8 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
       /* que el cubo, girado y con perspectiva, quepa a lo ancho y a lo alto */
       /* la marca: ancha para que el rotulo quepa dentro, y girando a un lado
          y a otro -no vueltas enteras- para que siempre se lea de frente */
-      const big=Math.min(R,W*.42,H*.34);
+      /* en escritorio, grande: casi todo el alto */
+      const big=W<760?Math.min(R0,W*.42,H*.34):Math.min(R0*1.2,W*.42,H*.40);
       const yaw=(QUIETO?0:Math.sin(T*.45)*.42)+(p-.85)*1.2, cyaw=Math.cos(yaw), syaw=Math.sin(yaw), tl=.14, ct=Math.cos(tl), st=Math.sin(tl);
       const Mb=[[cyaw,syaw*st,syaw*ct],[0,ct,-st],[-syaw,cyaw*st,cyaw*ct]], lista=[];
       for(let i=0;i<cubos.length;i++){
@@ -11746,16 +11802,31 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
       }
       lista.sort((a,b)=>a.z-b.z);
       const paso=Math.SQRT2*big/(W<760?14:17), lado0=R*(W<760?.07:.055), ladoF=paso*.72;
+      /* el barrido de luz: una banda que cruza la marca en diagonal cada
+         pocos segundos, como un reflejo sobre metal */
+      const barre=QUIETO?-9:(((T*.22)%1)*3.2-1.6), brillo=reune*reune;
       for(const q of lista){
         const c=q.c, lado=(c.nodo?1.4:1)*(lado0+(ladoF-lado0)*reune)*(.35+.65*aparecen);
+        const dd=(q.x+q.y)/(big*1.4)-barre, luzB=brillo*26*Math.exp(-dd*dd/.035);
         const M=giro(c.ax,c.ay,c.az,c.a0+(QUIETO?0:T*c.gv*(.3+estalla*1.2))+estalla*3*c.gv);
         /* al reunirse, cada cubo toma el tono de su sitio en la marca */
         const tn=reune>0?{h:c.tono.h+(c.fin.h-c.tono.h)*reune, s:c.tono.s+(c.fin.s-c.tono.s)*reune, l:c.tono.l+(c.fin.l-c.tono.l)*reune}:c.tono;
-        cubo(cx,cy,foco,q.x,q.y,q.z,lado,M,tn,aparecen);
+        cubo(cx,cy,foco,q.x,q.y,q.z,lado,M,tn,aparecen,luzB);
       }
     }
 
-    /* ── el destello de la explosion ── */
+    /* ── la explosion: la onda que se abre y el destello horizontal ── */
+    const onda=clm((p-.585)/.09);
+    if(onda>0&&onda<1){
+      ctx.strokeStyle='rgba(230,238,255,'+(.5*(1-onda)).toFixed(3)+')';
+      ctx.lineWidth=1.5+3*(1-onda); ctx.beginPath(); ctx.arc(cx,cy,R*(1+onda*2.4),0,6.2832); ctx.stroke();
+    }
+    if(fogon>.01){
+      const ha=ctx.createLinearGradient(0,cy,W,cy);
+      ha.addColorStop(0,'rgba(170,200,255,0)'); ha.addColorStop(.5,'rgba(235,242,255,'+(.8*fogon).toFixed(3)+')'); ha.addColorStop(1,'rgba(170,200,255,0)');
+      ctx.fillStyle=ha; ctx.fillRect(0,cy-1.2,W,2.4);
+      ctx.globalAlpha=.35*fogon; ctx.fillRect(0,cy-10,W,20); ctx.globalAlpha=1;
+    }
     if(fogon>.01){
       const g=ctx.createRadialGradient(cx,cy,0,cx,cy,R*1.8);
       g.addColorStop(0,'rgba(220,232,255,'+(.55*fogon).toFixed(3)+')');
@@ -11777,10 +11848,18 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
   addEventListener('load',()=>setTimeout(()=>{sitio();dirty=true},500));
   /* el bucle solo corre con el lienzo a la vista */
   let corre=false;
+  /* EL AVANCE VA SUAVIZADO. La rueda del raton y el dedo mueven la pagina a
+     saltos, y la escena los copiaba: por eso se sentia pesada. Ahora el
+     avance que se dibuja persigue al de verdad con un muelle de ~150 ms, y
+     todo -la camara, la explosion, la marca- se desliza. Si el salto es
+     enorme (un enlace, volver arriba) se coloca de golpe. */
+  let suave=-1, antT=0;
   function tick(){
     if(!corre) return;
-    const p=clm((__y-topSec)/runSec);
-    if(!QUIETO || dirty || Math.abs(p-last)>.0015){ last=p; dirty=false; draw(p,performance.now()/1000) }
+    const p=clm((__y-topSec)/runSec), ahora=performance.now()/1000;
+    const dt=Math.min(.1,antT?ahora-antT:.016); antT=ahora;
+    if(suave<0||Math.abs(p-suave)>.25||QUIETO) suave=p; else suave+=(p-suave)*(1-Math.exp(-dt*7));
+    if(!QUIETO || dirty || Math.abs(suave-last)>.0015){ last=suave; dirty=false; draw(suave,ahora) }
     requestAnimationFrame(tick);
   }
   new IntersectionObserver(es=>es.forEach(e=>{
