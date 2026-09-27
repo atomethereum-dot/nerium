@@ -7276,8 +7276,14 @@ main>section.sx#security{background:#030409 !important;background-image:none !im
 @media (max-width:899px){
   .sx-h{letter-spacing:-.042em;line-height:1.02}
   .sx-hold{height:calc(100svh + 120svh);margin-top:28px}
-  .sx-stage{height:100svh;padding:10px 0 calc(var(--hud-b,14px) + 52px);align-items:stretch}
-  .sx-grid{display:flex;flex-direction:column;width:100%;gap:12px;height:100%}
+  /* EL ALTO REAL DE LA PANTALLA Y EL CONJUNTO CENTRADO. Con «100svh» el
+     escenario media la pantalla con las barras de Safari DESPLEGADAS; al
+     bajar se recogen, la pantalla crece y todo quedaba pegado arriba con un
+     hueco debajo -visto en un iPhone-. «dvh» sigue a la pantalla de verdad,
+     y las pestañas y la tarjeta van JUNTAS en el centro del hueco que deja el
+     pie fijo de la pagina. */
+  .sx-stage{height:100svh;height:100dvh;padding:14px 0 calc(var(--hud-b,14px) + 56px);align-items:center}
+  .sx-grid{display:flex;flex-direction:column;width:100%;gap:18px;height:auto;max-height:100%}
   .sx-rail{display:block;padding:0;flex:none}
   .sx-list{flex-direction:row;gap:0;margin:0;padding:0;border-left:0;border-bottom:1px solid rgba(255,255,255,.08)}
   .sx-bar{top:auto;bottom:-1px;left:0;height:1px !important;width:0;
@@ -7289,10 +7295,10 @@ main>section.sx#security{background:#030409 !important;background-image:none !im
   #security .sx-it em{grid-column:1 / -1;margin-top:2px;font-size:9px;letter-spacing:.1em;gap:6px}
   .sx-it em i{width:5px;height:5px}
   .sx-cnt{display:none}
-  /* la tarjeta mide lo que su contenido y se centra en el hueco: estirada a
-     toda la altura dejaba un vacio entre el boton y la fuente */
-  .sx-cards{flex:1;min-height:0;display:grid;align-items:center}
-  .sx-card{grid-area:1/1;max-height:100%;padding:16px 16px 14px;border-radius:24px}
+  /* la tarjeta mide lo que su contenido; las tres en la misma celda, asi el
+     conjunto no cambia de alto al pasar de una a otra */
+  .sx-cards{flex:none;min-height:0;display:grid;align-items:start}
+  .sx-card{grid-area:1/1;padding:16px 16px 14px;border-radius:24px}
   .sx-top{gap:10px}
   .sx-cat{font-size:9.5px;letter-spacing:.08em}
   .sx-pill{white-space:nowrap;font-size:9.5px;letter-spacing:.08em;flex:none;padding:.45em .85em}
@@ -7311,6 +7317,20 @@ main>section.sx#security{background:#030409 !important;background-image:none !im
   .sx-log li{padding:5px 0;font-size:10.5px;letter-spacing:.02em}
   .sx-go{order:6;margin-top:10px;font-size:13.5px;padding:.5em 1.1em}
   .sx-foot{margin-top:14px;flex-direction:column;gap:4px;font-size:9px;letter-spacing:.08em}
+}
+/* telefonos altos: la tarjeta crece un punto para no quedarse chica en el
+   centro de una pantalla grande */
+@media (max-width:899px) and (min-height:800px){
+  .sx-grid{gap:22px}
+  .sx-it b{font-size:19px}
+  .sx-card{padding:20px 18px 18px}
+  .sx-t{font-size:clamp(30px,8.4vw,36px)}
+  #security .sx-p{font-size:14.5px;line-height:1.5}
+  .sx-kv>div{min-height:36px}
+  #security .sx-kv dd{font-size:14.5px}
+  .sx-log li{padding:7px 0;font-size:11px}
+  .sx-go{font-size:14.5px;margin-top:14px}
+  .sx-sello{width:88px}
 }
 /* pantallas bajas: fuera lo que se puede perder sin perder la prueba */
 @media (max-width:899px) and (max-height:760px){
