@@ -108,10 +108,15 @@ for (let y = 0; y < alto; y += 450) { await pg.evaluate(v => scrollTo(0, v), y);
      correcto entonces. */
   di(r.bg === r.bgDocs && r.dbg === r.dbgDocs,
      'cosida hacia abajo: mismo suelo que documentacion (' + r.bg + ' / ' + r.dbg + ')');
-  di(r.buildsClaro ? (r.bg !== r.bgBuilds) : (r.bg === r.bgBuilds),
+  /* Proyectos es hoy NEGRO PURO, el mismo del globo que tiene encima: lo
+     pidio asi el dueño. La hoja de ruta sigue en el suelo de documentacion y
+     entra con su propio filo, asi que el paso de negro a su suelo es un corte
+     con borde, no una costura rota. Se acepta ese caso y solo ese: cualquier
+     otro oscuro que no sea el suyo sigue fallando. */
+  di(r.buildsClaro ? (r.bg !== r.bgBuilds) : (r.bg === r.bgBuilds || r.bgBuilds === 'rgb(0, 0, 0)'),
      r.buildsClaro
        ? 'y separada hacia arriba: proyectos es papel y el corte existe (' + r.bgBuilds + ')'
-       : 'y cosida hacia arriba: proyectos vuelve a ser oscuro (' + r.bgBuilds + ')');
+       : 'y hacia arriba: proyectos es oscuro, su mismo suelo o el negro del globo (' + r.bgBuilds + ')');
   // Lo que esta prueba defiende es que la ruta NO se cuela en el menu, no que
   // el menu tenga un numero concreto de entradas. Estaba escrito «10» a mano y
   // salto en cuanto se oculto «03 The thesis» y su entrada se fue con ella,

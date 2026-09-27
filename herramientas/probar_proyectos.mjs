@@ -30,7 +30,7 @@ for (const [W, H, mob] of [[1440, 900, 0], [1366, 657, 0], [430, 932, 1], [375, 
   }, p);
   const a = await en(0.10), b = await en(0.46), c = await en(0.86);
   const tag = W + 'x' + H + ' · ';
-  di(!a.claro && /rgb\(10, 13, 20\)/.test(a.fondo), tag + 'la seccion es oscura, como el resto (' + a.fondo + ')');
+  di(!a.claro && /rgb\(0, 0, 0\)/.test(a.fondo), tag + 'la seccion es negra, la del globo de arriba (' + a.fondo + ')');
   di(a.on === 0 && b.on === 1 && c.on === 2, tag + 'al bajar se elige un proyecto cada vez (' + [a.on, b.on, c.on].join(' → ') + ')');
   di(a.nodo === 0 && b.nodo === 1 && c.nodo === 2, tag + 'y el indice marca el mismo');
   const cabe = [a, b, c].every(x => x.card[0] >= x.tit - 6 && x.card[1] <= x.ind + 6 && x.card[2] >= -2 && x.card[3] <= x.vw + 2);
