@@ -1317,8 +1317,8 @@ main>section#stack{position:relative;z-index:3;margin-bottom:-200vh;pointer-even
 }
 @media(max-width:899px){
 }
-.xf{position:relative;height:340vh}
-@media(max-width:899px){.xf{height:300vh}}
+.xf{position:relative;height:420vh}
+@media(max-width:899px){.xf{height:380vh}}
 .xf-stage{position:sticky;top:0;height:100dvh;overflow:hidden;background:var(--suelo)}
 .xf-cv{position:absolute;inset:0;width:100%;height:100%;display:block}
 .xf-word{position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);z-index:2;
@@ -8121,8 +8121,7 @@ main>section.sx#security{background:#030409 !important;background-image:none !im
 <section class="xf" id="xfade" data-bg="#0A0D14" data-acc="#1A7AFF"><i class="emb" aria-hidden="true" style="--emb:#0B0D13"></i>
   <div class="xf-stage" id="xfStage">
     <canvas class="xf-cv" id="xfCv"></canvas>
-    <!-- el rotulo de entrada se esconde: la escena es el globo -->
-    <div class="xf-txt" id="xfEsq" aria-hidden="true" hidden>
+    <div class="xf-txt" id="xfEsq" aria-hidden="true">
       <span class="xf-agua">Nereum</span>
       <p class="xf-tit">One chain, four layers.</p>
     </div>
@@ -11494,7 +11493,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
   }
 
   /* ── el mapa, cuando la seccion se acerca ── */
-  let G=null, tierra=null, suelo=null, fronteras=null, reticula=null, pedido=false;
+  let G=null, tierra=null, suelo=null, reticula=null, arcos=null, pedido=false;
   function carga(){
     if(pedido) return; pedido=true;
     const s=document.createElement('script'); s.src='assets/globo.js';
@@ -11503,8 +11502,11 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
         G=window.NereumGlobo;
         tierra=G.feature(topo,topo.objects.countries);
         suelo=G.feature(topo,topo.objects.land);
-        fronteras=G.mesh(topo,topo.objects.countries,(a,b)=>a!==b);
         reticula=G.geoGraticule10();
+        /* los arcos se calculan UNA vez: antes se interpolaban 23 arcos de 25
+           puntos en cada cuadro */
+        arcos=ARCOS.map(([a,b])=>{ const A=NODOS[a], B=NODOS[b], f=G.geoInterpolate(A,B), alto=.08+G.geoDistance(A,B)*.12;
+          return Array.from({length:25},(_,k)=>{ const q=f(k/24); return [q[0],q[1],1+alto*Math.sin(Math.PI*k/24)] }) });
         siembra(); dirty=true;
       }).catch(()=>{});
     };
@@ -11605,15 +11607,46 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
     }
   }
 
+  /* LAS PERSIANAS de la entrada: franjas verticales que se cierran desde
+     los bordes hacia el centro, alternando arriba y abajo, con el canto
+     encendido. Cerradas, la pantalla es negra y de ahi sale el globo. */
+  const eOut=t=>1-Math.pow(1-t,3);
+  function persianas(close){
+    const n=Math.max(6,Math.round(W/108));
+    for(let i=0;i<n;i++){
+      const w=W/n, x=i*w, d=Math.abs(i-(n-1)/2)/Math.max(1,(n-1)/2), t0=(1-d)*.34;
+      const k=Math.min(1, eOut(clm((close-t0)/(1-t0)))*1.06);
+      if(k<=0) continue;
+      const h=H*k, down=i%2===0, y=down?0:H-h;
+      ctx.fillStyle='#000000'; ctx.fillRect(x-.5,y,w+1,h);
+      const borde=1-clm((k-.86)/.14);
+      if(borde>.02){
+        const ey=down?y+h:y;
+        const g=ctx.createLinearGradient(0,ey-(down?28:0),0,ey+(down?0:28));
+        g.addColorStop(down?0:1,'rgba(157,159,164,0)');
+        g.addColorStop(down?1:0,'rgba(157,159,164,'+(.85*borde).toFixed(3)+')');
+        ctx.fillStyle=g; ctx.fillRect(x,down?ey-28:ey,w,28);
+        ctx.fillStyle='rgba(230,242,255,'+(.92*borde).toFixed(3)+')';
+        ctx.fillRect(x,ey-(down?1.5:0),w,1.5);
+      }
+    }
+  }
   function draw(p,T){
     ctx.fillStyle='#06070A'; ctx.fillRect(0,0,W,H);
-    const cx=W/2, cy=H/2, R=Math.min(W*.42,H*.34), foco=R*3.2;
-    const globo=1-sube((p-.46)/.10);          /* el globo, hasta que es cubos */
-    const aparecen=sube((p-.40)/.08);         /* los cubos sobre la tierra */
-    const estalla=sube((p-.50)/.16);
-    const reune=sube((p-.64)/.20);
-    const fogon=Math.exp(-Math.pow((p-.53)/.035,2));
-    rl=-20+(QUIETO?0:T*5)+p*110; rp=-16; cdl=Math.cos(rp*RAD); sdl=Math.sin(rp*RAD);
+    /* 1 · LA ENTRADA, como estaba: «One chain, four layers.» con «Nereum»
+       detras, y las persianas que se cierran */
+    const q=clm(p/.21);
+    if(esq) esq.style.opacity=clm((0.34-q*.8)/0.26).toFixed(3);
+    persianas(q);
+    const entra=sube((p-.185)/.08);           /* 2 · de las persianas sale el globo */
+    /* mas grande: casi todo el ancho en el telefono y buena parte del alto en escritorio */
+    const cx=W/2, cy=H/2, R=Math.min(W*.47,H*.42)*(.9+.1*entra), foco=R*3.2;
+    const globo=entra*(1-sube((p-.54)/.08));  /* el globo, hasta que es cubos */
+    const aparecen=sube((p-.48)/.08);         /* 3 · los cubos sobre la tierra */
+    const estalla=sube((p-.57)/.14);          /* 4 · estalla */
+    const reune=sube((p-.70)/.18);            /* 5 · el cubo grande */
+    const fogon=Math.exp(-Math.pow((p-.60)/.03,2));
+    rl=-20+(QUIETO?0:T*9)+p*110; rp=-16; cdl=Math.cos(rp*RAD); sdl=Math.sin(rp*RAD);
 
     /* ── el globo ── */
     if(globo>.01){
@@ -11630,30 +11663,25 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
         const proj=G.geoOrthographic().scale(R).translate([cx,cy]).rotate([rl,rp]).clipAngle(90);
         const path=G.geoPath(proj,ctx);
         ctx.beginPath(); path(reticula); ctx.strokeStyle='rgba(160,180,220,.05)'; ctx.lineWidth=.6; ctx.stroke();
-        /* la tierra en gris, que se apaga al volverse cubos */
-        ctx.beginPath(); path(tierra);
+        /* la tierra en gris, que se apaga al volverse cubos. Sin fronteras:
+           se dibuja la tierra como una sola forma, que ademas es mucho menos
+           trabajo por cuadro que 177 paises */
+        ctx.beginPath(); path(suelo);
         const gt=ctx.createLinearGradient(cx-R,cy-R,cx+R,cy+R);
         gt.addColorStop(0,'#4A515E'); gt.addColorStop(1,'#2A2F39');
         ctx.globalAlpha=globo*(1-aparecen*.85); ctx.fillStyle=gt; ctx.fill();
         ctx.globalAlpha=globo;
-        ctx.beginPath(); path(fronteras); ctx.strokeStyle='rgba(12,15,22,.9)'; ctx.lineWidth=.7; ctx.stroke();
         /* los arcos: suben sobre la superficie y los recorre un destello */
-        const interp=G.geoInterpolate;
-        for(let i=0;i<ARCOS.length;i++){
-          const A=NODOS[ARCOS[i][0]], B=NODOS[ARCOS[i][1]], f=interp(A,B);
-          const alto=.08+G.geoDistance(A,B)*.12, trazo=[];
-          for(let k=0;k<=24;k++){
-            const t=k/24, q=f(t), v=a3(q[0],q[1]), s=1+alto*Math.sin(Math.PI*t);
-            const vis=v[2]>0 || s*s*(1-v[2]*v[2])>1;
-            trazo.push(vis?[cx+v[0]*R*s, cy+v[1]*R*s]:null);
-          }
+        for(let i=0;i<arcos.length;i++){
+          const trazo=arcos[i].map(q=>{ const v=a3(q[0],q[1]), s=q[2];
+            return (v[2]>0 || s*s*(1-v[2]*v[2])>1)?[cx+v[0]*R*s, cy+v[1]*R*s]:null });
           ctx.strokeStyle='rgba(70,130,255,.35)'; ctx.lineWidth=1; ctx.beginPath();
           let dentro=false;
           for(const q of trazo){ if(!q){dentro=false;continue} dentro?ctx.lineTo(q[0],q[1]):ctx.moveTo(q[0],q[1]); dentro=true }
           ctx.stroke();
           if(!QUIETO){
-            const u=((T*.35+i*.137)%1), q=trazo[Math.round(u*24)];
-            if(q){ ctx.fillStyle='rgba(190,215,255,.9)'; ctx.beginPath(); ctx.arc(q[0],q[1],1.8,0,6.2832); ctx.fill() }
+            const u=((T*.7+i*.137)%1), q=trazo[Math.round(u*24)];
+            if(q){ ctx.fillStyle='rgba(200,222,255,.95)'; ctx.beginPath(); ctx.arc(q[0],q[1],2.2,0,6.2832); ctx.fill() }
           }
         }
       }
@@ -11662,7 +11690,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
       /* los nodos, latiendo */
       for(let i=0;i<NODOS.length;i++){
         const v=a3(NODOS[i][0],NODOS[i][1]); if(v[2]<=0.02) continue;
-        const x=cx+v[0]*R, y=cy+v[1]*R, lat=QUIETO?0:(T*.8+i*.23)%1;
+        const x=cx+v[0]*R, y=cy+v[1]*R, lat=QUIETO?0:(T*1.6+i*.23)%1;
         ctx.fillStyle='rgba(46,134,255,'+(.25*(1-lat)).toFixed(3)+')';
         ctx.beginPath(); ctx.arc(x,y,3+lat*9,0,6.2832); ctx.fill();
         ctx.fillStyle='#8FB6FF'; ctx.beginPath(); ctx.arc(x,y,2.2,0,6.2832); ctx.fill();
@@ -11701,8 +11729,10 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
       g.addColorStop(1,'rgba(46,106,245,0)');
       ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
     }
-    stage.classList.toggle('lit', p>.74);
-    stage.classList.toggle('go', p<.9);
+    /* el rotulo sale con el globo y ya no se va: sobre el globo y, al
+       final, en medio del cubo */
+    stage.classList.toggle('lit', p>.2);
+    stage.classList.toggle('go', p<.92);
   }
 
   let topSec=0, runSec=1;

@@ -1,4 +1,6 @@
-// probar_globo: la seccion «Real-world asset chain» es un GLOBO con sus
+// probar_globo: la seccion «Real-world asset chain» empieza como estaba
+// -«One chain, four layers.» con «Nereum» detras y las persianas- y de las
+// persianas sale un GLOBO con sus
 // paises -mar oscuro, tierra gris- y nodos, que al bajar estalla en cubos 3D
 // y los cubos se reunen en un cubo grande con el rotulo en medio. El mapa se
 // sirve desde el propio sitio (assets/), sin CDN.
@@ -49,12 +51,16 @@ for (const [W, H, mob] of [[1440, 900, 0], [430, 932, 1]]) {
              color: getComputedStyle(w).color };
   }, { p, espera });
   const dif = (a, b) => a.firma.reduce((s, v, i) => s + (v !== b.firma[i] ? 1 : 0), 0) / a.firma.length;
-  const g1 = await lee(0.18), g2 = await lee(0.18, 700);
-  di(g1.gris > 0.03 && g1.azul > 6, W + 'x' + H + ' · el globo tiene tierra gris y nodos azules (' + Math.round(g1.gris * 100) + ' % gris, ' + g1.azul + ' px azules)');
+  const ini = await pg.evaluate(async () => { const s = document.getElementById('xfade');
+    scrollTo(0, Math.round(s.getBoundingClientRect().top + scrollY)); await new Promise(r => setTimeout(r, 900));
+    return +getComputedStyle(document.getElementById('xfEsq')).opacity });
+  di(ini > 0.9, W + 'x' + H + ' · la entrada sigue: «One chain, four layers.» con «Nereum» detras (opacidad ' + ini + ')');
+  const g1 = await lee(0.34), g2 = await lee(0.34, 700);
+  di(g1.gris > 0.03 && g1.azul > 6 && g1.lit, W + 'x' + H + ' · de las persianas sale el globo, con tierra gris, nodos azules y el rotulo ya encendido (' + Math.round(g1.gris * 100) + ' % gris, ' + g1.azul + ' px azules)');
   di(dif(g1, g2) > 0.01, W + 'x' + H + ' · y gira solo, sin tocar el scroll (' + Math.round(dif(g1, g2) * 100) + ' % cambia)');
-  const e = await lee(0.60);
+  const e = await lee(0.66);
   di(e.manchas >= 40 && e.gris < g1.gris * 0.5, W + 'x' + H + ' · al bajar estalla: muchos cubos sueltos (' + e.manchas + ') y ya no hay globo');
-  const f = await lee(0.94);
+  const f = await lee(0.96);
   di(f.lit && Math.abs(f.texto[0]) <= 4 && Math.abs(f.texto[1]) <= 4,
      W + 'x' + H + ' · al final el rotulo se enciende en el centro, dentro del cubo (' + f.texto.join(', ') + ')');
   di(f.manchas >= 1, W + 'x' + H + ' · y el cubo grande esta dibujado');
