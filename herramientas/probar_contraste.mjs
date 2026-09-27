@@ -100,6 +100,13 @@ const MEDIR = () => {
          Es el «antes» de una animacion, igual que lo que esta a medio
          desvanecer. */
     if (el.closest('.sx-it:not(.on), .sx-log li.pend')) return;
+    /* Y lo que en ese instante esta CAMBIANDO de color -una pestaña de
+       Seguridad que se enciende tarda medio segundo-: medido a mitad de
+       camino da un gris que no es ni el de antes ni el de despues. Se mira
+       el propio texto y sus tres padres. */
+    for (let n3 = el, k = 0; n3 && k < 4; n3 = n3.parentElement, k++)
+      if (n3.getAnimations && n3.getAnimations().some(a => a.playState === 'running' &&
+          /color/.test(a.transitionProperty || ''))) return;
     const trazo = c.webkitTextStrokeWidth;
     if (trazo && parseFloat(trazo) > 0) return;
     let op = 1, n2 = el;
