@@ -1227,22 +1227,22 @@ body.light .srail{color:#E3E6EE}
 .stk-ronda{position:absolute;left:50%;top:50%;z-index:2;transform:translate(-50%,-50%);
   width:min(560px,calc(100% - 40px));display:flex;flex-direction:column;align-items:center;
   text-align:center;pointer-events:none;font-family:var(--m);text-transform:uppercase}
-.stk-ronda-t{margin:0;font-size:clamp(10px,1.1vw,12px);letter-spacing:.42em;color:rgba(255,255,255,0);
-  padding-left:.42em;transition:color .6s ease,letter-spacing 1.4s cubic-bezier(.16,.84,.26,1),padding 1.4s cubic-bezier(.16,.84,.26,1)}
-.stk-ronda.lit .stk-ronda-t{color:rgba(255,255,255,.62);letter-spacing:.58em;padding-left:.58em}
+/* EL SCROLL LO ESCRIBE. El rotulo no entra de golpe: cada pieza sale a su
+   tramo del recorrido y vuelve a esconderse al subir. El script solo mueve
+   cuatro variables -de 0 a 1- y aqui se decide que hace cada una. */
+.stk-ronda{--t1:0;--t2:0;--t3:0;--k:0}
+.stk-ronda-t{margin:0;font-size:clamp(10px,1.1vw,12px);color:rgba(255,255,255,calc(.62*var(--t1)));
+  letter-spacing:calc(.42em + .16em*var(--t1));padding-left:calc(.42em + .16em*var(--t1));
+  transform:translateY(calc((1 - var(--t1))*10px))}
 .stk-ronda-bar{position:relative;width:min(300px,64%);height:1px;margin-top:22px;
-  background:rgba(255,255,255,.12);opacity:0;transition:opacity .6s ease .2s}
-.stk-ronda.lit .stk-ronda-bar{opacity:1}
-.stk-ronda-bar b{position:absolute;left:0;top:0;bottom:0;width:0;background:#2E86FF;
-  box-shadow:0 0 8px rgba(46,134,255,.55);transition:width 1.8s cubic-bezier(.16,.84,.26,1) .35s}
-.stk-ronda.lit .stk-ronda-bar b{width:var(--p)}
+  background:rgba(255,255,255,.12);opacity:var(--t2)}
+.stk-ronda-bar b{position:absolute;left:0;top:0;bottom:0;width:calc(var(--p)*var(--k));background:#2E86FF;
+  box-shadow:0 0 8px rgba(46,134,255,.55)}
 .stk-ronda-m{display:flex;align-items:center;justify-content:center;gap:.9em;margin:16px 0 0;
-  font-size:clamp(9px,.9vw,10px);letter-spacing:.3em;color:rgba(255,255,255,0);transition:color .6s ease .35s}
-.stk-ronda.lit .stk-ronda-m{color:rgba(255,255,255,.4)}
-.stk-ronda-m b{font-weight:400;color:inherit}
-.stk-ronda.lit .stk-ronda-m b{color:rgba(143,182,255,.85)}
+  font-size:clamp(9px,.9vw,10px);letter-spacing:.3em;color:rgba(255,255,255,calc(.4*var(--t3)));
+  transform:translateY(calc((1 - var(--t3))*8px))}
+.stk-ronda-m b{font-weight:400;color:rgba(143,182,255,calc(.85*var(--t3)))}
 .stk-ronda-m i{font-style:normal}
-@media(prefers-reduced-motion:reduce){.stk-ronda *{transition:none !important}}
 .stk-copy{position:absolute;left:0;right:0;bottom:clamp(38px,6.5vh,86px);z-index:2;
   text-align:center;pointer-events:none;padding:0 24px}
 .stk-stage::after{display:none;content:"";position:absolute;left:0;right:0;bottom:0;height:46%;z-index:1;
@@ -1297,7 +1297,7 @@ body.light .srail{color:#E3E6EE}
 .xf-go{position:absolute;left:50%;bottom:clamp(26px,5.4vh,56px);transform:translateX(-50%);
   z-index:3;display:grid;justify-items:center;gap:11px;pointer-events:none;
   mix-blend-mode:difference;color:#fff;opacity:0;transition:opacity .6s ease}
-.xf-stage.go .xf-go,.xl-stage.go .xf-go{opacity:.85}
+.xf-stage.go .xf-go,.xl-stage.go .xf-go,.stk-stage.go .xf-go{opacity:.85}
 .xf-go i{position:relative;display:block;width:1px;height:34px;background:currentColor;opacity:.32;
   overflow:hidden}
 .xf-go i::after{content:"";position:absolute;left:-1px;width:3px;height:9px;border-radius:2px;
@@ -7878,6 +7878,12 @@ main>section.sx#security{background:#030409 !important;background-image:none !im
       <div class="stk-ronda-bar" role="progressbar" aria-label="Seed Round" aria-valuemin="0" aria-valuemax="100" aria-valuenow="85"><b id="stkBar" style="--p:85%"></b></div>
       <p class="stk-ronda-m"><span><b id="stkPct">85%</b> <span>complete</span></span><i aria-hidden="true">&#183;</i><span>Launching soon</span></p>
     </div>
+    <!-- la señal de seguir bajando, la misma de las otras secciones fijas -->
+    <div class="xf-go" aria-hidden="true">
+      <i></i>
+      <svg viewBox="0 0 24 24"><path d="M12 4v13M6 12l6 6 6-6"/></svg>
+      <b>Keep scrolling</b>
+    </div>
     <!-- SOLO LOS CUBOS. Se pidio la seccion sin texto: el campo de cubos a
          pantalla completa, como el video. El texto y sus tres pasos se
          esconden con «hidden» -volver es quitarlo- y el degradado negro de
@@ -11250,12 +11256,23 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
   let cerca=false;
   new IntersectionObserver(es=>{ cerca=es[0].isIntersecting; if(cerca){ size() } },
     {rootMargin:'20% 0px'}).observe(hold);
-  /* el rotulo se enciende -y se abre el espaciado- al llegar a la seccion */
-  const ronda=document.getElementById('stkRonda');
-  if(ronda){ if('IntersectionObserver' in window)
-    new IntersectionObserver((es,o)=>{ if(es[0].isIntersecting){ ronda.classList.add('lit'); o.disconnect() } },
-      {threshold:.6}).observe(ronda);
-    else ronda.classList.add('lit') }
+  /* el rotulo lo va escribiendo el scroll: el titulo, luego la barra que
+     se llena hasta la cifra, luego la linea de abajo. Y la flecha de seguir
+     bajando se ve hasta casi el final del tramo. */
+  const ronda=document.getElementById('stkRonda'), escena=cv.parentElement;
+  let rondaP=-1, flecha=null;
+  function rotulo(p){
+    if(Math.abs(p-rondaP)<.0005) return; rondaP=p;
+    const sube=t=>{ t=clm(t); return t*t*(3-2*t) };
+    if(ronda){
+      ronda.style.setProperty('--t1',sube((p-.03)/.16).toFixed(3));
+      ronda.style.setProperty('--t2',sube((p-.14)/.10).toFixed(3));
+      ronda.style.setProperty('--k', ease(clm((p-.18)/.30)).toFixed(3));
+      ronda.style.setProperty('--t3',sube((p-.42)/.14).toFixed(3));
+    }
+    const va=p<.86;
+    if(va!==flecha){ flecha=va; escena.classList.toggle('go',va) }
+  }
   let paso=-1;
   (function tick(){
     requestAnimationFrame(tick);
@@ -11265,6 +11282,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
     if(QUIETO && !dirty && Math.abs(p-last)<=.0015) return;
     dirty=false; last=p;
     draw(p,performance.now()/1000);
+    rotulo(p);
     const step=p<.34?0:p<.68?1:2;
     if(step!==paso){ paso=step;
       titles.forEach((t,i)=>t.classList.toggle('on',i===step));
