@@ -1219,7 +1219,10 @@ body.light .srail{color:#E3E6EE}
 .hero h1 .wd,.hero h1 .wdw{display:inline-block;white-space:nowrap}
 .hero h1{overflow-wrap:normal;word-break:keep-all;text-wrap:balance}
 .hero h1 .sp{display:inline-block;width:.26em}
-.stk-hold{position:relative;height:340vh}
+.stk-hold{position:relative;height:520vh}
+/* sin relleno abajo: el escenario acaba en el azul de la ronda y la
+   seccion de compra empieza justo debajo, sin franja oscura entre medias */
+#stack{padding-bottom:0 !important}
 .stk-stage{position:sticky;top:0;height:100dvh;display:flex;flex-direction:column;
   align-items:center;justify-content:center;overflow:hidden}
 .stk-cv{position:absolute;inset:0;width:100%;height:100%}
@@ -4444,6 +4447,7 @@ main>section :is(.wrap,.sec-head,.join-head):has(.sk){position:relative}
      seccion de la ronda, que asi ya esta viva por debajo del escenario
      anclado. Lo que se ve por los huecos es la ronda de verdad. */
   margin-bottom:-100vh}
+.umb[hidden]{display:none !important}
 .umb-esc{position:sticky;top:0;height:100dvh;overflow:hidden;background:transparent}
 .umb-lz{position:absolute;inset:0;width:100%;height:100%;display:block}
 /* La cifra vive en el DOM aunque se dibuje en el lienzo: es la misma cifra
@@ -7910,7 +7914,11 @@ main>section.sx#security{background:#030409 !important;background-image:none !im
 
 
 
-<div class="umb" aria-hidden="true">
+<!-- EL UMBRAL SE ESCONDE. La puerta de la ronda -la cifra que se arma y se
+     abre- quedaba entre el tunel de los cubos y la compra: se pidio salir del
+     tunel DIRECTAMENTE a la seccion de compra. Se quita con «hidden» y no
+     borrando, para que volver sea deshacer. -->
+<div class="umb" aria-hidden="true" hidden>
   <div class="umb-esc">
     <canvas class="umb-lz" id="umbLz"></canvas>
     <span class="umb-cifra" id="umbPct">85</span>
@@ -11171,13 +11179,50 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
         cristal:azar(i,11)<.14, i});
     }
   }
+  /* ══ EL TUNEL ═══════════════════════════════════════════════════════════
+     La segunda mitad del recorrido es un viaje: los cubos dejan de flotar y
+     se ordenan en las paredes de un tubo, la camara acelera -cada vez mas-,
+     los cubos se estiran en estelas, al fondo se enciende una luz que crece
+     y, al final, todo es el azul de la ronda: se sale del tunel directamente
+     a la seccion de compra, que empieza con ese mismo azul. Todo es funcion
+     de la posicion del scroll: subiendo, se desanda. */
+  const sube=t=>{ t=clm(t); return t*t*(3-2*t) };
+  const RAYOS=Array.from({length:70},(_,i)=>({an:azar(i,90)*6.2832, s0:azar(i,91), l:.18+azar(i,92)*.3}));
   function draw(p,T){
     ctx.clearRect(0,0,W,H);
     if(!cubos)siembra();
     const f=Math.max(W,H)*.62, mx=W/(2*f), my=H/(2*f);
+    const tun=sube((p-.50)/.16);              /* los cubos a las paredes */
+    const vel=clm((p-.52)/.48);               /* la aceleracion */
+    const estela=QUIETO?0:sube((p-.58)/.14);  /* las estelas de velocidad */
+    const luz=sube((p-.62)/.28);              /* la luz del final */
+    const bano=sube((p-.88)/.10);             /* todo se vuelve el azul de la ronda */
+    const rotuloVa=1-sube((p-.48)/.08);       /* el rotulo se retira al entrar */
     /* la camara: avanza con el scroll de la seccion y, ademas, a paso lento
-       con el reloj, para que el campo siga vivo aunque nadie baje */
-    const cam=p*5.4 + (QUIETO?0:T*.16);
+       con el reloj, para que el campo siga vivo aunque nadie baje; en el
+       tunel se dispara */
+    const cam=p*5.4 + (QUIETO?0:T*.16) + 70*Math.pow(vel,2.4);
+    /* la luz del fondo del tunel, detras de todo */
+    if(luz>0){
+      const R0=Math.hypot(W,H)*(.05+.7*luz*luz);
+      const g=ctx.createRadialGradient(W/2,H/2,0,W/2,H/2,R0);
+      g.addColorStop(0,'rgba(236,242,255,'+(.95*luz).toFixed(3)+')');
+      g.addColorStop(.16,'rgba(126,168,255,'+(.85*luz).toFixed(3)+')');
+      g.addColorStop(.5,'rgba(46,106,245,'+(.55*luz).toFixed(3)+')');
+      g.addColorStop(1,'rgba(14,58,196,0)');
+      ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+    }
+    /* los rayos: lineas finas que salen disparadas del centro */
+    if(estela>0){
+      const Rmax=Math.hypot(W,H)*.62;
+      ctx.lineWidth=1;
+      for(const ry of RAYOS){
+        const u=(ry.s0+cam*.05)%1, r0=u*u*Rmax, r1=r0*(1+ry.l*estela*1.6)+2;
+        const cs=Math.cos(ry.an), sn=Math.sin(ry.an);
+        ctx.strokeStyle='rgba(190,212,255,'+(.5*estela*u*(1-bano)).toFixed(3)+')';
+        ctx.beginPath(); ctx.moveTo(W/2+cs*r0,H/2+sn*r0); ctx.lineTo(W/2+cs*r1,H/2+sn*r1); ctx.stroke();
+      }
+    }
     const lista=[];
     for(const c of cubos){
       const d=c.z0-cam, k=Math.floor(d/TRAMO);
@@ -11185,14 +11230,23 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
       /* cada vuelta nace en otro sitio: repartido por la pantalla a la
          profundidad del fondo, y desde ahi se abre hacia los bordes */
       const nx=azar(c.i,20+k*2)*2-1, ny=azar(c.i,21+k*2)*2-1;
-      const x=nx*mx*LEJOS*.62, y=ny*my*LEJOS*.62;
-      const r=c.lado*f/zr;
+      let x=nx*mx*LEJOS*.62, y=ny*my*LEJOS*.62;
+      /* en el tunel cada cubo toma su sitio en la pared del tubo: a la
+         distancia de la camara donde el tubo toca el borde de la pantalla, y
+         mas lejos, cerrandose hacia el punto de fuga */
+      if(tun>0){
+        const an=azar(c.i,60+k)*6.2832, rr=1.02+azar(c.i,61+k)*.32;
+        x+=(Math.cos(an)*mx*1.15*rr-x)*tun; y+=(Math.sin(an)*my*1.15*rr-y)*tun;
+      }
+      const r=c.lado*(1-.3*tun)*f/zr;
       const sx=W/2+x/zr*f, sy=H/2+y/zr*f;
       if(sx<-r*1.8||sx>W+r*1.8||sy<-r*1.8||sy>H+r*1.8) continue;
       /* niebla: nace en el fondo y se apaga al cruzar la camara */
       const hondo=(zr-CERCA)/TRAMO;
       const aparece=clm((1-hondo)/.22), sePasa=clm((zr-CERCA)/.45);
-      const a=aparece*sePasa;
+      /* al entrar en el tunel, el cubo que pasa rozando la camara no tapa
+         media pantalla: los enormes se desvanecen */
+      const a=aparece*sePasa*(1-bano)*(1-tun*clm((r-W*.16)/(W*.18)));
       if(a<.01) continue;
       /* detras del rotulo de la ronda los cubos se OSCURECEN -no se vuelven
          transparentes, que dejaria ver sus caras de dentro-: una letra tan
@@ -11202,13 +11256,20 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
       if(calma){
         const dx=Math.max(0,Math.abs(sx-calma.x)-calma.w), dy=Math.max(0,Math.abs(sy-calma.y)-calma.h);
         const k=clm((Math.hypot(dx,dy)-r*.75+10)/60);
-        sombra=.2+.8*k*k*(3-2*k);
+        sombra=1-(1-(.2+.8*k*k*(3-2*k)))*rotuloVa;
       }
-      lista.push({c,x,y,zr,hondo,a,sombra});
+      lista.push({c,x,y,zr,hondo,a,sombra,sx,sy});
     }
     lista.sort((p1,p2)=>p2.zr-p1.zr);
     for(const q of lista){
-      const c=q.c, h=c.lado/2;
+      const c=q.c, h=c.lado*(1-.3*tun)/2;
+      /* la estela: el cubo se estira hacia el fondo, de donde viene */
+      if(estela>0){
+        const z2=q.zr+estela*1.1, ex=W/2+q.x/z2*f, ey=H/2+q.y/z2*f;
+        ctx.strokeStyle=cstr(c.tone.h,c.tone.s,clm(c.tone.l+18,3,96),.55*estela*q.a);
+        ctx.lineWidth=Math.max(1,c.lado*f/q.zr*.18);
+        ctx.beginPath(); ctx.moveTo(q.sx,q.sy); ctx.lineTo(ex,ey); ctx.stroke();
+      }
       /* la matriz de giro de ESTE cubo (Rodrigues) */
       const ang=c.a0+(QUIETO?0:T*c.gv)+p*1.6*Math.sign(c.gv);
       const co=Math.cos(ang), si=Math.sin(ang), t1=1-co, X=c.ax, Y=c.ay, Z=c.az;
@@ -11252,6 +11313,8 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
         }
       }
     }
+    /* la salida: el azul de la ronda lo cubre todo */
+    if(bano>0){ ctx.fillStyle='rgba(14,58,196,'+bano.toFixed(3)+')'; ctx.fillRect(0,0,W,H) }
   }
   let cerca=false;
   new IntersectionObserver(es=>{ cerca=es[0].isIntersecting; if(cerca){ size() } },
@@ -11263,14 +11326,15 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
   let rondaP=-1, flecha=null;
   function rotulo(p){
     if(Math.abs(p-rondaP)<.0005) return; rondaP=p;
-    const sube=t=>{ t=clm(t); return t*t*(3-2*t) };
     if(ronda){
-      ronda.style.setProperty('--t1',sube((p-.03)/.16).toFixed(3));
-      ronda.style.setProperty('--t2',sube((p-.14)/.10).toFixed(3));
-      ronda.style.setProperty('--k', ease(clm((p-.18)/.30)).toFixed(3));
-      ronda.style.setProperty('--t3',sube((p-.42)/.14).toFixed(3));
+      ronda.style.setProperty('--t1',sube((p-.02)/.12).toFixed(3));
+      ronda.style.setProperty('--t2',sube((p-.10)/.07).toFixed(3));
+      ronda.style.setProperty('--k', ease(clm((p-.13)/.20)).toFixed(3));
+      ronda.style.setProperty('--t3',sube((p-.28)/.09).toFixed(3));
+      /* al entrar en el tunel, el rotulo se va */
+      ronda.style.opacity=(1-sube((p-.48)/.08)).toFixed(3);
     }
-    const va=p<.86;
+    const va=p<.47;
     if(va!==flecha){ flecha=va; escena.classList.toggle('go',va) }
   }
   let paso=-1;

@@ -239,6 +239,13 @@ for (const [a, b] of PEGADAS) {
      (malas.length ? ' — ' + malas.join('; ') : ''));
 }
 
+/* EL UMBRAL SE ESCONDIO. Se pidio salir del tunel de los cubos DIRECTAMENTE
+   a la seccion de compra, y la puerta de la cifra quedaba en medio. Si esta
+   escondida, lo que se mide en su lugar es el tunel: que acabe en el azul de
+   la ronda y que ese azul sea el mismo con el que empieza la seccion. */
+const umbralVisto = await pg.evaluate(() => { const u = document.querySelector('.umb');
+  return !!u && getComputedStyle(u).display !== 'none' });
+if (umbralVisto) {
 /* ── 2 · el umbral ────────────────────────────────────────────────────────── */
 const caja = await pg.evaluate(() => {
   const u = document.querySelector('.umb'); if (!u) return null;
@@ -690,24 +697,48 @@ di(cuadros[1].desv >= 0.010 || cuadros[2].desv >= 0.010,
   }
 }
 
+} else {
+  const tunel = async p => pg.evaluate(async p => {
+    const h = document.getElementById('stack'), r = h.getBoundingClientRect();
+    scrollTo(0, Math.round(r.top + scrollY + p * (h.offsetHeight - innerHeight)));
+    await new Promise(s => setTimeout(s, 900));
+    const cv = document.getElementById('stkCv'), c = document.createElement('canvas');
+    c.width = cv.width >> 2; c.height = cv.height >> 2;
+    const g = c.getContext('2d'); g.drawImage(cv, 0, 0, c.width, c.height);
+    const px = (x, y) => Array.from(g.getImageData(Math.round(x * (c.width - 1)), Math.round(y * (c.height - 1)), 1, 1).data);
+    const bg = getComputedStyle(document.getElementById('presale')).backgroundColor.match(/\d+/g).map(Number);
+    return { centro: px(.5, .5), esquinas: [px(.03, .03), px(.97, .03), px(.03, .97), px(.97, .97)], bg };
+  }, p);
+  const luz = c => (0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2]) / 255;
+  const antes = await tunel(0.30), dentro = await tunel(0.80), fin = await tunel(1);
+  di(luz(dentro.centro) > luz(antes.centro) + 0.25,
+     'en el tunel se enciende la luz del fondo (' + luz(antes.centro).toFixed(2) + ' → ' + luz(dentro.centro).toFixed(2) + ')');
+  const lejos = fin.esquinas.concat([fin.centro]).map(c => Math.max(...[0, 1, 2].map(k => Math.abs(c[k] - fin.bg[k]))));
+  di(Math.max(...lejos) <= 14 && fin.centro[3] > 240,
+     'y se sale al azul de la ronda: el final del tunel es el mismo color con el que empieza la compra (' +
+     fin.bg.slice(0, 3).join(',') + ', se aparta ' + Math.max(...lejos) + ')');
+}
 /* ── 3 · la cifra, la misma en los cuatro sitios ──────────────────────────── */
 const cifras = await pg.evaluate(() => {
   const t = s => { const e = document.querySelector(s); return e ? (e.textContent || '').replace(/[^\d]/g, '') : null };
-  return { franja: t('#annPct'), portada: t('#heroPct'), umbral: t('#umbPct'),
+  return { franja: t('#annPct'), portada: t('#heroPct'), umbral: t('#umbPct'), tunel: t('#stkPct'),
            barra: (document.getElementById('annFill') || {}).style ? document.getElementById('annFill').style.width : null };
 });
-const v = [cifras.franja, cifras.portada, cifras.umbral].filter(Boolean);
-di(v.length === 3 && new Set(v).size === 1,
-   'la cifra de la ronda dice lo mismo en los tres sitios de texto (' + v.join(' / ') + ')');
+const v = [cifras.franja, cifras.portada, cifras.umbral, cifras.tunel].filter(Boolean);
+di(v.length === 4 && new Set(v).size === 1,
+   'la cifra de la ronda dice lo mismo en los cuatro sitios de texto (' + v.join(' / ') + ')');
 // Y esta VIVA: se mueve con la misma llamada que las otras.
 const movida = await pg.evaluate(() => {
   if (typeof window.__aviso !== 'function') return null;
   window.__aviso(41);
   return { umbral: (document.getElementById('umbPct') || {}).textContent,
-           portada: (document.getElementById('heroPct') || {}).textContent };
+           portada: (document.getElementById('heroPct') || {}).textContent,
+           tunel: (document.getElementById('stkPct') || {}).textContent };
 });
 if (movida) di(String(movida.umbral).replace(/\D/g, '') === '41',
                'y la del umbral es la misma cifra viva, no un 85 escrito a mano (__aviso(41) → ' + movida.umbral + ')');
+if (movida) di(String(movida.tunel).replace(/\D/g, '') === '41',
+               'y la del rotulo del tunel tambien (__aviso(41) → ' + movida.tunel + ')');
 else console.log('  ··  no hay __aviso() expuesto: la cifra viva no se puede mover desde aqui');
 
 di(errs.length === 0, 'sin errores de pagina' + (errs.length ? ': ' + errs[0] : ''));

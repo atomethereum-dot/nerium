@@ -230,10 +230,14 @@ const f = await pg.evaluate(() => {
 {
   const u = await pg.evaluate(() => {
     const e = document.querySelector('.umb'); if (!e) return null;
+    if (getComputedStyle(e).display === 'none') return { escondido: true };
     const r = e.getBoundingClientRect();
     return { top: r.top + scrollY, alto: r.height, vh: innerHeight };
   });
-  if (!u) { di(false, 'el umbral esta en el telefono'); }
+  /* El umbral se escondio: se sale del tunel de los cubos directamente a la
+     ronda, y lo que se mide en su lugar esta en probar_giro. */
+  if (u && u.escondido) console.log('  ··  el umbral esta escondido: se sale del tunel a la ronda');
+  else if (!u) { di(false, 'el umbral esta en el telefono'); }
   else {
     // 0,57 y no 0,38: el reloj del umbral se re-sincronizo con la pagina que
     // hay detras -la cifra se arma hasta 0,40, funde hasta 0,52 y se queda
