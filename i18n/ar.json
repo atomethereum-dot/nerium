@@ -275,5 +275,13 @@
  "Documents held in escrow": "الوثائق لدى جهة حفظ مستقلة",
  "Renewal · annual": "التجديد · سنوي",
  "Source · Assure DeFi · Third-party KYC": "المصدر · Assure DeFi · KYC من طرف ثالث",
- "Launching soon": "الإطلاق قريباً"
+ "Launching soon": "الإطلاق قريباً",
+ "Blocks in sequence": "كتل متتابعة",
+ "One asset, many units": "أصل واحد، وحدات كثيرة",
+ "Sun over racks": "شمس فوق الخزائن",
+ "Move to disturb · Scroll to re-form": "حرّك للتشتيت · مرّر لإعادة التشكيل",
+ "Three pieces, two already running.": "ثلاث قطع، اثنتان تعملان بالفعل.",
+ "Bitcoin mining": "تعدين البيتكوين",
+ "In development": "قيد التطوير",
+ "Physical servers we own and operate, powered by solar. Not rented hashrate and not a reseller's contract: machines in racks, with their own energy behind them.": "خوادم فعلية نملكها ونشغّلها، تعمل بالطاقة الشمسية. ليست قدرة تعدين مستأجرة ولا عقدًا من موزّع: أجهزة في خزائن، ووراءها طاقتها الخاصة."
 }

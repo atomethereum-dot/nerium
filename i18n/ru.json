@@ -275,5 +275,13 @@
  "Documents held in escrow": "Документы хранятся у эскроу-агента",
  "Renewal · annual": "Продление · ежегодно",
  "Source · Assure DeFi · Third-party KYC": "Источник · Assure DeFi · KYC третьей стороны",
- "Launching soon": "Скоро запуск"
+ "Launching soon": "Скоро запуск",
+ "Blocks in sequence": "Блоки по порядку",
+ "One asset, many units": "Один актив, много долей",
+ "Sun over racks": "Солнце над стойками",
+ "Move to disturb · Scroll to re-form": "Двигайте, чтобы рассеять · Прокрутите, чтобы собрать",
+ "Three pieces, two already running.": "Три части, две уже работают.",
+ "Bitcoin mining": "Майнинг биткоина",
+ "In development": "В разработке",
+ "Physical servers we own and operate, powered by solar. Not rented hashrate and not a reseller's contract: machines in racks, with their own energy behind them.": "Физические серверы, которыми мы владеем и управляем, на солнечной энергии. Не арендованный хешрейт и не контракт перепродавца: машины в стойках, со своей собственной энергией."
 }

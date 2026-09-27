@@ -275,5 +275,13 @@
  "Documents held in escrow": "書類はエスクローで保管",
  "Renewal · annual": "更新 · 毎年",
  "Source · Assure DeFi · Third-party KYC": "出典 · Assure DeFi · 第三者による KYC",
- "Launching soon": "まもなくローンチ"
+ "Launching soon": "まもなくローンチ",
+ "Blocks in sequence": "連なるブロック",
+ "One asset, many units": "ひとつの資産、多くの単位",
+ "Sun over racks": "ラックの上の太陽",
+ "Move to disturb · Scroll to re-form": "動かして崩す · スクロールで組み直す",
+ "Three pieces, two already running.": "3つのうち、2つはすでに稼働中。",
+ "Bitcoin mining": "ビットコインのマイニング",
+ "In development": "開発中",
+ "Physical servers we own and operate, powered by solar. Not rented hashrate and not a reseller's contract: machines in racks, with their own energy behind them.": "自社で所有・運用し、太陽光で動く物理サーバー。借りたハッシュレートでも、転売業者の契約でもありません。自前のエネルギーを備えたラックの中のマシンです。"
 }

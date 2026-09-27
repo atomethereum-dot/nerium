@@ -275,5 +275,13 @@
  "Documents held in escrow": "文件由托管方保管",
  "Renewal · annual": "续期 · 每年",
  "Source · Assure DeFi · Third-party KYC": "来源 · Assure DeFi · 第三方 KYC",
- "Launching soon": "即将上线"
+ "Launching soon": "即将上线",
+ "Blocks in sequence": "按顺序排列的区块",
+ "One asset, many units": "一项资产，多个单位",
+ "Sun over racks": "机架上方的太阳",
+ "Move to disturb · Scroll to re-form": "移动以打散 · 滚动以重组",
+ "Three pieces, two already running.": "三个部分，两个已在运行。",
+ "Bitcoin mining": "比特币挖矿",
+ "In development": "开发中",
+ "Physical servers we own and operate, powered by solar. Not rented hashrate and not a reseller's contract: machines in racks, with their own energy behind them.": "我们自有并运营的实体服务器，由太阳能供电。不是租来的算力，也不是转售商的合约：机架里的机器，背后有自己的能源。"
 }

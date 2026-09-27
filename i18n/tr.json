@@ -275,5 +275,13 @@
  "Documents held in escrow": "Belgeler emanet kuruluşunda",
  "Renewal · annual": "Yenileme · yıllık",
  "Source · Assure DeFi · Third-party KYC": "Kaynak · Assure DeFi · Üçüncü taraf KYC",
- "Launching soon": "Yakında lansman"
+ "Launching soon": "Yakında lansman",
+ "Blocks in sequence": "Sıralı bloklar",
+ "One asset, many units": "Tek varlık, çok birim",
+ "Sun over racks": "Rafların üzerinde güneş",
+ "Move to disturb · Scroll to re-form": "Dağıtmak için hareket et · Yeniden oluşturmak için kaydır",
+ "Three pieces, two already running.": "Üç parça, ikisi zaten çalışıyor.",
+ "Bitcoin mining": "Bitcoin madenciliği",
+ "In development": "Geliştiriliyor",
+ "Physical servers we own and operate, powered by solar. Not rented hashrate and not a reseller's contract: machines in racks, with their own energy behind them.": "Sahibi olduğumuz ve işlettiğimiz, güneş enerjisiyle çalışan fiziksel sunucular. Kiralık hashrate de değil, bir bayinin sözleşmesi de değil: arkasında kendi enerjisi olan raflardaki makineler."
 }
