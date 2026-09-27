@@ -7275,7 +7275,7 @@ main>section.sx#security{background:#030409 !important;background-image:none !im
    los datos y el boton al final. */
 @media (max-width:899px){
   .sx-h{letter-spacing:-.042em;line-height:1.02}
-  .sx-hold{height:calc(100svh + 120svh);margin-top:28px}
+  .sx-hold{height:calc(100lvh + 120svh);margin-top:28px}
   /* EL ALTO REAL DE LA PANTALLA Y EL CONJUNTO CENTRADO. Con «100svh» el
      escenario media la pantalla con las barras de Safari DESPLEGADAS; al
      bajar se recogen, la pantalla crece y todo quedaba pegado arriba con un
@@ -7284,10 +7284,14 @@ main>section.sx#security{background:#030409 !important;background-image:none !im
      pie fijo de la pagina. */
   /* A PANTALLA COMPLETA Y SIMETRICO. Ni centrado ni apoyado abajo: las dos
      cosas dejaban un hueco -abajo o arriba- en algun telefono. El conjunto
-     ocupa TODO el alto: las pestañas a 24 px del borde de arriba y la tarjeta
-     hasta 24 px del pie fijo -que ocupa los ultimos 58 px-. La tarjeta se
+     ocupa TODO el alto: las pestañas arriba y la tarjeta hasta 24 px del pie
+     fijo -que ocupa los ultimos 58 px-. La tarjeta se
      estira, y lo que le sobra se reparte a partes iguales entre sus bloques. */
-  .sx-stage{height:100svh;height:100dvh;padding:24px 0 calc(var(--hud-b,14px) + 68px);align-items:stretch}
+  /* FIJA: «dvh» sigue a las barras de Safari, y al recogerse o desplegarse
+     la tarjeta se estiraba y se encogia mientras se bajaba. «lvh» es la
+     pantalla con las barras recogidas -la que se ve al bajar- y NO cambia.
+     Las pestañas a 44 px de arriba; la tarjeta, hasta 24 px del pie. */
+  .sx-stage{height:100svh;height:100lvh;padding:44px 0 calc(var(--hud-b,14px) + 68px);align-items:stretch}
   .sx-grid{display:flex;flex-direction:column;width:100%;gap:20px;height:100%}
   .sx-rail{display:block;padding:0;flex:none}
   .sx-list{flex-direction:row;gap:0;margin:0;padding:0;border-left:0;border-bottom:1px solid rgba(255,255,255,.08)}
