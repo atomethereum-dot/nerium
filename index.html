@@ -1326,6 +1326,9 @@ main>section#stack{position:relative;z-index:3;margin-bottom:-200vh;pointer-even
   letter-spacing:.42em;text-transform:uppercase;color:rgba(255,255,255,.0);
   transition:color .5s ease,letter-spacing 1.2s cubic-bezier(.16,.84,.26,1)}
 .xf-stage.lit .xf-word{color:rgba(255,255,255,.62);letter-spacing:.58em}
+/* en el telefono el rotulo va en dos lineas -«REAL-WORLD» / «ASSET CHAIN»-:
+   asi cabe holgado dentro del rombo de la marca, que es donde acaba */
+@media(max-width:560px){.xf-word{padding:0 20vw;text-wrap:balance;line-height:2.3}}
 .xf-go{position:absolute;left:50%;bottom:clamp(26px,5.4vh,56px);transform:translateX(-50%);
   z-index:3;display:grid;justify-items:center;gap:11px;pointer-events:none;
   mix-blend-mode:difference;color:#fff;opacity:0;transition:opacity .6s ease}
@@ -11520,8 +11523,8 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
   const NODOS=[[-74,40.7],[-0.1,51.5],[8.7,50.1],[8.5,47.4],[55.3,25.2],[103.8,1.35],[114.2,22.3],
     [139.7,35.7],[127,37.6],[-46.6,-23.5],[-99.1,19.4],[-79.4,43.7],[3.4,6.5],[28,-26.2],[72.9,19.1],
     [151.2,-33.9],[-122.4,37.8],[2.35,48.9],[-58.4,-34.6],[36.8,-1.3],[121.5,31.2],[-87.6,41.9]];
-  const ARCOS=[[0,1],[1,2],[2,4],[4,5],[5,6],[6,7],[7,8],[0,16],[0,9],[9,18],[1,12],[12,13],
-    [4,14],[14,5],[5,15],[1,3],[0,10],[11,0],[17,1],[19,4],[20,6],[21,0],[16,7]];
+  /* pocos arcos: los justos para que se lea la red sin llenarla */
+  const ARCOS=[[0,1],[1,4],[4,5],[5,7],[0,9],[1,12],[4,14],[5,15],[16,7],[0,16]];
 
   /* ── la rotacion del globo, la misma que usa d3 (rotate [λ, φ]) ── */
   const RAD=Math.PI/180;
@@ -11538,15 +11541,31 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
   const GRIS=[TONES[3],TONES[6],TONES[5],TONES[3],TONES[6],TONES[4]];
   let cubos=null;
   function siembra(){
-    /* el cubo grande es SOLO sus 12 aristas -un cubo de alambre hecho de
-       cubos-, asi que su forma se lee y el centro queda limpio para el
-       rotulo. Tantos cubos como puntos tengan las aristas. */
-    const PA=W<760?14:17, obj=[];
-    const V=[[-1,-1,-1],[1,-1,-1],[1,1,-1],[-1,1,-1],[-1,-1,1],[1,-1,1],[1,1,1],[-1,1,1]];
-    const AR=[[0,1],[1,2],[2,3],[3,0],[4,5],[5,6],[6,7],[7,4],[0,4],[1,5],[2,6],[3,7]];
-    for(const v of V) obj.push(v);
-    for(const [a,b] of AR) for(let k=1;k<PA;k++){ const t=k/PA;
-      obj.push([V[a][0]+(V[b][0]-V[a][0])*t, V[a][1]+(V[b][1]-V[a][1])*t, V[a][2]+(V[b][2]-V[a][2])*t]) }
+    /* LA FIGURA DEL FINAL ES LA MARCA: el rombo de Nereum hecho de cubos, en
+       volumen -una cara delante, otra detras y los cantos que las unen- y con
+       su banda casi blanca a lo largo del lado de abajo a la derecha, como en
+       el logotipo. Por dentro queda hueco: ahi va el rotulo.
+       Coordenadas del rombo: izquierda (-1,0), arriba (0,-1), derecha (1,0),
+       abajo (0,1). Cada destino lleva su tono: plata el contorno, gris hondo
+       la cara de atras -el canto del logotipo- y casi blanco la banda. */
+    const E=W<760?14:17, obj=[], FON=.16;
+    const PLATA={h:224,s:12,l:80}, CANTO={h:222,s:4,l:36}, BANDA={h:210,s:8,l:97};
+    const Vr=[[-1,0],[0,-1],[1,0],[0,1]];
+    for(let lado=0;lado<4;lado++){
+      const A=Vr[lado], B=Vr[(lado+1)%4];
+      for(let k=0;k<E;k++){ const t=k/E, x=A[0]+(B[0]-A[0])*t, y=A[1]+(B[1]-A[1])*t;
+        obj.push({v:[x,y,FON],tono:PLATA}); obj.push({v:[x,y,-FON],tono:CANTO}) }
+    }
+    /* los cantos que unen las dos caras, en las cuatro esquinas */
+    for(const V of Vr) obj.push({v:[V[0],V[1],0],tono:CANTO});
+    /* la banda: filas paralelas al lado derecha→abajo, hacia dentro */
+    const ANCHO=.26, nx=-Math.SQRT1_2, ny=-Math.SQRT1_2;   /* hacia dentro del rombo */
+    for(let fila=1;fila<=3;fila++){
+      const d=ANCHO*fila/3.4;
+      for(let k=0;k<=E;k++){ const t=k/E;
+        const x=1+(0-1)*t+nx*d, y=0+(1-0)*t+ny*d;
+        if(Math.abs(x)+Math.abs(y)<=1-d*.9) obj.push({v:[x,y,FON],tono:BANDA}) }
+    }
     const tope=obj.length-NODOS.length, tierraPts=[];
     /* espiral de Fibonacci sobre la esfera: puntos repartidos por igual, y de
        los que caen en tierra se toman repartidos por todo el globo */
@@ -11559,12 +11578,12 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
     const pts=[];
     for(let k=0;k<tope;k++) pts.push(tierraPts[Math.floor(k*tierraPts.length/tope)]);
     for(const n of NODOS) pts.push([n[0],n[1],1]);
-    /* los destinos, barajados: cada cubo viaja a un sitio cualquiera del
-       cubo grande, no al de al lado */
+    /* los destinos, barajados: cada cubo viaja a un sitio cualquiera de la
+       marca, no al de al lado */
     for(let i=obj.length-1;i>0;i--){ const j=Math.floor(azar(i,21)*(i+1)); const t=obj[i]; obj[i]=obj[j]; obj[j]=t }
     cubos=pts.map((q,i)=>{
       let ax=azar(i,5)-.5, ay=azar(i,6)-.5, az=azar(i,7)-.5; const m=Math.hypot(ax,ay,az)||1;
-      return { lon:q[0], lat:q[1], nodo:q[2]===1, obj:obj[i],
+      return { lon:q[0], lat:q[1], nodo:q[2]===1, obj:obj[i].v, fin:obj[i].tono,
         tono:q[2]===1?TONES[i%3===0?7:i%3===1?0:1]:GRIS[i%GRIS.length],
         ax:ax/m, ay:ay/m, az:az/m, a0:azar(i,8)*6.28, gv:.6+azar(i,9)*1.4,
         sale:1.1+azar(i,10)*1.7, jx:azar(i,11)-.5, jy:azar(i,12)-.5, jz:azar(i,13)-.5 };
@@ -11646,14 +11665,14 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
     const estalla=sube((p-.57)/.14);          /* 4 · estalla */
     const reune=sube((p-.70)/.18);            /* 5 · el cubo grande */
     const fogon=Math.exp(-Math.pow((p-.60)/.03,2));
-    rl=-20+(QUIETO?0:T*9)+p*110; rp=-16; cdl=Math.cos(rp*RAD); sdl=Math.sin(rp*RAD);
+    rl=-20+(QUIETO?0:T*6)+p*110; rp=-16; cdl=Math.cos(rp*RAD); sdl=Math.sin(rp*RAD);
 
     /* ── el globo ── */
     if(globo>.01){
       ctx.save(); ctx.globalAlpha=globo;
       /* la atmosfera: un halo azul fino alrededor */
       const at=ctx.createRadialGradient(cx,cy,R*.9,cx,cy,R*1.35);
-      at.addColorStop(0,'rgba(46,106,245,.22)'); at.addColorStop(1,'rgba(46,106,245,0)');
+      at.addColorStop(0,'rgba(232,238,252,.16)'); at.addColorStop(1,'rgba(232,238,252,0)');
       ctx.fillStyle=at; ctx.beginPath(); ctx.arc(cx,cy,R*1.35,0,6.2832); ctx.fill();
       /* el mar: oscuro, con un poco de volumen */
       const mar=ctx.createRadialGradient(cx-R*.35,cy-R*.4,R*.1,cx,cy,R);
@@ -11662,7 +11681,6 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
       if(G){
         const proj=G.geoOrthographic().scale(R).translate([cx,cy]).rotate([rl,rp]).clipAngle(90);
         const path=G.geoPath(proj,ctx);
-        ctx.beginPath(); path(reticula); ctx.strokeStyle='rgba(160,180,220,.05)'; ctx.lineWidth=.6; ctx.stroke();
         /* la tierra en gris, que se apaga al volverse cubos. Sin fronteras:
            se dibuja la tierra como una sola forma, que ademas es mucho menos
            trabajo por cuadro que 177 paises */
@@ -11671,27 +11689,37 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
         gt.addColorStop(0,'#4A515E'); gt.addColorStop(1,'#2A2F39');
         ctx.globalAlpha=globo*(1-aparecen*.85); ctx.fillStyle=gt; ctx.fill();
         ctx.globalAlpha=globo;
-        /* los arcos: suben sobre la superficie y los recorre un destello */
+        /* LOS ARCOS SE VAN FORMANDO. Pocos, y cada uno se traza despacio de
+           una ciudad a la otra -unos tres segundos-, se queda un momento y se
+           desvanece; luego empieza el siguiente. Sin puntos corriendo: eran lo
+           que se veia a saltos. */
+        const CICLO=9;
         for(let i=0;i<arcos.length;i++){
-          const trazo=arcos[i].map(q=>{ const v=a3(q[0],q[1]), s=q[2];
-            return (v[2]>0 || s*s*(1-v[2]*v[2])>1)?[cx+v[0]*R*s, cy+v[1]*R*s]:null });
-          ctx.strokeStyle='rgba(70,130,255,.35)'; ctx.lineWidth=1; ctx.beginPath();
-          let dentro=false;
-          for(const q of trazo){ if(!q){dentro=false;continue} dentro?ctx.lineTo(q[0],q[1]):ctx.moveTo(q[0],q[1]); dentro=true }
-          ctx.stroke();
+          let crece=1, va=1;
           if(!QUIETO){
-            const u=((T*.7+i*.137)%1), q=trazo[Math.round(u*24)];
-            if(q){ ctx.fillStyle='rgba(200,222,255,.95)'; ctx.beginPath(); ctx.arc(q[0],q[1],2.2,0,6.2832); ctx.fill() }
+            const u=((T+i*CICLO/arcos.length)/CICLO)%1;
+            crece=sube(u/.34); va=1-sube((u-.62)/.3);
           }
+          if(va<=.01||crece<=.01) continue;
+          const hasta=Math.max(1,Math.round(crece*24));
+          ctx.strokeStyle='rgba(120,165,255,'+(.55*va).toFixed(3)+')'; ctx.lineWidth=1.2; ctx.beginPath();
+          let dentro=false;
+          for(let k=0;k<=hasta;k++){
+            const q=arcos[i][k], v=a3(q[0],q[1]), s2=q[2];
+            if(!(v[2]>0 || s2*s2*(1-v[2]*v[2])>1)){ dentro=false; continue }
+            const X=cx+v[0]*R*s2, Y=cy+v[1]*R*s2;
+            dentro?ctx.lineTo(X,Y):ctx.moveTo(X,Y); dentro=true;
+          }
+          ctx.stroke();
         }
       }
       /* el borde del globo */
-      ctx.strokeStyle='rgba(46,134,255,.35)'; ctx.lineWidth=1; ctx.beginPath(); ctx.arc(cx,cy,R,0,6.2832); ctx.stroke();
+      ctx.strokeStyle='rgba(236,242,255,.38)'; ctx.lineWidth=1; ctx.beginPath(); ctx.arc(cx,cy,R,0,6.2832); ctx.stroke();
       /* los nodos, latiendo */
       for(let i=0;i<NODOS.length;i++){
         const v=a3(NODOS[i][0],NODOS[i][1]); if(v[2]<=0.02) continue;
-        const x=cx+v[0]*R, y=cy+v[1]*R, lat=QUIETO?0:(T*1.6+i*.23)%1;
-        ctx.fillStyle='rgba(46,134,255,'+(.25*(1-lat)).toFixed(3)+')';
+        const x=cx+v[0]*R, y=cy+v[1]*R, lat=QUIETO?0:(T*.5+i*.23)%1;
+        ctx.fillStyle='rgba(120,165,255,'+(.22*(1-lat)).toFixed(3)+')';
         ctx.beginPath(); ctx.arc(x,y,3+lat*9,0,6.2832); ctx.fill();
         ctx.fillStyle='#8FB6FF'; ctx.beginPath(); ctx.arc(x,y,2.2,0,6.2832); ctx.fill();
       }
@@ -11701,7 +11729,11 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
     /* ── los cubos: sobre la tierra, estallando, y el cubo grande ── */
     if(cubos && aparecen>0){
       /* que el cubo, girado y con perspectiva, quepa a lo ancho y a lo alto */
-      const big=Math.min(R*.88,W*.26,H*.22), Mb=giro(.35,.9,.25,(QUIETO?0:T*.22)+p*2.2), lista=[];
+      /* la marca: ancha para que el rotulo quepa dentro, y girando a un lado
+         y a otro -no vueltas enteras- para que siempre se lea de frente */
+      const big=Math.min(R,W*.42,H*.34);
+      const yaw=(QUIETO?0:Math.sin(T*.45)*.42)+(p-.85)*1.2, cyaw=Math.cos(yaw), syaw=Math.sin(yaw), tl=.14, ct=Math.cos(tl), st=Math.sin(tl);
+      const Mb=[[cyaw,syaw*st,syaw*ct],[0,ct,-st],[-syaw,cyaw*st,cyaw*ct]], lista=[];
       for(let i=0;i<cubos.length;i++){
         const c=cubos[i], v=a3(c.lon,c.lat);
         /* en la superficie, antes de estallar solo se ven los de la cara visible */
@@ -11713,11 +11745,13 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
         lista.push({c,x,y,z});
       }
       lista.sort((a,b)=>a.z-b.z);
-      const paso=2*big/(W<760?14:17), lado0=R*(W<760?.07:.055), ladoF=paso*.6;
+      const paso=Math.SQRT2*big/(W<760?14:17), lado0=R*(W<760?.07:.055), ladoF=paso*.72;
       for(const q of lista){
         const c=q.c, lado=(c.nodo?1.4:1)*(lado0+(ladoF-lado0)*reune)*(.35+.65*aparecen);
         const M=giro(c.ax,c.ay,c.az,c.a0+(QUIETO?0:T*c.gv*(.3+estalla*1.2))+estalla*3*c.gv);
-        cubo(cx,cy,foco,q.x,q.y,q.z,lado,M,c.tono,aparecen);
+        /* al reunirse, cada cubo toma el tono de su sitio en la marca */
+        const tn=reune>0?{h:c.tono.h+(c.fin.h-c.tono.h)*reune, s:c.tono.s+(c.fin.s-c.tono.s)*reune, l:c.tono.l+(c.fin.l-c.tono.l)*reune}:c.tono;
+        cubo(cx,cy,foco,q.x,q.y,q.z,lado,M,tn,aparecen);
       }
     }
 
