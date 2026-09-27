@@ -1434,7 +1434,10 @@
   /* Con la ronda en espera (NRM_PRONTO, en index.html) no se suma la privada:
      la barra enseña solo lo que entra por la cadena. El objetivo sigue
      contando con ella, para que la meta no cambie. */
-  var PRIVADA_USD = window.NRM_PRONTO ? 0 : PRIVADA_BASE;
+  /* TEMPORAL — pruebas del dueño: con la ronda en espera la barra arranca en
+     $500,000 en vez de en $0. Cuando terminen las pruebas vuelve a ser 0. */
+  var PRONTO_USD = 500000;
+  var PRIVADA_USD = window.NRM_PRONTO ? PRONTO_USD : PRIVADA_BASE;
 
   var barra = document.getElementById('saleFill'),
       globo = document.getElementById('saleTip'),

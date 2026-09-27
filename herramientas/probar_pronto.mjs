@@ -32,7 +32,7 @@ di(r.flag === true, 'la ronda esta en espera en la pagina publicada');
 di([r.ann, r.hero, r.stk].every(x => x === 'Starts soon'), 'aviso, portada y tunel dicen «Starts soon» (' + [r.ann, r.hero, r.stk].join(' / ') + ')');
 di(r.pcVisibles === 0, 'y no asoma «complete», «Seed Round open» ni «Launching soon» (' + r.pcVisibles + ')');
 di(parseFloat(r.annW) === 0 && parseFloat(r.stkP) === 0, 'las barras estan vacias (' + r.annW + ', ' + r.stkP + ')');
-di(r.raised === '$0' && /\$16,000,000/.test(r.meta), 'la dapp enseña $0 recaudados de la meta de siempre (' + r.raised + ' ' + r.meta + ')');
+di(r.raised === '$500,000' && /\$16,000,000/.test(r.meta), 'la dapp enseña $500,000 recaudados (temporal, pruebas) de la meta de siempre (' + r.raised + ' ' + r.meta + ')');
 di(r.enProceso >= 6 && r.cyber, 'Seguridad: registro, auditoria y KYC en proceso, con CyberScope (' + r.enProceso + ')');
 di(!r.viejo, 'Seguridad y la portada ya no dicen Halborn, Assure DeFi, «passed» ni el numero de registro');
 di(r.hb === 'Audit in progress', 'el boton de la portada tampoco dice ya «audited» (' + r.hb + ')');
