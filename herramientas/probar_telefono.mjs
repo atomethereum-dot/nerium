@@ -31,8 +31,10 @@ await pg.waitForTimeout(2600);
 const f = await pg.evaluate(() => {
   /* la seccion clara se busca: estaba escrita «.secure», y seguridad se rehizo
      en negro. Vale la primera clara que se vea. */
-  const s = [...document.querySelectorAll('main>section.claro')].find(x => !x.hidden && getComputedStyle(x).display !== 'none'),
-        c = getComputedStyle(s);
+  const s = [...document.querySelectorAll('main>section.claro')].find(x => !x.hidden && getComputedStyle(x).display !== 'none');
+  /* ya no queda ninguna seccion clara: la de proyectos se rehizo en oscuro */
+  if (!s) return null;
+  const c = getComputedStyle(s);
   const r = s.getBoundingClientRect();
   return { img:c.backgroundImage, size:c.backgroundSize, rep:c.backgroundRepeat,
            ancho:Math.round(r.width) };
@@ -52,7 +54,7 @@ const f = await pg.evaluate(() => {
 {
   const sec = await pg.evaluateHandle(() => [...document.querySelectorAll('main>section.claro')].find(x => !x.hidden && getComputedStyle(x).display !== 'none') || null).then(h => h.asElement());
   const caja = sec ? await sec.boundingBox() : null;
-  di(!!caja, 'hay una seccion clara en la que mirar el suelo');
+  if (!caja) console.log('  ··  no queda ninguna seccion clara: no hay suelo claro en el que buscar una costura');
   if (caja) {
     await pg.evaluate(y => scrollTo(0, y), Math.round(caja.y + 40));
     await pg.waitForTimeout(700);

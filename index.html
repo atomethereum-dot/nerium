@@ -7479,6 +7479,97 @@ main>section.sx#security{background:#030409 !important;background-image:none !im
   .sx-sello{transition:opacity .3s}
 }
 </style>
+<style id="pz-css">
+/* ══ 06 · LOS PROYECTOS SOBRE UN EJE ═══════════════════════════════════════
+   Seccion oscura, como el resto. Un escenario fijo mientras se baja: arriba
+   la cabecera, en medio las tres piezas flotando sobre un eje horizontal en
+   perspectiva, abajo el indice. El script solo mueve la posicion del eje. */
+main>section#builds{background:#0A0D14 !important;background-image:none !important;
+  padding:0 !important;content-visibility:visible;overflow:visible !important}
+#builds .pz-hold{position:relative;height:320vh}
+#builds .pz-stage{position:sticky;top:0;height:100vh;height:100svh;overflow:hidden;
+  display:flex;flex-direction:column;padding-top:clamp(64px,9vh,110px)}
+#builds .builds-head{margin-bottom:0;position:relative;z-index:3}
+#builds .pz-escena{position:relative;flex:1;min-height:0;perspective:1400px;perspective-origin:50% 45%}
+/* el eje: una linea fina de lado a lado, a la altura del centro de las piezas,
+   con un brillo que se desliza hasta la elegida */
+#builds .pz-eje{position:absolute;left:0;right:0;top:55%;height:1px;z-index:0;
+  background:linear-gradient(90deg,rgba(255,255,255,0),rgba(255,255,255,.12) 18%,rgba(255,255,255,.12) 82%,rgba(255,255,255,0))}
+#builds .pz-eje i{position:absolute;left:50%;top:-1px;width:min(560px,70vw);height:3px;transform:translateX(-50%);
+  background:radial-gradient(closest-side,rgba(99,169,255,.9),rgba(99,169,255,0));filter:blur(.3px)}
+#builds .pz-card{position:absolute;left:50%;top:55%;width:min(460px,34vw);z-index:1;
+  transform-style:preserve-3d;will-change:transform,opacity;margin:0}
+#builds .pz-flota{transform:translate(-50%,-50%);border-radius:22px;padding:14px;
+  background:linear-gradient(180deg,#121724,#0C0F18);border:1px solid rgba(255,255,255,.08);
+  box-shadow:0 40px 90px -40px rgba(0,0,0,.9);transition:border-color .5s,box-shadow .5s;position:relative}
+#builds .pz-card::after{content:"";position:absolute;inset:0;pointer-events:none}
+#builds .pz-card.on .pz-flota{border-color:rgba(99,169,255,.34);
+  box-shadow:0 40px 90px -40px rgba(0,0,0,.9),0 0 0 1px rgba(99,169,255,.08),0 30px 120px -40px rgba(46,106,245,.55)}
+/* flotan: un vaiven lento, cada una a su ritmo */
+@keyframes pzVaiven{from{translate:0 -6px}to{translate:0 6px}}
+#builds .pz-card .pz-flota{animation:pzVaiven 5.5s ease-in-out infinite alternate}
+#builds .pz-card[data-i="1"] .pz-flota{animation-duration:6.4s;animation-delay:-2s}
+#builds .pz-card[data-i="2"] .pz-flota{animation-duration:5.9s;animation-delay:-4s}
+#builds .pz-art{position:relative;aspect-ratio:1.9;border-radius:14px;overflow:hidden;background:#0A1024}
+#builds .pz-art .bcd-plate{position:absolute;inset:0;width:100%;height:100%;border-radius:0}
+#builds .pz-art .bcd-shot{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 0}
+#builds .pz-txt{padding:16px 8px 6px}
+#builds .pz-tag{display:flex;align-items:center;gap:10px;font-family:var(--m);font-size:11px;
+  letter-spacing:.2em;text-transform:uppercase;color:#8A90A0}
+#builds .pz-tag .bcd-dot{width:6px;height:6px;border-radius:50%;flex:0 0 auto}
+#builds .pz-tag .bcd-dot.obra{background:#E0A04A}
+#builds .pz-t{margin:10px 0 0;font-family:var(--f);font-weight:400;font-size:clamp(22px,2.1vw,30px);
+  letter-spacing:-.035em;line-height:1.1;color:#F4F5F9}
+#builds .pz-d{margin:10px 0 0;font-size:clamp(13.5px,1.1vw,15px);line-height:1.6;color:#9AA0AA !important;max-width:none}
+#builds .pz-go{display:inline-flex;gap:8px;margin-top:14px;font-family:var(--m);font-size:11px;letter-spacing:.2em;
+  text-transform:uppercase;color:#63A9FF;text-decoration:none;transition:gap .3s}
+#builds .pz-go:hover{gap:13px}
+/* el indice: las tres piezas con su linea de avance, y el whitepaper */
+#builds .pz-indice{position:relative;z-index:3;display:flex;align-items:center;gap:clamp(12px,2vw,28px);
+  padding-bottom:clamp(26px,5vh,54px)}
+#builds .pz-nodo{flex:1;display:flex;flex-direction:column;align-items:flex-start;gap:8px;padding:14px 0 0;
+  background:none;border:0;border-top:1px solid rgba(255,255,255,.12);color:#8A8E9B;cursor:pointer;
+  text-align:left;font:inherit;position:relative;transition:color .4s}
+#builds .pz-nodo::before{content:"";position:absolute;left:0;top:-1px;height:1px;width:calc(var(--k,0)*100%);background:#63A9FF}
+#builds .pz-nodo b{font-family:var(--m);font-weight:400;font-size:11px;letter-spacing:.2em}
+#builds .pz-nodo span{font-family:var(--f);font-size:clamp(14px,1.2vw,17px);letter-spacing:-.01em}
+#builds .pz-nodo.on{color:#F4F5F9}
+#builds .pz-nodo.on b{color:#63A9FF}
+#builds .pz-papel{flex:none;font-family:var(--m);font-size:11px;letter-spacing:.2em;text-transform:uppercase;
+  color:#63A9FF;text-decoration:none;align-self:flex-end;padding-bottom:2px}
+@media(max-width:899px){
+  #builds .pz-hold{height:300vh}
+  #builds .pz-stage{padding-top:clamp(56px,8vh,80px)}
+  #builds .pz-card{width:80vw;top:42%}
+  #builds .pz-eje{top:42%}
+  #builds .pz-flota{padding:10px;border-radius:18px}
+  #builds .pz-art{border-radius:11px}
+  #builds .pz-txt{padding:12px 6px 4px}
+  #builds .pz-d{font-size:13.5px;line-height:1.55}
+  #builds .pz-nodo span{display:none}
+  #builds .pz-nodo{align-items:center}
+  #builds .pz-papel{display:none}
+}
+/* portatiles bajos: todo un punto mas compacto para que la pieza no choque
+   con el indice */
+@media(min-width:900px) and (max-height:800px){
+  #builds .pz-stage{padding-top:clamp(40px,6vh,64px)}
+  #builds .builds-h{font-size:clamp(30px,3.4vw,46px)}
+  #builds .pz-card{width:min(380px,28vw);top:50%}
+  #builds .pz-eje{top:50%}
+  #builds .pz-d{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  #builds .pz-txt{padding-top:12px}
+  #builds .pz-indice{padding-bottom:18px}
+}
+/* telefonos bajos */
+@media(max-width:899px) and (max-height:720px){
+  #builds .pz-stage{padding-top:44px}
+  #builds .pz-card{width:72vw;top:47%}
+  #builds .pz-eje{top:47%}
+  #builds .pz-d{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+}
+@media(prefers-reduced-motion:reduce){#builds .pz-card .pz-flota{animation:none}}
+</style>
 </head>
 <body class="ann-fuera">
 <a class="saltar" href="#contenido">Skip to content</a>
@@ -8144,51 +8235,59 @@ main>section.sx#security{background:#030409 !important;background-image:none !im
 </section>
 
 
-<section class="builds claro" id="builds" data-bg="#F1F4FA" data-acc="#63A9FF"><i class="via" aria-hidden="true"></i>
-  <div class="wrap builds-head">
-    <div class="k sk rv"><i class="sk-n">06</i>What we are building</div>
-    <h2 class="builds-h">Three pieces, two already running.</h2>
-  </div>
-
-  <div class="wrap">
-    <div class="builds-rail" id="buildsRail">
-
-      <article class="bcd">
-        <div class="bcd-art">
-          <i class="cn tl"></i><i class="cn tr"></i><i class="cn bl"></i><i class="cn br"></i>
-          <div class="bcd-plate bcd-foto">
+<section class="builds" id="builds" data-bg="#0A0D14" data-acc="#63A9FF"><i class="via" aria-hidden="true"></i>
+  <!-- LOS PROYECTOS SOBRE UN EJE. Tres piezas que flotan sobre una linea
+       horizontal en perspectiva; al bajar, el eje avanza y se elige una cada
+       vez: la elegida viene al frente, nitida y con su halo; las otras se
+       quedan detras, giradas y en penumbra. Abajo, el indice de las tres. -->
+  <div class="pz-hold" id="pzHold">
+    <div class="pz-stage" id="pzStage">
+      <div class="wrap builds-head">
+        <div class="k sk rv"><i class="sk-n">06</i>What we are building</div>
+        <h2 class="builds-h">Three pieces, two already running.</h2>
+      </div>
+      <div class="pz-escena">
+        <i class="pz-eje" aria-hidden="true"><i></i></i>
+        <article class="pz-card" data-i="0">
+          <div class="pz-flota">
+            <div class="pz-art">
+              <div class="bcd-plate bcd-foto">
             <img class="bcd-shot" src="img/explorer-overview.webp" width="1500" height="789"
                  alt="The Nereum explorer: block height, tokenized assets and live block production" loading="lazy" decoding="async">
           </div>
-        </div>
-        <div class="bcd-tag"><i class="bcd-dot"></i>Testnet · 75% to mainnet</div>
-        <h3 class="bcd-t">The chain</h3>
-        <p class="bcd-d">Own validators, own consensus, EVM-compatible. Every
+            </div>
+            <div class="pz-txt">
+              <div class="pz-tag"><i class="bcd-dot"></i>Testnet · 75% to mainnet</div>
+              <h3 class="pz-t">The chain</h3>
+              <p class="pz-d">Own validators, own consensus, EVM-compatible. Every
         transfer is cleared against the asset's policy before it is written —
         in the protocol, not in a contract on top.</p>
-        <a class="bcd-go" href="https://nereum.xyz/explorer">Open the explorer &#8594;</a>
-      </article>
-
-      <article class="bcd">
-        <div class="bcd-art">
-          <i class="cn tl"></i><i class="cn tr"></i><i class="cn bl"></i><i class="cn br"></i>
-          <div class="bcd-plate bcd-foto">
+              <a class="pz-go" href="https://nereum.xyz/explorer">Open the explorer &#8594;</a>
+            </div>
+          </div>
+        </article>
+        <article class="pz-card" data-i="1">
+          <div class="pz-flota">
+            <div class="pz-art">
+              <div class="bcd-plate bcd-foto">
             <img class="bcd-shot" src="img/explorer-tokenize.webp" width="1500" height="789"
                  alt="Issuing an asset on Nereum: name, symbol, type, units and declared value" loading="lazy" decoding="async">
           </div>
-        </div>
-        <div class="bcd-tag"><i class="bcd-dot"></i>Testnet · 75% to mainnet</div>
-        <h3 class="bcd-t">Asset tokenization</h3>
-        <p class="bcd-d">Describe the asset, attach its documentation, choose the
+            </div>
+            <div class="pz-txt">
+              <div class="pz-tag"><i class="bcd-dot"></i>Testnet · 75% to mainnet</div>
+              <h3 class="pz-t">Asset tokenization</h3>
+              <p class="pz-d">Describe the asset, attach its documentation, choose the
         conditions that travel with it, and issue. No custom contract to write
         and no audit to commission for every issuance.</p>
-        <a class="bcd-go" href="https://nereum.xyz/explorer/#/tokenize">Tokenize an asset &#8594;</a>
-      </article>
-
-      <article class="bcd">
-        <div class="bcd-art">
-          <i class="cn tl"></i><i class="cn tr"></i><i class="cn bl"></i><i class="cn br"></i>
-          <div class="bcd-plate bcd-sol">
+              <a class="pz-go" href="https://nereum.xyz/explorer/#/tokenize">Tokenize an asset &#8594;</a>
+            </div>
+          </div>
+        </article>
+        <article class="pz-card" data-i="2">
+          <div class="pz-flota">
+            <div class="pz-art">
+              <div class="bcd-plate bcd-sol">
             <div class="bcd-mark">
               <svg viewBox="0 0 24 24" aria-hidden="true" fill="none"
                    stroke="currentColor" stroke-width="1.4" stroke-linecap="round">
@@ -8199,20 +8298,25 @@ main>section.sx#security{background:#030409 !important;background-image:none !im
               Solar mining
             </div>
           </div>
-        </div>
-        <div class="bcd-tag"><i class="bcd-dot obra"></i>In development</div>
-        <h3 class="bcd-t">Bitcoin mining</h3>
-        <p class="bcd-d">Physical servers we own and operate, powered by solar.
+            </div>
+            <div class="pz-txt">
+              <div class="pz-tag"><i class="bcd-dot obra"></i>In development</div>
+              <h3 class="pz-t">Bitcoin mining</h3>
+              <p class="pz-d">Physical servers we own and operate, powered by solar.
         Not rented hashrate and not a reseller's contract: machines in racks,
         with their own energy behind them.</p>
-      </article>
-
+              
+            </div>
+          </div>
+        </article>
+      </div>
+      <nav class="wrap pz-indice" aria-label="Projects">
+        <button type="button" class="pz-nodo" data-i="0"><b>01</b><span>The chain</span></button>
+        <button type="button" class="pz-nodo" data-i="1"><b>02</b><span>Asset tokenization</span></button>
+        <button type="button" class="pz-nodo" data-i="2"><b>03</b><span>Bitcoin mining</span></button>
+        <a class="pz-papel" href="https://nereum.xyz/whitepaper">Read the whitepaper &#8594;</a>
+      </nav>
     </div>
-  </div>
-
-  <div class="wrap builds-foot rv">
-    <span class="mono">Drag or scroll &#8594;</span>
-    <a class="press-all" href="https://nereum.xyz/whitepaper">Read the whitepaper &#8594;</a>
   </div>
 </section>
 
@@ -15275,6 +15379,65 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
         arrancada=true; mide(); marca(cur); verifica(cards[cur]) });
     },{threshold:.35}).observe(sec.querySelector('.sx-stage'));
   } else cards.forEach(final);
+})();
+</script>
+<script>
+/* ── 06 · el eje de los proyectos: al bajar se elige una pieza cada vez ── */
+(function(){
+  var hold=document.getElementById('pzHold'), stage=document.getElementById('pzStage');
+  if(!hold||!stage) return;
+  var cards=[].slice.call(hold.querySelectorAll('.pz-card')), nodos=[].slice.call(hold.querySelectorAll('.pz-nodo'));
+  var brillo=hold.querySelector('.pz-eje i');
+  var QUIETO=matchMedia('(prefers-reduced-motion:reduce)').matches;
+  function clm(v){ return v<0?0:v>1?1:v }
+  function sube(t){ t=clm(t); return t*t*(3-2*t) }
+  var top=0, run=1;
+  function mide(){ var y=0,n=hold; while(n){ y+=n.offsetTop; n=n.offsetParent } top=y; run=Math.max(1,hold.offsetHeight-innerHeight) }
+  /* el avance del scroll se convierte en la posicion del eje, con MESETAS:
+     cada pieza se queda quieta al frente un buen tramo antes de ceder el
+     sitio a la siguiente */
+  function eje(p){ return sube((p-.24)/.16)+sube((p-.60)/.16) }
+  var suave=-1, antT=0, ultimo=-1, elegida=-1;
+  function pinta(f){
+    var ancho=innerWidth, movil=ancho<900, paso=movil?ancho*.66:Math.min(ancho*.31,500);
+    for(var i=0;i<cards.length;i++){
+      var o=i-f, a=Math.abs(o), s=1-Math.min(a,1.6)*.14;
+      var tf='translate3d('+(o*paso).toFixed(1)+'px,0,'+(-a*220).toFixed(1)+'px) rotateY('+(-o*30).toFixed(2)+'deg) scale('+s.toFixed(3)+')';
+      cards[i].style.transform=tf;
+      cards[i].style.opacity=(1-Math.min(a,1.5)*.5).toFixed(3);
+      cards[i].style.zIndex=String(10-Math.round(a*3));
+      cards[i].style.pointerEvents=a<.5?'':'none';
+    }
+    var k=Math.round(f);
+    if(k!==elegida){ elegida=k;
+      cards.forEach(function(c,i){ c.classList.toggle('on',i===k) });
+      nodos.forEach(function(n,i){ n.classList.toggle('on',i===k); n.setAttribute('aria-current',i===k?'true':'false') }); }
+    /* la linea de cada nodo se llena mientras su pieza esta al frente */
+    nodos.forEach(function(n,i){ n.style.setProperty('--k',clm(f-i+1).toFixed(3)) });
+  }
+  function tick(){
+    if(!corre) return;
+    var p=clm((window.scrollY-top)/run), ahora=performance.now()/1000, dt=Math.min(.1,antT?ahora-antT:.016); antT=ahora;
+    var f=eje(p);
+    if(suave<0||QUIETO||Math.abs(f-suave)>1.2) suave=f; else suave+=(f-suave)*(1-Math.exp(-dt*8));
+    if(Math.abs(suave-ultimo)>.0005){ ultimo=suave; pinta(suave) }
+    requestAnimationFrame(tick);
+  }
+  var corre=false;
+  /* la etiqueta de la seccion va dentro del escenario fijo, y la red de
+     seguridad de las entradas -que guarda la posicion de cada pieza- no la ve
+     cuando se llega de un salto: se enciende aqui al asomar el escenario */
+  new IntersectionObserver(function(es){ var antes=corre; corre=es[0].isIntersecting;
+    if(corre){ [].forEach.call(hold.querySelectorAll('.rv:not(.in)'),function(e){ e.classList.add('in') });
+      [].forEach.call(hold.querySelectorAll('[data-tit]:not(.vis)'),function(e){ e.classList.add('vis') }) }
+    if(corre&&!antes){ mide(); requestAnimationFrame(tick) } },{rootMargin:'10% 0px'}).observe(hold);
+  addEventListener('resize',function(){ mide(); ultimo=-1 },{passive:true});
+  addEventListener('load',function(){ setTimeout(mide,600) });
+  addEventListener('nrm:remide',mide,{passive:true});
+  /* un nodo del indice lleva a su pieza */
+  var CENTRO=[.12,.5,.88];
+  nodos.forEach(function(n,i){ n.addEventListener('click',function(){ mide(); window.scrollTo({top:top+CENTRO[i]*run,behavior:QUIETO?'auto':'smooth'}) }) });
+  mide(); pinta(0);
 })();
 </script>
 </body>
