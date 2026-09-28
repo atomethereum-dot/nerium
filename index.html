@@ -11458,7 +11458,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
        con el reloj, para que el campo siga vivo aunque nadie baje. En el
        tunel ACELERA y, al llegar a la dapp, FRENA: la curva en S hace que la
        llegada sea tranquila y no un choque. */
-    const cam=p*5.4 + (QUIETO?0:T*.16) + 70*ease(clm((p-.42)/.43));
+    const cam=p*5.4 + (QUIETO?0:T*.16) + 48*ease(clm((p-.42)/.43));   /* 48 (antes 70): con la seccion mas corta los cubos pasaban demasiado rapido */
     /* la luz del fondo del tunel, detras de todo */
     if(luz>0){
       const R0=Math.hypot(W,H)*(.05+.7*luz*luz);
