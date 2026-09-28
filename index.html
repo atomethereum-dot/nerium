@@ -15730,7 +15730,10 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
       hold=document.querySelector('.hero-hold');
   if(matchMedia('(prefers-reduced-motion:reduce)').matches) return;
   function top(n){ var y=0; while(n){ y+=n.offsetTop; n=n.offsetParent } return y }
-  var PASOS=4, DUR=1100;
+  /* la duracion de cada paso va con lo que recorre: un paso corto de la
+     portada dura menos de medio segundo y uno largo del tunel menos de uno */
+  var PASOS=4;
+  function dura(px){ return Math.max(420, Math.min(850, 300+Math.abs(px)*.4)) }
   var TRAMOS=[];
   /* la portada: de arriba del todo a su ultimo cuadro (el avance llega a 1) */
   /* la portada: los tres primeros pasos reparten su animacion -persiana,
@@ -15761,11 +15764,11 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
   function suave(t){ return t<.5 ? 4*t*t*t : 1-Math.pow(-2*t+2,3)/2 }
   function para(){ volando=false; anim++; meta=null }
   function lleva(y1){
-    var y0=window.scrollY, id=++anim, desde=performance.now();
+    var y0=window.scrollY, id=++anim, desde=performance.now(), D=dura(y1-y0);
     volando=true; meta=y1;
     (function paso(ahora){
       if(id!==anim) return;
-      var k=Math.min(1,(ahora-desde)/DUR);
+      var k=Math.min(1,(ahora-desde)/D);
       window.scrollTo(0, y0+(y1-y0)*suave(k));
       if(k<1) requestAnimationFrame(paso); else { volando=false; meta=null; window.scrollTo(0,y1) }
     })(desde);
