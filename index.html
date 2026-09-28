@@ -980,6 +980,11 @@ body.light .hud-band{color:rgba(232,236,244,.6)}
   50%{transform:translate3d(5%,-4%,0) scale(1.1)}100%{transform:translate3d(-4%,3%,0) scale(.95)}}
 @media(prefers-reduced-motion:reduce){.sale-field i{animation:none}}
 .sale>.wrap{position:relative;z-index:1}
+/* LOS CUBOS DEL TUNEL SE QUEDAN EN LA COMPRA. Al terminar el tunel sus cubos
+   se veian solo en la franja de arriba, donde el lienzo se funde con la
+   compra. Ahora la seccion entera tiene su propio campo: cubos translucidos
+   de la misma paleta, girando y flotando despacio por detras del contenido. */
+.sale-cubos{position:absolute;left:0;top:0;width:100%;height:100%;z-index:0;pointer-events:none}
 .sale-top{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;
   padding-bottom:20px;margin-bottom:var(--s3);border-bottom:1px solid rgba(232,236,244,.12)}
 .sale-live{display:inline-flex;align-items:center;gap:9px;font-family:var(--m);font-size:10.5px;
@@ -8172,6 +8177,7 @@ main>section#builds{background:#000 !important;background-image:none !important;
 </div>
 <section class="sale" id="presale" data-bg="#0E3AC4" data-acc="#7FB0FF"><i class="via" aria-hidden="true"></i>
   <div class="sale-field" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+  <canvas class="sale-cubos" id="saleCubos" aria-hidden="true"></canvas>
   <div class="wrap">
     <div class="sale-top rv">
       <span class="sale-live sk"><i class="sk-n">03</i><i></i><span class="pc">Seed Round open</span><span class="ps">Seed Round</span></span>
@@ -15725,6 +15731,97 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
   addEventListener('load',()=>setTimeout(mideScroll,600));
   addEventListener('nrm:remide',mideScroll,{passive:true});
   mideScroll(); lee(); marca(Math.round(mapa(pRaw)));
+})();
+</script>
+<script>
+/* ── LOS CUBOS DE LA COMPRA ── un lienzo 2D con cubos en perspectiva, caras
+   sombreadas por una luz, translucidos -vidrio claro y algun azul-, que suben
+   despacio, giran y se desplazan un poco con el scroll segun su profundidad.
+   Solo se anima con la seccion en pantalla; con movimiento reducido se pinta
+   una vez y se queda quieto. */
+(function(){
+  var sec=document.getElementById('presale'), cv=document.getElementById('saleCubos');
+  if(!sec||!cv||!cv.getContext) return;
+  var ctx=cv.getContext('2d'); if(!ctx) return;
+  var QUIETO=matchMedia('(prefers-reduced-motion:reduce)').matches;
+  var W=0,H=0,dpr=1,F=1,cubos=[],visto=false,ultimo=0;
+  function azar(i,k){ var x=Math.sin(i*127.1+k*311.7)*43758.5453; return x-Math.floor(x) }
+  var CARAS=[[0,1,2,3],[4,7,6,5],[0,4,5,1],[3,2,6,7],[0,3,7,4],[1,5,6,2]];
+  var NORM=[[0,0,-1],[0,0,1],[0,-1,0],[0,1,0],[1,0,0],[-1,0,0]];
+  var L=(function(){ var v=[-.45,-.7,-.55], m=Math.hypot(v[0],v[1],v[2]); return [v[0]/m,v[1]/m,v[2]/m] })();
+  function siembra(){
+    var n=Math.round(Math.max(22,Math.min(38,W*H/52000)));
+    cubos=[];
+    for(var i=0;i<n;i++){
+      var z=3+azar(i,1)*6, azul=azar(i,2)<.3;
+      cubos.push({ sx:azar(i,3), sy:azar(i,4), z:z,
+        lado:(.05+Math.pow(azar(i,5),1.8)*.09),   /* de ~15 a ~120 px en escritorio */
+        rx:azar(i,6)*6.28, ry:azar(i,7)*6.28, rz:azar(i,8)*6.28,
+        vx:(azar(i,9)-.5)*.16, vy:(azar(i,10)-.5)*.2, vz:(azar(i,11)-.5)*.1,
+        sube:.006+azar(i,12)*.012, azul:azul });
+    }
+    cubos.sort(function(a,b){ return b.z-a.z });
+  }
+  function mide(){
+    var w=sec.clientWidth, h=sec.offsetHeight;
+    dpr=Math.min(window.devicePixelRatio||1,1.5);
+    if(w===W&&h===H) return;
+    W=w; H=h; cv.width=Math.round(W*dpr); cv.height=Math.round(H*dpr);
+    F=Math.max(W,innerHeight)*.9; siembra(); pinta(performance.now()/1000);
+  }
+  function rota(v,a,b,c){
+    var x=v[0],y=v[1],z=v[2],t;
+    t=y*Math.cos(a)-z*Math.sin(a); z=y*Math.sin(a)+z*Math.cos(a); y=t;
+    t=x*Math.cos(b)+z*Math.sin(b); z=-x*Math.sin(b)+z*Math.cos(b); x=t;
+    t=x*Math.cos(c)-y*Math.sin(c); y=x*Math.sin(c)+y*Math.cos(c); x=t;
+    return [x,y,z];
+  }
+  function pinta(T){
+    ctx.setTransform(dpr,0,0,dpr,0,0); ctx.clearRect(0,0,W,H);
+    /* cuanto se ha bajado por la seccion: los de cerca se mueven mas */
+    var r=sec.getBoundingClientRect(), des=-r.top;
+    for(var i=0;i<cubos.length;i++){
+      var c=cubos[i], z=c.z;
+      var sy=((c.sy - (QUIETO?0:T*c.sube)) % 1 + 1) % 1;
+      var cx=c.sx*W, cy=sy*(H+240)-120 - des*(.5/z);
+      if(cy<-160||cy>H+160) continue;
+      var a=c.rx+(QUIETO?0:T*c.vx), b=c.ry+(QUIETO?0:T*c.vy), g=c.rz+(QUIETO?0:T*c.vz);
+      var k=F/z, s=c.lado, P=[], V=[];
+      for(var j=0;j<8;j++){
+        /* x = signo(bit0)*signo(bit1): asi 0-1-2-3 dan la vuelta a la cara */
+        var v=rota([(j&1?1:-1)*(j&2?1:-1)*s,(j&2?1:-1)*s,(j&4?1:-1)*s],a,b,g);
+        V.push(v); P.push([cx+v[0]*k/(1+v[2]/z), cy+v[1]*k/(1+v[2]/z)]);
+      }
+      /* lejos, mas palido: se funde con el azul del fondo */
+      var lej=(z-3)/6, alfa=c.azul ? .55-.3*lej : .2-.1*lej;
+      for(var f=0;f<6;f++){
+        var n=rota(NORM[f],a,b,g);
+        if(n[2]>=0) continue;                     /* cara de espaldas */
+        var luz=Math.max(0,-(n[0]*L[0]+n[1]*L[1]+n[2]*L[2]));
+        var q=CARAS[f];
+        ctx.beginPath(); ctx.moveTo(P[q[0]][0],P[q[0]][1]);
+        for(var m=1;m<4;m++) ctx.lineTo(P[q[m]][0],P[q[m]][1]);
+        ctx.closePath();
+        if(c.azul){ var l=Math.round(40+luz*70);
+          ctx.fillStyle='rgba('+(20+l*.3|0)+','+(70+l|0)+','+(220+l*.3|0)+','+alfa.toFixed(3)+')' }
+        else ctx.fillStyle='rgba(225,236,255,'+(alfa*(.45+luz*.9)).toFixed(3)+')';
+        ctx.fill();
+        ctx.strokeStyle='rgba(235,242,255,'+(alfa*.55).toFixed(3)+')'; ctx.lineWidth=.8; ctx.stroke();
+      }
+    }
+  }
+  function bucle(t){
+    if(!visto) return;
+    if(!document.hidden) pinta(t/1000);
+    requestAnimationFrame(bucle);
+  }
+  mide();
+  if('ResizeObserver' in window) new ResizeObserver(mide).observe(sec); else addEventListener('resize',mide);
+  if(QUIETO){ addEventListener('scroll',function(){ pinta(0) },{passive:true}); return }
+  new IntersectionObserver(function(es){
+    var v=es[0].isIntersecting;
+    if(v&&!visto){ visto=true; requestAnimationFrame(bucle) } else if(!v) visto=false;
+  },{rootMargin:'200px 0px'}).observe(sec);
 })();
 </script>
 </body>
