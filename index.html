@@ -15714,5 +15714,69 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
   mideScroll(); lee(); marca(Math.round(mapa(pRaw)));
 })();
 </script>
+<script>
+/* ── EL TUNEL LLEVA SOLO A LA COMPRA ──
+   Dentro del tunel de cubos, al SEGUNDO gesto hacia abajo -dos deslizadas del
+   dedo o dos golpes de rueda- la pagina baja sola hasta la seccion de compra,
+   y el tunel se ve entero por el camino. Mientras baja no se le puede
+   arrastrar (se ignora el dedo y la rueda) para que no se quede a medias.
+   Solo hacia abajo, y solo con gestos: un ancla, la barra o un scrollTo no
+   cuentan. Con «prefers-reduced-motion» llega de un salto. */
+(function(){
+  var st=document.getElementById('stack'), pre=document.getElementById('presale');
+  if(!st||!pre) return;
+  var QUIETO=matchMedia('(prefers-reduced-motion:reduce)').matches;
+  var DOS=2, DUR=2200;
+  function top(n){ var y=0; while(n){ y+=n.offsetTop; n=n.offsetParent } return y }
+  var cuenta=0, ultimoGesto=0, volando=false, desde=0;
+  function zona(){
+    var a=top(st), b=top(pre), y=window.scrollY;
+    return y>=a-innerHeight*.35 && y<b-8;
+  }
+  function gesto(){
+    if(volando) return;
+    if(!zona()){ cuenta=0; return }
+    var ahora=performance.now();
+    if(ahora-ultimoGesto<260) return;          /* el mismo gesto aun sigue */
+    ultimoGesto=ahora; cuenta++;
+    if(cuenta>=DOS) vuela();
+  }
+  function suave(t){ return t<.5 ? 4*t*t*t : 1-Math.pow(-2*t+2,3)/2 }
+  function vuela(){
+    var y0=window.scrollY, y1=top(pre);
+    cuenta=0;
+    if(y1<=y0+2) return;
+    if(QUIETO){ window.scrollTo(0,y1); return }
+    volando=true; desde=performance.now();
+    (function paso(ahora){
+      var k=Math.min(1,(ahora-desde)/DUR);
+      window.scrollTo(0, y0+(y1-y0)*suave(k));
+      if(k<1) requestAnimationFrame(paso);
+      else { volando=false; window.scrollTo(0,y1) }
+    })(desde);
+  }
+  /* rueda: los golpes que llegan seguidos son un solo gesto */
+  var ruedaT=0;
+  /* en captura: si va volando, la rueda no le llega al desplazamiento suave
+     de escritorio, que si no tiraria de la pagina hacia otro lado */
+  addEventListener('wheel',function(e){
+    if(volando){ e.preventDefault(); e.stopImmediatePropagation(); return }
+    if(e.deltaY<=0){ if(e.deltaY<0) cuenta=0; return }
+    var ahora=performance.now(), nuevo=ahora-ruedaT>260; ruedaT=ahora;
+    if(nuevo){ ultimoGesto=0; gesto() }
+  },{passive:false,capture:true});
+  /* dedo: una deslizada hacia arriba de mas de 24 px es un gesto hacia abajo */
+  var y0t=null;
+  addEventListener('touchstart',function(e){ if(!volando) y0t=e.touches[0].clientY },{passive:true});
+  addEventListener('touchmove',function(e){ if(volando) e.preventDefault() },{passive:false});
+  addEventListener('touchend',function(e){
+    if(volando||y0t===null) return;
+    var t=e.changedTouches[0], dy=y0t-t.clientY; y0t=null;
+    if(dy>24){ ultimoGesto=0; gesto() } else if(dy<-24) cuenta=0;
+  },{passive:true});
+  addEventListener('keydown',function(e){ if(volando&&/^(ArrowDown|ArrowUp|PageDown|PageUp| |Home|End)$/.test(e.key)) e.preventDefault() });
+  window.__vuelaCompra=vuela;
+})();
+</script>
 </body>
 </html>
