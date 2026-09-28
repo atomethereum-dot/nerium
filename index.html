@@ -7526,6 +7526,14 @@ main>section.sx#security{background:#030409 !important;background-image:none !im
 .ps{display:none}
 .pronto .ps{display:inline}
 </style>
+<style id="plano-css">
+/* SIN LAMINAS. Cada seccion subia montada 36-64 px sobre la anterior, con las
+   esquinas de arriba redondeadas y una sombra encima, como una hoja que flota
+   al llegar. Lo pidio fuera el dueño: las secciones van a tope, una debajo de
+   otra, sin solape, sin esquinas y sin sombra. La linea azul del borde se
+   queda como separador. */
+html body main>section+section{margin-top:0 !important;border-radius:0 !important;box-shadow:none !important}
+</style>
 <style id="blanco-css">
 /* ══ EL FINAL EN BLANCO ══════════════════════════════════════════════════
    La escena de los cubos que suben («Nereum Finance») termina fundiendose a
