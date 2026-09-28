@@ -7540,7 +7540,10 @@ html body main>section+section{margin-top:0 !important;border-radius:0 !importan
    BLANCO y se queda en blanco; las redes (#join) y el pie van en blanco
    liso, con tinta oscura. Va al final de la hoja y con #id para ganar a las
    reglas de papel y de negro que ya pintaban estas dos piezas. */
-html body #join{background:#FFFFFF !important;background-image:none !important;color:#0B0E14 !important;box-shadow:none !important}
+html body #join{background-color:#FFFFFF !important;
+  background-image:radial-gradient(90% 60% at 50% -10%,#FFFFFF 0%,rgba(255,255,255,0) 64%),
+    linear-gradient(180deg,#FFFFFF 0%,#F7F8FB 60%,#F1F3F7 100%),var(--grano-claro) !important;
+  background-repeat:no-repeat,no-repeat,repeat !important;color:#0B0E14 !important;box-shadow:none !important}
 html body #join .via{--via-c:rgba(8,11,17,.14)}
 html body #join .sk,html body #join .k{color:#5E6573 !important}
 html body #join .sk::after{background:rgba(8,11,17,.2) !important}
@@ -7553,9 +7556,12 @@ html body #join .jbtn::after{display:none !important}
 html body #join .jbtn .jbtn-name{color:#0B0E14 !important}
 html body #join .jbtn .jbtn-sub{color:#5E6573 !important}
 html body #join .jbtn .jbtn-go{border-color:rgba(8,11,17,.2) !important;color:#0B0E14 !important}
-html body #join .jbtn:hover,html body #join .jbtn:focus-visible{border-color:var(--jb) !important}
-html body #join .jbtn:hover .jbtn-name,html body #join .jbtn:hover .jbtn-sub,
-html body #join .jbtn:hover .jbtn-go{color:#fff !important}
+/* al pulsar (o pasar el raton) la tarjeta se rellena de su color; el
+   relleno va en el propio fondo y no en el «::before», que sobre el blanco
+   forzado de arriba no llegaba a verse y dejaba el texto blanco sobre blanco */
+html body #join .jbtn:hover,html body #join .jbtn:focus-visible,html body #join .jbtn:active{
+  border-color:var(--jb) !important;background:var(--jb) !important}
+html body #join .jbtn:is(:hover,:focus-visible,:active) :is(.jbtn-name,.jbtn-sub,.jbtn-go){color:#fff !important}
 html body #join a.jbtn span.jbtn-go svg{stroke:#0B0E14 !important}
 html body #join a.jbtn svg.jbtn-mark,html body #join a.jbtn svg.jbtn-mark path{color:#0B0E14 !important;fill:#0B0E14 !important}
 html body #join a.jbtn:hover svg.jbtn-mark,html body #join a.jbtn:hover svg.jbtn-mark path,
@@ -7565,12 +7571,13 @@ html body #join .jbtn:hover .jbtn-go{border-color:#fff !important}
 html body #join .join-rule{color:#5E6573 !important}
 html body #join .join-rule span{color:#5E6573 !important}
 html body #join .join-rule i{background:rgba(8,11,17,.14) !important}
-html body footer{background:#FFFFFF !important;background-image:none !important;color:#0B0E14 !important;
+html body footer{background-color:#FFFFFF !important;
+  background-image:linear-gradient(180deg,#F1F3F7 0%,#FFFFFF 40%),var(--grano-claro) !important;background-repeat:no-repeat,repeat !important;color:#0B0E14 !important;
   border-top:1px solid rgba(8,11,17,.08) !important;--tapa:#FFFFFF}
 html body footer .ffield{display:none}
 html body footer .fbrand,html body footer .fbrand span,html body footer .fbrand svg{color:#0B0E14 !important}
 html body footer .fcopy{color:#5E6573 !important}
-html body footer .fgrid h3{color:#0B0E14 !important}
+html body footer .fgrid h3,html body footer .fgrid h3 *{color:#0B0E14 !important;-webkit-text-fill-color:#0B0E14 !important}
 html body footer .fgrid a{color:#4B5261 !important}
 html body footer .fgrid a:hover{color:#0E3AC4 !important}
 html body footer .fgrid a::before{color:rgba(8,11,17,.28) !important}
@@ -7581,7 +7588,6 @@ html body footer .fmark span{background-image:linear-gradient(180deg,rgba(11,14,
 html body footer .fmark-logo{--fmg-a:.12;--fmg-b:.03}
 /* el embudo del pie de la escena se funde al color al que ahora entrega: blanco */
 html body .xl .emb{--embc:255 255 255}
-html body .xl{background:#FFFFFF !important}
 /* el rotulo de la escena, oscuro sobre el blanco del final */
 .xl-stage.blanco .xl-word{color:rgba(11,14,20,.62) !important}
 </style>
@@ -8596,7 +8602,7 @@ main>section#builds{background:#000 !important;background-image:none !important;
       <p class="join-note">No private groups, no paid signals. The same information reaches everyone at the same time.</p>
     </div>
     <div class="join-grid rv">
-      <a class="jbtn" href="https://x.com/nereumlab" target="_blank" rel="noopener" style="--jb:#111318" aria-label="Nereum on X">
+      <a class="jbtn" href="https://x.com/nereuml1?s=21" target="_blank" rel="noopener" style="--jb:#111318" aria-label="Nereum on X">
         <div class="jbtn-top">
           <svg class="jbtn-mark" viewBox="0 0 24 24" aria-hidden="true">
             <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231 5.45-6.231Zm-1.161 17.52h1.833L7.084 4.126H5.117l11.966 15.644Z"/>
@@ -8765,7 +8771,11 @@ const CALM=matchMedia('(prefers-reduced-motion: reduce)').matches;
       e.preventDefault();
     });
     addEventListener('scroll',()=>{
-      if(Math.abs(scrollY-S.y)>4)S.t=S.y=scrollY;      // scrollbar drag, find-in-page, anchors
+      /* un salto que no viene de este bucle -barra, buscar, un ancla, un
+         scrollTo- manda: a mas de 1,5 px ya no es redondeo propio. Con 4 px, un
+         salto corto caia dentro del margen y la pagina seguia hasta el destino
+         viejo de la rueda. */
+      if(Math.abs(scrollY-S.y)>1.5)S.t=S.y=scrollY;      // scrollbar drag, find-in-page, anchors
     },{passive:true});
   }
   addEventListener('resize',measure,{passive:true});
