@@ -15715,30 +15715,42 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
 })();
 </script>
 <script>
-/* ── EL TUNEL SE REPRODUCE SOLO HASTA LA COMPRA ──
-   Dentro del tunel de cubos el scroll hacia abajo NO arrastra la pagina: un
-   golpe de dedo con inercia se saltaba medio tunel de una vez y no se veia.
-   En su lugar se cuentan los gestos: el PRIMERO adelanta un poco, con calma,
-   y el SEGUNDO reproduce el tunel entero solo, a paso constante -arranca y
-   frena suave, en medio no acelera- hasta dejar la compra arriba. El tunel
-   completo dura TUNEL ms; si se empieza mas abajo, lo que queda al mismo
-   paso. Hacia arriba todo va normal, y un gesto hacia arriba detiene el
-   viaje. Con «prefers-reduced-motion» no se toca el scroll. */
+/* ── LA PORTADA Y EL TUNEL SE REPRODUCEN SOLOS ──
+   Dos tramos van por scroll y eran demasiado cortos para un dedo: la
+   PORTADA -persiana, malla, corredor y el rotulo, en menos de una pantalla-
+   y el TUNEL de cubos que acaba en la compra. Un golpe con inercia se los
+   saltaba y no se veia el diseño. Dentro de cada tramo el scroll hacia abajo
+   ya NO arrastra la pagina; se cuentan los gestos: el PRIMERO adelanta un
+   poco, con calma, y el SEGUNDO reproduce el tramo entero solo, a paso
+   constante -arranca y frena suave, en medio no acelera- hasta su final.
+   Cada tramo tiene su duracion completa; si se empieza mas abajo dura lo que
+   queda, al mismo paso. Hacia arriba todo va normal, y un gesto hacia
+   arriba detiene el viaje. Con «prefers-reduced-motion» no se toca nada. */
 (function(){
-  var st=document.getElementById('stack'), pre=document.getElementById('presale');
-  if(!st||!pre) return;
+  var st=document.getElementById('stack'), pre=document.getElementById('presale'),
+      hold=document.querySelector('.hero-hold');
   if(matchMedia('(prefers-reduced-motion:reduce)').matches) return;
-  var DOS=2, TUNEL=12000, EMPUJE=.45;
   function top(n){ var y=0; while(n){ y+=n.offsetTop; n=n.offsetParent } return y }
-  var cuenta=0, ultimoGesto=0, volando=false, anim=0;
-  /* de un poco antes del tunel hasta la compra */
+  var TRAMOS=[];
+  /* la portada: de arriba del todo a su ultimo cuadro (el avance llega a 1) */
+  if(hold) TRAMOS.push({ nombre:'portada', dura:7000,
+    a:function(){ return 0 },
+    b:function(){ return Math.max(1, hold.offsetHeight-innerHeight) } });
+  /* el tunel: de un poco antes de el hasta la compra arriba */
+  if(st&&pre) TRAMOS.push({ nombre:'tunel', dura:12000,
+    a:function(){ return top(st)-innerHeight*.35 },
+    b:function(){ return top(pre) } });
+  if(!TRAMOS.length) return;
+  var DOS=2;
+  var cuenta=0, ultimoGesto=0, volando=false, anim=0, tramo=null;
   function zona(){
-    var a=top(st), b=top(pre), y=window.scrollY;
-    return y>=a-innerHeight*.35 && y<b-8;
+    var y=window.scrollY;
+    for(var k=0;k<TRAMOS.length;k++){ var t=TRAMOS[k]; if(y>=t.a() && y<t.b()-8) return t }
+    return null;
   }
   /* velocidad en trapecio: sube en el primer 8 %, llana y baja en el 14 % final */
   var AC=.08, FR=.14, VM=1/(1-AC/2-FR/2);
-  function tramo(t){
+  function trapecio(t){
     if(t<AC) return VM*t*t/(2*AC);
     if(t<1-FR) return VM*(AC/2+(t-AC));
     return 1-VM*(1-t)*(1-t)/(2*FR);
@@ -15755,33 +15767,40 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
       if(k<1) requestAnimationFrame(paso); else { volando=false; window.scrollTo(0,y1) }
     })(desde);
   }
-  function vuela(){
-    var a=top(st), y0=window.scrollY, y1=top(pre);
+  function reproduce(t){
+    var a=Math.max(0,t.a()), y0=window.scrollY, y1=t.b();
     cuenta=0;
     if(y1<=y0+2) return;
-    lleva(y1, Math.max(3000, TUNEL*(y1-y0)/Math.max(1,y1-a)), tramo);
+    lleva(y1, Math.max(2500, t.dura*(y1-y0)/Math.max(1,y1-a)), trapecio);
   }
-  function gesto(){
+  function gesto(t){
     var ahora=performance.now();
     if(ahora-ultimoGesto<260) return;          /* el mismo gesto aun sigue */
-    ultimoGesto=ahora; cuenta++;
-    if(cuenta>=DOS) vuela();
-    else lleva(Math.min(top(pre), window.scrollY+innerHeight*EMPUJE), 900, suave);
+    ultimoGesto=ahora;
+    if(t!==tramo){ tramo=t; cuenta=0 }         /* cada tramo cuenta aparte */
+    cuenta++;
+    if(cuenta>=DOS) reproduce(t);
+    else {
+      /* el empujon: un 12 % del tramo, nunca mas de media pantalla */
+      var largo=t.b()-Math.max(0,t.a());
+      lleva(Math.min(t.b(), window.scrollY+Math.min(innerHeight*.45, largo*.12)), 900, suave);
+    }
   }
-  /* rueda: en el tunel no arrastra; los golpes seguidos son un solo gesto */
+  /* rueda: en un tramo no arrastra; los golpes seguidos son un solo gesto */
   var ruedaT=0;
   addEventListener('wheel',function(e){
     if(e.deltaY<0){ if(volando) para(); cuenta=0; return }   /* arriba, normal */
-    if(!(volando||zona())) return;
+    var t=zona();
+    if(!(volando||t)) return;
     e.preventDefault(); e.stopImmediatePropagation();
     if(volando && cuenta===0) return;          /* ya se reproduce solo */
     var ahora=performance.now(), nuevo=ahora-ruedaT>260; ruedaT=ahora;
-    if(nuevo && !(volando && cuenta>=DOS)) { ultimoGesto=0; gesto() }
+    if(nuevo && t) { ultimoGesto=0; gesto(t) }
   },{passive:false,capture:true});
-  /* dedo: en el tunel, arrastrar hacia abajo no mueve la pagina (sin inercia);
-     arrastrar hacia arriba si, y para el viaje */
+  /* dedo: en un tramo, arrastrar hacia abajo no mueve la pagina (sin
+     inercia); arrastrar hacia arriba si, y para el viaje */
   var y0t=null, bloqueo=false;
-  addEventListener('touchstart',function(e){ y0t=e.touches[0].clientY; bloqueo=volando||zona() },{passive:true});
+  addEventListener('touchstart',function(e){ y0t=e.touches[0].clientY; bloqueo=volando||!!zona() },{passive:true});
   addEventListener('touchmove',function(e){
     if(y0t===null) return;
     var dy=y0t-e.touches[0].clientY;
@@ -15792,11 +15811,12 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
     if(y0t===null) return;
     var t=e.changedTouches[0], dy=y0t-t.clientY; y0t=null;
     if(dy<-24){ cuenta=0; return }
-    if(dy>24 && bloqueo && !(volando && cuenta===0)){ ultimoGesto=0; gesto() }
+    var z=zona();
+    if(dy>24 && bloqueo && z && !(volando && cuenta===0)){ ultimoGesto=0; gesto(z) }
   },{passive:true});
   /* teclado: mientras se reproduce, no se le mueve */
   addEventListener('keydown',function(e){ if(volando&&/^(ArrowDown|PageDown| |End)$/.test(e.key)) e.preventDefault() });
-  window.__vuelaCompra=vuela;
+  window.__vuelaCompra=function(){ var t=TRAMOS[TRAMOS.length-1]; if(t&&t.nombre==='tunel') reproduce(t) };
 })();
 </script>
 </body>
