@@ -46,7 +46,7 @@ const di = (b, t) => { if (b) { ok++; console.log('  ok  ' + t) } else { mal++; 
   // cazo cuando se movio la portada y no la tabla del whitepaper.
   const FASES = ['Foundation', 'Expansion', 'Integration'];
   const OBJ = [
-    'The contract deployed and verified, and the company registration, the audit, the team KYC and the Seed Round under way. Each step will be checkable by someone who is not us.',
+    'The contract deployed and verified, and the company registration, the audit and the team KYC under way. Each step will be checkable by someone who is not us.',
     'The chain and the interfaces that sit on top of it, built and out in the open, with a price anyone can look up.',
     'The infrastructure ceases to be a decision factor for the issuer, in the same way interbank payment rails are not one today.',
   ];

@@ -30,7 +30,7 @@ const r = await pg.evaluate(() => {
     hb: document.querySelector('.hb.white').textContent.trim(),
     ruta: [...document.querySelectorAll('#ruta .ruta-est')].map(e => e.textContent.trim()),
     rutaPasado: /Audit passed|KYC passed/.test(document.getElementById('ruta').textContent),
-    rutaProc: document.querySelectorAll('#ruta .ruta-proc').length };
+    rutaProc: document.querySelectorAll('#ruta .ruta-proc:not([hidden])').length };
 });
 di(r.flag === true, 'la ronda esta en espera en la pagina publicada');
 di([r.ann, r.hero, r.stk].every(x => x === 'Starts soon'), 'aviso, portada y tunel dicen «Starts soon» (' + [r.ann, r.hero, r.stk].join(' / ') + ')');
@@ -40,8 +40,8 @@ di(r.raised === '$0' && /\$500,000/.test(r.meta), 'la dapp enseña $0 recaudados
 di(r.enProceso >= 6 && r.cyber, 'Seguridad: registro, auditoria y KYC en proceso, con CyberScope (' + r.enProceso + ')');
 di(!r.viejo, 'Seguridad y la portada ya no dicen Halborn, Assure DeFi, «passed» ni el numero de registro');
 di(r.hb === 'Audit in progress', 'el boton de la portada tampoco dice ya «audited» (' + r.hb + ')');
-di(r.ruta[0] === 'In progress' && r.ruta[1] === 'In progress' && !r.rutaPasado && r.rutaProc === 5,
-   'el Roadmap: fases 01 y 02 en proceso; auditoria, KYC, registro y las dos Seed Round en proceso (' + r.ruta.join(' / ') + ', ' + r.rutaProc + ' en proceso)');
+di(r.ruta[0] === 'In progress' && r.ruta[1] === 'In progress' && !r.rutaPasado && r.rutaProc === 3,
+   'el Roadmap: fases 01 y 02 en proceso; auditoria, KYC y registro en proceso, sin hitos de recaudacion (' + r.ruta.join(' / ') + ', ' + r.rutaProc + ' en proceso)');
 di(errs.length === 0, 'sin errores de pagina' + (errs.length ? ': ' + errs[0] : ''));
 await nav.close(); srv.close();
 console.log(mal ? `\n${ok} bien, ${mal} MAL` : `\n${ok}/${ok} correctas`);
