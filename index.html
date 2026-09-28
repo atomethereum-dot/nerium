@@ -993,6 +993,9 @@ body.light .hud-band{color:rgba(232,236,244,.6)}
 .sale-tunel{position:absolute;inset:0;z-index:0;pointer-events:none;overflow:hidden}
 .sale-tunel canvas{position:absolute;left:0;top:0;display:block;width:100%;will-change:transform}
 .stk-velo{display:none !important}
+/* y sin la linea azul de separacion arriba: acababa a 40 px de cada lado y,
+   con el tunel pasando por detras, parecia cortada con tijera */
+main>section#presale::after{display:none !important}
 .sale-top{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;
   padding-bottom:20px;margin-bottom:var(--s3);border-bottom:1px solid rgba(232,236,244,.12)}
 .sale-live{display:inline-flex;align-items:center;gap:9px;font-family:var(--m);font-size:10.5px;
@@ -11621,17 +11624,14 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
     if(!fctx) return;
     if(fondo.width!==cv.width||fondo.height!==cv.height){ fondo.width=cv.width; fondo.height=cv.height }
     const alto=cv.clientHeight+'px'; if(fondo.style.height!==alto) fondo.style.height=alto;
-    const k=cv.width/Math.max(1,W);
-    /* pegado a la pantalla: arriba de la seccion mientras entra, luego
-       siguiendo la pantalla, y al final apoyado en el borde de abajo */
-    const sr=compra.getBoundingClientRect(), ch=cv.clientHeight;
-    const y=Math.max(0,Math.min(-sr.top, sr.height-ch));
-    fondo.style.transform='translate3d(0,'+y.toFixed(1)+'px,0)';
-    /* y el cuadro, alineado con la pantalla -donde vive el escenario- */
-    const dy=(sr.top+y)*k;
+    /* siempre exactamente donde esta la pantalla; la seccion recorta lo que
+       sobra por arriba o por abajo. Sin topes que calcular, no queda hueco
+       ni al entrar ni al salir */
+    const sr=compra.getBoundingClientRect();
+    fondo.style.transform='translate3d(0,'+(-sr.top).toFixed(1)+'px,0)';
     fctx.setTransform(1,0,0,1,0,0);
     fctx.clearRect(0,0,fondo.width,fondo.height);
-    fctx.drawImage(cv,0,-dy);
+    fctx.drawImage(cv,0,0);
   }
   if(fondo) new IntersectionObserver(es=>{ enCompra=es[0].isIntersecting; if(enCompra){ size(); dirty=true } },
     {rootMargin:'10% 0px'}).observe(document.getElementById('presale'));
