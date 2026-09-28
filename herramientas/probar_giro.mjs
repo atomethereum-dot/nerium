@@ -730,9 +730,12 @@ di(cuadros[1].desv >= 0.010 || cuadros[2].desv >= 0.010,
      va en --b-, con una linea de luz por el borde. Por encima del borde
      sigue el tunel: nunca queda nada vacio arriba. */
   const llega = await pg.evaluate(async () => {
-    const h = document.getElementById('stack'), top0 = h.getBoundingClientRect().top + scrollY;
-    const run = h.offsetHeight - innerHeight, st = document.querySelector('.stk-stage');
-    const mira = async p => { scrollTo(0, Math.round(top0 + p * run)); await new Promise(s => setTimeout(s, 700));
+    /* se mide por donde queda el borde de la compra en pantalla -en alturas
+       de pantalla-, no por el avance del tunel: asi no depende del alto de
+       la seccion */
+    const st = document.querySelector('.stk-stage');
+    const pre0 = document.getElementById('presale').getBoundingClientRect().top + scrollY;
+    const mira = async bv => { scrollTo(0, Math.round(pre0 - bv * innerHeight)); await new Promise(s => setTimeout(s, 700));
       const borde = document.getElementById('presale').getBoundingClientRect().top;
       const t = document.querySelector('#presale h2') || document.getElementById('presale');
       const cv = document.getElementById('stkCv'), c = document.createElement('canvas');
@@ -746,7 +749,7 @@ di(cuadros[1].desv >= 0.010 || cuadros[2].desv >= 0.010,
       return { borde: Math.round(borde), b: parseFloat(st.style.getPropertyValue('--b')),
                velo: parseFloat(st.style.getPropertyValue('--velo')) || 0, op: +getComputedStyle(st).opacity,
                tit: Math.round(t.getBoundingClientRect().top), vh: innerHeight, desv: Math.round(desv) } };
-    return { lejos: await mira(0.60), medio: await mira(0.78), fin: await mira(0.87) };
+    return { lejos: await mira(1.7), medio: await mira(0.5), fin: await mira(-0.12) };
   });
   di(llega.lejos.b >= llega.lejos.vh,
      'mientras dura el tunel, tapa entero la dapp que sube por debajo (borde a ' + llega.lejos.b + ' px)');
