@@ -15723,12 +15723,16 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
    y el tunel se ve entero por el camino. Mientras baja no se le puede
    arrastrar (se ignora el dedo y la rueda) para que no se quede a medias.
    Solo hacia abajo, y solo con gestos: un ancla, la barra o un scrollTo no
-   cuentan. Con «prefers-reduced-motion» llega de un salto. */
+   cuentan. Con «prefers-reduced-motion» llega de un salto.
+   El viaje va a VELOCIDAD CONSTANTE, como si alguien bajara despacio: el
+   tunel entero -de su borde de arriba a la compra- dura TUNEL ms, arranca y
+   frena suave y en medio no acelera. Si se empieza mas abajo dura menos, al
+   mismo paso. Un gesto hacia arriba lo detiene. */
 (function(){
   var st=document.getElementById('stack'), pre=document.getElementById('presale');
   if(!st||!pre) return;
   var QUIETO=matchMedia('(prefers-reduced-motion:reduce)').matches;
-  var DOS=2, DUR=1700;
+  var DOS=2, TUNEL=10000, dur=TUNEL;
   function top(n){ var y=0; while(n){ y+=n.offsetTop; n=n.offsetParent } return y }
   var cuenta=0, ultimoGesto=0, volando=false, desde=0;
   function zona(){
@@ -15743,15 +15747,26 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
     ultimoGesto=ahora; cuenta++;
     if(cuenta>=DOS) vuela();
   }
-  function suave(t){ return t<.5 ? 4*t*t*t : 1-Math.pow(-2*t+2,3)/2 }
+  /* velocidad en trapecio: sube en el primer 8 %, llana en medio y baja en
+     el ultimo 14 % del tiempo */
+  var AC=.08, FR=.14, VM=1/(1-AC/2-FR/2);
+  function suave(t){
+    if(t<AC) return VM*t*t/(2*AC);
+    if(t<1-FR) return VM*(AC/2+(t-AC));
+    return 1-VM*(1-t)*(1-t)/(2*FR);
+  }
+  function para(){ volando=false }
   function vuela(){
-    var y0=window.scrollY, y1=top(pre);
+    var a=top(st), y0=window.scrollY, y1=top(pre);
     cuenta=0;
     if(y1<=y0+2) return;
     if(QUIETO){ window.scrollTo(0,y1); return }
+    /* el mismo paso siempre: la parte que queda del tunel, al mismo ritmo */
+    dur=Math.max(2500, TUNEL*(y1-y0)/Math.max(1,y1-a));
     volando=true; desde=performance.now();
     (function paso(ahora){
-      var k=Math.min(1,(ahora-desde)/DUR);
+      if(!volando) return;
+      var k=Math.min(1,(ahora-desde)/dur);
       window.scrollTo(0, y0+(y1-y0)*suave(k));
       if(k<1) requestAnimationFrame(paso);
       else { volando=false; window.scrollTo(0,y1) }
@@ -15762,17 +15777,25 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
   /* en captura: si va volando, la rueda no le llega al desplazamiento suave
      de escritorio, que si no tiraria de la pagina hacia otro lado */
   addEventListener('wheel',function(e){
-    if(volando){ e.preventDefault(); e.stopImmediatePropagation(); return }
+    if(volando){
+      /* hacia arriba lo para y deja subir; hacia abajo no hace nada */
+      if(e.deltaY<0){ para(); cuenta=0; return }
+      e.preventDefault(); e.stopImmediatePropagation(); return }
     if(e.deltaY<=0){ if(e.deltaY<0) cuenta=0; return }
     var ahora=performance.now(), nuevo=ahora-ruedaT>260; ruedaT=ahora;
     if(nuevo){ ultimoGesto=0; gesto() }
   },{passive:false,capture:true});
   /* dedo: una deslizada hacia arriba de mas de 24 px es un gesto hacia abajo */
   var y0t=null;
-  addEventListener('touchstart',function(e){ if(!volando) y0t=e.touches[0].clientY },{passive:true});
-  addEventListener('touchmove',function(e){ if(volando) e.preventDefault() },{passive:false});
+  addEventListener('touchstart',function(e){ y0t=e.touches[0].clientY },{passive:true});
+  addEventListener('touchmove',function(e){
+    if(!volando) return;
+    /* el dedo hacia abajo (subir la pagina) lo para; lo demas se ignora */
+    if(y0t!==null && e.touches[0].clientY-y0t>24){ para(); cuenta=0; return }
+    e.preventDefault();
+  },{passive:false});
   addEventListener('touchend',function(e){
-    if(volando||y0t===null) return;
+    if(volando||y0t===null){ y0t=null; return }
     var t=e.changedTouches[0], dy=y0t-t.clientY; y0t=null;
     if(dy>24){ ultimoGesto=0; gesto() } else if(dy<-24) cuenta=0;
   },{passive:true});
