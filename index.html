@@ -5490,7 +5490,12 @@ body.light .hud::after{background:radial-gradient(120% 120% at 100% 100%,
 
 /* ── el telefono: el titular no cabe al lado del medio ── */
 @media(max-width:760px){
-  .prs-f{grid-template-columns:auto 1fr auto;row-gap:10px;column-gap:14px;
+  /* Columnas FIJAS: numero, medio y el hueco de la imagen (62 px, lo que
+     mide ella). Con «auto 1fr auto» el Safari del iPhone ensanchaba la
+     primera columna por el titular que la cruza, la fila salia mas ancha que
+     la pantalla y cada titular cortaba en un sitio distinto, con la imagen a
+     una distancia distinta del texto en cada fila. */
+  .prs-f{grid-template-columns:34px minmax(0,1fr) 62px;row-gap:10px;column-gap:14px;
     align-items:start;padding-block:18px;min-height:0}
   .prs-n{grid-row:1;grid-column:1}
   .prs-s{grid-row:1;grid-column:2;padding-left:0}
@@ -5506,7 +5511,8 @@ body.light .hud::after{background:radial-gradient(120% 120% at 100% 100%,
   .prs-vis{--v:62px}
   .prs-go{grid-row:1 / span 2;grid-column:3;align-self:center;justify-self:center;margin-right:0}
   .prs-f.con-vis .prs-go{opacity:0}
-  .prs-t{grid-row:2;grid-column:1 / 3;padding-left:0;font-size:19px}
+  .prs-t{grid-row:2;grid-column:1 / 3;min-width:0;padding-left:0;font-size:19px}
+  .prs-n{overflow:visible}
   .prs-tr{background:repeating-linear-gradient(90deg,
     var(--prs-trama) 0 1px, transparent 1px calc((100% - 1px) / 4))}
   /* El texto no se monta en el filete: en telefono la rejilla y el contenido
