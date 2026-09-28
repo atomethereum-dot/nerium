@@ -8,6 +8,12 @@
 import http from 'node:http'; import fs from 'node:fs'; import path from 'node:path';
 import { chromium } from 'playwright';
 const RAIZ = '/home/user/nerium';
+/* Mientras la seccion este oculta (atributo hidden) no hay nada que medir:
+   se dice y se sale en verde. */
+if (fs.readFileSync(path.join(RAIZ, 'index.html'), 'utf8').includes('id="press" data-bg="#030409" data-acc="#0F6BFF" hidden')) {
+  console.log('  --  la seccion de prensa esta oculta: no hay nada que medir');
+  process.exit(0);
+}
 const TIPO = {'.html':'text/html','.svg':'image/svg+xml','.css':'text/css','.woff2':'font/woff2',
   '.png':'image/png','.jpg':'image/jpeg','.js':'text/javascript','.json':'application/json'};
 const srv = http.createServer((q, r) => {
