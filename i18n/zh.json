@@ -309,5 +309,9 @@
  "Identity documents": "身份文件",
  "Source · CyberScope · Third-party KYC": "来源 · CyberScope · 第三方 KYC",
  "Company registration": "公司注册",
- "Audit in progress": "审计进行中"
+ "Audit in progress": "审计进行中",
+ "The contract deployed and verified, and the company registration, the audit and the team KYC under way. Each one will be checkable by someone who is not us.": "合约已部署并验证；公司注册、审计和团队 KYC 正在进行。每一项都将能由我们以外的人核查。",
+ "Audit in progress · CyberScope": "审计进行中 · CyberScope",
+ "Team KYC in progress · CyberScope": "团队 KYC 进行中 · CyberScope",
+ "Legal registration in the United States · in progress": "美国法律注册 · 进行中"
 }

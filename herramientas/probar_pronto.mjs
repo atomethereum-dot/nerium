@@ -1,7 +1,8 @@
 // probar_pronto: con la ronda en espera (NRM_PRONTO, como esta publicada) la
 // venta se anuncia como «Starts soon» en el aviso, la portada y el tunel, sin
 // cifra ni «complete»; la dapp enseña $0 recaudados y la meta de siempre; y
-// Seguridad dice que registro, auditoria y KYC estan en proceso con CyberScope.
+// Seguridad y el Roadmap dicen que registro, auditoria y KYC estan en proceso
+// con CyberScope.
 import { chromium } from 'playwright';
 import http from 'node:http'; import fs from 'node:fs'; import path from 'node:path';
 const RAIZ = '/home/user/nerium';
@@ -26,7 +27,10 @@ const r = await pg.evaluate(() => {
     pcVisibles, raised: t('saleRaised'), meta: document.querySelector('#saleRaised + span').textContent,
     enProceso: (sec.match(/In progress/gi) || []).length, cyber: /CyberScope/.test(sec),
     viejo: /Halborn|Assure DeFi|KYC passed|Audited|L26000341887/.test(document.getElementById('security').innerHTML + document.getElementById('top').innerHTML),
-    hb: document.querySelector('.hb.white').textContent.trim() };
+    hb: document.querySelector('.hb.white').textContent.trim(),
+    ruta: [...document.querySelectorAll('#ruta .ruta-est')].map(e => e.textContent.trim()),
+    rutaPasado: /Audit passed|KYC passed/.test(document.getElementById('ruta').textContent),
+    rutaProc: document.querySelectorAll('#ruta .ruta-proc').length };
 });
 di(r.flag === true, 'la ronda esta en espera en la pagina publicada');
 di([r.ann, r.hero, r.stk].every(x => x === 'Starts soon'), 'aviso, portada y tunel dicen «Starts soon» (' + [r.ann, r.hero, r.stk].join(' / ') + ')');
@@ -36,6 +40,8 @@ di(r.raised === '$500,000' && /\$16,000,000/.test(r.meta), 'la dapp enseña $500
 di(r.enProceso >= 6 && r.cyber, 'Seguridad: registro, auditoria y KYC en proceso, con CyberScope (' + r.enProceso + ')');
 di(!r.viejo, 'Seguridad y la portada ya no dicen Halborn, Assure DeFi, «passed» ni el numero de registro');
 di(r.hb === 'Audit in progress', 'el boton de la portada tampoco dice ya «audited» (' + r.hb + ')');
+di(r.ruta[0] === 'In progress' && r.ruta[1] === 'In progress' && !r.rutaPasado && r.rutaProc === 3,
+   'el Roadmap: fases 01 y 02 en proceso, y auditoria, KYC y registro sin «passed» (' + r.ruta.join(' / ') + ', ' + r.rutaProc + ' en proceso)');
 di(errs.length === 0, 'sin errores de pagina' + (errs.length ? ': ' + errs[0] : ''));
 await nav.close(); srv.close();
 console.log(mal ? `\n${ok} bien, ${mal} MAL` : `\n${ok}/${ok} correctas`);

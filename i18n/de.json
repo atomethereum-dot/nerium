@@ -309,5 +309,9 @@
  "Identity documents": "Ausweisdokumente",
  "Source · CyberScope · Third-party KYC": "Quelle · CyberScope · KYC durch Dritte",
  "Company registration": "Firmeneintragung",
- "Audit in progress": "Prüfung läuft"
+ "Audit in progress": "Prüfung läuft",
+ "The contract deployed and verified, and the company registration, the audit and the team KYC under way. Each one will be checkable by someone who is not us.": "Der Vertrag ist bereitgestellt und verifiziert; Firmeneintragung, Prüfung und Team-KYC laufen. Jeder Schritt wird von jemandem überprüfbar sein, der nicht wir ist.",
+ "Audit in progress · CyberScope": "Prüfung läuft · CyberScope",
+ "Team KYC in progress · CyberScope": "Team-KYC läuft · CyberScope",
+ "Legal registration in the United States · in progress": "Rechtliche Eintragung in den USA · läuft"
 }

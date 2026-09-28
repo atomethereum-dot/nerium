@@ -309,5 +309,9 @@
  "Identity documents": "신분 서류",
  "Source · CyberScope · Third-party KYC": "출처 · CyberScope · 제3자 KYC",
  "Company registration": "회사 등록",
- "Audit in progress": "감사 진행 중"
+ "Audit in progress": "감사 진행 중",
+ "The contract deployed and verified, and the company registration, the audit and the team KYC under way. Each one will be checkable by someone who is not us.": "컨트랙트는 배포·검증되었고, 회사 등록과 감사, 팀 KYC가 진행 중입니다. 모두 우리가 아닌 누군가가 확인할 수 있게 됩니다.",
+ "Audit in progress · CyberScope": "감사 진행 중 · CyberScope",
+ "Team KYC in progress · CyberScope": "팀 KYC 진행 중 · CyberScope",
+ "Legal registration in the United States · in progress": "미국 법인 등록 · 진행 중"
 }

@@ -309,5 +309,9 @@
  "Identity documents": "Giấy tờ tùy thân",
  "Source · CyberScope · Third-party KYC": "Nguồn · CyberScope · KYC của bên thứ ba",
  "Company registration": "Đăng ký công ty",
- "Audit in progress": "Đang kiểm toán"
+ "Audit in progress": "Đang kiểm toán",
+ "The contract deployed and verified, and the company registration, the audit and the team KYC under way. Each one will be checkable by someone who is not us.": "Hợp đồng đã triển khai và xác minh; việc đăng ký công ty, kiểm toán và KYC đội ngũ đang tiến hành. Mỗi bước đều sẽ được bên thứ ba kiểm chứng.",
+ "Audit in progress · CyberScope": "Đang kiểm toán · CyberScope",
+ "Team KYC in progress · CyberScope": "KYC đội ngũ đang tiến hành · CyberScope",
+ "Legal registration in the United States · in progress": "Đăng ký pháp lý tại Hoa Kỳ · đang tiến hành"
 }

@@ -309,5 +309,9 @@
  "Identity documents": "وثائق الهوية",
  "Source · CyberScope · Third-party KYC": "المصدر · CyberScope · KYC من جهة خارجية",
  "Company registration": "تسجيل الشركة",
- "Audit in progress": "التدقيق قيد التنفيذ"
+ "Audit in progress": "التدقيق قيد التنفيذ",
+ "The contract deployed and verified, and the company registration, the audit and the team KYC under way. Each one will be checkable by someone who is not us.": "العقد منشور ومُتحقَّق منه، وتسجيل الشركة والتدقيق وKYC الفريق قيد التنفيذ. وسيمكن لجهة ليست نحن التحقق من كل منها.",
+ "Audit in progress · CyberScope": "التدقيق قيد التنفيذ · CyberScope",
+ "Team KYC in progress · CyberScope": "KYC الفريق قيد التنفيذ · CyberScope",
+ "Legal registration in the United States · in progress": "التسجيل القانوني في الولايات المتحدة · قيد التنفيذ"
 }

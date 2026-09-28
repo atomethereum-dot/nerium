@@ -309,5 +309,9 @@
  "Identity documents": "Документы, удостоверяющие личность",
  "Source · CyberScope · Third-party KYC": "Источник · CyberScope · KYC третьей стороной",
  "Company registration": "Регистрация компании",
- "Audit in progress": "Аудит в процессе"
+ "Audit in progress": "Аудит в процессе",
+ "The contract deployed and verified, and the company registration, the audit and the team KYC under way. Each one will be checkable by someone who is not us.": "Контракт развёрнут и верифицирован, а регистрация компании, аудит и KYC команды в процессе. Каждый пункт сможет проверить тот, кто не мы.",
+ "Audit in progress · CyberScope": "Аудит в процессе · CyberScope",
+ "Team KYC in progress · CyberScope": "KYC команды в процессе · CyberScope",
+ "Legal registration in the United States · in progress": "Юридическая регистрация в США · в процессе"
 }

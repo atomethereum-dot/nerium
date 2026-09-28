@@ -309,5 +309,9 @@
  "Identity documents": "Pièces d'identité",
  "Source · CyberScope · Third-party KYC": "Source · CyberScope · KYC par un tiers",
  "Company registration": "Enregistrement de la société",
- "Audit in progress": "Audit en cours"
+ "Audit in progress": "Audit en cours",
+ "The contract deployed and verified, and the company registration, the audit and the team KYC under way. Each one will be checkable by someone who is not us.": "Le contrat déployé et vérifié, et en cours l'enregistrement de la société, l'audit et le KYC de l'équipe. Chacun pourra être vérifié par quelqu'un d'autre que nous.",
+ "Audit in progress · CyberScope": "Audit en cours · CyberScope",
+ "Team KYC in progress · CyberScope": "KYC de l'équipe en cours · CyberScope",
+ "Legal registration in the United States · in progress": "Enregistrement légal aux États-Unis · en cours"
 }
