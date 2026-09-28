@@ -7530,7 +7530,7 @@ main>section#builds{background:#000 !important;background-image:none !important;
 #builds .pt-cab{position:absolute;left:0;right:0;top:clamp(56px,8vh,96px);z-index:3;pointer-events:none;margin-bottom:0}
 #builds .pt-cab .builds-h{font-size:clamp(28px,2.8vw,42px);letter-spacing:-.04em;line-height:1;margin-top:14px}
 #builds .pt-fig{position:absolute;z-index:3;pointer-events:none;display:grid;gap:6px;justify-items:end;text-align:right;
-  font-family:var(--m);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.42)}
+  font-family:var(--m);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:#fff}
 #builds .pt-fig b{font-weight:400;color:#fff}
 #builds .pt-fig span{display:none}
 #builds .pt-fig span.on{display:block}
@@ -7555,9 +7555,9 @@ main>section#builds{background:#000 !important;background-image:none !important;
   opacity:0;visibility:hidden;transform:translateY(12px);filter:blur(6px);transition:opacity .25s,transform .25s,filter .25s,visibility 0s .25s}
 #builds .pt-info.on{opacity:1;visibility:visible;transform:none;filter:none;
   transition:opacity .6s cubic-bezier(.2,.8,.2,1) .12s,transform .8s cubic-bezier(.2,.8,.2,1) .12s,filter .6s .12s,visibility 0s}
-#builds .pt-ds{grid-column:1/6;margin:0;color:#A9AFBA !important;font-size:15px;line-height:1.62;max-width:46ch}
+#builds .pt-ds{grid-column:1/6;margin:0;color:rgba(255,255,255,.9) !important;font-size:15px;line-height:1.62;max-width:46ch}
 #builds .pt-lado{grid-column:6/9;display:grid;gap:16px;justify-items:start}
-#builds .pt-est{display:inline-flex;align-items:center;gap:10px;font-family:var(--m);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:#D9DCE3}
+#builds .pt-est{display:inline-flex;align-items:center;gap:10px;font-family:var(--m);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:#fff}
 #builds .pt-est .bcd-dot.obra{background:#E0A04A}
 #builds .pt-barra{display:block;width:100%;max-width:200px;height:1px;background:rgba(255,255,255,.16);position:relative}
 #builds .pt-barra i{position:absolute;left:0;top:-.5px;height:2px;width:75%;background:linear-gradient(90deg,#2E86FF,#63A9FF)}
@@ -15439,7 +15439,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
   let gl=null; try{ gl=cv.getContext('webgl',{antialias:false,alpha:false,premultipliedAlpha:false}) }catch(e){}
   const VS='attribute vec4 a;attribute float r;uniform vec2 R;uniform float D,SW,SE,DA;uniform vec3 AC,SC;varying vec4 vc;'+
     'void main(){vec2 p=a.xy/R*2.-1.;p.y=-p.y;gl_Position=vec4(p,0.,1.);float k=a.w,sp=clamp(a.z/700.,0.,1.);'+
-    'vec3 cw=mix(vec3(.95,.96,1.),vec3(.78,.86,1.),r*r);vec3 c=k<1.?mix(cw,AC,k):mix(AC,vec3(.4,.55,.85),k-1.);c=mix(c,SC,sp*.85);'+
+    'vec3 cw=vec3(1.);vec3 c=k<1.?mix(cw,AC,k):mix(AC,vec3(.4,.55,.85),k-1.);c=mix(c,SC,sp*.85);'+
     'float al=k<1.?1.:mix(1.,(.14+.36*r)*DA,k-1.);float sz=k<1.?mix(SW,SE,k):mix(SE,.7+1.9*r*r,k-1.);'+
     'gl_PointSize=sz*D*(1.+sp*.5);vc=vec4(c*(1.+sp*.6),al);}';
   const FS='precision mediump float;varying vec4 vc;void main(){float d=length(gl_PointCoord-.5);float a=1.-smoothstep(.34,.5,d);gl_FragColor=vec4(vc.rgb*vc.a*a,1.);}';
@@ -15466,7 +15466,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
   /* la franja libre para la palabra: bajo la cabecera y sobre el texto de abajo */
   let ZA=150, ZB=600, BT=0, CT=80;
   function zonas(){ const s=st.getBoundingClientRect(), c=$('ptCab').getBoundingClientRect(), b=$('ptBajo').getBoundingClientRect();
-    CT=c.top-s.top; BT=b.top-s.top; ZA=c.bottom-s.top+(MOB?18:26); ZB=MOB?Math.min(H*.5,BT-150):BT-34 }
+    CT=c.top-s.top; BT=b.top-s.top; ZA=c.bottom-s.top+(MOB?18:26); ZB=MOB?Math.min(H*.6,BT-48-40)-48-26:BT-34 }
   /* nombres largos en dos renglones, cortados por el espacio mas centrado */
   function renglones(nm){ if(nm.length<=10||nm.indexOf(' ')<0) return [nm];
     let mejor=-1,d=1e9; for(let k=0;k<nm.length;k++) if(nm[k]===' '){ const q=Math.abs(k-nm.length/2); if(q<d){ d=q; mejor=k } }
@@ -15476,7 +15476,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
     const lines=renglones(NOMS[i].textContent.trim().replace(/\s+/g,' ')), side=lado(), avail=W-side*2;
     tx.font='500 100px '+FUENTE; try{ tx.letterSpacing='-5px' }catch(e){}
     const mw=Math.max(...lines.map(l=>tx.measureText(l).width));
-    let F=Math.min(avail*.99/mw*100,(ZB-ZA)/(lines.length*.86+.1)); if(MOB) F=Math.min(F,W*.3);
+    let F=Math.min(avail*.99/mw*100,(ZB-ZA)/(lines.length*.86+.1));
     TC.width=W; TC.height=H; tx.clearRect(0,0,W,H); tx.fillStyle='#fff'; tx.font='500 '+F+'px '+FUENTE;
     try{ tx.letterSpacing=(-F*.05)+'px' }catch(e){}
     tx.textAlign='center'; tx.textBaseline='alphabetic';
@@ -15518,15 +15518,10 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
   st.addEventListener('pointerleave',()=>{ mOn=false; anillo.style.opacity=0 });
   st.addEventListener('touchmove',e=>{ const r=st.getBoundingClientRect(), t=e.touches[0]; mueve(t.clientX-r.left,t.clientY-r.top) },{passive:true});
   st.addEventListener('touchend',()=>{ mOn=false },{passive:true});
-  /* en el telefono una rafaga cruza la palabra cada ~4 s */
-  function viento(t){ const per=4.2, k=(t%per)/per, j=Math.floor(t/per), w=WL[CUR]; if(!w||k>.7) return null;
-    const u=k/.7, dir=j%2?-1:1;
-    return {x:W/2+dir*(u-.5)*(W+RAD*2), y:w.cy+Math.sin(j*2.1)*w.bh*.3+Math.sin(u*6.28)*w.bh*.15, vx:dir*(W+RAD*2)/(per*.7), vy:0} }
   const rizo=(x,y,t)=>{ const s=.0042; return (Math.sin(x*s+t*.6)+Math.sin(y*s*1.3-t*.4)+Math.sin((x+y)*s*.7+t*.3))*1.4 };
   function paso(h,t,e,cur){
     const w=WL[cur], tp=w.pts, nw=w.n, eb=caja(), ks=(1-e)*(1-e), kw=RM?200:(MOB?70:64), cw=RM?28:(MOB?11:10);
     let cx=mx, cy=my, cvx=mvx, cvy=mvy, on=mOn;
-    if(!on&&MOB&&!RM){ const g=viento(t); if(g){ cx=g.x; cy=g.y; cvx=g.vx; cvy=g.vy; on=true } }
     const R=RAD, R2=R*R, S=MOB?26000:30000, ox=W/2, oy=w.cy;
     for(let i=0;i<N;i++){
       let x=X[i], y=Y[i], vx=VX[i], vy=VY[i], tx, ty, kd, k=kw, c=cw;
@@ -15585,7 +15580,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
     gl.bindBuffer(gl.ARRAY_BUFFER,bufR); gl.enableVertexAttribArray(U.r); gl.vertexAttribPointer(U.r,1,gl.FLOAT,false,0,0);
     const am=cur===2;
     gl.uniform2f(U.R,W,H); gl.uniform1f(U.D,D);
-    gl.uniform1f(U.SW,cl(WL[cur].g*(MOB?.78:.9),1.3,2.8)); gl.uniform1f(U.DA,MOB?.45:1); gl.uniform1f(U.SE,MOB?1.5:1.8);
+    gl.uniform1f(U.SW,cl(WL[cur].g*(MOB?2.1:1.45),1.8,9)); gl.uniform1f(U.DA,MOB?.45:1); gl.uniform1f(U.SE,MOB?1.5:1.8);
     if(am){ gl.uniform3f(U.AC,1,.66,.3); gl.uniform3f(U.SC,1,.8,.5) } else { gl.uniform3f(U.AC,.3,.6,1); gl.uniform3f(U.SC,.45,.7,1) }
     gl.drawArrays(gl.POINTS,0,N);
   }
