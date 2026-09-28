@@ -7526,6 +7526,57 @@ main>section.sx#security{background:#030409 !important;background-image:none !im
 .ps{display:none}
 .pronto .ps{display:inline}
 </style>
+<style id="blanco-css">
+/* ══ EL FINAL EN BLANCO ══════════════════════════════════════════════════
+   La escena de los cubos que suben («Nereum Finance») termina fundiendose a
+   BLANCO y se queda en blanco; las redes (#join) y el pie van en blanco
+   liso, con tinta oscura. Va al final de la hoja y con #id para ganar a las
+   reglas de papel y de negro que ya pintaban estas dos piezas. */
+html body #join{background:#FFFFFF !important;background-image:none !important;color:#0B0E14 !important;box-shadow:none !important}
+html body #join .via{--via-c:rgba(8,11,17,.14)}
+html body #join .sk,html body #join .k{color:#5E6573 !important}
+html body #join .sk::after{background:rgba(8,11,17,.2) !important}
+html body #join .sk-n{color:#0E3AC4 !important}
+html body #join .join-h,html body #join .join-h *{color:#0B0E14 !important;-webkit-text-fill-color:#0B0E14 !important}
+html body #join .join-note{color:#4B5261 !important}
+html body #join .jbtn{background:#FFFFFF !important;border:1px solid rgba(8,11,17,.12) !important;color:#0B0E14 !important;
+  box-shadow:0 1px 0 rgba(8,11,17,.04),0 18px 40px -26px rgba(8,11,17,.22) !important;backdrop-filter:none !important}
+html body #join .jbtn::after{display:none !important}
+html body #join .jbtn .jbtn-name{color:#0B0E14 !important}
+html body #join .jbtn .jbtn-sub{color:#5E6573 !important}
+html body #join .jbtn .jbtn-go{border-color:rgba(8,11,17,.2) !important;color:#0B0E14 !important}
+html body #join .jbtn:hover,html body #join .jbtn:focus-visible{border-color:var(--jb) !important}
+html body #join .jbtn:hover .jbtn-name,html body #join .jbtn:hover .jbtn-sub,
+html body #join .jbtn:hover .jbtn-go{color:#fff !important}
+html body #join a.jbtn span.jbtn-go svg{stroke:#0B0E14 !important}
+html body #join a.jbtn svg.jbtn-mark,html body #join a.jbtn svg.jbtn-mark path{color:#0B0E14 !important;fill:#0B0E14 !important}
+html body #join a.jbtn:hover svg.jbtn-mark,html body #join a.jbtn:hover svg.jbtn-mark path,
+html body #join a.jbtn:focus-visible svg.jbtn-mark,html body #join a.jbtn:focus-visible svg.jbtn-mark path{color:#fff !important;fill:#fff !important}
+html body #join a.jbtn:hover span.jbtn-go svg,html body #join a.jbtn:focus-visible span.jbtn-go svg{stroke:#fff !important}
+html body #join .jbtn:hover .jbtn-go{border-color:#fff !important}
+html body #join .join-rule{color:#5E6573 !important}
+html body #join .join-rule span{color:#5E6573 !important}
+html body #join .join-rule i{background:rgba(8,11,17,.14) !important}
+html body footer{background:#FFFFFF !important;background-image:none !important;color:#0B0E14 !important;
+  border-top:1px solid rgba(8,11,17,.08) !important;--tapa:#FFFFFF}
+html body footer .ffield{display:none}
+html body footer .fbrand,html body footer .fbrand span,html body footer .fbrand svg{color:#0B0E14 !important}
+html body footer .fcopy{color:#5E6573 !important}
+html body footer .fgrid h3{color:#0B0E14 !important}
+html body footer .fgrid a{color:#4B5261 !important}
+html body footer .fgrid a:hover{color:#0E3AC4 !important}
+html body footer .fgrid a::before{color:rgba(8,11,17,.28) !important}
+html body footer .fend{border-top-color:rgba(8,11,17,.1) !important}
+html body footer .f-legal{color:#5E6573 !important}
+html body footer .fmark span{background-image:linear-gradient(180deg,rgba(11,14,20,.16),rgba(11,14,20,.03)) !important;
+  -webkit-background-clip:text;background-clip:text;color:transparent !important}
+html body footer .fmark-logo{--fmg-a:.12;--fmg-b:.03}
+/* el embudo del pie de la escena se funde al color al que ahora entrega: blanco */
+html body .xl .emb{--embc:255 255 255}
+html body .xl{background:#FFFFFF !important}
+/* el rotulo de la escena, oscuro sobre el blanco del final */
+.xl-stage.blanco .xl-word{color:rgba(11,14,20,.62) !important}
+</style>
 <style id="pt-css">
 /* ══ 06 · LOS PROYECTOS EN PARTICULAS ══════════════════════════════════════
    Negro puro, el mismo del globo de arriba. Escenario fijo mientras se baja;
@@ -8469,7 +8520,7 @@ main>section#builds{background:#000 !important;background-image:none !important;
 <section class="xl" id="xlight" data-bg="#0A0D14" data-acc="#1A7AFF"><i class="emb" aria-hidden="true" style="--emb:#06070A"></i>
   <div class="xl-stage" id="xlStage">
     <canvas class="xl-cv" id="xlCv"></canvas>
-    <div class="xl-word">Nereum Labs</div>
+    <div class="xl-word">Nereum Finance</div>
     <div class="xf-go" aria-hidden="true">
       <i></i>
       <svg viewBox="0 0 24 24"><path d="M12 4v13M6 12l6 6 6-6"/></svg>
@@ -8529,7 +8580,7 @@ main>section#builds{background:#000 !important;background-image:none !important;
   </div>
 </section>
 
-<section class="join" id="join" data-bg="#0A0D14" data-acc="#0A5CF5"><i class="via" aria-hidden="true"></i>
+<section class="join" id="join" data-bg="#FFFFFF" data-acc="#0A5CF5"><i class="via" aria-hidden="true"></i>
   <div class="wrap">
     <div class="join-head rv">
       <div class="k sk rv"><i class="sk-n">08</i>In the open</div>
@@ -8568,7 +8619,7 @@ main>section#builds{background:#000 !important;background-image:none !important;
 
 </main>
 
-<footer data-bg="#0D1017" data-acc="#0A5CF5">
+<footer data-bg="#FFFFFF" data-acc="#0A5CF5">
   <div class="ffield" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
   <div class="wrap">
     <div class="ftop">
@@ -12255,9 +12306,11 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
       g.addColorStop(1,'rgba(255,255,255,0)');
       ctx.fillStyle=g;ctx.fillRect(0,cy-hh,W,hh*2);
     }
-    const end=eOut(clm((p-.74)/.22));
+    /* el final se funde a BLANCO y se queda en blanco: detras vienen las
+       redes y el pie, que ahora son blancos */
+    const end=eOut(clm((p-.70)/.24));
     if(end>0){
-      ctx.fillStyle='rgba('+PAPER.join(',')+','+end.toFixed(3)+')';
+      ctx.fillStyle='rgba(255,255,255,'+end.toFixed(3)+')';
       ctx.fillRect(0,0,W,H);
     }
     const antes=clm((.30-p)/.22);
@@ -12265,6 +12318,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
     const abierto=clm((p-.40)/.20);
     if(abierto>.01)pintaSubida(abierto);
     stage.classList.toggle('lit', p>.66);
+    stage.classList.toggle('blanco', p>.8);
     stage.classList.toggle('go', p<.7);
   }
   /* EL SITIO DE LA SECCION NO CAMBIA AL BAJAR, ASI QUE NO SE PREGUNTA POR EL.
