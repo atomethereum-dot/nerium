@@ -10636,7 +10636,10 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
   function prensa(x){ x=cl(x); var t=x;
     for(var i=0;i<8;i++){ var cx=.51,bx=3*(.32-.17)-cx,ax=1-cx-bx, xt=((ax*t+bx)*t+cx)*t-x, d=(3*ax*t+2*bx)*t+cx; if(Math.abs(d)<1e-6) break; t-=xt/d }
     var cy=2.67,by=3*(1-.89)-cy,ay=1-cy-by; return ((ay*t+by)*t+cy)*t }
-  function rng(s){ return function(){ s=(s*16807)%2147483647; return s/2147483647 } }
+  /* la semilla se lleva a positivo: las filas de arriba del todo tienen
+     indice negativo, y con semilla negativa el generador daba numeros
+     negativos y HEX[...] salia «undefined» en la direccion */
+  function rng(s){ s=((s%2147483647)+2147483647)%2147483647||1; return function(){ s=(s*16807)%2147483647; return s/2147483647 } }
   var HEX='0123456789abcdef';
   function hx(r,n){ var s=''; for(var i=0;i<n;i++) s+=HEX[r()*16|0]; return s }
   function corto(r){ return '0x'+hx(r,4)+'…'+hx(r,4) }
