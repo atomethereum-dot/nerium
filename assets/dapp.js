@@ -1434,10 +1434,11 @@
   /* Con la ronda en espera (NRM_PRONTO, en index.html) no se suma la privada:
      la barra enseña solo lo que entra por la cadena. El objetivo sigue
      contando con ella, para que la meta no cambie. */
-  /* TEMPORAL — pruebas del dueño: con la ronda en espera la barra arranca en
-     $500,000 en vez de en $0. Cuando terminen las pruebas vuelve a ser 0. */
-  var PRONTO_USD = 500000;
-  var PRIVADA_USD = window.NRM_PRONTO ? PRONTO_USD : PRIVADA_BASE;
+  /* TEMPORAL — pruebas del dueño: con la ronda en espera lo recaudado va a
+     $0 y la meta a $500,000. Al terminar las pruebas se quita esto y la
+     dapp vuelve a la privada de siempre y a su meta. */
+  var PRONTO_META = 500000;
+  var PRIVADA_USD = window.NRM_PRONTO ? 0 : PRIVADA_BASE;
 
   var barra = document.getElementById('saleFill'),
       globo = document.getElementById('saleTip'),
@@ -1457,6 +1458,7 @@
   }
 
   function objetivoUsd() {
+    if (window.NRM_PRONTO) return PRONTO_META;
     var t = 0, hay = false;
     REDES.forEach(function (k) {
       var e = estado[k];
