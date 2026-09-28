@@ -6626,6 +6626,13 @@ main>section#presale{
 
 #presale .sale-sub,#presale p.sale-sub{color:rgba(255,255,255,.88) !important}
 #presale .sale-net,#presale .sale-net.mono{color:rgba(255,255,255,.84) !important}
+/* el punto de «Seed Round», en verde lima y con halo: el verde oscuro de
+   antes se perdia sobre el azul de la compra */
+#presale .sale-live>i:not(.sk-n){width:8px;height:8px;background:#A6FF1A !important;
+  box-shadow:0 0 0 4px rgba(166,255,26,.2),0 0 12px rgba(166,255,26,.8) !important;
+  animation:saleLima 2.2s ease-in-out infinite}
+@keyframes saleLima{0%,100%{opacity:1}50%{opacity:.62}}
+@media(prefers-reduced-motion:reduce){#presale .sale-live>i:not(.sk-n){animation:none}}
 #presale .sale-live,#presale .sale-live .sk-n,
 #presale .sk,#presale .k{color:#FFFFFF !important}
 /* El «.mono» blanco es para lo que va SOBRE el azul. Dentro de la ficha de
@@ -7882,7 +7889,7 @@ main>section#builds{background:#000 !important;background-image:none !important;
       <li><i></i><span class="pc">Seed Round open</span><span class="ps">Seed Round</span></li>
       <li class="hp-pct"><b id="heroPct">Starts soon</b> <span class="pc">complete</span></li>
       <li>1 NRM = $0.20</li>
-      <li>Ethereum &middot; BNB Chain</li>
+      <li>Ethereum &middot; BNB Chain &middot; Robinhood Chain</li>
       <li>Contracts verified</li>
     </ul>
     <i class="lq-sweep" aria-hidden="true"></i></div>
@@ -8192,7 +8199,7 @@ main>section#builds{background:#000 !important;background-image:none !important;
   <div class="wrap">
     <div class="sale-top rv">
       <span class="sale-live sk"><i class="sk-n">03</i><i></i><span class="pc">Seed Round open</span><span class="ps">Seed Round</span></span>
-      <span class="sale-net mono">Ethereum &#183; BNB Chain</span>
+      <span class="sale-net mono">Ethereum &#183; BNB Chain &#183; Robinhood Chain</span>
     </div>
 
     <div class="sale-grid">
@@ -11601,16 +11608,12 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
     if(bano>0){ ctx.fillStyle='rgba(14,58,196,'+bano.toFixed(3)+')'; ctx.fillRect(0,0,W,H) }
     /* el cuadro entero, antes de borrarlo, pasa al fondo de la compra */
     if(enCompra) copia();
-    /* la disolucion: por debajo del borde de la dapp el lienzo se borra, en
-       un degradado de 40 % de pantalla */
-    if(borde<H){
-      const b0=Math.max(-H,borde), b1=b0+vh*.4;
-      const g=ctx.createLinearGradient(0,b0,0,b1);
-      g.addColorStop(0,'rgba(0,0,0,0)'); g.addColorStop(1,'rgba(0,0,0,1)');
-      ctx.globalCompositeOperation='destination-out';
-      ctx.fillStyle=g; ctx.fillRect(0,Math.max(0,b0),W,H-Math.max(0,b0));
-      ctx.globalCompositeOperation='source-over';
-    }
+    /* por debajo del borde de la dapp el lienzo se borra DEL TODO, de golpe:
+       el mismo tunel sigue ahi, copiado en el fondo de la compra, asi que el
+       corte no se ve. Antes se borraba en un degradado de 40 % de pantalla y
+       en esa franja el tunel quedaba ENCIMA del contenido de la compra,
+       apagando el rotulo, el punto y las redes de arriba. */
+    if(borde<H) ctx.clearRect(0,Math.max(0,borde),W,H-Math.max(0,borde));
   }
   let cerca=false, enCompra=false;
   new IntersectionObserver(es=>{ cerca=es[0].isIntersecting; if(cerca){ size() } },
