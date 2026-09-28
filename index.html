@@ -8929,11 +8929,14 @@ const CALM=matchMedia('(prefers-reduced-motion: reduce)').matches;
     const r=W/Math.max(1,H);
     /* En una pantalla estrecha el pasillo se cerraba de lado y las paredes
        se subian encima del lockup: se le pone suelo al ancho. */
-    /* y sin el giro, en el telefono el pasillo recto llegaba justo a los
-       extremos de «Nereum»: un poco mas ancho para que la palabra quede en
-       el negro del fondo */
-    return { a: Math.max(W<760 ? 2.9 : 1.95, 1.55*Math.min(1.7, r)),
-             b: Math.max(1.55, 1.55*Math.min(1.4, 1/r)) };
+    /* EN ESCRITORIO, EL HUECO MAS GRANDE. El pasillo gira, y con un final
+       ajustado a la palabra cada esquina que pasaba cerca de «Nereum» lo
+       hacia parecer torcido. Un 30 % mas de pasillo deja el negro del fondo
+       holgado alrededor del rotulo y el giro se lee como giro, no como
+       desajuste. En el telefono se queda como estaba. */
+    const k = W<760 ? 1 : 1.3;
+    return { a: k*Math.max(1.95, 1.55*Math.min(1.7, r)),
+             b: k*Math.max(1.55, 1.55*Math.min(1.4, 1/r)) };
   }
 
   /* Cada pieza guarda su FASE, no su z. La z sale de un solo reloj:
@@ -9134,10 +9137,7 @@ const CALM=matchMedia('(prefers-reduced-motion: reduce)').matches;
     const vel=(0.20+emp*1.50)*dt;
     t=(t+vel)%RANGO;
     vt+=dt;
-    /* SIN GIRO. El pasillo rodaba sobre si mismo sin parar y su final se veia
-       como un rombo inclinado: torcido respecto a «Nereum», que va derecho.
-       Ahora avanza y respira, pero recto. */
-    giro=0;
+    giro+=(0.040+emp*0.075)*dt;
     /* EL PASILLO GIRA UNA VEZ, NO PIEZA A PIEZA.
        Girar cada cuadrado por separado son dos «save/restore» y una rotacion
        por pieza: con quinientas, medio millar de cambios de estado por cuadro.
