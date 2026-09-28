@@ -9381,7 +9381,7 @@ const CALM=matchMedia('(prefers-reduced-motion: reduce)').matches;
       }
       cv.style.transform='scale('+(1+p*.22).toFixed(4)+')';
       cv.style.opacity=(1-p*.72).toFixed(3);
-      inn.style.transform='translate3d(0,'+(S.y*.26).toFixed(1)+'px,0) scale('+((1-p*.06)*(+(inn.style.getPropertyValue('--sq')||1))).toFixed(4)+')';
+      inn.style.transform='translate3d(0,'+(S.y*.26).toFixed(1)+'px,0) scale('+(+(inn.style.getPropertyValue('--sq')||1)).toFixed(4)+')';
       inn.style.opacity=(1-cl(p*1.6)).toFixed(3);
       if(floor)floor.style.opacity=cl(p/.30).toFixed(3);
       /* LA CORTINA, PUBLICADA. La portada termina en CLARO -la malla tapa el
@@ -10857,6 +10857,10 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
                                                             quedaba encogida y con el velo
                                                             puesto mientras se elegia */
               && !sec.querySelector('.hero-hold, .hpin-stage'))
+    /* EL HUNDIMIENTO SE QUITA. Cada seccion se encogia un 5 % y se velaba al
+       irse; lo pidio fuera el dueño. Se deja la lista vacia -y no se borra el
+       codigo- para que vuelva con quitar esta linea. */
+    .filter(()=>false)
     .map(sec=>{
       sec.classList.add('depth');
       let d=null;
