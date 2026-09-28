@@ -1229,7 +1229,8 @@ body.light .srail{color:#E3E6EE}
 .hero h1 .wd,.hero h1 .wdw{display:inline-block;white-space:nowrap}
 .hero h1{overflow-wrap:normal;word-break:keep-all;text-wrap:balance}
 .hero h1 .sp{display:inline-block;width:.26em}
-.stk-hold{position:relative;height:780vh}
+/* 620vh (antes 780): el tunel pedia demasiado scroll */
+.stk-hold{position:relative;height:620vh}
 /* sin relleno abajo: el escenario acaba en el azul de la ronda y la
    seccion de compra empieza justo debajo, sin franja oscura entre medias */
 #stack{padding-bottom:0 !important}
@@ -1605,13 +1606,16 @@ main>section{position:relative;z-index:1}
    y no cambia nunca. Las etapas «sticky» de aqui abajo si pueden seguir en
    «dvh»: no estan en el flujo y llenar la ventana visible es justo lo que
    tienen que hacer. */
-.hero-hold{position:relative;height:calc(100svh + 42svh);z-index:0;background:var(--negro)}
+/* 120svh de recorrido (antes 42): con 42 un solo golpe de rueda o de dedo
+   se llevaba la persiana, el corredor y el rotulo enteros y no se veian. */
+.hero-hold{position:relative;height:calc(100svh + 120svh);z-index:0;background:var(--negro)}
 @media(max-width:900px){
   /* 125svh de sobra eran dos pantallas y cuarto de portada en un telefono:
      mas de la mitad del recorrido era tunel ya montado sin nada nuevo que
-     contar. 78 baja el anclado de 1055 px a 658 sin tocar la animacion, que
-     va por porcentaje del recorrido y no por pixeles. */
-  .hero-hold{height:calc(100svh + 78svh)}
+     contar. Luego se bajo a 78 y un solo golpe de dedo se llevaba la
+     persiana entera; 140 deja verla sin volver a las dos pantallas. La
+     animacion va por porcentaje del recorrido y no por pixeles. */
+  .hero-hold{height:calc(100svh + 140svh)}
 }
 .hero{position:sticky;top:0;z-index:0}
 main>section+section{margin-top:clamp(-36px,-3.4vw,-64px);
@@ -15712,108 +15716,6 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
   addEventListener('load',()=>setTimeout(mideScroll,600));
   addEventListener('nrm:remide',mideScroll,{passive:true});
   mideScroll(); lee(); marca(Math.round(mapa(pRaw)));
-})();
-</script>
-<script>
-/* ── LA PORTADA Y EL TUNEL VAN A PASOS: CUATRO SCROLL CADA UNO ──
-   Dos tramos van por scroll y eran demasiado cortos para un dedo: la
-   PORTADA -persiana, malla, corredor y el rotulo, en menos de una pantalla-
-   y el TUNEL de cubos que acaba en la compra. Un golpe con inercia se los
-   saltaba y no se veia el diseño. Dentro de cada tramo el scroll hacia abajo
-   ya NO arrastra la pagina: cada gesto -una deslizada o un golpe de rueda-
-   avanza UN CUARTO del tramo, con una animacion suave, y al CUARTO se esta en
-   la seccion siguiente. Un gesto mientras aun se mueve encadena el paso
-   siguiente. Hacia arriba todo va normal, y un gesto hacia arriba detiene el
-   paso. Con «prefers-reduced-motion» no se toca nada. */
-(function(){
-  var st=document.getElementById('stack'), pre=document.getElementById('presale'),
-      hold=document.querySelector('.hero-hold');
-  if(matchMedia('(prefers-reduced-motion:reduce)').matches) return;
-  function top(n){ var y=0; while(n){ y+=n.offsetTop; n=n.offsetParent } return y }
-  /* la duracion de cada paso va con lo que recorre: un paso corto de la
-     portada dura menos de medio segundo y uno largo del tunel menos de uno */
-  var PASOS=4;
-  function dura(px){ return Math.max(420, Math.min(850, 300+Math.abs(px)*.4)) }
-  var TRAMOS=[];
-  /* la portada: de arriba del todo a su ultimo cuadro (el avance llega a 1) */
-  /* la portada: los tres primeros pasos reparten su animacion -persiana,
-     corredor, rotulo- y el cuarto lleva a la primera seccion visible de
-     debajo */
-  function siguiente(){
-    var ss=document.querySelectorAll('main>section');
-    for(var k=0;k<ss.length;k++){ var q=ss[k];
-      if(q.offsetHeight>40 && top(q)>20 && getComputedStyle(q).display!=='none') return top(q) }
-    return hold.offsetHeight;
-  }
-  if(hold) TRAMOS.push({ nombre:'portada',
-    a:function(){ return 0 },
-    b:function(){ return siguiente() },
-    marcas:function(){ var r=Math.max(1, hold.offsetHeight-innerHeight);
-      return [r/3, r*2/3, r, siguiente()] } });
-  /* el tunel: de un poco antes de el hasta la compra arriba, en cuartos */
-  if(st&&pre) TRAMOS.push({ nombre:'tunel',
-    a:function(){ return top(st)-innerHeight*.35 },
-    b:function(){ return top(pre) } });
-  if(!TRAMOS.length) return;
-  var ultimoGesto=0, volando=false, anim=0, meta=null;
-  function zona(){
-    var y=window.scrollY;
-    for(var k=0;k<TRAMOS.length;k++){ var t=TRAMOS[k]; if(y>=t.a() && y<t.b()-8) return t }
-    return null;
-  }
-  function suave(t){ return t<.5 ? 4*t*t*t : 1-Math.pow(-2*t+2,3)/2 }
-  function para(){ volando=false; anim++; meta=null }
-  function lleva(y1){
-    var y0=window.scrollY, id=++anim, desde=performance.now(), D=dura(y1-y0);
-    volando=true; meta=y1;
-    (function paso(ahora){
-      if(id!==anim) return;
-      var k=Math.min(1,(ahora-desde)/D);
-      window.scrollTo(0, y0+(y1-y0)*suave(k));
-      if(k<1) requestAnimationFrame(paso); else { volando=false; meta=null; window.scrollTo(0,y1) }
-    })(desde);
-  }
-  /* el paso siguiente: la proxima marca de cuarto por delante de donde se
-     esta -o de donde se iba, si aun se mueve- */
-  function gesto(t){
-    var ahora=performance.now();
-    if(ahora-ultimoGesto<260) return;          /* el mismo gesto aun sigue */
-    ultimoGesto=ahora;
-    var a=Math.max(0,t.a()), b=t.b(), L=Math.max(1,b-a), m=[];
-    if(t.marcas) m=t.marcas(); else for(var k=1;k<=PASOS;k++) m.push(a+L*k/PASOS);
-    var desde=(volando&&meta!==null)?meta:window.scrollY;
-    for(var k=0;k<m.length;k++) if(m[k]>desde+L*.02){ lleva(m[k]); return }
-    lleva(b);
-  }
-  /* rueda: en un tramo no arrastra; los golpes seguidos son un solo gesto */
-  var ruedaT=0;
-  addEventListener('wheel',function(e){
-    if(e.deltaY<0){ if(volando) para(); return }   /* arriba, normal */
-    var t=zona();
-    if(!(volando||t)) return;
-    e.preventDefault(); e.stopImmediatePropagation();
-    var ahora=performance.now(), nuevo=ahora-ruedaT>260; ruedaT=ahora;
-    if(nuevo && t) { ultimoGesto=0; gesto(t) }
-  },{passive:false,capture:true});
-  /* dedo: en un tramo, arrastrar hacia abajo no mueve la pagina (sin
-     inercia); arrastrar hacia arriba si, y para el paso */
-  var y0t=null, bloqueo=false;
-  addEventListener('touchstart',function(e){ y0t=e.touches[0].clientY; bloqueo=volando||!!zona() },{passive:true});
-  addEventListener('touchmove',function(e){
-    if(y0t===null) return;
-    var dy=y0t-e.touches[0].clientY;
-    if(dy<-8){ if(volando) para(); return }   /* sube: normal */
-    if(bloqueo) e.preventDefault();
-  },{passive:false});
-  addEventListener('touchend',function(e){
-    if(y0t===null) return;
-    var t=e.changedTouches[0], dy=y0t-t.clientY; y0t=null;
-    var z=zona();
-    if(dy>24 && bloqueo && z){ ultimoGesto=0; gesto(z) }
-  },{passive:true});
-  /* teclado: mientras se mueve, no se le empuja */
-  addEventListener('keydown',function(e){ if(volando&&/^(ArrowDown|PageDown| |End)$/.test(e.key)) e.preventDefault() });
-  window.__vuelaCompra=function(){ var t=TRAMOS[TRAMOS.length-1]; if(t&&t.nombre==='tunel') lleva(t.b()) };
 })();
 </script>
 </body>
