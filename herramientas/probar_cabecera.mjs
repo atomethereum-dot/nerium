@@ -263,7 +263,7 @@ const es = await (async () => {
     nav: [...document.querySelectorAll('.nav>a')].map(a=>a.textContent.trim().replace(/^(.+?)\1$/,'$1')),
     ann: document.querySelector('.ann-in').innerText.replace(/\s+/g,' ') }));
 })();
-di(es.nav.includes('Construir') && es.nav.includes('Pila'), 'el menu se traduce: ' + es.nav.join(' '));
+di(es.nav.includes('Seguridad') && es.nav.includes('Pila'), 'el menu se traduce: ' + es.nav.join(' '));
 di(/completado/.test(es.ann), 'y el aviso tambien: ' + es.ann.trim());
 await ctx.close();
 
@@ -367,8 +367,11 @@ await ctx2.close();
   // azules en fila compiten con el enlace activo y el azul deja de senalar.
   di(pAz <= 6, 'y en reposo van apagadas, el azul es del seleccionado (' +
      pAz.toFixed(1) + ' % de pixeles azules, limite 6)');
-  di(pMa >= 11, 'y el trazo tiene cuerpo a 20 px, no es niebla (' + pMa.toFixed(1) +
-     ' % macizo frente a ' + (niebla / tot * 100).toFixed(1) + ' % de niebla, limite 11)');
+  /* Es una MEDIA de todas las fichas. Con Proyectos oculta sale del menu la
+     ficha de «Build», la de trazo mas lleno, y la media baja de 11 a 10,6 sin
+     que ninguna de las que quedan haya cambiado: el limite pasa a 10. */
+  di(pMa >= 10, 'y el trazo tiene cuerpo a 20 px, no es niebla (' + pMa.toFixed(1) +
+     ' % macizo frente a ' + (niebla / tot * 100).toFixed(1) + ' % de niebla, limite 10)');
   await ctx3.close();
 }
 

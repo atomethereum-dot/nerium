@@ -698,7 +698,8 @@ main>section.logos::after{display:none}
 }
 /* «hidden» en una seccion no basta: las reglas de «main>section» le dan
    «display» y lo pisan. Se refuerza aqui. */
-.kin[hidden],#thesis[hidden]{display:none !important}
+.kin[hidden],#thesis[hidden],#builds[hidden]{display:none !important}
+.nav a[hidden],.mnav a[hidden],a[href="#builds"][hidden]{display:none !important}
 .kin{background:#050609;padding:var(--s6) 0;overflow:hidden;
   border-block:1px solid rgba(255,255,255,.08)}
 .kin-row{overflow:hidden}
@@ -7734,7 +7735,6 @@ main>section#builds{background:#000 !important;background-image:none !important;
     <a href="#stack">Stack<i class="chip" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 4 4 8l8 4 8-4-8-4Z"/><path d="M4 14l8 4 8-4"/></svg></i></a>
     <a href="#presale">Seed Round<i class="chip" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4.6 18.4h14.8"/><path d="M8 18.4v-4.2M12 18.4v-8.6M16 18.4v-6.2"/></svg></i></a>
     <a href="#token">Token<i class="chip" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="7.6"/><circle cx="12" cy="12" r="3"/></svg></i></a>
-    <a href="#builds">Build<i class="chip" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9.2 8 5 12l4.2 4"/><path d="M14.8 8 19 12l-4.2 4"/></svg></i></a>
     <a href="#join">In the open<i class="chip" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="2.2"/><path d="M7.6 7.6a6.2 6.2 0 0 0 0 8.8"/><path d="M16.4 7.6a6.2 6.2 0 0 1 0 8.8"/></svg></i></a>
   </nav>
   <div class="hd-r">
@@ -7749,7 +7749,6 @@ main>section#builds{background:#000 !important;background-image:none !important;
   <a href="#stack">Stack<i class="chip" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 4 4 8l8 4 8-4-8-4Z"/><path d="M4 14l8 4 8-4"/></svg></i></a>
   <a href="#presale">Seed Round<i class="chip" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4.6 18.4h14.8"/><path d="M8 18.4v-4.2M12 18.4v-8.6M16 18.4v-6.2"/></svg></i></a>
   <a href="#token">Token<i class="chip" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="7.6"/><circle cx="12" cy="12" r="3"/></svg></i></a>
-  <a href="#builds">Build<i class="chip" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9.2 8 5 12l4.2 4"/><path d="M14.8 8 19 12l-4.2 4"/></svg></i></a>
   <a href="#join">In the open<i class="chip" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="2.2"/><path d="M7.6 7.6a6.2 6.2 0 0 0 0 8.8"/><path d="M16.4 7.6a6.2 6.2 0 0 1 0 8.8"/></svg></i></a>
   <a class="sheet-cta" href="#presale">Join the Seed Round</a>
 </div>
@@ -8266,7 +8265,7 @@ main>section#builds{background:#000 !important;background-image:none !important;
 </section>
 
 
-<section class="builds" id="builds" data-bg="#000000" data-acc="#63A9FF"><i class="via" aria-hidden="true"></i>
+<section class="builds" id="builds" data-bg="#000000" data-acc="#63A9FF" hidden><i class="via" aria-hidden="true"></i>
   <!-- LOS PROYECTOS EN PARTICULAS. El nombre del proyecto se muestrea de un
        lienzo 2D en miles de particulas que forman la palabra gigante; el
        cursor las aparta como un fluido y vuelven a su sitio. Al bajar, la

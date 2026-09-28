@@ -12,6 +12,12 @@ const srv = http.createServer((q, r) => { let f = decodeURIComponent(q.url.split
 await new Promise(r => srv.listen(9055, r));
 const nav = await chromium.launch({ executablePath:'/opt/pw-browsers/chromium-1194/chrome-linux/chrome', args:['--no-sandbox'] });
 let ok = 0, mal = 0;
+/* Mientras la seccion este oculta (atributo hidden, a la espera de decidir el
+   diseño) no hay nada que medir: se dice y se sale en verde. */
+if (fs.readFileSync(path.join(RAIZ, 'index.html'), 'utf8').includes('id="builds" data-bg="#000000" data-acc="#63A9FF" hidden')) {
+  console.log('  --  la seccion de proyectos esta oculta: no hay nada que medir');
+  await nav.close(); srv.close(); process.exit(0);
+}
 const di = (c, t) => { if (c) { ok++; console.log('  ok  ' + t) } else { mal++; console.log('  MAL ' + t) } };
 for (const [W, H, mob] of [[1440, 900, 0], [1366, 657, 0], [430, 932, 1], [375, 667, 1]]) {
   const ctx = await nav.newContext({ viewport:{ width:W, height:H }, isMobile:!!mob, hasTouch:!!mob });
