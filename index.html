@@ -1229,9 +1229,7 @@ body.light .srail{color:#E3E6EE}
 .hero h1 .wd,.hero h1 .wdw{display:inline-block;white-space:nowrap}
 .hero h1{overflow-wrap:normal;word-break:keep-all;text-wrap:balance}
 .hero h1 .sp{display:inline-block;width:.26em}
-/* 480vh (antes 780vh): el tunel pedia demasiado scroll. El avance se mide
-   sobre la altura, asi que la escena es la misma, solo que pasa antes. */
-.stk-hold{position:relative;height:480vh}
+.stk-hold{position:relative;height:780vh}
 /* sin relleno abajo: el escenario acaba en el azul de la ronda y la
    seccion de compra empieza justo debajo, sin franja oscura entre medias */
 #stack{padding-bottom:0 !important}
@@ -15717,89 +15715,87 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
 })();
 </script>
 <script>
-/* ── EL TUNEL LLEVA SOLO A LA COMPRA ──
-   Dentro del tunel de cubos, al SEGUNDO gesto hacia abajo -dos deslizadas del
-   dedo o dos golpes de rueda- la pagina baja sola hasta la seccion de compra,
-   y el tunel se ve entero por el camino. Mientras baja no se le puede
-   arrastrar (se ignora el dedo y la rueda) para que no se quede a medias.
-   Solo hacia abajo, y solo con gestos: un ancla, la barra o un scrollTo no
-   cuentan. Con «prefers-reduced-motion» llega de un salto.
-   El viaje va a VELOCIDAD CONSTANTE, como si alguien bajara despacio: el
-   tunel entero -de su borde de arriba a la compra- dura TUNEL ms, arranca y
-   frena suave y en medio no acelera. Si se empieza mas abajo dura menos, al
-   mismo paso. Un gesto hacia arriba lo detiene. */
+/* ── EL TUNEL SE REPRODUCE SOLO HASTA LA COMPRA ──
+   Dentro del tunel de cubos el scroll hacia abajo NO arrastra la pagina: un
+   golpe de dedo con inercia se saltaba medio tunel de una vez y no se veia.
+   En su lugar se cuentan los gestos: el PRIMERO adelanta un poco, con calma,
+   y el SEGUNDO reproduce el tunel entero solo, a paso constante -arranca y
+   frena suave, en medio no acelera- hasta dejar la compra arriba. El tunel
+   completo dura TUNEL ms; si se empieza mas abajo, lo que queda al mismo
+   paso. Hacia arriba todo va normal, y un gesto hacia arriba detiene el
+   viaje. Con «prefers-reduced-motion» no se toca el scroll. */
 (function(){
   var st=document.getElementById('stack'), pre=document.getElementById('presale');
   if(!st||!pre) return;
-  var QUIETO=matchMedia('(prefers-reduced-motion:reduce)').matches;
-  var DOS=2, TUNEL=10000, dur=TUNEL;
+  if(matchMedia('(prefers-reduced-motion:reduce)').matches) return;
+  var DOS=2, TUNEL=12000, EMPUJE=.45;
   function top(n){ var y=0; while(n){ y+=n.offsetTop; n=n.offsetParent } return y }
-  var cuenta=0, ultimoGesto=0, volando=false, desde=0;
+  var cuenta=0, ultimoGesto=0, volando=false, anim=0;
+  /* de un poco antes del tunel hasta la compra */
   function zona(){
     var a=top(st), b=top(pre), y=window.scrollY;
     return y>=a-innerHeight*.35 && y<b-8;
   }
-  function gesto(){
-    if(volando) return;
-    if(!zona()){ cuenta=0; return }
-    var ahora=performance.now();
-    if(ahora-ultimoGesto<260) return;          /* el mismo gesto aun sigue */
-    ultimoGesto=ahora; cuenta++;
-    if(cuenta>=DOS) vuela();
-  }
-  /* velocidad en trapecio: sube en el primer 8 %, llana en medio y baja en
-     el ultimo 14 % del tiempo */
+  /* velocidad en trapecio: sube en el primer 8 %, llana y baja en el 14 % final */
   var AC=.08, FR=.14, VM=1/(1-AC/2-FR/2);
-  function suave(t){
+  function tramo(t){
     if(t<AC) return VM*t*t/(2*AC);
     if(t<1-FR) return VM*(AC/2+(t-AC));
     return 1-VM*(1-t)*(1-t)/(2*FR);
   }
-  function para(){ volando=false }
+  function suave(t){ return t*t*(3-2*t) }
+  function para(){ volando=false; anim++ }
+  function lleva(y1,dur,curva){
+    var y0=window.scrollY, id=++anim, desde=performance.now();
+    volando=true;
+    (function paso(ahora){
+      if(id!==anim) return;
+      var k=Math.min(1,(ahora-desde)/dur);
+      window.scrollTo(0, y0+(y1-y0)*curva(k));
+      if(k<1) requestAnimationFrame(paso); else { volando=false; window.scrollTo(0,y1) }
+    })(desde);
+  }
   function vuela(){
     var a=top(st), y0=window.scrollY, y1=top(pre);
     cuenta=0;
     if(y1<=y0+2) return;
-    if(QUIETO){ window.scrollTo(0,y1); return }
-    /* el mismo paso siempre: la parte que queda del tunel, al mismo ritmo */
-    dur=Math.max(2500, TUNEL*(y1-y0)/Math.max(1,y1-a));
-    volando=true; desde=performance.now();
-    (function paso(ahora){
-      if(!volando) return;
-      var k=Math.min(1,(ahora-desde)/dur);
-      window.scrollTo(0, y0+(y1-y0)*suave(k));
-      if(k<1) requestAnimationFrame(paso);
-      else { volando=false; window.scrollTo(0,y1) }
-    })(desde);
+    lleva(y1, Math.max(3000, TUNEL*(y1-y0)/Math.max(1,y1-a)), tramo);
   }
-  /* rueda: los golpes que llegan seguidos son un solo gesto */
+  function gesto(){
+    var ahora=performance.now();
+    if(ahora-ultimoGesto<260) return;          /* el mismo gesto aun sigue */
+    ultimoGesto=ahora; cuenta++;
+    if(cuenta>=DOS) vuela();
+    else lleva(Math.min(top(pre), window.scrollY+innerHeight*EMPUJE), 900, suave);
+  }
+  /* rueda: en el tunel no arrastra; los golpes seguidos son un solo gesto */
   var ruedaT=0;
-  /* en captura: si va volando, la rueda no le llega al desplazamiento suave
-     de escritorio, que si no tiraria de la pagina hacia otro lado */
   addEventListener('wheel',function(e){
-    if(volando){
-      /* hacia arriba lo para y deja subir; hacia abajo no hace nada */
-      if(e.deltaY<0){ para(); cuenta=0; return }
-      e.preventDefault(); e.stopImmediatePropagation(); return }
-    if(e.deltaY<=0){ if(e.deltaY<0) cuenta=0; return }
+    if(e.deltaY<0){ if(volando) para(); cuenta=0; return }   /* arriba, normal */
+    if(!(volando||zona())) return;
+    e.preventDefault(); e.stopImmediatePropagation();
+    if(volando && cuenta===0) return;          /* ya se reproduce solo */
     var ahora=performance.now(), nuevo=ahora-ruedaT>260; ruedaT=ahora;
-    if(nuevo){ ultimoGesto=0; gesto() }
+    if(nuevo && !(volando && cuenta>=DOS)) { ultimoGesto=0; gesto() }
   },{passive:false,capture:true});
-  /* dedo: una deslizada hacia arriba de mas de 24 px es un gesto hacia abajo */
-  var y0t=null;
-  addEventListener('touchstart',function(e){ y0t=e.touches[0].clientY },{passive:true});
+  /* dedo: en el tunel, arrastrar hacia abajo no mueve la pagina (sin inercia);
+     arrastrar hacia arriba si, y para el viaje */
+  var y0t=null, bloqueo=false;
+  addEventListener('touchstart',function(e){ y0t=e.touches[0].clientY; bloqueo=volando||zona() },{passive:true});
   addEventListener('touchmove',function(e){
-    if(!volando) return;
-    /* el dedo hacia abajo (subir la pagina) lo para; lo demas se ignora */
-    if(y0t!==null && e.touches[0].clientY-y0t>24){ para(); cuenta=0; return }
-    e.preventDefault();
+    if(y0t===null) return;
+    var dy=y0t-e.touches[0].clientY;
+    if(dy<-8){ if(volando){ para(); cuenta=0 } return }   /* sube: normal */
+    if(bloqueo) e.preventDefault();
   },{passive:false});
   addEventListener('touchend',function(e){
-    if(volando||y0t===null){ y0t=null; return }
+    if(y0t===null) return;
     var t=e.changedTouches[0], dy=y0t-t.clientY; y0t=null;
-    if(dy>24){ ultimoGesto=0; gesto() } else if(dy<-24) cuenta=0;
+    if(dy<-24){ cuenta=0; return }
+    if(dy>24 && bloqueo && !(volando && cuenta===0)){ ultimoGesto=0; gesto() }
   },{passive:true});
-  addEventListener('keydown',function(e){ if(volando&&/^(ArrowDown|ArrowUp|PageDown|PageUp| |Home|End)$/.test(e.key)) e.preventDefault() });
+  /* teclado: mientras se reproduce, no se le mueve */
+  addEventListener('keydown',function(e){ if(volando&&/^(ArrowDown|PageDown| |End)$/.test(e.key)) e.preventDefault() });
   window.__vuelaCompra=vuela;
 })();
 </script>
