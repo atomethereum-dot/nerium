@@ -2266,6 +2266,9 @@ html[dir="rtl"] .subir{left:16px !important;right:auto !important}
   transition:opacity 1s ease .72s,transform 1.1s cubic-bezier(.16,.84,.26,1) .72s}
 .ready .hero-pr{opacity:1;transform:none}
 .hero-pr li{display:flex;align-items:center;gap:8px;white-space:nowrap}
+/* con Robinhood Chain la linea de redes ya no cabe en 320-360 px: ahi puede
+   partirse, centrada, en vez de salirse y descentrar la lista */
+@media(max-width:400px){.hero-pr li{white-space:normal;text-align:center;justify-content:center;max-width:100%}}
 .hero-pr li:first-child{color:#6FE3A8}
 .hero-pr i{width:5px;height:5px;border-radius:50%;background:currentColor;
   box-shadow:0 0 10px currentColor;animation:heroLate 2.4s ease-in-out infinite}
@@ -8198,7 +8201,7 @@ main>section#builds{background:#000 !important;background-image:none !important;
 </div>
 <section class="sale" id="presale" data-bg="#0E3AC4" data-acc="#7FB0FF"><i class="via" aria-hidden="true"></i>
   <div class="sale-field" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
-  <div class="sale-tunel" aria-hidden="true"><canvas id="saleTunel"></canvas></div>
+  <div class="sale-tunel" aria-hidden="true"><canvas id="saleTunel" data-sin-vigia></canvas></div>
   <div class="wrap">
     <div class="sale-top rv">
       <span class="sale-live sk"><i class="sk-n">03</i><i></i><span class="pc">Seed Round open</span><span class="ps">Seed Round</span></span>
@@ -8756,7 +8759,10 @@ PINTAN.forEach(function(m){
   P[m]=function(){
     if(actual){
       var c=this.canvas;
-      if(c&&c.isConnected){
+      /* un lienzo que solo recibe copias de otro -el fondo de la compra, que
+         copia el tunel- no decide nada: si el bucle se atara a el, se
+         aparcaria el tunel entero cada vez que la compra no asoma */
+      if(c&&c.isConnected&&!c.hasAttribute('data-sin-vigia')){
         if(!visible.has(c)){ visible.set(c,true); ojo.observe(c); }
         lienzo.set(actual,c);
       }
