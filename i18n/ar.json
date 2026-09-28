@@ -313,5 +313,8 @@
  "The contract deployed and verified, and the company registration, the audit and the team KYC under way. Each one will be checkable by someone who is not us.": "العقد منشور ومُتحقَّق منه، وتسجيل الشركة والتدقيق وKYC الفريق قيد التنفيذ. وسيمكن لجهة ليست نحن التحقق من كل منها.",
  "Audit in progress · CyberScope": "التدقيق قيد التنفيذ · CyberScope",
  "Team KYC in progress · CyberScope": "KYC الفريق قيد التنفيذ · CyberScope",
- "Legal registration in the United States · in progress": "التسجيل القانوني في الولايات المتحدة · قيد التنفيذ"
+ "Legal registration in the United States · in progress": "التسجيل القانوني في الولايات المتحدة · قيد التنفيذ",
+ "$5M Seed Round · in progress": "Seed Round بقيمة 5 ملايين دولار · قيد التنفيذ",
+ "$10M Seed Round · in progress": "Seed Round بقيمة 10 ملايين دولار · قيد التنفيذ",
+ "The contract deployed and verified, and the company registration, the audit, the team KYC and the Seed Round under way. Each step will be checkable by someone who is not us.": "العقد منشور ومُتحقَّق منه، وتسجيل الشركة والتدقيق وKYC الفريق وSeed Round قيد التنفيذ. وسيمكن لجهة ليست نحن التحقق من كل خطوة."
 }

@@ -313,5 +313,8 @@
  "The contract deployed and verified, and the company registration, the audit and the team KYC under way. Each one will be checkable by someone who is not us.": "Контракт развёрнут и верифицирован, а регистрация компании, аудит и KYC команды в процессе. Каждый пункт сможет проверить тот, кто не мы.",
  "Audit in progress · CyberScope": "Аудит в процессе · CyberScope",
  "Team KYC in progress · CyberScope": "KYC команды в процессе · CyberScope",
- "Legal registration in the United States · in progress": "Юридическая регистрация в США · в процессе"
+ "Legal registration in the United States · in progress": "Юридическая регистрация в США · в процессе",
+ "$5M Seed Round · in progress": "Seed Round на $5 млн · в процессе",
+ "$10M Seed Round · in progress": "Seed Round на $10 млн · в процессе",
+ "The contract deployed and verified, and the company registration, the audit, the team KYC and the Seed Round under way. Each step will be checkable by someone who is not us.": "Контракт развёрнут и верифицирован, а регистрация компании, аудит, KYC команды и Seed Round в процессе. Каждый шаг сможет проверить тот, кто не мы."
 }

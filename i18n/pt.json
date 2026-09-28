@@ -313,5 +313,8 @@
  "The contract deployed and verified, and the company registration, the audit and the team KYC under way. Each one will be checkable by someone who is not us.": "O contrato implantado e verificado, e em andamento o registo da empresa, a auditoria e o KYC da equipa. Cada um poderá ser verificado por alguém que não somos nós.",
  "Audit in progress · CyberScope": "Auditoria em andamento · CyberScope",
  "Team KYC in progress · CyberScope": "KYC da equipa em andamento · CyberScope",
- "Legal registration in the United States · in progress": "Registo legal nos Estados Unidos · em andamento"
+ "Legal registration in the United States · in progress": "Registo legal nos Estados Unidos · em andamento",
+ "$5M Seed Round · in progress": "Seed Round de 5 M$ · em andamento",
+ "$10M Seed Round · in progress": "Seed Round de 10 M$ · em andamento",
+ "The contract deployed and verified, and the company registration, the audit, the team KYC and the Seed Round under way. Each step will be checkable by someone who is not us.": "O contrato implantado e verificado, e em andamento o registo da empresa, a auditoria, o KYC da equipa e a Seed Round. Cada passo poderá ser verificado por alguém que não somos nós."
 }
