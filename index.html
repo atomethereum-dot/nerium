@@ -1229,7 +1229,9 @@ body.light .srail{color:#E3E6EE}
 .hero h1 .wd,.hero h1 .wdw{display:inline-block;white-space:nowrap}
 .hero h1{overflow-wrap:normal;word-break:keep-all;text-wrap:balance}
 .hero h1 .sp{display:inline-block;width:.26em}
-.stk-hold{position:relative;height:780vh}
+/* 480vh (antes 780vh): el tunel pedia demasiado scroll. El avance se mide
+   sobre la altura, asi que la escena es la misma, solo que pasa antes. */
+.stk-hold{position:relative;height:480vh}
 /* sin relleno abajo: el escenario acaba en el azul de la ronda y la
    seccion de compra empieza justo debajo, sin franja oscura entre medias */
 #stack{padding-bottom:0 !important}
@@ -15726,7 +15728,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
   var st=document.getElementById('stack'), pre=document.getElementById('presale');
   if(!st||!pre) return;
   var QUIETO=matchMedia('(prefers-reduced-motion:reduce)').matches;
-  var DOS=2, DUR=2200;
+  var DOS=2, DUR=1700;
   function top(n){ var y=0; while(n){ y+=n.offsetTop; n=n.offsetParent } return y }
   var cuenta=0, ultimoGesto=0, volando=false, desde=0;
   function zona(){
