@@ -189,6 +189,8 @@ if (txs.length === 2) {
   chk('selector approve', (txs[0].data||'').slice(0,10), '0x095ea7b3');
   chk('gastador aprobado', '0x'+(txs[0].data||'').slice(34,74),
       '0xacbf1add75139d0e926d57ec715fdab8bee04a89');
+  chk('aprueba SOLO lo de esta compra, no el tope de la ronda',
+      BigInt('0x'+(txs[0].data||'').slice(74,138)).toString(), '500000000');
   chk('selector buyWithUsdt', (txs[1].data||'').slice(0,10), '0x7789e96e');
   chk('cantidad USDT (6 dec)', BigInt('0x'+(txs[1].data||'').slice(10,74)).toString(), '500000000');
   chk('compra sin ether adjunto', txs[1].value === undefined || BigInt(txs[1].value)===0n, true);

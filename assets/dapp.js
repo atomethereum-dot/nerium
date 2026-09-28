@@ -1998,18 +1998,15 @@
           pasos = enviar({ to: c.usdt, data: SEL.approve + encA(c.venta) + encU(0) })
             .then(function (h) { return esperar(c.id, h); });
         }
-        /* Se aprueba el hueco que le queda a la cartera en toda la ronda, no
-           solo esta compra: así la segunda ya no pide otra firma. */
+        /* Se aprueba EXACTAMENTE lo de esta compra, ni un centavo más. Antes
+           se aprobaba todo el hueco que le quedaba a la cartera en la ronda
+           (hasta el tope de 10.000 $) para ahorrar la firma de la segunda
+           compra, y un permiso mayor que la compra es justo lo que los
+           escáneres de carteras marcan como riesgo. Cada compra pide ahora
+           su propia aprobación y el permiso queda en cero al terminar. */
         return pasos.then(function () {
           trabajando('Approve USDT in your wallet…');
-          return llamar(c.id, c.venta, SEL.remaining + encA(sesion.cuenta));
-        }).then(function (r2) {
-          var queda = decU(palabras(r2)[0]);
-          var tope = queda > 0n && queda < 10n ** 30n ? queda : usd8;
-          var techo = unidDeUsd(Number(tope) / 1e8);
-          if (techo === null) techo = cantidad;
-          if (techo < cantidad) techo = cantidad;
-          return enviar({ to: c.usdt, data: SEL.approve + encA(c.venta) + encU(techo) });
+          return enviar({ to: c.usdt, data: SEL.approve + encA(c.venta) + encU(cantidad) });
         }).then(function (h) {
           trabajando('Waiting for the approval…');
           return esperar(c.id, h);
