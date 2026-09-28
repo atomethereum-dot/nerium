@@ -605,6 +605,7 @@ td b{color:var(--ink)}
   vertical-align:-.02em;background:currentColor;
   -webkit-mask:no-repeat center/contain url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 3h7v7M13 3 3.5 12.5'/%3E%3C/svg%3E");
   mask:no-repeat center/contain url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 3h7v7M13 3 3.5 12.5'/%3E%3C/svg%3E")}
+[hidden]{display:none !important}
 </style>
 </head>
 <body>
@@ -1501,8 +1502,8 @@ red no resulta utilizable de extremo a extremo.</p>
   <li><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20 6 9 17l-5-5"/></svg><span>Desarrollo de la infraestructura Nereum Blockchain</span></li>
   <li><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20 6 9 17l-5-5"/></svg><span>Desarrollo de la interfaz de Assets Tokenization</span></li>
   <li><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20 6 9 17l-5-5"/></svg><span>Desarrollo de la interfaz de minería de BTC en línea</span></li>
-  <li><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20 6 9 17l-5-5"/></svg><span>Presencia en los principales medios cripto y web3</span></li>
-  <li><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20 6 9 17l-5-5"/></svg><span>Pre-listing en DexScreener a 1 $</span></li>
+  <li hidden><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20 6 9 17l-5-5"/></svg><span>Presencia en los principales medios cripto y web3</span></li>
+  <li hidden><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20 6 9 17l-5-5"/></svg><span>Pre-listing en DexScreener a 1 $</span></li>
   <li class="proc"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="7"/></svg><span>Seed Round de 10 M$ · en proceso</span></li>
 </ul>
 
@@ -2183,7 +2184,7 @@ la única dirección donde la Seed Round está abierta. El resto de canales est�
   <tr><td>Suministro total</td><td class="num"><b>160.000.000</b> — fijo en el génesis, no puede crecer</td></tr>
   <tr><td>Impuesto de compra y venta</td><td><b>0%</b></td></tr>
   <tr><td>Precio en la Seed Round</td><td class="num"><b>$0,20</b></td></tr>
-  <tr><td>Precio de salida</td><td class="num"><b>$1,00</b> — Uniswap v3</td></tr>
+  <tr hidden><td>Precio de salida</td><td class="num"><b>$1,00</b> — Uniswap v3</td></tr>
   <tr><td>Contrato</td><td>Propiedad renunciada — <a href="https://robinhoodchain.blockscout.com/tx/0xae5fd230fa1387b9a3b38ab9e048304ec81f4753c355a25092d3e9fa54549edb" target="_blank" rel="noopener">ver la transacción &#8599;</a></td></tr>
 </table>
 
@@ -2198,7 +2199,7 @@ la única dirección donde la Seed Round está abierta. El resto de canales est�
 <h2 id="caracteristicas">Qué te da esta ronda</h2>
 <table>
   <tr><th>Característica</th><th>Qué significa para el comprador</th></tr>
-  <tr><td><b>Entrada a $0,20</b></td>
+  <tr hidden><td><b>Entrada a $0,20</b></td>
       <td>El precio más bajo al que va a vender el proyecto. NRM abre a $1,00 en Uniswap v3, donde el precio de apertura lo fija el rango del fondo.</td></tr>
   <tr><td><b>Mínimo de $1</b></td>
       <td>Deliberadamente bajo. Una ronda que empieza en cuatro cifras es una ronda diseñada para excluir a casi todo el mundo.</td></tr>
@@ -2240,11 +2241,14 @@ la única dirección donde la Seed Round está abierta. El resto de canales est�
 contacte a nadie, y no anunciamos ventas fuera de las direcciones listadas en
 <a class="enl" href="#/links">Enlaces oficiales</a>.</p>
 
+<!-- OCULTO mientras Blockaid revisa: promete el precio de salida. Volver = quitar «hidden». -->
+<div hidden>
 <h2 id="listado">Cómo se fija el precio de salida</h2>
 <p>NRM sale a <strong>$1,00 en Uniswap v3</strong>. Ese precio no es una
 estimación: en Uniswap v3 la liquidez se concentra dentro de un rango elegido al
 crear el fondo, así que <strong>el precio de apertura es un parámetro del
 fondo</strong>.</p>
+</div>
 
 `},
 
@@ -2467,10 +2471,11 @@ privilegios a la que pedírselo.</p>
 contrato que ya no se puede cambiar, por orden de un propietario que ya no
 existe. Se comprueba en <a class="enl" href="https://nereum.xyz/explorer">nereum.xyz/explorer</a>.</p>
 
-<h3>¿Dónde cotiza NRM y a qué precio?</h3>
+<!-- OCULTO mientras Blockaid revisa: promete el precio de salida. Volver = quitar «hidden». -->
+<div hidden><h3>¿Dónde cotiza NRM y a qué precio?</h3>
 <p>A $1,00 en Uniswap v3. Como v3 concentra la liquidez en un rango elegido, el
 precio de apertura es un parámetro del fondo. Ver
-<a class="enl" href="#/seedround">Seed Round</a>.</p>
+<a class="enl" href="#/seedround">Seed Round</a>.</p></div>
 
 <h2 id="participar">Sobre participar</h2>
 
@@ -2631,8 +2636,8 @@ the network is not usable end to end.</p>
   <li><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20 6 9 17l-5-5"/></svg><span>Development of the Nereum Blockchain infrastructure</span></li>
   <li><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20 6 9 17l-5-5"/></svg><span>Development of the Assets Tokenization interface</span></li>
   <li><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20 6 9 17l-5-5"/></svg><span>Development of the online BTC mining interface</span></li>
-  <li><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20 6 9 17l-5-5"/></svg><span>Coverage in the main crypto and web3 outlets</span></li>
-  <li><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20 6 9 17l-5-5"/></svg><span>Pre-listing on DexScreener at $1</span></li>
+  <li hidden><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20 6 9 17l-5-5"/></svg><span>Coverage in the main crypto and web3 outlets</span></li>
+  <li hidden><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20 6 9 17l-5-5"/></svg><span>Pre-listing on DexScreener at $1</span></li>
   <li class="proc"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="7"/></svg><span>$10M Seed Round · in progress</span></li>
 </ul>
 
@@ -3164,10 +3169,11 @@ address, so there is not even a privileged address left to ask.</p>
 contract that can no longer be changed, on the orders of an owner who no longer
 exists. Check it on <a class="enl" href="https://nereum.xyz/explorer">nereum.xyz/explorer</a>.</p>
 
-<h3>Where does NRM list, and at what price?</h3>
+<!-- OCULTO mientras Blockaid revisa: promete el precio de salida. Volver = quitar «hidden». -->
+<div hidden><h3>Where does NRM list, and at what price?</h3>
 <p>At $1.00 on Uniswap v3. Because v3 concentrates liquidity in a chosen range,
 the opening price is a parameter of the pool. See
-<a class="enl" href="#/seedround">Seed Round</a>.</p>
+<a class="enl" href="#/seedround">Seed Round</a>.</p></div>
 
 <h2 id="participar">About taking part</h2>
 
@@ -3414,7 +3420,7 @@ nowhere else. Every other channel is listed on
   <tr><td>Total supply</td><td class="num"><b>160,000,000</b> — fixed at genesis, cannot grow</td></tr>
   <tr><td>Buy / sell tax</td><td><b>0%</b></td></tr>
   <tr><td>Seed Round price</td><td class="num"><b>$0.20</b></td></tr>
-  <tr><td>Price at listing</td><td class="num"><b>$1.00</b> — Uniswap v3</td></tr>
+  <tr hidden><td>Price at listing</td><td class="num"><b>$1.00</b> — Uniswap v3</td></tr>
   <tr><td>Contract</td><td>Ownership renounced — <a href="https://robinhoodchain.blockscout.com/tx/0xae5fd230fa1387b9a3b38ab9e048304ec81f4753c355a25092d3e9fa54549edb" target="_blank" rel="noopener">view the transaction &#8599;</a></td></tr>
 </table>
 
@@ -3429,7 +3435,7 @@ nowhere else. Every other channel is listed on
 <h2 id="caracteristicas">What this round gives you</h2>
 <table>
   <tr><th>Feature</th><th>What it means for a buyer</th></tr>
-  <tr><td><b>Entry at $0.20</b></td>
+  <tr hidden><td><b>Entry at $0.20</b></td>
       <td>The lowest price the project will sell at. NRM opens at $1.00 on Uniswap v3, where the opening price is set by the pool's range.</td></tr>
   <tr><td><b>$1 minimum</b></td>
       <td>Deliberately low. A round that starts at four figures is a round designed to exclude most people.</td></tr>
@@ -3487,6 +3493,8 @@ listed on <a class="enl" href="#/links">Official links</a>.</p>
       identical pie charts.</li>
 </ol>
 
+<!-- OCULTO mientras Blockaid revisa: promete el precio de salida. Volver = quitar «hidden». -->
+<div hidden>
 <h2 id="listado">How the listing price is set</h2>
 <p>NRM lists at <strong>$1.00 on Uniswap v3</strong>. That price is not an
 estimate: on Uniswap v3, liquidity is concentrated within a price range chosen
@@ -3498,6 +3506,7 @@ pool</strong>.</p>
   <tr><td>Venue</td><td><b>Uniswap v3</b> · Ethereum</td></tr>
   <tr><td>Opening price</td><td class="num"><b>$1.00</b></td></tr>
 </table>
+</div>
 
 `},
 
@@ -3763,7 +3772,7 @@ function pinta(id){
       ${sig?`<a class="der" href="#/${sig}"><em>${U().siguiente}</em><b>${P[sig].titulo}</b></a>`:'<span></span>'}
     </div>`;
   /* el índice de la derecha se construye desde los titulares de la página */
-  const hs=[...doc.querySelectorAll('h2[id]')];
+  const hs=[...doc.querySelectorAll('h2[id]')].filter(h=>!h.closest('[hidden]'));
   rail.innerHTML=hs.map(h=>`<a href="#${h.id}" data-id="${h.id}">${h.textContent}</a>`).join('');
   document.querySelectorAll('.gr a').forEach(a=>
     a.classList.toggle('on', a.getAttribute('href')==='#/'+id));
