@@ -1,8 +1,8 @@
-// probar_pronto: la espera (NRM_PRONTO) se apago al terminar las pruebas del
-// dueño: la ronda vuelve en vivo («Seed Round open», 85 % complete en el
-// aviso, la portada y el tunel, barras al 85 %) y la dapp suma la privada
-// sobre la meta de $16,000,000. Seguridad y el Roadmap siguen diciendo que
-// registro, auditoria y KYC estan en proceso con CyberScope.
+// probar_pronto: con la ronda en espera (NRM_PRONTO, como esta publicada) la
+// venta se anuncia como «Starts soon» en el aviso, la portada y el tunel, sin
+// cifra ni «complete»; la dapp enseña $0 recaudados y la meta de siempre; y
+// Seguridad y el Roadmap dicen que registro, auditoria y KYC estan en proceso
+// con CyberScope.
 import { chromium } from 'playwright';
 import http from 'node:http'; import fs from 'node:fs'; import path from 'node:path';
 const RAIZ = '/home/user/nerium';
@@ -32,11 +32,11 @@ const r = await pg.evaluate(() => {
     rutaPasado: /Audit passed|KYC passed/.test(document.getElementById('ruta').textContent),
     rutaProc: document.querySelectorAll('#ruta .ruta-proc:not([hidden])').length };
 });
-di(r.flag === false, 'la ronda esta en vivo en la pagina publicada (sin espera)');
-di([r.ann, r.hero, r.stk].every(x => /^\d+(\.\d)?%$/.test(x)), 'aviso, portada y tunel dan la cifra (' + [r.ann, r.hero, r.stk].join(' / ') + ')');
-di(r.pcVisibles >= 3, 'y asoman «complete», «Seed Round open» y «Launching soon» (' + r.pcVisibles + ')');
-di(parseFloat(r.annW) > 80 && parseFloat(r.stkP) > 80, 'las barras van llenas hasta la cifra (' + r.annW + ', ' + r.stkP + ')');
-di(/^\$[\d,]+$/.test(r.raised) && r.raised !== '$0' && /\$16,000,000/.test(r.meta), 'la dapp suma la privada sobre la meta de siempre (' + r.raised + ' ' + r.meta + ')');
+di(r.flag === true, 'la ronda esta en espera en la pagina publicada');
+di([r.ann, r.hero, r.stk].every(x => x === 'Starts soon'), 'aviso, portada y tunel dicen «Starts soon» (' + [r.ann, r.hero, r.stk].join(' / ') + ')');
+di(r.pcVisibles === 0, 'y no asoma «complete», «Seed Round open» ni «Launching soon» (' + r.pcVisibles + ')');
+di(parseFloat(r.annW) === 0 && parseFloat(r.stkP) === 0, 'las barras estan vacias (' + r.annW + ', ' + r.stkP + ')');
+di(r.raised === '$0' && /\$500,000/.test(r.meta), 'la dapp enseña $0 recaudados de una meta de $500,000 (temporal, pruebas) (' + r.raised + ' ' + r.meta + ')');
 di(r.enProceso >= 6 && r.cyber, 'Seguridad: registro, auditoria y KYC en proceso, con CyberScope (' + r.enProceso + ')');
 di(!r.viejo, 'Seguridad y la portada ya no dicen Halborn, Assure DeFi, «passed» ni el numero de registro');
 di(r.hb === 'Audit in progress', 'el boton de la portada tampoco dice ya «audited» (' + r.hb + ')');

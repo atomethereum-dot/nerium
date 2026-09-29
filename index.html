@@ -7,7 +7,7 @@
    la dapp no suma la ronda privada (enseña solo lo que entre por la cadena,
    hoy $0). Para volver a la cifra real basta con ponerlo a false. Las pruebas
    lo ponen a false antes de cargar para seguir comprobando la cuenta. */
-if(window.NRM_PRONTO===undefined) window.NRM_PRONTO=false;
+if(window.NRM_PRONTO===undefined) window.NRM_PRONTO=true;
 if(window.NRM_PRONTO) document.documentElement.classList.add('pronto');
 </script>
 <script>
@@ -7998,8 +7998,8 @@ main>section#ruta{z-index:2}
 <div class="ann" id="ann">
   <a class="ann-in" href="#presale">
     <span class="ann-k"><i class="ann-dot" aria-hidden="true"></i>Seed Round</span>
-    <span class="ann-bar" aria-hidden="true"><i class="ann-fill" id="annFill" style="width:85%"></i></span>
-    <span class="ann-n"><b id="annPct">85%</b> <span class="pc">complete</span></span>
+    <span class="ann-bar" aria-hidden="true"><i class="ann-fill" id="annFill" style="width:0%"></i></span>
+    <span class="ann-n"><b id="annPct">Starts soon</b> <span class="pc">complete</span></span>
     <i class="ann-p" aria-hidden="true"></i>
     <span class="ann-s">1 NRM = $0.20</span>
     <span class="ann-cta">Join the Seed Round<i class="ann-go" aria-hidden="true">&#8594;</i></span>
@@ -8108,7 +8108,7 @@ main>section#ruta{z-index:2}
     <div class="lq" id="lq"><i class="lq-rail" aria-hidden="true"></i>
     <ul class="hero-pr">
       <li><i></i><span class="pc">Seed Round open</span><span class="ps">Seed Round</span></li>
-      <li class="hp-pct"><b id="heroPct">85%</b> <span class="pc">complete</span></li>
+      <li class="hp-pct"><b id="heroPct">Starts soon</b> <span class="pc">complete</span></li>
       <li>1 NRM = $0.20</li>
       <li>Ethereum &middot; BNB Chain &middot; Robinhood Chain</li>
       <li>Contracts verified</li>
@@ -8369,8 +8369,8 @@ main>section#ruta{z-index:2}
          que la franja de arriba y la portada. -->
     <div class="stk-ronda" id="stkRonda">
       <p class="stk-ronda-t">Join the Seed Round</p>
-      <div class="stk-ronda-bar" role="progressbar" aria-label="Seed Round" aria-valuemin="0" aria-valuemax="100" aria-valuenow="85"><b id="stkBar" style="--p:85%"></b></div>
-      <p class="stk-ronda-m"><span><b id="stkPct">85%</b> <span class="pc">complete</span></span><i class="pc" aria-hidden="true">&#183;</i><span class="pc">Launching soon</span></p>
+      <div class="stk-ronda-bar" role="progressbar" aria-label="Seed Round" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><b id="stkBar" style="--p:0%"></b></div>
+      <p class="stk-ronda-m"><span><b id="stkPct">Starts soon</b> <span class="pc">complete</span></span><i class="pc" aria-hidden="true">&#183;</i><span class="pc">Launching soon</span></p>
     </div>
     <!-- la señal de seguir bajando, la misma de las otras secciones fijas -->
     <div class="xf-go" aria-hidden="true">
@@ -8426,10 +8426,10 @@ main>section#ruta{z-index:2}
     <div class="sale-grid">
 
       <div class="sale-left">
-        <!-- Restaurado a peticion del dueño (antes oculto mientras Blockaid revisaba). -->
+        <!-- OCULTO mientras Blockaid revisa: nada que prometa el precio de salida, el 5x ni ganancias. Volver = quitar «hidden» y reponer el titular de abajo. -->
         <!-- titular original: «One price now. One price at listing.» / «Nothing hidden between them. What you pay today and what it lists at are both on this page.» -->
-        <h2 class="sale-h">One price now. One price at listing.</h2>
-        <p class="sale-sub">Nothing hidden between them. What you pay today and what it lists at are both on this page.</p>
+        <h2 class="sale-h">One price for the whole Seed Round.</h2>
+        <p class="sale-sub">Every buyer pays the same $0.20 per NRM. Crypto assets are volatile: only put in what you can afford to lose.</p>
 
         <div class="prices">
           <div class="pr">
@@ -8437,18 +8437,18 @@ main>section#ruta{z-index:2}
             <b class="pr-v">$0.20</b>
             <span class="pr-n mono">per NRM</span>
           </div>
-          <div class="pr-arrow" aria-hidden="true"><i></i><svg viewBox="0 0 18 12"><path d="M1 6h15M11 1.5 16.5 6 11 10.5"/></svg></div>
-          <div class="pr up">
+          <div class="pr-arrow" aria-hidden="true" hidden><i></i><svg viewBox="0 0 18 12"><path d="M1 6h15M11 1.5 16.5 6 11 10.5"/></svg></div>
+          <div class="pr up" hidden>
             <span class="pr-k mono">Listing price</span>
             <b class="pr-v">$1.00</b>
             <span class="pr-n mono">at market open</span>
           </div>
-          <div class="pr-mult"><b>5&#215;</b><span class="mono">from Seed Round to listing</span></div>
+          <div class="pr-mult" hidden><b>5&#215;</b><span class="mono">from Seed Round to listing</span></div>
         </div>
 
         <div class="raise">
           <div class="raise-head">
-            <b id="saleRaised">$0</b><span class="mono">raised of $16,000,000</span>
+            <b id="saleRaised">$0</b><span class="mono">raised of $500,000</span>
           </div>
           <div class="raise-bar"><i id="saleFill"></i><i class="raise-tip" id="saleTip"><em>0.0%</em></i></div>
           <div class="raise-foot mono"><span>Minimum $1</span><span>Maximum $10,000 per wallet</span></div>
@@ -8489,7 +8489,7 @@ main>section#ruta{z-index:2}
           <em class="mono">NRM</em>
         </label>
 
-        <dl class="w-out">
+        <dl class="w-out" hidden>
           <div><dt class="mono">Value at listing</dt><dd id="wVal">$2,500</dd></div>
           <div><dt class="mono">Unrealised gain</dt><dd class="up" id="wGain">+$2,000</dd></div>
         </dl>
