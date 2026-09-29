@@ -7639,19 +7639,29 @@ html body .xl .emb{--embc:255 255 255}
 main>section#builds{background:#000 !important;background-image:none !important;
   padding:0 !important;content-visibility:visible;overflow:visible !important}
 #builds .tn-hold{position:relative;height:560vh}
-#builds .tn-stage{position:sticky;top:0;height:100vh;height:100svh;overflow:hidden;background:#0A0D14}
+/* p65 · EL ESCENARIO LLEGA SIEMPRE AL CANTO DE ABAJO. Con «100svh» medía la
+   pantalla con las barras de Safari DESPLEGADAS; al recogerse, la pantalla
+   crecía y abajo quedaba una franja negra (visto en un iPhone). «lvh» es la
+   pantalla con las barras recogidas: nunca se queda corto y NO cambia al
+   bajar. El dibujo y los rótulos siguen colocados en el alto «svh» de
+   siempre -el mismo sitio que antes-; lo de más es solo túnel. */
+#builds .tn-stage{position:sticky;top:0;height:100vh;height:100lvh;overflow:hidden;background:#0A0D14;--tn-extra:0px}
+@supports(height:100lvh){#builds .tn-stage{--tn-extra:calc(100lvh - 100svh)}}
+#builds .tn-vis{position:absolute;left:0;top:0;width:0;height:100vh;height:100svh;visibility:hidden;pointer-events:none}
 #builds .tn-cv{position:absolute;inset:0;width:100%;height:100%;display:block}
 #builds .tn-stage::after{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;
   background:radial-gradient(ellipse 75% 70% at 50% 50%,rgba(0,0,0,0) 55%,rgba(0,0,0,.62) 100%)}
+@supports(height:100lvh){#builds .tn-stage::after{
+  background:radial-gradient(ellipse 75% 70svh at 50% 50svh,rgba(0,0,0,0) 55%,rgba(0,0,0,.62) 100%)}}
 /* la entrada: el epígrafe y el titular de la casa, a la izquierda como todos */
-#builds .tn-cab{position:absolute;left:0;right:0;top:50%;z-index:3;transform:translateY(-50%);pointer-events:none}
+#builds .tn-cab{position:absolute;left:0;right:0;top:calc(50% - var(--tn-extra) / 2);z-index:3;transform:translateY(-50%);pointer-events:none}
 #builds .tn-cab .sk{padding-top:0}
 #builds .tn-cab .builds-h{margin-top:clamp(18px,2vw,26px);max-width:15ch}
 #builds .tn-papel{display:inline-block;margin-top:clamp(20px,2.4vw,30px);pointer-events:auto;font-family:var(--m);font-size:11px;
   letter-spacing:.2em;text-transform:uppercase;color:#63A9FF;text-decoration:none}
 #builds .tn-papel:hover,#builds .tn-papel:focus-visible{color:#fff}
 /* cada estación: el rótulo, centrado dentro de su emblema */
-#builds .tn-sta{position:absolute;left:50%;top:50%;z-index:3;width:min(470px,calc(100% - 32px));text-align:center;
+#builds .tn-sta{position:absolute;left:50%;top:calc(50% - var(--tn-extra) / 2);z-index:3;width:min(470px,calc(100% - 32px));text-align:center;
   pointer-events:none;transform:translate(-50%,-50%);opacity:0;visibility:hidden}
 #builds .tn-lk{display:flex;flex-direction:column;align-items:center;gap:14px}
 #builds .tn-lk>i{display:block;height:1px;width:clamp(120px,16vw,220px);background:rgba(232,236,244,.3);transform:scaleX(var(--a,0))}
@@ -7668,7 +7678,7 @@ main>section#builds{background:#000 !important;background-image:none !important;
   padding-bottom:5px;border-bottom:1px solid rgba(255,255,255,.28);transition:border-color .3s}
 #builds .tn-cta:hover,#builds .tn-cta:focus-visible{border-color:#63A9FF}
 /* el carril de estaciones, al canto izquierdo (el índice de la página va al derecho) */
-#builds .tn-rail{position:absolute;left:max(24px,calc((100% - 1240px) / 2 - 64px));top:50%;transform:translateY(-50%);z-index:3;
+#builds .tn-rail{position:absolute;left:max(24px,calc((100% - 1240px) / 2 - 64px));top:calc(50% - var(--tn-extra) / 2);transform:translateY(-50%);z-index:3;
   display:flex;flex-direction:column;gap:26px;pointer-events:none;font:400 11px var(--m);letter-spacing:.2em;
   color:rgba(255,255,255,.42);font-variant-numeric:tabular-nums;opacity:0}
 #builds .tn-rail span{display:flex;align-items:center;gap:12px;transition:color .5s}
@@ -7677,20 +7687,21 @@ main>section#builds{background:#000 !important;background-image:none !important;
 #builds .tn-rail span.on{color:#fff}
 #builds .tn-rail span.on::before{transform:scaleX(1.6);background:#63A9FF}
 /* la leyenda del emblema, la misma «FIG.» de antes */
-#builds .tn-fig{position:absolute;left:50%;bottom:clamp(26px,5.4vh,56px);transform:translateX(-50%);z-index:3;pointer-events:none;
+#builds .tn-fig{position:absolute;left:50%;bottom:calc(var(--tn-extra) + clamp(26px,5.4vh,56px));transform:translateX(-50%);z-index:3;pointer-events:none;
   display:flex;gap:12px;align-items:center;font:400 10px var(--m);letter-spacing:.24em;text-transform:uppercase;
   color:rgba(214,217,224,.62);white-space:nowrap;opacity:0}
 #builds .tn-fig b{font-weight:400;color:#fff}
 #builds .tn-fig span{display:none}
 #builds .tn-fig span.on{display:inline}
 #builds .tn-stage.go .xf-go{opacity:.85}
+#builds .tn-stage .xf-go{bottom:calc(var(--tn-extra) + clamp(26px,5.4vh,56px))}
 @media(max-width:760px){
   #builds .tn-hold{height:500vh}
   #builds .tn-cab .builds-h{max-width:12ch}
   #builds .tn-sta{width:calc(100% - 40px)}
   #builds .tn-p{font-size:14px;max-width:34ch}
   #builds .tn-cta{font-size:14px}
-  #builds .tn-rail{left:50%;top:auto;bottom:calc(var(--hud-b,14px) + 64px);transform:translateX(-50%);flex-direction:row;gap:18px}
+  #builds .tn-rail{left:50%;top:auto;bottom:calc(var(--tn-extra) + var(--hud-b,14px) + 64px);transform:translateX(-50%);flex-direction:row;gap:18px}
   #builds .tn-rail span{flex-direction:column;gap:8px}
   #builds .tn-rail span::before{transform-origin:50% 50%}
   #builds .tn-fig{bottom:auto;top:calc(var(--bar,56px) + 18px);font-size:9px;letter-spacing:.2em}
@@ -8417,7 +8428,7 @@ main>section#builds{background:#000 !important;background-image:none !important;
        la ruta y se queda de índice. -->
   <div class="tn-hold" id="tnHold">
     <div class="tn-stage" id="tnStage">
-      <canvas class="tn-cv" id="tnCv" aria-hidden="true"></canvas>
+      <canvas class="tn-cv" id="tnCv" aria-hidden="true"></canvas><i class="tn-vis" id="tnVis" aria-hidden="true"></i>
       <div class="tn-cab" id="tnCab">
         <div class="wrap">
           <div class="k sk rv"><i class="sk-n">05</i>What we are building</div>
@@ -13407,7 +13418,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
         st=document.getElementById('tnStage'), cv=document.getElementById('tnCv');
   if(!sec||!hold||!st||!cv) return;
   const ctx=cv.getContext('2d',{alpha:false}); if(!ctx) return;
-  const cab=document.getElementById('tnCab');
+  const cab=document.getElementById('tnCab'), caja0=document.getElementById('tnVis');
   const STA=[...st.querySelectorAll('.tn-sta')];
   const LKI=STA.map(s=>s.querySelector('.tn-lk>i')), LKS=STA.map(s=>s.querySelector('.tn-lk>span'));
   const RAIL=[...st.querySelectorAll('.tn-rail span')], rail=st.querySelector('.tn-rail');
@@ -13491,13 +13502,13 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
   const HA=.77, HB=.9, CY=.5, TH0=4.6*Math.PI;
   const tamH=()=>clm(Math.min(innerWidth,innerHeight)*.042,15,38);
 
-  let CVL=0,W=0,H=0,f=1,movil=false,cubos=null,texto=[null,null,null,null],RK=0,hero=-1;
+  let CVL=0,W=0,H=0,HV=0,HC=0,f=1,movil=false,cubos=null,texto=[null,null,null,null],RK=0,hero=-1;
   /* un cubo -o una caja- en el espacio de la cámara (y abajo, z hacia el fondo) */
   function caja(x,y,z,hx,hy,hz,M,tn,a,apaga,extra,cristal,leds,ledCara,T){
     for(let i=0;i<8;i++){
       const e=ESQ[i], lx=e[0]*hx, ly=e[1]*hy, lz=e[2]*hz;
       const zz=Math.max(.05,z+M[2][0]*lx+M[2][1]*ly+M[2][2]*lz);
-      PX[i*2]=W/2+(x+M[0][0]*lx+M[0][1]*ly+M[0][2]*lz)/zz*f; PX[i*2+1]=H/2+(y+M[1][0]*lx+M[1][1]*ly+M[1][2]*lz)/zz*f;
+      PX[i*2]=W/2+(x+M[0][0]*lx+M[0][1]*ly+M[0][2]*lz)/zz*f; PX[i*2+1]=HC+(y+M[1][0]*lx+M[1][1]*ly+M[1][2]*lz)/zz*f;
     }
     const canto=Math.max(hx,hy,hz)*2*f/z>9;
     for(let k=0;k<6;k++){
@@ -13521,7 +13532,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
           const L=leds[j], ll=[nrm[0]?nrm[0]*hx*1.05:L[0]*hx, nrm[1]?nrm[1]*hy*1.05:L[1]*hy, nrm[2]?nrm[2]*hz*1.05:L[1]*hz];
           if(nrm[0]){ ll[1]=L[1]*hy; ll[2]=L[0]*hz } else if(nrm[2]){ ll[0]=L[0]*hx; ll[1]=L[1]*hy }
           const wx=x+M[0][0]*ll[0]+M[0][1]*ll[1]+M[0][2]*ll[2], wy=y+M[1][0]*ll[0]+M[1][1]*ll[1]+M[1][2]*ll[2], wz=z+M[2][0]*ll[0]+M[2][1]*ll[1]+M[2][2]*ll[2];
-          const zz=Math.max(.05,wz), sx=W/2+wx/zz*f, sy=H/2+wy/zz*f, r=Math.max(.7,.0055*f/zz);
+          const zz=Math.max(.05,wz), sx=W/2+wx/zz*f, sy=HC+wy/zz*f, r=Math.max(.7,.0055*f/zz);
           const on=(QUIETO?.85:(Math.sin(T*(2.1+j*.9+L[3]*2.4)+L[3]*9)>-.3?.95:.12))*a*clm((apaga-.2)/.6);
           ctx.fillStyle=L[2]; ctx.globalAlpha=on*.2; ctx.beginPath(); ctx.arc(sx,sy,r*3.4,0,6.2832); ctx.fill();
           ctx.globalAlpha=on; ctx.beginPath(); ctx.arc(sx,sy,r,0,6.2832); ctx.fill(); ctx.globalAlpha=1;
@@ -13650,32 +13661,32 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
     const neg=sube((p-.84)/.1);
     ctx.fillStyle='rgb('+Math.round(10*(1-neg))+','+Math.round(13*(1-neg))+','+Math.round(20*(1-neg))+')'; ctx.fillRect(0,0,W,H);
     if(!cubos) siembra();
-    const mx=W/(2*f), my=H/(2*f);
+    const mx=W/(2*f), my=HC/f;
     const FS=[forma(p,0),forma(p,1),forma(p,2)], LOC=[local(p,0),local(p,1),local(p,2)];
     const quieta=Math.max(FS[0],FS[1],FS[2]);
     const v=velDe(p);
     const estela=QUIETO?0:sube((v-.3)/.5)*sube(p/.08)*(1-sube((p-.72)/.06));
-    const cam=camDe(p)+(QUIETO?0:T*.05);
+    const cam=camDe(p)+deriva;
     const roll=cam*.018+(QUIETO?0:T*.012);
     RK=FS[2];
     /* la luz del fondo: blanca y azul siempre; al final se enciende un momento
        -la salida del túnel- y se apaga dejando solo el cubo que se suelta */
     const fin=sube((p-.76)/.06)*(1-sube((p-.86)/.07));
     const luz=(.34+.3*estela-.16*quieta)*(1-sube((p-.77)/.08))+.2*fin;
-    if(luz>.005){ const R0=Math.hypot(W,H)*(.08+.34*luz*luz+.12*fin);
-      const g=ctx.createRadialGradient(W/2,H/2,0,W/2,H/2,R0);
+    if(luz>.005){ const R0=Math.hypot(W,HV)*(.08+.34*luz*luz+.12*fin);
+      const g=ctx.createRadialGradient(W/2,HC,0,W/2,HC,R0);
       g.addColorStop(0,'rgba(236,242,255,'+(.9*luz).toFixed(3)+')');
       g.addColorStop(.16,'rgba(126,168,255,'+(.7*luz).toFixed(3)+')');
       g.addColorStop(.5,'rgba(46,106,245,'+(.42*luz).toFixed(3)+')');
       g.addColorStop(1,'rgba(14,58,196,0)');
       ctx.fillStyle=g; ctx.fillRect(0,0,W,H); }
     if(estela>0){
-      const Rmax=Math.hypot(W,H)*.62; ctx.lineWidth=1;
+      const Rmax=Math.hypot(W,HV)*.62; ctx.lineWidth=1;
       for(const ry of RAYOS){
         const u=(ry.s0+cam*.05)%1, r0=u*u*Rmax, r1=r0*(1+ry.l*estela*1.6)+2;
         const cs=Math.cos(ry.an+roll), sn=Math.sin(ry.an+roll);
         ctx.strokeStyle='rgba(190,212,255,'+(.5*estela*u).toFixed(3)+')';
-        ctx.beginPath(); ctx.moveTo(W/2+cs*r0,H/2+sn*r0); ctx.lineTo(W/2+cs*r1,H/2+sn*r1); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(W/2+cs*r0,HC+sn*r0); ctx.lineTo(W/2+cs*r1,HC+sn*r1); ctx.stroke();
       }
     }
     /* el rótulo que se está leyendo: detrás de él los cubos se oscurecen */
@@ -13735,7 +13746,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
       if(!esH) a*=aFin;
       if(a<.01&&!esH) continue;
       const r=Math.max(lado,hx*2,hy*2)*f/z;
-      const sx=W/2+x/z*f, sy=H/2+y/z*f;
+      const sx=W/2+x/z*f, sy=HC+y/z*f;
       if(!esH&&(sx<-r*1.8||sx>W+r*1.8||sy<-r*1.8||sy>H+r*1.8)) continue;
       let sombra=1;
       if(calma&&ca>0){
@@ -13751,7 +13762,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
       for(const q of lista){
         if(q.hx||q.cristal>.5||q.a<.3) continue;
         const azul=q.tono===TONES[0]||q.tono===TONES[8]||q.tono===TONES[1];
-        const pz=q.z<.9||q.z>2.6?2:0, dd=Math.hypot(q.sx-W/2,q.sy-H/2)/Math.max(W,H);
+        const pz=q.z<.9||q.z>2.6?2:0, dd=Math.hypot(q.sx-W/2,q.sy-HC)/Math.max(W,H);
         const pp=dd+(azul?0:1)+pz; if(pp<pb){pb=pp;mejor=q}
       }
       if(mejor) hero=mejor.c.i;
@@ -13761,7 +13772,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
     for(const q of lista){
       if(q.c.i===hero){ heroQ=q; if(eH>0) continue }
       if(estela>0){
-        const z2=q.z+estela*1.1, ex=W/2+q.x/z2*f, ey=H/2+q.y/z2*f;
+        const z2=q.z+estela*1.1, ex=W/2+q.x/z2*f, ey=HC+q.y/z2*f;
         ctx.strokeStyle=cstr(q.tono.h,q.tono.s,clm(q.tono.l+18,3,96),.55*estela*q.a);
         ctx.lineWidth=Math.max(1,(q.lado||q.hy*2)*f/q.z*.18);
         ctx.beginPath(); ctx.moveTo(q.sx,q.sy); ctx.lineTo(ex,ey); ctx.stroke();
@@ -13773,7 +13784,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
     /* hasta HB lo pinta el túnel; desde ahí, el lienzo de la caída */
     if(heroQ&&eH>0&&pr<HB){
       const q=heroQ, hf=(q.lado||q.hy*2)*f/q.z*.5, h0=tamH();
-      const x=q.sx+(W/2-q.sx)*eH, y=q.sy+(H*CY-q.sy)*eH, h=hf+(h0-hf)*eH;
+      const x=q.sx+(W/2-q.sx)*eH, y=q.sy+(HC-q.sy)*eH, h=hf+(h0-hf)*eH;
       const Mt=deQ(slerp(aQ(q.M),aQ(Rcaida(T,TH0)),eH));
       const apaga=((1-clm(q.hondo)*.55)*q.sombra)*(1-eH)+eH;
       cuboOrto(ctx,x,y,h,Mt,mezclaTono(q.tono,TONES[0],eH),q.a+(1-q.a)*eH,apaga);
@@ -13814,10 +13825,16 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
     const d=Math.min(devicePixelRatio||1, innerWidth<760?1.5:2);
     W=cv.clientWidth; H=cv.clientHeight; movil=W<760;
     if(!W||!H) return;
-    cv.width=Math.round(W*d); cv.height=Math.round(H*d); ctx.setTransform(d,0,0,d,0,0);
-    f=Math.max(W,H)*.62; CVL=cv.getBoundingClientRect().left;
-    top=dTop(hold); run=Math.max(1,hold.offsetHeight-innerHeight);
-    texto=STA.map(el=>({x:W/2,y:H/2,w:el.offsetWidth/2,h:el.offsetHeight/2,W:el.offsetWidth,H:el.offsetHeight}));
+    /* p65 · el cuadro de dibujo es el de siempre (alto «svh», centrado igual
+       que los rótulos); el lienzo es todo el escenario (alto «lvh»), hasta el
+       canto de abajo. Si no ha cambiado de tamaño, no se vuelve a crear. */
+    HV=Math.min(H,(caja0&&caja0.offsetHeight)||H); HC=HV/2;
+    const cw=Math.round(W*d), ch=Math.round(H*d);
+    if(cv.width!==cw||cv.height!==ch){ cv.width=cw; cv.height=ch }
+    ctx.setTransform(d,0,0,d,0,0);
+    f=Math.max(W,HV)*.62; CVL=cv.getBoundingClientRect().left;
+    top=dTop(hold); run=Math.max(1,hold.offsetHeight-(st.offsetHeight||innerHeight));
+    texto=STA.map(el=>({x:W/2,y:HC,w:el.offsetWidth/2,h:el.offsetHeight/2,W:el.offsetWidth,H:el.offsetHeight}));
     texto.push(cab?caja2(cab.querySelectorAll('.sk,.builds-h,.tn-papel')):null);
     if(cubos) emblemas();
     tabla(); dirty=true; osize();
@@ -13827,11 +13844,18 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
   addEventListener('nrm:remide',size,{passive:true});
   /* lo de arriba cambia de alto al cargar (letras, imágenes): el sitio del
      anclado se vuelve a medir cuando cambia el alto de la página, no por cuadro */
-  const remideSitio=()=>{ top=dTop(hold); run=Math.max(1,hold.offsetHeight-innerHeight); midePie() };
+  const remideSitio=()=>{ top=dTop(hold); run=Math.max(1,hold.offsetHeight-(st.offsetHeight||innerHeight)); midePie() };
   if(window.ResizeObserver) { const ro=new ResizeObserver(remideSitio); ro.observe(document.body); const mn=document.getElementById('contenido'); if(mn) ro.observe(mn) }
 
   /* ── el bucle del túnel ── */
   let pS=0,pT=0,vis=false,dirty=true,ult=0,last=-1,tRaf=0;
+  /* p65 · EL TÚNEL YA VA EN MARCHA AL LLEGAR. La cámara avanza también con el
+     reloj, al paso lento de «The stack» (.16), para que el campo esté vivo
+     aunque nadie baje; en las estaciones vuelve al paso de antes (.05) para
+     que el emblema se lea quieto, y al final se recoge. Es una suma por
+     cuadro -no T×k-: el paso cambia sin que la cámara dé un salto. */
+  let deriva=0;
+  const pasoReloj=p=>QUIETO?0:.05+.11*(1-para(p))*(1-sube((p-.7)/.08));
   new IntersectionObserver(es=>{vis=es[0].isIntersecting; if(vis&&!tRaf){ult=performance.now();tRaf=requestAnimationFrame(tick)}},{rootMargin:'10% 0px'}).observe(hold);
   function tick(now){
     tRaf=0;
@@ -13841,6 +13865,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
     pT=clm((scrollY-top)/run);
     pS=QUIETO?pT:pS+(pT-pS)*(1-Math.exp(-dt*4.2));
     if(Math.abs(pT-pS)<.0002) pS=pT;
+    deriva+=dt*pasoReloj(pS);
     if(QUIETO&&!dirty&&Math.abs(pS-last)<.0005) return;
     dirty=false; last=pS;
     const FS=draw(pS,now/1000,pT); rotulos(pS,FS);
@@ -13877,7 +13902,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
     const M=L.M, mov=M.movil;
     const gut=Math.max(12,(L.hb.x0||0)+(M.wl||0));        /* el margen izquierdo, hasta la columna */
     const xg=gut*.46, hG=clm(gut*.27,5,15), hM=HM(mov), h0=tamH();
-    const C={x:(W?CVL+W/2:OW/2),y:(H||OH)*CY};
+    const C={x:(W?CVL+W/2:OW/2),y:HC||OH*CY};
     let x,y,h,th,anillo=-1;
     const yH=OH*.3, y0=C.y-OH*.035;
     const Sg=Math.max(L.Se+OH*.25,Math.min(L.Se+(L.Sb-L.Se)*.5,L.cab!=null?L.cab-yH-hG-18:1e9)), Sf=Math.max(Sg+20,L.Sb-OH*.24);
@@ -13959,7 +13984,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
   /* otro idioma, otras cajas de rótulo: los emblemas se vuelven a medir */
   if(window.ResizeObserver){ let rz=0; const ro2=new ResizeObserver(()=>{ clearTimeout(rz); rz=setTimeout(()=>{
       if(!W) return;
-      texto=STA.map(el=>({x:W/2,y:H/2,w:el.offsetWidth/2,h:el.offsetHeight/2,W:el.offsetWidth,H:el.offsetHeight}));
+      texto=STA.map(el=>({x:W/2,y:HC,w:el.offsetWidth/2,h:el.offsetHeight/2,W:el.offsetWidth,H:el.offsetHeight}));
       texto.push(cab?caja2(cab.querySelectorAll('.sk,.builds-h,.tn-papel')):null);
       if(cubos) emblemas(); dirty=true },120) });
     STA.forEach(e=>ro2.observe(e)); if(cab) ro2.observe(cab) }
