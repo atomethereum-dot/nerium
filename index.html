@@ -7712,6 +7712,11 @@ main>section#builds{background:#000 !important;background-image:none !important;
    cabecera y del HUD, y sin recibir nunca un clic */
 .caida-cv{position:fixed;left:0;top:0;width:100vw;height:100vh;z-index:58;pointer-events:none;display:block}
 @media(prefers-reduced-motion:reduce){.caida-cv{display:none}}
+/* p66 · el destino: el mismo epígrafe de la ruta, al pie de la hebra que
+   empieza a bajar desde el cubo. Lo enciende el túnel (opacidad y filete). */
+#builds .tn-sig{position:absolute;left:0;right:0;top:calc((100% - var(--tn-extra)) * .8);z-index:3;display:flex;justify-content:center;
+  width:auto;padding-top:0;pointer-events:none;opacity:0;visibility:hidden}
+#builds .tn-sig::after{transform:scaleX(var(--a,0)) !important;transition:none !important}
 </style>
 <style id="r04-css">
 /* ══ r04 «Hebra» ══ la hebra de la ruta, crecida: cada hito es un nodo ══ */
@@ -8459,6 +8464,7 @@ main>section#builds{background:#000 !important;background-image:none !important;
       </div>
       <div class="tn-rail" aria-hidden="true"><span data-no-traducir>01</span><span data-no-traducir>02</span><span data-no-traducir>03</span></div>
       <div class="tn-fig" aria-hidden="true"><b data-no-traducir>FIG. 01</b><span>Blocks in sequence</span><span>One asset, many units</span><span>Sun over racks</span></div>
+      <div class="k sk tn-sig" id="tnSig" aria-hidden="true"><i class="sk-n">06</i>Roadmap</div>
       <div class="xf-go" aria-hidden="true">
         <i></i>
         <svg viewBox="0 0 24 24"><path d="M12 4v13M6 12l6 6 6-6"/></svg>
@@ -13573,7 +13579,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
         st=document.getElementById('tnStage'), cv=document.getElementById('tnCv');
   if(!sec||!hold||!st||!cv) return;
   const ctx=cv.getContext('2d',{alpha:false}); if(!ctx) return;
-  const cab=document.getElementById('tnCab'), caja0=document.getElementById('tnVis');
+  const cab=document.getElementById('tnCab'), caja0=document.getElementById('tnVis'), SIG=document.getElementById('tnSig');
   const STA=[...st.querySelectorAll('.tn-sta')];
   const LKI=STA.map(s=>s.querySelector('.tn-lk>i')), LKS=STA.map(s=>s.querySelector('.tn-lk>span'));
   const RAIL=[...st.querySelectorAll('.tn-rail span')], rail=st.querySelector('.tn-rail');
@@ -13658,7 +13664,131 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
 
   /* el tramo del túnel donde un cubo se suelta (progreso del anclado) */
   const HA=.77, HB=.9, CY=.5, TH0=4.6*Math.PI;
-  const tamH=()=>clm(Math.min(innerWidth,innerHeight)*.042,15,38);
+  /* p66 · guardado: se leía «innerWidth/innerHeight» varias veces por cuadro */
+  let TAMH=0;
+  const tamH=()=>TAMH||(TAMH=clm(Math.min(innerWidth,innerHeight)*.042,15,38));
+
+  /* ══ p66 · LA CARGA ══════════════════════════════════════════════════════
+     Al final el túnel no se apaga sin más: una parte de sus cubos cae en
+     espiral dentro del cubo azul, uno detrás de otro (cogen impulso hacia
+     fuera, aceleran hacia el centro y dejan una estela corta), y cada
+     llegada lo carga: late un aro fino, sube un punto el brillo. Debajo
+     empieza a bajar la hebra de la ruta —el camino que hará el cubo— hasta
+     su epígrafe. Posiciones: función del scroll; el latido, del reloj. */
+  const IMP0=.795, ARR0=.9, ARR1=.982;
+  let IMP=null, IMPI=null, cargaN=0, carga=0, llegadas=0, pPrev=-1, EX=0, SIGY=0, GLOW=null;
+  const PULSOS=[];
+  const backIn=u=>{ const c=1.3; return (c+1)*u*u*u-c*u*u };
+  const anilloR=()=>Math.max(tamH()*2.5,42);
+  /* el alto del cubo en su sitio: en la caída sube un 3,5 % al coger impulso */
+  const yCubo=p=>HC-HV*.035*sube((clm((p-HB)/(1-HB))-.3)/.7);
+  const destello=T=>{ let s=0; for(let i=0;i<PULSOS.length;i++){ const k=T-PULSOS[i]; if(k>=0&&k<1.2) s+=Math.exp(-k*5) } return Math.min(1,s) };
+  /* la luz de la punta: un punto azul con su halo, horneado una vez */
+  const PUNTA=document.createElement('canvas'); PUNTA.width=PUNTA.height=32;
+  { const g=PUNTA.getContext('2d'), r=g.createRadialGradient(16,16,0,16,16,16);
+    r.addColorStop(0,'rgba(236,244,255,1)'); r.addColorStop(.2,'rgba(150,196,255,.9)');
+    r.addColorStop(.45,'rgba(46,134,255,.3)'); r.addColorStop(1,'rgba(46,134,255,0)');
+    g.fillStyle=r; g.fillRect(0,0,32,32) }
+  /* la cifra de la mira, «07 / 16» en DM Mono: se hornea una vez por valor */
+  const ETQ=new Map();
+  if(document.fonts&&document.fonts.ready) document.fonts.ready.then(()=>ETQ.clear());
+  function etiqueta(n,N){
+    const k=n*100+N; let c=ETQ.get(k); if(c) return c;
+    const a=String(n).padStart(2,'0'), b=' / '+String(N).padStart(2,'0'), d=2;
+    c=document.createElement('canvas'); const g=c.getContext('2d');
+    const fnt='400 '+(10*d)+'px "DM Mono",ui-monospace,monospace', sp=10*d*.2;
+    g.font=fnt; const w=[...(a+b)].reduce((s,ch)=>s+g.measureText(ch).width+sp,0);
+    c.width=Math.ceil(w)+2; c.height=14*d; g.font=fnt; g.textBaseline='middle';
+    let x=0; [...(a+b)].forEach((ch,i)=>{ g.fillStyle=i<a.length?'#63A9FF':'rgba(214,217,224,.62)'; g.fillText(ch,x,7*d); x+=g.measureText(ch).width+sp });
+    c._w=c.width/d; c._h=c.height/d; ETQ.set(k,c); return c;
+  }
+  /* la mira: aro de 1 px, cuatro marcas en cruz, cuatro esquinas y la cifra.
+     «a» es su alfa, «R» su radio; los latidos salen de PULSOS */
+  function mira(g,x,y,R,a,T,cifra){
+    if(a<=.01) return;
+    g.lineWidth=1; g.lineCap='butt';
+    g.strokeStyle='rgba(99,169,255,'+(.46*a*(1+.5*destello(T))).toFixed(3)+')';
+    g.beginPath(); g.arc(x,y,R,0,6.2832); g.stroke();
+    for(let i=0;i<PULSOS.length;i++){ const k=(T-PULSOS[i])/.95; if(k<=0||k>=1) continue;
+      const e=1-Math.pow(1-k,3);
+      g.strokeStyle='rgba(99,169,255,'+(.5*a*Math.pow(1-k,1.6)).toFixed(3)+')';
+      g.beginPath(); g.arc(x,y,R*(1+.75*e),0,6.2832); g.stroke() }
+    const B=Math.round(R*1.34)+.5, L=7, xx=Math.round(x)+.5, yy=Math.round(y)+.5;
+    g.strokeStyle='rgba(214,217,224,'+(.42*a).toFixed(3)+')';
+    g.beginPath();
+    /* la cruz: cuatro marcas cortas por fuera del aro */
+    g.moveTo(xx,yy-R-4); g.lineTo(xx,yy-R-10); g.moveTo(xx+R+4,yy); g.lineTo(xx+R+10,yy);
+    g.moveTo(xx-R-4,yy); g.lineTo(xx-R-10,yy);
+    /* las esquinas */
+    for(const sx of [-1,1]) for(const sy of [-1,1]){
+      g.moveTo(xx+sx*B,yy+sy*(B-L)); g.lineTo(xx+sx*B,yy+sy*B); g.lineTo(xx+sx*(B-L),yy+sy*B) }
+    g.stroke();
+    /* la escala: marcas de 1 px a cada lado, cada vez más tenues hacia fuera */
+    for(let j=0;j<4;j++){
+      g.strokeStyle='rgba(214,217,224,'+(.3*a*(1-j/4)).toFixed(3)+')'; g.beginPath();
+      for(let q=0;q<2;q++){ const i=j*2+q, dx=B+10+i*8, t=i===3?5:2.5;
+        g.moveTo(xx-dx,yy-t); g.lineTo(xx-dx,yy+t); g.moveTo(xx+dx,yy-t); g.lineTo(xx+dx,yy+t) }
+      g.stroke() }
+    if(cifra){ const c=etiqueta(cifra[0],cifra[1]);
+      g.globalAlpha=a; g.drawImage(c,Math.round(xx+B+8),Math.round(yy-B-c._h/2),c._w,c._h); g.globalAlpha=1 }
+  }
+  /* el resplandor detrás del cubo: un degradado horneado una vez en un
+     lienzo pequeño y escalado (un dibujo por cuadro, sin degradado) */
+  function resplandor(y,R,a){
+    if(a<=.005) return;
+    if(!GLOW){ GLOW=document.createElement('canvas'); GLOW.width=GLOW.height=96;
+      const g=GLOW.getContext('2d'), r=g.createRadialGradient(48,48,0,48,48,48);
+      r.addColorStop(0,'rgba(46,134,255,.5)'); r.addColorStop(.3,'rgba(26,122,255,.2)');
+      r.addColorStop(.62,'rgba(14,58,196,.06)'); r.addColorStop(1,'rgba(14,58,196,0)');
+      g.fillStyle=r; g.fillRect(0,0,96,96) }
+    ctx.globalAlpha=Math.min(1,a); ctx.drawImage(GLOW,W/2-R,y-R,R*2,R*2); ctx.globalAlpha=1;
+  }
+  /* la hebra que empieza: las cinco hebras de la ruta (r04), trenzadas bajo
+     el cubo hasta el epígrafe; se abren al salir y se cierran al llegar.
+     Se hornea una vez por medida (con su regla de 1 px al lado) y cada
+     cuadro solo se recorta hasta la punta, que lleva la luz. */
+  const HEB=[{A:1,l:310,f:0,w:1,o:.78},{A:.8,l:372,f:2.1,w:.88,o:.62},{A:.62,l:262,f:4,w:.8,o:.46},
+             {A:.88,l:436,f:1.2,w:.8,o:.52},{A:.5,l:338,f:5.3,w:.74,o:.34}];
+  let HCV=null, HKEY='';
+  function hebraHorno(len,A,d){
+    const key=[len|0,A,d,W].join('|'); if(key===HKEY&&HCV) return HCV; HKEY=key;
+    const hw=A+30, cw=Math.ceil(hw*2*d), ch=Math.ceil((len+8)*d);
+    if(!HCV) HCV=document.createElement('canvas');
+    HCV.width=cw; HCV.height=ch; HCV._w=hw*2; HCV._h=len+8;
+    const g=HCV.getContext('2d'); g.setTransform(d,0,0,d,0,0); g.lineCap='round';
+    for(let pase=0;pase<2;pase++){
+      const col=pase?'192,216,255':'204,206,213', gr=g.createLinearGradient(0,0,0,len);
+      gr.addColorStop(0,'rgba('+col+',0)'); gr.addColorStop(.2,'rgba('+col+',1)'); gr.addColorStop(1,'rgba('+col+',.85)');
+      g.strokeStyle=gr;
+      for(let i=0;i<5;i++){ const e=HEB[i];
+        g.globalAlpha=e.o*(pase?1:.16); g.lineWidth=pase?e.w*.95:e.w*3.4; g.beginPath();
+        for(let y=0;y<=len+.1;y+=3){ const env=sube(y/56)*sube((len-y)/46);
+          const x=hw+A*e.A*env*Math.sin(6.2832*y/e.l+e.f); y===0?g.moveTo(x,y):g.lineTo(x,y) }
+        g.stroke() }
+    }
+    g.globalAlpha=1;
+    /* la regla: marcas de 1 px cada 12 px, más largas cada 48 */
+    const xr=Math.round(hw+A+14)+.5; g.strokeStyle='rgba(214,217,224,.26)'; g.lineWidth=1; g.beginPath();
+    for(let y=12,j=1;y<len-8;y+=12,j++){ const yy=Math.round(y)+.5; g.moveTo(xr,yy); g.lineTo(xr+(j%4===0?7:3),yy) }
+    g.stroke();
+    return HCV;
+  }
+  function hebraNueva(p,T,yc,a){
+    if(a<=.01||!SIGY) return;
+    const R=anilloR(), yK=SIGY-16, yMin=HC-HV*.035+R+12, len=yK-yMin; if(len<40) return;
+    const y1=yc+R+12, gRow=QUIETO?1:sube((p-.905)/.07), tip=y1+(yK-y1)*gRow; if(tip<y1+3) return;
+    const A=movil?8:12, cv2=hebraHorno(len,A,__dens());
+    const hs=Math.min(cv2._h,tip-y1); if(hs<=1) return;
+    const k=cv2.height/cv2._h;
+    ctx.globalAlpha=a; ctx.drawImage(cv2,0,0,cv2.width,hs*k,W/2-cv2._w/2,y1,cv2._w,hs); ctx.globalAlpha=1;
+    /* la luz: en la punta mientras crece; luego baja por la hebra hasta el epígrafe */
+    if(!QUIETO){
+      let py=tip, pa=1-sube((gRow-.9)/.1);
+      if(gRow>=.9){ const u=(T/3.4)%1, py2=y1+sube(u)*(yK-y1), pa2=Math.sin(u*Math.PI)*sube((gRow-.9)/.1);
+        if(pa2>pa){ py=py2; pa=pa2 } }
+      if(pa>.02){ const sz=movil?15:18; ctx.globalAlpha=a*pa; ctx.drawImage(PUNTA,W/2-sz/2,py-sz/2,sz,sz); ctx.globalAlpha=1 }
+    }
+  }
 
   let CVL=0,W=0,H=0,HV=0,HC=0,f=1,movil=false,cubos=null,texto=[null,null,null,null],RK=0,hero=-1;
   /* un cubo -o una caja- en el espacio de la cámara (y abajo, z hacia el fondo) */
@@ -13842,7 +13972,17 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
         LUZG.addColorStop(.5,'rgba(46,106,245,.42)');
         LUZG.addColorStop(1,'rgba(14,58,196,0)') }
       ctx.save(); ctx.globalAlpha=luz; ctx.translate(W/2,HC); ctx.scale(R0,R0);
-      ctx.fillStyle=LUZG; ctx.fillRect(-W/2/R0,-HC/R0,W/R0,H/R0); ctx.restore(); }
+      /* p66 · fuera del radio el degradado es transparente: se rellena solo
+         su cuadrado (recortado al lienzo), no el lienzo entero. Idéntico. */
+      const x0=Math.max(-1,-W/2/R0), y0=Math.max(-1,-HC/R0), x1=Math.min(1,W/2/R0), y1=Math.min(1,(H-HC)/R0);
+      ctx.fillStyle=LUZG; ctx.fillRect(x0,y0,x1-x0,y1-y0); ctx.restore(); }
+    /* p66 · el resplandor del cubo: crece con la carga y late con cada llegada */
+    if(p<IMP0-.02){ IMP=null; IMPI=null; cargaN=0 }
+    const yT=yCubo(p), sale66=1-sube(EX/.3), Tq=QUIETO?0:T;
+    carga=0; llegadas=0;
+    if(IMP){ for(let i=0;i<IMP.length;i++){ const r=IMP[i]; carga+=clm((p-r.arr)/.012); if(p>=r.arr) llegadas++ } carga/=IMP.length||1 }
+    const qa=QUIETO?sube((p-.84)/.06):0;
+    resplandor(yT,anilloR()*3.6,(QUIETO?.62*qa:(.1+.55*carga)*sube((p-.86)/.05)+.22*destello(Tq))*(1-sube(EX/.13)));
     if(estela>0){
       const Rmax=Math.hypot(W,HV)*.62; ctx.lineWidth=1;
       for(const ry of RAYOS){
@@ -13858,17 +13998,27 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
     const cabA=1-sube((p-.035)/.05);
     if(cabA>ca&&texto[3]){ca=cabA;calma=texto[3]}
     const aFin=1-sube((p-.81)/.08);
+    /* p66 · con la carga en marcha, los que no caen dentro se van antes */
+    const aFin2=IMP?1-sube((p-.81)/.06):aFin;
     const eH=QUIETO?0:sube((pr-HA)/(HB-HA));
     if(QUIETO||pr<HA-.02) hero=-1;
     const lista=[];
+    /* p66 · la primera vez que se llega al final se eligen los que van a caer
+       dentro: visibles, a media distancia, de cerca a lejos */
+    const pick=!QUIETO&&IMP===null&&p>=IMP0-.005&&p<1.5, cand=pick?[]:null;
+    const fuga=sube((p-.8)/.1);
     for(const c of cubos){
-      const esH=c.i===hero;
+      const esH=c.i===hero, im=IMPI?IMPI.get(c.i):undefined;
+      /* p66 · pasado el final, los que ya no se ven ni se calculan */
+      if(aFin2<=0&&!esH&&!im&&!pick) continue;
       const d=c.z0-cam, k=Math.floor(d/TRAMO);
       const zr=CERCA+(d-k*TRAMO);
       const an=azar(c.i,60+k)*6.2832+roll, rr=1.02+azar(c.i,61+k)*.32;
       let x=Math.cos(an)*mx*1.15*rr, y=Math.sin(an)*my*1.15*rr, z=zr;
       let lado=c.lado*.7, hx=0,hy=0,hz=0, tono=c.tone, extra=0, cristal=c.cristal?1:0, leds=null, ledCara=-1;
       const ang=c.a0+(QUIETO?0:T*c.gv)+cam*.3*Math.sign(c.gv);
+      /* p66 · pasadas las estaciones, el que ya no se va a ver no se calcula */
+      if(p>.8&&!esH&&!im&&!pick){ const h0=(zr-CERCA)/TRAMO; if(clm((1-h0)/.22)*clm((zr-CERCA)/.45)*aFin2<.01) continue }
       let M=giro(c.ax,c.ay,c.az,ang);
       const hondo=(zr-CERCA)/TRAMO;
       let a=clm((1-hondo)/.22)*clm((zr-CERCA)/.45);
@@ -13906,7 +14056,24 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
           cristal*=1-e; a*=1-.35*e*(s===2&&!leds?1:0);
         }
       }
-      if(!esH) a*=aFin;
+      let imq=null;
+      if(pick&&!esH&&!hx&&a>.25&&z>.75&&z<4.6&&lado*f/z<70){ const qx=W/2+x/z*f, qy=HC+y/z*f;
+        if(qx>8&&qx<W-8&&qy>8&&qy<HV-8) cand.push({i:c.i,d:Math.hypot(qx-W/2,qy-HC)}) }
+      if(im&&!esH){
+        /* p66 · la caída en espiral: impulso hacia fuera, aceleración hacia el
+           cubo, a la misma profundidad (la perspectiva no salta) */
+        const u=(p-(im.arr-im.dur))/im.dur;
+        if(u>=1) continue;
+        if(u>0){
+          const e=backIn(u), ec=Math.max(0,e);
+          imq={x0:x,y0:y,u,im};
+          const th=im.sp*e, rr=1-e, cs=Math.cos(th), sn=Math.sin(th), ty=(yT-HC)/f*z*ec;
+          const nx=(x*cs-y*sn)*rr, ny=(x*sn+y*cs)*rr+ty; x=nx; y=ny;
+          lado*=1-.7*ec; M=giro(c.ax,c.ay,c.az,ang+6*ec*im.sp);
+          a=Math.max(a,.45+.55*clm(u*3)); extra=Math.max(extra,24*ec*ec); cristal*=1-clm(u*3);
+          if(ec>.55) tono=TONES[8];
+        }
+      }else if(!esH){ const k2=1-.16*fuga; x*=k2; y*=k2; a*=aFin2 }
       if(a<.01&&!esH) continue;
       const r=Math.max(lado,hx*2,hy*2)*f/z;
       const sx=W/2+x/z*f, sy=HC+y/z*f;
@@ -13917,7 +14084,17 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
         const kk=clm((Math.hypot(dx,dy)-r*.75+10)/60);
         sombra=1-(1-(.2+.8*kk*kk*(3-2*kk)))*ca;
       }
-      lista.push({c,x,y,z,lado,hx,hy,hz,M,tono,extra,cristal,leds,ledCara,a,sombra,hondo:(z-CERCA)/TRAMO,sx,sy});
+      lista.push({c,x,y,z,lado,hx,hy,hz,M,tono,extra,cristal,leds,ledCara,a,sombra,hondo:(z-CERCA)/TRAMO,sx,sy,imq});
+    }
+    if(pick){
+      cand.sort((q1,q2)=>q1.d-q2.d);
+      const N=Math.min(movil?14:22,cand.length), Dm=Math.hypot(W,HV)*.5;
+      IMP=[]; IMPI=new Map();
+      for(let j=0;j<N;j++){ const q=cand[Math.floor((j+.5)*cand.length/N)], dn=clm(q.d/Dm);
+        const arr=ARR0+(ARR1-ARR0)*Math.pow((j+.5)/N,.92)+(azar(q.i,97)-.5)*.003;
+        const rec={i:q.i,arr,dur:.085+.045*dn,sp:(azar(q.i,98)<.5?-1:1)*(1.3+azar(q.i,99)*1.1)};
+        IMP.push(rec); IMPI.set(q.i,rec) }
+      cargaN=N; pPrev=p;
     }
     /* ── el cubo que se suelta: uno azul, cerca del centro y a media distancia ── */
     if(!QUIETO&&hero<0&&pr>=HA-.02&&pr<HB){
@@ -13940,6 +14117,20 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
         ctx.lineWidth=Math.max(1,(q.lado||q.hy*2)*f/q.z*.18);
         ctx.beginPath(); ctx.moveTo(q.sx,q.sy); ctx.lineTo(ex,ey); ctx.stroke();
       }
+      if(q.imq&&q.imq.u>.04){
+        /* p66 · la estela: el mismo camino, un poco atrás, que se apaga */
+        const m=q.imq, im=m.im, zq=q.z;
+        const ta=clm(m.u*5);
+        ctx.lineCap='round'; ctx.lineJoin='round';
+        /* dos trazos: la cola entera, fina y tenue; la cabeza, más viva */
+        for(let pase=0;pase<2;pase++){
+          ctx.beginPath(); ctx.moveTo(q.sx,q.sy);
+          for(let j=1;j<=(pase?3:7);j++){ const uj=m.u-j*.022; if(uj<=0) break;
+            const e=backIn(uj), ec=Math.max(0,e), th=im.sp*e, rr=1-e, cs=Math.cos(th), sn=Math.sin(th);
+            ctx.lineTo(W/2+((m.x0*cs-m.y0*sn)*rr)/zq*f, HC+((m.x0*sn+m.y0*cs)*rr+(yT-HC)/f*zq*ec)/zq*f) }
+          ctx.strokeStyle=cstr(216,100,pase?80:70,(pase?.6:.24)*ta); ctx.lineWidth=pase?1.7:1;
+          ctx.stroke() }
+      }
       const apaga=(1-clm(q.hondo)*.55)*q.sombra;
       if(q.hx) caja(q.x,q.y,q.z,q.hx,q.hy,q.hz,q.M,q.tono,q.a,apaga,q.extra*q.sombra,q.cristal,q.leds,q.ledCara,T);
       else { const h=q.lado/2; caja(q.x,q.y,q.z,h,h,h,q.M,q.tono,q.a,apaga,q.extra*q.sombra,q.cristal,null,-1,T) }
@@ -13951,6 +14142,13 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
       const Mt=deQ(slerp(aQ(q.M),aQ(Rcaida(T,TH0)),eH));
       const apaga=((1-clm(q.hondo)*.55)*q.sombra)*(1-eH)+eH;
       cuboOrto(ctx,x,y,h,Mt,mezclaTono(q.tono,TONES[0],eH),q.a+(1-q.a)*eH,apaga);
+    }
+    /* p66 · la hebra que empieza, bajo el cubo; y, sin movimiento, la
+       composición entera y quieta: cubo, mira, resplandor y hebra */
+    hebraNueva(p,Tq,yT,(QUIETO?qa:sube((p-.895)/.03))*sale66);
+    if(QUIETO&&qa>0){
+      cuboOrto(ctx,W/2,yT,tamH(),Rmarca(0),TONES[0],qa,1);
+      mira(ctx,W/2,yT,anilloR(),qa*sale66,0,null);
     }
     return FS;
   }
@@ -13981,6 +14179,11 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
     if(fig){ pon(fig,'opacity',(figA*.9).toFixed(3));
       if(figS>=0&&figS!==figI){ figI=figS; if(figN) figN.textContent='FIG. 0'+(figS+1); FIGS.forEach((e,i)=>e.classList.toggle('on',i===figS)) } }
     st.classList.toggle('go',p<.03);
+    /* p66 · el destino: el epígrafe de la ruta, al pie de la hebra; se va
+       cuando el escenario sube y entra el de verdad */
+    if(SIG){ const a=(QUIETO?sube((p-.86)/.05):sube((p-.955)/.03))*(1-sube(EX/.15));
+      pon(SIG,'opacity',a.toFixed(3)); pon(SIG,'visibility',a>.02?'visible':'hidden');
+      pon(SIG,'--a',(QUIETO?1:sube((p-.965)/.03)).toFixed(3)) }
   }
 
   /* ── medidas ── */
@@ -13998,7 +14201,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
     /* p65 · el cuadro de dibujo es el de siempre (alto «svh», centrado igual
        que los rótulos); el lienzo es todo el escenario (alto «lvh»), hasta el
        canto de abajo. Si no ha cambiado de tamaño, no se vuelve a crear. */
-    HV=Math.min(H,(caja0&&caja0.offsetHeight)||H); HC=HV/2;
+    HV=Math.min(H,(caja0&&caja0.offsetHeight)||H); HC=HV/2; TAMH=0;
     const cw=Math.round(W*d), ch=Math.round(H*d);
     if(cv.width!==cw||cv.height!==ch){ cv.width=cw; cv.height=ch }
     ctx.setTransform(d,0,0,d,0,0);
@@ -14006,6 +14209,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
     top=dTop(hold); run=Math.max(1,hold.offsetHeight-(st.offsetHeight||innerHeight));
     texto=STA.map(el=>({x:W/2,y:HC,w:el.offsetWidth/2,h:el.offsetHeight/2,W:el.offsetWidth,H:el.offsetHeight}));
     texto.push(cab?caja2(cab.querySelectorAll('.sk,.builds-h,.tn-papel')):null);
+    SIGY=SIG?SIG.offsetTop:0;
     if(cubos) emblemas();
     tabla(); dirty=true; osize();
   }
@@ -14036,8 +14240,13 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
     pS=QUIETO?pT:pS+(pT-pS)*(1-Math.exp(-dt*4.2));
     if(Math.abs(pT-pS)<.0002) pS=pT;
     deriva+=dt*pasoReloj(pS);
-    if(QUIETO&&!dirty&&Math.abs(pS-last)<.0005) return;
-    dirty=false; last=pS;
+    /* p66 · cuánto ha subido ya el escenario (en altos de pantalla), y el
+       latido de cada llegada, al cruzarla bajando */
+    const ex=Math.max(0,(__y-(top+run))/(HV||innerHeight));
+    if(QUIETO&&!dirty&&Math.abs(pS-last)<.0005&&Math.abs(ex-EX)<.002) return;
+    dirty=false; last=pS; EX=ex;
+    if(IMP&&!QUIETO){ for(let i=0;i<IMP.length;i++){ const a=IMP[i].arr; if(pPrev<a&&pS>=a){ PULSOS.push(now/1000); if(PULSOS.length>5) PULSOS.shift() } } }
+    pPrev=pS;
     const FS=draw(pS,now/1000,pT); rotulos(pS,FS);
   }
   addEventListener('visibilitychange',()=>{if(!document.hidden&&vis&&!tRaf){ult=performance.now();tRaf=requestAnimationFrame(tick)}});
@@ -14061,12 +14270,13 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
      y se crea -a la misma densidad de siempre- al entrar en el tramo. */
   let oTiene=false;
   function osize(){
-    odpr=Math.min(2,devicePixelRatio||1); OW=document.documentElement.clientWidth||innerWidth; OH=innerHeight;
+    TAMH=0; odpr=Math.min(2,devicePixelRatio||1); OW=document.documentElement.clientWidth||innerWidth; OH=innerHeight;
     oc.style.width=OW+'px'; oc.style.height=OH+'px';
     if(oTiene) __mide(oc,Math.round(OW*odpr),Math.round(OH*odpr));
     oLimpio=!oTiene; midePie(); if(oTiene) odespierta();
   }
-  function oEnciende(){ if(oTiene) return; oTiene=true; oc.style.display='';
+  let OB=null;
+  function oEnciende(){ if(oTiene) return; oTiene=true; OB=null; oc.style.display='';
     __mide(oc,Math.round(OW*odpr),Math.round(OH*odpr)); oLimpio=true }
   function oApaga(){ if(!oTiene) return; oTiene=false; oc.style.display='none'; oc.width=1; oc.height=1; oLimpio=true }
   oc.style.display='none';
@@ -14078,7 +14288,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
     const HOP=clm(OH*.2,110,190);
     return {Sa,Se,Sb,Sc:Sb+HOP,HOP,M,hb,pie:PIE,cab:CABK};
   }
-  function pose(s,T){
+  function pose(s,T,soloXY){
     const L=LIM; if(!L||s<L.Sa||s>=L.Sc) return null;
     const M=L.M, mov=M.movil;
     const gut=Math.max(12,(L.hb.x0||0)+(M.wl||0));        /* el margen izquierdo, hasta la columna */
@@ -14126,6 +14336,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
         th=-.32*Math.sin(r*Math.PI*1.5)*(1-r); anillo=r;
       }
     }
+    if(soloXY) return {x,y,h};
     return {x,y,h,M:Rcaida(T,th),anillo,hM};
   }
   function ocuadro(){
@@ -14136,14 +14347,50 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
     if(P||dentro) oEnciende();
     if(!oTiene){ oLimpio=true; if(dentro) oRaf=requestAnimationFrame(ocuadro); return }
     og.setTransform(odpr,0,0,odpr,0,0);
-    if(P||!oLimpio){ og.clearRect(0,0,OW,OH); oLimpio=true }
+    /* p66 · se borra solo la caja de lo que se pintó en el cuadro anterior,
+       no la pantalla entera (a densidad 2 eran 1,3 Mpx por cuadro) */
+    if(P||!oLimpio){ if(OB) og.clearRect(OB[0],OB[1],OB[2]-OB[0],OB[3]-OB[1]); else og.clearRect(0,0,OW,OH); oLimpio=true; OB=null }
     if(P){
+      const T=performance.now()/1000, h0=tamH(), nb=[P.x,P.y,P.x,P.y];
+      const caja3=(x,y,r)=>{ if(x-r<nb[0])nb[0]=x-r; if(y-r<nb[1])nb[1]=y-r; if(x+r>nb[2])nb[2]=x+r; if(y+r>nb[3])nb[3]=y+r };
+      caja3(P.x,P.y,P.h*2+4);
+      /* p66 · la estela de la caída: el mismo camino, unos píxeles de scroll
+         atrás, en azul y cada vez más fina; se apaga al posarse */
+      if(s>LIM.Se){
+        const d=OH*.013, ta=1-sube((s-(LIM.Sc-LIM.HOP*.55))/(LIM.HOP*.35));
+        if(ta>.01){ og.lineCap='round'; og.lineJoin='round';
+          const X=[P.x], Y=[P.y];
+          for(let j=1;j<=7;j++){ const Q=pose(s-j*d,T,true); if(!Q) break; X.push(Q.x); Y.push(Q.y); caja3(Q.x,Q.y,P.h*1.2+3) }
+          const lg=Math.abs(X[X.length-1]-P.x)+Math.abs(Y[Y.length-1]-P.y);
+          if(lg>2){
+            /* un cometa: tres pasadas apiladas (ancha y tenue, media, núcleo
+               vivo) que se afinan y se apagan hacia la cola: se lee suave,
+               sin degradados por cuadro */
+            const n=X.length-1; og.lineCap='butt';
+            for(let pase=0;pase<3;pase++){ const wd=[1.7,.95,.38][pase]*P.h, al=[.045,.08,.34][pase];
+              og.strokeStyle=pase===2?'rgb(120,184,255)':'rgb(46,134,255)';
+              for(let j=0;j<n;j++){ const k=1-j/n;
+                og.globalAlpha=al*k*(pase===2?k:1)*ta; og.lineWidth=wd*k+(pase===2?.8:1);
+                og.beginPath(); og.moveTo(X[j],Y[j]); og.lineTo(X[j+1],Y[j+1]); og.stroke() } }
+            og.globalAlpha=1;
+          }
+        }
+      }
+      /* p66 · la mira: se cierra sobre el cubo al llegar al centro y lo
+         suelta cuando el escenario se va */
+      const lock=sube((s-LIM.Sa)/(OH*.09)), va=lock*(1-sube((s-LIM.Se)/(OH*.16)));
+      if(va>.01){ const Rm=anilloR()*(P.h/h0)*(1+.45*(1-lock));
+        mira(og,P.x,P.y,Rm,va,T,cargaN?[llegadas,cargaN]:null); caja3(P.x,P.y,Rm*1.34+80); caja3(P.x+Rm*1.34+84,P.y-Rm*1.34,12) }
       if(P.anillo>=0&&P.anillo<1){
         og.strokeStyle='rgba(46,134,255,'+(.6*(1-P.anillo)).toFixed(3)+')'; og.lineWidth=1;
         og.beginPath(); og.arc(P.x,P.y,P.hM*1.3+P.anillo*(P.hM*3.2),0,6.2832); og.stroke();
+        caja3(P.x,P.y,P.hM*4.6+3);
       }
-      cuboOrto(og,P.x,P.y,P.h,P.M,TONES[0],1,1);
+      /* p66 · cargado brilla un punto más; lo suelta mientras cae */
+      const br=(.07*carga+.12*destello(T))*(1-sube((s-LIM.Se)/Math.max(1,LIM.Sc-LIM.Se)));
+      cuboOrto(og,P.x,P.y,P.h,P.M,TONES[0],1,1+br);
       oLimpio=false;
+      OB=[Math.max(0,Math.floor(nb[0]-2)),Math.max(0,Math.floor(nb[1]-2)),Math.min(OW,Math.ceil(nb[2]+2)),Math.min(OH,Math.ceil(nb[3]+2))];
     }
     if(dentro) oRaf=requestAnimationFrame(ocuadro);
     else if(oLimpio) oApaga();
