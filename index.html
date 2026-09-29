@@ -7759,6 +7759,36 @@ html body .xl .emb{--embc:255 255 255}
 /* el rotulo de la escena, oscuro sobre el blanco del final */
 .xl-stage.blanco .xl-word{color:rgba(11,14,20,.62) !important}
 </style>
+<style id="p69-css">
+/* ══ p69 · EL FINAL EN BLANCO, CON VIDA ═══════════════════════════════════
+   «Déjalo blanco pero con vida». Las redes y el pie siguen en blanco, con la
+   misma tinta y las mismas tarjetas; lo que cambia es lo que hay DETRAS:
+   · en #join, los cubos de «Nereum Finance» no se cortan en la costura: la
+     subida sigue, ya en fantasma -plata y azul palido, con el sombreado de
+     caras de la casa-, cada vez mas lenta y mas tenue hacia abajo;
+   · una luz fria a la derecha (sin filetes ni cuadricula: se probaron y
+     leian como el borde de una caja, o como papel otra vez);
+   · en el pie, el suelo de cubos de la escena, en claro, sobre el que se
+     apoya la marca de agua «NEREUM».
+   Todo detras del contenido (z 0), sin tocar un solo texto. */
+html body #join>.wrap{position:relative;z-index:1}
+.fv{position:absolute;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+.fv>i{position:absolute;inset:0;display:block}
+.fv-cv{position:absolute;left:0;top:0;width:100%;height:100%;display:block}
+.fv-join .fv-luz{background:
+  radial-gradient(50% 34% at 92% 26%, rgba(99,169,255,.16) 0%, rgba(99,169,255,.05) 48%, rgba(99,169,255,0) 76%),
+  radial-gradient(46% 34% at 0% 100%, rgba(46,134,255,.07) 0%, rgba(46,134,255,0) 72%)}
+.fv-join .fv-cv{-webkit-mask-image:linear-gradient(to bottom,#000 0%,#000 40%,rgba(0,0,0,.35) 100%);
+                        mask-image:linear-gradient(to bottom,#000 0%,#000 40%,rgba(0,0,0,.35) 100%)}
+/* el pie: la misma luz, al otro lado, y el suelo abajo */
+.fv-pie .fv-luz{background:
+  radial-gradient(50% 30% at 8% 0%, rgba(99,169,255,.10) 0%, rgba(99,169,255,0) 72%),
+  radial-gradient(46% 26% at 100% 46%, rgba(99,169,255,.13) 0%, rgba(99,169,255,0) 74%),
+  radial-gradient(70% 40% at 60% 100%, rgba(46,134,255,.06) 0%, rgba(46,134,255,0) 70%)}
+.fv-pie .fv-cv{top:auto;bottom:0;height:0;
+  -webkit-mask-image:linear-gradient(to bottom,rgba(0,0,0,0) 0%,rgba(0,0,0,.5) 30%,#000 58%,#000 88%,rgba(0,0,0,0) 100%);
+          mask-image:linear-gradient(to bottom,rgba(0,0,0,0) 0%,rgba(0,0,0,.5) 30%,#000 58%,#000 88%,rgba(0,0,0,0) 100%)}
+</style>
 <style id="p64-css">
 /* ══ 05 · LO QUE ESTAMOS CONSTRUYENDO — «Túnel de proyectos» (d64) ══════════
    El túnel de cubos de «The stack» con tres estaciones: en cada una la cámara
@@ -8827,6 +8857,7 @@ main>section#ruta{z-index:2}
 </section>
 
 <section class="join" id="join" data-bg="#FFFFFF" data-acc="#0A5CF5"><i class="via" aria-hidden="true"></i>
+  <div class="fv fv-join" aria-hidden="true"><i class="fv-luz"></i><canvas class="fv-cv" id="joinCv"></canvas></div>
   <div class="wrap">
     <div class="join-head rv">
       <div class="k sk rv"><i class="sk-n">07</i>In the open</div>
@@ -8867,6 +8898,7 @@ main>section#ruta{z-index:2}
 
 <footer data-bg="#FFFFFF" data-acc="#0A5CF5">
   <div class="ffield" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+  <div class="fv fv-pie" aria-hidden="true"><i class="fv-luz"></i><canvas class="fv-cv" id="pieCv"></canvas></div>
   <div class="wrap">
     <div class="ftop">
       <a class="fbrand" href="#top">
@@ -14479,6 +14511,13 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
      Sb la cabeza de la hebra llega a la altura del índice · Sc ya es el índice. */
   const oc=document.createElement('canvas');
   oc.className='caida-cv'; oc.setAttribute('aria-hidden','true'); oc.setAttribute('data-sin-vigia','');
+  /* p69 · fuera del aparcamiento de lienzos («proteger»), como la vía: pasa
+     de display:none a visible y el vigía aún lo cree oculto durante el primer
+     cuadro, que se descartaba. Con movimiento reducido no hay bucle que lo
+     repinte, y al llegar de un salto (ancla, Av Pág) la vía no aparecía hasta
+     el siguiente scroll. Él mismo ya se apaga (display:none y mapa de bits
+     soltado) fuera de su tramo. */
+  oc.__guardado=1;
   document.body.appendChild(oc);
   const og=oc.getContext('2d');
   let OW=0,OH=0,odpr=1,oLimpio=true,oRaf=0,LIM=null,PIE=null,CABK=null;
@@ -14535,7 +14574,11 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
     if(yK-y1<40) return null;
     const yb=y1+(yK-y1)*.42;
     const gut=(M.x0||0)+(M.wl||0);
-    const xm=Math.max(10,gut-clm(gut*.3,12,30)), xs=(M.x0||0)+M.sx;
+    /* p69 · en el telefono el margen mide ~22 px y el cubo, girando, casi
+       otro tanto: con la via a 10 px el cubo rozaba el canto de la pantalla.
+       La via baja 3 px mas adentro (13); su trenzado conserva la amplitud de
+       antes (la de 10 px), asi que el dibujo es el mismo, solo desplazado. */
+    const xm0=Math.max(10,gut-clm(gut*.3,12,30)), xm=movil?Math.max(13,xm0):xm0, xs=(M.x0||0)+M.sx;
     const kTop=CABK-Se, pie=PIE-Se, yJ=M.docTop+M.y0-Se;
     const ym=Math.max(yb+90,Math.min(kTop-24,yb+Math.max(150,(xc-xm)*.62)));
     const yj0=Math.max(ym+12,pie+8);
@@ -14564,7 +14607,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
       NX.push(b/l); NY.push(-a/l) }
     const aJ=(n-1)*VPASO, a1=y1-yc;
     VIA={Se,xc,yc,y1,yK,yb,xm,ym,yj0,xs,yJ,X,Y,NX,NY,n,a1,ab,am,aj0,aJ,
-      Ab:movil?8:12, Am:Math.min(movil?8:12,xm*.5), dPh:M.y0-(aJ-a1), M};
+      Ab:movil?8:12, Am:Math.min(movil?8:12,xm0*.5), dPh:M.y0-(aJ-a1), M};
     VIAK=key; return VIA;
   }
   /* la hebra i en el punto k de la vía: cuánto se aparta de la línea media */
@@ -14801,6 +14844,9 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
         viaPinta(VS.V,VS.sc,VS.yRecta,VS.aRecta,VS.yDesde,VS.luz,nb);
       }
       if(P){
+        /* p69 · y el cubo, que gira, nunca toca el canto: su media anchura
+           proyectada de verdad (la del giro de ese cuadro) + 3 px de aire */
+        if(movil){ const M0=P.M[0], ex=P.h*(Math.abs(M0[0])+Math.abs(M0[1])+Math.abs(M0[2]))+3; if(P.x<ex) P.x=ex }
         caja3(P.x,P.y,P.h*2+4);
         /* p66 · la estela: el mismo camino, unos píxeles de scroll atrás */
         if(s>LIM.Se){
@@ -17273,6 +17319,198 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
   }
   vigila();
   addEventListener('load',function(){ setTimeout(vigila,500) });
+})();
+</script>
+<script>
+/* ══ p69 · EL FINAL EN BLANCO, CON VIDA — los dos lienzos ══════════════════
+   «joinCv»: la subida de cubos de «Nereum Finance» que continua, en fantasma.
+   «pieCv» : el suelo de cubos de la escena, en claro, al pie de la marca.
+   Las reglas de la casa, todas: el scroll se lee de «__y» (una vez por
+   cuadro, lo publica el evento); la densidad la decide «__dens» y la vigila
+   «__guarda» (son adornos de bajo contraste, asi que su techo es 2, el suelo
+   de un telefono); el mapa de bits solo se rehace si cambia de tamaño
+   («__mide»); fuera de pantalla el lienzo se oculta y el bucle se para;
+   quieto, a media velocidad (sin scroll basta con 30 cuadros: la deriva es
+   de unos pixeles por segundo); y con movimiento reducido, un cuadro fijo. */
+(function(){
+  const QUIETO=matchMedia('(prefers-reduced-motion:reduce)').matches;
+  const clm=(v,a=0,b=1)=>Math.min(b,Math.max(a,v));
+  const azar=(i,k)=>{ const r=Math.sin(i*127.1+k*311.7+.5)*43758.5453; return r-Math.floor(r) };
+  const dTop=n=>{ let y=0; while(n){ y+=n.offsetTop; n=n.offsetParent } return y };
+  const mod=(a,b)=>((a%b)+b)%b;
+  /* el sombreado de caras de los cubos de la hebra, tal cual */
+  const LIGHT=[.34,-.42,-.84];
+  const FACES=[
+    [[0,0,1],[[-1,-1,1],[1,-1,1],[1,1,1],[-1,1,1]]],
+    [[0,0,-1],[[1,-1,-1],[-1,-1,-1],[-1,1,-1],[1,1,-1]]],
+    [[1,0,0],[[1,-1,1],[1,-1,-1],[1,1,-1],[1,1,1]]],
+    [[-1,0,0],[[-1,-1,-1],[-1,-1,1],[-1,1,1],[-1,1,-1]]],
+    [[0,-1,0],[[-1,-1,-1],[1,-1,-1],[1,-1,1],[-1,-1,1]]],
+    [[0,1,0],[[-1,1,1],[1,1,1],[1,1,-1],[-1,1,-1]]]];
+  const mul=(M,v)=>[M[0][0]*v[0]+M[0][1]*v[1]+M[0][2]*v[2],M[1][0]*v[0]+M[1][1]*v[1]+M[1][2]*v[2],M[2][0]*v[0]+M[2][1]*v[1]+M[2][2]*v[2]];
+  const mm=(A,B)=>A.map(r=>[0,1,2].map(j=>r[0]*B[0][j]+r[1]*B[1][j]+r[2]*B[2][j]));
+  const TILT=.56, ROLL=.2;
+  const RZX=mm([[Math.cos(ROLL),-Math.sin(ROLL),0],[Math.sin(ROLL),Math.cos(ROLL),0],[0,0,1]],
+               [[1,0,0],[0,Math.cos(TILT),-Math.sin(TILT)],[0,Math.sin(TILT),Math.cos(TILT)]]);
+  const Ry=a=>{ const c=Math.cos(a), s=Math.sin(a); return mm(RZX,[[c,0,s],[0,1,0],[-s,0,c]]) };
+  const COLS=new Map();
+  const cstr=(h,sa,l,a)=>{ const L=Math.round(l*10), A=Math.round(a*1000), k=((((h|0)*101+(sa|0))*1001+L)*1001+A);
+    let c=COLS.get(k); if(c===undefined){ if(COLS.size>6000) COLS.clear(); c='hsla('+(h|0)+','+(sa|0)+'%,'+(L/10).toFixed(1)+'%,'+(A/1000).toFixed(3)+')'; COLS.set(k,c) } return c };
+  /* los tonos claros de TONES -plata, perla y los dos azules de la marca- */
+  const PLATA={h:210,s:10,l:92}, PERLA={h:213,s:13,l:76}, AZC={h:218,s:100,l:62}, AZ={h:219,s:100,l:56}, AZH={h:224,s:97,l:46};
+  const tono=r=> r<.30?PLATA : r<.54?PERLA : r<.80?AZC : r<.95?AZ : AZH;
+  function cubo(g,cx,cy,h,M,tn,a,px1){
+    if(a<=.01||h<=.3) return;
+    for(let k=0;k<6;k++){
+      const n=mul(M,FACES[k][0]); if(n[2]>=-.001) continue;
+      const pts=FACES[k][1];
+      g.beginPath();
+      for(let j=0;j<4;j++){ const w=mul(M,pts[j]); const X=cx+w[0]*h, Y=cy+w[1]*h; j?g.lineTo(X,Y):g.moveTo(X,Y) }
+      g.closePath();
+      const lam=clm(n[0]*LIGHT[0]+n[1]*LIGHT[1]+n[2]*LIGHT[2]), lit=.20+lam*.96;
+      g.fillStyle=cstr(tn.h,tn.s,clm(tn.l*(.58+lit*.62)+lit*10,3,98),a); g.fill();
+      /* el canto, en tinta y no en luz: sobre blanco el filete claro de la
+         casa no se ve; uno azul muy bajo dibuja la arista igual */
+      g.strokeStyle=cstr(222,40,30,a*.28); g.lineWidth=px1*1.5; g.stroke();
+    }
+  }
+
+  /* el motor comun: medida, densidad, guarda, visibilidad y bucle */
+  function monta(cv,siembra,pinta,coloca){
+    if(!cv) return;
+    /* se ocultan y se paran solos fuera de pantalla: fuera del aparcamiento
+       («proteger»), que descartaria el cuadro unico de movimiento reducido */
+    cv.__guardado=1;
+    const ctx=cv.getContext('2d');
+    cv.__tope=2;
+    let W=0,H=0,PX1=1,top=0,corre=false,vivo=false,last=0,T=0,yAnt=-1,par=0;
+    const cuadro=()=>{ ctx.clearRect(0,0,W,H); pinta(ctx,W,H,T,clm((__y+__vh-top)/(__vh+H)),PX1) };
+    const GU=__guarda(cv,()=>{ const d=__dens(cv); __mide(cv,W*d,H*d); ctx.setTransform(d,0,0,d,0,0); PX1=1/d; cuadro() });
+    const sitio=()=>{ top=dTop(cv) };
+    function build(){
+      if(coloca) coloca(cv);
+      const d=__dens(cv); PX1=1/d;
+      const w=cv.clientWidth, h=cv.clientHeight;
+      const cambia=w!==W;
+      W=w; H=h;
+      __mide(cv,W*d,H*d); ctx.setTransform(d,0,0,d,0,0);
+      if(cambia) siembra(W,H);
+      sitio();
+    }
+    function tick(now){
+      if(!corre){ vivo=false; return }
+      const dt=Math.min(.05,(now-last)/1000||0); last=now; T+=dt;
+      const y=__y;
+      /* quieto: un cuadro de cada dos; con scroll, todos */
+      if(y!==yAnt || (par^=1)){ yAnt=y; GU.ini(); cuadro(); GU.fin() }
+      requestAnimationFrame(tick);
+    }
+    build();
+    addEventListener('resize',()=>{ build(); if(corre||QUIETO) cuadro() },{passive:true});
+    addEventListener('nrm:remide',()=>{ if(coloca) build(); else sitio() },{passive:true});
+    new IntersectionObserver(es=>es.forEach(e=>{
+      corre=e.isIntersecting&&e.intersectionRatio>0;
+      cv.style.visibility=corre?'':'hidden';
+      if(!corre) return;
+      /* lo de encima puede haber cambiado de alto mientras no se veia
+         (fuentes, secciones que se pintan al llegar): se vuelve a medir al
+         entrar, una vez, y no en cada cuadro */
+      build();
+      if(QUIETO){ cuadro(); corre=false; return }
+      if(!vivo){ vivo=true; last=performance.now(); requestAnimationFrame(tick) }
+    }),{rootMargin:'0px',threshold:[0,1e-6]}).observe(cv);
+  }
+
+  /* ── #join: la subida, en fantasma ──
+     Por detras de los textos pasan, pero apagados: cada linea de lectura
+     (epigrafe, titular, entradilla, filete) se mide al medir el lienzo y el
+     cubo que la cruza baja a un quinto con una rampa de 30 px, sin saltos. Asi la tinta nunca baja de 4,5:1 aunque un cubo pase justo
+     por debajo de una linea. */
+  let NU=[], ZONAS=[];
+  const jsec=document.getElementById('join');
+  const calma=(x,y)=>{ let f=1;
+    for(const z of ZONAS){ const dx=Math.max(z[0]-x,0,x-z[2]), dy=Math.max(z[1]-y,0,y-z[3]);
+      const g=.22+.78*clm(Math.hypot(dx,dy)/30); if(g<f) f=g }
+    return f };
+  monta(document.getElementById('joinCv'),(W,H)=>{
+    const n=W<760?20:28; NU=[];
+    for(let i=0;i<n;i++){
+      const z=azar(i,3), u=azar(i,1);
+      NU.push({u: W<760?u:Math.pow(u,.72), v:azar(i,2), z, tn:tono(azar(i,4)),
+        ph:azar(i,5)*6.283, sp:(.05+azar(i,6)*.12)*(azar(i,7)<.5?-1:1),
+        vy:(W<760?3:4)+z*9, h:(W<760?5.5:6)+z*(W<760?9:14)});
+    }
+  },(g,W,H,T,pr,px1)=>{
+    const m=60, Hs=H+m*2;
+    for(const q of NU){
+      const k=.22-q.z*.34;                       /* lo lejano se retrasa, lo cercano adelanta */
+      const y=mod(q.v*Hs - T*q.vy + pr*H*k, Hs) - m;
+      const x=q.u*W + Math.sin(T*.12+q.ph)*8;
+      /* mas presente arriba, donde sigue la subida de la escena */
+      const baja=1-.55*clm(y/H);
+      const a=(.50-q.z*.16)*baja*calma(x,y);
+      cubo(g,x,y,q.h,Ry(q.ph+T*q.sp),q.tn,a,px1);
+    }
+  },(cv)=>{
+    if(!jsec) return;
+    /* una zona por LINEA de texto (los rectangulos del rango), no por bloque:
+       asi el cubo solo se aclara donde de verdad hay tinta. Se mide al entrar
+       y al cambiar de tamaño, nunca por cuadro. */
+    const s0=jsec.getBoundingClientRect(), P=14, rg=document.createRange();
+    ZONAS=[];
+    jsec.querySelectorAll('.join-head>*, .join-rule span').forEach(el=>{
+      rg.selectNodeContents(el);
+      for(const r of rg.getClientRects()) if(r.width>2)
+        ZONAS.push([r.left-s0.left-P, r.top-s0.top-P, r.right-s0.left+P, r.bottom-s0.top+P]);
+    });
+  });
+
+  /* (las zonas, junto al lienzo de #join; ver «colocaJoin» abajo) */
+  /* ── el pie: el suelo de la escena, en claro ──
+     Una reticula en perspectiva -las losas del suelo de «In the open»- que
+     llega despacio hacia quien mira. Vive entre las columnas de enlaces y el
+     filete final, detras de la marca de agua «NEREUM», que queda de pie
+     sobre el: ningun texto de lectura tiene una losa detras. */
+  const pie=document.querySelector('footer'), fmark=pie&&pie.querySelector('.fmark'), fend=pie&&pie.querySelector('.fend');
+  monta(document.getElementById('pieCv'),()=>{},(g,W,H,T,pr,px1)=>{
+    const cx=W/2, hor=H*.02, R=W<760?15:16, C=W<760?10:18;
+    const cel=W<760?W*.07:Math.min(W*.042,60);
+    const A=T*.10 + pr*2.4;                       /* filas recorridas: reloj y scroll */
+    const kz=z=>1/(.16+z*1.34), K0=kz(1), K1=kz(.13);
+    const Y=z=>hor+(H-hor)*(kz(z)-K0)/(K1-K0);
+    const n1=Math.floor(A+R), n0=Math.ceil(A+R*.13)-1;
+    for(let n=n1; n>=n0; n--){                    /* del fondo hacia delante */
+      const z=(n-A)/R, z2=(n-1-A)/R;
+      if(z>1||z2<.02) continue;
+      const y1=Y(Math.min(1,z)), y2=Y(Math.max(.13,z2));
+      const k=kz(Math.min(1,Math.max(.13,(z+z2)/2)));
+      const alto=(y2-y1);
+      if(alto<.6) continue;
+      const lejos=clm((1-z)*1.6);                 /* nace en la niebla del horizonte */
+      for(let c=-C;c<=C;c++){
+        const hsh=azar(n*31+c,21);
+        if(hsh<.38) continue;                     /* huecos: suelo, no baldosa */
+        const r2=azar(n*31+c,22), tn=r2<.45?PLATA:r2<.76?PERLA:r2<.94?AZC:AZ;
+        const xa=cx+(c-.5)*cel*k*.62, xb=cx+(c+.5)*cel*k*.62;
+        const gap=(xb-xa)*.12;
+        const x=xa+gap, w=(xb-xa)-gap*2;
+        if(x>W||x+w<0) continue;
+        const lado=clm(1-Math.abs(c)/(C+.5));
+        const al=(.05+azar(n*31+c,23)*.14)*lejos*(.30+.70*lado);
+        if(al<.012) continue;
+        const lt=alto*.66, lf=Math.max(px1,alto*.20);
+        g.fillStyle=cstr(tn.h,tn.s,clm(tn.l*.9+10,3,98),al); g.fillRect(x,y1,w,lt);
+        g.fillStyle=cstr(tn.h,tn.s,clm(tn.l*.62,3,98),al*1.1); g.fillRect(x,y1+lt,w,lf);
+      }
+    }
+  },(cv)=>{
+    if(!fmark||!fend) return;
+    /* por maquetacion (offsetTop) y no por caja: la marca entra con una
+       transformacion y la caja la veia donde aun no estaba */
+    const b=dTop(pie), mt=dTop(fmark)-b, mh=fmark.offsetHeight;
+    const abajo=dTop(fend)-b, arriba=Math.max(0,mt+mh*.32);
+    cv.style.top=arriba+'px'; cv.style.bottom='auto'; cv.style.height=Math.max(40,abajo-arriba)+'px';
+  });
 })();
 </script>
 </body>
