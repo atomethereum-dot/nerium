@@ -165,7 +165,10 @@ const verde = await pg2.evaluate(() => {
            build: g(document.querySelector('.bcd-dot')),
            avance: getComputedStyle(document.querySelector('.ann-fill')).backgroundImage };
 });
-di(verde.punto === verde.build,
+/* Las tarjetas de build ya no existen: proyectos es ahora el tunel, todo en
+   azul (lo pidio el cliente: nada de otro color en esa seccion). Si vuelven,
+   se compara con ellas; si no, el verde del aviso no se toca. */
+di(verde.build ? verde.punto === verde.build : verde.punto === 'rgb(63, 214, 140)',
    'el punto del aviso lleva el verde de la casa, no uno nuevo: ' + verde.punto);
 di(!/rgb\((?:1\d\d|2\d\d), 25[0-5], (?:[0-9]|[1-9]\d)\)/.test(verde.avance),
    'y el avance NO va en verde: el verde es un detalle, no la barra entera');

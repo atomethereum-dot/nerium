@@ -195,8 +195,10 @@ const enlazables = await pg.evaluate(() => {
   // Las de transicion y las decorativas nunca tuvieron entrada. «ruta»
   // tampoco, y esa si es una decision: la hoja de ruta esta numerada y se ve,
   // pero vive dentro del recorrido y no se salta a ella desde la barra.
+  // «builds» (proyectos, el tunel) igual: vuelve numerada, pero es el paso
+  // del globo a la hoja de ruta y no se anadio entrada al menu.
   const FUERA = new Set(['chroma','kin','xfade','xlight','hpin','docs','blog',
-                         'loop','dark','umb','hero','logos','team','tkp','ruta']);
+                         'loop','dark','umb','hero','logos','team','tkp','ruta','builds']);
   return [...document.querySelectorAll('main>section[id]')]
     .filter(s => getComputedStyle(s).display !== 'none')
     .map(s => s.id).filter(i => !FUERA.has(i)).length;
