@@ -7629,85 +7629,76 @@ html body .xl .emb{--embc:255 255 255}
 /* el rotulo de la escena, oscuro sobre el blanco del final */
 .xl-stage.blanco .xl-word{color:rgba(11,14,20,.62) !important}
 </style>
-<style id="pt-css">
-/* ══ 06 · LOS PROYECTOS EN PARTICULAS ══════════════════════════════════════
-   Negro puro, el mismo del globo de arriba. Escenario fijo mientras se baja;
-   el lienzo ocupa todo el escenario y encima va el texto: arriba la cabecera
-   y el emblema, abajo el indice, la descripcion, el estado y el enlace. */
+<style id="p64-css">
+/* ══ 05 · LO QUE ESTAMOS CONSTRUYENDO — «Túnel de proyectos» (d64) ══════════
+   El túnel de cubos de «The stack» con tres estaciones: en cada una la cámara
+   frena y los cubos de las paredes arman el emblema del proyecto alrededor de
+   su rótulo. Al final el túnel se vacía y queda UN cubo: es el que cae hasta
+   la hebra de la ruta y se queda de índice («estamos aquí»). Negro y azules de
+   la casa, sin ámbar: la minería también va en azul. */
 main>section#builds{background:#000 !important;background-image:none !important;
   padding:0 !important;content-visibility:visible;overflow:visible !important}
-#builds .pt-hold{position:relative;height:400vh}
-#builds .pt-stage{position:sticky;top:0;height:100vh;height:100svh;overflow:hidden;background:#000;touch-action:pan-y}
-#builds .pt-gl{position:absolute;inset:0;width:100%;height:100%;display:block}
-#builds .pt-grano{position:absolute;inset:-50%;pointer-events:none;opacity:.12;mix-blend-mode:overlay;background-size:180px;animation:ptGrano 1s steps(4) infinite}
-#builds.pt-quieto .pt-grano{animation-play-state:paused}
-@keyframes ptGrano{0%{transform:translate(0,0)}25%{transform:translate(-3%,2%)}50%{transform:translate(2%,-3%)}75%{transform:translate(-1%,3%)}}
-#builds .pt-cab{position:absolute;left:0;right:0;top:clamp(56px,8vh,96px);z-index:3;pointer-events:none;margin-bottom:0}
-#builds .pt-cab .builds-h{font-size:clamp(28px,2.8vw,42px);letter-spacing:-.04em;line-height:1;margin-top:14px}
-#builds .pt-fig{position:absolute;z-index:3;pointer-events:none;display:grid;gap:6px;justify-items:end;text-align:right;
-  font-family:var(--m);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:#fff}
-#builds .pt-fig b{font-weight:400;color:#fff}
-#builds .pt-fig span{display:none}
-#builds .pt-fig span.on{display:block}
-#builds .pt-fig.am{color:rgba(224,160,74,.7)}
-/* los nombres son la fuente de las particulas: invisibles salvo sin WebGL */
-#builds .pt-nom{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;margin:0}
-#builds.pt-nogl .pt-nom.on{clip:auto;width:auto;height:auto;overflow:visible;left:16px;right:16px;top:44%;transform:translateY(-50%);z-index:2;
-  text-align:center;white-space:normal;font-family:var(--f);font-weight:500;font-size:clamp(48px,11vw,170px);letter-spacing:-.06em;line-height:.9;color:#fff}
-#builds .pt-bajo{position:absolute;left:0;right:0;bottom:calc(var(--hud-b,14px) + 84px);z-index:3;pointer-events:none}
-#builds .pt-rej{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:0 24px;align-items:end}
-#builds .pt-idx{grid-column:1/4;display:grid;gap:2px;justify-items:start}
-#builds .pt-idx button{all:unset;pointer-events:auto;cursor:pointer;display:flex;gap:14px;align-items:baseline;font:400 14px/1.95 var(--f);letter-spacing:-.01em;
-  color:rgba(255,255,255,.4);transition:color .5s,transform .7s cubic-bezier(.2,.8,.2,1)}
-#builds .pt-idx button span{font:400 11px var(--m);letter-spacing:.16em;width:22px}
-#builds .pt-idx button.on{color:#fff;transform:translateX(10px)}
-#builds .pt-idx button.on span{color:#63A9FF}
-#builds .pt-idx button.on.am span{color:#E0A04A}
-#builds .pt-idx button:focus-visible{outline:1px solid #fff;outline-offset:4px}
-#builds .pt-papel{pointer-events:auto;margin-top:12px;font-family:var(--m);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:#63A9FF;text-decoration:none}
-#builds .pt-infos{grid-column:5/13;display:grid}
-#builds .pt-info{grid-area:1/1;display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:0 24px;align-items:end;
-  opacity:0;visibility:hidden;transform:translateY(12px);filter:blur(6px);transition:opacity .25s,transform .25s,filter .25s,visibility 0s .25s}
-#builds .pt-info.on{opacity:1;visibility:visible;transform:none;filter:none;
-  transition:opacity .6s cubic-bezier(.2,.8,.2,1) .12s,transform .8s cubic-bezier(.2,.8,.2,1) .12s,filter .6s .12s,visibility 0s}
-#builds .pt-ds{grid-column:1/6;margin:0;color:rgba(255,255,255,.9) !important;font-size:15px;line-height:1.62;max-width:46ch}
-#builds .pt-lado{grid-column:6/9;display:grid;gap:16px;justify-items:start}
-#builds .pt-est{display:inline-flex;align-items:center;gap:10px;font-family:var(--m);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:#fff}
-#builds .pt-est .bcd-dot.obra{background:#E0A04A}
-#builds .pt-barra{display:block;width:100%;max-width:200px;height:1px;background:rgba(255,255,255,.16);position:relative}
-#builds .pt-barra i{position:absolute;left:0;top:-.5px;height:2px;width:75%;background:linear-gradient(90deg,#2E86FF,#63A9FF)}
-#builds .pt-cta{pointer-events:auto;display:inline-flex;align-items:center;font-size:15px;color:#fff;letter-spacing:-.01em;padding-bottom:6px;
-  border-bottom:1px solid rgba(255,255,255,.4);text-decoration:none;transition:border-color .3s}
-#builds .pt-cta:hover{border-color:#63A9FF}
-#builds .pt-anillo{position:absolute;left:0;top:0;z-index:4;pointer-events:none;opacity:0;transition:opacity .4s}
-#builds .pt-anillo i{position:absolute;border-radius:50%;border:1px solid rgba(99,169,255,.35);transform:translate(-50%,-50%)}
-#builds .pt-anillo b{position:absolute;left:0;top:0;width:5px;height:5px;margin:-2.5px;border-radius:50%;background:#fff}
-#builds .pt-pista{position:absolute;z-index:3;pointer-events:none;text-align:right;
-  font-family:var(--m);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.34)}
-@media(max-width:899px){
-  #builds .pt-hold{height:360vh}
-  #builds .pt-cab{top:clamp(44px,6vh,64px)}
-  #builds .pt-cab .builds-h{font-size:clamp(24px,6.6vw,30px);max-width:14ch;margin-top:10px}
-  #builds .pt-bajo{bottom:calc(var(--hud-b,14px) + 66px)}
-  #builds .pt-rej{display:grid;grid-template-columns:1fr;gap:14px}
-  #builds .pt-idx{display:flex;gap:6px;grid-column:auto;order:-1;align-items:center}
-  #builds .pt-idx button{font-size:0;line-height:0;width:34px;height:14px;align-items:center}
-  #builds .pt-idx button span{display:none}
-  #builds .pt-idx button::before{content:"";display:block;width:100%;height:2px;background:currentColor}
-  #builds .pt-idx button.on{transform:none}
-  #builds .pt-papel{display:none}
-  #builds .pt-infos{grid-column:auto}
-  #builds .pt-info{grid-template-columns:1fr;gap:12px}
-  #builds .pt-ds{grid-column:auto;font-size:14px;line-height:1.55}
-  #builds .pt-lado{grid-column:auto;display:flex;flex-wrap:wrap;gap:12px 22px;align-items:center}
-  #builds .pt-barra{display:none}
-  #builds .pt-cta{font-size:14px}
-  #builds .pt-pista{display:none}
+#builds .tn-hold{position:relative;height:560vh}
+#builds .tn-stage{position:sticky;top:0;height:100vh;height:100svh;overflow:hidden;background:#0A0D14}
+#builds .tn-cv{position:absolute;inset:0;width:100%;height:100%;display:block}
+#builds .tn-stage::after{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;
+  background:radial-gradient(ellipse 75% 70% at 50% 50%,rgba(0,0,0,0) 55%,rgba(0,0,0,.62) 100%)}
+/* la entrada: el epígrafe y el titular de la casa, a la izquierda como todos */
+#builds .tn-cab{position:absolute;left:0;right:0;top:50%;z-index:3;transform:translateY(-50%);pointer-events:none}
+#builds .tn-cab .sk{padding-top:0}
+#builds .tn-cab .builds-h{margin-top:clamp(18px,2vw,26px);max-width:15ch}
+#builds .tn-papel{display:inline-block;margin-top:clamp(20px,2.4vw,30px);pointer-events:auto;font-family:var(--m);font-size:11px;
+  letter-spacing:.2em;text-transform:uppercase;color:#63A9FF;text-decoration:none}
+#builds .tn-papel:hover,#builds .tn-papel:focus-visible{color:#fff}
+/* cada estación: el rótulo, centrado dentro de su emblema */
+#builds .tn-sta{position:absolute;left:50%;top:50%;z-index:3;width:min(470px,calc(100% - 32px));text-align:center;
+  pointer-events:none;transform:translate(-50%,-50%);opacity:0;visibility:hidden}
+#builds .tn-lk{display:flex;flex-direction:column;align-items:center;gap:14px}
+#builds .tn-lk>i{display:block;height:1px;width:clamp(120px,16vw,220px);background:rgba(232,236,244,.3);transform:scaleX(var(--a,0))}
+#builds .tn-lk>span{display:flex;align-items:center;gap:12px;font:400 11px var(--m);letter-spacing:.2em;text-transform:uppercase;
+  color:rgba(255,255,255,.9);font-variant-numeric:tabular-nums;white-space:nowrap}
+#builds .tn-lk b{font-weight:500;color:#63A9FF;letter-spacing:.06em}
+/* el estado, en azul: en marcha = punto lleno; en desarrollo = aro discontinuo */
+#builds .tn-dot{width:6px;height:6px;border-radius:50%;background:#63A9FF;box-shadow:0 0 10px rgba(99,169,255,.8);flex:0 0 auto}
+#builds .tn-dot.obra{width:9px;height:9px;background:none;box-shadow:none;border:1px dashed #63A9FF}
+#builds .tn-t{font-weight:400;font-size:clamp(26px,3.4vw,46px);letter-spacing:-.04em;line-height:1.04;color:#fff;margin-top:22px;
+  text-shadow:0 6px 34px rgba(4,8,18,.92),0 2px 12px rgba(4,8,18,.85)}
+#builds .tn-p{font-size:15px;line-height:1.6;color:#AAB5CA;margin:14px auto 0;max-width:44ch;text-shadow:0 2px 14px rgba(4,8,18,.95)}
+#builds .tn-cta{display:inline-flex;margin-top:18px;pointer-events:auto;font-size:15px;color:#fff;letter-spacing:-.01em;text-decoration:none;
+  padding-bottom:5px;border-bottom:1px solid rgba(255,255,255,.28);transition:border-color .3s}
+#builds .tn-cta:hover,#builds .tn-cta:focus-visible{border-color:#63A9FF}
+/* el carril de estaciones, al canto izquierdo (el índice de la página va al derecho) */
+#builds .tn-rail{position:absolute;left:max(24px,calc((100% - 1240px) / 2 - 64px));top:50%;transform:translateY(-50%);z-index:3;
+  display:flex;flex-direction:column;gap:26px;pointer-events:none;font:400 11px var(--m);letter-spacing:.2em;
+  color:rgba(255,255,255,.42);font-variant-numeric:tabular-nums;opacity:0}
+#builds .tn-rail span{display:flex;align-items:center;gap:12px;transition:color .5s}
+#builds .tn-rail span::before{content:"";width:18px;height:1px;background:currentColor;transform-origin:0 50%;transform:scaleX(.5);
+  transition:transform .7s cubic-bezier(.16,.84,.26,1)}
+#builds .tn-rail span.on{color:#fff}
+#builds .tn-rail span.on::before{transform:scaleX(1.6);background:#63A9FF}
+/* la leyenda del emblema, la misma «FIG.» de antes */
+#builds .tn-fig{position:absolute;left:50%;bottom:clamp(26px,5.4vh,56px);transform:translateX(-50%);z-index:3;pointer-events:none;
+  display:flex;gap:12px;align-items:center;font:400 10px var(--m);letter-spacing:.24em;text-transform:uppercase;
+  color:rgba(214,217,224,.62);white-space:nowrap;opacity:0}
+#builds .tn-fig b{font-weight:400;color:#fff}
+#builds .tn-fig span{display:none}
+#builds .tn-fig span.on{display:inline}
+#builds .tn-stage.go .xf-go{opacity:.85}
+@media(max-width:760px){
+  #builds .tn-hold{height:500vh}
+  #builds .tn-cab .builds-h{max-width:12ch}
+  #builds .tn-sta{width:calc(100% - 40px)}
+  #builds .tn-p{font-size:14px;max-width:34ch}
+  #builds .tn-cta{font-size:14px}
+  #builds .tn-rail{left:50%;top:auto;bottom:calc(var(--hud-b,14px) + 64px);transform:translateX(-50%);flex-direction:row;gap:18px}
+  #builds .tn-rail span{flex-direction:column;gap:8px}
+  #builds .tn-rail span::before{transform-origin:50% 50%}
+  #builds .tn-fig{bottom:auto;top:calc(var(--bar,56px) + 18px);font-size:9px;letter-spacing:.2em}
 }
-@media(max-width:899px) and (max-height:720px){
-  #builds .pt-ds{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
-}
-@media(prefers-reduced-motion:reduce){#builds .pt-grano{animation:none}#builds .pt-info,#builds .pt-info.on,#builds .pt-idx button{transition:none}}
+/* el lienzo de la caída: fijo, encima de todo el contenido y por debajo de la
+   cabecera y del HUD, y sin recibir nunca un clic */
+.caida-cv{position:fixed;left:0;top:0;width:100vw;height:100vh;z-index:58;pointer-events:none;display:block}
+@media(prefers-reduced-motion:reduce){.caida-cv{display:none}}
 </style>
 <style id="r04-css">
 /* ══ r04 «Hebra» ══ la hebra de la ruta, crecida: cada hito es un nodo ══ */
@@ -8420,74 +8411,46 @@ main>section#builds{background:#000 !important;background-image:none !important;
 </section>
 
 
-<section class="builds" id="builds" data-bg="#000000" data-acc="#63A9FF" hidden><i class="via" aria-hidden="true"></i>
-  <!-- LOS PROYECTOS EN PARTICULAS. El nombre del proyecto se muestrea de un
-       lienzo 2D en miles de particulas que forman la palabra gigante; el
-       cursor las aparta como un fluido y vuelven a su sitio. Al bajar, la
-       palabra estalla en un remolino y se rehace con el siguiente nombre. Cada
-       proyecto lleva un emblema de particulas: bloques en cadena, moneda que se
-       parte en fichas, sol sobre racks. Los nombres salen de los h3 de abajo,
-       asi que se traducen como el resto de la pagina. Sin WebGL, el nombre se
-       ve en letra grande. -->
-  <div class="pt-hold" id="ptHold">
-    <div class="pt-stage" id="ptStage">
-      <canvas class="pt-gl" id="ptGl" aria-hidden="true"></canvas>
-      <div class="pt-grano" id="ptGrano" aria-hidden="true"></div>
-      <div class="wrap builds-head pt-cab" id="ptCab">
-        <div class="k sk rv"><i class="sk-n">06</i>What we are building</div>
-        <h2 class="builds-h">Three pieces, two already running.</h2>
-      </div>
-      <div class="pt-fig" id="ptFig" aria-hidden="true">
-        <b data-no-traducir>FIG. 01</b>
-        <span data-i="0">Blocks in sequence</span><span data-i="1">One asset, many units</span><span data-i="2">Sun over racks</span>
-      </div>
-      <div class="pt-nombres" id="ptNombres">
-        <h3 class="pt-nom" data-i="0">The chain</h3>
-        <h3 class="pt-nom" data-i="1">Asset tokenization</h3>
-        <h3 class="pt-nom" data-i="2">Bitcoin mining</h3>
-      </div>
-      <div class="pt-bajo" id="ptBajo">
-        <div class="wrap pt-rej">
-          <nav class="pt-idx" aria-label="Projects">
-            <button type="button" data-i="0"><span data-no-traducir>01</span>The chain</button>
-            <button type="button" data-i="1"><span data-no-traducir>02</span>Asset tokenization</button>
-            <button type="button" data-i="2" class="am"><span data-no-traducir>03</span>Bitcoin mining</button>
-            <a class="pt-papel" href="https://nereum.xyz/whitepaper">Read the whitepaper &#8594;</a>
-          </nav>
-          <div class="pt-infos">
-            <div class="pt-info" data-i="0">
-              <p class="pt-ds">Own validators, own consensus, EVM-compatible. Every
-        transfer is cleared against the asset's policy before it is written —
-        in the protocol, not in a contract on top.</p>
-              <div class="pt-lado">
-                <span class="pt-est"><i class="bcd-dot"></i>Testnet · 75% to mainnet</span>
-                <span class="pt-barra" aria-hidden="true"><i></i></span>
-                <a class="pt-cta" href="https://nereum.xyz/explorer">Open the explorer &#8594;</a>
-              </div>
-            </div>
-            <div class="pt-info" data-i="1">
-              <p class="pt-ds">Describe the asset, attach its documentation, choose the
-        conditions that travel with it, and issue. No custom contract to write
-        and no audit to commission for every issuance.</p>
-              <div class="pt-lado">
-                <span class="pt-est"><i class="bcd-dot"></i>Testnet · 75% to mainnet</span>
-                <span class="pt-barra" aria-hidden="true"><i></i></span>
-                <a class="pt-cta" href="https://nereum.xyz/explorer/#/tokenize">Tokenize an asset &#8594;</a>
-              </div>
-            </div>
-            <div class="pt-info" data-i="2">
-              <p class="pt-ds">Physical servers we own and operate, powered by solar.
-        Not rented hashrate and not a reseller's contract: machines in racks,
-        with their own energy behind them.</p>
-              <div class="pt-lado">
-                <span class="pt-est"><i class="bcd-dot obra"></i>In development</span>
-              </div>
-            </div>
-          </div>
+<section class="builds" id="builds" data-bg="#000000" data-acc="#63A9FF"><i class="via" aria-hidden="true"></i>
+  <!-- p64 «Túnel de proyectos»: el vuelo por el túnel de cubos, con una
+       estación por proyecto. El último cubo del túnel cae hasta la hebra de
+       la ruta y se queda de índice. -->
+  <div class="tn-hold" id="tnHold">
+    <div class="tn-stage" id="tnStage">
+      <canvas class="tn-cv" id="tnCv" aria-hidden="true"></canvas>
+      <div class="tn-cab" id="tnCab">
+        <div class="wrap">
+          <div class="k sk rv"><i class="sk-n">05</i>What we are building</div>
+          <h2 class="builds-h">Three pieces, two already running.</h2>
+          <a class="tn-papel" href="https://nereum.xyz/whitepaper">Read the whitepaper &#8594;</a>
         </div>
       </div>
-      <div class="pt-pista" aria-hidden="true">Move to disturb · Scroll to re-form</div>
-      <div class="pt-anillo" id="ptAnillo" aria-hidden="true"><i id="ptAnilloC"></i><b></b></div>
+      <div class="tn-stas" id="tnStas">
+        <article class="tn-sta" data-i="0">
+          <div class="tn-lk"><i></i><span><b data-no-traducir>01</b><i class="tn-dot"></i>Testnet · 75% to mainnet</span></div>
+          <h3 class="tn-t">The chain</h3>
+          <p class="tn-p">Own validators, own consensus, EVM-compatible. Every transfer is cleared against the asset's policy before it is written — in the protocol, not in a contract on top.</p>
+          <a class="tn-cta" href="https://nereum.xyz/explorer">Open the explorer &#8594;</a>
+        </article>
+        <article class="tn-sta" data-i="1">
+          <div class="tn-lk"><i></i><span><b data-no-traducir>02</b><i class="tn-dot"></i>Testnet · 75% to mainnet</span></div>
+          <h3 class="tn-t">Asset tokenization</h3>
+          <p class="tn-p">Describe the asset, attach its documentation, choose the conditions that travel with it, and issue. No custom contract to write and no audit to commission for every issuance.</p>
+          <a class="tn-cta" href="https://nereum.xyz/explorer/#/tokenize">Tokenize an asset &#8594;</a>
+        </article>
+        <article class="tn-sta" data-i="2">
+          <div class="tn-lk"><i></i><span><b data-no-traducir>03</b><i class="tn-dot obra"></i>In development</span></div>
+          <h3 class="tn-t">Bitcoin mining</h3>
+          <p class="tn-p">Physical servers we own and operate, powered by solar. Not rented hashrate and not a reseller's contract: machines in racks, with their own energy behind them.</p>
+        </article>
+      </div>
+      <div class="tn-rail" aria-hidden="true"><span data-no-traducir>01</span><span data-no-traducir>02</span><span data-no-traducir>03</span></div>
+      <div class="tn-fig" aria-hidden="true"><b data-no-traducir>FIG. 01</b><span>Blocks in sequence</span><span>One asset, many units</span><span>Sun over racks</span></div>
+      <div class="xf-go" aria-hidden="true">
+        <i></i>
+        <svg viewBox="0 0 24 24"><path d="M12 4v13M6 12l6 6 6-6"/></svg>
+        <b>Keep scrolling</b>
+      </div>
     </div>
   </div>
 </section>
@@ -8501,7 +8464,7 @@ main>section#builds{background:#000 !important;background-image:none !important;
   <!-- r04: la hebra la pinta el lienzo .hb-lz -->
   <div class="wrap ruta-wrap">
     <canvas class="hb-lz" aria-hidden="true"></canvas>
-    <div class="k sk rv ruta-top"><i class="sk-n">05</i>Roadmap</div>
+    <div class="k sk rv ruta-top"><i class="sk-n">06</i>Roadmap</div>
     <h2 class="ruta-h">Three phases, and what each one has to prove.</h2>
     <ol class="ruta-lista" id="rutaLista">
       <li class="ruta-f" data-i="0">
@@ -8679,7 +8642,7 @@ main>section#builds{background:#000 !important;background-image:none !important;
 <section class="join" id="join" data-bg="#FFFFFF" data-acc="#0A5CF5"><i class="via" aria-hidden="true"></i>
   <div class="wrap">
     <div class="join-head rv">
-      <div class="k sk rv"><i class="sk-n">06</i>In the open</div>
+      <div class="k sk rv"><i class="sk-n">07</i>In the open</div>
     <h2 class="join-h">Everything we ship is announced in the open.</h2>
       <p class="join-note">No private groups, no paid signals. The same information reaches everyone at the same time.</p>
     </div>
@@ -11347,7 +11310,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
   const rail=document.getElementById('srail');if(!rail)return;
   const NICE={top:'Where value settles',network:'Backed by',press:'In the press',chroma:'Spectrum',
     say:'The thesis',paper:'The thesis',kin:'Primitives',solutions:'Guarantees',stack:'The stack',security:'Security',
-    token:'Tokenomics',presale:'Seed Round',sale:'Seed Round',docs:'Get started',
+    token:'Tokenomics',presale:'Seed Round',sale:'Seed Round',docs:'Get started',builds:'What is running',
     people:'Behind the network',blog:'Stay in the loop'};
   const bands=[...document.querySelectorAll('main>section[data-bg]')]
     .filter(el=>getComputedStyle(el).display!=='none').map(el=>{
@@ -13427,6 +13390,585 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
 })();
 </script>
 <script>
+/* ══ p64 · 05 «Túnel de proyectos» + la caída del cubo hasta la hebra ══════
+   El túnel de «The stack» (mismo campo de cubos, TONES, luz [.34,-.42,-.84],
+   niebla, rayos y estelas) con tres estaciones: la cámara frena y las paredes
+   arman el emblema de cada proyecto alrededor de su rótulo (01 anillo de la
+   cadena con su puerta, 02 un cubo que se parte en unidades, 03 dos racks con
+   sus LEDs). Todo en azules: la minería tampoco lleva ámbar.
+   Al final el túnel se vacía y UNO de sus cubos se adelanta al centro. Ese
+   cubo lo recoge un lienzo fijo —el único que puede cruzar de una sección a
+   otra—: coge impulso, cae dando vueltas hasta el margen de la ruta, espera a
+   que llegue la hebra, salta a su cabeza y se queda: desde ahí es el índice
+   «estamos aquí» que antes era un punto azul. Todo es función del scroll: al
+   subir, el cubo vuelve a subir girando hasta el túnel. */
+(function(){
+  const sec=document.getElementById('builds'), hold=document.getElementById('tnHold'),
+        st=document.getElementById('tnStage'), cv=document.getElementById('tnCv');
+  if(!sec||!hold||!st||!cv) return;
+  const ctx=cv.getContext('2d',{alpha:false}); if(!ctx) return;
+  const cab=document.getElementById('tnCab');
+  const STA=[...st.querySelectorAll('.tn-sta')];
+  const LKI=STA.map(s=>s.querySelector('.tn-lk>i')), LKS=STA.map(s=>s.querySelector('.tn-lk>span'));
+  const RAIL=[...st.querySelectorAll('.tn-rail span')], rail=st.querySelector('.tn-rail');
+  const fig=st.querySelector('.tn-fig'), figN=fig&&fig.querySelector('b'), FIGS=fig?[...fig.querySelectorAll('span')]:[];
+
+  /* ── lo mismo que en «The stack» ── */
+  const clm=(v,a=0,b=1)=>Math.min(b,Math.max(a,v));
+  const sube=t=>{ t=clm(t); return t*t*(3-2*t) };
+  const azar=(i,k)=>{ const r=Math.sin(i*127.1+k*311.7+.5)*43758.5453; return r-Math.floor(r) };
+  const QUIETO=matchMedia('(prefers-reduced-motion:reduce)').matches;
+  const TONES=[{h:219,s:100,l:56},{h:224,s:97,l:46},{h:216,s:88,l:38},
+               {h:214,s:14,l:30},{h:220,s:26,l:19},{h:226,s:92,l:16},
+               {h:210,s:10,l:92},{h:213,s:13,l:76},{h:218,s:100,l:62}];
+  const LIGHT=[.34,-.42,-.84];
+  const cstr=(h,sa,l,a)=>'hsla('+(h|0)+','+(sa|0)+'%,'+l.toFixed(1)+'%,'+a.toFixed(3)+')';
+  const RACK1={h:214,s:14,l:30,rack:1}, RACK2={h:220,s:26,l:19,rack:1};
+  /* los LEDs de los racks: azules y blanco, nada de verde ni ámbar */
+  const LEDC=['#63A9FF','#DCE8FF','#2E86FF','#63A9FF'];
+  const CERCA=.34, LEJOS=7.2, TRAMO=LEJOS-CERCA;
+  function giro(ax,ay,az,ang){
+    const co=Math.cos(ang), si=Math.sin(ang), t=1-co;
+    return [[co+ax*ax*t, ax*ay*t-az*si, ax*az*t+ay*si],[ay*ax*t+az*si, co+ay*ay*t, ay*az*t-ax*si],[az*ax*t-ay*si, az*ay*t+ax*si, co+az*az*t]];
+  }
+  const mm=(A,B)=>A.map(r=>[0,1,2].map(j=>r[0]*B[0][j]+r[1]*B[1][j]+r[2]*B[2][j]));
+  const mul=(M,v)=>[M[0][0]*v[0]+M[0][1]*v[1]+M[0][2]*v[2],M[1][0]*v[0]+M[1][1]*v[1]+M[1][2]*v[2],M[2][0]*v[0]+M[2][1]*v[1]+M[2][2]*v[2]];
+  const I3=[[1,0,0],[0,1,0],[0,0,1]];
+  const ESQ=[[-1,-1,-1],[1,-1,-1],[1,1,-1],[-1,1,-1],[-1,-1,1],[1,-1,1],[1,1,1],[-1,1,1]];
+  const CARAS=[[[0,0,1],[4,5,6,7]],[[0,0,-1],[1,0,3,2]],[[1,0,0],[5,1,2,6]],[[-1,0,0],[0,4,7,3]],[[0,-1,0],[0,1,5,4]],[[0,1,0],[7,6,2,3]]];
+  const PX=new Float32Array(16);
+
+  /* ══ EL CUBO SUELTO ══════════════════════════════════════════════════════
+     Ortográfico, con el sombreado exacto de los cubos de la hebra (r04): así
+     el cubo que cae y el índice que se queda son, píxel a píxel, el mismo. */
+  const FACES=[
+    [[0,0,1],[[-1,-1,1],[1,-1,1],[1,1,1],[-1,1,1]]],
+    [[0,0,-1],[[1,-1,-1],[-1,-1,-1],[-1,1,-1],[1,1,-1]]],
+    [[1,0,0],[[1,-1,1],[1,-1,-1],[1,1,-1],[1,1,1]]],
+    [[-1,0,0],[[-1,-1,-1],[-1,-1,1],[-1,1,1],[-1,1,-1]]],
+    [[0,-1,0],[[-1,-1,-1],[1,-1,-1],[1,-1,1],[-1,-1,1]]],
+    [[0,1,0],[[-1,1,1],[1,1,1],[1,1,-1],[-1,1,-1]]]];
+  function cuboOrto(g,cx,cy,h,M,tn,a,apaga){
+    if(a<=.01||h<=.2) return;
+    apaga=apaga==null?1:apaga;
+    g.lineJoin='round';
+    for(let k=0;k<6;k++){
+      const n=mul(M,FACES[k][0]); if(n[2]>=-.001) continue;
+      const pts=FACES[k][1];
+      g.beginPath();
+      for(let j=0;j<4;j++){ const w=mul(M,pts[j]), X=cx+w[0]*h, Y=cy+w[1]*h; j?g.lineTo(X,Y):g.moveTo(X,Y) }
+      g.closePath();
+      const lam=clm(n[0]*LIGHT[0]+n[1]*LIGHT[1]+n[2]*LIGHT[2]), lit=.24+lam*.88;
+      g.fillStyle=cstr(tn.h,tn.s,clm((tn.l*(.58+lit*.62)+lit*10)*apaga,3,100),a); g.fill();
+      g.strokeStyle='rgba(226,236,255,'+(.26*a*(.55+tn.l/150)).toFixed(3)+')'; g.lineWidth=1; g.stroke();
+    }
+  }
+  /* la postura del índice: la de los cubos de la hebra (ladeado .56, rodado .2)
+     girando despacio sobre su eje */
+  const TILT=.56, ROLL=.2;
+  const RZX=mm([[Math.cos(ROLL),-Math.sin(ROLL),0],[Math.sin(ROLL),Math.cos(ROLL),0],[0,0,1]],
+               [[1,0,0],[0,Math.cos(TILT),-Math.sin(TILT)],[0,Math.sin(TILT),Math.cos(TILT)]]);
+  function Rmarca(T){ const a=QUIETO?.5:T*.5+.5, c=Math.cos(a), s=Math.sin(a); return mm(RZX,[[c,0,s],[0,1,0],[-s,0,c]]) }
+  /* el volteo: dos ejes a la vez, que caiga dando tumbos y no como una peonza */
+  const nrm3=v=>{ const m=Math.hypot(v[0],v[1],v[2]); return v.map(x=>x/m) };
+  const EJ1=nrm3([.55,.8,.25]), EJ2=nrm3([-.7,.2,.68]);
+  const Rgiro=th=>th===0?I3:mm(giro(EJ1[0],EJ1[1],EJ1[2],th),giro(EJ2[0],EJ2[1],EJ2[2],th*.62));
+  const Rcaida=(T,th)=>mm(Rmarca(T),Rgiro(th));
+  /* cuaterniones, para pasar sin salto del giro del túnel al de la caída */
+  function aQ(M){ const t=M[0][0]+M[1][1]+M[2][2]; let s;
+    if(t>0){ s=Math.sqrt(t+1)*2; return [.25*s,(M[2][1]-M[1][2])/s,(M[0][2]-M[2][0])/s,(M[1][0]-M[0][1])/s] }
+    if(M[0][0]>M[1][1]&&M[0][0]>M[2][2]){ s=Math.sqrt(1+M[0][0]-M[1][1]-M[2][2])*2; return [(M[2][1]-M[1][2])/s,.25*s,(M[0][1]+M[1][0])/s,(M[0][2]+M[2][0])/s] }
+    if(M[1][1]>M[2][2]){ s=Math.sqrt(1+M[1][1]-M[0][0]-M[2][2])*2; return [(M[0][2]-M[2][0])/s,(M[0][1]+M[1][0])/s,.25*s,(M[1][2]+M[2][1])/s] }
+    s=Math.sqrt(1+M[2][2]-M[0][0]-M[1][1])*2; return [(M[1][0]-M[0][1])/s,(M[0][2]+M[2][0])/s,(M[1][2]+M[2][1])/s,.25*s] }
+  function deQ(q){ const w=q[0],x=q[1],y=q[2],z=q[3];
+    return [[1-2*(y*y+z*z),2*(x*y-z*w),2*(x*z+y*w)],[2*(x*y+z*w),1-2*(x*x+z*z),2*(y*z-x*w)],[2*(x*z-y*w),2*(y*z+x*w),1-2*(x*x+y*y)]] }
+  function slerp(a,b,t){ let d=a[0]*b[0]+a[1]*b[1]+a[2]*b[2]+a[3]*b[3]; if(d<0){ b=b.map(v=>-v); d=-d }
+    if(d>.9995){ const r=a.map((v,i)=>v+(b[i]-v)*t), m=Math.hypot(r[0],r[1],r[2],r[3]); return r.map(v=>v/m) }
+    const th=Math.acos(d), s=Math.sin(th), k1=Math.sin((1-t)*th)/s, k2=Math.sin(t*th)/s; return a.map((v,i)=>v*k1+b[i]*k2) }
+  const mezclaTono=(a,b,e)=>({h:a.h+(b.h-a.h)*e,s:a.s+(b.s-a.s)*e,l:a.l+(b.l-a.l)*e});
+
+  /* el tramo del túnel donde un cubo se suelta (progreso del anclado) */
+  const HA=.77, HB=.9, CY=.5, TH0=4.6*Math.PI;
+  const tamH=()=>clm(Math.min(innerWidth,innerHeight)*.042,15,38);
+
+  let CVL=0,W=0,H=0,f=1,movil=false,cubos=null,texto=[null,null,null,null],RK=0,hero=-1;
+  /* un cubo -o una caja- en el espacio de la cámara (y abajo, z hacia el fondo) */
+  function caja(x,y,z,hx,hy,hz,M,tn,a,apaga,extra,cristal,leds,ledCara,T){
+    for(let i=0;i<8;i++){
+      const e=ESQ[i], lx=e[0]*hx, ly=e[1]*hy, lz=e[2]*hz;
+      const zz=Math.max(.05,z+M[2][0]*lx+M[2][1]*ly+M[2][2]*lz);
+      PX[i*2]=W/2+(x+M[0][0]*lx+M[0][1]*ly+M[0][2]*lz)/zz*f; PX[i*2+1]=H/2+(y+M[1][0]*lx+M[1][1]*ly+M[1][2]*lz)/zz*f;
+    }
+    const canto=Math.max(hx,hy,hz)*2*f/z>9;
+    for(let k=0;k<6;k++){
+      const nrm=CARAS[k][0], idx=CARAS[k][1], n=mul(M,nrm);
+      const h=Math.abs(nrm[0])*hx+Math.abs(nrm[1])*hy+Math.abs(nrm[2])*hz;
+      if(n[0]*(x+n[0]*h)+n[1]*(y+n[1]*h)+n[2]*(z+n[2]*h)>=0) continue;
+      const lam=clm(n[0]*LIGHT[0]+n[1]*LIGHT[1]+n[2]*LIGHT[2]), lit=.24+lam*.88;
+      ctx.beginPath();
+      ctx.moveTo(PX[idx[0]*2],PX[idx[0]*2+1]); ctx.lineTo(PX[idx[1]*2],PX[idx[1]*2+1]);
+      ctx.lineTo(PX[idx[2]*2],PX[idx[2]*2+1]); ctx.lineTo(PX[idx[3]*2],PX[idx[3]*2+1]); ctx.closePath();
+      if(cristal>0.5){
+        ctx.fillStyle=cstr(tn.h,tn.s,clm(62+lit*26,3,100),(.10+lit*.07)*a*apaga); ctx.fill();
+        ctx.strokeStyle='rgba(226,236,255,'+(.46*a*apaga).toFixed(3)+')'; ctx.lineWidth=1; ctx.stroke();
+      }else{
+        ctx.fillStyle=cstr(tn.h,tn.s,clm((tn.l*(.58+lit*.62)+lit*10)*apaga+(extra||0),3,100),a); ctx.fill();
+        if(tn.rack){ ctx.strokeStyle='rgba(99,169,255,'+(.3*a*apaga*RK).toFixed(3)+')'; ctx.lineWidth=1; ctx.stroke() }
+        else if(canto){ ctx.strokeStyle='rgba(226,236,255,'+(.14*a*apaga*(.55+tn.l/150)+(extra?.004*extra*a:0)).toFixed(3)+')'; ctx.lineWidth=1; ctx.stroke() }
+      }
+      if(leds && k===ledCara){
+        for(let j=0;j<leds.length;j++){
+          const L=leds[j], ll=[nrm[0]?nrm[0]*hx*1.05:L[0]*hx, nrm[1]?nrm[1]*hy*1.05:L[1]*hy, nrm[2]?nrm[2]*hz*1.05:L[1]*hz];
+          if(nrm[0]){ ll[1]=L[1]*hy; ll[2]=L[0]*hz } else if(nrm[2]){ ll[0]=L[0]*hx; ll[1]=L[1]*hy }
+          const wx=x+M[0][0]*ll[0]+M[0][1]*ll[1]+M[0][2]*ll[2], wy=y+M[1][0]*ll[0]+M[1][1]*ll[1]+M[1][2]*ll[2], wz=z+M[2][0]*ll[0]+M[2][1]*ll[1]+M[2][2]*ll[2];
+          const zz=Math.max(.05,wz), sx=W/2+wx/zz*f, sy=H/2+wy/zz*f, r=Math.max(.7,.0055*f/zz);
+          const on=(QUIETO?.85:(Math.sin(T*(2.1+j*.9+L[3]*2.4)+L[3]*9)>-.3?.95:.12))*a*clm((apaga-.2)/.6);
+          ctx.fillStyle=L[2]; ctx.globalAlpha=on*.2; ctx.beginPath(); ctx.arc(sx,sy,r*3.4,0,6.2832); ctx.fill();
+          ctx.globalAlpha=on; ctx.beginPath(); ctx.arc(sx,sy,r,0,6.2832); ctx.fill(); ctx.globalAlpha=1;
+        }
+      }
+    }
+  }
+
+  /* ══ EL CAMPO: la siembra de «The stack» ══ */
+  function siembra(){
+    const n=movil?150:230;
+    cubos=[];
+    for(let i=0;i<n;i++){
+      const u=azar(i,1), v=azar(i,2), w=azar(i,3), t=azar(i,4);
+      const tone = t<.16?TONES[0] : t<.28?TONES[1] : t<.38?TONES[2] : t<.46?TONES[8]
+                 : t<.60?TONES[7] : t<.70?TONES[6] : t<.82?TONES[3] : t<.91?TONES[4] : TONES[5];
+      let ax=azar(i,5)-.5, ay=azar(i,6)-.5, az=azar(i,7)-.5; const m=Math.hypot(ax,ay,az)||1;
+      const grande=azar(i,8)<.045;
+      cubos.push({z0:u*TRAMO, tone, ax:ax/m, ay:ay/m, az:az/m, a0:v*6.283, gv:(.18+w*.42)*(azar(i,9)<.5?-1:1),
+        lado:grande ? .32+azar(i,10)*.16 : .075+Math.pow(azar(i,10),1.7)*.19, cristal:azar(i,11)<.14, i});
+    }
+    emblemas();
+  }
+
+  /* ══ LAS ESTACIONES ══ */
+  const S=[.2,.44,.68];
+  let HUECOS=[[],[],[]];
+  function emblemas(){
+    const H0=[[],[],[]], U=TONES;
+    const tb=[0,1,2].map(i=>texto[i]||{W:movil?W-32:470,H:260});
+    /* 01 · el anillo de la cadena alrededor del rótulo, su puerta arriba y los validadores */
+    { const rx=movil?W*.43:Math.min(W*.33,Math.max(tb[0].W*.5+150,380)), ry=movil?Math.min(H*.36,tb[0].H*.5+130):Math.min(H*.38,tb[0].H*.5+120), N=movil?16:22;
+      for(let k=0;k<N;k++) H0[0].push({rol:'anillo',k,N,rx,ry,px:movil?15:20,tono:k%4===0?U[6]:k%4===2?U[7]:k%2?U[0]:U[1]});
+      for(let k=0;k<N;k++) H0[0].push({rol:'enlace',k:k+.5,N,rx,ry,px:movil?5:7,tono:U[7]});
+      const g=movil?24:34;
+      for(const [dx,dy] of [[-1,-1],[0,-1],[1,-1],[-1,0],[1,0],[-1,1],[0,1],[1,1]])
+        H0[0].push({rol:'puerta',N0:N,x:dx*g,y:-ry+dy*g,px:movil?10:13,tono:(dx===0||dy===0)?U[0]:U[8]});
+      for(let k=0;k<6;k++) H0[0].push({rol:'validador',k,rx:rx*1.22,ry:ry*1.2,px:movil?8:11,tono:k%2?U[6]:U[7]});
+    }
+    /* 02 · el activo: un cubo de 4×4×4 que se parte en dos mitades y en unidades */
+    { const pit=movil?30:42;
+      for(let a=0;a<4;a++) for(let b=0;b<4;b++) for(let c=0;c<4;c++){
+        const sup=b===0, borde=(a===0||a===3)+(c===0||c===3);
+        H0[1].push({rol:'unidad',g:[a-1.5,b-1.5,c-1.5],pit,px:pit*.8,half:movil?(b<2?-1:1):(a<2?-1:1),
+          suelta:azar(a*16+b*4+c,31)<.16,
+          tono:sup?(borde?U[6]:U[7]):borde===2?U[3]:(a+b+c)%3===0?U[0]:(a+b+c)%3===1?U[1]:U[2]});
+      }
+      H0[1].sep=movil?tb[1].H*.5+88:tb[1].W*.5+190;
+    }
+    /* 03 · dos racks que enmarcan el rótulo (en el teléfono, sobre él) con su tapa y LEDs */
+    { const nu=movil?5:8, pit=movil?22:36, wS=movil?64:108;
+      for(let r=0;r<2;r++) for(let u=0;u<nu;u++){
+        const leds=[0,1,2,3].map(j=>[-.74+j*.17,0,LEDC[(r*nu+u+j)%4],azar(r*nu+u,40+j)]);
+        H0[2].push({rol:'servidor',r,u,nu,pit,w:wS,h:pit*.78,d:wS*.7,leds,tono:u%3===2?U[4]:U[3]});
+      }
+      for(let r=0;r<2;r++) H0[2].push({rol:'tapa',r,nu,pit,w:wS*1.08,h:6,d:wS*.76,tono:U[6]});
+      H0[2].sep=movil?0:tb[2].W*.5+110;
+    }
+    HUECOS=H0;
+    for(let s=0;s<3;s++){
+      const ids=cubos.map((c,i)=>i).sort((a,b)=>azar(a,70+s)-azar(b,70+s));
+      H0[s].forEach((h,j)=>{ h.cubo=ids[j]; h.espera=azar(ids[j],80+s)*.35 });
+      for(const c of cubos) c['h'+s]=null;
+      H0[s].forEach(h=>{ cubos[h.cubo]['h'+s]=h });
+    }
+  }
+  const PROF=2.4;
+  function sitio(s,h,T,fs,loc){
+    let px=0,py=0,z=PROF,rot=e=>I3,lado=h.px*PROF/f,hx=0,hy=0,hz=0,extra=0,tono=h.tono,leds=null,ledCara=-1;
+    const t=QUIETO?0:T;
+    if(s===0){
+      if(h.rol==='anillo'||h.rol==='enlace'){
+        const th=-Math.PI/2+(h.k/h.N)*6.2832+t*.07;
+        px=Math.cos(th)*h.rx; py=Math.sin(th)*h.ry; z=PROF+Math.sin(th)*.55;
+        rot=e=>giro(0,0,1,(th+Math.PI/2)*e);
+        let dth=((th+Math.PI/2)%6.2832+6.2832)%6.2832; if(dth>Math.PI) dth-=6.2832;
+        extra=Math.exp(-dth*dth/.018)*(h.rol==='anillo'?30:40);
+      }else if(h.rol==='puerta'){
+        px=h.x; py=h.y; z=PROF-.57; rot=e=>I3;
+        const pul=Math.cos((t*.07/6.2832)*h.N0*6.2832)*.5+.5; extra=8+24*Math.pow(pul,6);
+      }else{
+        const th=h.k*1.047+t*.16;
+        px=Math.cos(th)*h.rx; py=Math.sin(th)*h.ry; z=PROF+Math.sin(th)*.4;
+        rot=e=>giro(.4,.8,.44,(t*.9+h.k)*e);
+      }
+      lado=h.px*z/f*2;
+    }else if(s===1){
+      const parte=sube((loc-.1)/.22), abre=sube((loc-.3)/.3);
+      const yaw=.62+(QUIETO?0:Math.sin(t*.35)*.22), R=mm(giro(1,0,0,-.38),giro(0,1,0,yaw));
+      const g=h.g, sp=h.pit*(1+.35*abre);
+      let v=mul(R,[g[0]*sp,g[1]*sp,g[2]*sp]);
+      const sep=HUECOS[1].sep*parte;
+      if(movil) v[1]+=h.half*sep; else v[0]+=h.half*sep;
+      if(h.suelta){ const q=QUIETO?.6:sube(.5-.5*Math.cos(t*.8+g[0]*2+g[2]*3)); v[1]-=q*h.pit*1.4*abre; v[0]+=h.half*q*h.pit*.8*abre; extra=q*12 }
+      px=v[0]; py=v[1]; z=PROF+v[2]/f*PROF;
+      rot=e=>mm(giro(1,0,0,-.38*e),giro(0,1,0,yaw*e)); lado=h.px*z/f;
+    }else{
+      const x0=movil?(h.r?1:-1)*(h.w*.72):(h.r?1:-1)*HUECOS[2].sep;
+      const y0=movil?-(texto[2]?texto[2].h:150)-92-(h.nu*h.pit)*.5:0;
+      const yy=(h.rol==='tapa'?-(h.nu/2)*h.pit-6:(h.u-(h.nu-1)/2)*h.pit);
+      const yaw=(h.r?-1:1)*(movil?.22:.5);
+      rot=e=>giro(0,1,0,yaw*e);
+      px=x0; py=y0+yy; z=PROF;
+      const k2=z/f; hx=h.w*.5*k2; hy=h.h*.5*k2; hz=h.d*.5*k2;
+      if(h.rol==='servidor'){ leds=h.leds; ledCara=1 }
+    }
+    return {x:px*z/f, y:py*z/f, z, rot, lado, hx,hy,hz, extra, tono, leds, ledCara};
+  }
+
+  /* ══ LA CÁMARA: vuela, frena en cada estación, vuelve a volar y, al final, se para ══ */
+  const PASOS=800; let CAM=null;
+  const para=p=>Math.max(...S.map(s=>sube((p-(s-.105))/.05)*(1-sube((p-(s+.06))/.05))));
+  const velDe=p=>(1-.985*para(p))*(.25+.75*sube(p/.07))*(1-.8*sube((p-.78)/.12));
+  function tabla(){
+    CAM=new Float32Array(PASOS+1); let acc=0;
+    for(let i=0;i<=PASOS;i++){ CAM[i]=acc; acc+=velDe(i/PASOS)/PASOS }
+    const tot=CAM[PASOS]; for(let i=0;i<=PASOS;i++) CAM[i]=CAM[i]/tot*42;
+  }
+  const camDe=p=>{ const x=clm(p)*PASOS, i=Math.min(PASOS-1,x|0), r=x-i; return CAM[i]+(CAM[i+1]-CAM[i])*r };
+  const forma=(p,s)=>sube((p-(S[s]-.085))/.06)*(1-sube((p-(S[s]+.052))/.06));
+  const local=(p,s)=>clm((p-(S[s]-.085))/.197);
+
+  const RAYOS=Array.from({length:70},(_,i)=>({an:azar(i,90)*6.2832, s0:azar(i,91), l:.18+azar(i,92)*.3}));
+  function draw(p,T,pr){
+    /* al final el fondo se va al negro de la ruta: el borde del escenario no se ve */
+    const neg=sube((p-.84)/.1);
+    ctx.fillStyle='rgb('+Math.round(10*(1-neg))+','+Math.round(13*(1-neg))+','+Math.round(20*(1-neg))+')'; ctx.fillRect(0,0,W,H);
+    if(!cubos) siembra();
+    const mx=W/(2*f), my=H/(2*f);
+    const FS=[forma(p,0),forma(p,1),forma(p,2)], LOC=[local(p,0),local(p,1),local(p,2)];
+    const quieta=Math.max(FS[0],FS[1],FS[2]);
+    const v=velDe(p);
+    const estela=QUIETO?0:sube((v-.3)/.5)*sube(p/.08)*(1-sube((p-.72)/.06));
+    const cam=camDe(p)+(QUIETO?0:T*.05);
+    const roll=cam*.018+(QUIETO?0:T*.012);
+    RK=FS[2];
+    /* la luz del fondo: blanca y azul siempre; al final se enciende un momento
+       -la salida del túnel- y se apaga dejando solo el cubo que se suelta */
+    const fin=sube((p-.76)/.06)*(1-sube((p-.86)/.07));
+    const luz=(.34+.3*estela-.16*quieta)*(1-sube((p-.77)/.08))+.2*fin;
+    if(luz>.005){ const R0=Math.hypot(W,H)*(.08+.34*luz*luz+.12*fin);
+      const g=ctx.createRadialGradient(W/2,H/2,0,W/2,H/2,R0);
+      g.addColorStop(0,'rgba(236,242,255,'+(.9*luz).toFixed(3)+')');
+      g.addColorStop(.16,'rgba(126,168,255,'+(.7*luz).toFixed(3)+')');
+      g.addColorStop(.5,'rgba(46,106,245,'+(.42*luz).toFixed(3)+')');
+      g.addColorStop(1,'rgba(14,58,196,0)');
+      ctx.fillStyle=g; ctx.fillRect(0,0,W,H); }
+    if(estela>0){
+      const Rmax=Math.hypot(W,H)*.62; ctx.lineWidth=1;
+      for(const ry of RAYOS){
+        const u=(ry.s0+cam*.05)%1, r0=u*u*Rmax, r1=r0*(1+ry.l*estela*1.6)+2;
+        const cs=Math.cos(ry.an+roll), sn=Math.sin(ry.an+roll);
+        ctx.strokeStyle='rgba(190,212,255,'+(.5*estela*u).toFixed(3)+')';
+        ctx.beginPath(); ctx.moveTo(W/2+cs*r0,H/2+sn*r0); ctx.lineTo(W/2+cs*r1,H/2+sn*r1); ctx.stroke();
+      }
+    }
+    /* el rótulo que se está leyendo: detrás de él los cubos se oscurecen */
+    let calma=null, ca=0;
+    for(let s=0;s<3;s++){ const a=sube((FS[s]-.6)/.4); if(a>ca&&texto[s]){ca=a;calma=texto[s]} }
+    const cabA=1-sube((p-.035)/.05);
+    if(cabA>ca&&texto[3]){ca=cabA;calma=texto[3]}
+    const aFin=1-sube((p-.81)/.08);
+    const eH=QUIETO?0:sube((pr-HA)/(HB-HA));
+    if(QUIETO||pr<HA-.02) hero=-1;
+    const lista=[];
+    for(const c of cubos){
+      const esH=c.i===hero;
+      const d=c.z0-cam, k=Math.floor(d/TRAMO);
+      const zr=CERCA+(d-k*TRAMO);
+      const an=azar(c.i,60+k)*6.2832+roll, rr=1.02+azar(c.i,61+k)*.32;
+      let x=Math.cos(an)*mx*1.15*rr, y=Math.sin(an)*my*1.15*rr, z=zr;
+      let lado=c.lado*.7, hx=0,hy=0,hz=0, tono=c.tone, extra=0, cristal=c.cristal?1:0, leds=null, ledCara=-1;
+      const ang=c.a0+(QUIETO?0:T*c.gv)+cam*.3*Math.sign(c.gv);
+      let M=giro(c.ax,c.ay,c.az,ang);
+      const hondo=(zr-CERCA)/TRAMO;
+      let a=clm((1-hondo)/.22)*clm((zr-CERCA)/.45);
+      for(let s=0;s<3;s++){
+        const fs=FS[s]; if(fs<=0) continue;
+        const h=c['h'+s];
+        if(h){
+          const e=sube((fs-h.espera)/.62);
+          if(e<=0) continue;
+          const q=sitio(s,h,T,fs,LOC[s]);
+          x+=(q.x-x)*e; y+=(q.y-y)*e; z+=(q.z-z)*e;
+          if(q.hx){ const L=lado/2; hx=L+(q.hx-L)*e; hy=L+(q.hy-L)*e; hz=L+(q.hz-L)*e } else lado+=(q.lado-lado)*e;
+          M=mm(q.rot(e),giro(c.ax,c.ay,c.az,ang*(1-e)));
+          a+=(1-a)*e; extra=q.extra*e; cristal*=1-e; if(e>.6){ tono=q.tono; if(q.leds){leds=q.leds;ledCara=q.ledCara} }
+        }else{
+          const e=sube((fs-azar(c.i,85+s)*.3)/.7);
+          if(e<=0) continue;
+          let tx=x, ty=y, tl=lado, tM=null;
+          if(s===0){ const st2=6.2832/28, aq=Math.round((an-roll)/st2)*st2+roll; tx=Math.cos(aq)*mx*1.12; ty=Math.sin(aq)*my*1.12; tl=.1; tM=giro(0,0,1,aq*e); z+=(CERCA+Math.round((z-CERCA)/.62)*.62+.3-z)*e }
+          else if(s===1){ const st2=6.2832/44, aq=Math.round((an-roll)/st2)*st2+roll; tx=Math.cos(aq)*mx*1.08; ty=Math.sin(aq)*my*1.08; tl=.055; z+=(CERCA+Math.round((z-CERCA)/.3)*.3+.25-z)*e;
+            if(e>.6) tono=(c.i%3===0)?TONES[7]:(c.i%3===1)?TONES[0]:TONES[2] }
+          else {
+            const ca2=Math.cos(an), lado2=ca2>0?1:-1;
+            if(Math.abs(ca2)>.42){
+              const paso=my*.14, yq=clm(Math.round(Math.sin(an)*my*1.15*rr/paso)*paso,-my*.98,my*.98);
+              tx=lado2*mx*1.1; ty=yq; tl=0;
+              const L=lado/2; hx=L+(.028-L)*e; hy=L+(my*.052-L)*e; hz=L+(.16-L)*e;
+              if(e>.6){ tono=(c.i%3===0)?RACK2:RACK1; leds=[[-.6,-.2,'#63A9FF',azar(c.i,1)],[-.2,-.2,c.i%2?'#DCE8FF':'#2E86FF',azar(c.i,2)],[.2,-.2,'#63A9FF',azar(c.i,3)]]; ledCara=lado2>0?3:2 }
+              extra=0;
+            }else{ tx=Math.cos(an)*mx*1.12; ty=Math.sign(Math.sin(an))*my*1.08; tl=lado*.6; if(e>.6) tono=TONES[4] }
+          }
+          x+=(tx-x)*e; y+=(ty-y)*e;
+          if(!hx) lado+=(tl-lado)*e;
+          M=tM?mm(tM,giro(c.ax,c.ay,c.az,ang*(1-e))):giro(c.ax,c.ay,c.az,ang*(1-e));
+          cristal*=1-e; a*=1-.35*e*(s===2&&!leds?1:0);
+        }
+      }
+      if(!esH) a*=aFin;
+      if(a<.01&&!esH) continue;
+      const r=Math.max(lado,hx*2,hy*2)*f/z;
+      const sx=W/2+x/z*f, sy=H/2+y/z*f;
+      if(!esH&&(sx<-r*1.8||sx>W+r*1.8||sy<-r*1.8||sy>H+r*1.8)) continue;
+      let sombra=1;
+      if(calma&&ca>0){
+        const dx=Math.max(0,Math.abs(sx-calma.x)-calma.w), dy=Math.max(0,Math.abs(sy-calma.y)-calma.h);
+        const kk=clm((Math.hypot(dx,dy)-r*.75+10)/60);
+        sombra=1-(1-(.2+.8*kk*kk*(3-2*kk)))*ca;
+      }
+      lista.push({c,x,y,z,lado,hx,hy,hz,M,tono,extra,cristal,leds,ledCara,a,sombra,hondo:(z-CERCA)/TRAMO,sx,sy});
+    }
+    /* ── el cubo que se suelta: uno azul, cerca del centro y a media distancia ── */
+    if(!QUIETO&&hero<0&&pr>=HA-.02&&pr<HB){
+      let mejor=null, pb=1e9;
+      for(const q of lista){
+        if(q.hx||q.cristal>.5||q.a<.3) continue;
+        const azul=q.tono===TONES[0]||q.tono===TONES[8]||q.tono===TONES[1];
+        const pz=q.z<.9||q.z>2.6?2:0, dd=Math.hypot(q.sx-W/2,q.sy-H/2)/Math.max(W,H);
+        const pp=dd+(azul?0:1)+pz; if(pp<pb){pb=pp;mejor=q}
+      }
+      if(mejor) hero=mejor.c.i;
+    }
+    lista.sort((p1,p2)=>p2.z-p1.z);
+    let heroQ=null;
+    for(const q of lista){
+      if(q.c.i===hero){ heroQ=q; if(eH>0) continue }
+      if(estela>0){
+        const z2=q.z+estela*1.1, ex=W/2+q.x/z2*f, ey=H/2+q.y/z2*f;
+        ctx.strokeStyle=cstr(q.tono.h,q.tono.s,clm(q.tono.l+18,3,96),.55*estela*q.a);
+        ctx.lineWidth=Math.max(1,(q.lado||q.hy*2)*f/q.z*.18);
+        ctx.beginPath(); ctx.moveTo(q.sx,q.sy); ctx.lineTo(ex,ey); ctx.stroke();
+      }
+      const apaga=(1-clm(q.hondo)*.55)*q.sombra;
+      if(q.hx) caja(q.x,q.y,q.z,q.hx,q.hy,q.hz,q.M,q.tono,q.a,apaga,q.extra*q.sombra,q.cristal,q.leds,q.ledCara,T);
+      else { const h=q.lado/2; caja(q.x,q.y,q.z,h,h,h,q.M,q.tono,q.a,apaga,q.extra*q.sombra,q.cristal,null,-1,T) }
+    }
+    /* hasta HB lo pinta el túnel; desde ahí, el lienzo de la caída */
+    if(heroQ&&eH>0&&pr<HB){
+      const q=heroQ, hf=(q.lado||q.hy*2)*f/q.z*.5, h0=tamH();
+      const x=q.sx+(W/2-q.sx)*eH, y=q.sy+(H*CY-q.sy)*eH, h=hf+(h0-hf)*eH;
+      const Mt=deQ(slerp(aQ(q.M),aQ(Rcaida(T,TH0)),eH));
+      const apaga=((1-clm(q.hondo)*.55)*q.sombra)*(1-eH)+eH;
+      cuboOrto(ctx,x,y,h,Mt,mezclaTono(q.tono,TONES[0],eH),q.a+(1-q.a)*eH,apaga);
+    }
+    return FS;
+  }
+
+  /* ── los rótulos ── */
+  let figI=-1;
+  function rotulos(p,FS){
+    const cabA=1-sube((p-.035)/.05);
+    if(cab){ cab.style.opacity=cabA.toFixed(3); cab.style.visibility=cabA>.02?'visible':'hidden';
+      cab.style.transform='translateY(calc(-50% - '+((1-cabA)*18).toFixed(1)+'px))' }
+    let figA=0, figS=-1;
+    STA.forEach((el,s)=>{
+      const a=sube((FS[s]-.62)/.38);
+      el.style.opacity=a.toFixed(3); el.style.visibility=a>.02?'visible':'hidden';
+      el.style.transform='translate(-50%,calc(-50% + '+((1-a)*16).toFixed(1)+'px))';
+      if(LKI[s]) LKI[s].style.setProperty('--a',a.toFixed(3));
+      if(LKS[s]) LKS[s].style.letterSpacing=(.2+.1*a).toFixed(3)+'em';
+      if(a>figA){figA=a;figS=s}
+    });
+    const cerca=S.reduce((b,s,i)=>Math.abs(p-s)<Math.abs(p-S[b])?i:b,0);
+    RAIL.forEach((r,i)=>r.classList.toggle('on',i===cerca&&p>.1));
+    if(rail) rail.style.opacity=(sube((p-.08)/.06)*(1-sube((p-.74)/.06))).toFixed(3);
+    if(fig){ fig.style.opacity=(figA*.9).toFixed(3);
+      if(figS>=0&&figS!==figI){ figI=figS; if(figN) figN.textContent='FIG. 0'+(figS+1); FIGS.forEach((e,i)=>e.classList.toggle('on',i===figS)) } }
+    st.classList.toggle('go',p<.03);
+  }
+
+  /* ── medidas ── */
+  let top=0,run=1;
+  const dTop=n=>{let y=0;while(n){y+=n.offsetTop;n=n.offsetParent}return y};
+  function caja2(els){ const sr=st.getBoundingClientRect(); let l=1e9,t=1e9,r=-1e9,b=-1e9;
+    for(const e of els){ if(!e) continue; const q=e.getBoundingClientRect(); if(!q.width) continue; l=Math.min(l,q.left); t=Math.min(t,q.top); r=Math.max(r,q.right); b=Math.max(b,q.bottom) }
+    if(l>r) return null; return {x:(l+r)/2-sr.left,y:(t+b)/2-sr.top,w:(r-l)/2,h:(b-t)/2,W:r-l,H:b-t} }
+  function size(){
+    const d=Math.min(devicePixelRatio||1, innerWidth<760?1.5:2);
+    W=cv.clientWidth; H=cv.clientHeight; movil=W<760;
+    if(!W||!H) return;
+    cv.width=Math.round(W*d); cv.height=Math.round(H*d); ctx.setTransform(d,0,0,d,0,0);
+    f=Math.max(W,H)*.62; CVL=cv.getBoundingClientRect().left;
+    top=dTop(hold); run=Math.max(1,hold.offsetHeight-innerHeight);
+    texto=STA.map(el=>({x:W/2,y:H/2,w:el.offsetWidth/2,h:el.offsetHeight/2,W:el.offsetWidth,H:el.offsetHeight}));
+    texto.push(cab?caja2(cab.querySelectorAll('.sk,.builds-h,.tn-papel')):null);
+    if(cubos) emblemas();
+    tabla(); dirty=true; osize();
+  }
+  addEventListener('resize',size,{passive:true});
+  addEventListener('load',()=>setTimeout(size,300));
+  addEventListener('nrm:remide',size,{passive:true});
+  /* lo de arriba cambia de alto al cargar (letras, imágenes): el sitio del
+     anclado se vuelve a medir cuando cambia el alto de la página, no por cuadro */
+  const remideSitio=()=>{ top=dTop(hold); run=Math.max(1,hold.offsetHeight-innerHeight); midePie() };
+  if(window.ResizeObserver) { const ro=new ResizeObserver(remideSitio); ro.observe(document.body); const mn=document.getElementById('contenido'); if(mn) ro.observe(mn) }
+
+  /* ── el bucle del túnel ── */
+  let pS=0,pT=0,vis=false,dirty=true,ult=0,last=-1,tRaf=0;
+  new IntersectionObserver(es=>{vis=es[0].isIntersecting; if(vis&&!tRaf){ult=performance.now();tRaf=requestAnimationFrame(tick)}},{rootMargin:'10% 0px'}).observe(hold);
+  function tick(now){
+    tRaf=0;
+    if(!vis||document.hidden) return;
+    tRaf=requestAnimationFrame(tick);
+    const dt=Math.min(.05,(now-ult)/1000||.016); ult=now;
+    pT=clm((scrollY-top)/run);
+    pS=QUIETO?pT:pS+(pT-pS)*(1-Math.exp(-dt*4.2));
+    if(Math.abs(pT-pS)<.0002) pS=pT;
+    if(QUIETO&&!dirty&&Math.abs(pS-last)<.0005) return;
+    dirty=false; last=pS;
+    const FS=draw(pS,now/1000,pT); rotulos(pS,FS);
+  }
+  addEventListener('visibilitychange',()=>{if(!document.hidden&&vis&&!tRaf){ult=performance.now();tRaf=requestAnimationFrame(tick)}});
+
+  /* ══ LA CAÍDA ════════════════════════════════════════════════════════════
+     Un solo lienzo fijo, sin clics, que solo trabaja en el tramo de la caída.
+     Tramos (scroll):  Sa fin del túnel · Se se suelta el escenario ·
+     Sb la cabeza de la hebra llega a la altura del índice · Sc ya es el índice. */
+  const oc=document.createElement('canvas');
+  oc.className='caida-cv'; oc.setAttribute('aria-hidden','true'); oc.setAttribute('data-sin-vigia','');
+  document.body.appendChild(oc);
+  const og=oc.getContext('2d');
+  let OW=0,OH=0,odpr=1,oLimpio=true,oRaf=0,LIM=null,PIE=null,CABK=null;
+  /* el pie del titular de la ruta (documento): el cubo no se cruza por encima de él */
+  const rutaH=document.querySelector('#ruta .ruta-h'), rutaK=document.querySelector('#ruta .ruta-top');
+  function midePie(){ if(rutaH){ const r=rutaH.getBoundingClientRect(); PIE=r.bottom+scrollY } if(rutaK){ CABK=rutaK.getBoundingClientRect().top+scrollY } }
+  function osize(){
+    odpr=Math.min(2,devicePixelRatio||1); OW=document.documentElement.clientWidth||innerWidth; OH=innerHeight;
+    oc.style.width=OW+'px'; oc.style.height=OH+'px';
+    oc.width=Math.round(OW*odpr); oc.height=Math.round(OH*odpr); oLimpio=false; midePie();
+  }
+  const HM=m=>m?7:9;                      /* el tamaño del índice en la hebra */
+  function limites(){
+    const hb=window.__hebra, M=hb&&hb.M; if(!M||!run) return null;
+    const Sa=top+HB*run, Se=top+run;
+    const Sb=Math.max(Se+OH*.6, M.docTop+M.y0+20-OH*.62);
+    const HOP=clm(OH*.2,110,190);
+    return {Sa,Se,Sb,Sc:Sb+HOP,HOP,M,hb,pie:PIE,cab:CABK};
+  }
+  function pose(s,T){
+    const L=LIM; if(!L||s<L.Sa||s>=L.Sc) return null;
+    const M=L.M, mov=M.movil;
+    const gut=Math.max(12,(L.hb.x0||0)+(M.wl||0));        /* el margen izquierdo, hasta la columna */
+    const xg=gut*.46, hG=clm(gut*.27,5,15), hM=HM(mov), h0=tamH();
+    const C={x:(W?CVL+W/2:OW/2),y:(H||OH)*CY};
+    let x,y,h,th,anillo=-1;
+    const yH=OH*.3, y0=C.y-OH*.035;
+    const Sg=Math.max(L.Se+OH*.25,Math.min(L.Se+(L.Sb-L.Se)*.5,L.cab!=null?L.cab-yH-hG-18:1e9)), Sf=Math.max(Sg+20,L.Sb-OH*.24);
+    const TH1=2.3*Math.PI, TH2=1.9*Math.PI;
+    if(s<L.Se){
+      /* 1 · presentado en el centro, coge impulso: sube un poco y gira hacia atrás */
+      const u=(s-L.Sa)/(L.Se-L.Sa), w=sube((u-.3)/.7);
+      x=C.x; y=C.y-OH*.035*w; h=h0; th=TH0+.55*w;
+    }else if(s<Sg){
+      /* 2 · el escenario se va hacia arriba y se lo lleva; el cubo se suelta y
+         se aparta al margen de la ruta, arriba, girando */
+      const t=(s-L.Se)/(Sg-L.Se);
+      h=h0+(hG-h0)*sube((t-.25)/.75);
+      x=C.x+(Math.max(xg,h*1.3+2)-C.x)*sube((t-.1)/.85);   /* nunca cortado por el canto */
+      y=y0+(yH-y0)*sube(t)-OH*.09*Math.sin(Math.PI*t)*(1-t);
+      th=TH0+.55-(TH0+.55-TH1)*sube(t);
+    }else if(s<Sf){
+      /* 3 · suspendido en el margen mientras sube el titular de la ruta */
+      const q=(s-Sg)/(Sf-Sg);
+      x=xg; y=yH+Math.sin(q*Math.PI)*OH*.006; h=hG; th=TH1-(TH1-TH2)*q;
+    }else{
+      /* 4 · cae: gravedad por el margen, y solo cuando ya ha pasado el pie del
+         titular se cruza a la hebra; golpe en su cabeza, bote y asiento */
+      const t=(s-Sf)/(L.Sc-Sf), tl=.78, hb=L.hb;
+      const tip=hb.tip?hb.tip():M.y0+20;
+      const yM=M.docTop+clm(tip,M.y0+20,M.aqui)-s, xM=(hb.x0||0)+M.sx;
+      const bH=mov?4:7;
+      if(t<tl){
+        const k=t/tl; y=yH+(yM-yH)*k*k; h=hG+(hM-hG)*sube(k);
+        /* se cruza a la hebra solo por debajo del pie del titular y del primer
+           nodo de fase: no pisa ni texto ni el cubo plata */
+        const nodo=M.fases&&M.fases[0]?M.docTop+M.fases[0].y-s+(mov?7:10.5)+6:-1e4;
+        const thr=Math.max((L.pie!=null?L.pie-s:-1e4)+10+h,nodo+h);
+        const gx=yM-thr>4?sube((y-thr)/(yM-thr)):0;
+        x=xg+(xM-xg)*Math.max(gx,sube((k-.9)/.1));
+        th=TH2*(1-k*k);
+      }else{
+        const r=(t-tl)/(1-tl);
+        x=xM; y=yM-bH*Math.abs(Math.sin(r*Math.PI*2))*Math.pow(1-r,2); h=hM;
+        th=-.32*Math.sin(r*Math.PI*1.5)*(1-r); anillo=r;
+      }
+    }
+    return {x,y,h,M:Rcaida(T,th),anillo,hM};
+  }
+  function ocuadro(){
+    oRaf=0;
+    if(!og) return;
+    LIM=limites();
+    const s=scrollY, P=QUIETO?null:pose(s,performance.now()/1000);
+    og.setTransform(odpr,0,0,odpr,0,0);
+    if(P||!oLimpio){ og.clearRect(0,0,OW,OH); oLimpio=true }
+    if(P){
+      if(P.anillo>=0&&P.anillo<1){
+        og.strokeStyle='rgba(46,134,255,'+(.6*(1-P.anillo)).toFixed(3)+')'; og.lineWidth=1;
+        og.beginPath(); og.arc(P.x,P.y,P.hM*1.3+P.anillo*(P.hM*3.2),0,6.2832); og.stroke();
+      }
+      cuboOrto(og,P.x,P.y,P.h,P.M,TONES[0],1,1);
+      oLimpio=false;
+    }
+    if(enRango()) oRaf=requestAnimationFrame(ocuadro);
+  }
+  function enRango(){ const L=LIM||limites(); if(!L) return false; const s=scrollY; return s>L.Sa-OH&&s<L.Sc+OH }
+  function odespierta(){ if(!oRaf&&!QUIETO&&(enRango()||!oLimpio)) oRaf=requestAnimationFrame(ocuadro) }
+  addEventListener('scroll',odespierta,{passive:true});
+
+  /* ── lo que usa la hebra (r04): el índice ya no es un punto, es este cubo ── */
+  window.__caida={
+    /* ¿el cubo ya está en la hebra? (si no, la hebra no pinta su índice) */
+    posada:function(){ if(QUIETO) return true; const L=LIM||limites(); return !L||scrollY>=L.Sc },
+    dibujaMarca:function(g,x,y,aqui,mov){
+      const T=performance.now()/1000, h=HM(mov);
+      if(aqui&&!QUIETO){ const ul=(T/2.6)%1;
+        g.strokeStyle='rgba(46,134,255,'+(.55*(1-ul)).toFixed(3)+')'; g.lineWidth=1;
+        g.beginPath(); g.arc(x,y,h*1.3+ul*(mov?12:18),0,6.2832); g.stroke() }
+      cuboOrto(g,x,y,h,Rmarca(T),TONES[0],1,1);
+    }
+  };
+
+  /* otro idioma, otras cajas de rótulo: los emblemas se vuelven a medir */
+  if(window.ResizeObserver){ let rz=0; const ro2=new ResizeObserver(()=>{ clearTimeout(rz); rz=setTimeout(()=>{
+      if(!W) return;
+      texto=STA.map(el=>({x:W/2,y:H/2,w:el.offsetWidth/2,h:el.offsetHeight/2,W:el.offsetWidth,H:el.offsetHeight}));
+      texto.push(cab?caja2(cab.querySelectorAll('.sk,.builds-h,.tn-papel')):null);
+      if(cubos) emblemas(); dirty=true },120) });
+    STA.forEach(e=>ro2.observe(e)); if(cab) ro2.observe(cab) }
+  size();
+  if(document.fonts&&document.fonts.ready) document.fonts.ready.then(()=>{ size() });
+  odespierta();
+})();
+</script>
+<script>
 /* ══ r04 «Hebra» ══ la hebra crece con el scroll y ramifica a cada hito ══ */
 (function(){
   var sec=document.getElementById('ruta'); if(!sec) return;
@@ -13530,7 +14072,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
     lz.style.width=W+'px'; lz.style.height=H+'px';
     if(lz.width!==Math.round(W*dpr)) lz.width=Math.round(W*dpr);
     if(lz.height!==Math.round(H*dpr)) lz.height=Math.round(H*dpr);
-    var m={movil:movil,sx:sx,nx:nx,k:k,A:movil?9.5:24,top:top,fases:[],hitos:[],
+    var m={movil:movil,sx:sx,nx:nx,k:k,A:movil?9.5:24,top:top,fases:[],hitos:[],wl:wl,
            xt:wl+carril-(movil?4:10)};
     var ultimoHecho=0;
     fases.forEach(function(f,i){
@@ -13563,8 +14105,11 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
     M=m;
     var r=wrap.getBoundingClientRect();
     M.docTop=r.top+scrollY+top;
+    /* p64: donde cae el lienzo en la pantalla, para el cubo que baja del tunel */
+    M.x0=lz.getBoundingClientRect().left;
     if(punta<0) punta=QUIETO?M.fin:M.y0;
   }
+  window.__hebra={get M(){ return M }, tip:function(){ return punta }};
 
   /* la hebra, en su sitio: x de la hebra i a la altura y */
   function hx(i,y,T){
@@ -13744,8 +14289,12 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
       }
     }
 
-    /* ── el punto: «estamos aqui» ── */
-    if(tip>M.y0+20){
+    /* ── «estamos aqui»: desde p64 es el cubo que cae del tunel de proyectos.
+       Mientras cae lo pinta su lienzo; posado, lo pinta la hebra, aqui. ── */
+    var CA=window.__caida;
+    if(CA&&CA.dibujaMarca){
+      if(CA.posada()) CA.dibujaMarca(ctx,sx,clm(tip,M.y0+20,M.aqui),tip>=M.aqui-2,M.movil);
+    }else if(tip>M.y0+20){
       var yp=Math.min(tip,M.aqui);
       if(!QUIETO&&tip>=M.aqui-2){
         var ul=(T/2.6)%1;
@@ -15750,219 +16299,6 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
   } else cards.forEach(final);
 })();
 </script>
-<script>
-/* ── 06 · los proyectos en particulas: el nombre se muestrea en miles de
-   puntos, el cursor los aparta y al bajar la palabra se rehace en la
-   siguiente. Fisica en la CPU, dibujo en WebGL. Arranca al acercarse. ── */
-(function(){
-  const sec=document.getElementById('builds'), hold=document.getElementById('ptHold'),
-        st=document.getElementById('ptStage'), cv=document.getElementById('ptGl');
-  if(!sec||!hold||!st||!cv) return;
-  const $=id=>document.getElementById(id), cl=(v,a,b)=>Math.min(b,Math.max(a,v)), ss=t=>t*t*(3-2*t);
-  const RM=matchMedia('(prefers-reduced-motion:reduce)').matches;
-  const NOMS=[...st.querySelectorAll('.pt-nom')], BTN=[...st.querySelectorAll('.pt-idx button')],
-        INFO=[...st.querySelectorAll('.pt-info')], FIGS=[...$('ptFig').querySelectorAll('span')];
-  const fig=$('ptFig'), figN=fig.querySelector('b'), anillo=$('ptAnillo'), pista=st.querySelector('.pt-pista');
-  const FUENTE="Switzer,'Inter Tight',system-ui,sans-serif";
-
-  /* ---------- estado visible ---------- */
-  let act=-1;
-  function marca(i){ if(i===act) return; act=i;
-    BTN.forEach((b,k)=>{ b.classList.toggle('on',k===i); b.setAttribute('aria-current',k===i?'true':'false') });
-    INFO.forEach((e,k)=>e.classList.toggle('on',k===i));
-    NOMS.forEach((e,k)=>e.classList.toggle('on',k===i));
-    FIGS.forEach((e,k)=>e.classList.toggle('on',k===i));
-    figN.textContent='FIG. 0'+(i+1); fig.classList.toggle('am',i===2) }
-
-  /* ---------- scroll ---------- */
-  let top=0, run=1, pRaw=0, ps=-1;
-  function mideScroll(){ let y=0,n=hold; while(n){ y+=n.offsetTop; n=n.offsetParent } top=y; run=Math.max(1,hold.offsetHeight-innerHeight) }
-  const lee=()=>{ pRaw=cl((window.scrollY-top)/run,0,1) };
-  /* mesetas: cada nombre se queda formado un buen tramo */
-  const mapa=p=>p<.22?0:p<.42?(p-.22)/.2:p<.58?1:p<.78?1+(p-.58)/.2:2;
-  const CENTRO=[.1,.5,.9];
-  BTN.forEach((b,i)=>b.addEventListener('click',()=>{ mideScroll(); window.scrollTo({top:top+CENTRO[i]*run,behavior:RM?'auto':'smooth'}) }));
-
-  /* ---------- WebGL ---------- */
-  let gl=null; try{ gl=cv.getContext('webgl',{antialias:false,alpha:false,premultipliedAlpha:false}) }catch(e){}
-  const VS='attribute vec4 a;attribute float r;uniform vec2 R;uniform float D,SW,SE,DA;uniform vec3 AC,SC;varying vec4 vc;'+
-    'void main(){vec2 p=a.xy/R*2.-1.;p.y=-p.y;gl_Position=vec4(p,0.,1.);float k=a.w,sp=clamp(a.z/700.,0.,1.);'+
-    'vec3 cw=vec3(1.);vec3 c=k<1.?mix(cw,AC,k):mix(AC,vec3(.4,.55,.85),k-1.);c=mix(c,SC,sp*.85);'+
-    'float al=k<1.?1.:mix(1.,(.14+.36*r)*DA,k-1.);float sz=k<1.?mix(SW,SE,k):mix(SE,.7+1.9*r*r,k-1.);'+
-    'gl_PointSize=sz*D*(1.+sp*.5);vc=vec4(c*(1.+sp*.6),al);}';
-  const FS='precision mediump float;varying vec4 vc;void main(){float d=length(gl_PointCoord-.5);float a=1.-smoothstep(.34,.5,d);gl_FragColor=vec4(vc.rgb*vc.a*a,1.);}';
-  let U={}, bufA=null, bufR=null, listo=false;
-  function prepara(){
-    if(!gl) return false;
-    const sh=(t,s)=>{ const o=gl.createShader(t); gl.shaderSource(o,s); gl.compileShader(o); return gl.getShaderParameter(o,gl.COMPILE_STATUS)?o:null };
-    const v=sh(gl.VERTEX_SHADER,VS), f=sh(gl.FRAGMENT_SHADER,FS); if(!v||!f) return false;
-    const pr=gl.createProgram(); gl.attachShader(pr,v); gl.attachShader(pr,f); gl.linkProgram(pr);
-    if(!gl.getProgramParameter(pr,gl.LINK_STATUS)) return false;
-    gl.useProgram(pr); 'R D SW SE AC SC DA'.split(' ').forEach(k=>U[k]=gl.getUniformLocation(pr,k));
-    bufA=gl.createBuffer(); bufR=gl.createBuffer(); U.a=gl.getAttribLocation(pr,'a'); U.r=gl.getAttribLocation(pr,'r');
-    gl.enable(gl.BLEND); gl.blendFunc(gl.ONE,gl.ONE); gl.clearColor(0,0,0,1); return true }
-
-  /* ---------- particulas ---------- */
-  let W=0,H=0,D=1,MOB=false,N=0,NE=0,X,Y,VX,VY,KD,HX,HY,RR,GA,ARR,WL=[],CUR=-1;
-  const rnd=(()=>{ let s=1234567; return ()=>(s=(s*16807)%2147483647)/2147483647 })();
-  function reserva(){ N=MOB?9000:26000; NE=MOB?800:1600;
-    X=new Float32Array(N); Y=new Float32Array(N); VX=new Float32Array(N); VY=new Float32Array(N); KD=new Float32Array(N).fill(2);
-    HX=new Float32Array(N); HY=new Float32Array(N); RR=new Float32Array(N); GA=new Float32Array(N); ARR=new Float32Array(N*4);
-    for(let i=0;i<N;i++){ RR[i]=rnd(); GA[i]=rnd(); HX[i]=rnd()*W; HY[i]=rnd()*H; X[i]=HX[i]; Y[i]=HY[i] }
-    gl.bindBuffer(gl.ARRAY_BUFFER,bufR); gl.bufferData(gl.ARRAY_BUFFER,RR,gl.STATIC_DRAW) }
-  const lado=()=>MOB?16:Math.max(32,(W-1360)/2);
-  /* la franja libre para la palabra: bajo la cabecera y sobre el texto de abajo */
-  let ZA=150, ZB=600, BT=0, CT=80;
-  function zonas(){ const s=st.getBoundingClientRect(), c=$('ptCab').getBoundingClientRect(), b=$('ptBajo').getBoundingClientRect();
-    CT=c.top-s.top; BT=b.top-s.top; ZA=c.bottom-s.top+(MOB?18:26); ZB=MOB?Math.min(H*.6,BT-48-40)-48-26:BT-34 }
-  /* nombres largos en dos renglones, cortados por el espacio mas centrado */
-  function renglones(nm){ if(nm.length<=10||nm.indexOf(' ')<0) return [nm];
-    let mejor=-1,d=1e9; for(let k=0;k<nm.length;k++) if(nm[k]===' '){ const q=Math.abs(k-nm.length/2); if(q<d){ d=q; mejor=k } }
-    return [nm.slice(0,mejor),nm.slice(mejor+1)] }
-  const TC=document.createElement('canvas'), tx=TC.getContext('2d',{willReadFrequently:true});
-  function muestrea(i){
-    const lines=renglones(NOMS[i].textContent.trim().replace(/\s+/g,' ')), side=lado(), avail=W-side*2;
-    tx.font='500 100px '+FUENTE; try{ tx.letterSpacing='-5px' }catch(e){}
-    const mw=Math.max(...lines.map(l=>tx.measureText(l).width));
-    let F=Math.min(avail*.99/mw*100,(ZB-ZA)/(lines.length*.86+.1));
-    TC.width=W; TC.height=H; tx.clearRect(0,0,W,H); tx.fillStyle='#fff'; tx.font='500 '+F+'px '+FUENTE;
-    try{ tx.letterSpacing=(-F*.05)+'px' }catch(e){}
-    tx.textAlign='center'; tx.textBaseline='alphabetic';
-    const lh=F*.86, bh=(lines.length-1)*lh+F*.72, cy=(ZA+ZB)/2; const y=cy-bh/2+F*.72;
-    lines.forEach((l,k)=>tx.fillText(l,W/2,y+k*lh));
-    const d=tx.getImageData(0,0,W,H).data;
-    let tinta=0; for(let yy=0;yy<H;yy+=2) for(let xx=0;xx<W;xx+=2) if(d[(yy*W+xx)*4+3]>128) tinta+=4;
-    const cupo=N-NE-(MOB?700:2400), g=Math.ceil(Math.max(MOB?1.6:2.1,Math.sqrt(tinta/Math.max(1,cupo)))*D)/D, pts=[], o=.5/D;
-    for(let yy=o;yy<H;yy+=g) for(let xx=o;xx<W;xx+=g){ const ix=xx|0, iy=yy|0; if(d[(iy*W+ix)*4+3]>140) pts.push(xx,yy) }
-    const n=pts.length/2; for(let k=n-1;k>0;k--){ const j=(rnd()*(k+1))|0; let t=pts[2*k]; pts[2*k]=pts[2*j]; pts[2*j]=t; t=pts[2*k+1]; pts[2*k+1]=pts[2*j+1]; pts[2*j+1]=t }
-    const cap=Math.min(n,cupo);
-    return {pts:new Float32Array(pts.slice(0,cap*2)),n:cap,cy,F,bh,g} }
-  function caja(){ return MOB?{x:16+50,y:BT?Math.min(H*.6,BT-48-40):H*.555,s:48}:{x:W-lado()-46,y:CT+46,s:46} }
-  const hh=n=>{ const x=Math.sin(n*127.1+311.7)*43758.5453; return x-Math.floor(x) };
-  /* destino del punto e del emblema del proyecto i, en [-1,1], y su tono */
-  function emb(i,e,t){ const a=hh(e), b=hh(e+.37), c=hh(e*1.31+.9);
-    if(i===0){ const nb=4, sp=.56, off=(t*.22)%1, k=e%nb, bx=(k-2)*sp-off*sp+sp*.5, bxw=bx<-1.1?bx+nb*sp:bx;
-      if(c<.18){ const x0=bxw+.16, x1=bxw+sp-.16; return [x0+(x1-x0)*a,Math.sin(a*6.28)*.02,1] }
-      const h=.19, u=b*4, s=u%1, side=u|0; let x,y;
-      if(side===0){ x=-h+2*h*s; y=-h } else if(side===1){ x=h; y=-h+2*h*s } else if(side===2){ x=h-2*h*s; y=h } else { x=-h; y=h-2*h*s }
-      if(a<.3){ x*=a/.3; y*=a/.3 }
-      return [bxw+x,y,bxw>.55?1:.55] }
-    if(i===1){ const m=ss(cl(.5-.5*Math.cos(t*.7)*1.25,0,1)), an=a*6.2832, r0=c<.62?.82:c<.8?.62:Math.sqrt(b)*.5;
-      const cx0=Math.cos(an)*r0, cy0=Math.sin(an)*r0, k=e%9, gx=(k%3-1)*.68, gy=((k/3|0)-1)*.68, r1=c<.7?.2:Math.sqrt(b)*.13;
-      const cx1=gx+Math.cos(an)*r1, cy1=gy+Math.sin(an)*r1;
-      return [cx0+(cx1-cx0)*m,cy0+(cy1-cy0)*m,c<.62?1:.7] }
-    if(c<.36){ const an=a*6.2832, r=Math.sqrt(b)*.36; return [Math.cos(an)*r,-.5+Math.sin(an)*r,1] }
-    if(c<.44){ const an=a*6.2832, r=.44+b*.05; return [Math.cos(an)*r,-.5+Math.sin(an)*r,1] }
-    const k=e%4, rx=(k-1.5)*.46, w=.17, tp=.08, bt=.92;
-    if(c<.78){ const u=b*2, s=u%1; let x,y; if(u<1){ x=rx+(s<.5?-w:w); y=tp+(bt-tp)*(s*2%1) } else { x=rx-w+2*w*s; y=(b*7|0)%2?tp:bt } return [x,y,.3] }
-    const row=(a*6|0), blink=hh(row*7+k*13+Math.floor(t*7+hh(k+row)*9))>.45?1:0;
-    return [rx-w*.55+b*w*1.1,tp+.12+row*.13,blink?1:.35] }
-
-  /* ---------- entrada ---------- */
-  let mx=-1e4,my=-1e4,mvx=0,mvy=0,mOn=false,lastM=0,RAD=112;
-  function mueve(x,y){ const now=performance.now(), dt=Math.max(8,now-lastM)/1000;
-    if(mOn){ mvx=mvx*.5+((x-mx)/dt)*.5; mvy=mvy*.5+((y-my)/dt)*.5 } mx=x; my=y; mOn=true; lastM=now }
-  st.addEventListener('pointermove',e=>{ const r=st.getBoundingClientRect(); mueve(e.clientX-r.left,e.clientY-r.top) });
-  st.addEventListener('pointerleave',()=>{ mOn=false; anillo.style.opacity=0 });
-  st.addEventListener('touchmove',e=>{ const r=st.getBoundingClientRect(), t=e.touches[0]; mueve(t.clientX-r.left,t.clientY-r.top) },{passive:true});
-  st.addEventListener('touchend',()=>{ mOn=false },{passive:true});
-  const rizo=(x,y,t)=>{ const s=.0042; return (Math.sin(x*s+t*.6)+Math.sin(y*s*1.3-t*.4)+Math.sin((x+y)*s*.7+t*.3))*1.4 };
-  function paso(h,t,e,cur){
-    const w=WL[cur], tp=w.pts, nw=w.n, eb=caja(), ks=(1-e)*(1-e), kw=RM?200:(MOB?70:64), cw=RM?28:(MOB?11:10);
-    let cx=mx, cy=my, cvx=mvx, cvy=mvy, on=mOn;
-    const R=RAD, R2=R*R, S=MOB?26000:30000, ox=W/2, oy=w.cy;
-    for(let i=0;i<N;i++){
-      let x=X[i], y=Y[i], vx=VX[i], vy=VY[i], tx, ty, kd, k=kw, c=cw;
-      if(i<nw){ tx=tp[2*i]; ty=tp[2*i+1]; kd=0; if(!RM){ tx+=Math.sin(t*1.3+GA[i]*40)*.18; ty+=Math.cos(t*1.1+GA[i]*30)*.18 } }
-      else if(i<nw+NE){ const q=emb(cur,i-nw,t); tx=eb.x+q[0]*eb.s; ty=eb.y+q[1]*eb.s; kd=q[2]+.001; k=kw*1.4 }
-      else { tx=HX[i]+Math.sin(t*.13+GA[i]*9)*40; ty=HY[i]+Math.cos(t*.11+RR[i]*9)*30; kd=2; k=1.2; c=2.2 }
-      KD[i]+=(kd-KD[i])*.08;
-      let ax=(tx-x)*k*(kd===2?1:ks+.004), ay=(ty-y)*k*(kd===2?1:ks+.004);
-      ax-=vx*c*(kd===2?1:(.45+.55*ks)); ay-=vy*c*(kd===2?1:(.45+.55*ks));
-      if(e>.001&&kd===0){ const dx=x-ox, dy=y-oy, dd=Math.sqrt(dx*dx+dy*dy)+1, an=rizo(x,y,t);
-        const tg=(.45+GA[i]*1.1)*1500*Math.min(1.6,260/Math.sqrt(dd*40)), rd=380+RR[i]*520;
-        ax+=(-dy/dd*tg+dx/dd*rd+Math.cos(an)*900)*e; ay+=(dx/dd*tg+dy/dd*rd+Math.sin(an)*900)*e }
-      if(on){ const dx=x-cx, dy=y-cy, d2=dx*dx+dy*dy;
-        if(d2<R2){ const d=Math.sqrt(d2)+.01, f=1-d/R, f2=f*f; ax+=dx/d*S*f2; ay+=dy/d*S*f2; ax+=(cvx-vx)*f2*14; ay+=(cvy-vy)*f2*14 } }
-      vx+=ax*h; vy+=ay*h; x+=vx*h; y+=vy*h; X[i]=x; Y[i]=y; VX[i]=vx; VY[i]=vy }
-    return {cx,cy,on} }
-
-  /* ---------- medidas ---------- */
-  function coloca(){ const eb=caja();
-    if(MOB){ fig.style.left=(eb.x+eb.s+22)+'px'; fig.style.right='auto'; fig.style.top=(eb.y-16)+'px'; fig.style.justifyItems='start'; fig.style.textAlign='left' }
-    else { fig.style.right=(lado()+2*eb.s+26)+'px'; fig.style.left='auto'; fig.style.top=(eb.y-14)+'px'; fig.style.justifyItems=''; fig.style.textAlign='';
-      pista.style.right=lado()+'px'; pista.style.top=(eb.y+eb.s+18)+'px' } }
-  function medidas(){
-    const oW=W, oH=H, eraMob=MOB; W=st.clientWidth; H=st.clientHeight; MOB=W<900||matchMedia('(hover:none)').matches;
-    D=Math.min(window.devicePixelRatio||1,MOB?1.5:2); RAD=MOB?44:112;
-    $('ptAnilloC').style.width=$('ptAnilloC').style.height=RAD*2+'px';
-    zonas(); coloca();
-    if(!X||eraMob!==MOB) reserva(); else if(oW&&oH){ for(let i=0;i<N;i++){ HX[i]=HX[i]/oW*W; HY[i]=HY[i]/oH*H } }
-    cv.width=Math.round(W*D); cv.height=Math.round(H*D); gl.viewport(0,0,cv.width,cv.height);
-    WL=[0,1,2].map(muestrea) }
-  function asienta(c){ const w=WL[c], eb=caja();
-    for(let i=0;i<N;i++){ VX[i]=VY[i]=0;
-      if(i<w.n){ X[i]=w.pts[2*i]; Y[i]=w.pts[2*i+1]; KD[i]=0 }
-      else if(i<w.n+NE){ const q=emb(c,i-w.n,tt); X[i]=eb.x+q[0]*eb.s; Y[i]=eb.y+q[1]*eb.s; KD[i]=q[2] }
-      else { X[i]=HX[i]; Y[i]=HY[i]; KD[i]=2 } } }
-
-  /* ---------- bucle ---------- */
-  let tp=0, tt=0, visto=false, corre=false, acum=0;
-  function cuadro(now){
-    if(!visto){ corre=false; sec.classList.add('pt-quieto'); return }
-    requestAnimationFrame(cuadro);
-    const dt=Math.min(.05,tp?(now-tp)/1000:.016); tp=now; if(!RM) tt+=dt;
-    lee(); if(ps<0||RM) ps=pRaw; else { ps+=(pRaw-ps)*(1-Math.exp(-dt*4.5)); if(Math.abs(pRaw-ps)<1e-5) ps=pRaw }
-    const s=mapa(ps), A=Math.min(1,Math.floor(s)), f=cl(s-A,0,1), cur=s>=2?2:(f<.5?A:A+1);
-    const e=RM?0:Math.pow(Math.sin(Math.PI*f),.8);
-    marca(cur); if(!listo) return; CUR=cur;
-    acum+=dt; let n=0, r=null;
-    while(acum>=1/60&&n<3){ r=paso(1/60,tt,e,cur); acum-=1/60; n++ } if(n===3) acum=0;
-    if(!r) r={cx:mx,cy:my,on:mOn};
-    if(r.on&&mOn&&!MOB){ anillo.style.opacity=1; anillo.style.transform='translate('+r.cx+'px,'+r.cy+'px)' } else anillo.style.opacity=0;
-    mvx*=.9; mvy*=.9;
-    for(let i=0;i<N;i++){ const j=i*4; ARR[j]=X[i]; ARR[j+1]=Y[i]; ARR[j+2]=Math.abs(VX[i])+Math.abs(VY[i]); ARR[j+3]=KD[i] }
-    gl.clear(gl.COLOR_BUFFER_BIT);
-    gl.bindBuffer(gl.ARRAY_BUFFER,bufA); gl.bufferData(gl.ARRAY_BUFFER,ARR,gl.DYNAMIC_DRAW);
-    gl.enableVertexAttribArray(U.a); gl.vertexAttribPointer(U.a,4,gl.FLOAT,false,0,0);
-    gl.bindBuffer(gl.ARRAY_BUFFER,bufR); gl.enableVertexAttribArray(U.r); gl.vertexAttribPointer(U.r,1,gl.FLOAT,false,0,0);
-    const am=cur===2;
-    gl.uniform2f(U.R,W,H); gl.uniform1f(U.D,D);
-    gl.uniform1f(U.SW,cl(WL[cur].g*(MOB?2.1:1.45),1.8,9)); gl.uniform1f(U.DA,MOB?.45:1); gl.uniform1f(U.SE,MOB?1.5:1.8);
-    if(am){ gl.uniform3f(U.AC,1,.66,.3); gl.uniform3f(U.SC,1,.8,.5) } else { gl.uniform3f(U.AC,.3,.6,1); gl.uniform3f(U.SC,.45,.7,1) }
-    gl.drawArrays(gl.POINTS,0,N);
-  }
-  function arranca(){ if(!corre&&visto){ corre=true; tp=0; sec.classList.remove('pt-quieto'); requestAnimationFrame(cuadro) } }
-
-  /* el grano se dibuja una vez */
-  (function(){ const c=document.createElement('canvas'); c.width=c.height=180; const x=c.getContext('2d'), d=x.createImageData(180,180);
-    for(let i=0;i<d.data.length;i+=4){ const v=Math.random()*255; d.data[i]=d.data[i+1]=d.data[i+2]=v; d.data[i+3]=255 }
-    x.putImageData(d,0,0); $('ptGrano').style.backgroundImage='url('+c.toDataURL()+')' })();
-
-  /* se prepara al acercarse (muestrear los nombres cuesta unas decenas de ms),
-     y solo corre con el escenario a la vista */
-  let preparado=false;
-  function arma(){ if(preparado) return; preparado=true;
-    if(!prepara()){ sec.classList.add('pt-nogl'); return }
-    const va=()=>{ mideScroll(); medidas(); lee(); ps=pRaw; const c=Math.round(mapa(ps)); marca(c); CUR=c; asienta(c); listo=true; arranca() };
-    (document.fonts&&document.fonts.load?document.fonts.load('500 100px Switzer').catch(()=>{}):Promise.resolve()).then(va) }
-  if(!gl) sec.classList.add('pt-nogl');
-  new IntersectionObserver(es=>{ if(es[0].isIntersecting) arma() },{rootMargin:'100% 0px'}).observe(hold);
-  /* la etiqueta de la seccion va dentro del escenario fijo y la red de
-     seguridad de las entradas no la ve al llegar de un salto: se enciende aqui */
-  new IntersectionObserver(es=>{ visto=es[0].isIntersecting;
-    if(visto){ [].forEach.call(hold.querySelectorAll('.rv:not(.in)'),e=>e.classList.add('in'));
-      [].forEach.call(hold.querySelectorAll('[data-tit]:not(.vis)'),e=>e.classList.add('vis')); arma(); arranca() }
-  },{rootMargin:'10% 0px'}).observe(hold);
-  if(gl) cv.addEventListener('webglcontextlost',e=>{ e.preventDefault(); listo=false; sec.classList.add('pt-nogl') });
-  /* al cambiar de idioma los nombres cambian: se vuelven a muestrear */
-  let rz=0; const remuestrea=()=>{ clearTimeout(rz); rz=setTimeout(()=>{ if(listo){ zonas(); coloca(); WL=[0,1,2].map(muestrea) } },120) };
-  new MutationObserver(remuestrea).observe($('ptNombres'),{subtree:true,characterData:true,childList:true});
-  addEventListener('resize',()=>{ mideScroll(); clearTimeout(rz); rz=setTimeout(()=>{ if(listo) medidas() },150) },{passive:true});
-  addEventListener('load',()=>setTimeout(mideScroll,600));
-  addEventListener('nrm:remide',mideScroll,{passive:true});
-  mideScroll(); lee(); marca(Math.round(mapa(pRaw)));
-})();
-</script>
+<!-- p64: el guion de las particulas de #builds se retira; el tunel va antes de la hebra -->
 </body>
 </html>
