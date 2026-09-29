@@ -4005,11 +4005,16 @@ footer .fgrid h3,footer .tec-real{color:#9EA2AB}
      degradado. El velo va debajo del texto —la marca esta en z-index 0 y el
      texto en 1—, asi que no toca ni una letra. */
 }
-/* El apagado de los cantos y el hueco sobre la columna de texto, pintados. */
+/* El apagado de los cantos y el hueco sobre la columna de texto, pintados.
+   p67 · el velo llega entero hasta el final de la columna de texto (que acaba
+   hacia el 67-69 % del ancho): con el reflejo de «marcaLuz» cruzando por
+   detras del primer parrafo el fondo subia a rgb 75 y el texto se quedaba en
+   4,17:1 (3,62 a 1280). Con estas paradas el peor momento da 5,6-6,7:1 de
+   1024 a 1920; mas alla del texto el logo queda como estaba. */
 .ruta-marca::after{content:"";position:absolute;inset:0;display:block;
   pointer-events:none;
   background:radial-gradient(145% 125% at 50% 50%,transparent 58%,#000 100%),
-             linear-gradient(to right,rgba(0,0,0,.8) 0 46%,transparent 82%)}
+             linear-gradient(to right,rgba(0,0,0,.8) 0 46%,rgba(0,0,0,.62) 62%,rgba(0,0,0,.5) 71%,transparent 86%)}
 .ruta-marca-v,.ruta-marca-g{position:absolute;inset:0;display:block;
   transform-style:preserve-3d;will-change:transform}
 .ruta-marca-v{animation:marcaPasea 47s ease-in-out infinite}
@@ -7120,10 +7125,67 @@ html body .ruta-p{color:#AAB5CA !important}
    llegar a algunas secciones».
    A partir de aqui el techo es 1,25 en telefono y sigue en 2 en escritorio,
    donde no hay problema que resolver. Es una sola linea y la leen los doce. */
-window.__dens = function(){
-  var d = window.devicePixelRatio || 1;
-  var techo = (innerWidth < 900) ? 1.25 : 2;
-  return Math.min(d, techo);
+/* p67 · LOS CUBOS, A LA DENSIDAD DE VERDAD DE LA PANTALLA.
+   El techo de 1,25 hacia que en un iPhone (densidad 3) cada lienzo se pintara
+   a menos de la mitad de sus pixeles y el navegador lo estirara 2,4 veces: el
+   canto de un cubo -que es todo lo que es un cubo- salia borroso. Ahora cada
+   lienzo se pinta a min(densidad del aparato, 3), con su mapa de bits igual
+   pixel a pixel que su caja.
+   Y para que eso no devuelva los tirones que se quitaron, cada bucle lleva su
+   GUARDA («__guarda»): mide lo que le cuesta su cuadro y cada cuanto le llega.
+   Si durante un segundo seguido va por encima del presupuesto, ese lienzo -y
+   solo ese- baja a densidad 2, que en un telefono es el suelo: nunca menos.
+   «__dens(lienzo)» devuelve la densidad que le toca a ESE lienzo. */
+window.__dens = function(cv){
+  var d = Math.min(window.devicePixelRatio || 1, 3);
+  if (cv && cv.__tope && d > cv.__tope) d = cv.__tope;
+  return d;
+};
+window.__nitLog = [];
+/* «QUE BRILLEN»: el canto de luz de las caras iluminadas. Un pixel DE
+   PANTALLA (no de CSS: a densidad 3 un pixel CSS son tres) en el blanco
+   azulado de los cantos de la casa, mas vivo cuanto mas de cara a la luz.
+   Sin desenfoque ni resplandor: es una linea. Se llama con el camino de la
+   cara aun abierto, despues de rellenarla. Las cadenas, hechas una vez. */
+(function(){
+  var C = [];
+  for (var i = 0; i <= 40; i++) C.push('rgba(236,244,255,' + (i / 40).toFixed(3) + ')');
+  window.__canto = function(g, lam, a, px){
+    if (lam < .45) return;
+    var v = (lam - .45) / .55 * a; if (v > 1) v = 1;
+    if (v < .03) return;
+    g.lineWidth = px; g.strokeStyle = C[Math.round(v * 40)]; g.stroke();
+  };
+})();
+window.__guarda = function(cv, remide){
+  if (!cv) return {ini:function(){}, fin:function(){}};
+  if (cv.__g) { if (remide) cv.__g.remide = remide; return cv.__g; }
+  var PRESU = 12,       /* ms de su propio cuadro, de media */
+      LENTO = 80,       /* ms entre cuadros, de media (el reloj del telefono va a 33-66) */
+      VENTANA = 1000;   /* un segundo seguido */
+  var g = {remide: remide, t0: 0, prev: 0, n: 0, sc: 0, si: 0};
+  function limpia(){ g.n = 0; g.sc = 0; g.si = 0; }
+  g.ini = function(){
+    var now = performance.now();
+    if (g.prev) {
+      var iv = now - g.prev;
+      /* un bucle que se ha dormido y vuelve no cuenta ese hueco */
+      if (iv > 400) limpia(); else { g.si += iv; g.n++; }
+    }
+    g.prev = now; g.t0 = now;
+    if (g.si >= VENTANA && g.n >= 8) {
+      var coste = g.sc / g.n, paso = g.si / g.n;
+      if ((coste > PRESU || paso > LENTO) && __dens(cv) > 2) {
+        cv.__tope = 2;
+        window.__nitLog.push({cv: cv.id || cv.className, coste: +coste.toFixed(1), paso: +paso.toFixed(1), t: Math.round(now)});
+        if (g.remide) try { g.remide(); } catch (e) {}
+      }
+      limpia();
+    }
+  };
+  g.fin = function(){ if (g.t0) g.sc += performance.now() - g.t0; };
+  cv.__g = g;
+  return g;
 };
 
 /* ═══════════ NO REHACER UN MAPA DE BITS QUE YA MIDE LO QUE TOCA ═══════════
@@ -7649,6 +7711,20 @@ main>section#builds{background:#000 !important;background-image:none !important;
    siempre -el mismo sitio que antes-; lo de más es solo túnel. */
 #builds .tn-stage{position:sticky;top:0;height:100vh;height:100lvh;overflow:hidden;background:#0A0D14;--tn-extra:0px}
 @supports(height:100lvh){#builds .tn-stage{--tn-extra:calc(100lvh - 100svh)}}
+/* p67 · LA COSTURA CON «#xfade», SIN TIJERA.
+   1) La linea azul que crece arriba de cada seccion SI estaba -la regla
+   general «main>section+section::after»-, pero el escenario del tunel
+   («.builds>*», z-index 1) la tapaba. Se sube por encima del escenario.
+   2) Arriba el embudo de «#xfade» acaba en #0A101B y abajo el tunel empezaba
+   en su gris con la vineta: dos colores en una recta. El escenario recoge el
+   mismo color en su canto de arriba y lo deja ir con la misma curva del
+   embudo, al reves; se apaga con el primer tramo del anclado (--tnb), cuando
+   la costura ya ha salido de pantalla. */
+main>section#builds::after{z-index:5}
+#builds .tn-stage::before{content:"";position:absolute;left:0;right:0;top:0;z-index:2;pointer-events:none;
+  height:clamp(104px,12vw,180px);opacity:var(--tnb,1);
+  background:linear-gradient(to bottom,rgb(10 16 27 / 1) 0%,rgb(10 16 27 / .84) 12%,rgb(10 16 27 / .30) 44%,rgb(10 16 27 / 0) 100%)}
+@media(max-width:760px){#builds .tn-stage::before{height:clamp(64px,18vw,104px)}}
 #builds .tn-vis{position:absolute;left:0;top:0;width:0;height:100vh;height:100svh;visibility:hidden;pointer-events:none}
 #builds .tn-cv{position:absolute;inset:0;width:100%;height:100%;display:block}
 #builds .tn-stage::after{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;
@@ -8945,7 +9021,8 @@ const CALM=matchMedia('(prefers-reduced-motion: reduce)').matches;
   ];
   const CLAROS=[[233,235,237],[186,193,202]];               /* blanco y plata */
   const HONDO=9.6, CERCA=0.42, RANGO=HONDO-CERCA;
-  let W=0,H=0,piezas=null,giro=0,raf=0,ultimo=0,t=0,hueco=null,huecoW=0,huecoH=0;
+  let W=0,H=0,piezas=null,giro=0,raf=0,ultimo=0,t=0,hueco=null,huecoW=0,huecoH=0,PX1=1;
+  const GU=__guarda(cv,()=>{ mide() });
   let vt=0, raton=0, ratonY=0, mira=0, miraY=0, anclaX=0, anclaY=0;
   const FINO=matchMedia('(hover:hover) and (pointer:fine)').matches;
 
@@ -9043,19 +9120,21 @@ const CALM=matchMedia('(prefers-reduced-motion: reduce)').matches;
        En escritorio no hay techo de cuadros y sobran 500 peticiones por
        segundo: ahi va a resolucion entera. En telefono se sube de 0,66 a
        0,86, que es lo que el techo deja sin volver a los tirones. */
-    const d=(window.__dens?__dens():1)*(innerWidth<900?0.72:1);
+    /* p67 · a la densidad de la pantalla (hasta 3), sin el recorte al 72 %:
+       el canto de un cubo es lo primero que se ve borroso. Lo vigila su guarda. */
+    const d=__dens(cv);
     W=cv.clientWidth; H=cv.clientHeight;
     if(!W||!H)return false;
-    if(window.__mide)__mide(cv,W*d,H*d); else {cv.width=W*d;cv.height=H*d}
-    ctx.setTransform(d,0,0,d,0,0);
+    __mide(cv,W*d,H*d);
+    ctx.setTransform(d,0,0,d,0,0); PX1=1/d;
     /* EL RESPIRO DEL LOCKUP, COCIDO UNA VEZ.
        Era un degradado radial creado de cero en cada cuadro, con su arco y su
        relleno. Ahora se cuece en un lienzo aparte al cambiar de tamaño y cada
        cuadro solo lo estampa: un «drawImage» en vez de un degradado nuevo. */
     const rx=Math.min(W*0.30,340), ry=Math.min(H*0.17,150);
     hueco=document.createElement('canvas');
-    hueco.width=Math.max(2,Math.ceil(rx*2)); hueco.height=Math.max(2,Math.ceil(ry*2));
-    const hx=hueco.getContext('2d');
+    hueco.width=Math.max(2,Math.ceil(rx*2*d)); hueco.height=Math.max(2,Math.ceil(ry*2*d));
+    const hx=hueco.getContext('2d'); hx.setTransform(d,0,0,d,0,0);
     const g=hx.createRadialGradient(rx,ry,0,rx,ry,1);
     g.addColorStop(0,'rgba(0,0,0,.96)');
     g.addColorStop(0.60,'rgba(0,0,0,.72)');
@@ -9102,7 +9181,8 @@ const CALM=matchMedia('(prefers-reduced-motion: reduce)').matches;
      la tabla y la transparencia va por «globalAlpha», que es un numero y no
      pasa por el analizador. */
   const FILO='rgb(215,232,255)';
-  const ESCALONES=14, CARAS=[1, 0.50, 0.80, 0.38];   /* cara, costado, arriba, abajo */
+  /* p67 · un punto mas de contraste entre caras (antes .50 · .80 · .38) */
+  const ESCALONES=14, CARAS=[1, 0.46, 0.84, 0.34];   /* cara, costado, arriba, abajo */
   let TABLA=null;
   function cueceTabla(){
     const todos=PAL.concat(CLAROS);
@@ -9275,6 +9355,9 @@ const CALM=matchMedia('(prefers-reduced-motion: reduce)').matches;
           ctx.globalAlpha=al*0.16*(0.30+hondo*0.70);
           ctx.fillStyle=FILO;
           ctx.fillRect(fx0,fy0,fx1-fx0,Math.max(1,(fy1-fy0)*0.11));
+          /* p67 · el canto de luz: un pixel de pantalla, vivo, en el borde de arriba */
+          ctx.globalAlpha=al*0.62*(0.30+hondo*0.70);
+          ctx.fillRect(fx0,fy0,fx1-fx0,PX1);
           /* ══ LA MARCA GRABADA ═══════════════════════════════════════════
              Una de cada dieciseis cajas lleva el rombo de la casa grabado en
              la cara. No se lee: se RECONOCE, medio segundo, cuando una pasa
@@ -9301,6 +9384,7 @@ const CALM=matchMedia('(prefers-reduced-motion: reduce)').matches;
       ctx.globalAlpha=al*0.13*(0.30+hondo*0.70);
       ctx.fillStyle=FILO;
       ctx.fillRect(px-media,py-media,lado,Math.max(1,lado*0.12));
+      if(lado>6){ ctx.globalAlpha=al*0.5*(0.30+hondo*0.70); ctx.fillRect(px-media,py-media,lado,PX1) }
     }
     ctx.globalAlpha=1;
     ctx.restore();
@@ -9337,7 +9421,7 @@ const CALM=matchMedia('(prefers-reduced-motion: reduce)').matches;
     raf=requestAnimationFrame(tick);
     const dt=Math.min(.05,((ahora-ultimo)||16)/1000); ultimo=ahora;
     if((window.__tunel||0)<=0.004) return;       /* aun no ha entrado */
-    pinta(dt);
+    GU.ini(); pinta(dt); GU.fin();
   }
   function enciende(){
     if(corre||quieto||!W) return;
@@ -10588,8 +10672,11 @@ function campo2D(){
     p.rec = p.posa ? Math.abs(p.destino-(p.abajo?1.16:-0.16))
                    : (Math.pow(Math.random(),1.7)*(p.abajo?.70:.86)+.14);
   }
+  /* p67 · a la densidad de la pantalla, con su guarda: los bloques caen en
+     la reticula de pixel entero y a 1,5 cada canto caia en medio pixel */
+  const GU=__guarda(cv,()=>{ const d=__dens(cv); if(__mide(cv,W*d,H*d)){ dpr=d; ctx.setTransform(dpr,0,0,dpr,0,0); ctx.fillStyle='#000';ctx.fillRect(0,0,W,H) } });
   function size(){
-    dpr=Math.min(devicePixelRatio||1,1.5);
+    dpr=__dens(cv);
     W=cv.clientWidth;H=cv.clientHeight;
     __mide(cv, W*dpr, H*dpr); ctx.setTransform(dpr,0,0,dpr,0,0);
     ctx.fillStyle='#000';ctx.fillRect(0,0,W,H);
@@ -10647,6 +10734,7 @@ function campo2D(){
       M.vx=(M.x-px)/Math.max(dt,.001);M.vy=(M.y-py)/Math.max(dt,.001);
     }
     desliz += ((__y*0.62) - desliz) * Math.min(1,dt*6);
+    GU.ini();
     ctx.globalCompositeOperation='source-over';
     ctx.fillStyle='rgba(0,0,0,.17)';ctx.fillRect(0,0,W,H);
     rejilla();
@@ -10746,6 +10834,7 @@ function campo2D(){
       }
     }
     ctx.globalCompositeOperation='source-over';
+    GU.fin();
   }
   addEventListener('resize',size,{passive:true});
   if(FINE&&!CALM){
@@ -11153,7 +11242,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
   const mixc=(c,t,k)=>'rgb('+c.map((v,i)=>Math.round(v+(t[i]-v)*k)).join(',')+')';
   function build(){
     const r=cv.getBoundingClientRect();if(!r.width)return;
-    dpr=__dens();
+    dpr=__dens(cv);
     W=r.width;H=r.height;narrow=innerWidth<880;
     sc=narrow?H/(DX*0.72):W/DX;
     __mide(cv, W*dpr, H*dpr);
@@ -11515,8 +11604,10 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
     escFin=t+hold.offsetHeight-(parseFloat(cs.paddingBottom)||0)-es.offsetHeight;
   }
   let dirty=true, lastT=0, cubos=null, calma=null;
+  let PX1=1;
+  const GU=__guarda(cv,()=>{ const d=__dens(cv); __mide(cv,W*d,H*d); ctx0.setTransform(d,0,0,d,0,0); PX1=1/d; dirty=true });
   function size(){
-    const d=__dens();
+    const d=__dens(cv); PX1=1/d;
     W=cv.clientWidth;H=cv.clientHeight;
     __mide(cv, W*d, H*d); ctx0.setTransform(d,0,0,d,0,0);
     top=dTop(hold);hh=hold.offsetHeight;vh=innerHeight;
@@ -11635,6 +11726,10 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
         ctx.beginPath(); ctx.moveTo(W/2+cs*r0,H/2+sn*r0); ctx.lineTo(W/2+cs*r1,H/2+sn*r1); ctx.stroke();
       }
     }
+    /* p67 · uniones redondas: una cara casi de canto es una astilla y, con la
+       union en inglete, su trazo sacaba una punta de varios pixeles que a
+       densidad 3 ya se ve */
+    ctx.lineJoin='round';
     const lista=[];
     for(const c of cubos){
       const d=c.z0-cam, k=Math.floor(d/TRAMO);
@@ -11690,7 +11785,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
             r10=Y*X*t1+Z*si, r11=co+Y*Y*t1, r12=Y*Z*t1-X*si,
             r20=Z*X*t1-Y*si, r21=Z*Y*t1+X*si, r22=co+Z*Z*t1;
       /* lo hondo se apaga hacia el fondo de la seccion */
-      const apaga=(1-q.hondo*.55)*q.sombra;
+      const apaga=(1-q.hondo*.55)*q.sombra, big=h*2*f/q.zr>8;
       for(let fc=0;fc<6;fc++){
         const nrm=FACES[fc][0], pts=FACES[fc][1];
         const n0=r00*nrm[0]+r01*nrm[1]+r02*nrm[2], n1=r10*nrm[0]+r11*nrm[1]+r12*nrm[2], n2=r20*nrm[0]+r21*nrm[1]+r22*nrm[2];
@@ -11698,7 +11793,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
         const cx=q.x+n0*h, cy=q.y+n1*h, cz=q.zr+n2*h;
         if(n0*cx+n1*cy+n2*cz>=0) continue;
         const lam=clm(n0*LIGHT[0]+n1*LIGHT[1]+n2*LIGHT[2]);
-        const F={lit:.24+lam*.88};
+        const F={lit:.20+lam*.96};                /* p67 · antes .24+lam*.88 */
         ctx.beginPath();
         for(let i=0;i<4;i++){ const v=pts[i];
           const w0=r00*v[0]+r01*v[1]+r02*v[2], w1=r10*v[0]+r11*v[1]+r12*v[2], w2=r20*v[0]+r21*v[1]+r22*v[2];
@@ -11717,6 +11812,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
           ctx.fill();
           ctx.strokeStyle='rgba(226,236,255,'+(.14*q.a*apaga*(.55+tn.l/150)).toFixed(3)+')';
           ctx.lineWidth=1; ctx.stroke();
+          if(big) __canto(ctx,lam,.62*q.a*apaga,PX1);
         }
       }
     }
@@ -11763,7 +11859,11 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
   function fondoListo(){
     if(fondo.width!==cv.width||fondo.height!==cv.height){ fondo.width=cv.width; fondo.height=cv.height }
     const alto=H+'px'; if(fondo.style.height!==alto) fondo.style.height=alto;
-    const ty='translate3d(0,'+(-(compraTop-__y)).toFixed(1)+'px,0)';
+    /* p67 · con tres decimales y no con uno: la seccion esta en medio pixel y
+       el lienzo tiene que caer EXACTO en el cero de la pantalla. Con uno se
+       quedaba hasta 0,05 px fuera, y una capa movida una fraccion de pixel
+       se remuestrea: el tunel entero se ve blando */
+    const ty='translate3d(0,'+(-(compraTop-__y)).toFixed(3)+'px,0)';
     if(ty!==fondoY){ fondoY=ty; fondo.style.transform=ty }
     const d=W?cv.width/W:1; fctx.setTransform(d,0,0,d,0,0);
   }
@@ -11837,8 +11937,10 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
     if(ido!==oculto){ oculto=ido; escena.style.visibility=ido?'hidden':'' }
     /* con el escenario ya ido, el tunel se sigue pintando -sin borrar- solo
        para el fondo de la compra */
+    GU.ini();
     if(!ido) pinta(p,performance.now()/1000,borde,compraVe);
     else if(compraVe) pinta(p,performance.now()/1000,-1,true);
+    GU.fin();
     rotulo(p,borde);
     const step=p<.34?0:p<.68?1:2;
     if(step!==paso){ paso=step;
@@ -11921,13 +12023,14 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
   const dTop=nn=>{let y=0;while(nn){y+=nn.offsetTop;nn=nn.offsetParent}return y};
   const QUIETO=matchMedia('(prefers-reduced-motion:reduce)').matches;
   const azar=(i,k)=>{ const r=Math.sin(i*127.1+k*311.7+.5)*43758.5453; return r-Math.floor(r) };
-  let W=0,H=0,last=-1,dirty=true;
+  let W=0,H=0,last=-1,dirty=true,PX1=1,DN=1;
   function build(){
-    const d=__dens();
+    const d=__dens(cv); DN=d; PX1=1/d;
     W=cv.clientWidth;H=cv.clientHeight;
     __mide(cv, W*d, H*d); ctx.setTransform(d,0,0,d,0,0);
     last=-1; dirty=true;
   }
+  const GU=__guarda(cv,build);
 
   /* ── el mapa, cuando la seccion se acerca ── */
   let G=null, tierra=null, suelo=null, reticula=null, arcos=null, pedido=false;
@@ -12067,13 +12170,13 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
       /* se ve si mira hacia la camara (que esta en z = +foco) */
       const px=x+n0*h, py=y+n1*h, pz=z+n2*h;
       if(n0*(-px)+n1*(-py)+n2*(foco-pz)<=0) continue;
-      const lam=clm(n0*LIGHT[0]+n1*LIGHT[1]+n2*LIGHT[2]), lit=.24+lam*.88;
+      const lam=clm(n0*LIGHT[0]+n1*LIGHT[1]+n2*LIGHT[2]), lit=.20+lam*.96;   /* p67 · antes .24+lam*.88 */
       ctx.beginPath();
       ctx.moveTo(PX[idx[0]*2],PX[idx[0]*2+1]); ctx.lineTo(PX[idx[1]*2],PX[idx[1]*2+1]);
       ctx.lineTo(PX[idx[2]*2],PX[idx[2]*2+1]); ctx.lineTo(PX[idx[3]*2],PX[idx[3]*2+1]);
       ctx.closePath();
       ctx.fillStyle=cstr(tono.h,tono.s,clm(tono.l*(.58+lit*.62)+lit*10+(extra||0),3,100),a); ctx.fill();
-      if(canto){ ctx.strokeStyle='rgba(226,236,255,'+(.16*a).toFixed(3)+')'; ctx.lineWidth=1; ctx.stroke() }
+      if(canto){ ctx.strokeStyle='rgba(226,236,255,'+(.16*a).toFixed(3)+')'; ctx.lineWidth=1; ctx.stroke(); __canto(ctx,lam,.6*a,PX1) }
     }
   }
 
@@ -12114,9 +12217,12 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
      globo sin costar nada */
   const POLVO=Array.from({length:70},(_,i)=>({x:azar(i,40)*2-1, y:azar(i,41)*2-1, z:.25+azar(i,42)*.75, t:azar(i,43)*6.28}));
   let hornoG=null;
-  function fondoGlobo(){
-    if(hornoG) return hornoG;
-    const L=512, c=L/2, r=L/2.7, o=document.createElement('canvas'); o.width=o.height=L;
+  function fondoGlobo(R){
+    /* p67 · horneado al tamaño en pantalla y a la densidad del lienzo (antes
+       512 px fijos, estirados casi tres veces en un telefono) */
+    const L=Math.max(64,Math.min(1024,Math.ceil(R*2.7*DN)));
+    if(hornoG&&hornoG.width===L) return hornoG;
+    const c=L/2, r=L/2.7, o=document.createElement('canvas'); o.width=o.height=L;
     const g=o.getContext('2d');
     const at=g.createRadialGradient(c,c,r*.9,c,c,r*1.35);
     at.addColorStop(0,'rgba(232,238,252,.16)'); at.addColorStop(1,'rgba(232,238,252,0)');
@@ -12166,7 +12272,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
          degradados grandes que no cambian, horneados UNA vez en una imagen
          y pintados escalados -rehacerlos en cada cuadro era lo que mas
          pesaba en el telefono- */
-      ctx.drawImage(fondoGlobo(), cx-R*1.35, cy-R*1.35, R*2.7, R*2.7);
+      ctx.drawImage(fondoGlobo(R0*1.14), cx-R*1.35, cy-R*1.35, R*2.7, R*2.7);
       if(G){
         const proj=G.geoOrthographic().scale(R).translate([cx,cy]).rotate([rl,rp]).clipAngle(90);
         const path=G.geoPath(proj,ctx);
@@ -12238,6 +12344,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
         lista.push({c,x,y,z});
       }
       lista.sort((a,b)=>a.z-b.z);
+      ctx.lineJoin='round';   /* p67 · sin puntas de inglete en las caras de canto */
       const paso=Math.SQRT2*big/(W<760?14:17), lado0=R*(W<760?.07:.055), ladoF=paso*.72;
       /* el barrido de luz: una banda que cruza la marca en diagonal cada
          pocos segundos, como un reflejo sobre metal */
@@ -12300,7 +12407,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
     const p=clm((__y-topSec)/runSec), ahora=performance.now()/1000;
     const dt=Math.min(.1,antT?ahora-antT:.016); antT=ahora;
     if(suave<0||Math.abs(p-suave)>.25||QUIETO) suave=p; else suave+=(p-suave)*(1-Math.exp(-dt*7));
-    if(!QUIETO || dirty || Math.abs(suave-last)>.0015){ last=suave; dirty=false; draw(suave,ahora) }
+    if(!QUIETO || dirty || Math.abs(suave-last)>.0015){ last=suave; dirty=false; GU.ini(); draw(suave,ahora); GU.fin() }
     requestAnimationFrame(tick);
   }
   /* p65 · «a la vista» es con algun pixel dentro: tocando el borde (la
@@ -12323,9 +12430,11 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
   /* El fundido terminaba en papel claro; ahora termina en el mismo grafito
      que el resto, que es a donde entrega la escena. */
   const PAPER=[6,7,10];
-  let W=0,H=0,U=0,cols=0,rows=0,cells=[],last=-1;
+  let W=0,H=0,U=0,cols=0,rows=0,cells=[],last=-1,PX1=1;
+  /* p67 · la guarda solo cambia la densidad: las casillas no se vuelven a sortear */
+  const GU=__guarda(cv,()=>{ const d=__dens(cv); __mide(cv,W*d,H*d); ctx.setTransform(d,0,0,d,0,0); PX1=1/d; last=-1 });
   function build(){
-    const d=__dens();
+    const d=__dens(cv); PX1=1/d;
     W=cv.clientWidth;H=cv.clientHeight;
     __mide(cv, W*d, H*d); ctx.setTransform(d,0,0,d,0,0);
     U=Math.max(34,Math.round(Math.min(W,H)/13));
@@ -12417,6 +12526,8 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
       ctx.fillRect(-L/2,-L/2,L,L);
       ctx.fillStyle='rgba(255,255,255,'+(a*0.22).toFixed(3)+')';
       ctx.fillRect(-L/2,-L/2,L,Math.max(1,L*0.08));
+      /* p67 · el canto de luz, un pixel de pantalla */
+      if(L>6){ ctx.fillStyle='rgba(236,244,255,'+(a*0.55).toFixed(3)+')'; ctx.fillRect(-L/2,-L/2,L,PX1) }
       ctx.restore();
     }
   }
@@ -12447,7 +12558,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
     if(!SU)haceSuelo();
     const ahora=performance.now()/1000;
     const dt=Math.min(.05,(ahora-suL)||.016); suL=ahora;
-    const d=__dens();
+    const d=__dens(cv);
     if(scvW!==Math.round(W*d)||scvH!==Math.round(H*d)){
       scvW=scv.width=Math.round(W*d); scvH=scv.height=Math.round(H*d);
       sctx.setTransform(d,0,0,d,0,0);
@@ -12609,7 +12720,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
     if(!corre) return;
     const top=topSec, run=runSec;
     const p=clm((__y-top)/run*1.26 + 0.06);
-    if(Math.abs(p-last)>.0014 || p>.40 || p<.30){last=p;draw(p)}
+    if(Math.abs(p-last)>.0014 || p>.40 || p<.30){last=p;GU.ini();draw(p);GU.fin()}
     requestAnimationFrame(tick);
   }
   /* p65 · «a la vista» es con algun pixel dentro: tocando el borde (la
@@ -13627,15 +13738,18 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
     if(a<=.01||h<=.2) return;
     apaga=apaga==null?1:apaga;
     g.lineJoin='round';
+    /* p67 · un pixel de pantalla en el lienzo que sea (tunel, caida o hebra) */
+    const px1=g===ctx?PX1:1/(g.getTransform?g.getTransform().a||1:1);
     for(let k=0;k<6;k++){
       const n=mul(M,FACES[k][0]); if(n[2]>=-.001) continue;
       const pts=FACES[k][1];
       g.beginPath();
       for(let j=0;j<4;j++){ const w=mul(M,pts[j]), X=cx+w[0]*h, Y=cy+w[1]*h; j?g.lineTo(X,Y):g.moveTo(X,Y) }
       g.closePath();
-      const lam=clm(n[0]*LIGHT[0]+n[1]*LIGHT[1]+n[2]*LIGHT[2]), lit=.24+lam*.88;
+      const lam=clm(n[0]*LIGHT[0]+n[1]*LIGHT[1]+n[2]*LIGHT[2]), lit=.20+lam*.96;   /* p67 · antes .24+lam*.88 */
       g.fillStyle=cstr(tn.h,tn.s,clm((tn.l*(.58+lit*.62)+lit*10)*apaga,3,100),a); g.fill();
       g.strokeStyle='rgba(226,236,255,'+(.26*a*(.55+tn.l/150)).toFixed(3)+')'; g.lineWidth=1; g.stroke();
+      __canto(g,lam,.75*a,px1);
     }
   }
   /* la postura del índice: la de los cubos de la hebra (ladeado .56, rodado .2)
@@ -13694,7 +13808,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
   if(document.fonts&&document.fonts.ready) document.fonts.ready.then(()=>ETQ.clear());
   function etiqueta(n,N){
     const k=n*100+N; let c=ETQ.get(k); if(c) return c;
-    const a=String(n).padStart(2,'0'), b=' / '+String(N).padStart(2,'0'), d=2;
+    const a=String(n).padStart(2,'0'), b=' / '+String(N).padStart(2,'0'), d=Math.min(3,Math.max(2,window.devicePixelRatio||1));
     c=document.createElement('canvas'); const g=c.getContext('2d');
     const fnt='400 '+(10*d)+'px "DM Mono",ui-monospace,monospace', sp=10*d*.2;
     g.font=fnt; const w=[...(a+b)].reduce((s,ch)=>s+g.measureText(ch).width+sp,0);
@@ -13777,7 +13891,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
     if(a<=.01||!SIGY) return;
     const R=anilloR(), yK=SIGY-16, yMin=HC-HV*.035+R+12, len=yK-yMin; if(len<40) return;
     const y1=yc+R+12, gRow=QUIETO?1:sube((p-.905)/.07), tip=y1+(yK-y1)*gRow; if(tip<y1+3) return;
-    const A=movil?8:12, cv2=hebraHorno(len,A,__dens());
+    const A=movil?8:12, cv2=hebraHorno(len,A,__dens(cv));
     const hs=Math.min(cv2._h,tip-y1); if(hs<=1) return;
     const k=cv2.height/cv2._h;
     ctx.globalAlpha=a; ctx.drawImage(cv2,0,0,cv2.width,hs*k,W/2-cv2._w/2,y1,cv2._w,hs); ctx.globalAlpha=1;
@@ -13790,7 +13904,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
     }
   }
 
-  let CVL=0,W=0,H=0,HV=0,HC=0,f=1,movil=false,cubos=null,texto=[null,null,null,null],RK=0,hero=-1;
+  let CVL=0,W=0,H=0,HV=0,HC=0,f=1,movil=false,cubos=null,texto=[null,null,null,null],RK=0,hero=-1,PX1=1;
   /* un cubo -o una caja- en el espacio de la cámara (y abajo, z hacia el fondo) */
   function caja(x,y,z,hx,hy,hz,M,tn,a,apaga,extra,cristal,leds,ledCara,T){
     for(let i=0;i<8;i++){
@@ -13804,7 +13918,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
       const n0=M[0][0]*nrm[0]+M[0][1]*nrm[1]+M[0][2]*nrm[2], n1=M[1][0]*nrm[0]+M[1][1]*nrm[1]+M[1][2]*nrm[2], n2=M[2][0]*nrm[0]+M[2][1]*nrm[1]+M[2][2]*nrm[2];
       const h=Math.abs(nrm[0])*hx+Math.abs(nrm[1])*hy+Math.abs(nrm[2])*hz;
       if(n0*(x+n0*h)+n1*(y+n1*h)+n2*(z+n2*h)>=0) continue;
-      const lam=clm(n0*LIGHT[0]+n1*LIGHT[1]+n2*LIGHT[2]), lit=.24+lam*.88;
+      const lam=clm(n0*LIGHT[0]+n1*LIGHT[1]+n2*LIGHT[2]), lit=.20+lam*.96;   /* p67 · antes .24+lam*.88 */
       ctx.beginPath();
       ctx.moveTo(PX[idx[0]*2],PX[idx[0]*2+1]); ctx.lineTo(PX[idx[1]*2],PX[idx[1]*2+1]);
       ctx.lineTo(PX[idx[2]*2],PX[idx[2]*2+1]); ctx.lineTo(PX[idx[3]*2],PX[idx[3]*2+1]); ctx.closePath();
@@ -13814,7 +13928,8 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
       }else{
         ctx.fillStyle=cstr(tn.h,tn.s,clm((tn.l*(.58+lit*.62)+lit*10)*apaga+(extra||0),3,100),a); ctx.fill();
         if(tn.rack){ ctx.strokeStyle='rgba(99,169,255,'+(.3*a*apaga*RK).toFixed(3)+')'; ctx.lineWidth=1; ctx.stroke() }
-        else if(canto){ ctx.strokeStyle='rgba(226,236,255,'+(.14*a*apaga*(.55+tn.l/150)+(extra?.004*extra*a:0)).toFixed(3)+')'; ctx.lineWidth=1; ctx.stroke() }
+        else if(canto){ ctx.strokeStyle='rgba(226,236,255,'+(.14*a*apaga*(.55+tn.l/150)+(extra?.004*extra*a:0)).toFixed(3)+')'; ctx.lineWidth=1; ctx.stroke();
+          __canto(ctx,lam,.62*a*apaga,PX1) }
       }
       if(leds && k===ledCara){
         for(let j=0;j<leds.length;j++){
@@ -14108,6 +14223,10 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
       if(mejor) hero=mejor.c.i;
     }
     lista.sort((p1,p2)=>p2.z-p1.z);
+    /* p67 · uniones redondas: una cara casi de canto es una astilla y, con la
+       union en inglete, su trazo sacaba una punta de varios pixeles que a
+       densidad 3 ya se ve */
+    ctx.lineJoin='round';
     let heroQ=null;
     for(const q of lista){
       if(q.c.i===hero){ heroQ=q; if(eH>0) continue }
@@ -14179,6 +14298,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
     if(fig){ pon(fig,'opacity',(figA*.9).toFixed(3));
       if(figS>=0&&figS!==figI){ figI=figS; if(figN) figN.textContent='FIG. 0'+(figS+1); FIGS.forEach((e,i)=>e.classList.toggle('on',i===figS)) } }
     st.classList.toggle('go',p<.03);
+    pon(st,'--tnb',(1-sube(p/.03)).toFixed(3));
     /* p66 · el destino: el epígrafe de la ruta, al pie de la hebra; se va
        cuando el escenario sube y entra el de verdad */
     if(SIG){ const a=(QUIETO?sube((p-.86)/.05):sube((p-.955)/.03))*(1-sube(EX/.15));
@@ -14195,7 +14315,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
   function size(){
     /* p65 · la densidad de la casa (1,25 en el telefono, como el tunel de
        «The stack», que es la misma escena): antes 1,5, un 44 % mas de pixeles */
-    const d=__dens();
+    const d=__dens(cv); PX1=1/d;
     W=cv.clientWidth; H=cv.clientHeight; movil=W<760;
     if(!W||!H) return;
     /* p65 · el cuadro de dibujo es el de siempre (alto «svh», centrado igual
@@ -14223,6 +14343,10 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
 
   /* ── el bucle del túnel ── */
   let pS=0,pT=0,vis=false,dirty=true,ult=0,last=-1,tRaf=0;
+  /* p67 · la guarda del tunel: solo la densidad, sin volver a medir la escena */
+  const GU=__guarda(cv,()=>{ if(!W) return; const d=__dens(cv); PX1=1/d;
+    const cw=Math.round(W*d), ch=Math.round(H*d); if(cv.width!==cw||cv.height!==ch){ cv.width=cw; cv.height=ch }
+    ctx.setTransform(d,0,0,d,0,0); dirty=true });
   /* p65 · EL TÚNEL YA VA EN MARCHA AL LLEGAR. La cámara avanza también con el
      reloj, al paso lento de «The stack» (.16), para que el campo esté vivo
      aunque nadie baje; en las estaciones vuelve al paso de antes (.05) para
@@ -14247,7 +14371,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
     dirty=false; last=pS; EX=ex;
     if(IMP&&!QUIETO){ for(let i=0;i<IMP.length;i++){ const a=IMP[i].arr; if(pPrev<a&&pS>=a){ PULSOS.push(now/1000); if(PULSOS.length>5) PULSOS.shift() } } }
     pPrev=pS;
-    const FS=draw(pS,now/1000,pT); rotulos(pS,FS);
+    GU.ini(); const FS=draw(pS,now/1000,pT); GU.fin(); rotulos(pS,FS);
   }
   addEventListener('visibilitychange',()=>{if(!document.hidden&&vis&&!tRaf){ult=performance.now();tRaf=requestAnimationFrame(tick)}});
 
@@ -14270,7 +14394,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
      y se crea -a la misma densidad de siempre- al entrar en el tramo. */
   let oTiene=false;
   function osize(){
-    TAMH=0; odpr=Math.min(2,devicePixelRatio||1); OW=document.documentElement.clientWidth||innerWidth; OH=innerHeight;
+    TAMH=0; odpr=__dens(oc); OW=document.documentElement.clientWidth||innerWidth; OH=innerHeight;
     oc.style.width=OW+'px'; oc.style.height=OH+'px';
     if(oTiene) __mide(oc,Math.round(OW*odpr),Math.round(OH*odpr));
     oLimpio=!oTiene; midePie(); if(oTiene) odespierta();
@@ -14339,6 +14463,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
     if(soloXY) return {x,y,h};
     return {x,y,h,M:Rcaida(T,th),anillo,hM};
   }
+  const OG=__guarda(oc,()=>{ odpr=__dens(oc); if(oTiene){ __mide(oc,Math.round(OW*odpr),Math.round(OH*odpr)); OB=null; oLimpio=true } });
   function ocuadro(){
     oRaf=0;
     if(!og) return;
@@ -14349,6 +14474,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
     og.setTransform(odpr,0,0,odpr,0,0);
     /* p66 · se borra solo la caja de lo que se pintó en el cuadro anterior,
        no la pantalla entera (a densidad 2 eran 1,3 Mpx por cuadro) */
+    if(P) OG.ini();
     if(P||!oLimpio){ if(OB) og.clearRect(OB[0],OB[1],OB[2]-OB[0],OB[3]-OB[1]); else og.clearRect(0,0,OW,OH); oLimpio=true; OB=null }
     if(P){
       const T=performance.now()/1000, h0=tamH(), nb=[P.x,P.y,P.x,P.y];
@@ -14389,7 +14515,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
       /* p66 · cargado brilla un punto más; lo suelta mientras cae */
       const br=(.07*carga+.12*destello(T))*(1-sube((s-LIM.Se)/Math.max(1,LIM.Sc-LIM.Se)));
       cuboOrto(og,P.x,P.y,P.h,P.M,TONES[0],1,1+br);
-      oLimpio=false;
+      oLimpio=false; OG.fin();
       OB=[Math.max(0,Math.floor(nb[0]-2)),Math.max(0,Math.floor(nb[1]-2)),Math.min(OW,Math.ceil(nb[2]+2)),Math.min(OH,Math.ceil(nb[3]+2))];
     }
     if(dentro) oRaf=requestAnimationFrame(ocuadro);
@@ -14476,12 +14602,13 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
       for(var j=0;j<4;j++){ var w=rot(pts[j]), X=cx+w[0]*h, Y=cy+w[1]*h;
         j?ctx.lineTo(X,Y):ctx.moveTo(X,Y) }
       ctx.closePath();
-      var lam=clm(n[0]*LIGHT[0]+n[1]*LIGHT[1]+n[2]*LIGHT[2]), lit=.24+lam*.88;
+      var lam=clm(n[0]*LIGHT[0]+n[1]*LIGHT[1]+n[2]*LIGHT[2]), lit=.20+lam*.96;   /* p67 · antes .24+lam*.88 */
       var L=clm((tn.l*(.58+lit*.62)+lit*10)*apaga,3,100);
       if(modo===0){
         ctx.fillStyle=cstr(tn.h,tn.s,L,a); ctx.fill();
         ctx.strokeStyle='rgba(226,236,255,'+(.26*a*(.55+tn.l/150)).toFixed(3)+')';
         ctx.lineWidth=1; ctx.stroke();
+        __canto(ctx,lam,.75*a,1/dpr);
       }else if(modo===1){
         var q=arm?arm[vis]||0:0;
         if(q>0){ ctx.fillStyle=cstr(tn.h,tn.s,L,a*q); ctx.fill() }
@@ -14523,7 +14650,9 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
     var k=movil?1:1.7;
     W=Math.ceil(wl+carril-4); H=Math.ceil(lista.offsetHeight+PADT+PADB);
     var top=lt-PADT;
-    dpr=Math.min(2,window.devicePixelRatio||1);
+    /* p67 · a la densidad de la pantalla (antes con techo en 2): los cubos
+       de la hebra miden diez pixeles y a 2 se estiraban 1,5 veces */
+    dpr=__dens(lz);
     lz.style.left=(-wl)+'px'; lz.style.top=top+'px';
     lz.style.width=W+'px'; lz.style.height=H+'px';
     if(lz.width!==Math.round(W*dpr)) lz.width=Math.round(W*dpr);
@@ -14783,6 +14912,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
   }
 
   var visible=false, rafId=0;
+  var GU=__guarda(lz,function(){ remide() });
   function cuadro(now){
     rafId=0;
     if(!M) return;
@@ -14790,7 +14920,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
     var obj=objetivo();
     punta+= (obj-punta)*(1-Math.exp(-dt*3.2));
     if(Math.abs(obj-punta)<.3) punta=obj;
-    dibuja(T);
+    GU.ini(); dibuja(T); GU.fin();
     if(visible&&!QUIETO) rafId=requestAnimationFrame(cuadro);
   }
   function arranca(){ if(!rafId) rafId=requestAnimationFrame(cuadro) }
