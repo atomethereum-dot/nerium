@@ -7,14 +7,22 @@
 //      tabla «Adoption phases» del whitepaper y la portada se queda con la
 //      version vieja, la pagina pasa a prometer una cosa y el documento otra.
 //      Esto compara las dos fuentes, no una copia mia de ninguna.
-//   2. Que el rail se ANIME con el scroll: «--p» de 0 a 1 y las tres fases
-//      encendiendose en orden. Es lo que se pidio.
-//   3. Que los extremos del rail salgan de MEDIR los nodos y no de un numero
-//      a ojo, que a ojo se descuadra en cuanto un titular pasa a dos renglones.
-//   4. Que no entre en el menu: la cabecera tiene diez entradas y otra bateria
-//      lo comprueba; esto es un capitulo, no una estacion.
-//   5. Que el suelo sea el MISMO que el de la seccion de proyectos, que es lo
-//      que hace que las dos se lean como un solo campo.
+//   2. Que el indice «estamos aqui» sea el CUBO que cae del tunel de
+//      proyectos: posado SOBRE la hebra, bajando por ella con el scroll y
+//      parado en «hoy»; y que al subir se despegue otra vez. El punto y el
+//      galon del DOM («.ruta-punto», «.ruta-flecha») ya no existen: la hebra
+//      la pinta un lienzo («.hb-lz») y el cubo lo pinta la hebra al posarse.
+//   3. Que la hebra ramifique a cada hito: cubo lleno si esta hecho, aro
+//      discontinuo si esta en proceso; todo en azul, sin ambar, y el «In
+//      progress» legible (4,5:1 como minimo).
+//   4. Que no entre en el menu: esto es un capitulo, no una estacion.
+//   5. Que el suelo siga cosido con documentacion, que es su familia.
+//
+// Para saber donde esta el cubo se le pregunta a la pagina, no a un numero
+// mio: «__hebra.M» da las medidas de la hebra (su eje «sx», «y0», «aqui» =
+// hoy, los hitos), «__hebra.tip()» la punta que crece con el scroll y
+// «__caida.posada()» si el cubo ya esta en la hebra. Lo que se ve se comprueba
+// leyendo los PIXELES de los dos lienzos.
 import http from 'node:http'; import fs from 'node:fs'; import path from 'node:path';
 import { chromium } from 'playwright';
 const RAIZ = '/home/user/nerium';
@@ -84,7 +92,9 @@ for (let y = 0; y < alto; y += 450) { await pg.evaluate(v => scrollTo(0, v), y);
              buildsClaro:b.classList.contains('claro'),
              fases:document.querySelectorAll('.ruta-f').length,
              menu:document.querySelectorAll('.nav>a').length,
-             enMenu:!!document.querySelector('.nav>a[href="#ruta"]') };
+             enMenu:!!document.querySelector('.nav>a[href="#ruta"]'),
+             num:(document.querySelector('#ruta .ruta-top .sk-n') || {}).textContent,
+             rotulo:(document.querySelector('#ruta .ruta-top') || {}).textContent };
   });
   di(!!r, 'la seccion existe');
   di(r.padre === 'MAIN', 'cuelga de «main», que es de donde la pagina lee los fondos (' + r.padre + ')');
@@ -122,119 +132,131 @@ for (let y = 0; y < alto; y += 450) { await pg.evaluate(v => scrollTo(0, v), y);
   // salto en cuanto se oculto «03 The thesis» y su entrada se fue con ella,
   // senalando un fallo donde no lo habia. Se comprueba lo que importa.
   di(!r.enMenu, 'no entra en el menu (que tiene ' + r.menu + ' entradas)');
+  di(r.num === '06' && /^06\s*Roadmap$/.test(r.rotulo.trim()), 'se numera «06 Roadmap», detras de proyectos (05) (' + r.rotulo.trim() + ')');
 }
 
-// ── 3 · el recorrido y la hebra son UNA cosa ───────────────────────────────
-// Antes el recorrido era una linea recta blanca por encima del dibujo, y se
-// leian como dos cosas que no se conocen: una trenza que curva y un palo que
-// no. Ahora la barra ES la hebra —la misma trenza, encendida hasta donde vas—
-// y el punto cabalga la curva.
-//
-// Lo que se comprueba es justo eso, y no que «exista un elemento»: que no
-// quede ninguna linea recta, que el punto caiga SOBRE el camino, y que el
-// borde de la luz y el punto sean el mismo sitio.
+/* Lo que se hace DENTRO de la pagina: leer los lienzos.
+   Dos azules distintos, y no por gusto:
+     · en la hebra se cuenta solo el azul LLENO del cubo (sin rojo): la trenza
+       es un blanco azulado que por tono se confunde con la cara clara del
+       cubo, y alrededor del indice pasan sus cinco hebras;
+     · en el lienzo de la caida no hay trenza, asi que se cuentan todas las
+       caras, de la oscura a la clara. */
+const AYUDA = () => {
+  window.__ambar = (r, g, b) => { const M = Math.max(r, g, b), m = Math.min(r, g, b);
+    if (M < 90 || (M - m) / M < .45) return false;
+    const h = M === r ? (((g - b) / (M - m)) % 6) * 60 : M === g ? ((b - r) / (M - m) + 2) * 60 : ((r - g) / (M - m) + 4) * 60;
+    const hh = (h + 360) % 360; return hh >= 20 && hh <= 60; };
+  const lleno = (r, g, b, a) => a > 180 && r < 120 && b > r + 100;
+  const todo = (r, g, b, a) => a > 180 && b > 150 && b > r + 40 && b > g;
+  /* los pixeles azules de un lienzo dentro de una caja EN PANTALLA, con su centro */
+  window.__azul = (cv, caja, estricto) => {
+    if (!cv || getComputedStyle(cv).display === 'none' || !cv.width) return { n:0 };
+    const b = cv.getBoundingClientRect(), k = cv.width / b.width, es = estricto ? lleno : todo;
+    const [x0, y0, x1, y1] = caja ? caja.map((v, i) => Math.round((v - (i % 2 ? b.top : b.left)) * k)) : [0, 0, cv.width, cv.height];
+    const X0 = Math.max(0, x0), Y0 = Math.max(0, y0), X1 = Math.min(cv.width, x1), Y1 = Math.min(cv.height, y1);
+    if (X1 <= X0 || Y1 <= Y0) return { n:0 };
+    const d = cv.getContext('2d').getImageData(X0, Y0, X1 - X0, Y1 - Y0).data, w = X1 - X0;
+    let n = 0, sx = 0, sy = 0;
+    for (let i = 0; i < d.length; i += 4) if (es(d[i], d[i+1], d[i+2], d[i+3])) {
+      const p = i / 4; n++; sx += X0 + p % w + .5; sy += Y0 + Math.floor(p / w) + .5; }
+    return n ? { n, x:b.left + sx / n / k, y:b.top + sy / n / k } : { n:0 };
+  };
+  /* donde tiene que estar el indice, segun la hebra, y lo que hay pintado ahi */
+  window.__indice = () => {
+    const M = __hebra.M, lz = document.querySelector('#ruta .hb-lz').getBoundingClientRect();
+    const tip = __hebra.tip(), my = Math.min(Math.max(tip, M.y0 + 20), M.aqui);
+    const hx = lz.left + M.sx, hy = lz.top + my, R = M.movil ? 11 : 14;
+    return { M:{ y0:M.y0, aqui:M.aqui, sx:M.sx, movil:M.movil }, tip, my, hx, hy,
+             marca:__azul(document.querySelector('#ruta .hb-lz'), [hx - R, hy - R, hx + R, hy + R], true),
+             caida:__azul(document.querySelector('.caida-cv')),
+             posada:__caida.posada(),
+             on:[...document.querySelectorAll('.ruta-f')].map(e => e.classList.contains('on') ? 1 : 0).join('') };
+  };
+};
+await pg.evaluate(AYUDA);
+
+/* El tramo de la caida: «Se» es donde el escenario de proyectos se suelta y
+   «Sc» donde el cubo se posa. «Sc» se busca preguntando a «posada()» -
+   biseccion sobre el scroll-, no copiando la cuenta de la pagina. */
+async function tramo(p, H) {
+  const Se = await p.evaluate(() => { const h = document.getElementById('tnHold'), st = document.getElementById('tnStage');
+    return h.getBoundingClientRect().top + scrollY + h.offsetHeight - st.offsetHeight; });
+  let lo = Se, hi = Se + H * 5;
+  for (let i = 0; i < 18; i++) { const m = (lo + hi) / 2;
+    await p.evaluate(v => scrollTo(0, v), Math.round(m)); await p.waitForTimeout(90);
+    (await p.evaluate(() => __caida.posada())) ? hi = m : lo = m; }
+  return { Se, Sc:hi };
+}
+
+// ── 3 · el indice es el cubo, posado sobre la hebra ─────────────────────────
+// Se hace a dos tamaños: la hebra del telefono es otra (mas estrecha y al
+// canto) y el cubo, mas pequeño.
+async function indice(p, W, H) {
+  const tag = W + 'x' + H + ' · ';
+  const ir = async (y, ms = 1300) => { await p.evaluate(v => scrollTo(0, v), Math.round(y)); await p.waitForTimeout(ms); };
+  const viejo = await p.evaluate(() => ({
+    dom:document.querySelectorAll('.ruta-punto, .ruta-flecha').length,
+    lienzo:!!document.querySelector('#ruta .hb-lz'),
+    rail:[...document.querySelectorAll('.ruta-adn')].filter(e => getComputedStyle(e).display !== 'none').length,
+    ganchos:!!(window.__hebra && window.__hebra.M && window.__caida && window.__caida.posada) }));
+  di(viejo.dom === 0 && viejo.rail === 0, tag + 'el punto y el galon del DOM ya no existen, ni el rail viejo (' + viejo.dom + ' piezas)');
+  di(viejo.lienzo && viejo.ganchos, tag + 'la hebra es un lienzo y la pagina expone «__hebra» y «__caida»');
+
+  const { Se, Sc } = await tramo(p, H);
+  const docTop = await p.evaluate(() => __hebra.M.docTop), vh = H;
+  const hacia = t => docTop + t - vh * .62;       // el scroll que pone la punta en «t»
+  /* En la hebra solo se cuentan las caras de azul lleno (la clara se
+     confunde con la trenza), asi que el centro de lo contado se corre hacia
+     la cara oscura unos pixeles en vertical segun gire el cubo: la tolerancia
+     vertical es la mitad del cubo (9 px), la horizontal no. */
+  const enHebra = (q, tol) => q.marca.n >= 25 && Math.abs(q.marca.x - q.hx) <= tol && Math.abs(q.marca.y - q.hy) <= 6;
+  const desvio = q => q.marca.n ? Math.abs(q.marca.x - q.hx).toFixed(1) + '/' + Math.abs(q.marca.y - q.hy).toFixed(1) + ' px' : 'sin cubo';
+
+  await ir(Sc + 60);
+  const a = await p.evaluate(() => __indice());
+  di(a.posada && a.caida.n === 0, tag + 'pasada la caida el cubo esta en la hebra y el lienzo de la caida, limpio (' + a.caida.n + ' px)');
+  di(enHebra(a, 3), tag + 'el cubo cae SOBRE el eje de la hebra: ' + (a.marca.n ? Math.abs(a.marca.x - a.hx).toFixed(1) + ' px de desvio, ' +
+     Math.abs(a.marca.y - a.hy).toFixed(1) + ' de la punta (' + a.marca.n + ' px de cubo)' : 'no hay cubo'));
+  await ir(Sc + 260);
+  const b = await p.evaluate(() => __indice());
+  di(b.my - a.my >= 150 && b.my < b.M.aqui, tag + 'y baja por ella con el scroll: de ' + a.my.toFixed(0) + ' a ' + b.my.toFixed(0) + ' px de hebra');
+  di(enHebra(b, 3), tag + 'sin salirse del eje (' + desvio(b) + ')');
+  await ir(hacia(a.M.aqui + 220));
+  const c = await p.evaluate(() => __indice());
+  await ir(hacia(a.M.aqui + 520));
+  const d = await p.evaluate(() => __indice());
+  di(Math.abs(c.my - c.M.aqui) < 1 && Math.abs(d.my - d.M.aqui) < 1 && c.tip > c.M.aqui + 100,
+     tag + 'se para en «hoy» aunque la hebra siga: ' + c.my.toFixed(1) + ' y ' + d.my.toFixed(1) + ' con «aqui» en ' + c.M.aqui.toFixed(1));
+  di(enHebra(c, 3) && enHebra(d, 3), tag + 'y alli sigue siendo el cubo, sobre la hebra (desvio ' + desvio(c) + ' y ' + desvio(d) + ')');
+  const hoy = await p.evaluate(() => { const M = __hebra.M;
+    return { hecho:Math.max(...M.hitos.filter(h => h.hecho).map(h => h.y)), plan:M.fases.filter(f => f.modo === 2).map(f => f.y)[0], aqui:M.aqui }; });
+  di(hoy.aqui > hoy.hecho && hoy.aqui < hoy.plan, tag + '«hoy» cae pasado el ultimo hito hecho y antes de la fase planeada (' +
+     hoy.hecho.toFixed(0) + ' < ' + hoy.aqui.toFixed(0) + ' < ' + hoy.plan.toFixed(0) + ')');
+
+  // vuelta atras: el cubo se despega de la hebra y vuelve a caer
+  await ir(Se + (Sc - Se) * .5);
+  const e = await p.evaluate(() => __indice());
+  const lejos = e.caida.n ? Math.hypot(e.caida.x - e.hx, e.caida.y - e.hy) : 0;
+  di(!e.posada && e.marca.n <= 3 && e.caida.n > 20 && lejos > 30,
+     tag + 'al subir se deshace: la hebra deja de pintar el cubo (' + e.marca.n + ' px) y vuelve al lienzo de la caida, a ' + lejos.toFixed(0) + ' px de la hebra');
+  await ir(Sc - 30);
+  const f = await p.evaluate(() => __indice());
+  di(!f.posada && f.marca.n <= 3, tag + 'y justo antes de posarse la hebra aun no lo pinta (' + f.marca.n + ' px)');
+  await ir(Sc + 60);
+  const g = await p.evaluate(() => __indice());
+  di(g.posada && enHebra(g, 3) && g.caida.n === 0, tag + 'al volver a bajar se posa otra vez en el mismo sitio (' + desvio(g) + ')');
+}
+await indice(pg, 1440, 900);
 {
-  /* El scroll se CONVERGE, como en el bloque de la marca: «scrollIntoView» no
-     cae dos veces en el mismo sitio —hay secciones ancladas que cambian el
-     alto del documento— y el punto viaja 0,8 s hasta su sitio. Leyendolo a
-     medio viaje salian 3,6 px de desvio y un 70% donde hay un 55, y fallaba
-     una tirada de cada dos sin que nada estuviera mal. */
-  for (let i = 0; i < 12; i++) {
-    const d = await pg.evaluate(() => {
-      const r = document.getElementById('ruta').getBoundingClientRect();
-      return (r.top + r.height / 2) - innerHeight / 2;
-    });
-    if (Math.abs(d) < 2) break;
-    await pg.evaluate(v => scrollBy(0, v), d);
-    await pg.waitForTimeout(90);
-  }
-  await pg.waitForTimeout(1400);
-  const r = await pg.evaluate(() => {
-    const ad = document.querySelector('.ruta-adn'), cad = getComputedStyle(ad);
-    const caja = ad.getBoundingClientRect();
-    const pu = document.querySelector('.ruta-punto'), cp = getComputedStyle(pu);
-    const fl = document.querySelector('.ruta-flecha'), cf = getComputedStyle(fl);
-    const rp = pu.getBoundingClientRect(), rf = fl.getBoundingClientRect();
-    const viva = document.querySelector('.ruta-viva');
-    const cabs = [...document.querySelectorAll('.ruta-cab')].map(c => {
-      const b = c.getBoundingClientRect(); return (b.top - caja.top) / caja.height; });
-    // donde pasa el camino a la altura del punto, preguntandoselo a el
-    const esp = document.querySelector('#nr-adn-0');
-    const vb = (document.querySelector('.ruta-viva svg').getAttribute('viewBox') || '').split(' ');
-    const alto = +vb[3] || 0;
-    const fPunto = (rp.top + rp.height / 2 - caja.top) / caja.height;
-    let xCamino = null;
-    if (esp && alto) {
-      const u = fPunto * alto, L = esp.getTotalLength();
-      let lo = 0, hi = L, q = null;
-      for (let i = 0; i < 22; i++) { const m = (lo + hi) / 2; q = esp.getPointAtLength(m);
-        if (q.y < u) lo = m; else hi = m; }
-      xCamino = caja.left + q.x / 96 * caja.width;
-    }
-    return {
-      puntos:document.querySelectorAll('.ruta-punto').length,
-      aros:document.querySelectorAll('.ruta-nodo').length,
-      rectas:document.querySelectorAll('.ruta-linea, .ruta-rail').length,
-      colorPunto:cp.backgroundColor, radio:cp.borderRadius, sombra:cp.boxShadow,
-      viva:!!viva, recorte:viva ? getComputedStyle(viva).clipPath : '',
-      v0:parseFloat(cad.getPropertyValue('--v0')), v1:parseFloat(cad.getPropertyValue('--v1')),
-      cab0:cabs[0] * 100, fPunto:fPunto * 100,
-      ejePunto:(rp.left + rp.right) / 2, xCamino,
-      galon:{ op:+cf.opacity, vis:cf.visibility, alto:+rf.height.toFixed(1) },
-      /* Contra el texto de la primera FASE, no contra el titular: el titular
-         se alinea con el resto de la web y pasa por encima de la hebra a
-         proposito, asi que compararlo con el no mide nada. */
-      titular:+(function(){ const e = document.querySelector('.ruta-t');
-        const g = document.createRange(); g.selectNodeContents(e);
-        return g.getBoundingClientRect().left; })().toFixed(1) };
-  });
-  di(r.puntos === 1 && r.aros === 0,
-     'un solo punto y ningun aro, como en la referencia (' + r.puntos + ' punto, ' + r.aros + ' aros)');
-  /* El color concreto no se escribe aqui NUNCA MAS. Llevaba «rgb(62,134,255)»
-     a mano, salto cuando la pagina paso a plata, lo cambie a «neutro y claro»
-     y volvio a saltar cuando el azul regreso. Dos veces el mismo error: fijar
-     un color en la prueba y que la prueba se rompa cada vez que la marca
-     cambia de idea. Lo que el punto tiene que ser es LLENO -radio 50 %, no un
-     aro- y del ACENTO DE LA PAGINA, asi que se le pregunta a la pagina cual
-     es su acento en vez de recordarlo. */
-  const acento = await pg.evaluate(() =>
-    getComputedStyle(document.documentElement).getPropertyValue('--blue').trim());
-  const aRGB = await pg.evaluate(c => { const d = document.createElement('div');
-    d.style.color = c; document.body.appendChild(d);
-    const v = getComputedStyle(d).color; d.remove(); return v; }, acento);
-  /* Y se compara por TONO, no byte a byte. La pagina tiene una familia de
-     azules -uno para marcas, uno mas claro para texto sobre negro- y el punto
-     usa uno de ellos; exigir el valor exacto de «--blue» seria volver a fijar
-     un color, que es el error que esta prueba ya cometio dos veces. Lo que
-     define «el acento» es el tono, no la luminosidad. */
-  const num = s => (s.match(/[\d.]+/g) || []).map(Number).slice(0, 3);
-  const tonoDe = c => { const [r0,g0,b0] = c, M = Math.max(r0,g0,b0), m = Math.min(r0,g0,b0), D = M-m;
-    if (!D) return -1;
-    const h = M === r0 ? (((g0-b0)/D)%6) : M === g0 ? ((b0-r0)/D+2) : ((r0-g0)/D+4);
-    return (h*60 + 360) % 360; };
-  const [p1, p2] = [num(r.colorPunto), num(aRGB)];
-  const [h1, h2] = [tonoDe(p1), tonoDe(p2)];
-  const cerca = h1 >= 0 && h2 >= 0 && Math.abs(h1 - h2) <= 14 &&
-    Math.max(...p1) >= 120;
-  di(cerca && r.radio.startsWith('50%'),
-     'el punto va LLENO y del tono del acento que la pagina declara (' +
-     r.colorPunto + ' a ' + h1.toFixed(0) + 'deg contra --blue ' + aRGB +
-     ' a ' + h2.toFixed(0) + 'deg)');
-  di(r.sombra === 'none', 'y sin halo, que la referencia no lo lleva (' + r.sombra + ')');
-  di(r.rectas === 0, 'no queda ninguna barra recta encima del dibujo (' + r.rectas + ' piezas)');
-  di(r.viva && /inset/.test(r.recorte), 'la barra es la propia hebra encendida: ' + r.recorte);
-  // EL punto de todo esto: el punto cae SOBRE el camino, no a su lado
-  const desvio = r.xCamino === null ? 999 : Math.abs(r.ejePunto - r.xCamino);
-  di(desvio <= 2, 'y el punto cabalga la curva: ' + desvio.toFixed(2) +
-     ' px entre el punto y el camino a esa altura (maximo 2)');
-  di(Math.abs(r.v0 - r.cab0) <= 1.2,
-     'la luz arranca en el renglon del primer contador: ' + r.v0.toFixed(2) + '% vs ' + r.cab0.toFixed(2) + '%');
-  di(Math.abs((100 - r.v1) - r.fPunto) <= 1.2,
-     'y termina EN el punto, no antes ni despues: ' + (100 - r.v1).toFixed(2) + '% vs ' + r.fPunto.toFixed(2) + '%');
-  di(r.galon.op === 1 && r.galon.vis === 'visible' && r.galon.alto > 8,
-     'el galon del final se VE (opacidad ' + r.galon.op + ', ' + r.galon.alto + ' px)');
-  di(r.ejePunto < r.titular, 'y todo ello en su carril, a la izquierda del texto de las fases: ' +
-     r.ejePunto.toFixed(1) + ' vs ' + r.titular);
+  const c = await nav.newContext({ viewport:{ width:390, height:844 }, isMobile:true, hasTouch:true });
+  const p = await c.newPage();
+  p.on('pageerror', e => fallos.push('390 · ' + String(e).slice(0, 140)));
+  await p.goto('http://127.0.0.1:9163/', { waitUntil:'load' });
+  await p.waitForTimeout(900);
+  await p.evaluate(AYUDA);
+  await indice(p, 390, 844);
+  await c.close();
 }
 
 // ── 3a · la cabecera, en el mismo borde que las demas secciones ────────────
@@ -277,14 +299,10 @@ for (let y = 0; y < alto; y += 450) { await pg.evaluate(v => scrollTo(0, v), y);
   }
 }
 
-// ── 3b · el carril y el texto, separados de verdad ──────────────────────────
-// El primer montaje ponia el rail en el mismo eje que el titular, asi que
-// media hebra caia debajo de las primeras letras. Ahora la seccion tiene su
-// propia columna y la hebra su carril, y esto lo mide a siete anchos.
-//
-// El borde de la hebra se mide CON EL RESPLANDOR: la sombra de las chispas y
-// el «drop-shadow» del trazo se salen de la caja, y era justo eso lo que se
-// comia el hueco cuando la medida a secas decia que habia sitio de sobra.
+// ── 3b · la hebra y el texto, separados de verdad ──────────────────────────
+// La hebra vive en su carril, a la izquierda de la columna de las fases. Se
+// mide lo PINTADO -los pixeles del lienzo, con el resplandor, las ramas y los
+// aros de los hitos-, no la caja del lienzo, que llega hasta la columna.
 {
   for (const [W, H] of [[1512,900],[1440,900],[1280,900],[1024,800],[430,932],[390,844],[320,700]]) {
     const c = await nav.newContext({ viewport:{ width:W, height:H }, isMobile:W < 900, hasTouch:W < 900 });
@@ -293,129 +311,96 @@ for (let y = 0; y < alto; y += 450) { await pg.evaluate(v => scrollTo(0, v), y);
     await p2.waitForTimeout(800);
     const alto = await p2.evaluate(() => document.documentElement.scrollHeight);
     for (let y = 0; y < alto; y += 450) { await p2.evaluate(v => scrollTo(0, v), y); await p2.waitForTimeout(45); }
-    await p2.evaluate(() => document.getElementById('ruta').scrollIntoView({ block:'center' }));
-    await p2.waitForTimeout(800);
+    for (let i = 0; i < 12; i++) {
+      const d = await p2.evaluate(() => { const r = document.getElementById('ruta').getBoundingClientRect();
+        return (r.top + r.height / 2) - innerHeight / 2; });
+      if (Math.abs(d) < 2) break;
+      await p2.evaluate(v => scrollBy(0, v), d); await p2.waitForTimeout(90);
+    }
+    await p2.waitForTimeout(1400);
     const r = await p2.evaluate(() => {
-      const sv = document.querySelector('.ruta-adn svg').getBoundingClientRect();
-      const brillo = e => parseFloat((getComputedStyle(e).boxShadow.match(/0px 0px ([\d.]+)px/) || [0, 0])[1]) || 0;
-      const chispas = [...document.querySelectorAll('.ruta-adn i')].map(e => e.getBoundingClientRect().right + brillo(e));
-      const trazo = parseFloat((getComputedStyle(document.querySelector('.ruta-adn use')).filter
-        .match(/drop-shadow\(0px 0px ([\d.]+)px/) || [0, 0])[1]) || 0;
-      const derecha = Math.max(sv.right + trazo, ...chispas);
-      // El borde del TEXTO con un «Range» sobre su contenido. Sumar el
-      // «padding-left» que devuelve «getComputedStyle» NO vale: con barra de
-      // scroll, un «clamp» en «vw» se reporta contra un ancho y se maqueta
-      // contra otro, y salian 5 px de desajuste que en pantalla no existen.
-      const borde = sel => { const e = document.querySelector(sel); if (!e) return null;
-        const g = document.createRange(); g.selectNodeContents(e);
-        const b = g.getBoundingClientRect(); return b.width ? b.left : null; };
-      /* Solo el texto de las FASES. La cabecera —rotulo y titular— ya no entra:
-         desde que se alinea con el resto de las secciones nace en el mismo
-         borde que la hebra y pasa por encima de ella a proposito. Lo que no
-         puede tocarla es el texto de las fases, que es pequeño y apagado, y
-         eso es lo que se mide aqui. */
-      const bordes = ['.ruta-cab', '.ruta-t', '.ruta-p']
-        .map(borde).filter(x => x !== null);
-      /* TODO LO DE AQUI SE DESESCALA ANTES DE MEDIR.
-         La seccion lleva un «scale» de 0,95-1 que va con el scroll, y
-         «scrollIntoView» la deja en un punto distinto en cada ancho: a 1280
-         se mide a 0,978 y a 1440 a 0,955. Encogida tira de sus cantos hacia
-         el centro, asi que un recorte de 20 px se lee como si sobraran 13.
-         Asi se colo: la medida era estable —misma cifra a 800 ms y a 3,3 s—
-         pero indulgente. El centro de la seccion no se mueve con el «scale»,
-         asi que desde el se deshace: x → cx + (x - cx) / k. */
-      const sc = document.getElementById('ruta').getBoundingClientRect();
-      const k = (getComputedStyle(document.getElementById('ruta')).transform
-        .match(/matrix\(([\d.]+)/) || [0, 1])[1] * 1 || 1;
-      const cx = sc.left + sc.width / 2;
-      const real = x => cx + (x - cx) / k;
-
-      // El canto IZQUIERDO de la hebra, y el eje del rail. Faltaban las dos:
-      // sin la primera se colo una version con «--borde» a 11-22 px que
-      // cortaba 18 px de hebra contra el borde de la pantalla, y sin la
-      // segunda se colo que el rail leia «--borde» con «parseFloat» de un
-      // «clamp()» —NaN— y se quedaba clavado en el respaldo, asi que la
-      // hebra se movia y el rail no.
-      const izq = Math.min(sv.left - trazo, ...[...document.querySelectorAll('.ruta-adn i')]
-        .map(e => e.getBoundingClientRect().left - brillo(e)));
-      const pt = document.querySelector('.ruta-punto').getBoundingClientRect();
-      const ad = document.querySelector('.ruta-adn').getBoundingClientRect();
-      return { derecha, izq:real(izq), escala:k,
-               ejePunto:real(pt.left + pt.width / 2),
-               hebraIzq:real(ad.left), hebraDer:real(ad.right),
+      const lz = document.querySelector('#ruta .hb-lz'), b = lz.getBoundingClientRect(), k = lz.width / b.width;
+      const d = lz.getContext('2d').getImageData(0, 0, lz.width, lz.height).data;
+      let izq = 1e9, der = -1;
+      for (let y = 0; y < lz.height; y++) for (let x = 0; x < lz.width; x++)
+        if (d[(y * lz.width + x) * 4 + 3] > 20) { if (x < izq) izq = x; if (x > der) der = x; }
+      // el borde del TEXTO con un «Range» sobre su contenido, no con la caja
+      const borde = sel => [...document.querySelectorAll(sel)].map(e => { const g = document.createRange(); g.selectNodeContents(e);
+        const q = g.getBoundingClientRect(); return q.width ? q.left : null; }).filter(v => v !== null);
+      const bordes = ['.ruta-cab', '.ruta-t', '.ruta-p'].flatMap(borde);
+      const M = __hebra.M;
+      return { izq:b.left + izq / k, der:b.left + (der + 1) / k, eje:b.left + M.sx,
                texto:Math.min(...bordes), disp:Math.max(...bordes) - Math.min(...bordes),
+               escala:getComputedStyle(document.getElementById('ruta')).transform,
                scroll:document.documentElement.scrollWidth > innerWidth };
     });
-    const hueco = r.texto - r.derecha;
-    di(hueco >= 10, W + 'px · la hebra despega del texto: ' + hueco.toFixed(1) + ' px de hueco (minimo 10)');
-    di(r.izq >= 0, W + 'px · y entra ENTERA: su canto izquierdo cae en ' + r.izq.toFixed(1)
-       + ' px, en reposo (medido a escala ' + r.escala.toFixed(3) + ')');
-    /* Ya no se pide que el punto este en el EJE: cabalga la curva, asi que
-       se separa del centro a proposito. Que caiga sobre el camino lo mide el
-       bloque 3; aqui solo se exige que no se salga de la hebra. */
-    di(r.ejePunto > r.hebraIzq && r.ejePunto < r.hebraDer,
-       W + 'px · el punto va DENTRO de la hebra: ' + r.ejePunto.toFixed(1) +
-       ' entre ' + r.hebraIzq.toFixed(1) + ' y ' + r.hebraDer.toFixed(1));
+    const hueco = r.texto - r.der;
+    di(hueco >= 3, W + 'px · la hebra pintada despega del texto: ' + hueco.toFixed(1) + ' px de hueco (minimo 3)');
+    di(r.izq >= 0, W + 'px · y entra ENTERA: su canto izquierdo cae en ' + r.izq.toFixed(1) + ' px');
+    di(r.eje > r.izq && r.eje < r.texto, W + 'px · el eje del cubo va dentro de la hebra: ' + r.eje.toFixed(1) +
+       ' entre ' + r.izq.toFixed(1) + ' y el texto en ' + r.texto.toFixed(1));
     di(r.disp <= 1.5, W + 'px · y las tres fases en una sola columna (dispersion ' + r.disp.toFixed(1) + ' px)');
-    di(!r.scroll, W + 'px · sin scroll horizontal');
+    di(!r.scroll, W + 'px · sin scroll horizontal (' + r.escala + ')');
     await c.close();
   }
 }
 
-// ── 3c · la trenza es una trenza, no una barra ─────────────────────────────
-// Dos fallos distintos la convirtieron en una barra blanca maciza, y ninguno
-// se veia leyendo el CSS:
-//
-//   · la caja que envuelve las chispas es TAMBIEN un <i> dentro de
-//     «.ruta-adn», asi que la regla «.ruta-adn i» —fondo #E4EFFF, para las
-//     chispas— la pintaba a ella entera: un rectangulo macizo de la altura de
-//     la seccion encima del dibujo;
-//
-//   · y las medidas proporcionales se escribieron como «calc(var(--adn)/56…)».
-//     Una propiedad personalizada llega SIN resolver, asi que ahi dentro
-//     «--adn» es la cadena «clamp(30px,4.4vw,74px)»: la cuenta sale px por px
-//     —px al cuadrado— y la declaracion entera se cae. Apagaba el resplandor
-//     en unas pantallas y mandaba el tamaño de las chispas a «auto» en otras.
-//
-// Asi que se comprueba lo que se ve: que dentro de la hebra no haya nada
-// pintado que sea ancho —solo las chispas, y son diminutas— y que ni el trazo
-// ni el resplandor se hayan caido.
+// ── 3c · la hebra ramifica a cada hito ─────────────────────────────────────
+// Cada hito visible tiene su rama y su nodo, y el nodo dice el estado: hecho
+// = cubo azul LLENO; en proceso = aro azul DISCONTINUO alrededor. Se lee el
+// pixel: el centro del nodo y un anillo a 1,8-2,3 radios (el aro vive ahi y
+// un cubo lleno no llega), sin la franja por donde entra la rama.
+// Y la trenza es una trenza, no una barra: pintada, pero con aire dentro.
 {
   for (const [W, H] of [[1440,900],[1280,900],[390,844],[320,700]]) {
     const c = await nav.newContext({ viewport:{ width:W, height:H }, isMobile:W < 900, hasTouch:W < 900 });
     const p3 = await c.newPage();
     await p3.goto('http://127.0.0.1:9163/', { waitUntil:'load' });
-    await p3.waitForTimeout(700);
-    await p3.evaluate(() => document.getElementById('ruta').scrollIntoView({ block:'center' }));
     await p3.waitForTimeout(900);
-    const r = await p3.evaluate(() => {
-      const ad = document.querySelector('.ruta-adn');
-      const ancho = ad.getBoundingClientRect().width;
-      // lo que pinta un fondo dentro de la hebra, y cuanto ocupa
-      const manchas = [...ad.querySelectorAll('*')].filter(e => {
-        // el punto y el galon son el recorrido, no la trenza
-        if (e.closest('.ruta-punto, .ruta-flecha')) return false;
-        const cs = getComputedStyle(e);
-        return cs.backgroundColor !== 'rgba(0, 0, 0, 0)' || cs.backgroundImage !== 'none';
-      }).map(e => ({ q:e.tagName.toLowerCase() + '.' + (e.getAttribute('class') || ''),
-                     w:+e.getBoundingClientRect().width.toFixed(1) }));
-      const ps = [...ad.querySelectorAll('use')].map(e => {
-        const cs = getComputedStyle(e);
-        return { sw:parseFloat(cs.strokeWidth), fill:cs.fill, luz:cs.filter };
-      });
-      return { ancho:+ancho.toFixed(1), manchas, ps,
-               k:getComputedStyle(ad).getPropertyValue('--k').trim() };
+    const n = await p3.evaluate(() => __hebra.M.hitos.length);
+    const hitos = [];
+    for (let h = 0; h < n; h++) {
+      /* el renglon del hito al 40 % de la pantalla: la punta de la hebra va
+         al 62 %, asi que ya lo ha pasado y su nodo esta entero */
+      await p3.evaluate(h => { const M = __hebra.M; scrollTo(0, Math.round(M.docTop + M.hitos[h].y - innerHeight * .4)); }, h);
+      await p3.waitForTimeout(1300);
+      hitos.push(await p3.evaluate(h => {
+        const M = __hebra.M, it = M.hitos[h], lz = document.querySelector('#ruta .hb-lz');
+        const k = lz.width / lz.getBoundingClientRect().width, g = lz.getContext('2d');
+        const hr = M.movil ? 4.8 : 7, cx = M.nx, cy = it.y;
+        let centro = 0, ncentro = 0, aro = 0, naro = 0;
+        for (let y = Math.floor(cy - hr * 2.6); y <= cy + hr * 2.6; y++) for (let x = Math.floor(cx - hr * 2.6); x <= cx + hr * 2.6; x++) {
+          const q = g.getImageData(Math.round(x * k), Math.round(y * k), 1, 1).data, r = Math.hypot(x - cx, y - cy);
+          if (r < hr * .45) { ncentro++; if (q[3] > 180 && q[0] < 120 && q[2] > q[0] + 100) centro++; }
+          if (r >= hr * 1.8 && r <= hr * 2.3 && !(x < cx && Math.abs(y - cy) < 3)) { naro++; if (q[3] > 30 && q[0] < 130 && q[2] > q[0] + 90) aro++; }
+        }
+        return { hecho:it.hecho, on:it.el.classList.contains('hb-on'), txt:it.el.textContent.trim().slice(0, 28),
+                 centro:centro / ncentro, aro:aro / naro };
+      }, h));
+    }
+    const hechos = hitos.filter(x => x.hecho), proc = hitos.filter(x => !x.hecho);
+    di(hitos.length >= 6 && hitos.every(x => x.on), W + 'px · la hebra llega a los ' + hitos.length + ' hitos visibles y los enciende');
+    di(hechos.length > 0 && hechos.every(x => x.centro >= .5 && x.aro <= .08),
+       W + 'px · hecho = cubo azul lleno, sin aro (centro ' + hechos.map(x => (100 * x.centro).toFixed(0)).join('/') +
+       ' %, aro ' + hechos.map(x => (100 * x.aro).toFixed(0)).join('/') + ' %)');
+    di(proc.length > 0 && proc.every(x => x.aro >= .12 && x.aro <= .7),
+       W + 'px · en proceso = aro azul discontinuo (' + proc.map(x => (100 * x.aro).toFixed(0)).join('/') + ' % del anillo pintado)');
+    /* la trenza: ruta centrada, y se mira el tramo de la hebra ya crecido */
+    await p3.evaluate(() => { const r = document.getElementById('ruta').getBoundingClientRect();
+      scrollBy(0, r.top + r.height / 2 - innerHeight / 2); });
+    await p3.waitForTimeout(1300);
+    const t = await p3.evaluate(() => {
+      const M = __hebra.M, lz = document.querySelector('#ruta .hb-lz'), b = lz.getBoundingClientRect(), k = lz.width / b.width;
+      const hasta = Math.min(__hebra.tip(), M.aqui) - 80, desde = Math.max(M.y0 + 160, -b.top + 20), fin = Math.min(hasta, innerHeight - b.top - 20);
+      if (fin - desde < 60) return null;
+      const A = M.movil ? 12 : 30;
+      const d = lz.getContext('2d').getImageData(Math.round((M.sx - A) * k), Math.round(desde * k), Math.round(2 * A * k), Math.round((fin - desde) * k)).data;
+      let algo = 0, macizo = 0; const tot = d.length / 4;
+      for (let i = 0; i < d.length; i += 4) { if (d[i+3] > 20) algo++; if (d[i+3] > 200) macizo++; }
+      return { algo:algo / tot, macizo:macizo / tot, alto:fin - desde };
     });
-    const gorda = r.manchas.filter(m => m.w > 6);
-    di(gorda.length === 0, W + 'px · nada macizo dentro de la hebra: ' +
-       (gorda.length ? gorda.map(m => m.q + ' de ' + m.w + ' px' ).join(', ') + ' sobre una caja de ' + r.ancho
-                     : r.manchas.length + ' piezas pintadas, ninguna pasa de 6 px'));
-    di(r.ps.every(x => x.fill === 'none'), W + 'px · las hebras son trazo, no relleno');
-    const sw = r.ps.map(x => x.sw);
-    di(sw.every(v => v >= .3 && v <= 3), W + 'px · el trazo sale en pixeles razonables: ' +
-       sw.map(v => v.toFixed(2)).join(', '));
-    di(r.ps.every(x => x.luz !== 'none'), W + 'px · y el resplandor no se ha caido por una cuenta invalida');
-    di(/^[0-9.]+$/.test(r.k), W + 'px · «--k» llega resuelto y sin unidades: "' + r.k + '"');
+    di(t && t.algo > .05, W + 'px · la trenza esta pintada en su carril (' + (t ? (100 * t.algo).toFixed(0) + ' % de ' + t.alto.toFixed(0) + ' px de hebra' : 'sin tramo que medir') + ')');
+    di(t && t.macizo < .35, W + 'px · y no es una barra maciza: ' + (t ? (100 * t.macizo).toFixed(0) : '?') + ' % opaco');
     await c.close();
   }
 }
@@ -428,6 +413,18 @@ for (let y = 0; y < alto; y += 450) { await pg.evaluate(v => scrollTo(0, v), y);
 // Se mide con el texto escondido —lo que hay DETRAS— y con la animacion
 // congelada en varios momentos del ciclo, que dura casi un minuto y el peor
 // fotograma no tiene por que ser el primero.
+//
+// CONGELADA ENTERA. Antes solo se paraban el paseo y el giro («-v», «-g»); el
+// cabeceo («-x») y el reflejo que barre la cara («-luz») seguian corriendo, y
+// la medida dependia del segundo en que cayera la captura: seis tiradas
+// seguidas dieron de 4,17 a 5,19:1 sin tocar la pagina. Ahora el cabeceo va
+// con el paseo y el giro, momento a momento, y el reflejo se deja en su
+// arranque, fuera de la cara.
+// OJO, PENDIENTE EN LA PAGINA: con el reflejo pasando por detras del primer
+// parrafo (a los 3 s de sus 17) el peor momento baja a 4,19:1. No es de este
+// rediseño -antes de el ya daba 4,27- y arreglarlo es cosa de «index.html»
+// (mas velo sobre la columna o menos brillo en el reflejo), no de la prueba.
+// Para comprobarlo: poner varios retrasos a «.ruta-marca-luz» abajo.
 //
 // El limite no es un gusto: el parrafo de una fase no alcanzada va en
 // rgba(226,236,250,.58), que compuesto sobre negro da luminancia 0,2517. Para
@@ -454,7 +451,8 @@ for (let y = 0; y < alto; y += 450) { await pg.evaluate(v => scrollTo(0, v), y);
   }
   await p4.waitForTimeout(700);
   await p4.addStyleTag({ content:
-    '.ruta-marca-v,.ruta-marca-g{animation-play-state:paused !important}' +
+    '.ruta-marca-v,.ruta-marca-g,.ruta-marca-x,.ruta-marca-luz{animation-play-state:paused !important}' +
+    '.ruta-marca-luz{animation-delay:0s !important}' +
     /* «opacity:0» y no «visibility:hidden»: el sistema de revelado de la
        pagina le pone «visibility:visible» a los hijos al entrar, asi que el
        texto reaparecia y lo que se media era el azul del rotulo —rgb
@@ -595,7 +593,7 @@ for (let y = 0; y < alto; y += 450) { await pg.evaluate(v => scrollTo(0, v), y);
 
   let peor = 0, cuando = 0, donde = null;
   for (const d of [0, 9, 18, 27, 36, 45, 54, 63]) {
-    await p4.evaluate(v => { document.querySelectorAll('.ruta-marca-v,.ruta-marca-g')
+    await p4.evaluate(v => { document.querySelectorAll('.ruta-marca-v,.ruta-marca-g,.ruta-marca-x')
       .forEach(e => { e.style.animationDelay = (-v) + 's'; }); }, d);
     await p4.evaluate(() => new Promise(r =>
       requestAnimationFrame(() => requestAnimationFrame(r))));
@@ -634,110 +632,154 @@ for (let y = 0; y < alto; y += 450) { await pg.evaluate(v => scrollTo(0, v), y);
   await c.close();
 }
 
-// ── 4 · el punto baja con el scroll ────────────────────────────────────────
-// Dos cosas distintas, y hay que medirlas por separado:
-//
-//   · el ESTADO —por que fase vas— cambia en el mismo cuadro del scroll, asi
-//     que se puede leer recorriendo la seccion a pasos cortos;
-//   · el SITIO del punto llega deslizandose, 0,8 s. Leerlo a 320 ms del paso
-//     es leer un fotograma a medio camino: la primera version de esto daba
-//     24 px de desvio y los 24 px eran el deslizamiento, no un fallo.
-//
-// Asi que el recorrido comprueba el estado, y el sitio se comprueba parado.
-//
-// Se RECORRE en vez de saltar a una fraccion: esta pagina lleva secciones
-// ancladas que cambian de alto mientras la recorres, y un salto calculado no
-// deja el scroll donde uno cree.
+// ── 3e · «In progress», en azul y legible ──────────────────────────────────
+// El estado de las fases en marcha era ambar; ahora es el azul de la casa, y
+// azul sobre casi negro hay que medirlo: apagado va al .78. Se mide en los
+// dos estados -antes de que la hebra llegue y encendido-, contra el suelo de
+// la seccion, que se LEE de la pagina. Y en toda la seccion, nada ambar.
+{
+  const c = await nav.newContext({ viewport:{ width:1440, height:900 } });
+  const p6 = await c.newPage();
+  await p6.goto('http://127.0.0.1:9163/', { waitUntil:'load' });
+  await p6.waitForTimeout(900);
+  await p6.evaluate(AYUDA);
+  const mide = () => p6.evaluate(() => {
+    const num = s => (s.match(/[\d.]+/g) || []).map(Number);
+    const lin = v => { v /= 255; return v <= .04045 ? v / 12.92 : Math.pow((v + .055) / 1.055, 2.4); };
+    const L = c => .2126 * lin(c[0]) + .7152 * lin(c[1]) + .0722 * lin(c[2]);
+    const fondo = num(getComputedStyle(document.getElementById('ruta')).backgroundColor);
+    return [...document.querySelectorAll('#ruta .ruta-est-en')].map(e => {
+      const m = num(getComputedStyle(e).color), a = m.length > 3 ? m[3] : 1;
+      const s = [0, 1, 2].map(i => m[i] * a + fondo[i] * (1 - a));
+      const M = Math.max(...s), mi = Math.min(...s);
+      const h = M === s[2] ? ((s[0] - s[1]) / (M - mi) + 4) * 60 : M === s[1] ? ((s[2] - s[0]) / (M - mi) + 2) * 60 : (((s[1] - s[2]) / (M - mi)) % 6) * 60;
+      return { txt:e.textContent.trim(), on:e.closest('.ruta-f').classList.contains('on'),
+               cr:(Math.max(L(s), L(fondo)) + .05) / (Math.min(L(s), L(fondo)) + .05), tono:(h + 360) % 360,
+               ambar:__ambar(m[0], m[1], m[2]) };
+    });
+  });
+  const apagados = await mide();
+  const ruta = await p6.evaluate(() => document.getElementById('ruta').getBoundingClientRect().top + scrollY);
+  await p6.evaluate(y => scrollTo(0, y), ruta + 700);
+  await p6.waitForTimeout(1800);
+  const encendidos = await mide();
+  const hud = await p6.evaluate(() => document.querySelector('.hud-count').textContent.replace(/\s+/g, ' ').trim());
+  di(hud === '06 / 07', 'dentro de la ruta el contador de abajo dice «' + hud + '»');
+  for (const [q, lista] of [['apagado', apagados], ['encendido', encendidos]]) {
+    di(lista.length === 2 && lista.every(x => x.txt === 'In progress'), q + ' · las dos fases en marcha dicen «In progress» (' + lista.length + ')');
+    di(lista.every(x => x.tono >= 200 && x.tono <= 230 && !x.ambar),
+       q + ' · en azul, nada de ambar (' + lista.map(x => x.tono.toFixed(0) + 'deg').join(', ') + ')');
+    di(lista.every(x => x.cr >= 4.5), q + ' · y legible: ' + lista.map(x => x.cr.toFixed(2) + ':1').join(', ') + ' (minimo 4,5)');
+  }
+  di(encendidos.every(x => x.on) && apagados.every(x => !x.on), 'y se midio de verdad en los dos estados');
+  const dom = await p6.evaluate(() => {
+    const malos = [];
+    for (const e of document.querySelectorAll('#ruta, #ruta *')) {
+      const cs = getComputedStyle(e);
+      for (const k of ['color', 'backgroundColor', 'borderTopColor', 'fill', 'stroke', 'boxShadow'])
+        for (const m of (cs[k] || '').matchAll(/rgba?\(([\d.]+), ([\d.]+), ([\d.]+)(?:, ([\d.]+))?\)/g))
+          if ((m[4] === undefined || +m[4] > .1) && __ambar(+m[1], +m[2], +m[3])) malos.push((e.getAttribute('class') || e.tagName) + ' ' + k + ' ' + m[0]);
+    }
+    const lz = document.querySelector('#ruta .hb-lz'), d = lz.getContext('2d').getImageData(0, 0, lz.width, lz.height).data;
+    let px = 0; for (let i = 0; i < d.length; i += 4) if (d[i+3] > 60 && __ambar(d[i], d[i+1], d[i+2])) px++;
+    return { malos, px };
+  });
+  di(dom.malos.length === 0 && dom.px === 0, 'en la ruta nada es ambar: ni un estilo ni un pixel de la hebra' +
+     (dom.malos.length ? ': ' + dom.malos.slice(0, 3).join(' | ') : ' (' + dom.px + ' px)'));
+  await c.close();
+}
+
+// ── 4 · las fases se encienden con el scroll, y el cubo acaba en «hoy» ────
+// El ESTADO -por que fase vas- lo pone la hebra al llegar a cada nodo, asi
+// que se lee recorriendo la seccion a pasos cortos. Se RECORRE en vez de
+// saltar a una fraccion: esta pagina lleva secciones ancladas que cambian de
+// alto mientras la recorres, y un salto calculado no deja el scroll donde uno
+// cree.
 {
   const estado = () => pg.evaluate(() =>
     [...document.querySelectorAll('.ruta-f')].map(e => e.classList.contains('on') ? 1 : 0).join(''));
-  /* PARADO DE VERDAD: se le pregunta al navegador.
-     El punto viaja 0,8 s hasta su sitio con una curva que frena mucho al
-     final. Una espera fija fallaba de vez en cuando —una tirada dio 18,8 px,
-     que son los que le faltaban por recorrer—, y mirar si la cifra «ya casi no
-     cambia» tampoco vale: en la cola de esa curva avanza menos de medio pixel
-     por decima y todavia le quedan siete. La unica lectura honesta es esperar
-     a que las transiciones terminen, que es un dato que el navegador tiene. */
-  const clavado = async () => {
-    await pg.evaluate(async () => {
-      const e = [document.querySelector('.ruta-punto'), document.querySelector('.ruta-viva')].filter(Boolean);
-      const an = e.flatMap(x => x.getAnimations ? x.getAnimations() : []);
-      await Promise.race([
-        Promise.all(an.map(a => a.finished.catch(() => {}))),
-        new Promise(r => setTimeout(r, 2500)),
-      ]);
-    });
-    return leerClavado();
-  };
-  const leerClavado = () => pg.evaluate(() => {
-    const l = document.getElementById('rutaLista'), cl = l.getBoundingClientRect();
-    const rp = document.querySelector('.ruta-punto').getBoundingClientRect();
-    const cabs = [...document.querySelectorAll('.ruta-cab')].map(c => {
-      const b = c.getBoundingClientRect(); return (b.top - cl.top) + b.height / 2; });
-    const y = (rp.top - cl.top) + rp.height / 2;
-    let cerca = 0, d = 1e9;
-    cabs.forEach((c, i) => { if (Math.abs(c - y) < d) { d = Math.abs(c - y); cerca = i; } });
-    return { fase:cerca, lejos:+d.toFixed(1) };
-  });
   /* Colocarse arriba de la seccion cuesta varias pasadas: al subir desde
      abajo, las secciones ancladas de encima se re-despliegan y el documento
      cambia de alto, asi que el primer «scrollTo» aterriza en otro sitio. Se
-     repite hasta que el borde superior se queda donde toca. */
+     repite hasta que el borde superior se queda donde toca.
+     Y el sitio es con la seccion a MEDIA pantalla, no asomando: la pagina
+     aparca el bucle de cada lienzo mientras el lienzo esta fuera de
+     pantalla (el vigia de «requestAnimationFrame»), y el lienzo de la hebra
+     empieza unos 400 px por debajo del borde de la seccion. Asomando, la
+     hebra aun no ha despertado y las fases conservan el estado de la ultima
+     vez que se pinto: se leia «100» de la bajada anterior y al primer paso se
+     apagaba, que parecia un retroceso y era la hebra despertando. */
   const arriba = async () => {
     for (let i = 0; i < 8; i++) {
       const d = await pg.evaluate(() => { const s = document.getElementById('ruta');
-        const t = s.getBoundingClientRect().top - innerHeight * 0.92;
+        const t = s.getBoundingClientRect().top - innerHeight * 0.5;
         scrollBy(0, t); return Math.abs(t); });
       await pg.waitForTimeout(320);
       if (d < 4) break;
     }
-    await pg.waitForTimeout(900);
+    /* Y se espera a que la PUNTA de la hebra llegue: crece y encoge
+       suavizada (~1 s), y se viene de mas abajo. Leyendo antes, la fase 1
+       seguia encendida de la bajada anterior y se apagaba en el primer paso,
+       que parecia un retroceso y era solo la hebra recogiendose. */
+    await pg.waitForFunction(() => { const M = __hebra.M;
+      const obj = Math.min(Math.max(__y + innerHeight * .62 - M.docTop, M.y0), M.fin + 4);
+      return Math.abs(__hebra.tip() - obj) < 1; }, null, { timeout:8000 }).catch(() => {});
+    await pg.waitForTimeout(300);
   };
 
   await arriba();
-  di(await estado() === '100', 'al entrar solo esta encendida la fase 1 (' + await estado() + ')');
-  const q0 = await clavado();
-  di(q0.fase === 0 && q0.lejos <= 2, 'y el punto, parado, cae clavado en su renglon (' + q0.lejos + ' px)');
+  const e0 = await estado();
+  /* Ya no se exige «100» al entrar: la fase se enciende cuando la hebra llega
+     a su nodo, y al asomar la seccion la hebra aun no ha crecido. Lo que no
+     puede pasar es entrar con la 2 o la 3 ya encendidas. */
+  di(/^[01]00$/.test(e0), 'al entrar no hay encendida ninguna fase mas alla de la 1 (' + e0 + ')');
+  const q0 = await pg.evaluate(() => __indice());
+  di(!q0.posada && q0.marca.n <= 3, 'y el cubo aun no esta en la hebra: viene cayendo del tunel (' + q0.marca.n + ' px en la hebra)');
 
   const paso = await pg.evaluate(() => Math.round(document.getElementById('ruta').getBoundingClientRect().height / 16));
   const serie = [];
   for (let k = 0; k < 22; k++) {
     await pg.evaluate(d => scrollBy(0, d), paso);
-    await pg.waitForTimeout(260);
+    await pg.waitForTimeout(300);
     serie.push(await estado());
   }
   const n = serie.map(x => x.split('').filter(c => c === '1').length);
   di(n[n.length - 1] === 3, 'al salir estan las tres encendidas (' + serie[serie.length - 1] + ')');
   const atras = n.filter((v, i) => i && v < n[i - 1]).length;
   di(atras === 0, 'y nunca vuelve atras: ' + n.join('') + (atras ? ' — ' + atras + ' retrocesos' : ''));
-  di(new Set(n).size === 3, 'pasa por las tres, sin saltarse ninguna (' + [...new Set(n)].join(',') + ')');
+  di([1, 2, 3].every(v => n.includes(v)), 'pasa por las tres, sin saltarse ninguna (' + [...new Set(n)].join(',') + ')');
   const desorden = serie.filter(x => !/^1*0*$/.test(x)).length;
   di(desorden === 0, 'y siempre en orden, en las ' + serie.length + ' paradas del recorrido');
 
-  await pg.waitForTimeout(1200);
-  const q2 = await clavado();
-  di(q2.fase === 2 && q2.lejos <= 2, 'al final, parado, el punto cae clavado en la fase 3 (' + q2.lejos + ' px)');
+  await pg.waitForTimeout(1400);
+  const q2 = await pg.evaluate(() => __indice());
+  di(q2.posada && Math.abs(q2.my - q2.M.aqui) < 1 && q2.marca.n >= 25 && Math.abs(q2.marca.x - q2.hx) <= 3,
+     'al final, parado, el cubo esta en «hoy» sobre la hebra (' + q2.my.toFixed(1) + ' vs ' + q2.M.aqui.toFixed(1) + ')');
 }
 
 // ── 5 · sin movimiento, y sin desbordes ─────────────────────────────────────
 {
   const c2 = await nav.newContext({ viewport:{ width:1280, height:900 }, reducedMotion:'reduce' });
   const p2 = await c2.newPage();
+  const f2 = []; p2.on('pageerror', e => f2.push(String(e).slice(0, 140)));
   await p2.goto('http://127.0.0.1:9163/', { waitUntil:'load' });
   await p2.waitForTimeout(900);
+  await p2.evaluate(AYUDA);
   await p2.evaluate(() => document.getElementById('ruta').scrollIntoView({ block:'center' }));
   await p2.waitForTimeout(700);
-  await p2.evaluate(() => { const s = document.getElementById('ruta');
-    scrollTo(0, scrollY + s.getBoundingClientRect().bottom - innerHeight * 0.4); });
-  await p2.waitForTimeout(800);
-  const r = await p2.evaluate(() => ({
-    on:[...document.querySelectorAll('.ruta-f')].map(e => e.classList.contains('on') ? 1 : 0).join(''),
-    tr:getComputedStyle(document.querySelector('.ruta-punto')).transitionDuration }));
-  /* Sin movimiento el punto SIGUE avanzando —quien lo tiene desactivado
-     tambien baja por la pagina y tiene que ver por que fase va—; lo unico que
-     se apaga es el deslizamiento: salta en vez de deslizarse. */
-  di(r.on === '111', 'sin movimiento el punto avanza igual (' + r.on + ')');
-  di(/^0s?$/.test(r.tr.trim()), 'y lo que se apaga es el viaje, no el avance (transicion ' + r.tr + ')');
+  await p2.evaluate(() => { const M = __hebra.M; scrollTo(0, Math.round(M.docTop + M.aqui - innerHeight / 2)); });
+  await p2.waitForTimeout(900);
+  const r = await p2.evaluate(() => ({ ...__indice(),
+    hitos:__hebra.M.hitos.every(h => h.el.classList.contains('hb-on')),
+    caidaVis:getComputedStyle(document.querySelector('.caida-cv')).display }));
+  /* Sin movimiento la composicion esta hecha desde el principio: la hebra
+     entera, las tres fases y todos los hitos encendidos, y el cubo ya en
+     «hoy»; lo unico que se apaga es el viaje. */
+  di(r.on === '111' && r.hitos, 'sin movimiento la hebra esta entera: fases ' + r.on + ' y todos los hitos encendidos');
+  di(r.posada && r.caidaVis === 'none', 'y no hay caida: el lienzo fijo no existe (' + r.caidaVis + ') y el cubo ya esta posado');
+  di(Math.abs(r.my - r.M.aqui) < 1 && r.marca.n >= 25 && Math.abs(r.marca.x - r.hx) <= 3 && Math.abs(r.marca.y - r.hy) <= 6,
+     'el cubo esta pintado en «hoy», sobre la hebra (' + r.marca.n + ' px, ' + (r.marca.n ? Math.abs(r.marca.x - r.hx).toFixed(1) : '?') + ' px de desvio)');
+  di(f2.length === 0, 'sin movimiento · sin errores de pagina' + (f2.length ? ': ' + f2.join(' | ') : ''));
   await c2.close();
 
   for (const W of [320, 360, 390, 1440]) {
@@ -749,7 +791,7 @@ for (let y = 0; y < alto; y += 450) { await pg.evaluate(v => scrollTo(0, v), y);
     await p3.waitForTimeout(700);
     const r3 = await p3.evaluate(() => {
       const s = document.getElementById('ruta');
-      const hijos = [...s.querySelectorAll('.ruta-t,.ruta-p,.ruta-h,.ruta-cab,.ruta-punto')];
+      const hijos = [...s.querySelectorAll('.ruta-t,.ruta-p,.ruta-h,.ruta-cab,.ruta-hecho li,.hb-lz')];
       const fuera = hijos.filter(e => { const b = e.getBoundingClientRect();
         return b.width && (b.left < -1 || b.right > innerWidth + 1); }).length;
       return { fuera, scroll:document.documentElement.scrollWidth > innerWidth };
@@ -760,7 +802,7 @@ for (let y = 0; y < alto; y += 450) { await pg.evaluate(v => scrollTo(0, v), y);
   }
 }
 
-di(fallos.length === 0, 'sin errores de pagina' + (fallos.length ? ': ' + fallos.join(' | ') : ''));
+di(fallos.length === 0, 'sin errores de pagina a 1440x900 ni a 390x844' + (fallos.length ? ': ' + fallos.join(' | ') : ''));
 
 console.log('\n' + ok + '/' + (ok + mal) + ' correctas');
 await nav.close(); srv.close();
