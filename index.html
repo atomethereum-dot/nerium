@@ -7136,12 +7136,51 @@ html body .ruta-p{color:#AAB5CA !important}
    Si durante un segundo seguido va por encima del presupuesto, ese lienzo -y
    solo ese- baja a densidad 2, que en un telefono es el suelo: nunca menos.
    «__dens(lienzo)» devuelve la densidad que le toca a ESE lienzo. */
+/* p68 · LA DECISION ES DEL APARATO, NO DE CADA LIENZO, Y NO SE DESHACE.
+   Con una guarda por lienzo, en un telefono lento cada escena descubria por
+   su cuenta -tras un segundo de tirones- que tenia que bajar a 2, y cada una
+   rehacia su mapa de bits a mitad de la visita: 21 reasignaciones en un
+   recorrido (la sonda «probar_ventana» pone el limite en 16).
+   Ahora la primera que tiene que bajar lo decide para todas («__densTope»):
+     · si ocurre en la primera pantalla -en un telefono lento la primera en
+       tropezar es la portada, al cargar-, las que aun no se han visto nunca
+       (reservadas desde la carga, mas abajo) bajan YA, mientras nadie las
+       mira, y ya no tienen que tropezar ellas;
+     · las que se crean o cambian de tamaño despues nacen directamente a 2;
+     · la que esta en pantalla sigue a la suya hasta que su guarda decida (no
+       se ve un salto de nitidez en mitad de un cubo);
+     · un lienzo que ya tiene su mapa de bits lo conserva al volver a medirse
+       sin haber cambiado de ancho la ventana («__dFija»): rehacerlo igual es
+       justo el derroche que se quita;
+     · y nada vuelve a subir en toda la visita: se guarda en la sesion, asi
+       que al recargar o volver atras se empieza ya a 2, sin tropezar.
+   En un aparato que aguanta 3 no cambia nada: nadie baja y todo va a 3. */
+window.__densTope = 0;
+try { var __dS = +sessionStorage.getItem('nrm-dens'); if (__dS === 2) window.__densTope = 2; } catch (e) {}
+window.__densGen = 0;
+(function(){
+  var an = window.innerWidth;
+  /* un cambio de ANCHO de verdad (girar el telefono) rehace los lienzos de
+     todos modos: es el momento de volver a decidir su densidad. La barra del
+     navegador solo cambia el alto y no cuenta. */
+  addEventListener('resize', function(){ if (window.innerWidth !== an) { an = window.innerWidth; window.__densGen++; } }, {passive: true});
+})();
 window.__dens = function(cv){
   var d = Math.min(window.devicePixelRatio || 1, 3);
-  if (cv && cv.__tope && d > cv.__tope) d = cv.__tope;
+  if (!cv) return d;
+  if (cv.__tope && d > cv.__tope) return cv.__tope;
+  var g = window.__densTope;
+  if (g && d > g) {
+    /* ya tiene su mapa de bits a esta densidad y la ventana no ha cambiado de
+       ancho: se queda como esta, que rehacerlo igual no ahorra nada */
+    if (cv.__dFija && cv.__dGen === window.__densGen && cv.width > 1) return cv.__dFija;
+    d = g;
+  }
+  cv.__dUlt = d;
   return d;
 };
 window.__nitLog = [];
+window.__lienzosG = [];
 /* «QUE BRILLEN»: el canto de luz de las caras iluminadas. Un pixel DE
    PANTALLA (no de CSS: a densidad 3 un pixel CSS son tres) en el blanco
    azulado de los cantos de la casa, mas vivo cuanto mas de cara a la luz.
@@ -7179,14 +7218,39 @@ window.__guarda = function(cv, remide){
         cv.__tope = 2;
         window.__nitLog.push({cv: cv.id || cv.className, coste: +coste.toFixed(1), paso: +paso.toFixed(1), t: Math.round(now)});
         if (g.remide) try { g.remide(); } catch (e) {}
+        __bajaTodos(cv, now);
       }
       limpia();
     }
   };
   g.fin = function(){ if (g.t0) g.sc += performance.now() - g.t0; };
+  g.cv = cv;
   cv.__g = g;
+  window.__lienzosG.push(g);
   return g;
 };
+/* p68 · la primera que baja, baja a las que no se ven (ver «__densTope») */
+function __bajaTodos(quien, now){
+  if (window.__densTope) return;
+  window.__densTope = 2;
+  try { sessionStorage.setItem('nrm-dens', '2'); } catch (e) {}
+  /* con el visitante ya bajando, no se toca lo reservado: cada rehecho es
+     memoria que se suelta y se vuelve a pedir, y la escena quiza no se llegue
+     a ver. Lo que se cree o se remida desde aqui nace a 2 igualmente. */
+  if ((window.scrollY || 0) > (window.innerHeight || 800)) return;
+  var L = window.__lienzosG;
+  for (var i = 0; i < L.length; i++) {
+    var o = L[i], c = o.cv;
+    if (c === quien || c.__tope) continue;
+    /* solo las que aun no han pintado nunca: estan reservadas desde la carga
+       y nadie las ha visto. Las que ya se han visto -en pantalla ahora, o ya
+       pasadas- siguen con lo suyo y las vigila su guarda: rehacer el mapa de
+       bits de una escena que quiza no se vuelva a ver es gastar por gastar */
+    if (o.prev) continue;
+    c.__tope = 2;
+    if (o.remide) try { o.remide(); } catch (e) {}
+  }
+}
 
 /* ═══════════ NO REHACER UN MAPA DE BITS QUE YA MIDE LO QUE TOCA ═══════════
    Asignar «canvas.width» REHACE el mapa de bits aunque el valor no cambie:
@@ -7216,6 +7280,8 @@ window.__guarda = function(cv, remide){
 window.__mide = function(cv, w, h){
   w = Math.round(w); h = Math.round(h);
   if (w < 1) w = 1; if (h < 1) h = 1;
+  /* p68 · la densidad con la que se ha medido queda fijada a este lienzo */
+  if (cv.__dUlt) { cv.__dFija = cv.__dUlt; cv.__dGen = window.__densGen; }
   if (cv.width === w && cv.height === h) return false;
   cv.width = w; cv.height = h;
   return true;
@@ -7787,12 +7853,38 @@ main>section#builds::after{z-index:5}
 /* el lienzo de la caída: fijo, encima de todo el contenido y por debajo de la
    cabecera y del HUD, y sin recibir nunca un clic */
 .caida-cv{position:fixed;left:0;top:0;width:100vw;height:100vh;z-index:58;pointer-events:none;display:block}
-@media(prefers-reduced-motion:reduce){.caida-cv{display:none}}
+/* p68 · sin movimiento tambien existe: pinta la via quieta (el cubo no viaja) */
 /* p66 · el destino: el mismo epígrafe de la ruta, al pie de la hebra que
    empieza a bajar desde el cubo. Lo enciende el túnel (opacidad y filete). */
 #builds .tn-sig{position:absolute;left:0;right:0;top:calc((100% - var(--tn-extra)) * .8);z-index:3;display:flex;justify-content:center;
   width:auto;padding-top:0;pointer-events:none;opacity:0;visibility:hidden}
 #builds .tn-sig::after{transform:scaleX(var(--a,0)) !important;transition:none !important}
+/* p68 · LA RUTA ENTRA ANTES, SIN SOLAPAR SECCIONES. El anclado mide lo
+   mismo (el tunel, la implosion y la carga no pierden ni un pixel de
+   recorrido), pero la seccion acaba un 14 % de pantalla antes: el pie del
+   escenario -la franja que al final queda en negro, por debajo del epigrafe
+   provisional- sobresale de ella y la ruta empieza justo ahi, a tope, con su
+   linea azul. Al soltarse el escenario el canto de la ruta ya esta al 86 %
+   del alto de la escena en vez de en el borde de la pantalla.
+   La cuenta va en «svh» y «lvh», que no cambian con la barra del navegador
+   (el escenario mide «lvh»; su dibujo se coloca en «svh»). El margen
+   negativo del escenario es lo que le deja seguir anclado hasta el final. */
+#builds .tn-hold{height:calc(560vh - 14vh)}
+#builds .tn-stage{margin-bottom:-14vh}
+@supports(height:100svh){
+  #builds .tn-hold{height:calc(560vh - 100lvh + 86svh)}
+  #builds .tn-stage{margin-bottom:calc(86svh - 100lvh)}
+}
+@media(max-width:760px){
+  #builds .tn-hold{height:calc(500vh - 14vh)}
+  @supports(height:100svh){#builds .tn-hold{height:calc(500vh - 100lvh + 86svh)}}
+}
+/* la ruta pinta por encima de lo que sobresale del escenario (fondo, linea azul) */
+main>section#ruta{z-index:2}
+/* el epigrafe de verdad lo releva la via (opacidad, entrada lateral y filete):
+   sin su recorte de entrada, que seria una segunda aparicion encima */
+#ruta .ruta-top{opacity:var(--ko,1) !important;clip-path:none !important;transform:translateX(var(--kx,0px)) !important;transition:none !important}
+#ruta .ruta-top::after{transform:scaleX(var(--ka,1)) !important;transition:none !important}
 </style>
 <style id="r04-css">
 /* ══ r04 «Hebra» ══ la hebra de la ruta, crecida: cada hito es un nodo ══ */
@@ -11006,11 +11098,13 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
        y texto a 1,25 en una pantalla de 3 se ve borroso. Pintarla cuesta poco
        -unas setenta palabras por cuadro-, asi que va a la densidad de verdad,
        con techo en 3. */
-    dpr=Math.min(window.devicePixelRatio||1,3);
+    /* p68 · los rotulos horneados solo se tiran si cambia la densidad (la
+       llevan en su clave); un «resize» sin cambio no rehace ninguno */
+    var d0=dpr; dpr=Math.min(window.devicePixelRatio||1,3);
     W=Math.max(1,Math.round(r.width)); H=Math.max(1,Math.round(r.height));
     __mide(cv, W*dpr, H*dpr);
     ctx.setTransform(dpr,0,0,dpr,0,0);
-    SPR.clear();
+    if(dpr!==d0) SPR.clear();
     draw();
   }
   var CUADRO=1000/30, reloj=0, ultimoTs=0, pRaf=0;
@@ -11040,7 +11134,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
   document.querySelectorAll('.card .bg').forEach(cv=>{
     const ctx=cv.getContext('2d');
     const r=cv.getBoundingClientRect();
-    const dpr=__dens();
+    const dpr=__dens(cv);
     __mide(cv, r.width*dpr, r.height*dpr);
     ctx.setTransform(dpr,0,0,dpr,0,0);
     const seed=+cv.dataset.seed||1;
@@ -12740,7 +12834,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
             '.rm-stop,.rm-row,.nav>a,.get,.scrollbtn,.w-field,[data-hov]';
   let W=0,H=0,mx=-999,my=-999,hov=null,box=null,DPR=1;
   function size(){
-    const d=__dens();
+    const d=__dens(cv);
     DPR=d;
     const r=cv.getBoundingClientRect();
     W=r.width||innerWidth; H=r.height||innerHeight;
@@ -13189,7 +13283,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
     const ctx=cv.getContext('2d');
     let W=0,H=0,t0=performance.now()+k*2100;
     function arma(){
-      const d=__dens();
+      const d=__dens(cv);
       const r=cv.getBoundingClientRect();
       W=r.width; H=r.height;
       __mide(cv, W*d, H*d); ctx.setTransform(d,0,0,d,0,0);
@@ -13198,7 +13292,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
     let sello=null, R=0;
     function haceSello(){
       R=Math.max(40, W*0.42);
-      const d=__dens();
+      const d=__dens(cv);
       sello=document.createElement('canvas');
       sello.width=Math.ceil(R*2*d); sello.height=Math.ceil(R*2*d);
       const c=sello.getContext('2d');
@@ -13857,50 +13951,31 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
       g.fillStyle=r; g.fillRect(0,0,96,96) }
     ctx.globalAlpha=Math.min(1,a); ctx.drawImage(GLOW,W/2-R,y-R,R*2,R*2); ctx.globalAlpha=1;
   }
-  /* la hebra que empieza: las cinco hebras de la ruta (r04), trenzadas bajo
-     el cubo hasta el epígrafe; se abren al salir y se cierran al llegar.
-     Se hornea una vez por medida (con su regla de 1 px al lado) y cada
-     cuadro solo se recorta hasta la punta, que lleva la luz. */
-  const HEB=[{A:1,l:310,f:0,w:1,o:.78},{A:.8,l:372,f:2.1,w:.88,o:.62},{A:.62,l:262,f:4,w:.8,o:.46},
-             {A:.88,l:436,f:1.2,w:.8,o:.52},{A:.5,l:338,f:5.3,w:.74,o:.34}];
-  let HCV=null, HKEY='';
-  function hebraHorno(len,A,d){
-    const key=[len|0,A,d,W].join('|'); if(key===HKEY&&HCV) return HCV; HKEY=key;
-    const hw=A+30, cw=Math.ceil(hw*2*d), ch=Math.ceil((len+8)*d);
-    if(!HCV) HCV=document.createElement('canvas');
-    HCV.width=cw; HCV.height=ch; HCV._w=hw*2; HCV._h=len+8;
-    const g=HCV.getContext('2d'); g.setTransform(d,0,0,d,0,0); g.lineCap='round';
-    for(let pase=0;pase<2;pase++){
-      const col=pase?'192,216,255':'204,206,213', gr=g.createLinearGradient(0,0,0,len);
-      gr.addColorStop(0,'rgba('+col+',0)'); gr.addColorStop(.2,'rgba('+col+',1)'); gr.addColorStop(1,'rgba('+col+',.85)');
-      g.strokeStyle=gr;
-      for(let i=0;i<5;i++){ const e=HEB[i];
-        g.globalAlpha=e.o*(pase?1:.16); g.lineWidth=pase?e.w*.95:e.w*3.4; g.beginPath();
-        for(let y=0;y<=len+.1;y+=3){ const env=sube(y/56)*sube((len-y)/46);
-          const x=hw+A*e.A*env*Math.sin(6.2832*y/e.l+e.f); y===0?g.moveTo(x,y):g.lineTo(x,y) }
-        g.stroke() }
-    }
-    g.globalAlpha=1;
-    /* la regla: marcas de 1 px cada 12 px, más largas cada 48 */
-    const xr=Math.round(hw+A+14)+.5; g.strokeStyle='rgba(214,217,224,.26)'; g.lineWidth=1; g.beginPath();
-    for(let y=12,j=1;y<len-8;y+=12,j++){ const yy=Math.round(y)+.5; g.moveTo(xr,yy); g.lineTo(xr+(j%4===0?7:3),yy) }
-    g.stroke();
-    return HCV;
-  }
-  function hebraNueva(p,T,yc,a){
-    if(a<=.01||!SIGY) return;
-    const R=anilloR(), yK=SIGY-16, yMin=HC-HV*.035+R+12, len=yK-yMin; if(len<40) return;
-    const y1=yc+R+12, gRow=QUIETO?1:sube((p-.905)/.07), tip=y1+(yK-y1)*gRow; if(tip<y1+3) return;
-    const A=movil?8:12, cv2=hebraHorno(len,A,__dens(cv));
-    const hs=Math.min(cv2._h,tip-y1); if(hs<=1) return;
-    const k=cv2.height/cv2._h;
-    ctx.globalAlpha=a; ctx.drawImage(cv2,0,0,cv2.width,hs*k,W/2-cv2._w/2,y1,cv2._w,hs); ctx.globalAlpha=1;
-    /* la luz: en la punta mientras crece; luego baja por la hebra hasta el epígrafe */
-    if(!QUIETO){
-      let py=tip, pa=1-sube((gRow-.9)/.1);
-      if(gRow>=.9){ const u=(T/3.4)%1, py2=y1+sube(u)*(yK-y1), pa2=Math.sin(u*Math.PI)*sube((gRow-.9)/.1);
-        if(pa2>pa){ py=py2; pa=pa2 } }
-      if(pa>.02){ const sz=movil?15:18; ctx.globalAlpha=a*pa; ctx.drawImage(PUNTA,W/2-sz/2,py-sz/2,sz,sz); ctx.globalAlpha=1 }
+  /* p68 · la hebra que empezaba bajo el cubo (horneada aquí) es ahora el
+     primer tramo de la vía: ver «LA VÍA», en el lienzo fijo */
+
+  /* p68 · EL CAMPO QUE QUEDA. Pocos (9 en el teléfono, 13 en escritorio),
+     pequeños, a media y larga distancia, con el sombreado de los del túnel
+     pero apagados a menos de la mitad. Se reparten por la escena dejando
+     libre la columna del cubo y de la vía; derivan despacio (unos píxeles en
+     varios segundos) y giran más despacio aún. Se colocan en pantalla y se
+     llevan al espacio de la cámara, así que no dependen del vuelo. */
+  let AMB=null, AMBK='';
+  function ambiente(T,k){
+    const key=W+'|'+HV; if(!AMB||AMBK!==key){ AMBK=key; AMB=[]; const n=movil?9:13;
+      for(let i=0;i<n;i++){
+        let u=(i+.15+.7*azar(i,150))/n; const v=.06+.86*azar(i,151);
+        /* fuera de la columna central (el cubo, su mira, el tramo recto de la vía) */
+        if(Math.abs(u-.5)<.17) u=u<.5?u-.17:u+.17;
+        let ax=azar(i,153)-.5, ay=azar(i,154)-.5, az=azar(i,155)-.5; const m=Math.hypot(ax,ay,az)||1;
+        AMB.push({u:clm(u,.05,.95),v,z:2.6+azar(i,152)*2.8,lado:(movil?.075:.06)+azar(i,156)*.07,ax:ax/m,ay:ay/m,az:az/m,
+          a0:azar(i,157)*6.283,gv:(azar(i,158)<.5?-1:1)*(.05+azar(i,159)*.08),dr:azar(i,160)*6.283,
+          tono:[TONES[3],TONES[7],TONES[4],TONES[2],TONES[6],TONES[5]][i%6],a:.42+azar(i,161)*.4});
+      } }
+    for(let i=0;i<AMB.length;i++){ const c=AMB[i], z=c.z;
+      const sx=c.u*W+Math.sin(T*.05+c.dr)*W*.018, sy=c.v*HV+Math.cos(T*.04+c.dr*1.3)*HV*.012;
+      const x=(sx-W/2)*z/f, y=(sy-HC)*z/f, h=c.lado/2;
+      caja(x,y,z,h,h,h,giro(c.ax,c.ay,c.az,c.a0+T*c.gv),c.tono,c.a*k,.42+.1*(1-z/5.4),0,0,null,-1,T);
     }
   }
 
@@ -14097,6 +14172,10 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
     carga=0; llegadas=0;
     if(IMP){ for(let i=0;i<IMP.length;i++){ const r=IMP[i]; carga+=clm((p-r.arr)/.012); if(p>=r.arr) llegadas++ } carga/=IMP.length||1 }
     const qa=QUIETO?sube((p-.84)/.06):0;
+    /* p68 · lo que queda del túnel cuando se vacía: unos pocos cubos, lejos,
+       apagados, a la deriva; el negro de después de la carga no está muerto */
+    const ambA=QUIETO?sube((p-.84)/.06):sube((p-.855)/.09);
+    if(ambA>.01) ambiente(Tq,ambA);
     resplandor(yT,anilloR()*3.6,(QUIETO?.62*qa:(.1+.55*carga)*sube((p-.86)/.05)+.22*destello(Tq))*(1-sube(EX/.13)));
     if(estela>0){
       const Rmax=Math.hypot(W,HV)*.62; ctx.lineWidth=1;
@@ -14262,9 +14341,9 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
       const apaga=((1-clm(q.hondo)*.55)*q.sombra)*(1-eH)+eH;
       cuboOrto(ctx,x,y,h,Mt,mezclaTono(q.tono,TONES[0],eH),q.a+(1-q.a)*eH,apaga);
     }
-    /* p66 · la hebra que empieza, bajo el cubo; y, sin movimiento, la
-       composición entera y quieta: cubo, mira, resplandor y hebra */
-    hebraNueva(p,Tq,yT,(QUIETO?qa:sube((p-.895)/.03))*sale66);
+    /* p66 · sin movimiento, la composición entera y quieta: cubo, mira y
+       resplandor. p68 · la hebra que empieza bajo el cubo es ya el primer
+       tramo de la vía, y la pinta el lienzo fijo (ver «LA VÍA») */
     if(QUIETO&&qa>0){
       cuboOrto(ctx,W/2,yT,tamH(),Rmarca(0),TONES[0],qa,1);
       mira(ctx,W/2,yT,anilloR(),qa*sale66,0,null);
@@ -14273,7 +14352,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
   }
 
   /* ── los rótulos ── */
-  let figI=-1;
+  let figI=-1, SALE=0;
   /* p65 · cada estilo se escribe solo si cambia: quietos, los rotulos
      escribian doce propiedades por cuadro y cada una es un recalculo */
   const PUESTO=new Map();
@@ -14301,13 +14380,17 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
     pon(st,'--tnb',(1-sube(p/.03)).toFixed(3));
     /* p66 · el destino: el epígrafe de la ruta, al pie de la hebra; se va
        cuando el escenario sube y entra el de verdad */
-    if(SIG){ const a=(QUIETO?sube((p-.86)/.05):sube((p-.955)/.03))*(1-sube(EX/.15));
+    /* p68 · ...y se va hacia la izquierda —hacia donde va la vía— en cuanto
+       el cubo se suelta: el de verdad entra cuando este ya no está. Sin
+       movimiento no aparece: el de verdad está en su sitio desde el principio */
+    if(SIG){ const a=QUIETO?0:sube((p-.955)/.03)*(1-SALE);
       pon(SIG,'opacity',a.toFixed(3)); pon(SIG,'visibility',a>.02?'visible':'hidden');
-      pon(SIG,'--a',(QUIETO?1:sube((p-.965)/.03)).toFixed(3)) }
+      pon(SIG,'--a',(QUIETO?1:sube((p-.965)/.03)).toFixed(3));
+      pon(SIG,'transform','translateX('+(-18*SALE).toFixed(1)+'px)') }
   }
 
   /* ── medidas ── */
-  let top=0,run=1;
+  let top=0,run=1,MB=0;   /* p68 · MB: el margen de abajo del escenario (negativo) */
   const dTop=n=>{let y=0;while(n){y+=n.offsetTop;n=n.offsetParent}return y};
   function caja2(els){ const sr=st.getBoundingClientRect(); let l=1e9,t=1e9,r=-1e9,b=-1e9;
     for(const e of els){ if(!e) continue; const q=e.getBoundingClientRect(); if(!q.width) continue; l=Math.min(l,q.left); t=Math.min(t,q.top); r=Math.max(r,q.right); b=Math.max(b,q.bottom) }
@@ -14323,10 +14406,11 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
        canto de abajo. Si no ha cambiado de tamaño, no se vuelve a crear. */
     HV=Math.min(H,(caja0&&caja0.offsetHeight)||H); HC=HV/2; TAMH=0;
     const cw=Math.round(W*d), ch=Math.round(H*d);
-    if(cv.width!==cw||cv.height!==ch){ cv.width=cw; cv.height=ch }
+    __mide(cv,cw,ch);
     ctx.setTransform(d,0,0,d,0,0);
     f=Math.max(W,HV)*.62; CVL=cv.getBoundingClientRect().left;
-    top=dTop(hold); run=Math.max(1,hold.offsetHeight-(st.offsetHeight||innerHeight));
+    MB=parseFloat(getComputedStyle(st).marginBottom)||0;
+    top=dTop(hold); run=Math.max(1,hold.offsetHeight-((st.offsetHeight||innerHeight)+MB));
     texto=STA.map(el=>({x:W/2,y:HC,w:el.offsetWidth/2,h:el.offsetHeight/2,W:el.offsetWidth,H:el.offsetHeight}));
     texto.push(cab?caja2(cab.querySelectorAll('.sk,.builds-h,.tn-papel')):null);
     SIGY=SIG?SIG.offsetTop:0;
@@ -14338,14 +14422,14 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
   addEventListener('nrm:remide',size,{passive:true});
   /* lo de arriba cambia de alto al cargar (letras, imágenes): el sitio del
      anclado se vuelve a medir cuando cambia el alto de la página, no por cuadro */
-  const remideSitio=()=>{ top=dTop(hold); run=Math.max(1,hold.offsetHeight-(st.offsetHeight||innerHeight)); midePie() };
+  const remideSitio=()=>{ top=dTop(hold); run=Math.max(1,hold.offsetHeight-((st.offsetHeight||innerHeight)+MB)); midePie() };
   if(window.ResizeObserver) { const ro=new ResizeObserver(remideSitio); ro.observe(document.body); const mn=document.getElementById('contenido'); if(mn) ro.observe(mn) }
 
   /* ── el bucle del túnel ── */
-  let pS=0,pT=0,vis=false,dirty=true,ult=0,last=-1,tRaf=0;
+  let pS=0,pT=0,vis=false,dirty=true,ult=0,last=-1,tRaf=0,tPint=0;
   /* p67 · la guarda del tunel: solo la densidad, sin volver a medir la escena */
   const GU=__guarda(cv,()=>{ if(!W) return; const d=__dens(cv); PX1=1/d;
-    const cw=Math.round(W*d), ch=Math.round(H*d); if(cv.width!==cw||cv.height!==ch){ cv.width=cw; cv.height=ch }
+    __mide(cv,Math.round(W*d),Math.round(H*d));
     ctx.setTransform(d,0,0,d,0,0); dirty=true });
   /* p65 · EL TÚNEL YA VA EN MARCHA AL LLEGAR. La cámara avanza también con el
      reloj, al paso lento de «The stack» (.16), para que el campo esté vivo
@@ -14368,10 +14452,24 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
        latido de cada llegada, al cruzarla bajando */
     const ex=Math.max(0,(__y-(top+run))/(HV||innerHeight));
     if(QUIETO&&!dirty&&Math.abs(pS-last)<.0005&&Math.abs(ex-EX)<.002) return;
+    /* p68 · SUELTO, EL ESCENARIO YA NO CAMBIA CON EL SCROLL: sube con la página
+       y el navegador lo desplaza solo. Pasado el resplandor, lo único vivo es
+       la deriva de los cubos de fondo (unos píxeles en muchos segundos): se
+       repinta cuatro veces por segundo, no en cada cuadro */
+    if(!QUIETO&&!dirty&&pS>=.9995&&ex>.14&&EX>.14&&now-tPint<250){ EX=ex; return }
+    tPint=now;
     dirty=false; last=pS; EX=ex;
     if(IMP&&!QUIETO){ for(let i=0;i<IMP.length;i++){ const a=IMP[i].arr; if(pPrev<a&&pS>=a){ PULSOS.push(now/1000); if(PULSOS.length>5) PULSOS.shift() } } }
     pPrev=pS;
-    GU.ini(); const FS=draw(pS,now/1000,pT); GU.fin(); rotulos(pS,FS);
+    /* p68 · solo se pinta lo que se ve del escenario: al soltarse sube y, por
+       abajo, lo tapa la ruta; lo de fuera no se rasteriza */
+    const stT=Math.min(0,(top+run)-__y), b0=Math.max(0,-stT), b1=Math.min(H,(RUTAT?RUTAT-__y+40:1e9)-stT);
+    const recorta=b0>.5||b1<H-.5;
+    GU.ini();
+    if(recorta){ ctx.save(); ctx.beginPath(); ctx.rect(0,b0,W,Math.max(0,b1-b0)); ctx.clip() }
+    const FS=draw(pS,now/1000,pT);
+    if(recorta) ctx.restore();
+    GU.fin(); rotulos(pS,FS);
   }
   addEventListener('visibilitychange',()=>{if(!document.hidden&&vis&&!tRaf){ult=performance.now();tRaf=requestAnimationFrame(tick)}});
 
@@ -14386,7 +14484,10 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
   let OW=0,OH=0,odpr=1,oLimpio=true,oRaf=0,LIM=null,PIE=null,CABK=null;
   /* el pie del titular de la ruta (documento): el cubo no se cruza por encima de él */
   const rutaH=document.querySelector('#ruta .ruta-h'), rutaK=document.querySelector('#ruta .ruta-top');
-  function midePie(){ if(rutaH){ const r=rutaH.getBoundingClientRect(); PIE=r.bottom+scrollY } if(rutaK){ CABK=rutaK.getBoundingClientRect().top+scrollY } }
+  /* p68 · por la maqueta, no por la caja pintada: el epígrafe lleva un
+     desplazamiento propio (su relevo) y la caja lo incluiría */
+  function midePie(){ if(rutaH) PIE=dTop(rutaH)+rutaH.offsetHeight; if(rutaK) CABK=dTop(rutaK); RUTAT=rutaS?dTop(rutaS):0 }
+  const rutaS=document.getElementById('ruta'); let RUTAT=0;
   /* p65 · FUERA DE SU TRAMO, EL LIENZO FIJO NO EXISTE. Era un lienzo a
      pantalla completa (5 MB en un telefono) compuesto encima de toda la
      pagina durante toda la visita, y se volvia a crear en cada medida. Ahora
@@ -14400,129 +14501,356 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
     oLimpio=!oTiene; midePie(); if(oTiene) odespierta();
   }
   let OB=null;
-  function oEnciende(){ if(oTiene) return; oTiene=true; OB=null; oc.style.display='';
+  function oEnciende(){ if(oTiene) return; oTiene=true; OB=null; oc.style.display=''; odpr=__dens(oc);
     __mide(oc,Math.round(OW*odpr),Math.round(OH*odpr)); oLimpio=true }
   function oApaga(){ if(!oTiene) return; oTiene=false; oc.style.display='none'; oc.width=1; oc.height=1; oLimpio=true }
+  /* p68 · fuera de su tramo la vía tampoco existe: se sueltan sus mapas de bits */
+  function viaSuelta(){ vdVe(false); if(VCK){ vd.width=vd.height=1; VCK='' } }
   oc.style.display='none';
   const HM=m=>m?7:9;                      /* el tamaño del índice en la hebra */
+
+  /* ══ p68 · LA VÍA ═══════════════════════════════════════════════════════
+     Antes, al soltarse el escenario, la hebra de debajo del cubo se apagaba,
+     el epígrafe provisional también, y durante casi media pantalla de scroll
+     quedaba el negro con un cubo pequeño yéndose al margen. Ahora esa hebra
+     no se apaga: es el primer tramo de una VÍA —las mismas cinco hebras
+     trenzadas de la ruta— que se curva hacia el margen izquierdo, baja por
+     él junto al epígrafe y el titular de la ruta, cruza el canto entre las
+     dos secciones y entra en la hebra de verdad justo encima del primer
+     nodo, con su misma fase, su misma amplitud y su mismo grosor: la hebra
+     de la ruta EMPIEZA donde acaba la vía. El cubo baja por ella —no vuela
+     suelto— y se posa en su cabeza.
+     Coordenadas: las del escenario (0 = su canto de arriba). Mientras está
+     anclado coinciden con la pantalla; desde que se suelta, todo —escenario
+     y ruta— sube junto y basta restar lo que ha subido. La vía se pinta aquí,
+     en el lienzo fijo, porque es lo único que cruza de una sección a otra. */
+  const VPASO=3;
+  let VIA=null, VIAK='';
+  function viaGeo(){
+    const hb=window.__hebra, M=hb&&hb.M; if(!M||!W||!run||!SIGY||PIE==null||CABK==null) return null;
+    const Se=top+run, R=anilloR();
+    const key=[Se,M.docTop,M.y0,M.sx,M.x0,M.wl,W,HV,HC,CVL,PIE,CABK,OH].join('|');
+    if(VIA&&VIAK===key) return VIA;
+    const xc=CVL+W/2, yc=(HC||OH*CY)-OH*.035, y1=yc+R+12, yK=SIGY-16;
+    if(yK-y1<40) return null;
+    const yb=y1+(yK-y1)*.42;
+    const gut=(M.x0||0)+(M.wl||0);
+    const xm=Math.max(10,gut-clm(gut*.3,12,30)), xs=(M.x0||0)+M.sx;
+    const kTop=CABK-Se, pie=PIE-Se, yJ=M.docTop+M.y0-Se;
+    const ym=Math.max(yb+90,Math.min(kTop-24,yb+Math.max(150,(xc-xm)*.62)));
+    const yj0=Math.max(ym+12,pie+8);
+    if(yJ-yj0<14) return null;
+    /* la línea media, muy fina, y luego a pasos iguales de 3 px */
+    const px=[xc], py=[yc];
+    const recta=(x,ya,yb2)=>{ for(let y=ya+1;y<=yb2;y+=1){ px.push(x); py.push(y) } };
+    const curva=(x0,y0,x3,y3,n)=>{ const k=(y3-y0)*.55;
+      for(let i=1;i<=n;i++){ const t=i/n, m=1-t, a=m*m*m, b=3*m*m*t, c=3*m*t*t, d=t*t*t;
+        px.push(a*x0+b*x0+c*x3+d*x3); py.push(a*y0+b*(y0+k)+c*(y3-k)+d*y3) } };
+    recta(xc,yc,yb); const nB=px.length-1;
+    curva(xc,yb,xm,ym,260); const nM=px.length-1;
+    recta(xm,ym,yj0); const nJ0=px.length-1;
+    curva(xm,yj0,xs,yJ,120);
+    const X=[],Y=[],NX=[],NY=[];
+    let acc=0, sig=VPASO, ab=0, am=0, aj0=0;
+    X.push(px[0]); Y.push(py[0]);
+    for(let i=1;i<px.length;i++){
+      const dx=px[i]-px[i-1], dy=py[i]-py[i-1], dl=Math.hypot(dx,dy);
+      while(acc+dl>=sig){ const f=(sig-acc)/dl; X.push(px[i-1]+dx*f); Y.push(py[i-1]+dy*f); sig+=VPASO }
+      acc+=dl;
+      if(i===nB) ab=acc; if(i===nM) am=acc; if(i===nJ0) aj0=acc;
+    }
+    const n=X.length;
+    for(let k=0;k<n;k++){ const a=X[Math.min(n-1,k+1)]-X[Math.max(0,k-1)], b=Y[Math.min(n-1,k+1)]-Y[Math.max(0,k-1)], l=Math.hypot(a,b)||1;
+      NX.push(b/l); NY.push(-a/l) }
+    const aJ=(n-1)*VPASO, a1=y1-yc;
+    VIA={Se,xc,yc,y1,yK,yb,xm,ym,yj0,xs,yJ,X,Y,NX,NY,n,a1,ab,am,aj0,aJ,
+      Ab:movil?8:12, Am:Math.min(movil?8:12,xm*.5), dPh:M.y0-(aJ-a1), M};
+    VIAK=key; return VIA;
+  }
+  /* la hebra i en el punto k de la vía: cuánto se aparta de la línea media */
+  const HEBV=[{A:1,l:310,f:0,w:1,o:.78,d:0},{A:.8,l:372,f:2.1,w:.88,o:.62,d:1.7},{A:.62,l:262,f:4,w:.8,o:.46,d:3.4},
+              {A:.88,l:436,f:1.2,w:.8,o:.52,d:5.1},{A:.5,l:338,f:5.3,w:.74,o:.34,d:6.8}];
+  function viaOff(V,i,a,T,cierra){
+    const e=HEBV[i];
+    const wm=sube((a-V.am)/Math.max(1,V.aJ-V.am)), wj=sube((a-V.aj0)/Math.max(1,V.aJ-V.aj0));
+    const v=(a-V.a1)+V.dPh*wm;
+    let A=(V.Ab+(V.Am-V.Ab)*sube((a-V.ab)/Math.max(1,V.am-V.ab)))*e.A*sube((a-V.a1)/56);
+    if(wj>0){ const mod=.82+.18*Math.sin(v/190+i*1.7); A=A*(1-wj)+V.M.A*e.A*mod*.55*wj }
+    return A*cierra*Math.sin(6.2832*v/e.l+e.f);
+  }
+  /* los degradados de la vía, en coordenadas del escenario (se mueven con la
+     matriz): suben desde el cubo como la hebra de antes */
+  let VGR=null, VGRK='';
+  function viaGr(V){
+    const k=V.y1+'|'+V.yK; if(VGR&&VGRK===k) return VGR; VGRK=k;
+    VGR=[0,1].map(pase=>{ const col=pase?'192,216,255':'204,206,213', len=V.yK-V.y1, g=og.createLinearGradient(0,V.y1,0,V.yK);
+      g.addColorStop(0,'rgba('+col+',0)'); g.addColorStop(.2,'rgba('+col+',1)'); g.addColorStop(1,'rgba('+col+',.9)'); return g });
+    return VGR;
+  }
+  /* pinta la vía: el tramo recto de arriba hasta «yRecta» (el de la carga,
+     que se cierra en el epígrafe), y el ramal curvo hasta «aTip».
+     «sc» = lo que ha subido el escenario; «tq» = el reloj de la hebra */
+  /* p68 · LA VÍA, EN SU PROPIO LIENZO DE PÁGINA. Pintada en el lienzo fijo
+     costaba ~10 ms por cuadro en un teléfono lento (diez trazos largos, o una
+     copia grande, en cada cuadro de scroll). Pero desde que el escenario se
+     suelta la vía no se mueve respecto a la página: vive en un lienzo
+     colocado en la página, por encima de las dos secciones, que se pinta UNA
+     vez y el navegador desplaza solo. Su fase no depende del reloj (y el
+     arranque de la hebra de la ruta tampoco): es quieta. Lo que crece se
+     descubre con un recorte perpendicular a la vía en la punta; lo único que
+     se repinta es el final —unos 50 px— mientras la hebra de la ruta sale de
+     él. En el lienzo fijo quedan la carga (antes de soltarse), el tramo que
+     se apaga bajo el desvío, la regla, la luz y el cubo. */
+  const vd=document.createElement('canvas');
+  vd.className='via-cv'; vd.setAttribute('aria-hidden','true'); vd.setAttribute('data-sin-vigia','');
+  vd.style.cssText='position:absolute;left:0;top:0;z-index:3;pointer-events:none;display:none';
+  /* se pinta mientras está oculto (antes de soltarse el escenario): no puede
+     llevar el filtro de la página que ignora los trazos de los lienzos que no
+     se ven («proteger»), o se hornearía en blanco */
+  vd.__guardado=1;
+  document.body.appendChild(vd);
+  const vg=vd.getContext('2d');
+  let VCK='', VAB=-1, VVIS=false, VCLIP='', VB=null;
+  function vdTrazos(V,ka,kb,abre){
+    const g=vg, kk=movil?1:(V.M.k||1), GR=V.GRd, kM=Math.floor(V.am/VPASO), kJ0=Math.floor(V.aj0/VPASO);
+    g.lineCap='round'; g.lineJoin='round';
+    for(let pase=0;pase<2;pase++){ g.strokeStyle=GR[pase];
+      for(let i=0;i<5;i++){ const e=HEBV[i], o=e.o*(pase?1:.16);
+        /* en tres trozos: arriba el grosor de la hebra de la carga; abajo el de
+           la hebra de la ruta; en medio, mitad y mitad */
+        const cortes=[ka,Math.max(ka,Math.min(kb,kM)),Math.max(ka,Math.min(kb,kJ0)),kb];
+        for(let c=0;c<3;c++){ const k0=cortes[c], k1=cortes[c+1]; if(k1<=k0) continue;
+          const w=c===0?1:c===1?(1+kk)/2:kk;
+          g.globalAlpha=o*(c===0?1:c===1?.95:.9); g.lineWidth=(pase?e.w*.95:e.w*3.4)*w; g.beginPath();
+          for(let k=k0;k<=k1;k++){ const a=k*VPASO, ci=abre+(1-abre)*sube((V.aJ-a)/40), f=viaOff(V,i,a,0,ci), x=V.X[k]+V.NX[k]*f, y=V.Y[k]+V.NY[k]*f; k===k0?g.moveTo(x,y):g.lineTo(x,y) }
+          g.stroke() } } }
+    g.globalAlpha=1;
+  }
+  function viaHorno(V,abre){
+    const d=odpr, key=VIAK+'|'+d;
+    if(VCK!==key){
+      const pad=(V.Ab+8)*1.2; let xa=1e9, xb=-1e9; for(let k=0;k<V.n;k+=2){ if(V.X[k]<xa) xa=V.X[k]; if(V.X[k]>xb) xb=V.X[k] }
+      const bx=Math.max(0,Math.floor(xa-pad)), by=Math.floor(V.y1-6), bw=Math.ceil(xb+pad)-bx, bh=Math.ceil(V.yJ+8)-by;
+      VB={x:bx,y:by,w:bw,h:bh,d};
+      __mide(vd,bw*d,bh*d);
+      vd.style.left=bx+'px'; vd.style.top=(V.Se+by)+'px'; vd.style.width=bw+'px'; vd.style.height=bh+'px';
+      vg.setTransform(d,0,0,d,-bx*d,-by*d); vg.clearRect(bx,by,bw,bh);
+      V.GRd=[0,1].map(pase=>{ const col=pase?'192,216,255':'204,206,213', gr=vg.createLinearGradient(0,V.y1,0,V.yK);
+        gr.addColorStop(0,'rgba('+col+',0)'); gr.addColorStop(.2,'rgba('+col+',1)'); gr.addColorStop(1,'rgba('+col+',.9)'); return gr });
+      vdTrazos(V,Math.ceil(V.a1/VPASO),V.n-1,abre); VCK=key; VAB=abre; VCLIP='';
+    }else if(Math.abs(abre-VAB)>.012||(abre!==VAB&&(abre===0||abre===1))){
+      /* solo el final: se borra su caja y se vuelve a trazar lo que cae en ella */
+      const kE=Math.max(0,Math.floor((V.aJ-54)/VPASO)), yA=V.Y[kE]-2, A=Math.max(V.Am,V.M.A*.55)*1.3+8;
+      let xa=1e9, xb=-1e9; for(let k=kE;k<V.n;k++){ if(V.X[k]<xa) xa=V.X[k]; if(V.X[k]>xb) xb=V.X[k] }
+      const r=[xa-A,yA,xb-xa+2*A,V.yJ+8-yA];
+      vg.save(); vg.beginPath(); vg.rect(r[0],r[1],r[2],r[3]); vg.clip(); vg.clearRect(r[0],r[1],r[2],r[3]);
+      let kS=kE; while(kS>0&&V.Y[kS]>yA-A) kS--;
+      vdTrazos(V,Math.max(Math.ceil(V.a1/VPASO),kS),V.n-1,abre); vg.restore(); VAB=abre;
+    }
+    return VB;
+  }
+  function vdVe(v){ if(v!==VVIS){ VVIS=v; vd.style.display=v?'':'none' } }
+  function vdRecorte(V,aTip){
+    let c='none';
+    if(aTip<V.aJ-.5){ const k=Math.min(V.n-1,Math.max(0,Math.round(aTip/VPASO))), cx=V.X[k]-VB.x, cy=V.Y[k]-VB.y, nx=V.NX[k], ny=V.NY[k], tx=-ny, ty=nx, L=3000;
+      const P=[[cx+nx*L,cy+ny*L],[cx+nx*L-tx*L,cy+ny*L-ty*L],[cx-nx*L-tx*L,cy-ny*L-ty*L],[cx-nx*L,cy-ny*L]];
+      c='polygon('+P.map(p=>Math.round(p[0])+'px '+Math.round(p[1])+'px').join(',')+')' }
+    if(c!==VCLIP){ VCLIP=c; vd.style.clipPath=c }
+  }
+  /* lo que va en el lienzo fijo: el tramo recto de la carga (entero antes de
+     soltarse; después, lo de debajo del desvío, apagándose), la regla y la
+     luz. «sc» = lo que ha subido el escenario */
+  /* lo que va en el lienzo fijo: el tramo recto de la carga (entero antes de
+     soltarse: hasta el desvío es una copia del lienzo de la vía, y por debajo
+     —lo que luego se apaga— va en vivo), la regla y la luz. «sc» = lo que ha
+     subido el escenario */
+  function viaPinta(V,sc,yRecta,aRecta,yDesde,luzA,nb){
+    const g=og;
+    g.save(); g.translate(0,-sc);
+    if(aRecta>.01&&yRecta>yDesde){
+      if(yDesde<V.yb&&VB){ const y1=Math.min(yRecta,V.yb), d=VB.d;
+        if(y1>yDesde){ g.globalAlpha=aRecta; g.drawImage(vd,0,Math.round((yDesde-VB.y)*d),vd.width,Math.round((y1-yDesde)*d),VB.x,yDesde,VB.w,Math.round((y1-yDesde)*d)/d); g.globalAlpha=1 } }
+      const ya=Math.max(V.yb,sc-4), yb2=Math.min(yRecta,sc+OH+4);
+      if(yb2>ya){ const GR=viaGr(V); g.lineCap='round'; g.lineJoin='round';
+        for(let pase=0;pase<2;pase++){ g.strokeStyle=GR[pase];
+          for(let i=0;i<5;i++){ const e=HEBV[i]; g.globalAlpha=e.o*(pase?1:.16)*aRecta; g.lineWidth=pase?e.w*.95:e.w*3.4; g.beginPath();
+            for(let y=ya;;y+=VPASO*(pase?1:2)){ const yy=Math.min(y,yb2), A=V.Ab*e.A*sube((yy-V.y1)/56)*sube((V.yK-yy)/46);
+              const x=V.xc+A*Math.sin(6.2832*(yy-V.y1)/e.l+e.f); y===ya?g.moveTo(x,yy):g.lineTo(x,yy); if(yy>=yb2) break }
+            g.stroke() } }
+        g.globalAlpha=1 }
+      /* la regla: marcas de 1 px cada 12 px junto al tramo recto */
+      const xr=Math.round(V.xc+V.Ab+14)+.5, yl=Math.min(yRecta,V.yK-8);
+      g.strokeStyle='rgba(214,217,224,'+(.26*aRecta).toFixed(3)+')'; g.lineWidth=1; g.beginPath();
+      for(let y=V.y1+12,j=1;y<yl;y+=12,j++){ const yy=Math.round(y)+.5; g.moveTo(xr,yy); g.lineTo(xr+(j%4===0?7:3),yy) }
+      g.stroke();
+    }
+    if(luzA){ const sz=movil?15:18; g.globalAlpha=luzA[2]; g.drawImage(PUNTA,luzA[0]-sz/2,luzA[1]-sz/2,sz,sz); g.globalAlpha=1 }
+    g.restore();
+    if(nb){ const y0=(aRecta>.01?yDesde:1e9), y1=Math.max(aRecta>.01?yRecta:-1e9,luzA?luzA[1]+12:-1e9);
+      if(y1>-1e8){ nb[0]=Math.min(nb[0],Math.min(V.xc-V.Ab-32,luzA?luzA[0]-12:1e9)); nb[2]=Math.max(nb[2],Math.max(V.xc+V.Ab+32,luzA?luzA[0]+12:-1e9));
+        nb[1]=Math.min(nb[1],Math.max(0,Math.min(y0,luzA?luzA[1]-12:1e9)-sc-6)); nb[3]=Math.max(nb[3],Math.min(OH,y1-sc+6)) } }
+  }
+  const Ecubo=q=>{ q=clm(q); return q*q*(3-2*q) };
   function limites(){
     const hb=window.__hebra, M=hb&&hb.M; if(!M||!run) return null;
+    const V=viaGeo(); if(!V) return null;
     const Sa=top+HB*run, Se=top+run;
-    const Sb=Math.max(Se+OH*.6, M.docTop+M.y0+20-OH*.62);
-    const HOP=clm(OH*.2,110,190);
-    return {Sa,Se,Sb,Sc:Sb+HOP,HOP,M,hb,pie:PIE,cab:CABK};
+    /* se posa cuando la cabeza de la hebra de la ruta llega a la vía */
+    const Sb=Math.max(Se+OH*.4, M.docTop+M.y0-(window.__vh||OH)*.62);
+    const HOP=clm(OH*.12,70,120);
+    return {Sa,Se,Sb,Sc:Sb+HOP,HOP,M,hb,V,fin:Se+V.yJ+OH*.1};
   }
   function pose(s,T,soloXY){
     const L=LIM; if(!L||s<L.Sa||s>=L.Sc) return null;
-    const M=L.M, mov=M.movil;
-    const gut=Math.max(12,(L.hb.x0||0)+(M.wl||0));        /* el margen izquierdo, hasta la columna */
-    const xg=gut*.46, hG=clm(gut*.27,5,15), hM=HM(mov), h0=tamH();
-    const C={x:(W?CVL+W/2:OW/2),y:HC||OH*CY};
+    const V=L.V, M=L.M, mov=M.movil, hM=HM(mov), h0=tamH();
     let x,y,h,th,anillo=-1;
-    const yH=OH*.3, y0=C.y-OH*.035;
-    const Sg=Math.max(L.Se+OH*.25,Math.min(L.Se+(L.Sb-L.Se)*.5,L.cab!=null?L.cab-yH-hG-18:1e9)), Sf=Math.max(Sg+20,L.Sb-OH*.24);
-    const TH1=2.3*Math.PI, TH2=1.9*Math.PI;
     if(s<L.Se){
       /* 1 · presentado en el centro, coge impulso: sube un poco y gira hacia atrás */
       const u=(s-L.Sa)/(L.Se-L.Sa), w=sube((u-.3)/.7);
-      x=C.x; y=C.y-OH*.035*w; h=h0; th=TH0+.55*w;
-    }else if(s<Sg){
-      /* 2 · el escenario se va hacia arriba y se lo lleva; el cubo se suelta y
-         se aparta al margen de la ruta, arriba, girando */
-      const t=(s-L.Se)/(Sg-L.Se);
-      h=h0+(hG-h0)*sube((t-.25)/.75);
-      x=C.x+(Math.max(xg,h*1.3+2)-C.x)*sube((t-.1)/.85);   /* nunca cortado por el canto */
-      y=y0+(yH-y0)*sube(t)-OH*.09*Math.sin(Math.PI*t)*(1-t);
-      th=TH0+.55-(TH0+.55-TH1)*sube(t);
-    }else if(s<Sf){
-      /* 3 · suspendido en el margen mientras sube el titular de la ruta */
-      const q=(s-Sg)/(Sf-Sg);
-      x=xg; y=yH+Math.sin(q*Math.PI)*OH*.006; h=hG; th=TH1-(TH1-TH2)*q;
+      x=V.xc; y=V.yc+OH*.035*(1-w); h=h0; th=TH0+.55*w;
+    }else if(s<L.Sb){
+      /* 2 · baja por la vía: se deja caer del centro de la mira, toma la curva,
+         baja por el margen junto al epígrafe y se mete en la hebra */
+      const q=(s-L.Se)/(L.Sb-L.Se), a=V.aJ*Ecubo(q), k=Math.min(V.n-1,a/VPASO), k0=k|0, f=k-k0, k1=Math.min(V.n-1,k0+1);
+      x=V.X[k0]+(V.X[k1]-V.X[k0])*f; y=V.Y[k0]+(V.Y[k1]-V.Y[k0])*f-(s-L.Se);
+      h=h0+(hM*1.12-h0)*sube((a-V.ab*.6)/Math.max(1,V.am-V.ab*.6));
+      h=h+(hM-h)*sube((a-V.aj0)/Math.max(1,V.aJ-V.aj0));
+      th=(TH0+.55)*Math.pow(1-sube(q),1.35);
     }else{
-      /* 4 · cae: gravedad por el margen, y solo cuando ya ha pasado el pie del
-         titular se cruza a la hebra; golpe en su cabeza, bote y asiento */
-      const t=(s-Sf)/(L.Sc-Sf), tl=.78, hb=L.hb;
-      const tip=hb.tip?hb.tip():M.y0+20;
-      const yM=M.docTop+clm(tip,M.y0+20,M.aqui)-s, xM=(hb.x0||0)+M.sx;
-      const bH=mov?4:7;
-      if(t<tl){
-        const k=t/tl; y=yH+(yM-yH)*k*k; h=hG+(hM-hG)*sube(k);
-        /* se cruza a la hebra solo por debajo del pie del titular y del primer
-           nodo de fase: no pisa ni texto ni el cubo plata */
-        const nodo=M.fases&&M.fases[0]?M.docTop+M.fases[0].y-s+(mov?7:10.5)+6:-1e4;
-        const thr=Math.max((L.pie!=null?L.pie-s:-1e4)+10+h,nodo+h);
-        const gx=yM-thr>4?sube((y-thr)/(yM-thr)):0;
-        x=xg+(xM-xg)*Math.max(gx,sube((k-.9)/.1));
-        th=TH2*(1-k*k);
-      }else{
-        const r=(t-tl)/(1-tl);
-        x=xM; y=yM-bH*Math.abs(Math.sin(r*Math.PI*2))*Math.pow(1-r,2); h=hM;
-        th=-.32*Math.sin(r*Math.PI*1.5)*(1-r); anillo=r;
-      }
+      /* 3 · posado en la cabeza de la hebra: bote corto, aro, y ya es el índice */
+      const r=(s-L.Sb)/(L.Sc-L.Sb), hb=L.hb, tip=hb.tip?hb.tip():M.y0;
+      x=V.xs; y=M.docTop+clm(tip,M.y0,M.aqui)-s-(mov?3:5)*Math.abs(Math.sin(r*Math.PI*2))*Math.pow(1-r,2); h=hM;
+      th=-.28*Math.sin(r*Math.PI*1.5)*(1-r); anillo=r;
     }
     if(soloXY) return {x,y,h};
     return {x,y,h,M:Rcaida(T,th),anillo,hM};
   }
   const OG=__guarda(oc,()=>{ odpr=__dens(oc); if(oTiene){ __mide(oc,Math.round(OW*odpr),Math.round(OH*odpr)); OB=null; oLimpio=true } });
+  /* p68 · el relevo del epígrafe: el provisional se va hacia la izquierda y,
+     ya ido, entra el de verdad desde la derecha trazando su filete. Nunca
+     están los dos a la vez. Sin movimiento: solo el de verdad. */
+  let KV='';
+  /* p68 · y la línea azul del canto de la ruta se traza con el scroll según
+     sube la ruta (de nada a entera), en vez de encenderse de golpe cuando ya
+     está arriba: la costura se dibuja mientras el cubo sale hacia ella */
+  if(rutaS&&!QUIETO) rutaS.classList.add('linea-viva');
+  function epigrafes(s,Se){
+    const sK=s-Se, ida=QUIETO?1:sube(sK/(OH*.06)), llega=QUIETO?1:sube((sK-OH*.055)/(OH*.085)), fil=QUIETO?1:sube((sK-OH*.08)/(OH*.12));
+    const ln=QUIETO?1:sube((OH-(RUTAT-s))/(OH*.42));
+    /* en pasos de 1/50: cada cambio es un recálculo de estilo y a más no se ve */
+    const q=v=>(Math.round(v*50)/50).toFixed(2);
+    const k=q(ida)+'|'+q(llega)+'|'+q(fil)+'|'+q(ln); if(k===KV) return;
+    const kv=KV.split('|'); KV=k; const kn=k.split('|');
+    SALE=+kn[0];
+    if(rutaK&&(kn[1]!==kv[1]||kn[2]!==kv[2])){ rutaK.style.setProperty('--ko',kn[1]); rutaK.style.setProperty('--kx',(16*(1-kn[1])).toFixed(1)+'px'); rutaK.style.setProperty('--ka',kn[2]) }
+    if(rutaS&&!QUIETO&&kn[3]!==kv[3]) rutaS.style.setProperty('--ln',kn[3]);
+  }
   function ocuadro(){
     oRaf=0;
     if(!og) return;
     LIM=limites();
-    const s=__y, P=QUIETO?null:pose(s,performance.now()/1000), dentro=enRango();
-    if(P||dentro) oEnciende();
-    if(!oTiene){ oLimpio=true; if(dentro) oRaf=requestAnimationFrame(ocuadro); return }
-    og.setTransform(odpr,0,0,odpr,0,0);
-    /* p66 · se borra solo la caja de lo que se pintó en el cuadro anterior,
-       no la pantalla entera (a densidad 2 eran 1,3 Mpx por cuadro) */
-    if(P) OG.ini();
-    if(P||!oLimpio){ if(OB) og.clearRect(OB[0],OB[1],OB[2]-OB[0],OB[3]-OB[1]); else og.clearRect(0,0,OW,OH); oLimpio=true; OB=null }
-    if(P){
-      const T=performance.now()/1000, h0=tamH(), nb=[P.x,P.y,P.x,P.y];
-      const caja3=(x,y,r)=>{ if(x-r<nb[0])nb[0]=x-r; if(y-r<nb[1])nb[1]=y-r; if(x+r>nb[2])nb[2]=x+r; if(y+r>nb[3])nb[3]=y+r };
-      caja3(P.x,P.y,P.h*2+4);
-      /* p66 · la estela de la caída: el mismo camino, unos píxeles de scroll
-         atrás, en azul y cada vez más fina; se apaga al posarse */
-      if(s>LIM.Se){
-        const d=OH*.013, ta=1-sube((s-(LIM.Sc-LIM.HOP*.55))/(LIM.HOP*.35));
-        if(ta>.01){ og.lineCap='round'; og.lineJoin='round';
-          const X=[P.x], Y=[P.y];
-          for(let j=1;j<=7;j++){ const Q=pose(s-j*d,T,true); if(!Q) break; X.push(Q.x); Y.push(Q.y); caja3(Q.x,Q.y,P.h*1.2+3) }
-          const lg=Math.abs(X[X.length-1]-P.x)+Math.abs(Y[Y.length-1]-P.y);
-          if(lg>2){
-            /* un cometa: tres pasadas apiladas (ancha y tenue, media, núcleo
-               vivo) que se afinan y se apagan hacia la cola: se lee suave,
-               sin degradados por cuadro */
-            const n=X.length-1; og.lineCap='butt';
-            for(let pase=0;pase<3;pase++){ const wd=[1.7,.95,.38][pase]*P.h, al=[.045,.08,.34][pase];
-              og.strokeStyle=pase===2?'rgb(120,184,255)':'rgb(46,134,255)';
-              for(let j=0;j<n;j++){ const k=1-j/n;
-                og.globalAlpha=al*k*(pase===2?k:1)*ta; og.lineWidth=wd*k+(pase===2?.8:1);
-                og.beginPath(); og.moveTo(X[j],Y[j]); og.lineTo(X[j+1],Y[j+1]); og.stroke() } }
-            og.globalAlpha=1;
-          }
+    const s=__y, L=LIM, T=performance.now()/1000;
+    if(L) epigrafes(s,L.Se);
+    const P=QUIETO?null:pose(s,T), dentro=enRango();
+    const hayVia=!!(L&&s>=L.Sa-OH*.05&&s<L.fin);
+    /* p68 · la vía: su lienzo de página, y lo que de ella va en el fijo */
+    let VS=null;
+    if(hayVia){
+      const V=L.V, sc=Math.max(0,s-L.Se), hb=L.hb, M=L.M, suelto=s>=L.Se;
+      const tipH=hb.tip?hb.tip():M.y0, abre=QUIETO?1:sube((tipH-M.y0)/40);
+      const B=viaHorno(V,abre);
+      let yRecta=0, aRecta=0, yDesde=V.y1, luz=null, copia=false;
+      if(QUIETO){
+        /* sin movimiento: la vía entera y quieta. Anclado el escenario, se
+           copia en el lienzo fijo (va con el escenario, no con la página) */
+        if(suelto){ vdVe(true); vdRecorte(V,V.aJ) } else { vdVe(false); copia=true }
+      }else if(!suelto){
+        /* la carga: el tramo recto crece desde el cubo hasta el epígrafe */
+        vdVe(false);
+        const p=clm((s-top)/run), gRow=sube((p-.905)/.07), aV=sube((p-.895)/.03);
+        yRecta=V.y1+(V.yK-V.y1)*gRow; aRecta=gRow*(V.yK-V.y1)<3?0:aV;
+        let py=yRecta, pa=(1-sube((gRow-.9)/.1))*aV;
+        if(gRow>=.9){ const u=(T/3.4)%1, py2=V.y1+sube(u)*(V.yK-V.y1), pa2=Math.sin(u*Math.PI)*sube((gRow-.9)/.1)*aV; if(pa2>pa){ py=py2; pa=pa2 } }
+        if(pa>.02) luz=[V.xc,py,pa];
+      }else{
+        /* suelto: la vía (en su lienzo de página) se descubre por delante del
+           cubo; lo de debajo del desvío se apaga; la luz corre por ella hasta
+           que el cubo se posa. Después no queda nada en el lienzo fijo */
+        const q=(s-L.Se)/(L.Sb-L.Se), aTip=V.ab+(V.aJ-V.ab)*sube(q/.62);
+        vdVe(true); vdRecorte(V,aTip);
+        yRecta=V.yK; yDesde=V.yb; aRecta=1-sube((s-L.Se)/(OH*.11));
+        if(s<L.Sc){
+          if(aTip<V.aJ-2){ const k=Math.min(V.n-1,Math.floor(aTip/VPASO)); luz=[V.X[k],V.Y[k],1] }
+          else { const u=(T/4.2)%1, a=V.a1+sube(u)*(V.aJ-V.a1), k=Math.min(V.n-1,Math.floor(a/VPASO)), pa=Math.sin(u*Math.PI)*(1-sube((s-L.Sb)/(L.Sc-L.Sb)));
+            if(pa>.02) luz=[V.X[k],V.Y[k],pa] }
         }
       }
-      /* p66 · la mira: se cierra sobre el cubo al llegar al centro y lo
-         suelta cuando el escenario se va */
-      const lock=sube((s-LIM.Sa)/(OH*.09)), va=lock*(1-sube((s-LIM.Se)/(OH*.16)));
-      if(va>.01){ const Rm=anilloR()*(P.h/h0)*(1+.45*(1-lock));
-        mira(og,P.x,P.y,Rm,va,T,cargaN?[llegadas,cargaN]:null); caja3(P.x,P.y,Rm*1.34+80); caja3(P.x+Rm*1.34+84,P.y-Rm*1.34,12) }
-      if(P.anillo>=0&&P.anillo<1){
-        og.strokeStyle='rgba(46,134,255,'+(.6*(1-P.anillo)).toFixed(3)+')'; og.lineWidth=1;
-        og.beginPath(); og.arc(P.x,P.y,P.hM*1.3+P.anillo*(P.hM*3.2),0,6.2832); og.stroke();
-        caja3(P.x,P.y,P.hM*4.6+3);
+      if(copia||luz||(aRecta>.01&&yRecta>yDesde)) VS={V,B,sc,yRecta,aRecta,yDesde,luz,copia};
+    }else if(VCK) viaSuelta();
+    const pinta=!!(P||VS);
+    if(pinta) oEnciende();
+    if(oTiene){
+      og.setTransform(odpr,0,0,odpr,0,0);
+      /* p66 · se borra solo la caja de lo que se pintó en el cuadro anterior */
+      if(pinta) OG.ini();
+      if(pinta||!oLimpio){ if(OB) og.clearRect(OB[0],OB[1],OB[2]-OB[0],OB[3]-OB[1]); else og.clearRect(0,0,OW,OH); oLimpio=true; OB=null }
+      const nb=[1e9,1e9,-1e9,-1e9];
+      const caja3=(x,y,r)=>{ if(x-r<nb[0])nb[0]=x-r; if(y-r<nb[1])nb[1]=y-r; if(x+r>nb[2])nb[2]=x+r; if(y+r>nb[3])nb[3]=y+r };
+      if(VS){
+        if(VS.copia){ const B=VS.B; og.drawImage(vd,B.x,B.y,B.w,B.h); caja3(B.x+B.w/2,Math.min(OH,B.y+B.h/2),Math.max(B.w,B.h)/2+4) }
+        viaPinta(VS.V,VS.sc,VS.yRecta,VS.aRecta,VS.yDesde,VS.luz,nb);
       }
-      /* p66 · cargado brilla un punto más; lo suelta mientras cae */
-      const br=(.07*carga+.12*destello(T))*(1-sube((s-LIM.Se)/Math.max(1,LIM.Sc-LIM.Se)));
-      cuboOrto(og,P.x,P.y,P.h,P.M,TONES[0],1,1+br);
-      oLimpio=false; OG.fin();
-      OB=[Math.max(0,Math.floor(nb[0]-2)),Math.max(0,Math.floor(nb[1]-2)),Math.min(OW,Math.ceil(nb[2]+2)),Math.min(OH,Math.ceil(nb[3]+2))];
+      if(P){
+        caja3(P.x,P.y,P.h*2+4);
+        /* p66 · la estela: el mismo camino, unos píxeles de scroll atrás */
+        if(s>LIM.Se){
+          const d=OH*.013, ta=1-sube((s-(LIM.Sb-LIM.HOP*.2))/(LIM.HOP*.6));
+          if(ta>.01){ og.lineCap='round'; og.lineJoin='round';
+            const X=[P.x], Y=[P.y];
+            for(let j=1;j<=7;j++){ const Q=pose(s-j*d,T,true); if(!Q) break; X.push(Q.x); Y.push(Q.y); caja3(Q.x,Q.y,P.h*1.2+3) }
+            const lg=Math.abs(X[X.length-1]-P.x)+Math.abs(Y[Y.length-1]-P.y);
+            if(lg>2){
+              const n=X.length-1; og.lineCap='butt';
+              for(let pase=0;pase<3;pase++){ const wd=[1.7,.95,.38][pase]*P.h, al=[.045,.08,.34][pase];
+                og.strokeStyle=pase===2?'rgb(120,184,255)':'rgb(46,134,255)';
+                for(let j=0;j<n;j++){ const k=1-j/n;
+                  og.globalAlpha=al*k*(pase===2?k:1)*ta; og.lineWidth=wd*k+(pase===2?.8:1);
+                  og.beginPath(); og.moveTo(X[j],Y[j]); og.lineTo(X[j+1],Y[j+1]); og.stroke() } }
+              og.globalAlpha=1;
+            }
+          }
+        }
+        /* p68 · la mira se queda donde se cargó el cubo: al soltarse el
+           escenario sube con él, se abre un poco y se apaga; el cubo se va sin ella */
+        const lock=sube((s-LIM.Sa)/(OH*.09)), su=sube((s-LIM.Se)/(OH*.16)), va=lock*(1-su);
+        if(va>.01){ const V=LIM.V, mx=s<LIM.Se?P.x:V.xc, my=s<LIM.Se?P.y:V.yc-(s-LIM.Se);
+          const Rm=anilloR()*(1+.45*(1-lock))*(1+.32*su);
+          mira(og,mx,my,Rm,va,T,cargaN?[llegadas,cargaN]:null); caja3(mx,my,Rm*1.34+80); caja3(mx+Rm*1.34+84,my-Rm*1.34,12) }
+        if(P.anillo>=0&&P.anillo<1){
+          og.strokeStyle='rgba(46,134,255,'+(.6*(1-P.anillo)).toFixed(3)+')'; og.lineWidth=1;
+          og.beginPath(); og.arc(P.x,P.y,P.hM*1.3+P.anillo*(P.hM*3.2),0,6.2832); og.stroke();
+          caja3(P.x,P.y,P.hM*4.6+3);
+        }
+        /* p66 · cargado brilla un punto más; lo suelta mientras baja */
+        const br=(.07*carga+.12*destello(T))*(1-sube((s-LIM.Se)/Math.max(1,LIM.Sc-LIM.Se)));
+        cuboOrto(og,P.x,P.y,P.h,P.M,TONES[0],1,1+br);
+      }
+      if(pinta){
+        oLimpio=false; OG.fin();
+        OB=[Math.max(0,Math.floor(nb[0]-2)),Math.max(0,Math.floor(nb[1]-2)),Math.min(OW,Math.ceil(nb[2]+2)),Math.min(OH,Math.ceil(nb[3]+2))];
+        if(OB[2]<=OB[0]||OB[3]<=OB[1]) OB=[0,0,1,1];
+      }else if(oLimpio) oApaga();
     }
-    if(dentro) oRaf=requestAnimationFrame(ocuadro);
-    else if(oLimpio) oApaga();
+    if(dentro&&!QUIETO) oRaf=requestAnimationFrame(ocuadro);
   }
-  function enRango(){ const L=LIM||limites(); if(!L) return false; const s=__y; return s>L.Sa-OH&&s<L.Sc+OH }
-  function odespierta(){ if(!oRaf&&!QUIETO&&(enRango()||!oLimpio)) oRaf=requestAnimationFrame(ocuadro) }
+  function enRango(){ const L=LIM||limites(); if(!L) return false; const s=__y; return s>L.Sa-OH&&s<Math.max(L.Sc,L.fin)+OH*.2 }
+  /* sin movimiento no hay bucle: se pinta una vez por cada scroll */
+  function odespierta(){ if(oRaf) return; if(QUIETO){ oRaf=requestAnimationFrame(ocuadro); return }
+    if(enRango()||!oLimpio){ oRaf=requestAnimationFrame(ocuadro); return }
+    /* fuera del tramo solo hace falta dejar los epígrafes como tocan (un
+       salto de un ancla, por ejemplo): una vez, y ya no se vuelve a pedir */
+    const L=LIM, y=window.__y;
+    if(L&&!((y<L.Sa&&KV==='0.00|0.00|0.00|0.00')||(y>L.Se&&KV==='1.00|1.00|1.00|1.00'))) oRaf=requestAnimationFrame(ocuadro) }
   addEventListener('scroll',odespierta,{passive:true});
 
   /* ── lo que usa la hebra (r04): el índice ya no es un punto, es este cubo ── */
@@ -14535,7 +14863,9 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
         g.strokeStyle='rgba(46,134,255,'+(.55*(1-ul)).toFixed(3)+')'; g.lineWidth=1;
         g.beginPath(); g.arc(x,y,h*1.3+ul*(mov?12:18),0,6.2832); g.stroke() }
       cuboOrto(g,x,y,h,Rmarca(T),TONES[0],1,1);
-    }
+    },
+    /* p68 · la vía existe: la hebra de la ruta empieza entera en su cabeza */
+    via:true
   };
 
   /* otro idioma, otras cajas de rótulo: los emblemas se vuelven a medir */
@@ -14559,6 +14889,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
   if(!wrap||!lista||!lz) return;
   var ctx=lz.getContext('2d'); if(!ctx) return;
   var QUIETO=matchMedia('(prefers-reduced-motion:reduce)').matches;
+  var VIA=!!(window.__caida&&window.__caida.via);
   var fases=[].slice.call(lista.querySelectorAll('.ruta-f'));
   if(!fases.length) return;
 
@@ -14655,8 +14986,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
     dpr=__dens(lz);
     lz.style.left=(-wl)+'px'; lz.style.top=top+'px';
     lz.style.width=W+'px'; lz.style.height=H+'px';
-    if(lz.width!==Math.round(W*dpr)) lz.width=Math.round(W*dpr);
-    if(lz.height!==Math.round(H*dpr)) lz.height=Math.round(H*dpr);
+    __mide(lz,W*dpr,H*dpr);
     var m={movil:movil,sx:sx,nx:nx,k:k,A:movil?9.5:24,top:top,fases:[],hitos:[],wl:wl,
            xt:wl+carril-(movil?4:10)};
     var ultimoHecho=0;
@@ -14676,6 +15006,9 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
     });
     var ult=fases[fases.length-1], p=ult.querySelector('.ruta-p');
     m.y0=m.fases[0].y-(movil?34:64);
+    /* p68 · con la vía, la hebra empieza donde la vía entra en ella: justo
+       encima del primer nodo, y ya entera (la vía trae la luz desde arriba) */
+    if(VIA) m.y0=m.fases[0].y-(movil?13:17);
     m.fin=offY(p)-top+p.offsetHeight+34;
     var planY=m.fases[m.fases.length-1].y;
     /* «estamos aqui»: pasado el ultimo hito hecho, antes de lo que falta */
@@ -14694,7 +15027,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
     M.x0=lz.getBoundingClientRect().left;
     if(punta<0) punta=QUIETO?M.fin:M.y0;
   }
-  window.__hebra={get M(){ return M }, tip:function(){ return punta }};
+  window.__hebra={get M(){ return M }, tip:function(){ return punta }, get T0(){ return T0 }};
 
   /* la hebra, en su sitio: x de la hebra i a la altura y */
   function hx(i,y,T){
@@ -14702,7 +15035,10 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
     var env=1-sube((y-(M.aqui-120))/120);            /* se cierra en «estamos aqui» */
     var ent=.55+.45*sube((y-M.y0)/140);
     var mod=.82+.18*Math.sin(y/190+i*1.7);
-    return M.sx+M.A*e.A*mod*env*ent*Math.sin(6.2832*y/e.l+e.f+T*.22);
+    /* p68 · con la vía, el arranque de la hebra no se mueve con el reloj: ahí
+       la vía (horneada, quieta) empalma con ella hebra a hebra */
+    var fr=VIA?sube((y-M.y0)/220):1;
+    return M.sx+M.A*e.A*mod*env*ent*Math.sin(6.2832*y/e.l+e.f+T*.22*fr);
   }
 
   var punta=-1, T0=performance.now(), antes=0;
@@ -14715,7 +15051,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
     if(c&&c.t===trenza&&c.y0===M.y0&&c.cr===crece) return c.g;
     var g=ctx.createLinearGradient(0,M.y0,0,trenza);
     var col=pase?'192,216,255':'204,206,213';
-    g.addColorStop(0,'rgba('+col+',0)');
+    g.addColorStop(0,'rgba('+col+','+(VIA?1:0)+')');
     g.addColorStop(clm(80/len,0,.98),'rgba('+col+',1)');
     if(crece){
       g.addColorStop(clm(1-70/len,.02,.99),'rgba('+col+',1)');
@@ -14898,7 +15234,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
        Mientras cae lo pinta su lienzo; posado, lo pinta la hebra, aqui. ── */
     var CA=window.__caida;
     if(CA&&CA.dibujaMarca){
-      if(CA.posada()) CA.dibujaMarca(ctx,sx,clm(tip,M.y0+20,M.aqui),tip>=M.aqui-2,M.movil);
+      if(CA.posada()) CA.dibujaMarca(ctx,sx,clm(tip,M.y0+(VIA?0:20),M.aqui),tip>=M.aqui-2,M.movil);
     }else if(tip>M.y0+20){
       var yp=Math.min(tip,M.aqui);
       if(!QUIETO&&tip>=M.aqui-2){
@@ -15336,7 +15672,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
   }
 
   function medir(){
-    DPR=__dens();
+    DPR=__dens(lz);
     var r=lz.getBoundingClientRect();
     W=Math.max(1,r.width); H=Math.max(1,r.height);
     __mide(lz, W*DPR, H*DPR);
