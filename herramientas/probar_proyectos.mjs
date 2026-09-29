@@ -2,9 +2,17 @@
 // un escenario anclado con un lienzo que vuela por un tunel de cubos y frena
 // en tres estaciones -la cadena, la tokenizacion de activos y la mineria-,
 // con los textos de la web y todo en azules. Al final los cubos implosionan
-// en UN cubo azul cargado (mira de 1 px y cifra «NN / NN»), debajo se dibuja
-// la hebra hacia un «06 Roadmap» provisional, y el cubo cae -en el lienzo
-// fijo «.caida-cv»- hasta la hebra de la ruta.
+// en UN cubo azul cargado (mira de 1 px y cifra «NN / NN»); quedan unos pocos
+// cubos lejanos y apagados a la deriva, debajo se dibuja la hebra hacia un
+// «06 Roadmap» provisional, y esa hebra es el primer tramo de una VIA (su
+// propio lienzo, anclado a la pagina, «.via-cv») que se curva al margen,
+// cruza la costura y entra en la hebra de la ruta. El cubo baja por ella -en
+// el lienzo fijo «.caida-cv»- y se posa en su cabeza. El epigrafe provisional
+// le pasa el relevo al de la ruta: nunca se ven los dos.
+//
+// p68 · el escenario lleva un margen negativo abajo (-14 % de pantalla): el
+// anclado mide lo mismo, pero #builds acaba antes. El avance se cuenta como
+// lo cuenta la pagina: alto del anclado - (alto del escenario + ese margen).
 //
 // Lo que se mide, por orden:
 //   1. que la seccion este, se vea, vaya en su sitio y con su numero (05, y
@@ -15,9 +23,10 @@
 //   4. que al bajar se lea una estacion cada vez, entera y sin pisar el carril
 //      ni la leyenda, y que no haya ni un pixel ambar;
 //   5. que al final quede el cubo cargado EN EL CENTRO, con su mira, su cifra
-//      y la hebra que baja hasta el epigrafe;
-//   6. que el cubo caiga hasta la hebra de la ruta y que todo se deshaga al
-//      subir;
+//      y la hebra que baja hasta el epigrafe, y fuera solo luz tenue;
+//   6. que el relevo de epigrafes no duplique, que la via llegue del cubo a
+//      la hebra de la ruta, que el cubo baje por ella hasta posarse y que todo
+//      se deshaga al subir;
 //   7. que sin movimiento sea una composicion quieta y sin errores.
 import { chromium } from 'playwright';
 import http from 'node:http'; import fs from 'node:fs'; import path from 'node:path';
@@ -51,6 +60,12 @@ const PARADAS = [.2, .44, .68];          // donde la camara frena en cada estaci
 
 /* Lo que se hace DENTRO de la pagina, una vez por contexto. */
 const AYUDA = () => {
+  /* el anclado, contado como lo cuenta la pagina: el escenario lleva un
+     margen negativo abajo (p68), asi que el recorrido es el alto del anclado
+     menos el escenario MAS lo que ese margen le deja seguir anclado */
+  window.__anclado = () => { const h = document.getElementById('tnHold'), st = document.getElementById('tnStage');
+    const mb = parseFloat(getComputedStyle(st).marginBottom) || 0, top = h.getBoundingClientRect().top + scrollY;
+    return { top, run:h.offsetHeight - (st.offsetHeight + mb), mb }; };
   /* ambar: tono de 20 a 60 grados, saturado y con luz. Es el color que la
      seccion tenia en la mineria y que se pidio quitar. */
   window.__ambar = (r, g, b) => { const M = Math.max(r, g, b), m = Math.min(r, g, b);
@@ -76,6 +91,26 @@ const AYUDA = () => {
       const p = i / 4; n++; sx += X0 + p % w; sy += Y0 + Math.floor(p / w); }
     return n ? { n, x:b.left + sx / n / k, y:b.top + sy / n / k } : { n:0 };
   };
+  /* p68 · los dos «06 Roadmap»: el provisional del tunel y el de la ruta.
+     «op» es lo que se ve de cada uno (opacidad, y 0 si esta oculto o fuera
+     de la pantalla); el relevo exige que nunca se vean los dos. */
+  window.__epigrafes = () => [document.getElementById('tnSig'), document.querySelector('#ruta .ruta-top')].map(e => {
+    const cs = getComputedStyle(e), r = e.getBoundingClientRect();
+    const dentro = r.bottom > 0 && r.top < innerHeight && r.width > 0;
+    return { op:cs.visibility === 'hidden' || !dentro ? 0 : +cs.opacity, top:r.top, txt:e.textContent.replace(/\s+/g, '') };
+  });
+  /* p68 · la via, horneada en su lienzo de pagina: por cada fila con trazo,
+     su y en el documento y la x minima, maxima y media de lo pintado */
+  window.__via = () => {
+    const vd = document.querySelector('.via-cv');
+    if (!vd || vd.width < 2) return null;
+    const L = parseFloat(vd.style.left), Tp = parseFloat(vd.style.top), w = parseFloat(vd.style.width), h = parseFloat(vd.style.height);
+    const k = vd.width / w, d = vd.getContext('2d').getImageData(0, 0, vd.width, vd.height).data, filas = [];
+    for (let y = 0; y < vd.height; y++) { let a = 1e9, b = -1e9, s = 0, n = 0;
+      for (let x = 0; x < vd.width; x++) if (d[(y * vd.width + x) * 4 + 3] > 60) { if (x < a) a = x; if (x > b) b = x; s += x; n++; }
+      if (n) filas.push({ y:Tp + (y + .5) / k, a:L + a / k, b:L + (b + 1) / k, m:L + (s / n + .5) / k }); }
+    return { pos:getComputedStyle(vd).position, L, Tp, w, h, filas };
+  };
 };
 
 for (const [W, H, mob] of [[1440, 900, 0], [390, 844, 1]]) {
@@ -86,8 +121,7 @@ for (const [W, H, mob] of [[1440, 900, 0], [390, 844, 1]]) {
   const tag = W + 'x' + H + ' · ';
   /* el avance del anclado: 0 al entrar, 1 cuando el escenario se suelta. El
      lienzo suaviza el avance (~1 s), asi que se espera a que se asiente. */
-  const en = async (p, ms = 1800) => { await pg.evaluate(p => { const h = document.getElementById('tnHold'), st = document.getElementById('tnStage');
-      scrollTo(0, Math.round(h.getBoundingClientRect().top + scrollY + p * (h.offsetHeight - st.offsetHeight))) }, p);
+  const en = async (p, ms = 1800) => { await pg.evaluate(p => scrollTo(0, Math.round(__anclado().top + p * __anclado().run)), p);
     await pg.waitForTimeout(ms); };
   const irA = async (y, ms = 120) => { await pg.evaluate(v => scrollTo(0, v), Math.round(y)); await pg.waitForTimeout(ms); };
 
@@ -227,26 +261,36 @@ for (const [W, H, mob] of [[1440, 900, 0], [390, 844, 1]]) {
         const d = g.getImageData(Math.round((c.x + B + 4) * k), Math.round((c.y - B - 12) * k), Math.round(90 * k), Math.round(24 * k)).data;
         for (let i = 0; i < d.length; i += 4) if (d[i+3] > 60) { cifra++; if (d[i+2] > d[i] + 90) cifraAzul++; }
       }
-      /* el tunel, a esas alturas: vacio fuera del resplandor y de la hebra */
+      /* el tunel, a esas alturas: los cubos que volaban ya se han ido al
+         centro. p68 · quedan unos pocos (9 en el telefono, 13 en escritorio)
+         lejos, pequeños y apagados a menos de la mitad, a la deriva: fuera del
+         centro hay algo de luz, pero solo tenue. Mientras se vuela, los cubos
+         del tunel llegan al blanco (canal 255, suma 765); los que quedan no
+         pasan de ~120 por canal. Se mide el canal mas vivo, lo que pasa de
+         suma 360 (lo vivo) y cuanto ocupa lo que no es negro. */
       const cv = document.getElementById('tnCv'), k2 = cv.width / cv.getBoundingClientRect().width;
       const d2 = cv.getContext('2d').getImageData(0, 0, cv.width, cv.height).data;
-      let fuera = 0, tot = 0;
+      let fuera = 0, vivos = 0, canal = 0, tot = 0;
       for (let y = 0; y < cv.height; y += 2) for (let x = 0; x < cv.width; x += 2) {
         const X = x / k2, Y = y / k2;
         if (Math.hypot(X - CX, Y - HC) < R * 3.8 || Math.abs(X - CX) < 60) continue;
-        tot++; const i = (y * cv.width + x) * 4; if (d2[i] + d2[i+1] + d2[i+2] > 90) fuera++;
+        tot++; const i = (y * cv.width + x) * 4, s = d2[i] + d2[i+1] + d2[i+2];
+        if (s > 90) fuera++; if (s > 360) vivos++; canal = Math.max(canal, d2[i], d2[i+1], d2[i+2]);
       }
-      /* la hebra que baja del cubo hasta el epigrafe */
+      /* la hebra que baja del cubo hasta el epigrafe. p68 · es el primer tramo
+         de la via y, mientras el escenario esta anclado, la pinta el lienzo
+         fijo de la caida (ya no el del tunel) */
       const sig = document.getElementById('tnSig'), sr = sig.getBoundingClientRect();
       let hebra = 0, filas = 0;
-      if (c.n) for (let y = Math.round(c.y + R + 20); y < sr.top - 20; y += 2) {
-        filas++;
-        const d = cv.getContext('2d').getImageData(Math.round((CX - 24) * k2), Math.round(y * k2), Math.round(48 * k2), 1).data;
-        let mx = 0; for (let i = 0; i < d.length; i += 4) mx = Math.max(mx, d[i] + d[i+1] + d[i+2]);
-        if (mx > 150) hebra++;
-      }
-      return { c, CX, HC, aro:aro / (vueltas || 1), cifra, cifraAzul, fuera:fuera / (tot || 1),
-               hebra:hebra / (filas || 1), filas, sigOp:+getComputedStyle(sig).opacity, sigTop:sr.top,
+      if (c.n) { const ko = oc.width / oc.getBoundingClientRect().width, go = oc.getContext('2d');
+        for (let y = Math.round(c.y + R + 20); y < sr.top - 20; y += 2) {
+          filas++;
+          const d = go.getImageData(Math.round((CX - 24) * ko), Math.round(y * ko), Math.round(48 * ko), 1).data;
+          let mx = 0; for (let i = 0; i < d.length; i += 4) mx = Math.max(mx, (d[i] + d[i+1] + d[i+2]) * d[i+3] / 255);
+          if (mx > 150) hebra++;
+        } }
+      return { c, CX, HC, aro:aro / (vueltas || 1), cifra, cifraAzul, fuera:fuera / (tot || 1), vivos, canal,
+               hebra:hebra / (filas || 1), filas, sigTop:sr.top, epi:__epigrafes(),
                posada:window.__caida && window.__caida.posada() };
     });
     di(r.c.n > 80, tag + 'al final queda UN cubo azul en el lienzo de la caida (' + r.c.n + ' px)');
@@ -254,16 +298,34 @@ for (const [W, H, mob] of [[1440, 900, 0], [390, 844, 1]]) {
     di(dx <= 6 && dy <= H * .06, tag + 'y esta en el centro: ' + dx.toFixed(1) + ' px en horizontal y ' + dy.toFixed(1) + ' en vertical');
     di(r.aro > .75, tag + 'cargado: lo rodea el aro de 1 px de la mira (' + (100 * r.aro).toFixed(0) + ' % de la vuelta)');
     di(r.cifra > 20 && r.cifraAzul > 5, tag + 'con su cifra «NN / NN» arriba a la derecha (' + r.cifra + ' px, ' + r.cifraAzul + ' azules)');
-    di(r.fuera < .01, tag + 'los cubos del tunel ya han implosionado: fuera del centro queda ' + (100 * r.fuera).toFixed(2) + ' % de luz');
-    di(r.filas > 10 && r.hebra > .8, tag + 'debajo baja la hebra hasta el epigrafe (' + (100 * r.hebra).toFixed(0) + ' % de ' + r.filas + ' filas)');
-    di(r.sigOp > .9 && r.sigTop > r.c.y, tag + '«06 Roadmap» se ve, debajo del cubo (opacidad ' + r.sigOp + ')');
+    /* (los de fondo giran: alguna cara clara puede asomar un pixel; los del
+       tunel en vuelo son miles, el 3-9 % de lo medido) */
+    di(r.vivos <= 20 && r.canal < 200 && r.fuera < .03,
+       tag + 'los cubos del tunel ya han implosionado: fuera del centro solo quedan cubos apagados (canal mas vivo ' + r.canal +
+       ', ' + r.vivos + ' px vivos, ' + (100 * r.fuera).toFixed(2) + ' % no negro)');
+    di(r.filas > 10 && r.hebra > .8, tag + 'debajo baja la hebra hasta el epigrafe, en el lienzo fijo (' + (100 * r.hebra).toFixed(0) + ' % de ' + r.filas + ' filas)');
+    const vistos = r.epi.filter(e => e.op > .02);
+    di(vistos.length === 1 && r.epi[0].op > .9 && /^06\s*Roadmap$/.test(r.epi[0].txt) && r.sigTop > r.c.y,
+       tag + 'se ve UN «06 Roadmap», el provisional, debajo del cubo (provisional ' + r.epi[0].op + ', el de la ruta ' + r.epi[1].op + ')');
     di(r.posada === false, tag + 'y el cubo aun no esta en la hebra de la ruta');
   }
 
-  // ── 6 · la caida hasta la hebra, y vuelta atras ──────────────────────────
+  // ── 6 · el relevo, la via y la bajada hasta la hebra; y vuelta atras ─────
   {
-    const Se = await pg.evaluate(() => { const h = document.getElementById('tnHold'), st = document.getElementById('tnStage');
-      return h.getBoundingClientRect().top + scrollY + h.offsetHeight - st.offsetHeight; });
+    /* «Se»: donde el escenario se suelta (contado con su margen negativo) */
+    const Se = await pg.evaluate(() => { const a = __anclado(); return a.top + a.run; });
+    /* p68 · #builds acaba un 14 % de pantalla antes: al soltarse el
+       escenario, el canto de la ruta ya asoma al 86 % de la pantalla */
+    await irA(Se, 600);
+    const canto = await pg.evaluate(() => document.getElementById('ruta').getBoundingClientRect().top / innerHeight);
+    di(canto > .8 && canto < .92, tag + 'al soltarse el escenario la ruta ya asoma abajo: #builds acaba antes (canto al ' + (100 * canto).toFixed(0) + ' % de la pantalla)');
+    /* el relevo de epigrafes: del provisional al de la ruta, nunca los dos */
+    const relevo = [];
+    for (let y = Se - H * .03; y <= Se + H * .3; y += H * .015) { await irA(y, 110); relevo.push(await pg.evaluate(() => __epigrafes().map(e => e.op))); }
+    const dobles = relevo.filter(e => e[0] > .02 && e[1] > .02).length, fin = relevo[relevo.length - 1];
+    di(dobles === 0 && relevo[0][0] > .9 && fin[0] <= .02 && fin[1] > .9,
+       tag + 'el «06 Roadmap» provisional le pasa el relevo al de la ruta sin verse nunca los dos (' + dobles + ' de ' + relevo.length +
+       ' posiciones con los dos; al final ' + fin.map(v => v.toFixed(2)).join(' / ') + ')');
     /* donde se posa, preguntandoselo a la pagina: «__caida.posada()» */
     let lo = Se, hi = Se + H * 5;
     for (let i = 0; i < 18; i++) { const m = (lo + hi) / 2; await irA(m); (await pg.evaluate(() => __caida.posada())) ? hi = m : lo = m; }
@@ -272,17 +334,44 @@ for (const [W, H, mob] of [[1440, 900, 0], [390, 844, 1]]) {
       const M = __hebra.M, lz = document.querySelector('#ruta .hb-lz').getBoundingClientRect();
       const tip = __hebra.tip(), my = Math.min(Math.max(tip, M.y0 + 20), M.aqui);
       const texto = Math.min(...[...document.querySelectorAll('#ruta .ruta-cab')].map(e => e.getBoundingClientRect().left));
-      return { c:__cubo(document.querySelector('.caida-cv')), hx:lz.left + M.sx, hy:lz.top + my, texto,
-               posada:__caida.posada(), vista:getComputedStyle(document.querySelector('.caida-cv')).display };
+      return { c:__cubo(document.querySelector('.caida-cv')), hx:lz.left + M.sx, hy:lz.top + my, texto, sy:scrollY,
+               posada:__caida.posada(), vista:getComputedStyle(document.querySelector('.caida-cv')).display,
+               via:getComputedStyle(document.querySelector('.via-cv')).display };
     });
     const tramo = [];
-    for (const f of [.1, .45, .8, .97]) { await irA(Se + (Sc - Se) * f, 900); tramo.push(await mira()); }
-    di(tramo.every(t => t.c.n > 20 && !t.posada), tag + 'el cubo se ve durante toda la caida (' + tramo.map(t => t.c.n).join(', ') + ' px)');
-    di(tramo[1].c.x < tramo[1].texto && tramo[1].c.x < tramo[0].c.x,
-       tag + 'se aparta al margen de la ruta, a la izquierda del texto (x ' + tramo.map(t => Math.round(t.c.x)).join(' → ') + ')');
-    const u = tramo[3];
+    for (const f of [.1, .3, .45, .6, .8, .97]) { await irA(Se + (Sc - Se) * f, 900); tramo.push(await mira()); }
+    di(tramo.every(t => t.c.n > 20 && !t.posada), tag + 'el cubo se ve durante toda la bajada (' + tramo.map(t => t.c.n).join(', ') + ' px)');
+    /* p68 · la via: su propio lienzo, anclado a la pagina (no a la pantalla),
+       que sale de debajo del cubo, se curva al margen izquierdo, baja por el
+       junto al epigrafe y el titular de la ruta, cruza la costura y acaba en
+       la cabeza de la hebra de la ruta */
+    const via = await pg.evaluate(() => { const M = __hebra.M, lz = document.querySelector('#ruta .hb-lz').getBoundingClientRect();
+      return { v:__via(), hx:lz.left + scrollX + M.sx, hy:M.docTop + M.y0, ruta:document.getElementById('ruta').getBoundingClientRect().top + scrollY }; });
+    const F = via.v ? via.v.filas : [], f0 = F[0], fN = F[F.length - 1];
+    const margen = F.length ? Math.min(...F.map(f => f.a)) : 1e9;
+    di(!!via.v && via.v.pos === 'absolute' && tramo.every(t => t.via !== 'none') && F.length > 100,
+       tag + 'la hebra de debajo del cubo sigue en una via, horneada en su lienzo de pagina (' + (via.v ? via.v.pos + ', ' + F.length + ' filas' : 'no hay via') + ')');
+    di(F.length && Math.abs(f0.m - W / 2) <= 8 && margen < tramo[0].texto && f0.y < via.ruta && fN.y > via.ruta,
+       tag + 'sale de debajo del cubo (x ' + (F.length ? Math.round(f0.m) : '?') + '), se curva al margen a la izquierda del texto (x ' + Math.round(margen) +
+       ' < ' + Math.round(tramo[0].texto) + ') y cruza la costura (' + (F.length ? Math.round(f0.y) + ' < ' + Math.round(via.ruta) + ' < ' + Math.round(fN.y) : '?') + ')');
+    di(F.length && Math.abs(fN.m - via.hx) <= 10 && Math.abs(fN.y - via.hy) <= 14,
+       tag + 'y acaba en la cabeza de la hebra de la ruta (' + (F.length ? Math.abs(fN.m - via.hx).toFixed(1) + ' px en horizontal, ' + Math.abs(fN.y - via.hy).toFixed(1) + ' en vertical' : '?') + ')');
+    /* el cubo no vuela suelto: en la curva, en el margen y al volver hacia la
+       hebra esta sobre la via (su centro, en el documento, a pocos pixeles de
+       lo pintado). Al principio aun esta dentro de la mira, por encima de
+       donde se pinta la via, y al final ya esta en la hebra: eso lo miden las
+       comprobaciones de al lado. */
+    const sobre = tramo.slice(1, -1).map(t => { const yd = t.c.y + t.sy; let m = 1e9;
+      for (const f of F) { if (Math.abs(f.y - yd) > 30) continue;
+        const dx = t.c.x < f.a ? f.a - t.c.x : t.c.x > f.b ? t.c.x - f.b : 0; m = Math.min(m, Math.hypot(dx, f.y - yd)); }
+      return m; });
+    di(sobre.every(d => d <= 8), tag + 'el cubo baja POR la via: en cada muestra esta sobre ella (a ' + sobre.map(d => d > 1e8 ? '?' : d.toFixed(1)).join(', ') + ' px)');
+    const xs = tramo.map(t => Math.round(t.c.x)), minX = Math.min(...xs);
+    di(Math.abs(tramo[0].c.x - W / 2) <= 8 && minX < tramo[0].texto && xs.indexOf(minX) > 0 && xs.indexOf(minX) < xs.length - 1,
+       tag + 'sale del centro, se aparta al margen de la ruta a la izquierda del texto y vuelve a la hebra (x ' + xs.join(' → ') + ')');
+    const u = tramo[tramo.length - 1];
     di(Math.abs(u.c.x - u.hx) <= 4 && Math.abs(u.c.y - u.hy) <= 8,
-       tag + 'y cae SOBRE la hebra: ' + Math.abs(u.c.x - u.hx).toFixed(1) + ' px de la hebra, ' + Math.abs(u.c.y - u.hy).toFixed(1) + ' de su punta');
+       tag + 'y acaba SOBRE la hebra: ' + Math.abs(u.c.x - u.hx).toFixed(1) + ' px de la hebra, ' + Math.abs(u.c.y - u.hy).toFixed(1) + ' de su punta');
     await irA(Sc + 40, 900);
     const p = await mira();
     di(p.posada && p.c.n === 0, tag + 'posado, lo pinta ya la hebra y el lienzo de la caida queda limpio (' + p.c.n + ' px)');
@@ -309,8 +398,7 @@ for (const [W, H, mob] of [[1440, 900, 0], [390, 844, 1]]) {
   const pg = await ctx.newPage(); const errs = []; pg.on('pageerror', e => errs.push(e.message));
   await pg.goto('http://127.0.0.1:9055/', { waitUntil:'load' }); await pg.waitForTimeout(1500);
   await pg.evaluate(AYUDA);
-  const en = async p => { await pg.evaluate(p => { const h = document.getElementById('tnHold'), st = document.getElementById('tnStage');
-      scrollTo(0, Math.round(h.getBoundingClientRect().top + scrollY + p * (h.offsetHeight - st.offsetHeight))) }, p);
+  const en = async p => { await pg.evaluate(p => scrollTo(0, Math.round(__anclado().top + p * __anclado().run)), p);
     await pg.waitForTimeout(1500); };
   const foto = () => pg.evaluate(() => { const cv = document.getElementById('tnCv');
     return Array.from(cv.getContext('2d').getImageData(0, 0, cv.width, cv.height).data.filter((v, i) => i % 16 === 0)); });
@@ -319,17 +407,43 @@ for (const [W, H, mob] of [[1440, 900, 0], [390, 844, 1]]) {
   const dif = f1.filter((v, i) => Math.abs(v - f2[i]) > 2).length;
   const op = await pg.evaluate(() => +getComputedStyle(document.querySelector('#builds .tn-sta')).opacity);
   di(dif === 0 && op > .95, 'sin movimiento · el tunel esta quieto (' + dif + ' pixeles cambian) y la estacion se lee igual');
-  await en(.99);
+  /* se llega bajando, como llega un visitante (varios «scroll»): sin
+     movimiento el lienzo fijo se pinta una vez por «scroll», y el primer
+     cuadro tras encenderlo se pierde (su vigia de visibilidad aun lo cree
+     oculto; lo que se lleva el primer cuadro es un fallo aparte de la
+     pagina, no del diseño: ver el mensaje del commit de esta sonda). */
+  await en(.97); await en(.98); await en(.99);
+  const fija = () => pg.evaluate(() => { const oc = document.querySelector('.caida-cv');
+    if (getComputedStyle(oc).display === 'none' || oc.width < 2) return [];
+    return Array.from(oc.getContext('2d').getImageData(0, 0, oc.width, oc.height).data.filter((v, i) => i % 16 === 3)); });
   const r = await pg.evaluate(() => {
-    const cv = document.getElementById('tnCv'), HC = document.getElementById('tnVis').offsetHeight / 2;
-    return { c:__cubo(cv, [innerWidth / 2 - 80, HC - 80, innerWidth / 2 + 80, HC + 80]), HC,
-             caida:getComputedStyle(document.querySelector('.caida-cv')).display, posada:__caida.posada(),
-             sig:+getComputedStyle(document.getElementById('tnSig')).opacity };
+    const cv = document.getElementById('tnCv'), oc = document.querySelector('.caida-cv'), HC = document.getElementById('tnVis').offsetHeight / 2;
+    const caja = [innerWidth / 2 - 80, HC - 80, innerWidth / 2 + 80, HC + 80];
+    /* la via quieta, en el lienzo fijo: lo pintado por debajo del cubo */
+    let via = 0;
+    if (getComputedStyle(oc).display !== 'none' && oc.width > 1) { const k = oc.width / oc.getBoundingClientRect().width;
+      const d = oc.getContext('2d').getImageData(0, Math.round((HC + 100) * k), oc.width, Math.round(120 * k)).data;
+      for (let i = 3; i < d.length; i += 4) if (d[i] > 60) via++; }
+    return { c:__cubo(cv, caja), cf:__cubo(oc, caja), HC, via, posada:__caida.posada(), epi:__epigrafes(),
+             sigVis:getComputedStyle(document.getElementById('tnSig')).visibility,
+             rk:+getComputedStyle(document.querySelector('#ruta .ruta-top')).opacity };
   });
+  const q1 = await fija(); await pg.waitForTimeout(500); const q2 = await fija();
+  const cambia = q1.length === q2.length ? q1.filter((v, i) => Math.abs(v - q2[i]) > 2).length : -1;
   di(r.c.n > 80 && Math.abs(r.c.x - 720) <= 6 && Math.abs(r.c.y - r.HC) <= 54,
      'sin movimiento · al final el cubo esta ya en el centro, pintado quieto (' + r.c.n + ' px en ' + Math.round(r.c.x || 0) + ', ' + Math.round(r.c.y || 0) + ')');
-  di(r.caida === 'none' && r.posada === true, 'sin movimiento · no hay caida: el lienzo fijo no existe y el cubo ya esta en la hebra');
-  di(r.sig > .9, 'sin movimiento · y el epigrafe «06 Roadmap» se ve (' + r.sig + ')');
+  /* p68 · el lienzo fijo existe tambien sin movimiento, pero solo para la via
+     quieta: ningun cubo cae por el y el cubo ya esta en la hebra */
+  di(r.cf.n === 0 && r.posada === true && r.via > 50 && cambia === 0,
+     'sin movimiento · no hay caida: el lienzo fijo solo lleva la via, quieta (' + r.via + ' px de via, ' + r.cf.n + ' de cubo, ' + cambia +
+     ' cambian en 0,5 s) y el cubo ya esta en la hebra');
+  /* p68 · sin movimiento no hay relevo: el provisional no aparece y el de la
+     ruta esta en su sitio desde el principio */
+  await pg.evaluate(() => { const k = document.querySelector('#ruta .ruta-top'); scrollTo(0, Math.round(k.getBoundingClientRect().top + scrollY - innerHeight * .5)); });
+  await pg.waitForTimeout(800);
+  const e2 = await pg.evaluate(() => __epigrafes());
+  di(r.epi[0].op === 0 && r.sigVis === 'hidden' && r.rk > .95 && e2.filter(e => e.op > .02).length === 1 && e2[1].op > .95 && /^06\s*Roadmap$/.test(e2[1].txt),
+     'sin movimiento · se ve UN epigrafe «06 Roadmap», el de la ruta (provisional ' + r.epi[0].op + ', el de la ruta ' + e2[1].op + ')');
   di(errs.length === 0, 'sin movimiento · sin errores de pagina' + (errs.length ? ': ' + errs[0] : ''));
   await ctx.close();
 }
