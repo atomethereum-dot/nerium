@@ -12625,82 +12625,74 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
       ctx.restore();
     }
   }
-  /* ══ EL SUELO (p70) ═══════════════════════════════════════════════════
-     «Se ve muy oscura, un poco distorsionada, y que vaya mas lento.» Las
-     tres cosas venian del mismo sitio: el suelo eran tiras planas (1 o 2
-     de ancho por 0,62 de alto, sin cara de arriba) en seis azules hondos,
-     pintadas en un lienzo aparte que se iba borrando al 26 % por cuadro, y
-     con una velocidad que las llevaba del horizonte al pie en menos de un
-     segundo. Lo que quedaba en pantalla era la estela: barras horizontales
-     embarradas, casi negras.
-     Ahora son CUBOS de verdad sobre un plano, con la camara por encima:
-       · una perspectiva sola (el mismo foco en x y en y), asi que un cubo es
-         un cubo en todas las filas: ancho = alto = fondo, sin estirar;
-       · se ve la cara de arriba (la clara), la de delante y, fuera del
-         pasillo, la de dentro (la oscura), con la luz y el canto de 1 px de
-         los cubos del tunel (#stack) y los TONES de la casa: azules, plata
-         y blanco, pocos grises hondos;
-       · sin estela: cada cuadro se pinta limpio, directamente en su lienzo
-         (y el lienzo de apoyo de 2 MB ya no hace falta);
-       · la velocidad, a menos de la mitad, medida en pantalla (ver «VEL»);
-       · filas en rejilla con un pasillo al centro que lleva a la puerta.
-     Cada casilla se decide por su fila y su columna («sazar»): subir y
-     bajar da siempre el mismo suelo. Con movimiento reducido, quieto. */
+  /* ══ EL SUELO · TRANSACCIONES EN CAMINO (p71) ══════════════════════════
+     «Que no se vean como cajas desordenadas en un almacen, que se vean mas
+     como transacciones.» El suelo de p70 eran cubos sueltos en una rejilla
+     con casillas vacias al azar, tamaños distintos y tonos mezclados: un
+     almacen. Ahora es un FLUJO:
+       · pocos carriles, paralelos en el plano -por la perspectiva convergen
+         en la puerta, bajo «IN THE OPEN»-, cada uno con su rail de luz de
+         1 px en el azul de la casa y un pulso corto que lo recorre;
+       · por cada carril, cubos iguales a paso fijo (el paso es del carril:
+         cada corriente regular, las corrientes no van en fila entre si),
+         unidos por un eslabon fino: una cadena;
+       · van HACIA la puerta, despacio. En azul mientras viajan; al cruzar la
+         linea de validacion dan un destello blanco y siguen en plata o
+         blanco (confirmados) hasta perderse en la puerta.
+     Mismas caras y luz que el tunel de #stack (lit=.20+lam*.96) y el canto
+     de 1 px. Todo sale del reloj del suelo: subir y bajar da lo mismo; con
+     movimiento reducido el reloj no corre y queda la composicion quieta. */
   const STON=[{h:219,s:100,l:56},{h:224,s:97,l:46},{h:216,s:88,l:38},
               {h:214,s:14,l:30},{h:220,s:26,l:19},{h:226,s:92,l:16},
               {h:210,s:10,l:92},{h:213,s:13,l:76},{h:218,s:100,l:62}];
-  const sazar=(i,k)=>{ const r=Math.sin(i*127.1+k*311.7+.5)*43758.5453; return r-Math.floor(r) };
-  /* azules 61 %, plata y blanco 28 %, grises y el azul hondo 11 % (de fondo) */
-  const stono=t=> t<.24?STON[0] : t<.39?STON[1] : t<.49?STON[2] : t<.61?STON[8]
-                : t<.76?STON[7] : t<.89?STON[6] : t<.95?STON[3] : t<.975?STON[4] : STON[5];
+  const T_VIAJE=[STON[0],STON[8],STON[1]], T_OK=[STON[6],STON[7]];
   const SCOL=new Map();
-  /* p70 · L en enteros y alfa a 1/50: un escalon de 1 % entre filas no se ve
-     y la tabla de cadenas no se vacia a mitad de bajada */
+  /* L en enteros y alfa a 1/50: la tabla de cadenas no se vacia a mitad de bajada */
   const scstr=(h,s,l,a)=>{ const L=Math.round(l), A=Math.round(a*50), k=((((h|0)*101+(s|0))*101+L)*51+A);
     let c=SCOL.get(k); if(c===undefined){ if(SCOL.size>4000) SCOL.clear(); c='hsla('+(h|0)+','+(s|0)+'%,'+L+'%,'+(A/50).toFixed(2)+')'; SCOL.set(k,c) } return c };
   /* la luz de cada cara: arriba casi de lleno, delante a medias, el costado
-     de refilon -la misma cuenta que en el tunel: lit=.20+lam*.96- */
-  const LAM_T=.92, LAM_F=.56, LAM_S=.26;
-  /* en el blanco y la plata la cuenta llega al tope en la cara de arriba Y
-     en la de delante (quedaban iguales, un recorte plano): las caras en
-     sombra se quedan siempre 10 y 22 puntos por debajo de la de arriba */
-  const LIT_T=.20+LAM_T*.96;
-  const litL=(tn,lam,apaga)=>{ const lit=.20+lam*.96; let L=tn.l*(.58+lit*.62)+lit*10;
+     de refilon. En blanco y plata las caras en sombra quedan siempre 10 y 22
+     puntos por debajo de la de arriba (si no, un recorte plano). «+fl» es el
+     destello de la validacion, que lleva la cara hacia el blanco. */
+  const LAM_T=.92, LAM_F=.56, LAM_S=.26, LIT_T=.20+LAM_T*.96;
+  const litL=(tn,lam,apaga,fl)=>{ const lit=.20+lam*.96; let L=tn.l*(.58+lit*.62)+lit*10;
     if(lam<LAM_T) L=Math.min(L, Math.min(97,tn.l*(.58+LIT_T*.62)+LIT_T*10)-(lam===LAM_F?10:22));
+    if(fl>0) L+=(97-L)*fl;
     return clm(L*apaga,3,97) };
-  const SP=1.72, SAIS=1.3;               /* paso de la rejilla y medio pasillo, en cubos */
-  const SPERIODO=SP*4096;
-  let suCam=0, suL=0, suVelo=null, suVeloH=0, suFil=null, suFilW=0, suCol=null, suColH=0, suAn=null, suNiebla=null, suNieblaH=0;
-  const sfila=[];
+  const LADO=.8;                          /* el cubo, igual en todo el suelo */
+  const SAIS=1.3, LP=2.2;                 /* medio pasillo y distancia entre carriles */
+  const PASOS=[4.4,5.2,4.8,5.6];          /* el paso de cada carril, fijo */
+  const FLASH=3.4;                        /* lo que dura el destello, en cubos de recorrido */
+  let suT=0, suL=0, suVelo=null, suVeloH=0, suFil=null, suFilW=0, suCol=null, suColH=0, suAn=null,
+      suNiebla=null, suNieblaH=0, suVal=null, suValW=0;
   let suPie=null, suPieH=0;
-  /* sin suelo que pintar: el reloj se para (ya no hay lienzo de apoyo) */
+  const sSeg=[[],[],[],[],[],[]],
+        SEGC=['rgba(99,169,255,.8)','rgba(78,150,255,.5)','rgba(46,134,255,.26)',
+              'rgba(214,224,240,.55)','rgba(214,224,240,.36)','rgba(214,224,240,.18)'];
+  const sLista=[];
+  /* sin suelo que pintar: el reloj se para */
   function sueltaSuelo(){ suL=0 }
   function pintaSuelo(fuerza){
-    /* Directo en su lienzo, siempre. Al fundirse (la entrada de la escena
-       siguiente) los cubos NO se vuelven transparentes -cada uno dejaria ver
-       el de detras-: se APAGAN hacia el negro del fondo, opacos, y solo en la
-       ultima mitad, ya casi negros, pierden tambien el alfa. Componerlo en un
-       lienzo aparte, como antes, costaba 4 veces mas por cuadro (medido). */
+    /* Directo en su lienzo. Al fundirse (la entrada de la escena siguiente)
+       los cubos se APAGAN hacia el negro, opacos, y solo en la ultima mitad
+       pierden tambien el alfa: asi ninguno deja ver el de detras. */
     const g=ctx, fu=fuerza, fuA=clm(fuerza*2);
     const ahora=performance.now()/1000;
     const dt=Math.min(.05,suL?ahora-suL:.016); suL=ahora;
     const cx=W/2, hor=H*.30;
-    /* el cubo del pie de pantalla mide «sb» px; de ahi sale la altura de la
+    /* el cubo del pie de pantalla mide «sb» px; de ahi la altura de la
        camara (en cubos) con el foco = alto de pantalla */
-    const f=H, sb=clm(Math.min(W,H)*.14,44,96), hc=.7*H/sb;
-    /* VEL · la del suelo anterior en pantalla era, a cualquier altura,
-       8,07·(y-hor)²/H·(.55+.55·fuerza) px/s; esta es (y-hor)²/(H·hc)·v, y
-       con v = hc·(2+2·fuerza) queda en el 45 % de aquella en todo el suelo.
-       El scroll la sigue modulando igual (con «fuerza»), a la misma escala. */
-    if(!CALM){ suCam+=dt*hc*(2.0+2.0*fuerza); if(suCam>SPERIODO) suCam-=SPERIODO }
-    /* hasta donde las filas quedan a ~2,5 px: de ahi al horizonte, el velo */
-    const zLej=Math.sqrt(f*hc*SP/2.6), JMAX=W<760?6:9;
-    const zCer=Math.max(.3,(hc-1)/.7*.98);      /* por debajo, ya fuera del pie */
-    /* un velo azul muy bajo sobre el plano, que nace en la puerta: el suelo
-       se lee como suelo y el negro deja de ser negro sin mas */
+    const f=H, sb=clm(Math.min(W,H)*.14,44,96)*LADO, hc=.7*H*LADO/sb;
+    /* PASO TRANQUILO: v = .75·hc cubos/s es, en pantalla, (y-hor)²/(H)·.75
+       px/s -a media altura del suelo de un telefono unos 60 px/s, un sexto
+       de lo de p70-. El scroll lo modula un poco, como antes. */
+    if(!CALM){ suT+=dt*hc*.75*(.6+.4*fuerza); if(suT>5000) suT-=5000 }
+    const zLej=Math.sqrt(f*hc*4.8/3.2), zCer=Math.max(.3,(hc-LADO)/.7*.98);
+    /* la linea de validacion, a un tercio largo del suelo desde el horizonte */
+    const yVal=hor+(H-hor)*.36, zVal=f*hc/(yVal-hor);
+    const nL=W<760?3:4, Xfin=SAIS+(nL-1)*LP+LADO;
+    /* el velo azul del horizonte, solo en su franja */
     g.globalAlpha=fuerza;
-    /* solo la franja del horizonte (un degradado a pantalla entera costaba,
-       medido, mas que todos los cubos juntos) */
     const nh=(H-hor)*.3;
     if(!suNiebla||suNieblaH!==H){
       suNiebla=g.createLinearGradient(0,hor,0,hor+nh);
@@ -12711,63 +12703,101 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
       suNieblaH=H;
     }
     g.fillStyle=suNiebla; g.fillRect(0,hor,W,nh);
+    /* LOS PULSOS: un tramo corto y claro que corre por cada rail hacia la
+       puerta, mas deprisa que los cubos */
+    g.beginPath();
+    for(let k=0;k<nL;k++) for(let s=-1;s<=1;s+=2){
+      const X=s*(SAIS+k*LP), L=zLej-zCer, u=((suT*2.2+(k*2+(s>0))*L*.37)%L+L)%L, z0=zCer+u, z1=z0+4;
+      g.moveTo(cx+X*f/z0, hor+hc*f/z0); g.lineTo(cx+X*f/z1, hor+hc*f/z1) }
+    g.strokeStyle='rgba(190,222,255,.95)'; g.lineWidth=1.5; g.stroke();
+    /* LA LINEA DE VALIDACION: 1 px de plata a lo ancho de los carriles */
+    const xv=Xfin*f/zVal;
+    if(!suVal||suValW!==Math.round(xv)){
+      suVal=g.createLinearGradient(cx-xv,0,cx+xv,0);
+      suVal.addColorStop(0,'rgba(214,224,240,0)');
+      suVal.addColorStop(.2,'rgba(214,224,240,.6)');
+      suVal.addColorStop(.8,'rgba(214,224,240,.6)');
+      suVal.addColorStop(1,'rgba(214,224,240,0)');
+      suValW=Math.round(xv);
+    }
+    g.fillStyle=suVal; g.fillRect(cx-xv,yVal,xv*2,1);
+    /* una marca en cada carril, donde se valida */
+    g.fillStyle='rgba(226,236,255,.7)';
+    for(let k=0;k<nL;k++) for(let s=-1;s<=1;s+=2){ const xm=cx+s*(SAIS+k*LP)*f/zVal; g.fillRect(xm-.5,yVal-3,1,7) }
     g.globalAlpha=1;
-    g.lineJoin='round';
-    const nA=Math.ceil((suCam+zCer)/SP), nB=Math.floor((suCam+zLej)/SP);
-    for(let n=nB;n>=nA;n--){
-      const zr=n*SP-suCam;
-      /* niebla: lejos se apaga hacia el fondo; el ultimo tramo entra en alfa */
-      const hondo=clm((zr-zCer)/(zLej-zCer));
-      const apaga=(1-hondo*.55)*fu, al=clm((1-hondo)/.28)*fuA;
-      if(al<.02) continue;
-      const Xmax=(W/2+sb)*(zr+1)/f+1;
-      let m=0;
-      for(let j=0;j<JMAX&&SAIS+j*SP<Xmax;j++){
-        for(let s=-1;s<=1;s+=2){
-          const id=n*64+(s>0?32:0)+j;
-          if(sazar(id,1)>.56) continue;
-          const sz=.74+sazar(id,3)*.26;
-          const xc=s*(SAIS+.5+j*SP+(sazar(id,4)-.5)*.3);
-          /* los objetos de la fila se reusan: nada nuevo por cuadro */
-          const o=sfila[m]||(sfila[m]={xc:0,sz:0,tn:null}); m++;
-          o.xc=xc; o.sz=sz; o.tn=stono(sazar(id,2));
-        }
+    /* los cubos de todos los carriles, del fondo hacia la camara; y, de paso,
+       LOS RAILES: una linea de 1 px en el suelo entre cada cubo y el siguiente
+       de su carril, que los encadena. Van en el suelo, asi que se pintan todos
+       antes que los cubos (lo que queda detras de un cubo lo tapa el), en
+       color liso -un trazo con degradado costaba, medido, un 10 % de
+       cuadros- y en seis trazos: azul antes de la linea de validacion, plata
+       despues, cada uno a tres alturas de niebla. */
+    for(let i=0;i<6;i++) sSeg[i].length=0;
+    let m=0;
+    for(let k=0;k<nL;k++) for(let s=-1;s<=1;s+=2){
+      const ln=k*2+(s>0?1:0), P=PASOS[ln%PASOS.length], X=s*(SAIS+k*LP);
+      const fase=suT+ln*.83, base=Math.floor(fase/P), off=fase-base*P;
+      for(let n=Math.floor((zCer*.5-off)/P)-1;;n++){
+        const z0=n*P+off; if(z0>zLej) break;
+        const za=Math.max(z0+LADO,zCer*.5), zb=z0+P;
+        if(zb<zLej&&zb>za){
+          const hz=clm((za-zCer)/(zLej-zCer)), cub=(z0+LADO*.5>zVal?3:0)+(hz<.35?0:hz<.7?1:2), A=sSeg[cub];
+          A.push(cx+X*f/za,hor+hc*f/za,cx+X*f/zb,hor+hc*f/zb) }
+        if(z0+LADO<zCer) continue;
+        const o=sLista[m]||(sLista[m]={}); m++;
+        o.z0=z0; o.X=X; o.ln=ln; o.id=n-base; o.P=P;
       }
-      /* de fuera hacia el pasillo: el de dentro tapa el costado del de fuera */
-      for(let i=m-1;i>=0;i--){
-        const q=sfila[i], h=q.sz, x0=q.xc-h/2, x1=q.xc+h/2, z0=zr+(1-h)/2, z1=z0+h;
-        const k0=f/z0, k1=f/z1;
-        const yT0=hor+(hc-h)*k0, yB0=hor+hc*k0, yT1=hor+(hc-h)*k1;
-        if(yT0>H+1) continue;
-        const a0=cx+x0*k0, a1=cx+x1*k0, b0=cx+x0*k1, b1=cx+x1*k1;
-        if(a1<-2&&b1<-2||a0>W+2&&b0>W+2) continue;
-        const tn=q.tn, lado=a1-a0, canto=lado>12;
-        /* lejos, un cubo de 3 px es un punto: un solo rectangulo con su luz */
-        if(lado<3){ g.fillStyle=scstr(tn.h,tn.s,litL(tn,LAM_T,apaga),al); g.fillRect(a0,yT1,lado,yB0-yT1); continue }
-        /* pequeño, sin caminos (un camino con borde suave cuesta mucho mas que
-           un rectangulo): arriba y delante, dos rectangulos; la cara de
-           arriba, al ancho medio de su trapecio, y sin costado */
-        if(lado<12){
-          const m0=(a0+b0)/2, m1=(a1+b1)/2;
-          g.fillStyle=scstr(tn.h,tn.s,litL(tn,LAM_T,apaga),al); g.fillRect(m0,yT1,m1-m0,yT0-yT1);
-          g.fillStyle=scstr(tn.h,tn.s,litL(tn,LAM_F,apaga),al); g.fillRect(a0,yT0,lado,yB0-yT0);
-          continue;
-        }
-        /* el costado que mira al pasillo */
-        /* (una astilla de menos de 1,2 px no se pinta) */
+    }
+    g.globalAlpha=fuerza; g.lineWidth=1;
+    for(let i=0;i<6;i++){ const A=sSeg[i]; if(!A.length) continue;
+      g.beginPath(); for(let j=0;j<A.length;j+=4){ g.moveTo(A[j],A[j+1]); g.lineTo(A[j+2],A[j+3]) }
+      g.strokeStyle=SEGC[i]; g.stroke() }
+    g.globalAlpha=1;
+    sLista.length=m; sLista.sort((a,b)=>b.z0-a.z0);
+    g.lineJoin='round';
+    const h=LADO;
+    for(const q of sLista){
+      const z0=q.z0, z1=z0+h, x0=q.X-h/2, x1=q.X+h/2;
+      const k0=f/z0, k1=f/z1;
+      const yT0=hor+(hc-h)*k0, yB0=hor+hc*k0, yT1=hor+(hc-h)*k1;
+      if(yT0>H+1) continue;
+      const a0=cx+x0*k0, a1=cx+x1*k0, b0=cx+x0*k1, b1=cx+x1*k1;
+      if(a1<-2&&b1<-2||a0>W+2&&b0>W+2) continue;
+      /* niebla: lejos se apaga hacia el fondo; el ultimo tramo, en alfa */
+      const hondo=clm((z0-zCer)/(zLej-zCer));
+      const apaga=(1-hondo*.55)*fu, al=clm((1-hondo)/.26)*fuA;
+      if(al<.02) continue;
+      /* el estado: en camino (azul) o confirmado (plata/blanco), con su
+         destello al cruzar la linea */
+      const pasa=z0+h*.5-zVal, ok=pasa>0;
+      const tn=ok?T_OK[((q.id%2)+2)%2]:T_VIAJE[q.ln%3];
+      const fl=ok&&pasa<FLASH?Math.pow(1-pasa/FLASH,1.4)*fu:0;
+      const lado=a1-a0;
+      if(lado<3){ g.fillStyle=scstr(tn.h,tn.s,litL(tn,LAM_T,apaga,fl),al); g.fillRect(a0,yT1,lado,yB0-yT1); continue }
+      if(lado<10){
+        const m0=(a0+b0)/2, m1=(a1+b1)/2;
+        g.fillStyle=scstr(tn.h,tn.s,litL(tn,LAM_T,apaga,fl),al); g.fillRect(m0,yT1,m1-m0,yT0-yT1);
+        g.fillStyle=scstr(tn.h,tn.s,litL(tn,LAM_F,apaga,fl),al); g.fillRect(a0,yT0,lado,yB0-yT0);
+      }else{
+        /* el costado que mira al pasillo (una astilla de menos de 1,2 px no) */
         const xs=x0>0?x0:x1<0?x1:0, s0=cx+xs*k0, s1=cx+xs*k1;
         if(xs&&Math.abs(s0-s1)>1.2){
           g.beginPath(); g.moveTo(s0,yT0); g.lineTo(s1,yT1); g.lineTo(s1,hor+hc*k1); g.lineTo(s0,yB0); g.closePath();
-          g.fillStyle=scstr(tn.h,tn.s,litL(tn,LAM_S,apaga),al); g.fill();
+          g.fillStyle=scstr(tn.h,tn.s,litL(tn,LAM_S,apaga,fl),al); g.fill();
         }
-        /* la cara de delante: un rectangulo, sin deformar */
-        g.fillStyle=scstr(tn.h,tn.s,litL(tn,LAM_F,apaga),al);
+        g.fillStyle=scstr(tn.h,tn.s,litL(tn,LAM_F,apaga,fl),al);
         g.fillRect(a0,yT0,lado,yB0-yT0);
-        /* la de arriba, la clara, con el canto de luz */
         g.beginPath(); g.moveTo(a0,yT0); g.lineTo(a1,yT0); g.lineTo(b1,yT1); g.lineTo(b0,yT1); g.closePath();
-        g.fillStyle=scstr(tn.h,tn.s,litL(tn,LAM_T,apaga),al); g.fill();
-        /* el canto de luz de 1 px de pantalla, solo en la cara iluminada */
-        if(canto) __canto(g,LAM_T,.62*al*apaga,PX1);
+        g.fillStyle=scstr(tn.h,tn.s,litL(tn,LAM_T,apaga,fl),al); g.fill();
+        if(lado>12) __canto(g,LAM_T,Math.min(1,(.62+fl)*al*apaga),PX1);
+      }
+      /* el destello deja su marca en la linea: un tramo blanco bajo el cubo */
+      if(fl>.02){
+        const w=lado*2.4, xm=cx+q.X*f/zVal;
+        g.fillStyle='rgba(240,246,255,'+(fl*.95).toFixed(2)+')'; g.fillRect(xm-w/2,yVal-.5,w,2);
+        /* y el cubo se enciende por fuera: su contorno, un instante, en blanco */
+        g.strokeStyle='rgba(244,248,255,'+(fl*.9).toFixed(2)+')'; g.lineWidth=1;
+        g.beginPath(); g.moveTo(a0,yB0); g.lineTo(a0,yT0); g.lineTo(b0,yT1); g.lineTo(b1,yT1); g.lineTo(a1,yT0); g.lineTo(a1,yB0); g.closePath(); g.stroke();
       }
     }
     /* el pie: los cubos mas cercanos se funden al fondo en el 14 % de abajo,
