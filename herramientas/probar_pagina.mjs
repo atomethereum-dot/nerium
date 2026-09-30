@@ -34,13 +34,16 @@ await pg.waitForTimeout(2600);
    plana se afirma en «probar_prensa». */
 /* Y «.secure» tampoco: seguridad se rehizo sobre otro video y su fondo es
    el negro plano de la referencia, #0B0C11, como la prensa. */
-const papel = await pg.evaluate(() => ['.paper', '.paper2', '.sale', '.tkp', '.join']
+/* Y «.tkp» (Token) tampoco: paso al negro plano de la prensa y seguridad,
+   #030409, sin los degradados azules. Que sea ese negro plano se afirma aqui
+   abajo, donde antes se media su suelo de metal. */
+const papel = await pg.evaluate(() => ['.paper', '.paper2', '.sale', '.join']
   .map(s => { const e = document.querySelector(s); if (!e) return null;
     const c = getComputedStyle(e);
     return { sel: s, claro: e.classList.contains('claro'), col: c.backgroundColor,
              img: c.backgroundImage, capas: c.backgroundImage.split(/,(?![^()]*\))/).length }; })
   .filter(Boolean));
-di(papel.length >= 5, 'estan las secciones claras (' + papel.length + ')');
+di(papel.length >= 4, 'estan las secciones claras (' + papel.length + ')');
 di(papel.every(p => p.img !== 'none'),
    'ninguna es ya un color plano: todas llevan luz encima');
 di(papel.every(p => /feTurbulence/.test(p.img)),
@@ -100,7 +103,10 @@ di(papel.every(p => /gradient/.test(p.img)),
    y ademas medir el archivo siempre fue medir menos: el archivo podia estar
    perfecto y el resultado no, si algo se le ponia encima. Se fotografia una
    seccion clara y se mide ahi. */
-const suelo = await (async () => {
+const tkpPlano = await pg.evaluate(() => { const e = document.querySelector('.tkp');
+  const c = e && getComputedStyle(e); return !!c && c.backgroundImage === 'none' && c.backgroundColor === 'rgb(3, 4, 9)'; });
+di(tkpPlano, 'Token va en el negro plano de la prensa y seguridad (#030409, sin degradados)');
+const suelo = tkpPlano ? null : await (async () => {
   /* el suelo de metal se fotografia en Tokenomics: seguridad era la que se
      usaba y ya es negro plano */
   const sec = await pg.$('.tkp');
@@ -160,14 +166,14 @@ const suelo = await (async () => {
 
 /* El limite baja con la paleta: el recorrido de luz posible en grafito es una
    fraccion del que habia en papel. Un color liso sigue dando 0,000. */
-di(suelo.rango > 0.02,
+if (suelo) di(suelo.rango > 0.02,
    'el suelo no es un color plano: ' + suelo.rango.toFixed(3) + ' de recorrido de luz');
 /* Al reves que antes, y por el mismo motivo de siempre: donde va el texto, el
    suelo tiene que APARTARSE. Con tinta negra sobre papel eso queria decir que
    el rincon del titular fuera lo mas CLARO. Con plata sobre negro quiere decir
    exactamente lo contrario: lo mas oscuro. La regla no cambia, cambia el
    signo, y el margen se ajusta a la escala en la que ahora vive todo. */
-di(!(suelo.fx < 0.48 && suelo.fy < 0.34),
+if (suelo) di(!(suelo.fx < 0.48 && suelo.fy < 0.34),
    'y el foco del suelo NO cae en el rincon del titular, que es donde va la ' +
    'tinta de plata (el foco, en x=' + (suelo.fx*100).toFixed(0) + ' % y=' +
    (suelo.fy*100).toFixed(0) + ' %)');
@@ -181,7 +187,7 @@ di(!(suelo.fx < 0.48 && suelo.fy < 0.34),
    fria da unos pocos puntos por el lado del azul; el papel calido, los mismos
    por el lado del rojo. Las dos son direcciones de arte legitimas; el neutro
    no es ninguna. Se mide la distancia y se informa del signo. */
-di(suelo.croma > 1.6,
+if (suelo) di(suelo.croma > 1.6,
    'y el suelo tiene color dentro, no es el gris de una plantilla: ' +
    suelo.croma.toFixed(2) + ' de croma medio (limite 1,6), y tira a ' +
    (suelo.frio > 0.5 ? 'frio' : 'calido'));

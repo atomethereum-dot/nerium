@@ -5415,6 +5415,9 @@ body.light .hud::after{background:radial-gradient(120% 120% at 100% 100%,
 /* El titular va con el mismo blanco que los de las demas secciones oscuras
    -el de Security, #F9FAFD-: en el gris se leia apagado. */
 html body .press .press-h,html body .press .press-h *{color:#F9FAFD !important;-webkit-text-fill-color:#F9FAFD !important}
+/* Token en el mismo negro plano que Prensa y Security: sin los degradados
+   azules que lo dejaban tirando a azul. */
+html body main>section#token{background-color:#030409 !important;background-image:none !important}
 /* Aire entre «All coverage» y la cinta de transacciones, que empezaba pegada. */
 html body main>section.press{padding-bottom:clamp(96px,11vw,176px) !important}
 
@@ -8510,7 +8513,7 @@ main>section#ruta{z-index:2}
 
 
 
-<section class="tkp" id="token" data-bg="#0A0D14" data-acc="#0A5CF5"><i class="via" aria-hidden="true"></i>
+<section class="tkp" id="token" data-bg="#030409" data-acc="#0A5CF5"><i class="via" aria-hidden="true"></i>
   <div class="wrap tkp-head">
     <div class="k sk rv"><i class="sk-n">05</i>Token</div>
     <h2 class="tkp-h">One hundred and sixty million NRM, fixed at genesis.</h2>
