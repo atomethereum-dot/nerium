@@ -7932,6 +7932,39 @@ main>section#ruta{z-index:2}
   #ruta .ruta-hecho li,#ruta .ruta-hecho svg{transition:none;animation:none}
 }
 </style>
+<style id="compra-directa">
+/* ── EL CAMINO A LA COMPRA ──
+   Un boton flotante que aparece al salir de la portada y se esconde cuando la
+   compra esta en pantalla, y un salto directo: todos los «Join the Seed Round»
+   y los enlaces a #presale llevan a la compra SIN recorrer las secciones de
+   en medio. El salto se tapa con un velo del negro de la casa que se abre ya
+   sobre la compra. */
+.flota{position:fixed;left:50%;bottom:calc(var(--hud-b) - 8px);z-index:62;
+  display:inline-flex;align-items:center;gap:10px;height:40px;padding:0 16px 0 15px;
+  border-radius:999px;background:#0A5CF5;color:#fff;
+  font-family:var(--m);font-size:10.5px;letter-spacing:.17em;text-transform:uppercase;white-space:nowrap;
+  box-shadow:0 12px 30px -12px rgba(10,92,245,.75),0 0 0 1px rgba(255,255,255,.12) inset;
+  opacity:0;pointer-events:none;transform:translate3d(-50%,14px,0);
+  transition:opacity .35s ease,transform .5s cubic-bezier(.16,.84,.26,1),background-color .2s ease}
+.flota.on{opacity:1;pointer-events:auto;transform:translate3d(-50%,0,0)}
+.flota:hover{background:#2E86FF}
+.flota:focus-visible{outline:2px solid #63A9FF;outline-offset:3px}
+.flota-dot{width:6px;height:6px;border-radius:50%;background:#fff;flex:0 0 auto;
+  animation:flotaLate 2.2s ease-in-out infinite}
+.flota svg{width:12px;height:12px;fill:none;stroke:currentColor;stroke-width:1.6;flex:0 0 auto;
+  transition:transform .25s ease}
+.flota:hover svg{transform:translateX(3px)}
+@keyframes flotaLate{0%,100%{box-shadow:0 0 0 0 rgba(255,255,255,.45)}60%{box-shadow:0 0 0 6px rgba(255,255,255,0)}}
+body.lock .flota{opacity:0 !important;pointer-events:none !important}
+@media(max-width:700px){
+  /* en el telefono va encima de la fila del idioma y el contador */
+  .flota{bottom:calc(var(--hud-b) + 30px);height:42px}
+}
+@media(prefers-reduced-motion:reduce){.flota{transition:opacity .2s ease}.flota-dot{animation:none}}
+#salto{position:fixed;inset:0;z-index:9990;background:#030409;opacity:0;pointer-events:none;
+  transition:opacity .45s ease}
+#salto.on{opacity:1;transition:none}
+</style>
 </head>
 <body class="ann-fuera">
 <a class="saltar" href="#contenido">Skip to content</a>
@@ -8003,6 +8036,8 @@ main>section#ruta{z-index:2}
   <svg viewBox="0 0 12 12"><path d="M6 1v10M2.5 7.5L6 11l3.5-3.5"/></svg>
 </button>
 
+<a class="flota" id="flota" href="#presale" aria-hidden="true" tabindex="-1"><i class="flota-dot" aria-hidden="true"></i><span>Join the Seed Round</span><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M1 6h9M6.5 2.5 10 6l-3.5 3.5"/></svg></a>
+<div id="salto" aria-hidden="true"></div>
 <div class="ann" id="ann">
   <a class="ann-in" href="#presale">
     <span class="ann-k"><i class="ann-dot" aria-hidden="true"></i>Seed Round</span>
@@ -17436,6 +17471,56 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
   }
   vigila();
   addEventListener('load',function(){ setTimeout(vigila,500) });
+})();
+</script>
+<script id="compra-directa-js">
+(function(){
+  var pre=document.getElementById('presale'), fl=document.getElementById('flota'),
+      velo=document.getElementById('salto');
+  if(!pre) return;
+  var CALMA=matchMedia('(prefers-reduced-motion:reduce)').matches;
+  var dTop=function(n){var y=0;while(n){y+=n.offsetTop;n=n.offsetParent}return y};
+  /* el mismo sitio al que llevaba el ancla: la compra arriba, bajo el menu */
+  var destino=function(){return Math.max(0,dTop(pre)-46)};
+  var saltando=false;
+  function salta(){
+    saltando=true;
+    if(velo&&!CALMA){ velo.classList.add('on'); void velo.offsetWidth }
+    window.scrollTo(0,destino());
+    /* Las secciones de en medio pueden cambiar de alto al pintarse por primera
+       vez (las que llevan «content-visibility»), asi que el sitio se corrige
+       unos cuadros seguidos hasta que se queda quieto. */
+    var n=0;
+    (function fija(){ requestAnimationFrame(function(){
+      var d=destino(); if(Math.abs(window.scrollY-d)>2) window.scrollTo(0,d);
+      if(++n<8) fija(); else { saltando=false; if(velo) velo.classList.remove('on'); ve() }
+    }) })();
+    try{ pre.setAttribute('tabindex','-1'); pre.focus({preventScroll:true}) }catch(e){}
+  }
+  /* Se escucha en el documento, en burbuja: primero corren los de cada enlace
+     -el del menu del telefono lo cierra- y despues el salto manda sobre el
+     desplazamiento suave, que ya no recorre la pagina. */
+  document.addEventListener('click',function(e){
+    var a=e.target.closest&&e.target.closest('a[href="#presale"]');
+    if(!a||e.button>0||e.metaKey||e.ctrlKey||e.shiftKey) return;
+    e.preventDefault(); salta();
+  });
+  if(!fl) return;
+  /* el boton: fuera de la portada, y nunca con la compra en pantalla */
+  var top=0, alto=0, on=false, pend=0;
+  function mide(){ top=dTop(pre); alto=pre.offsetHeight }
+  function ve(){
+    pend=0; if(saltando) return;
+    var y=window.scrollY, vh=window.innerHeight;
+    var enCompra = y+vh > top+vh*.25 && y < top+alto-vh*.25;
+    var quiere = y > vh*.85 && !enCompra;
+    if(quiere!==on){ on=quiere; fl.classList.toggle('on',on);
+      fl.setAttribute('aria-hidden',on?'false':'true'); fl.tabIndex=on?0:-1 }
+  }
+  mide(); ve();
+  addEventListener('scroll',function(){ if(!pend) pend=requestAnimationFrame(ve) },{passive:true});
+  addEventListener('resize',function(){ mide(); ve() },{passive:true});
+  if(window.ResizeObserver) new ResizeObserver(function(){ mide(); if(!pend) pend=requestAnimationFrame(ve) }).observe(document.body);
 })();
 </script>
 </body>
