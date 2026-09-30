@@ -413,7 +413,11 @@ di(lado.scrollW <= lado.clientW + 2 && lado.movido === 0,
   di(!!caja, 'los mandos del rincon estan en pantalla para poder medirlos');
   let malos = 0, n = 0;
   if (caja) {
-    await pg.addStyleTag({ content: '.hud,.hud::after,.subir,.srail,.scrollbtn,.lang-menu{opacity:0!important}' });
+    /* El banner en video de la banda «chroma» cambia de tono de un cuadro a
+       otro -su transicion en damero pasa por un blanco entero medio segundo-,
+       y ninguna etiqueta fija del HUD puede seguir eso: es el mismo caso que
+       los fundidos «xf» y «xl». Se tapa para medir, como el propio HUD. */
+    await pg.addStyleTag({ content: '.hud,.hud::after,.subir,.srail,.scrollbtn,.lang-menu{opacity:0!important} .chroma .ban{visibility:hidden!important}' });
     const alto = await pg.evaluate(() => document.documentElement.scrollHeight - innerHeight);
     const paso = await pg.evaluate(() => Math.round(innerHeight * 0.6));
     for (let y = 0; y <= alto; y += paso) {
