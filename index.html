@@ -5430,6 +5430,13 @@ html body main>section#token{background-color:#030409 !important;background-imag
 html body .press .prs-vis{--v:clamp(58px,5.4vw,86px)}
 html body .press .prs-f.con-vis .prs-go{opacity:0}
 @media(max-width:760px){html body .press .prs-vis{--v:62px}}
+/* EL BANNER EN VIDEO en el sitio de la cinta de transacciones: mismo alto,
+   fondo negro, y se abre con el mismo recorte que tenia el lienzo. */
+html body main>section.chroma{background-color:#000 !important}
+.chroma .ban{position:absolute;inset:0;z-index:1;clip-path:inset(14% 6% round 18px);
+  transition:clip-path 1.2s cubic-bezier(.16,.84,.26,1)}
+.chroma.in .ban{clip-path:inset(0 0 round 0px)}
+.chroma .ban-v{width:100%;height:100%;object-fit:cover;display:block;background:#000}
 /* Aire entre «All coverage» y la cinta de transacciones, que empezaba pegada. */
 html body main>section.press{padding-bottom:clamp(96px,11vw,176px) !important}
 
@@ -8249,7 +8256,8 @@ body.lock .flota{opacity:0 !important;pointer-events:none !important}
 </section>
 
 
-<section class="chroma" data-bg="#0A0D14" data-acc="#2E86FF"><i class="emb" aria-hidden="true" style="--emb:#000000"></i><canvas id="chroma"></canvas></section>
+<section class="chroma" data-bg="#0A0D14" data-acc="#2E86FF"><i class="emb" aria-hidden="true" style="--emb:#000000"></i><!-- La cinta de transacciones se OCULTA (hidden): en su sitio va el banner en video. Volver = quitar «hidden» del lienzo y el bloque «.ban». --><canvas id="chroma" hidden></canvas>
+  <div class="ban" role="img" aria-label="Nereum Finance. Seed Round 85%. Layer 1: NereumEVM, Nereum DEX, NUSD, Forge, Vaults, Feed, Link, Wallet. L2 on Nereum. nereum.xyz"><video class="ban-v" id="banV" muted playsinline loop preload="none" poster="img/banner-desk.webp" data-d="img/banner-desk.mp4" data-t="img/banner-tel.mp4" data-pd="img/banner-desk.webp" data-pt="img/banner-tel.webp" aria-hidden="true"></video></div></section>
 
 
 <!-- «03 The thesis» se OCULTA. Esta no era como la tira de palabras: iba
@@ -11020,7 +11028,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
      El gobierno es el de siempre: solo anima con un tercio a la vista, un
      cuadro quieto si asoma menos, techo de 30 cuadros y quieta con
      «prefers-reduced-motion». */
-  var cv=document.getElementById('chroma'); if(!cv) return;
+  var cv=document.getElementById('chroma'); if(!cv||cv.hidden) return;   /* oculta: en su sitio va el banner */
   var ctx=cv.getContext('2d',{alpha:false}); if(!ctx) return;
   var CALMA=matchMedia('(prefers-reduced-motion:reduce)').matches;
   var cs=getComputedStyle(document.documentElement);
@@ -17563,6 +17571,24 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
   addEventListener('scroll',function(){ if(!pend) pend=requestAnimationFrame(ve) },{passive:true});
   addEventListener('resize',function(){ mide(); ve() },{passive:true});
   if(window.ResizeObserver) new ResizeObserver(function(){ mide(); if(!pend) pend=requestAnimationFrame(ve) }).observe(document.body);
+})();
+</script>
+<script id="banner-js">
+/* El banner: solo se carga el video que toca (ancho o telefono), empieza al
+   acercarse y se para al irse. Con «movimiento reducido» se queda el poster. */
+(function(){
+  var v=document.getElementById('banV'); if(!v) return;
+  var mq=matchMedia('(max-width:899px)'), calma=matchMedia('(prefers-reduced-motion:reduce)').matches;
+  var cual='', visto=false;
+  function pon(){ var t=mq.matches?'t':'d'; if(t===cual) return; cual=t;
+    /* MP4 (H.264) donde se puede -Safari, Chrome, Edge- y WebM (VP9) si no */
+    var mp4=v.canPlayType('video/mp4; codecs="avc1.640028"');
+    v.poster=v.getAttribute('data-p'+t); v.src=v.getAttribute('data-'+t).replace(/\.mp4$/, mp4?'.mp4':'.webm');
+    if(visto&&!calma){ var p=v.play(); if(p&&p.catch) p.catch(function(){}) } }
+  pon(); if(mq.addEventListener) mq.addEventListener('change',pon);
+  if(calma||!window.IntersectionObserver) return;
+  new IntersectionObserver(function(es){ visto=es[0].isIntersecting;
+    if(visto){ var p=v.play(); if(p&&p.catch) p.catch(function(){}) } else v.pause() },{rootMargin:'300px 0px'}).observe(v);
 })();
 </script>
 </body>
