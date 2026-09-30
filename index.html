@@ -5436,6 +5436,9 @@ html body main>section.chroma{background-color:#000 !important}
 .chroma .ban{position:absolute;inset:0;z-index:1;clip-path:inset(14% 6% round 18px);
   transition:clip-path 1.2s cubic-bezier(.16,.84,.26,1)}
 .chroma.in .ban{clip-path:inset(0 0 round 0px)}
+/* arriba del video, la misma costura que abajo: la linea azul que crece con
+   el scroll y la via con su cubo. La linea va por encima del video. */
+html body main>section.chroma::after{z-index:3}
 .chroma .ban-v{width:100%;height:100%;object-fit:cover;display:block;background:#000}
 /* Aire entre «All coverage» y la cinta de transacciones, que empezaba pegada. */
 html body main>section.press{padding-bottom:clamp(96px,11vw,176px) !important}
@@ -8256,7 +8259,7 @@ body.lock .flota{opacity:0 !important;pointer-events:none !important}
 </section>
 
 
-<section class="chroma" data-bg="#0A0D14" data-acc="#2E86FF"><i class="emb" aria-hidden="true" style="--emb:#000000"></i><!-- La cinta de transacciones se OCULTA (hidden): en su sitio va el banner en video. Volver = quitar «hidden» del lienzo y el bloque «.ban». --><canvas id="chroma" hidden></canvas>
+<section class="chroma" data-bg="#0A0D14" data-acc="#2E86FF"><i class="via" aria-hidden="true"></i><i class="emb" aria-hidden="true" style="--emb:#000000"></i><!-- La cinta de transacciones se OCULTA (hidden): en su sitio va el banner en video. Volver = quitar «hidden» del lienzo y el bloque «.ban». --><canvas id="chroma" hidden></canvas>
   <div class="ban" role="img" aria-label="Nereum Finance. Seed Round 85%. Layer 1: NereumEVM, Nereum DEX, NUSD, Forge, Vaults, Feed, Link, Wallet. L2 on Nereum. nereum.xyz"><video class="ban-v" id="banV" muted playsinline loop preload="none" poster="img/banner-desk.webp" data-d="img/banner-desk.mp4" data-t="img/banner-tel.mp4" data-pd="img/banner-desk.webp" data-pt="img/banner-tel.webp" aria-hidden="true"></video></div></section>
 
 
