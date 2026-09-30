@@ -11993,9 +11993,17 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
        corte no se ve. Antes se borraba en un degradado de 40 % de pantalla y
        en esa franja el tunel quedaba ENCIMA del contenido de la compra,
        apagando el rotulo, el punto y las redes de arriba. */
-    if(borde<H) ctx0.clearRect(0,Math.max(0,borde),W,H-Math.max(0,borde));
+    /* AL SUBIR, UN MARGEN. El escenario va pegado a la pantalla por el
+       navegador, pero este borde sale del scroll que leyo el script, que en
+       el iPhone llega uno o dos cuadros tarde. Subiendo, la compra ya esta
+       mas abajo que el borde calculado y entre los dos quedaba una franja sin
+       tunel: el corte negro. Se borra un poco mas abajo, tanto como se esta
+       moviendo; lo que el tunel pisa de mas es el mismo tunel copiado en el
+       fondo de la compra, asi que no se nota. Quieto, el margen es cero. */
+    const bordeB=borde+margenSube;
+    if(bordeB<H) ctx0.clearRect(0,Math.max(0,bordeB),W,H-Math.max(0,bordeB));
   }
-  let cerca=false, enCompra=false;
+  let cerca=false, enCompra=false, margenSube=0, yAntes=null;
   new IntersectionObserver(es=>{ cerca=es[0].isIntersecting; if(cerca){ size(); despiertaPila() } },
     {rootMargin:'20% 0px'}).observe(hold);
   /* EL FONDO DE LA COMPRA: el mismo tunel, copiado. Su lienzo va pegado a la
@@ -12080,6 +12088,8 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
     dirty=false; last=p;
     /* el borde de arriba de la dapp, medido en el lienzo */
     const y=__y, borde=compra?(compraTop-y)-cvTop(y):vh*3;
+    const dv=yAntes===null?0:y-yAntes; yAntes=y;
+    margenSube=dv<0?Math.min(vh*.3,8-dv*3):0;
     const compraVe=!!compra&&borde<H&&compraTop+compraAlto-y>0;
     /* disuelto del todo sobre la dapp, el tunel ya no se ve: no se dibuja y
        el escenario se oculta. Seguia pintando el tunel entero en cada cuadro
