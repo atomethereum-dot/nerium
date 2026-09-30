@@ -17493,8 +17493,8 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
   /* DONDE SE ATERRIZA. La seccion entera a la vista, sin tener que bajar:
      desde el rotulo «Seed Round» hasta el pie del widget de compra, centrado
      en la pantalla. Si no cabe -el telefono, donde el widget va debajo del
-     texto-, el widget de compra entero arriba, con el boton de la cartera a
-     la vista. */
+     texto-, el inicio de la seccion arriba: el rotulo «Seed Round» y el
+     titular, y el widget se alcanza bajando. */
   var cab=pre.querySelector('.sale-top'), wid=pre.querySelector('.widget');
   var destino=function(){
     var vh=window.innerHeight, sec=dTop(pre);
@@ -17502,7 +17502,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
     var a=dTop(cab), wt=dTop(wid), b=wt+wid.offsetHeight, alto=b-a;
     var holgura=window.innerWidth<=700?64:20;       /* los mandos fijos de abajo */
     if(alto+16<=vh) return Math.max(0,Math.round(a-Math.max(8,Math.min(56,(vh-holgura-alto)/2))));
-    return Math.max(0,Math.round(wt-14));
+    return Math.max(0,Math.round(a-24));
   };
   var saltando=false;
   function salta(){
