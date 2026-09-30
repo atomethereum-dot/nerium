@@ -5418,6 +5418,11 @@ html body .press .press-h,html body .press .press-h *{color:#F9FAFD !important;-
 /* Token en el mismo negro plano que Prensa y Security: sin los degradados
    azules que lo dejaban tirando a azul. */
 html body main>section#token{background-color:#030409 !important;background-image:none !important}
+/* La imagen del medio en la columna de la flecha tambien en escritorio,
+   como en el telefono: pequeña, en el sitio del rombo, que se aparta. */
+html body .press .prs-vis{--v:clamp(58px,5.4vw,86px)}
+html body .press .prs-f.con-vis .prs-go{opacity:0}
+@media(max-width:760px){html body .press .prs-vis{--v:62px}}
 /* Aire entre «All coverage» y la cinta de transacciones, que empezaba pegada. */
 html body main>section.press{padding-bottom:clamp(96px,11vw,176px) !important}
 
@@ -7939,14 +7944,14 @@ main>section#ruta{z-index:2}
    y los enlaces a #presale llevan a la compra SIN recorrer las secciones de
    en medio. El salto se tapa con un velo del negro de la casa que se abre ya
    sobre la compra. */
-.flota{position:fixed;left:50%;bottom:calc(var(--hud-b) - 8px);z-index:62;
-  display:inline-flex;align-items:center;gap:10px;height:40px;padding:0 16px 0 15px;
+.flota{position:fixed;top:16px;right:16px;z-index:62;
+  display:inline-flex;align-items:center;gap:10px;height:38px;padding:0 15px 0 14px;
   border-radius:999px;background:#0A5CF5;color:#fff;
   font-family:var(--m);font-size:10.5px;letter-spacing:.17em;text-transform:uppercase;white-space:nowrap;
   box-shadow:0 12px 30px -12px rgba(10,92,245,.75),0 0 0 1px rgba(255,255,255,.12) inset;
-  opacity:0;pointer-events:none;transform:translate3d(-50%,14px,0);
+  opacity:0;pointer-events:none;transform:translate3d(0,-12px,0);
   transition:opacity .35s ease,transform .5s cubic-bezier(.16,.84,.26,1),background-color .2s ease}
-.flota.on{opacity:1;pointer-events:auto;transform:translate3d(-50%,0,0)}
+.flota.on{opacity:1;pointer-events:auto;transform:none}
 .flota:hover{background:#2E86FF}
 .flota:focus-visible{outline:2px solid #63A9FF;outline-offset:3px}
 .flota-dot{width:6px;height:6px;border-radius:50%;background:#fff;flex:0 0 auto;
@@ -7954,11 +7959,14 @@ main>section#ruta{z-index:2}
 .flota svg{width:12px;height:12px;fill:none;stroke:currentColor;stroke-width:1.6;flex:0 0 auto;
   transition:transform .25s ease}
 .flota:hover svg{transform:translateX(3px)}
+.flota .fl-c{display:none}
 @keyframes flotaLate{0%,100%{box-shadow:0 0 0 0 rgba(255,255,255,.45)}60%{box-shadow:0 0 0 6px rgba(255,255,255,0)}}
 body.lock .flota{opacity:0 !important;pointer-events:none !important}
 @media(max-width:700px){
-  /* en el telefono va encima de la fila del idioma y el contador */
-  .flota{bottom:calc(var(--hud-b) + 30px);height:42px}
+  /* en el telefono, corto: arriba a la derecha, lejos de los mandos de abajo */
+  .flota{top:max(12px,env(safe-area-inset-top,0px));right:12px;height:34px;padding:0 12px;gap:8px;font-size:10px;letter-spacing:.15em}
+  .flota .fl-l{display:none}
+  .flota .fl-c{display:inline}
 }
 @media(prefers-reduced-motion:reduce){.flota{transition:opacity .2s ease}.flota-dot{animation:none}}
 #salto{position:fixed;inset:0;z-index:9990;background:#030409;opacity:0;pointer-events:none;
@@ -8036,7 +8044,7 @@ body.lock .flota{opacity:0 !important;pointer-events:none !important}
   <svg viewBox="0 0 12 12"><path d="M6 1v10M2.5 7.5L6 11l3.5-3.5"/></svg>
 </button>
 
-<a class="flota" id="flota" href="#presale" aria-hidden="true" tabindex="-1"><i class="flota-dot" aria-hidden="true"></i><span>Join the Seed Round</span><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M1 6h9M6.5 2.5 10 6l-3.5 3.5"/></svg></a>
+<a class="flota" id="flota" href="#presale" aria-hidden="true" tabindex="-1"><i class="flota-dot" aria-hidden="true"></i><span class="fl-l">Join the Seed Round</span><span class="fl-c">Seed Round</span><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M1 6h9M6.5 2.5 10 6l-3.5 3.5"/></svg></a>
 <div id="salto" aria-hidden="true"></div>
 <div class="ann" id="ann">
   <a class="ann-in" href="#presale">
@@ -17085,7 +17093,9 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
 
   var fino = !!(window.matchMedia && matchMedia('(pointer:fine)').matches);
   var mqEstrecho = window.matchMedia ? matchMedia('(max-width:760px)') : null;
-  function estrecho(){ return !!(mqEstrecho && mqEstrecho.matches) }
+  /* La imagen del medio va SIEMPRE en la columna de la flecha, tambien en
+     escritorio: flotando sobre la fila tapaba el titular de la seccion. */
+  function estrecho(){ return true }
   var quieto = !!(window.matchMedia && matchMedia('(prefers-reduced-motion:reduce)').matches);
   var x = 0, y = 0, dx = 0, dy = 0, puesta = false, pedido = false, viva = null;
 
@@ -17480,8 +17490,20 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
   if(!pre) return;
   var CALMA=matchMedia('(prefers-reduced-motion:reduce)').matches;
   var dTop=function(n){var y=0;while(n){y+=n.offsetTop;n=n.offsetParent}return y};
-  /* el mismo sitio al que llevaba el ancla: la compra arriba, bajo el menu */
-  var destino=function(){return Math.max(0,dTop(pre)-46)};
+  /* DONDE SE ATERRIZA. La seccion entera a la vista, sin tener que bajar:
+     desde el rotulo «Seed Round» hasta el pie del widget de compra, centrado
+     en la pantalla. Si no cabe -el telefono, donde el widget va debajo del
+     texto-, el widget de compra entero arriba, con el boton de la cartera a
+     la vista. */
+  var cab=pre.querySelector('.sale-top'), wid=pre.querySelector('.widget');
+  var destino=function(){
+    var vh=window.innerHeight, sec=dTop(pre);
+    if(!cab||!wid) return Math.max(0,sec-46);
+    var a=dTop(cab), wt=dTop(wid), b=wt+wid.offsetHeight, alto=b-a;
+    var holgura=window.innerWidth<=700?64:20;       /* los mandos fijos de abajo */
+    if(alto+16<=vh) return Math.max(0,Math.round(a-Math.max(8,Math.min(56,(vh-holgura-alto)/2))));
+    return Math.max(0,Math.round(wt-14));
+  };
   var saltando=false;
   function salta(){
     saltando=true;
