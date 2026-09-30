@@ -1,10 +1,10 @@
-// probar_proyectos: «05 · What we are building» es el tunel de cubos (d64):
+// probar_proyectos: «06 · What we are building» es el tunel de cubos (d64):
 // un escenario anclado con un lienzo que vuela por un tunel de cubos y frena
 // en tres estaciones -la cadena, la tokenizacion de activos y la mineria-,
 // con los textos de la web y todo en azules. Al final los cubos implosionan
 // en UN cubo azul cargado (mira de 1 px y cifra «NN / NN»); quedan unos pocos
 // cubos lejanos y apagados a la deriva, debajo se dibuja la hebra hacia un
-// «06 Roadmap» provisional, y esa hebra es el primer tramo de una VIA (su
+// «07 Roadmap» provisional, y esa hebra es el primer tramo de una VIA (su
 // propio lienzo, anclado a la pagina, «.via-cv») que se curva al margen,
 // cruza la costura y entra en la hebra de la ruta. El cubo baja por ella -en
 // el lienzo fijo «.caida-cv»- y se posa en su cabeza. El epigrafe provisional
@@ -16,7 +16,7 @@
 //
 // Lo que se mide, por orden:
 //   1. que la seccion este, se vea, vaya en su sitio y con su numero (05, y
-//      la ruta 06 y «In the open» 07; el contador de abajo dice «/ 07»);
+//      la ruta 07 y «In the open» 08; el contador de abajo dice «/ 08»);
 //   2. que los textos sean los de la web, letra por letra;
 //   3. que el lienzo llene el escenario hasta el canto de abajo y se MUEVA sin
 //      que nadie toque el scroll;
@@ -91,7 +91,7 @@ const AYUDA = () => {
       const p = i / 4; n++; sx += X0 + p % w; sy += Y0 + Math.floor(p / w); }
     return n ? { n, x:b.left + sx / n / k, y:b.top + sy / n / k } : { n:0 };
   };
-  /* p68 · los dos «06 Roadmap»: el provisional del tunel y el de la ruta.
+  /* p68 · los dos «07 Roadmap»: el provisional del tunel y el de la ruta.
      «op» es lo que se ve de cada uno (opacidad, y 0 si esta oculto o fuera
      de la pantalla); el relevo exige que nunca se vean los dos. */
   window.__epigrafes = () => [document.getElementById('tnSig'), document.querySelector('#ruta .ruta-top')].map(e => {
@@ -144,9 +144,9 @@ for (const [W, H, mob] of [[1440, 900, 0], [390, 844, 1]]) {
     di(r.escala === 'none', tag + 'no se hunde ni se vela (' + r.escala + ')');
     di(r.sig === 'ruta' && r.iB >= 0 && r.iB < r.iR && r.iR < r.iJ,
        tag + 'va justo encima de la ruta, y las dos antes de «In the open» (' + [r.iB, r.iR, r.iJ].join(' < ') + ')');
-    di(r.nB === '05' && r.nR === '06' && r.nJ === '07', tag + 'numeracion: proyectos 05, ruta 06, «In the open» 07 (' + [r.nB, r.nR, r.nJ].join(', ') + ')');
-    di(/^06\s*Roadmap$/.test(r.sig06), tag + 'el epigrafe provisional del final dice «06 Roadmap» (' + r.sig06 + ')');
-    di(r.tot === '07', tag + 'el contador de abajo a la derecha cuenta «/ 07» (' + r.tot + ')');
+    di(r.nB === '06' && r.nR === '07' && r.nJ === '08', tag + 'numeracion: proyectos 06, ruta 07, «In the open» 08 (' + [r.nB, r.nR, r.nJ].join(', ') + ')');
+    di(/^07\s*Roadmap$/.test(r.sig06), tag + 'el epigrafe provisional del final dice «07 Roadmap» (' + r.sig06 + ')');
+    di(r.tot === '08', tag + 'el contador de abajo a la derecha cuenta «/ 08» (' + r.tot + ')');
     di(!r.enMenu, tag + 'no entra en el menu: es el paso del globo a la ruta, no una estacion');
   }
 
@@ -190,7 +190,7 @@ for (const [W, H, mob] of [[1440, 900, 0], [390, 844, 1]]) {
     let dif = 0; for (let i = 0; i < f1.length; i++) if (Math.abs(f1[i] - f2[i]) > 6) dif++;
     di(dif / f1.length > .02, tag + 'el tunel se mueve SIN tocar el scroll: ' + (100 * dif / f1.length).toFixed(1) + ' % de pixeles cambian en 0,4 s');
     const hud = await pg.evaluate(() => document.querySelector('.hud-count b').textContent);
-    di(hud === '05', tag + 'y el contador marca 05 mientras se cruza (' + hud + ' / 07)');
+    di(hud === '06', tag + 'y el contador marca 06 mientras se cruza (' + hud + ' / 08)');
   }
 
   // ── 4 · una estacion cada vez, entera, y sin ambar ────────────────────────
@@ -308,8 +308,8 @@ for (const [W, H, mob] of [[1440, 900, 0], [390, 844, 1]]) {
        ', ' + r.vivos + ' px vivos, ' + (100 * r.fuera).toFixed(2) + ' % no negro)');
     di(r.filas > 10 && r.hebra > .8, tag + 'debajo baja la hebra hasta el epigrafe, en el lienzo fijo (' + (100 * r.hebra).toFixed(0) + ' % de ' + r.filas + ' filas)');
     const vistos = r.epi.filter(e => e.op > .02);
-    di(vistos.length === 1 && r.epi[0].op > .9 && /^06\s*Roadmap$/.test(r.epi[0].txt) && r.sigTop > r.c.y,
-       tag + 'se ve UN «06 Roadmap», el provisional, debajo del cubo (provisional ' + r.epi[0].op + ', el de la ruta ' + r.epi[1].op + ')');
+    di(vistos.length === 1 && r.epi[0].op > .9 && /^07\s*Roadmap$/.test(r.epi[0].txt) && r.sigTop > r.c.y,
+       tag + 'se ve UN «07 Roadmap», el provisional, debajo del cubo (provisional ' + r.epi[0].op + ', el de la ruta ' + r.epi[1].op + ')');
     di(r.posada === false, tag + 'y el cubo aun no esta en la hebra de la ruta');
   }
 
@@ -327,7 +327,7 @@ for (const [W, H, mob] of [[1440, 900, 0], [390, 844, 1]]) {
     for (let y = Se - H * .03; y <= Se + H * .3; y += H * .015) { await irA(y, 110); relevo.push(await pg.evaluate(() => __epigrafes().map(e => e.op))); }
     const dobles = relevo.filter(e => e[0] > .02 && e[1] > .02).length, fin = relevo[relevo.length - 1];
     di(dobles === 0 && relevo[0][0] > .9 && fin[0] <= .02 && fin[1] > .9,
-       tag + 'el «06 Roadmap» provisional le pasa el relevo al de la ruta sin verse nunca los dos (' + dobles + ' de ' + relevo.length +
+       tag + 'el «07 Roadmap» provisional le pasa el relevo al de la ruta sin verse nunca los dos (' + dobles + ' de ' + relevo.length +
        ' posiciones con los dos; al final ' + fin.map(v => v.toFixed(2)).join(' / ') + ')');
     /* donde se posa, preguntandoselo a la pagina: «__caida.posada()» */
     let lo = Se, hi = Se + H * 5;
@@ -445,8 +445,8 @@ for (const [W, H, mob] of [[1440, 900, 0], [390, 844, 1]]) {
   await pg.evaluate(() => { const k = document.querySelector('#ruta .ruta-top'); scrollTo(0, Math.round(k.getBoundingClientRect().top + scrollY - innerHeight * .5)); });
   await pg.waitForTimeout(800);
   const e2 = await pg.evaluate(() => __epigrafes());
-  di(r.epi[0].op === 0 && r.sigVis === 'hidden' && r.rk > .95 && e2.filter(e => e.op > .02).length === 1 && e2[1].op > .95 && /^06\s*Roadmap$/.test(e2[1].txt),
-     'sin movimiento · se ve UN epigrafe «06 Roadmap», el de la ruta (provisional ' + r.epi[0].op + ', el de la ruta ' + e2[1].op + ')');
+  di(r.epi[0].op === 0 && r.sigVis === 'hidden' && r.rk > .95 && e2.filter(e => e.op > .02).length === 1 && e2[1].op > .95 && /^07\s*Roadmap$/.test(e2[1].txt),
+     'sin movimiento · se ve UN epigrafe «07 Roadmap», el de la ruta (provisional ' + r.epi[0].op + ', el de la ruta ' + e2[1].op + ')');
   di(errs.length === 0, 'sin movimiento · sin errores de pagina' + (errs.length ? ': ' + errs[0] : ''));
   await ctx.close();
 }
