@@ -12660,12 +12660,15 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
     if(fl>0) L+=(97-L)*fl;
     return clm(L*apaga,3,97) };
   const LADO=.8;                          /* el cubo, igual en todo el suelo */
-  const SAIS=1.3, LP=2.2;                 /* medio pasillo y distancia entre carriles */
+  /* p74 · el pasillo, un poco mas ancho: los cubos mas cercanos del centro
+     ya no quedan debajo de «KEEP SCROLLING» */
+  const SAIS=1.8, LP=2.2;                 /* medio pasillo y distancia entre carriles */
   const PASOS=[4.4,5.2,4.8,5.6];          /* el paso de cada carril, fijo */
   const FLASH=3.4;                        /* lo que dura el destello, en cubos de recorrido */
   let suT=0, suL=0, suVelo=null, suVeloH=0, suFil=null, suFilW=0, suCol=null, suColH=0, suAn=null,
       suNiebla=null, suNieblaH=0, suVal=null, suValW=0;
   let suPie=null, suPieH=0;
+  const suLote=new Map();
   const sSeg=[[],[],[],[],[],[]],
         SEGC=['rgba(99,169,255,.8)','rgba(78,150,255,.5)','rgba(46,134,255,.26)',
               'rgba(214,224,240,.55)','rgba(214,224,240,.36)','rgba(214,224,240,.18)'];
@@ -12690,10 +12693,17 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
     const zLej=Math.sqrt(f*hc*4.8/3.2), zCer=Math.max(.3,(hc-LADO)/.7*.98);
     /* la linea de validacion, a un tercio largo del suelo desde el horizonte */
     const yVal=hor+(H-hor)*.36, zVal=f*hc/(yVal-hor);
-    const nL=W<760?3:4, Xfin=SAIS+(nL-1)*LP+LADO;
+    /* p74 · «que ocupen las partes laterales»: carriles hasta los bordes
+       (12 en el telefono, 16 en escritorio). Cada carril se empieza a mirar
+       solo desde donde entra en pantalla («zVis»): lo de mas cerca cae fuera
+       por los lados y ni se calcula. Los de fuera, un punto mas apagados. */
+    const nL=W<760?6:8, Xfin=SAIS+(nL-1)*LP+LADO;
+    const zVis=X=>Math.max(zCer*.5,(Math.abs(X)-LADO)*f/(W/2+4));
     /* el velo azul del horizonte, solo en su franja */
     g.globalAlpha=fuerza;
-    const nh=(H-hor)*.3;
+    /* p74 · la franja, un poco mas baja (su degradado es lo que mas cuesta
+       pintar, y su ultimo tramo ya casi no se veia) */
+    const nh=(H-hor)*.24;
     if(!suNiebla||suNieblaH!==H){
       suNiebla=g.createLinearGradient(0,hor,0,hor+nh);
       suNiebla.addColorStop(0,'rgba(46,134,255,0)');
@@ -12708,6 +12718,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
     g.beginPath();
     for(let k=0;k<nL;k++) for(let s=-1;s<=1;s+=2){
       const X=s*(SAIS+k*LP), L=zLej-zCer, u=((suT*2.2+(k*2+(s>0))*L*.37)%L+L)%L, z0=zCer+u, z1=z0+4;
+      if(z1<zVis(X)) continue;
       g.moveTo(cx+X*f/z0, hor+hc*f/z0); g.lineTo(cx+X*f/z1, hor+hc*f/z1) }
     g.strokeStyle='rgba(190,222,255,.95)'; g.lineWidth=1.5; g.stroke();
     /* LA LINEA DE VALIDACION: 1 px de plata a lo ancho de los carriles */
@@ -12723,7 +12734,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
     g.fillStyle=suVal; g.fillRect(cx-xv,yVal,xv*2,1);
     /* una marca en cada carril, donde se valida */
     g.fillStyle='rgba(226,236,255,.7)';
-    for(let k=0;k<nL;k++) for(let s=-1;s<=1;s+=2){ const xm=cx+s*(SAIS+k*LP)*f/zVal; g.fillRect(xm-.5,yVal-3,1,7) }
+    for(let k=0;k<nL;k++) for(let s=-1;s<=1;s+=2){ const xm=cx+s*(SAIS+k*LP)*f/zVal; if(xm>-2&&xm<W+2) g.fillRect(xm-.5,yVal-3,1,7) }
     g.globalAlpha=1;
     /* los cubos de todos los carriles, del fondo hacia la camara; y, de paso,
        LOS RAILES: una linea de 1 px en el suelo entre cada cubo y el siguiente
@@ -12735,17 +12746,20 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
     for(let i=0;i<6;i++) sSeg[i].length=0;
     let m=0;
     for(let k=0;k<nL;k++) for(let s=-1;s<=1;s+=2){
-      const ln=k*2+(s>0?1:0), P=PASOS[ln%PASOS.length], X=s*(SAIS+k*LP);
-      const fase=suT+ln*.83, base=Math.floor(fase/P), off=fase-base*P;
-      for(let n=Math.floor((zCer*.5-off)/P)-1;;n++){
-        const z0=n*P+off; if(z0>zLej) break;
-        const za=Math.max(z0+LADO,zCer*.5), zb=z0+P;
-        if(zb<zLej&&zb>za){
+      const ln=k*2+(s>0?1:0), P=PASOS[ln%PASOS.length]*(1+.1*Math.max(0,k-2)), X=s*(SAIS+k*LP);
+      /* los de fuera se pierden un poco antes en el fondo: alli se juntan y
+         solo sumarian puntos de un pixel */
+      const fase=suT+ln*.83, base=Math.floor(fase/P), off=fase-base*P, zv=zVis(X), zL=zLej*(1-.1*Math.max(0,k-2));
+      for(let n=Math.floor((zv-off)/P)-1;;n++){
+        const z0=n*P+off; if(z0>zL) break;
+        const za=Math.max(z0+LADO,zv), zb=z0+P;
+        if(zb<zL&&zb>za){
           const hz=clm((za-zCer)/(zLej-zCer)), cub=(z0+LADO*.5>zVal?3:0)+(hz<.35?0:hz<.7?1:2), A=sSeg[cub];
-          A.push(cx+X*f/za,hor+hc*f/za,cx+X*f/zb,hor+hc*f/zb) }
-        if(z0+LADO<zCer) continue;
+          /* (el tramo mas lejano de los carriles de fuera no se ve: se ahorra) */
+          if(!(k>2&&hz>=.7)) A.push(cx+X*f/za,hor+hc*f/za,cx+X*f/zb,hor+hc*f/zb) }
+        if(z0+LADO<zCer||z0+LADO<zv) continue;
         const o=sLista[m]||(sLista[m]={}); m++;
-        o.z0=z0; o.X=X; o.ln=ln; o.id=n-base; o.P=P;
+        o.z0=z0; o.X=X; o.ln=ln; o.id=n-base; o.P=P; o.k=k;
       }
     }
     g.globalAlpha=fuerza; g.lineWidth=1;
@@ -12755,6 +12769,10 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
     g.globalAlpha=1;
     sLista.length=m; sLista.sort((a,b)=>b.z0-a.z0);
     g.lineJoin='round';
+    const LOTE=suLote; let hayLote=false;
+    const lote=(c,x,y,w,hh)=>{ let A=LOTE.get(c); if(!A){ if(LOTE.size>300) LOTE.clear(); A=[]; LOTE.set(c,A) } A.push(x,y,w,hh); hayLote=true };
+    const vaciaLote=()=>{ if(!hayLote) return; hayLote=false;
+      for(const [c,A] of LOTE){ if(!A.length) continue; g.beginPath(); for(let j=0;j<A.length;j+=4) g.rect(A[j],A[j+1],A[j+2],A[j+3]); g.fillStyle=c; g.fill(); A.length=0 } };
     const h=LADO;
     for(const q of sLista){
       const z0=q.z0, z1=z0+h, x0=q.X-h/2, x1=q.X+h/2;
@@ -12765,7 +12783,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
       if(a1<-2&&b1<-2||a0>W+2&&b0>W+2) continue;
       /* niebla: lejos se apaga hacia el fondo; el ultimo tramo, en alfa */
       const hondo=clm((z0-zCer)/(zLej-zCer));
-      const apaga=(1-hondo*.55)*fu, al=clm((1-hondo)/.26)*fuA;
+      const apaga=(1-hondo*.55)*fu*(1-.035*Math.max(0,q.k-2)), al=clm((1-hondo)/.26)*fuA;
       if(al<.02) continue;
       /* el estado: en camino (azul) o confirmado (plata/blanco), con su
          destello al cruzar la linea */
@@ -12773,8 +12791,21 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
       const tn=ok?T_OK[((q.id%2)+2)%2]:T_VIAJE[q.ln%3];
       const fl=ok&&pasa<FLASH?Math.pow(1-pasa/FLASH,1.4)*fu:0;
       const lado=a1-a0;
+      /* p74 · LOS PEQUEÑOS, EN LOTE: con el doble de carriles, la mayoria son
+         cubos lejanos de pocos pixeles. Todos miden lo mismo, asi que en este
+         orden (de lejos a cerca) van TODOS primero: se juntan por color y se
+         rellenan de una vez por color, en vez de uno a uno */
+      if(lado<14&&fl<.02){
+        /* (en el lote, la luz a pasos de 3 y el alfa a decimas: pocos colores) */
+        const aq=Math.round(al*10)/10, cT=scstr(tn.h,tn.s,Math.round(litL(tn,LAM_T,apaga,0)/3)*3,aq);
+        if(lado<3) lote(cT,a0,yT1,lado,yB0-yT1);
+        else { const m0=(a0+b0)/2, m1=(a1+b1)/2;
+          lote(cT,m0,yT1,m1-m0,yT0-yT1); lote(scstr(tn.h,tn.s,Math.round(litL(tn,LAM_F,apaga,0)/3)*3,aq),a0,yT0,lado,yB0-yT0) }
+        continue;
+      }
+      vaciaLote();
       if(lado<3){ g.fillStyle=scstr(tn.h,tn.s,litL(tn,LAM_T,apaga,fl),al); g.fillRect(a0,yT1,lado,yB0-yT1); continue }
-      if(lado<10){
+      if(lado<14){
         const m0=(a0+b0)/2, m1=(a1+b1)/2;
         g.fillStyle=scstr(tn.h,tn.s,litL(tn,LAM_T,apaga,fl),al); g.fillRect(m0,yT1,m1-m0,yT0-yT1);
         g.fillStyle=scstr(tn.h,tn.s,litL(tn,LAM_F,apaga,fl),al); g.fillRect(a0,yT0,lado,yB0-yT0);
@@ -12789,7 +12820,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
         g.fillRect(a0,yT0,lado,yB0-yT0);
         g.beginPath(); g.moveTo(a0,yT0); g.lineTo(a1,yT0); g.lineTo(b1,yT1); g.lineTo(b0,yT1); g.closePath();
         g.fillStyle=scstr(tn.h,tn.s,litL(tn,LAM_T,apaga,fl),al); g.fill();
-        if(lado>12) __canto(g,LAM_T,Math.min(1,(.62+fl)*al*apaga),PX1);
+        if(lado>16) __canto(g,LAM_T,Math.min(1,(.62+fl)*al*apaga),PX1);
       }
       /* el destello deja su marca en la linea: un tramo blanco bajo el cubo */
       if(fl>.02){
@@ -12800,14 +12831,15 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
         g.beginPath(); g.moveTo(a0,yB0); g.lineTo(a0,yT0); g.lineTo(b0,yT1); g.lineTo(b1,yT1); g.lineTo(a1,yT0); g.lineTo(a1,yB0); g.closePath(); g.stroke();
       }
     }
+    vaciaLote();
     /* el pie: los cubos mas cercanos se funden al fondo en el 14 % de abajo,
        para que los mandos fijos (idioma, 06 / 07, subir) se lean limpios.
        Solo esa franja, no una capa a pantalla entera. */
     if(!suPie||suPieH!==H){
       suPie=g.createLinearGradient(0,H*.86,0,H);
       suPie.addColorStop(0,'rgba(0,0,0,0)');
-      suPie.addColorStop(.55,'rgba(0,0,0,.62)');
-      suPie.addColorStop(1,'rgba(0,0,0,.94)');
+      suPie.addColorStop(.45,'rgba(0,0,0,.66)');
+      suPie.addColorStop(1,'rgba(0,0,0,.96)');
       suPieH=H;
     }
     g.globalAlpha=fuerza; g.fillStyle=suPie; g.fillRect(0,H*.86,W,H*.14+1); g.globalAlpha=1;
