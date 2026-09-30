@@ -193,6 +193,8 @@ const salida = await pg.evaluate(() => {
     op: encendidas.length ? +getComputedStyle(encendidas[0]).opacity : 0,
     fuera: r.left < -1 || r.right > innerWidth + 1,
     encima: +(f.getBoundingClientRect().top - r.bottom).toFixed(1),
+    enFlecha: (function(){ const g = f.querySelector('.prs-go').getBoundingClientRect();
+      return +Math.hypot((r.left + r.width/2) - (g.left + g.width/2), (r.top + r.height/2) - (g.top + g.height/2)).toFixed(1) })(),
     pisaTitulo: (function(){ const A = r, B = f.querySelector('.prs-t').getBoundingClientRect();
       return !(A.right<=B.left+.5||B.right<=A.left+.5||A.bottom<=B.top+.5||B.bottom<=A.top+.5) })(),
     ancho: Math.round(r.width),
@@ -202,14 +204,13 @@ const salida = await pg.evaluate(() => {
 });
 di(salida.abierta, 'la fila se abre sola al cruzar el centro, y con ella su imagen');
 di(salida.cuantas === 1 && salida.suya, 'al abrirse una fila sale SU imagen, y solo esa');
-/* ARRIBA DE LA FILA, NO DENTRO. Es lo que distingue esto de un icono metido
-   en una celda: la imagen se apoya en el borde de arriba de la fila abierta
-   y flota sobre lo que haya encima. Si alguien la vuelve a centrar en el
-   puntero, se planta sobre el titular que se esta leyendo —con titulares
-   tan largos como estos eso no parece un efecto, parece un fallo— y esta
-   comprobacion salta. */
-di(salida.encima >= 0 && salida.encima <= 40,
-   'y sale ARRIBA de la fila, apoyada en su borde (' + salida.encima + ' px por encima)');
+/* EN LA COLUMNA DE LA FLECHA, EN TODAS LAS PANTALLAS. Antes la imagen se
+   apoyaba encima de la fila abierta y flotaba sobre lo de arriba; en
+   escritorio, grande como era, tapaba el titular de la seccion. Ahora va
+   pequeña en el sitio del rombo de la fila, como ya iba en el telefono, y
+   esta comprobacion salta si vuelve a salirse de ahi. */
+di(salida.enFlecha <= 3,
+   'y sale en la columna de la flecha de su fila, centrada en el rombo (a ' + salida.enFlecha + ' px)');
 di(!salida.pisaTitulo, 'sin taparle el titular a la fila que abre');
 di(salida.op > 0.9, 'y sale entera (' + salida.op + ')');
 di(!salida.fuera, 'sin salirse de la pantalla (' + salida.ancho + ' px de ancho)');
