@@ -5412,6 +5412,11 @@ body.light .hud::after{background:radial-gradient(120% 120% at 100% 100%,
    la pagina, y esta escrito despues. */
 .press .press-h{font-size:clamp(34px,6.16vw,104px);line-height:.92;
   max-width:max(320px,55%);color:var(--prs-mid)}
+/* El titular va con el mismo blanco que los de las demas secciones oscuras
+   -el de Security, #F9FAFD-: en el gris se leia apagado. */
+html body .press .press-h,html body .press .press-h *{color:#F9FAFD !important;-webkit-text-fill-color:#F9FAFD !important}
+/* Aire entre «All coverage» y la cinta de transacciones, que empezaba pegada. */
+html body main>section.press{padding-bottom:clamp(96px,11vw,176px) !important}
 
 .prs{position:relative;z-index:1;box-shadow:inset 0 1px 0 var(--prs-raya)}
 .prs-f{position:relative;isolation:isolate;display:grid;
