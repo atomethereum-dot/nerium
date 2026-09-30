@@ -5439,6 +5439,12 @@ html body main>section.chroma{background-color:#000 !important}
 /* arriba del video, la misma costura que abajo: la linea azul que crece con
    el scroll y la via con su cubo. La linea va por encima del video. */
 html body main>section.chroma::after{z-index:3}
+/* y abajo, la otra: la misma linea azul, con su cubo en el centro, cerrando
+   el video por debajo. Crece con el scroll a la vez que la de arriba. */
+.chroma .ban-bar{position:absolute;left:clamp(20px,2.6vw,40px);right:clamp(20px,2.6vw,40px);bottom:0;height:2px;z-index:3;
+  pointer-events:none;background:var(--blue);opacity:.85;transform:scaleX(var(--ln,1));transform-origin:50%}
+.chroma .ban-bar::after{content:"";position:absolute;left:50%;top:50%;width:7px;height:7px;transform:translate(-50%,-50%) scaleX(calc(1 / max(var(--ln,1),.001)));
+  background:#63A9FF;opacity:calc(var(--ln,1) * 1.2)}
 .chroma .ban-v{width:100%;height:100%;object-fit:cover;display:block;background:#000}
 /* Aire entre «All coverage» y la cinta de transacciones, que empezaba pegada. */
 html body main>section.press{padding-bottom:clamp(96px,11vw,176px) !important}
@@ -8260,7 +8266,7 @@ body.lock .flota{opacity:0 !important;pointer-events:none !important}
 
 
 <section class="chroma" data-bg="#0A0D14" data-acc="#2E86FF"><i class="via" aria-hidden="true"></i><i class="emb" aria-hidden="true" style="--emb:#000000"></i><!-- La cinta de transacciones se OCULTA (hidden): en su sitio va el banner en video. Volver = quitar «hidden» del lienzo y el bloque «.ban». --><canvas id="chroma" hidden></canvas>
-  <div class="ban" role="img" aria-label="Nereum Finance. Seed Round 85%. Layer 1: NereumEVM, Nereum DEX, NUSD, Forge, Vaults, Feed, Link, Wallet. L2 on Nereum. nereum.xyz"><video class="ban-v" id="banV" muted playsinline loop preload="none" poster="img/banner-desk.webp" data-d="img/banner-desk.mp4" data-t="img/banner-tel.mp4" data-pd="img/banner-desk.webp" data-pt="img/banner-tel.webp" aria-hidden="true"></video></div></section>
+  <div class="ban" role="img" aria-label="Nereum Finance. Seed Round 85%. Layer 1: NereumEVM, Nereum DEX, NUSD, Forge, Vaults, Feed, Link, Wallet. L2 on Nereum. nereum.xyz"><video class="ban-v" id="banV" muted playsinline loop preload="none" poster="img/banner-desk.webp" data-d="img/banner-desk.mp4" data-t="img/banner-tel.mp4" data-pd="img/banner-desk.webp" data-pt="img/banner-tel.webp" aria-hidden="true"></video></div><i class="ban-bar" aria-hidden="true"></i></section>
 
 
 <!-- «03 The thesis» se OCULTA. Esta no era como la tira de palabras: iba
