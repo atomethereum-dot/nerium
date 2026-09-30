@@ -7818,7 +7818,10 @@ main>section#builds::after{z-index:5}
 @supports(height:100lvh){#builds .tn-stage::after{
   background:radial-gradient(ellipse 75% 70svh at 50% 50svh,rgba(0,0,0,0) 55%,rgba(0,0,0,.62) 100%)}}
 /* la entrada: el epígrafe y el titular de la casa, a la izquierda como todos */
-#builds .tn-cab{position:absolute;left:0;right:0;top:calc(50% - var(--tn-extra) / 2);z-index:3;transform:translateY(-50%);pointer-events:none}
+/* arriba a la izquierda, a la misma altura que el epigrafe de todas las
+   secciones -el relleno de arriba de la casa, «--s6»-, no centrado en el
+   escenario */
+#builds .tn-cab{position:absolute;left:0;right:0;top:var(--s6);z-index:3;transform:none;pointer-events:none}
 #builds .tn-cab .sk{padding-top:0}
 #builds .tn-cab .builds-h{margin-top:clamp(18px,2vw,26px);max-width:15ch}
 #builds .tn-papel{display:inline-block;margin-top:clamp(20px,2.4vw,30px);pointer-events:auto;font-family:var(--m);font-size:11px;
@@ -14584,7 +14587,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
   function rotulos(p,FS){
     const cabA=1-sube((p-.035)/.05);
     if(cab){ pon(cab,'opacity',cabA.toFixed(3)); pon(cab,'visibility',cabA>.02?'visible':'hidden');
-      pon(cab,'transform','translateY(calc(-50% - '+((1-cabA)*18).toFixed(1)+'px))') }
+      pon(cab,'transform','translateY(-'+((1-cabA)*18).toFixed(1)+'px)') }
     let figA=0, figS=-1;
     STA.forEach((el,s)=>{
       const a=sube((FS[s]-.62)/.38);
