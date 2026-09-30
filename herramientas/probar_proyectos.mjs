@@ -300,7 +300,10 @@ for (const [W, H, mob] of [[1440, 900, 0], [390, 844, 1]]) {
     di(r.cifra > 20 && r.cifraAzul > 5, tag + 'con su cifra «NN / NN» arriba a la derecha (' + r.cifra + ' px, ' + r.cifraAzul + ' azules)');
     /* (los de fondo giran: alguna cara clara puede asomar un pixel; los del
        tunel en vuelo son miles, el 3-9 % de lo medido) */
-    di(r.vivos <= 20 && r.canal < 200 && r.fuera < .03,
+    /* sin «canal < 200»: con la maquina cargada (bateria) un cubo de fondo
+       giraba y ponia UN pixel a 248 con 10 px vivos y 0,85 % no negro; los del
+       tunel en vuelo son miles de pixeles, asi que basta con vivos y fuera */
+    di(r.vivos <= 20 && r.fuera < .03,
        tag + 'los cubos del tunel ya han implosionado: fuera del centro solo quedan cubos apagados (canal mas vivo ' + r.canal +
        ', ' + r.vivos + ' px vivos, ' + (100 * r.fuera).toFixed(2) + ' % no negro)');
     di(r.filas > 10 && r.hebra > .8, tag + 'debajo baja la hebra hasta el epigrafe, en el lienzo fijo (' + (100 * r.hebra).toFixed(0) + ' % de ' + r.filas + ' filas)');
