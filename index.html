@@ -1271,7 +1271,14 @@ body.light .srail{color:#E3E6EE}
    escenario sigue fijo pero invisible, y se baja por la compra con normalidad. */
 main>section#stack{position:relative;z-index:3;margin-bottom:-200vh;pointer-events:none;
   background-color:transparent !important;
-  background-image:linear-gradient(180deg,var(--stk-fondo,#0A0D14) calc(100% - 200vh),transparent calc(100% - 200vh)) !important}
+  background-image:linear-gradient(180deg,var(--stk-fondo,#0A0D14) calc(100% - 240vh),
+    #1646D8 calc(100% - 240vh),#1646D8 calc(100% - 200vh),transparent calc(100% - 200vh)) !important}
+/* EL CORTE NEGRO AL SUBIR. Justo encima del borde de la compra el fondo de la
+   seccion era negro, y el escenario del tunel -que va por encima- se pinta
+   con un cuadro de retraso respecto al scroll. En el iPhone, al subir rapido,
+   ese cuadro de retraso dejaba ver una franja del negro entre el tunel y la
+   compra. Ahora esa ultima franja del fondo es del azul del final del tunel:
+   si asoma, asoma azul sobre azul y no se ve el corte. */
 /* LA LLEGADA: EL TUNEL SE DISUELVE EN LA DAPP. El lienzo es opaco -pinta su
    propio fondo- y el mismo lienzo se borra por debajo del borde de arriba de
    la compra, con un degradado -como una mascara, pero dentro del lienzo: una
