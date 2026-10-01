@@ -17568,11 +17568,45 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
   /* el boton: fuera de la portada, y nunca con la compra en pantalla */
   var top=0, alto=0, on=false, pend=0;
   function mide(){ top=dTop(pre); alto=pre.offsetHeight }
+  /* NO SE MONTA EN NADA. Un boton fijo siempre tiene contenido pasando por
+     debajo, y segun el navegador -el margen de arriba cambia- acababa encima
+     de un titulo o una pestaña. Asi que mira lo que tiene debajo: si en su
+     caja hay texto, una imagen, un icono, un boton o el video, se aparta, y
+     vuelve cuando el sitio lleva un momento libre. Los lienzos de fondo, el
+     lavado y los mandos fijos no cuentan. */
+  function visible(e){ var c=getComputedStyle(e); return c.opacity!=='0'&&c.visibility!=='hidden' }
+  function esContenido(e){
+    if(e.tagName==='CANVAS') return false;
+    if(e.closest&&e.closest('.hud,.srail,#wash,#grain,#salto,.flota,.subir,.scrollbtn')) return false;
+    if(e.ownerSVGElement||/^(IMG|VIDEO|BUTTON|INPUT|SELECT|TEXTAREA|svg|SVG)$/.test(e.tagName)) return visible(e);
+    for(var n=e.firstChild;n;n=n.nextSibling) if(n.nodeType===3&&n.nodeValue.trim()) return visible(e);
+    return false;
+  }
+  function tapa(){
+    var r=fl.getBoundingClientRect(); if(!r.width) return false;
+    var dy=fl.classList.contains('on')?0:12;           /* escondido va 12 px mas arriba */
+    var xs=[r.left+4,r.left+r.width*.33,r.left+r.width*.66,r.right-4], ys=[r.top+dy+4,r.top+dy+r.height/2,r.bottom+dy-4];
+    for(var i=0;i<xs.length;i++)for(var j=0;j<ys.length;j++){
+      var es=document.elementsFromPoint(xs[i],ys[j]);
+      for(var k=0;k<es.length;k++){ var e=es[k];
+        if(e===fl||fl.contains(e)) continue;
+        if(e===document.body||e===document.documentElement) break;
+        if(esContenido(e)) return true; }
+    }
+    return false;
+  }
+  var libreDesde=0, reintento=0;
   function ve(){
     pend=0; if(saltando) return;
     var y=window.scrollY, vh=window.innerHeight;
     var enCompra = y+vh > top+vh*.25 && y < top+alto-vh*.25;
     var quiere = y > vh*.85 && !enCompra;
+    if(quiere){
+      var ahora=performance.now();
+      if(tapa()){ quiere=false; libreDesde=0 }
+      else{ if(!libreDesde) libreDesde=ahora;
+        if(!on && ahora-libreDesde<220){ quiere=false; clearTimeout(reintento); reintento=setTimeout(ve,240) } }
+    }else libreDesde=0;
     if(quiere!==on){ on=quiere; fl.classList.toggle('on',on);
       fl.setAttribute('aria-hidden',on?'false':'true'); fl.tabIndex=on?0:-1 }
   }
