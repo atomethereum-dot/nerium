@@ -17,7 +17,7 @@
   --up:#A6F03C; --up-t:#0A1200; --up-h:#B8F75A; --up-f:rgba(166,240,60,.11); --up-f2:rgba(166,240,60,.2);
   --dn:#FF4D6A; --dn-t:#FFFFFF; --dn-h:#FF6680; --dn-f:rgba(255,77,106,.11); --dn-f2:rgba(255,77,106,.2);
   --azul:#2F6BFF;
-  --ma5:#E0AE6C; --ma10:#D16FA5; --ma20:#6EC1E4; --ema12:#F5D76E; --ema26:#B08CFF; --boll:#8FA8FF;
+  --ma5:#F2F2F5; --ma10:#D16FA5; --ma20:#6EC1E4; --ema12:#4D8DFF; --ema26:#B08CFF; --boll:#8FA8FF;
   --r:10px; --e:cubic-bezier(.16,.84,.26,1);
 }
 /* convención asiática: rojo sube, lima baja */
@@ -113,7 +113,7 @@ svg{flex:none}
 .h1{display:contents}
 .fav{width:28px;height:28px;border-radius:7px;display:grid;place-items:center;color:var(--t4);flex:none}
 .fav:hover{color:var(--t2);background:var(--campo)}
-.fav.on{color:#F5C542}
+.fav.on{color:#fff}
 .fav svg{width:17px;height:17px}
 .par-sel{display:flex;align-items:center;gap:10px;flex:none;color:#fff;text-align:left;padding:4px 8px 4px 4px;
   border-radius:10px;margin-left:-14px}
@@ -352,7 +352,7 @@ svg{flex:none}
 .mk-r.on{background:#16161A}
 .mk-a{display:flex;align-items:center;gap:8px;min-width:0}
 .mk-a .st{color:var(--t4);display:grid;place-items:center;width:16px}
-.mk-a .st.on{color:#F5C542}
+.mk-a .st.on{color:#fff}
 .mk-a .st svg{width:13px;height:13px}
 .mk-a b{font-size:13px;font-weight:600;color:#fff}
 .mk-a s{text-decoration:none;font-size:11.5px;color:var(--t3)}
@@ -565,7 +565,7 @@ svg{flex:none}
   <button class="ib" id="btAjustes" aria-label="Settings" title="Settings">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
   </button>
-  <button class="red-chip dsk" id="btRed"><i></i><span>Ethereum</span></button>
+  <button class="red-chip dsk" id="btRed" hidden><i></i><span>Ethereum</span></button>
   <div class="wal">
     <button class="pill blanco" id="btCartera">Connect<span class="dsk">&nbsp;wallet</span></button>
     <div class="menu" id="menuC" hidden style="right:0;top:42px;min-width:240px"></div>
@@ -911,6 +911,21 @@ async function deOKX(){
   if (!k) throw 0; return 'OKX';
 }
 const KR = {BTC:'XBT', DOGE:'XDG'};
+/* OKX primero. Si no responde (caído o bloqueado en el país), velas, libro y
+   operaciones salen de Kraken. Tras un fallo de red, OKX se salta 60 s. */
+let okxMal = 0;
+const enKraken = () => Date.now() - okxMal < 60000;
+async function okx(ruta){
+  if (enKraken()) throw 0;
+  let j; try{ const r = await fetch(API + ruta); j = await r.json(); }catch(e){ okxMal = Date.now(); throw e; }
+  if (j.code !== '0') throw 0; return j.data;
+}
+const KR_INT = {'1m':1,'5m':5,'15m':15,'30m':30,'1H':60,'4H':240,'1D':1440,'1W':10080};
+async function kraken(ruta, s, extra=''){
+  const r = await fetch(`https://api.kraken.com/0/public/${ruta}?pair=${KR[s]||s}USDT${extra}`); const j = await r.json();
+  if (!j.result || (j.error && j.error.length)) throw 0;
+  const k = Object.keys(j.result).find(x => x !== 'last'); if (!k) throw 0; return j.result[k];
+}
 async function deKraken(){
   let k = 0; const g5 = []; for (let i=0;i<PARES.length;i+=5) g5.push(PARES.slice(i,i+5));
   await Promise.all(g5.map(async g => { try{
@@ -948,7 +963,7 @@ async function precios(){
     pintaEstado(); return true;
   }
   estado('No price feed — check your connection', true);
-  toast('Live prices could not be loaded. Open the file directly in your browser: market data needs an outbound connection.');
+  toast('Live prices could not be loaded. Check your connection and try again in a moment.');
   return false;
 }
 let intentado = false;
@@ -1111,16 +1126,21 @@ $('#btInd').onclick = e => { e.stopPropagation(); $('#menuInd').hidden = !$('#me
 $('#menuInd').addEventListener('change', e => { const k = e.target.dataset.i; if (!k) return;
   IND[k] = e.target.checked; guarda('nereum-dex-ind', IND); if (gTab !== 'chart') ponTab('chart'); dibuja(); });
 
+let velasMal = false;
 async function traeVelas(){
-  const s = actual, b = barra;
-  try{ const r = await fetch(`${API}/market/candles?instId=${s}-USDT&bar=${b}&limit=300`); const j = await r.json();
-    if (j.code !== '0') throw 0; if (s !== actual || b !== barra) return;
-    const nuevas = j.data.map(v => ({t:+v[0], a:+v[1], h:+v[2], l:+v[3], c:+v[4], v:+v[5]})).reverse();
+  const s = actual, b = barra; let nuevas = null, kr = false;
+  try{ nuevas = (await okx(`/market/candles?instId=${s}-USDT&bar=${b}&limit=300`)).map(v => ({t:+v[0], a:+v[1], h:+v[2], l:+v[3], c:+v[4], v:+v[5]})).reverse(); }
+  catch(e){ try{ nuevas = (await kraken('OHLC', s, '&interval='+KR_INT[b])).slice(-300)
+      .map(v => ({t:v[0]*1000, a:+v[1], h:+v[2], l:+v[3], c:+v[4], v:+v[6]})); kr = true; }catch(e2){} }
+  if (s !== actual || b !== barra) return;
+  velasMal = !(nuevas && nuevas.length) && !velas.length;
+  if (nuevas && nuevas.length){
+    if (kr) finHist = true;            /* Kraken no da historia más atrás */
     /* al refrescar se conserva la historia ya cargada hacia atrás */
-    if (velas.length && nuevas.length && velas[0].t < nuevas[0].t){
+    if (velas.length && velas[0].t < nuevas[0].t){
       const corte = nuevas[0].t; velas = velas.filter(v => v.t < corte).concat(nuevas);
     } else velas = nuevas;
-  }catch(e){ if (s === actual && !velas.length) velas = []; }
+  }
   dibuja();
 }
 async function masHistoria(){
@@ -1157,7 +1177,6 @@ function serieBOLL(n, m){ const mid = serieMA(n), up = mid.slice(), lo = mid.sli
     const sd = Math.sqrt(v/n); up[i] = mid[i]+m*sd; lo[i] = mid[i]-m*sd; } return [mid, up, lo]; }
 function escalon(r, n=5){ const c = r/n, mag = Math.pow(10, Math.floor(Math.log10(c))), x = c/mag;
   return (x<=1?1:x<=2?2:x<=2.5?2.5:x<=5?5:10)*mag; }
-const LOGO = new Path2D('M336 0 H464 V112 H480 V224 H672 V336 H560 V448 H592 V560 H464 V672 H336 A336 336 0 0 1 336 0 Z');
 const cv = $('#cv'), cx = cv.getContext('2d');
 let geo = {};                         /* geometría del último dibujo, para el puntero */
 
@@ -1174,7 +1193,7 @@ function dibuja(){
   const {W, H} = t, mv = W < 640;
   const UP = col('--up'), DN = col('--dn'), F = `${mv?10.5:11}px Inter, system-ui, sans-serif`;
   cx.font = F;
-  if (!velas.length){ cx.fillStyle = '#8E8E96'; cx.textAlign = 'center'; cx.textBaseline = 'middle'; cx.fillText('Loading chart…', W/2, H/2); return; }
+  if (!velas.length){ cx.fillStyle = '#8E8E96'; cx.textAlign = 'center'; cx.textBaseline = 'middle'; cx.fillText(velasMal ? 'Chart unavailable right now' : 'Loading chart…', W/2, H/2); return; }
   const PD = {t:44, r:mv?66:76, b:24};
   const gw = W - PD.r, gh = H - PD.t - PD.b;
   const volH = IND.vol ? Math.round(gh*0.17) : 0, ph = gh - volH - (IND.vol ? 8 : 0);
@@ -1210,13 +1229,6 @@ function dibuja(){
     const tx = fecha(vis[i].t), w = cx.measureText(tx).width; if (x-w/2 > 2 && x+w/2 < gw) cx.fillText(tx, x, H-PD.b/2); }
   cx.strokeStyle = '#1C1C21';
   cx.beginPath(); cx.moveTo(0,H-PD.b+.5); cx.lineTo(W,H-PD.b+.5); cx.moveTo(gw+.5,PD.t-6); cx.lineTo(gw+.5,H-PD.b); cx.stroke();
-
-  /* marca de agua */
-  cx.save(); cx.globalAlpha = .06; cx.fillStyle = '#fff';
-  const wx = gw/2 - 70, wy = PD.t + ph/2;
-  cx.translate(wx, wy-17); cx.scale(34/672, 34/672); cx.fill(LOGO); cx.restore();
-  cx.save(); cx.globalAlpha = .06; cx.fillStyle = '#fff'; cx.font = `700 ${mv?20:24}px Inter, system-ui, sans-serif`;
-  cx.textAlign = 'left'; cx.textBaseline = 'middle'; cx.fillText('NEREUM', wx+44, wy+1); cx.restore(); cx.font = F;
 
   /* volumen */
   if (IND.vol){
@@ -1406,11 +1418,12 @@ function filasLibro(){
   const h = $('#lb').clientHeight; return lim(Math.floor((h - 205)/40), 5, 22);
 }
 async function traeLibro(){
-  const s = actual, grande = paso > TICK[s]*1.5 || gTab === 'depth', t0 = performance.now();
-  try{ const r = await fetch(`${API}/market/books?instId=${s}-USDT&sz=${grande?400:80}`); const j = await r.json();
-    if (j.code !== '0') throw 0; if (s !== actual) return;
-    lat = Math.round(performance.now() - t0); libro = j.data[0]; pintaLibro(); dibujaDepth();
-  }catch(e){ if (!libro && s === actual) $('#asks').innerHTML = '<div class="lb-f"><span style="color:var(--t3)">Order book unavailable</span></div>'; }
+  const s = actual, grande = paso > TICK[s]*1.5 || gTab === 'depth', t0 = performance.now(); let L = null;
+  try{ L = (await okx(`/market/books?instId=${s}-USDT&sz=${grande?400:80}`))[0]; }
+  catch(e){ try{ const k = await kraken('Depth', s, '&count='+(grande?400:100)); L = {asks:k.asks, bids:k.bids}; }catch(e2){} }
+  if (s !== actual) return;
+  if (L && L.asks && L.bids && L.asks.length && L.bids.length){ lat = Math.round(performance.now() - t0); libro = L; pintaLibro(); dibujaDepth(); }
+  else if (!libro) $('#asks').innerHTML = '<div class="lb-f"><span style="color:var(--t3);grid-column:1/-1">Order book unavailable</span></div>';
 }
 function agrupa(lista, venta){ const m = new Map(), st = paso;
   for (const [p,c] of lista){ const k = venta ? Math.ceil(+p/st - 1e-7) : Math.floor(+p/st + 1e-7); m.set(k, (m.get(k)||0) + +c); }
@@ -1463,9 +1476,11 @@ $('#vLibro').addEventListener('mouseleave', ocultaTip);
 
 /* ══ OPERACIONES DE MERCADO ══ */
 async function traeTrades(){
-  const s = actual;
-  try{ const r = await fetch(`${API}/market/trades?instId=${s}-USDT&limit=60`); const j = await r.json();
-    if (j.code !== '0') throw 0; if (s !== actual) return; trades = j.data; pintaTrades(); }catch(e){}
+  const s = actual; let T = null;
+  try{ T = await okx(`/market/trades?instId=${s}-USDT&limit=60`); }
+  catch(e){ try{ T = (await kraken('Trades', s, '&count=60')).slice(-60).reverse().map(t =>
+      ({px:t[0], sz:t[1], side:t[3]==='b'?'buy':'sell', ts:Math.round(+t[2]*1000), tradeId:String(t[6] ?? t[2]+'-'+t[0]+'-'+t[1])})); }catch(e2){} }
+  if (s !== actual || !T || !T.length) return; trades = T; pintaTrades();
 }
 function pintaTrades(){
   if (vistaLb !== 'trades' || !trades.length) return;
@@ -1609,7 +1624,7 @@ function pintaCuenta(){
   const b = $('#btCartera');
   if (cuenta){ b.className = 'pill con'; b.innerHTML = `<i class="avatar" style="background:${avatar(cuenta)}"></i>${cuenta.slice(0,6)}…${cuenta.slice(-4)}<svg viewBox="0 0 12 12"><path fill="currentColor" d="M1 3.5h10L6 9.5z"/></svg>`; }
   else { b.className = 'pill blanco'; b.innerHTML = 'Connect<span class="dsk">&nbsp;wallet</span>'; $('#btRed span').textContent = 'Ethereum'; }
-  $('#ordBt').hidden = !!cuenta; pintaOrd(); calcula();
+  $('#btRed').hidden = !cuenta; $('#ordBt').hidden = !!cuenta; pintaOrd(); calcula();
 }
 $('#btCartera').onclick = e => {
   if (!cuenta) return abreCartera();
@@ -1715,8 +1730,9 @@ let rz; addEventListener('resize', () => { clearTimeout(rz); rz = setTimeout(() 
   await Promise.all([traeVelas(), traeLibro(), traeTrades(), traeInstr(actual)]);
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { dibuja(); dibujaDepth(); });
   if (ok) abreSocket();
-  setInterval(() => { if (!document.hidden) traeLibro(); }, 1200);
-  setInterval(() => { if (!document.hidden) traeTrades(); }, 2000);
+  let nL = 0, nT = 0;      /* con Kraken de respaldo se pide un tercio de las veces: su límite es más corto */
+  setInterval(() => { if (!document.hidden && (!enKraken() || ++nL % 3 === 0)) traeLibro(); }, 1200);
+  setInterval(() => { if (!document.hidden && (!enKraken() || ++nT % 3 === 0)) traeTrades(); }, 2000);
   setInterval(() => { if (!document.hidden) traeVelas(); }, 60000);
   setInterval(traeUsd, 60000);
   setInterval(() => { reloj(); if (!document.hidden){ pide(); if (gTab === 'info') pintaInfo(); } pintaEstado(); }, 1000);
