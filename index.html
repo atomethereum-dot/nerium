@@ -5454,7 +5454,11 @@ html body main>section.chroma::after{z-index:3}
    Security, la prensa y Token -#030409-: la pila, el globo, los proyectos, la
    ruta, el suelo y la banda del video. Antes cada una traia el suyo (#0A0D14,
    #06070A, #000) y al pasar de una a otra se veia el salto de tono. */
-html body main>section:is(#stack,#xfade,#xlight,#ruta,#builds,.chroma,#docs,#blog,#team,#network,#thesis,.kin){background-color:#030409 !important}
+/* p78 · #stack NO va en esta lista: su fondo tiene que seguir transparente en
+   las dos ultimas pantallas, porque la compra sube por DEBAJO de la pila
+   (margin-bottom:-200vh, z-index 3). Con el negro aqui la dapp quedaba tapada.
+   El negro de la pila ya lo pone su degradado con --stk-fondo. */
+html body main>section:is(#xfade,#xlight,#ruta,#builds,.chroma,#docs,#blog,#team,#network,#thesis,.kin){background-color:#030409 !important}
 html body main>section:is(#team,#network,#thesis):not(#presale){background-color:#030409 !important}
 html body :is(.xl-stage,#builds .tn-stage){background-color:#030409 !important}
 #stack{--stk-fondo:#030409}
