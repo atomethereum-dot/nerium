@@ -43,7 +43,7 @@ svg{flex:none}
 .top{height:52px;display:flex;align-items:center;gap:28px;padding:0 16px;
   border-bottom:1px solid var(--linea);background:var(--bg);position:relative;z-index:20}
 .marca{display:flex;align-items:center;gap:9px;flex:none;color:#fff;text-decoration:none}
-.marca svg{width:22px;height:22px}
+.marca svg{width:24px;height:24px}
 .marca b{font-size:16px;font-weight:700;letter-spacing:-.02em}
 .marca em{font-style:normal;font-size:10px;font-weight:700;letter-spacing:.08em;color:var(--up-t);
   background:var(--up);padding:2px 6px;border-radius:4px}
@@ -545,21 +545,184 @@ svg{flex:none}
   .sel select{padding:0 20px 0 8px}
   .sel svg{right:7px}
 }
+
+/* ══ pantallas: swap, pools, bridge, tokenizar y portafolio ══ */
+.vista{max-width:1180px;margin:0 auto;padding:28px 20px 70px}
+.v-cab{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:20px}
+.v-cab h1{font-size:28px;font-weight:700;letter-spacing:-.03em;color:#fff}
+.v-cab p{font-size:13.5px;color:var(--t3);margin-top:6px;max-width:640px;line-height:1.55}
+.card{background:var(--panel);border:1px solid var(--linea);border-radius:16px;padding:16px;min-width:0}
+.card-h{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}
+.card-h b{font-size:15px;font-weight:700;color:#fff}
+.card .p-bar{padding:0 16px}
+.card .p-bar > b{font-size:14px;font-weight:700;color:#fff}
+.card .p-bar small{font-size:12px;color:var(--t3)}
+.dos{display:grid;grid-template-columns:minmax(0,460px) minmax(0,1fr);gap:16px;align-items:start}
+.dos.tk-l{grid-template-columns:minmax(0,1fr) minmax(0,380px)}
+.caja{background:var(--campo);border:1px solid transparent;border-radius:14px;padding:12px 14px;transition:border-color .15s}
+.caja:focus-within{border-color:#3A3A42}
+.caja-l{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:12px;color:var(--t3);min-height:20px}
+.caja-r{display:flex;align-items:center;gap:10px;margin:6px 0}
+.caja-r input{flex:1;min-width:0;background:none;border:0;outline:none;font-size:28px;font-weight:600;color:#fff;letter-spacing:-.02em}
+.caja-r input[readonly]{color:var(--t2)}
+.tk{display:inline-flex;align-items:center;gap:8px;height:38px;padding:0 11px 0 6px;border-radius:999px;background:var(--campo2);
+  color:#fff;font-size:15px;font-weight:700;flex:none;white-space:nowrap}
+button.tk:hover{background:#2C2C33}
+.tk svg{width:10px;height:10px;color:var(--t3)}
+.tk .coin{width:26px;height:26px;font-size:11.5px}
+.flip{display:grid;place-items:center;width:40px;height:40px;margin:-12px auto;position:relative;z-index:1;border-radius:12px;
+  background:var(--campo2);border:4px solid var(--panel);color:var(--t2);transition:color .15s,transform .25s var(--e)}
+.flip:hover{color:#fff;transform:rotate(180deg)}
+.flip svg{width:16px;height:16px}
+.mini-b{font-size:11.5px;font-weight:600;color:var(--t2);padding:2px 7px;border-radius:5px;background:var(--campo2)}
+.mini-b:hover{color:#fff}
+.det{display:grid;gap:8px;margin:14px 2px 0}
+.spark-w{position:relative;height:130px;margin:14px 0 10px}
+.spark-w canvas{position:absolute;inset:0;width:100%;height:100%}
+.px-g{display:flex;align-items:baseline;gap:10px}
+.px-g b{font-size:30px;font-weight:700;color:#fff;letter-spacing:-.02em}
+.px-g span{font-size:13px;font-weight:600}
+.stats4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:16px}
+.st4{background:var(--panel);border:1px solid var(--linea);border-radius:14px;padding:14px 16px;display:grid;gap:5px;min-width:0}
+.st4 i{font-style:normal;font-size:11.5px;color:var(--t3)}
+.st4 b{font-size:19px;font-weight:700;color:#fff;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.st4 s{text-decoration:none;font-size:11.5px;color:var(--t4)}
+.tw{overflow-x:auto}
+.tb{width:100%;border-collapse:collapse;min-width:720px}
+.tb th{height:38px;padding:0 16px;text-align:left;font-size:11.5px;font-weight:500;color:var(--t3);white-space:nowrap;border-bottom:1px solid var(--linea)}
+.tb td{height:56px;padding:0 16px;font-size:13px;color:var(--t2);white-space:nowrap;border-bottom:1px solid var(--linea)}
+.tb tbody tr:last-child td{border-bottom:0}
+.tb .d{text-align:right}
+.tb .t4{color:var(--t4)}
+.tb tbody tr{transition:background .12s}
+.tb tbody tr:hover{background:var(--panel2)}
+.tb .vacio-c{text-align:center;color:var(--t3);height:90px}
+.par{display:flex;align-items:center;gap:10px}
+.pila{display:flex}
+.pila .coin{width:26px;height:26px;font-size:11px;box-shadow:0 0 0 2px var(--panel)}
+.pila .coin + .coin{margin-left:-8px}
+.par b{color:#fff;font-weight:600}
+.tag{display:inline-flex;align-items:center;height:22px;padding:0 8px;border-radius:6px;background:var(--campo);font-size:11.5px;font-weight:600;color:var(--t2)}
+a.pill{text-decoration:none}
+.pill.lima{background:var(--up);color:var(--up-t)} .pill.lima:hover{background:var(--up-h)}
+.pill.chico{height:30px;padding:0 12px;font-size:12.5px}
+.redes{display:grid;grid-template-columns:minmax(0,1fr) 34px minmax(0,1fr);gap:6px;align-items:end;margin-bottom:10px}
+.red-b{display:grid;gap:6px;position:relative;min-width:0}
+.red-b > span{font-size:12px;color:var(--t3)}
+.red-sel{display:flex;align-items:center;gap:9px;height:48px;padding:0 12px;border-radius:12px;background:var(--campo);color:#fff;
+  font-size:14px;font-weight:600;width:100%;text-align:left;white-space:nowrap}
+button.red-sel:hover{background:var(--campo2)}
+.red-sel i{width:22px;height:22px;border-radius:50%;background:var(--c,#333);flex:none}
+.red-sel > svg{width:10px;height:10px;color:var(--t3);margin-left:auto}
+.red-sel .nl{width:22px;height:22px;flex:none}
+.flecha{height:48px;display:grid;place-items:center;color:var(--t3)}
+.flecha svg{width:16px;height:16px}
+.dd2 .menu{left:0;right:0;top:calc(100% + 6px)}
+.dd2 .menu i{width:18px;height:18px;border-radius:50%;background:var(--c,#333);flex:none}
+.pasos-l{display:grid;gap:16px;margin:4px 0 0;padding:0}
+.pasos-l li{list-style:none;display:grid;grid-template-columns:30px 1fr;gap:12px;font-size:13px;color:var(--t3);line-height:1.5}
+.pasos-l li > em{width:30px;height:30px;border-radius:50%;background:var(--campo2);display:grid;place-items:center;font-style:normal;font-weight:700;color:#fff;font-size:12.5px}
+.pasos-l b{display:block;color:#fff;font-weight:600;margin-bottom:2px}
+.chips-r{display:flex;flex-wrap:wrap;gap:6px}
+.chp{height:32px;padding:0 13px;border-radius:999px;background:var(--campo);font-size:12.5px;font-weight:600;color:var(--t2);
+  border:1px solid transparent;display:inline-flex;align-items:center;gap:7px}
+.chp:hover{border-color:#3A3A42;color:#fff}
+.chp.on{background:#fff;color:#000}
+.chp i{width:8px;height:8px;border-radius:50%;background:var(--c,#555)}
+.sep{height:1px;background:var(--linea);margin:16px 0}
+/* tokenizar */
+.tk-pasos{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-bottom:20px}
+.tk-paso{display:grid;gap:8px;font-size:12px;color:var(--t4);font-weight:600;text-align:left}
+.tk-paso i{height:3px;border-radius:3px;background:var(--campo2)}
+.tk-paso.on{color:#fff} .tk-paso.on i{background:var(--up)}
+.tk-paso.hecho{color:var(--t2);cursor:pointer} .tk-paso.hecho i{background:var(--t2)}
+.cmp{display:grid;gap:6px;margin-bottom:14px;min-width:0}
+.cmp > label{font-size:12.5px;font-weight:600;color:#fff}
+.cmp > small{font-size:11.5px;color:var(--t3);margin-top:-3px;line-height:1.45}
+.inp{height:44px;border-radius:10px;background:var(--campo);border:1px solid transparent;padding:0 12px;font-size:14px;color:#fff;outline:none;width:100%}
+.inp:focus{border-color:#4A4A52;background:#1C1C21}
+.inp.mal{border-color:var(--dn)}
+select.inp{appearance:none;-webkit-appearance:none;cursor:pointer}
+select.inp option{background:#141417}
+.cmp .e{font-size:11.5px;color:var(--dn)}
+.dos-c{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.archivo{display:flex;align-items:center;gap:12px;padding:14px;border:1px dashed var(--linea2);border-radius:12px;cursor:pointer;color:var(--t3);font-size:12.5px;line-height:1.45}
+.archivo:hover{border-color:#4A4A52;color:var(--t2)}
+.archivo input{display:none}
+.archivo svg{width:22px;height:22px;flex:none}
+.archivo b{color:#fff;font-weight:600}
+.huella{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11.5px;color:var(--up);word-break:break-all}
+.aviso{display:flex;gap:10px;padding:12px 14px;border-radius:12px;background:var(--panel2);border:1px solid var(--linea);font-size:12.5px;color:var(--t3);line-height:1.55;margin-bottom:16px}
+.aviso svg{width:17px;height:17px;flex:none;color:var(--t2);margin-top:1px}
+.aviso b{color:#fff;font-weight:600}
+.tk-bts{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:18px}
+.tk-bts .accion{width:auto;flex:1;margin:0}
+.tk-bts .pill{height:46px;padding:0 22px}
+.prev-t{border-radius:16px;padding:18px;background:linear-gradient(160deg,#16161B,#0B0B0D);border:1px solid var(--linea2)}
+.prev-c{display:flex;gap:12px;align-items:center;margin-bottom:12px}
+.prev-c .sym{width:52px;height:52px;border-radius:14px;display:grid;place-items:center;background:var(--up);color:var(--up-t);
+  font-weight:800;font-size:14px;letter-spacing:-.02em;flex:none}
+.prev-c b{display:block;font-size:16px;color:#fff;font-weight:700;word-break:break-word}
+.prev-c small{font-size:12px;color:var(--t3)}
+.prev-c .tag{margin-left:auto}
+.res{width:100%;border-collapse:collapse;font-size:12.5px}
+.res td{padding:9px 0;border-bottom:1px solid var(--linea);color:var(--t3);vertical-align:top}
+.res tr:last-child td{border-bottom:0}
+.res td:last-child{text-align:right;font-weight:500;color:#fff;padding-left:12px;word-break:break-word}
+/* portafolio */
+.port-h{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.port-h .avatar{width:44px;height:44px}
+.port-h b{font-size:17px;color:#fff;font-weight:700}
+.port-h small{display:block;font-size:12px;color:var(--t3)}
+.port-v{margin-left:auto;text-align:right}
+.port-v b{font-size:26px;letter-spacing:-.02em}
+.vacio-g{display:grid;justify-items:center;text-align:center;gap:12px;padding:64px 20px;color:var(--t3);font-size:13px}
+.vacio-g b{color:#fff;font-size:17px}
+.vacio-g svg{width:48px;height:48px}
+@media(max-width:1023px){
+  .vista{padding:18px 14px 40px}
+  .v-cab{flex-direction:column;align-items:flex-start;margin-bottom:16px}
+  .v-cab h1{font-size:24px}
+  .dos,.dos.tk-l{grid-template-columns:minmax(0,1fr)}
+  #vPools .p-tabs{gap:14px;flex:none}
+  #vPools .busca{flex:1 1 auto !important;min-width:0;margin-left:12px}
+  /* el menú baja a su propia fila: los seis botones a la vista */
+  .top{height:auto;flex-wrap:wrap;row-gap:0;padding-top:8px;padding-bottom:0}
+  .top > .marca,.top > .ib,.top > .wal{height:36px}
+  .nav{order:9;flex:0 0 calc(100% + 26px);margin:6px -12px 0 -14px;padding:0 6px;height:42px;align-items:center;border-top:1px solid var(--linea)}
+  .nav button{font-size:14px;padding:0 9px;height:32px}
+  .stats4{grid-template-columns:1fr 1fr}
+  .dos-c{grid-template-columns:1fr}
+  .caja-r input{font-size:24px}
+  .port-v{margin-left:0;text-align:left;width:100%}
+  .tk-bts{flex-wrap:wrap}
+  .tk-bts .pill{flex:1}
+}
+@media(max-width:419px){ .nav button{font-size:13.5px;padding:0 6px} }
 </style>
 </head>
 <body>
 
 <header class="top">
-  <a class="marca" href="#" aria-label="Nereum DEX">
-    <svg viewBox="0 0 672 672"><path fill="#fff" d="M336 0 H464 V112 H480 V224 H672 V336 H560 V448 H592 V560 H464 V672 H336 A336 336 0 0 1 336 0 Z"/><rect fill="#2F6BFF" x="480" y="112" width="112" height="112"/><rect fill="#2F6BFF" x="560" y="336" width="112" height="112"/></svg>
+  <a class="marca" href="/" aria-label="Nereum · nereum.xyz">
+    <svg viewBox="0 0 672 672" aria-hidden="true"><defs>
+      <linearGradient id="nrmPlata" gradientUnits="userSpaceOnUse" x1="63.94" y1="390.33" x2="608.06" y2="281.67"><stop offset="0" stop-color="#C6CAD7"/><stop offset="1" stop-color="#9498A1"/></linearGradient>
+      <radialGradient id="nrmBrillo" gradientUnits="userSpaceOnUse" cx="0" cy="0" r="1" gradientTransform="translate(229.93 328.93) rotate(-9.60) scale(47.20 252.40)"><stop offset="0" stop-color="#fff" stop-opacity="0.92"/><stop offset=".36" stop-color="#fff" stop-opacity="0.43"/><stop offset=".70" stop-color="#fff" stop-opacity="0.10"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient></defs>
+      <g transform="translate(-43.88 -34.34) scale(1.0889)">
+        <path fill="#8E939E" d="M336.00 53.16 L361.74 61.36 L644.58 344.20 L361.74 627.05 L336.00 618.84 L618.84 336.00 Z"/>
+        <path fill="url(#nrmPlata)" d="M53.16 336.00 L336.00 53.16 L618.84 336.00 L336.00 618.84 Z"/>
+        <path fill="url(#nrmBrillo)" d="M53.16 336.00 L336.00 53.16 L618.84 336.00 L336.00 618.84 Z"/>
+        <path fill="#FCFCFC" d="M283.67 566.52 L566.52 283.67 L618.84 336.00 L336.00 618.84 Z"/>
+      </g></svg>
     <b>Nereum</b><em>DEX</em>
   </a>
   <nav class="nav">
-    <button class="on">Spot</button>
-    <button data-pronto="Swap">Swap</button>
-    <button data-pronto="Pools">Pools</button>
-    <button data-pronto="Bridge">Bridge</button>
-    <button data-pronto="Portfolio" class="dsk">Portfolio</button>
+    <button data-v="spot" class="on">Spot</button>
+    <button data-v="swap">Swap</button>
+    <button data-v="pools">Pools</button>
+    <button data-v="bridge">Bridge</button>
+    <button data-v="tokenize">Tokenize</button>
+    <button data-v="portfolio">Portfolio</button>
   </nav>
   <div class="esp"></div>
   <button class="ib" id="btAjustes" aria-label="Settings" title="Settings">
@@ -743,9 +906,9 @@ svg{flex:none}
       <div class="fila"><span><i class="coin sm" style="--c:#26A17B">T</i>USDT</span><b id="aQ">—</b></div>
       <div class="fila"><span><i class="coin sm" id="aIco">B</i><span id="aBl">BTC</span></span><b id="aB">—</b></div>
       <div class="cc-bts">
-        <button class="pill gris" data-pronto="Deposits">Deposit</button>
+        <button class="pill gris" data-ir="bridge">Deposit</button>
         <button class="pill gris" data-pronto="Withdrawals">Withdraw</button>
-        <button class="pill gris" data-pronto="Transfers">Transfer</button>
+        <button class="pill gris" data-ir="portfolio">Transfer</button>
       </div>
       <p class="nota">Prices, order book and trades are live from public spot markets. Settlement runs on NereumEVM.</p>
     </div>
@@ -771,6 +934,164 @@ svg{flex:none}
     </div>
   </section>
 </div>
+
+<!-- ══ swap ══ -->
+<main class="vista" id="vSwap" hidden>
+  <div class="v-cab"><div><h1>Swap</h1><p>Trade one coin for another in a single step at the live market rate. Swaps route through the Nereum AMM and settle on NereumEVM.</p></div></div>
+  <div class="dos">
+    <section class="card">
+      <div class="card-h"><b>Swap</b><button class="ib" id="swAj" aria-label="Swap settings" title="Settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg></button></div>
+      <div class="caja">
+        <div class="caja-l"><span>You pay</span><span id="swDeBal">Balance —</span></div>
+        <div class="caja-r"><input id="swDeIn" inputmode="decimal" placeholder="0" autocomplete="off" aria-label="Amount to pay"><button class="tk" id="swDeTk"></button></div>
+        <div class="caja-l"><span id="swDeUsd">≈ $0.00</span></div>
+      </div>
+      <button class="flip" id="swFlip" aria-label="Switch tokens"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2.5v11M3.5 9 8 13.5 12.5 9"/></svg></button>
+      <div class="caja">
+        <div class="caja-l"><span>You receive</span><span>Estimated</span></div>
+        <div class="caja-r"><input id="swAIn" readonly placeholder="0" aria-label="Amount to receive"><button class="tk" id="swATk"></button></div>
+        <div class="caja-l"><span id="swAUsd">≈ $0.00</span></div>
+      </div>
+      <div class="filas det">
+        <div class="fila"><span>Rate</span><b id="swRate">—</b></div>
+        <div class="fila"><span>Minimum received</span><b id="swMin">—</b></div>
+        <div class="fila"><span>Pool fee (0.30%)</span><b id="swFee">—</b></div>
+        <div class="fila"><span>Max slippage</span><b><button class="lnk" id="swSlip">0.5%</button></b></div>
+        <div class="fila"><span>Route</span><b>Nereum AMM · NereumEVM</b></div>
+      </div>
+      <button class="accion" id="swBt">Connect wallet</button>
+    </section>
+    <aside class="card">
+      <div class="card-h"><b id="swParT">BTC / USDT</b><span class="vivo"><i></i><span>Live market</span></span></div>
+      <div class="px-g"><b id="swPx">—</b><span id="swCam"></span></div>
+      <div class="spark-w"><canvas id="swSpark"></canvas></div>
+      <div class="filas">
+        <div class="fila"><span>24h high</span><b id="swAlt">—</b></div>
+        <div class="fila"><span>24h low</span><b id="swBaj">—</b></div>
+        <div class="fila"><span>24h turnover</span><b id="swVol">—</b></div>
+      </div>
+      <p class="nota">Last 48 hours, hourly closes. Rates follow live public spot markets; the pool sets the final price when the swap executes.</p>
+    </aside>
+  </div>
+</main>
+
+<!-- ══ pools ══ -->
+<main class="vista" id="vPools" hidden>
+  <div class="v-cab"><div><h1>Pools</h1><p>Provide liquidity to Nereum AMM pools. Every trade routed through a pool pays it the 0.30% fee, shared by its liquidity providers.</p></div>
+    <button class="pill lima" id="plNuevo">+ New position</button></div>
+  <div class="stats4">
+    <div class="st4"><i>Pools listed</i><b id="plN">—</b><s>All paired with USDT</s></div>
+    <div class="st4"><i>Fee tier</i><b>0.30%</b><s>Paid to liquidity providers</s></div>
+    <div class="st4"><i>Total value locked</i><b>—</b><s>Opens with the NereumEVM mainnet</s></div>
+    <div class="st4"><i>Your positions</i><b id="plMias">—</b><s id="plMiasS">Connect a wallet</s></div>
+  </div>
+  <section class="card" style="padding:0">
+    <div class="p-bar">
+      <div class="p-tabs" id="plTabs"><button class="on" data-p="all">All pools</button><button data-p="mine">My positions</button></div>
+      <span class="esp"></span>
+      <label class="busca" style="flex:0 1 240px;height:32px"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="7" cy="7" r="4.8"/><path d="m10.6 10.6 3.4 3.4"/></svg><input id="plBusca" placeholder="Search pool" autocomplete="off"></label>
+    </div>
+    <div class="tw" id="plTabla"><table class="tb"><thead><tr><th>Pool</th><th class="d">Price</th><th class="d">24h chg</th><th class="d">Market turnover 24h</th><th class="d">TVL</th><th class="d">APR</th><th></th></tr></thead><tbody id="plCuerpo"></tbody></table></div>
+    <div class="vacio-g" id="plVacio" hidden>
+      <svg viewBox="0 0 48 48" fill="none" stroke="#4A4A52" stroke-width="1.6"><circle cx="18" cy="24" r="10"/><circle cx="30" cy="24" r="10"/></svg>
+      <b id="plVacioT">No positions</b><span id="plVacioS"></span><button class="pill blanco" id="plVacioB">Connect wallet</button></div>
+  </section>
+  <p class="nota" style="margin-top:12px">Prices and 24h turnover come from live public spot markets. Pool TVL and APR appear once liquidity is deposited on NereumEVM mainnet; we do not estimate them in advance.</p>
+</main>
+
+<!-- ══ bridge ══ -->
+<main class="vista" id="vBridge" hidden>
+  <div class="v-cab"><div><h1>Bridge</h1><p>Move assets from another network to NereumEVM. You sign on the origin network and the same amount arrives at your address on NereumEVM.</p></div></div>
+  <div class="dos">
+    <section class="card">
+      <div class="card-h"><b>Bridge to NereumEVM</b><span class="tag" id="brRedW">Not connected</span></div>
+      <div class="redes">
+        <div class="red-b dd2"><span>From</span><button class="red-sel" id="brDe"></button><div class="menu" id="menuBr" hidden></div></div>
+        <div class="flecha"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 8h11M9 3.5 13.5 8 9 12.5"/></svg></div>
+        <div class="red-b"><span>To</span><div class="red-sel"><svg class="nl" viewBox="0 0 672 672"><use href="#nlLogo"/></svg>NereumEVM</div></div>
+      </div>
+      <div class="caja">
+        <div class="caja-l"><span>Amount</span><span id="brBal">Balance —</span></div>
+        <div class="caja-r"><input id="brIn" inputmode="decimal" placeholder="0" autocomplete="off" aria-label="Amount to bridge"><span class="dd2" style="position:relative"><button class="tk" id="brTk"></button><span class="menu" id="menuBrTk" hidden style="left:auto;right:0;min-width:200px"></span></span></div>
+        <div class="caja-l"><span id="brUsd">≈ $0.00</span><button class="mini-b" id="brMax" hidden>MAX</button></div>
+      </div>
+      <div class="filas det">
+        <div class="fila"><span>You receive on NereumEVM</span><b id="brRec">—</b></div>
+        <div class="fila"><span>Destination</span><b id="brDest">Your connected wallet</b></div>
+        <div class="fila"><span>Bridge fee</span><b>Shown before you sign</b></div>
+      </div>
+      <button class="accion" id="brBt">Connect wallet</button>
+    </section>
+    <aside class="card">
+      <div class="card-h"><b>How it works</b></div>
+      <ol class="pasos-l">
+        <li><em>1</em><span><b>Lock on the origin network</b>Your wallet sends the amount to the bridge contract on the network you choose.</span></li>
+        <li><em>2</em><span><b>Proof checked by NereumEVM</b>The deposit is verified before anything is released. If it does not check, nothing moves.</span></li>
+        <li><em>3</em><span><b>Released 1:1 on NereumEVM</b>The same amount arrives at your address, ready for Spot, Swap or Pools.</span></li>
+      </ol>
+      <div class="sep"></div>
+      <div class="card-h" style="margin-bottom:10px"><b style="font-size:13.5px">Supported networks</b></div>
+      <div class="chips-r" id="brRedes"></div>
+      <p class="nota">Your balance and network are read straight from your wallet. Transfers open with the NereumEVM mainnet; until then nothing is sent and your wallet is never asked to sign.</p>
+    </aside>
+  </div>
+</main>
+
+<!-- ══ tokenizar ══ -->
+<main class="vista" id="vTok" hidden>
+  <div class="v-cab"><div><h1>Tokenize</h1><p>Turn a real asset into a token with its rules bound to it. Four steps: describe the asset, attach its documentation, set the policy, review and issue.</p></div>
+    <a class="pill borde" href="/explorer/#/assets">See assets on testnet</a></div>
+  <div class="dos tk-l">
+    <section class="card" style="padding:20px">
+      <div class="tk-pasos" id="tkPasos"></div>
+      <div id="tkCuerpo"></div>
+    </section>
+    <aside>
+      <div class="prev-t" id="tkPrev"></div>
+      <p class="nota">The policy travels with the token: NereumEVM checks it on every transfer, not only at issuance. Your draft is kept in this browser.</p>
+    </aside>
+  </div>
+</main>
+
+<!-- ══ portafolio ══ -->
+<main class="vista" id="vPort" hidden>
+  <div class="v-cab"><div><h1>Portfolio</h1><p>Your wallet, its network and balance, and the markets you follow. Read straight from your wallet; Nereum never holds your keys.</p></div></div>
+  <div id="portC"></div>
+</main>
+
+<!-- token -->
+<div class="modal" id="mTok" role="dialog" aria-modal="true" aria-label="Select a token">
+  <div class="mod">
+    <div class="mod-t"><b>Select a token</b><button class="ib" data-cierra aria-label="Close">✕</button></div>
+    <label class="busca" style="margin-bottom:12px"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="7" cy="7" r="4.8"/><path d="m10.6 10.6 3.4 3.4"/></svg><input id="tkBusca" placeholder="Search name or symbol" autocomplete="off"></label>
+    <div id="tkLista" style="max-height:min(60vh,520px);overflow:auto"></div>
+  </div>
+</div>
+
+<!-- liquidez -->
+<div class="modal" id="mLiq" role="dialog" aria-modal="true" aria-label="Add liquidity">
+  <div class="mod">
+    <div class="mod-t"><b>Add liquidity</b><button class="ib" data-cierra aria-label="Close">✕</button></div>
+    <button class="red-sel" id="lqPar"></button>
+    <div class="caja" style="margin-top:10px">
+      <div class="caja-l"><span>Deposit</span><span>Balance —</span></div>
+      <div class="caja-r"><input id="lqA" inputmode="decimal" placeholder="0" autocomplete="off" aria-label="Base amount"><span class="tk" id="lqATk"></span></div>
+    </div>
+    <div class="caja" style="margin-top:8px">
+      <div class="caja-l"><span>Deposit</span><span>Balance —</span></div>
+      <div class="caja-r"><input id="lqB" inputmode="decimal" placeholder="0" autocomplete="off" aria-label="USDT amount"><span class="tk" id="lqBTk"></span></div>
+    </div>
+    <div class="filas det">
+      <div class="fila"><span>Pool price</span><b id="lqPx">—</b></div>
+      <div class="fila"><span>Total deposit</span><b id="lqTot">—</b></div>
+      <div class="fila"><span>Fee tier</span><b>0.30%</b></div>
+      <div class="fila"><span>Range</span><b>Full range</b></div>
+    </div>
+    <button class="accion" id="lqBt">Connect wallet</button>
+    <p class="mod-nota">Both sides are balanced at the live market price. The pool sets the final ratio and your share when NereumEVM mainnet opens.</p>
+  </div>
+</div>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="nlLogo" viewBox="0 0 672 672"><g transform="translate(-43.88 -34.34) scale(1.0889)"><path fill="#8E939E" d="M336.00 53.16 L361.74 61.36 L644.58 344.20 L361.74 627.05 L336.00 618.84 L618.84 336.00 Z"/><path fill="url(#nrmPlata)" d="M53.16 336.00 L336.00 53.16 L618.84 336.00 L336.00 618.84 Z"/><path fill="url(#nrmBrillo)" d="M53.16 336.00 L336.00 53.16 L618.84 336.00 L336.00 618.84 Z"/><path fill="#FCFCFC" d="M283.67 566.52 L566.52 283.67 L618.84 336.00 L336.00 618.84 Z"/></g></symbol></svg>
 
 <footer class="pie">
   <div class="vivo" id="estado"><i></i><span>Connecting</span></div>
@@ -1051,6 +1372,7 @@ document.addEventListener('click', e => {
   if ($('#mk').classList.contains('on') && !e.target.closest('#mk') && !e.target.closest('#parSel') && !movil()) abreMk(false);
   if (!e.target.closest('.dd')) $('#menuInd').hidden = true;
   if (!e.target.closest('.wal')) $('#menuC').hidden = true;
+  if (!e.target.closest('.dd2')) $$('.dd2 .menu').forEach(m => m.hidden = true);
 });
 addEventListener('keydown', e => { if (e.key === 'Escape'){ abreMk(false); $$('.modal.on').forEach(m => m.classList.remove('on')); } });
 
@@ -1068,7 +1390,7 @@ function pintaCabecera(){
   $('#midPx').textContent = fp(d.px); $('#midPx').className = dc;
   $('#midFl').setAttribute('class', dc === 'up' ? '' : 'baja'); $('#midFl').style.color = `var(--${dc})`;
   $('#midUsd').textContent = '≈ $'+nf(d.px*usd, usdDec());
-  document.title = fp(d.px)+' | '+actual+'/USDT | Nereum DEX';
+  if (vista === 'spot') document.title = fp(d.px)+' | '+actual+'/USDT | Nereum DEX';
 }
 function pintaPar(){
   $('#cPar').textContent = actual+'/USDT'; $('#cNom').textContent = NOMBRE[actual];
@@ -1579,7 +1901,7 @@ $('#btAccion').onclick = () => {
   if ((saldo()||0) < necesita) return mal(`Insufficient ${lado === 'buy' ? 'USDT' : actual} balance. Deposits open with the NereumEVM mainnet.`);
   toast('Order routing opens with the NereumEVM mainnet.');
 };
-$('#deposito').onclick = () => toast('Deposits open with the NereumEVM mainnet.');
+$('#deposito').onclick = () => { location.hash = '#/bridge'; };
 $('#slipBt').onclick = () => { pintaAjustes(); abreModal('#mAjustes'); };
 
 /* ══ CARTERA ══
@@ -1607,24 +1929,29 @@ function pintaCarteras(){
 }
 function abreCartera(){ dispatchEvent(new Event('eip6963:requestProvider')); pintaCarteras(); abreModal('#mCartera'); }
 const REDES = {'0x1':'Ethereum','0x38':'BNB Chain','0x89':'Polygon','0xa4b1':'Arbitrum','0x2105':'Base','0xa':'Optimism','0xaa36a7':'Sepolia'};
+/* moneda nativa de cada red; Sepolia es de prueba y no tiene precio */
+const NAT = {'0x1':'ETH','0xa4b1':'ETH','0x2105':'ETH','0xa':'ETH','0x38':'BNB','0x89':'POL','0xaa36a7':'SepoliaETH'};
+let redId = null, saldoNat = null;
 async function conecta(p){
   if (!p) return;
   try{
     const cs = await p.request({method:'eth_requestAccounts'}); if (!cs || !cs[0]) throw 0;
     prov = p; cuenta = cs[0]; cierraModal('#mCartera'); pintaCuenta(); toast('Wallet connected.');
     try{ ponRed(await p.request({method:'eth_chainId'})); }catch(e){}
-    if (p.on){ p.on('accountsChanged', a => { cuenta = a && a[0] || null; pintaCuenta(); });
+    leeSaldo();
+    if (p.on){ p.on('accountsChanged', a => { cuenta = a && a[0] || null; pintaCuenta(); leeSaldo(); });
       p.on('chainChanged', ponRed); }
   }catch(e){ toast('Connection cancelled.'); }
 }
-function ponRed(id){ $('#btRed span').textContent = REDES[id] || 'Chain '+parseInt(id,16); }
+function ponRed(id){ redId = id; $('#btRed span').textContent = REDES[id] || 'Chain '+parseInt(id,16); leeSaldo(); }
 function avatar(a){ let h = 0; for (const c of a) h = (h*31 + c.charCodeAt(0)) >>> 0;
   return `linear-gradient(135deg,hsl(${h%360} 80% 60%),hsl(${(h>>9)%360} 75% 45%))`; }
 function pintaCuenta(){
   const b = $('#btCartera');
   if (cuenta){ b.className = 'pill con'; b.innerHTML = `<i class="avatar" style="background:${avatar(cuenta)}"></i>${cuenta.slice(0,6)}…${cuenta.slice(-4)}<svg viewBox="0 0 12 12"><path fill="currentColor" d="M1 3.5h10L6 9.5z"/></svg>`; }
   else { b.className = 'pill blanco'; b.innerHTML = 'Connect<span class="dsk">&nbsp;wallet</span>'; $('#btRed span').textContent = 'Ethereum'; }
-  $('#btRed').hidden = !cuenta; $('#ordBt').hidden = !!cuenta; pintaOrd(); calcula();
+  if (!cuenta){ redId = null; saldoNat = null; }
+  $('#btRed').hidden = !cuenta; $('#ordBt').hidden = !!cuenta; pintaOrd(); calcula(); if (vista !== 'spot') pintaVista();
 }
 $('#btCartera').onclick = e => {
   if (!cuenta) return abreCartera();
@@ -1652,7 +1979,7 @@ function pintaAjustes(){
   $$('#conv button').forEach(b => b.classList.toggle('on', !!+b.dataset.inv === !!AJ.inv));
   $('#ajFlash').checked = AJ.flash; $('#ajTip').checked = AJ.tip;
 }
-function aplicaAjustes(){ guarda('nereum-dex-ajustes', AJ); document.body.classList.toggle('inv', !!AJ.inv); pintaForm(); pintaLibro(); dibuja(); dibujaDepth(); pintaMercados(); }
+function aplicaAjustes(){ guarda('nereum-dex-ajustes', AJ); document.body.classList.toggle('inv', !!AJ.inv); pintaForm(); pintaLibro(); dibuja(); dibujaDepth(); pintaMercados();  if (vista !== 'spot') pintaVista(); }
 $('#slipChips').onclick = e => { const b = e.target.closest('button'); if (!b) return; AJ.slip = +b.dataset.s; pintaAjustes(); aplicaAjustes(); };
 $('#slipCustom').addEventListener('input', e => { const v = num(e.target.value); if (v > 0 && v <= 50){ AJ.slip = v; $$('#slipChips button').forEach(b => b.classList.remove('on')); aplicaAjustes(); } });
 $('#plazo').addEventListener('input', e => { const v = Math.round(num(e.target.value)); if (v > 0 && v < 1000){ AJ.plazo = v; guarda('nereum-dex-ajustes', AJ); } });
@@ -1713,11 +2040,396 @@ let pend = false, pendDatos = false;
 function pide(conDatos){
   if (conDatos) pendDatos = true; if (pend) return; pend = true;
   requestAnimationFrame(() => { pend = false;
-    if (pendDatos){ pendDatos = false; refrescaListas(); pintaCabecera(); calcula(); }
+    if (pendDatos){ pendDatos = false; refrescaListas(); pintaCabecera(); calcula(); if (vista !== 'spot') vivoVista(); }
     dibuja(); });
 }
 let rz; addEventListener('resize', () => { clearTimeout(rz); rz = setTimeout(() => { dibuja(); dibujaDepth(); pintaLibro(); pintaTrades();
   if ($('#mk').classList.contains('on')) abreMk(true); }, 120); }, {passive:true});
+
+
+/* ══ PANTALLAS ══
+   Spot es la rejilla de siempre. Swap, Pools, Bridge, Tokenize y Portfolio son
+   pantallas propias con la misma paleta, y cada botón del menú lleva a la suya
+   (#/swap, #/pools…). Ninguna inventa números: los precios son los mismos en
+   vivo del spot, la red y el saldo salen de la cartera conectada, y lo que
+   depende de la mainnet (saldos en NereumEVM, TVL, APR, comisión del puente)
+   se dice tal cual. */
+Object.assign(COIN, {USDT:['#26A17B','#fff'], USDC:['#2775CA','#fff'], POL:['#8247E5','#fff'], SepoliaETH:['#627EEA','#fff']});
+Object.assign(NOMBRE, {USDT:'Tether USD', USDC:'USD Coin', POL:'Polygon', SepoliaETH:'Sepolia Ether'});
+const TOKS = [['USDT','Tether USD'], ...PARES];
+const VISTAS = {spot:'#app', swap:'#vSwap', pools:'#vPools', bridge:'#vBridge', tokenize:'#vTok', portfolio:'#vPort'};
+const TITULOS = {swap:'Swap', pools:'Pools', bridge:'Bridge', tokenize:'Tokenize', portfolio:'Portfolio'};
+const FLECHA = '<svg viewBox="0 0 12 12"><path fill="currentColor" d="M1 3.5h10L6 9.5z"/></svg>';
+const esc = v => String(v == null ? '' : v).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const coinHtml = s => { const c = COIN[s]||['#333','#fff']; return `<i class="coin" style="--c:${c[0]};--cf:${c[1]}">${esc(s[0])}</i>`; };
+const pxU = s => s === 'USDT' || s === 'USDC' ? 1 : (datos[s] ? datos[s].px : 0);
+const estable = s => s === 'USDT' || s === 'USDC';
+function fT(v, s){ v = Number(v)||0; if (estable(s)) return nf(v, 2); if (v >= 1e6) return nf(v/1e6, 2)+'M'; if (v >= 1) return nf(v, v >= 1000 ? 2 : 4); return v ? String(+v.toPrecision(5)) : '0'; }
+const corta = a => a.slice(0,6)+'…'+a.slice(-4);
+function sacude(b){ b.classList.remove('sacude'); void b.offsetWidth; b.classList.add('sacude'); }
+let vista = 'spot';
+function ruta(){
+  const v = (location.hash.match(/^#\/([a-z]+)/)||[])[1];
+  vista = VISTAS[v] ? v : 'spot';
+  for (const [n, sel] of Object.entries(VISTAS)) $(sel).hidden = n !== vista;
+  $$('.nav button[data-v]').forEach(b => b.classList.toggle('on', b.dataset.v === vista));
+  abreMk(false); ocultaTip();
+  if (vista === 'spot'){ pintaCabecera(); requestAnimationFrame(() => { dibuja(); dibujaDepth(); pintaLibro(); pintaTrades(); }); }
+  else { document.title = TITULOS[vista]+' | Nereum DEX'; if (vista === 'bridge' || vista === 'portfolio') leeSaldo(); pintaVista(); }
+  scrollTo(0, 0);
+}
+function pintaVista(){
+  if (vista === 'swap') pintaSwap(); else if (vista === 'pools') pintaPools(); else if (vista === 'bridge') pintaBridge();
+  else if (vista === 'tokenize') pintaTok(); else if (vista === 'portfolio') pintaPort();
+}
+function vivoVista(){
+  if (vista === 'swap'){ swCalc(); swInfo(false); } else if (vista === 'pools') vivoPools();
+  else if (vista === 'bridge') pintaBridge(); else if (vista === 'portfolio') vivoPort();
+}
+$$('.nav button[data-v]').forEach(b => b.onclick = () => { location.hash = '#/'+b.dataset.v; });
+$$('[data-ir]').forEach(b => b.onclick = () => { location.hash = '#/'+b.dataset.ir; });
+addEventListener('hashchange', ruta);
+/* saldo nativo de la cartera en su red actual, leído de la propia cartera */
+async function leeSaldo(){
+  if (!prov || !cuenta){ saldoNat = null; return; }
+  const yo = cuenta;
+  try{ const h = await prov.request({method:'eth_getBalance', params:[cuenta, 'latest']}); if (yo === cuenta) saldoNat = Number(BigInt(h)) / 1e18; }
+  catch(e){ saldoNat = null; }
+  if (vista !== 'spot') pintaVista();
+}
+
+/* ── elegir token ── */
+let tokCb = null;
+function abreTok(cb){ tokCb = cb; $('#tkBusca').value = ''; pintaTokLista(); abreModal('#mTok'); if (!movil()) setTimeout(() => $('#tkBusca').focus(), 120); }
+function pintaTokLista(){
+  const q = $('#tkBusca').value.trim().toUpperCase();
+  $('#tkLista').innerHTML = TOKS.filter(([s,n]) => !q || s.includes(q) || n.toUpperCase().includes(q)).map(([s,n]) => { const d = datos[s];
+    return `<button class="cart" data-tk="${s}">${coinHtml(s)}<span><b>${s}</b><small>${esc(n)}</small></span><em class="ins">${estable(s) ? '$1.00' : d ? '$'+fp(d.px, s) : '—'}</em></button>`; }).join('')
+    || '<p class="mod-nota">No tokens found</p>';
+}
+$('#tkBusca').addEventListener('input', pintaTokLista);
+$('#tkLista').onclick = e => { const b = e.target.closest('[data-tk]'); if (!b) return; cierraModal('#mTok'); if (tokCb) tokCb(b.dataset.tk); };
+
+/* ══ SWAP ══ */
+const SW = carga('nereum-dex-swap', {de:'USDT', a:'BTC'});
+function setTk(sel, s){ $(sel).innerHTML = coinHtml(s)+`<b>${s}</b>`+FLECHA; }
+function pintaSwap(){ setTk('#swDeTk', SW.de); setTk('#swATk', SW.a); swCalc(); swInfo(true); }
+function swCalc(){
+  const v = num($('#swDeIn').value), pd = pxU(SW.de), pa = pxU(SW.a);
+  const sale = v && pd && pa ? v*pd/pa*(1-COM) : 0;
+  $('#swAIn').value = sale ? fT(sale, SW.a) : '';
+  $('#swDeUsd').textContent = '≈ $'+nf(v*pd*usd, 2);
+  $('#swAUsd').textContent = '≈ $'+nf(sale*pa*usd, 2);
+  $('#swRate').textContent = pd && pa ? `1 ${SW.de} = ${fT(pd/pa, SW.a)} ${SW.a}` : '—';
+  $('#swMin').textContent = sale ? fT(sale*(1-AJ.slip/100), SW.a)+' '+SW.a : '—';
+  $('#swFee').textContent = v ? fT(v*COM, SW.de)+' '+SW.de : '—';
+  $('#swSlip').textContent = AJ.slip+'%';
+  $('#swDeBal').textContent = cuenta ? 'NereumEVM balance 0' : 'Balance —';
+  $('#swBt').textContent = !cuenta ? 'Connect wallet' : !(pd && pa) ? 'Price unavailable' : !v ? 'Enter an amount' : `Swap ${SW.de} for ${SW.a}`;
+}
+function swInfo(conChispa){
+  const s = SW.a !== 'USDT' ? SW.a : SW.de, d = datos[s];
+  $('#swParT').textContent = s+' / USDT'; $('#swPx').textContent = d ? fp(d.px, s) : '—';
+  const c = $('#swCam'); c.textContent = d ? pct(d.cam) : ''; c.className = d && d.cam < 0 ? 'dn' : 'up';
+  $('#swAlt').textContent = d ? fp(d.alt, s) : '—'; $('#swBaj').textContent = d ? fp(d.baj, s) : '—';
+  $('#swVol').textContent = d ? '$'+corto(d.vol) : '—';
+  if (conChispa) chispa(s);
+}
+const CHISPA = {};
+async function chispa(s){
+  const c = CHISPA[s];
+  if (!c || Date.now() - c.t > 300000){
+    let L = null;
+    try{ L = (await okx(`/market/candles?instId=${s}-USDT&bar=1H&limit=48`)).map(v => +v[4]).reverse(); }
+    catch(e){ try{ L = (await kraken('OHLC', s, '&interval=60')).slice(-48).map(v => +v[4]); }catch(e2){} }
+    CHISPA[s] = {t: Date.now(), L};
+  }
+  dibChispa(s);
+}
+function dibChispa(s){
+  const actualS = SW.a !== 'USDT' ? SW.a : SW.de; if (s !== actualS || vista !== 'swap') return;
+  const cvS = $('#swSpark'), k = cvS.getContext('2d'), t = prepara(cvS, k); if (!t) return;
+  const {W, H} = t, L = CHISPA[s] && CHISPA[s].L;
+  k.font = '11px Inter, system-ui, sans-serif'; k.fillStyle = '#8E8E96'; k.textAlign = 'center'; k.textBaseline = 'middle';
+  if (!L || L.length < 2){ k.fillText(CHISPA[s] ? 'Chart unavailable right now' : 'Loading…', W/2, H/2); return; }
+  const mx = Math.max(...L), mn = Math.min(...L), r = mx - mn || mx*0.001 || 1;
+  const X = i => i/(L.length-1)*W, Y = v => 6 + (mx - v)/r*(H-12);
+  const c = col(L[L.length-1] >= L[0] ? '--up' : '--dn');
+  const g = k.createLinearGradient(0, 0, 0, H); g.addColorStop(0, c+'33'); g.addColorStop(1, c+'00');
+  k.beginPath(); L.forEach((v,i) => i ? k.lineTo(X(i), Y(v)) : k.moveTo(X(i), Y(v))); k.lineTo(W, H); k.lineTo(0, H); k.closePath(); k.fillStyle = g; k.fill();
+  k.beginPath(); L.forEach((v,i) => i ? k.lineTo(X(i), Y(v)) : k.moveTo(X(i), Y(v))); k.strokeStyle = c; k.lineWidth = 1.8; k.lineJoin = 'round'; k.stroke();
+}
+$('#swDeIn').addEventListener('input', swCalc);
+$('#swDeTk').onclick = () => abreTok(s => { if (s === SW.a) SW.a = SW.de; SW.de = s; guarda('nereum-dex-swap', SW); pintaSwap(); });
+$('#swATk').onclick = () => abreTok(s => { if (s === SW.de) SW.de = SW.a; SW.a = s; guarda('nereum-dex-swap', SW); pintaSwap(); });
+$('#swFlip').onclick = () => { const out = num($('#swAIn').value); [SW.de, SW.a] = [SW.a, SW.de]; guarda('nereum-dex-swap', SW);
+  $('#swDeIn').value = out ? +out.toPrecision(8) : ''; pintaSwap(); };
+$('#swSlip').onclick = $('#swAj').onclick = () => { pintaAjustes(); abreModal('#mAjustes'); };
+$('#swBt').onclick = () => { if (!cuenta) return abreCartera(); if (!num($('#swDeIn').value) || !pxU(SW.de) || !pxU(SW.a)) return sacude($('#swBt'));
+  toast('Swaps settle on NereumEVM once mainnet opens. Nothing was sent and your wallet was not asked to sign.'); };
+
+/* ══ POOLS ══ */
+let plFiltro = 'all', lqS = 'BTC';
+function pintaPools(){
+  $('#plN').textContent = PARES.length;
+  $('#plMias').textContent = cuenta ? '0' : '—'; $('#plMiasS').textContent = cuenta ? 'On NereumEVM' : 'Connect a wallet';
+  if (plFiltro === 'mine'){
+    $('#plTabla').hidden = true; $('#plVacio').hidden = false;
+    $('#plVacioT').textContent = cuenta ? 'No liquidity positions yet' : 'Connect a wallet to see your positions';
+    $('#plVacioS').textContent = cuenta ? 'Positions you open on NereumEVM will appear here.' : 'Your positions are read from your wallet address.';
+    $('#plVacioB').textContent = cuenta ? 'New position' : 'Connect wallet'; return;
+  }
+  $('#plTabla').hidden = false; $('#plVacio').hidden = true;
+  const q = ($('#plBusca').value||'').trim().toUpperCase();
+  const L = PARES.filter(([s,n]) => !q || s.includes(q) || n.toUpperCase().includes(q));
+  $('#plCuerpo').innerHTML = L.map(([s]) => { const d = datos[s];
+    return `<tr data-s="${s}"><td><div class="par"><span class="pila">${coinHtml(s)}${coinHtml('USDT')}</span><span><b>${s}</b> / USDT</span><span class="tag">0.30%</span></div></td>
+      <td class="d" data-c="px">${d ? fp(d.px, s) : '—'}</td><td class="d"><span data-c="cam" class="${d && d.cam < 0 ? 'dn' : 'up'}">${d ? pct(d.cam) : '—'}</span></td>
+      <td class="d" data-c="vol">${d ? '$'+corto(d.vol) : '—'}</td>
+      <td class="d t4" title="Opens with the NereumEVM mainnet">—</td><td class="d t4" title="Opens with the NereumEVM mainnet">—</td>
+      <td class="d"><button class="pill gris chico" data-liq="${s}">Add liquidity</button></td></tr>`; }).join('')
+    || '<tr><td colspan="7" class="vacio-c">No pools found</td></tr>';
+}
+function vivoPools(){
+  $$('#plCuerpo tr[data-s]').forEach(r => { const s = r.dataset.s, d = datos[s]; if (!d) return;
+    r.querySelector('[data-c=px]').textContent = fp(d.px, s);
+    const c = r.querySelector('[data-c=cam]'); c.textContent = pct(d.cam); c.className = d.cam < 0 ? 'dn' : 'up';
+    r.querySelector('[data-c=vol]').textContent = '$'+corto(d.vol); });
+}
+$('#plTabs').onclick = e => { const b = e.target.closest('button'); if (!b) return; plFiltro = b.dataset.p;
+  $$('#plTabs button').forEach(x => x.classList.toggle('on', x === b)); pintaPools(); };
+$('#plBusca').addEventListener('input', pintaPools);
+$('#plCuerpo').onclick = e => { const b = e.target.closest('[data-liq]'); if (b) abreLiq(b.dataset.liq); };
+$('#plNuevo').onclick = () => abreLiq(lqS);
+$('#plVacioB').onclick = () => cuenta ? abreLiq(lqS) : abreCartera();
+function abreLiq(s){ lqS = s; $('#lqA').value = $('#lqB').value = ''; pintaLiq(); abreModal('#mLiq'); }
+function pintaLiq(){
+  $('#lqPar').innerHTML = `<span class="pila">${coinHtml(lqS)}${coinHtml('USDT')}</span>${lqS} / USDT<span class="tag" style="margin-left:6px">0.30%</span>`+FLECHA;
+  $('#lqATk').innerHTML = coinHtml(lqS)+`<b>${lqS}</b>`; $('#lqBTk').innerHTML = coinHtml('USDT')+'<b>USDT</b>';
+  const p = pxU(lqS); $('#lqPx').textContent = p ? `1 ${lqS} = ${fp(p, lqS)} USDT` : '—';
+  const b = num($('#lqB').value); $('#lqTot').textContent = b ? '≈ $'+nf(b*2*usd, 2) : '—';
+  $('#lqBt').textContent = !cuenta ? 'Connect wallet' : !p ? 'Price unavailable' : !num($('#lqA').value) ? 'Enter an amount' : 'Add liquidity';
+}
+$('#lqA').addEventListener('input', () => { const p = pxU(lqS), a = num($('#lqA').value); $('#lqB').value = a && p ? (a*p).toFixed(2) : ''; pintaLiq(); });
+$('#lqB').addEventListener('input', () => { const p = pxU(lqS), b = num($('#lqB').value); $('#lqA').value = b && p ? +(b/p).toPrecision(8) : ''; pintaLiq(); });
+$('#lqPar').onclick = () => { cierraModal('#mLiq'); abreTok(s => { if (estable(s)) return toast('Pools pair a coin with USDT. Pick a coin other than USDT.'); abreLiq(s); }); };
+$('#lqBt').onclick = () => { if (!cuenta) return abreCartera(); if (!num($('#lqA').value) || !pxU(lqS)) return sacude($('#lqBt'));
+  toast('Liquidity opens with the NereumEVM mainnet. Nothing was sent.'); };
+
+/* ══ BRIDGE ══ */
+const BR = [['0x1','Ethereum','ETH','#627EEA'],['0xa4b1','Arbitrum','ETH','#28A0F0'],['0x2105','Base','ETH','#0052FF'],
+  ['0xa','Optimism','ETH','#FF0420'],['0x38','BNB Chain','BNB','#F3BA2F'],['0x89','Polygon','POL','#8247E5']];
+let brRed = '0x1', brTk = 'native';
+function pintaBridge(){
+  const r = BR.find(x => x[0] === brRed), nat = r[2], tk = brTk === 'native' ? nat : brTk;
+  $('#brDe').innerHTML = `<i style="--c:${r[3]}"></i>${r[1]}`+FLECHA;
+  $('#brTk').innerHTML = coinHtml(tk)+`<b>${tk}</b>`+FLECHA;
+  const enRed = !!cuenta && redId === brRed, sal = enRed && brTk === 'native' ? saldoNat : null;
+  $('#brBal').textContent = 'Balance ' + (sal != null ? fT(sal, tk)+' '+tk : '—');
+  $('#brMax').hidden = sal == null || !sal;
+  const v = num($('#brIn').value), p = pxU(tk);
+  $('#brUsd').textContent = p ? '≈ $'+nf(v*p*usd, 2) : '≈ $—';
+  $('#brRec').textContent = v ? fT(v, tk)+' '+tk : '—';
+  $('#brDest').textContent = cuenta ? corta(cuenta) : 'Your connected wallet';
+  $('#brRedW').textContent = cuenta ? 'Wallet on '+(REDES[redId] || (redId ? 'chain '+parseInt(redId, 16) : '—')) : 'Not connected';
+  $('#brBt').textContent = !cuenta ? 'Connect wallet' : redId !== brRed ? 'Switch wallet to '+r[1] : !v ? 'Enter an amount'
+    : (sal != null && v > sal) ? 'Insufficient '+tk+' balance' : 'Bridge to NereumEVM';
+  $('#brRedes').innerHTML = BR.map(([id,n,,c]) => `<button class="chp ${id === brRed ? 'on' : ''}" data-red="${id}"><i style="--c:${c}"></i>${n}</button>`).join('')
+    + '<span class="chp" style="cursor:default"><svg class="nl" viewBox="0 0 672 672" style="width:14px;height:14px"><use href="#nlLogo"/></svg>NereumEVM</span>';
+}
+function ponBrRed(id){ brRed = id; brTk = 'native'; $('#brIn').value = ''; pintaBridge(); }
+$('#brDe').onclick = e => { e.stopPropagation(); const m = $('#menuBr');
+  m.innerHTML = BR.map(([id,n,,c]) => `<button data-red="${id}"><i style="--c:${c}"></i>${n}</button>`).join(''); m.hidden = !m.hidden; };
+$('#menuBr').onclick = e => { const b = e.target.closest('[data-red]'); if (!b) return; $('#menuBr').hidden = true; ponBrRed(b.dataset.red); };
+$('#brRedes').onclick = e => { const b = e.target.closest('[data-red]'); if (b) ponBrRed(b.dataset.red); };
+$('#brTk').onclick = e => { e.stopPropagation(); const r = BR.find(x => x[0] === brRed), m = $('#menuBrTk');
+  m.innerHTML = [['native', r[2]], ['USDT','USDT'], ['USDC','USDC']].map(([k,s]) => `<button data-btk="${k}">${coinHtml(s)}${s}<span style="margin-left:auto;color:var(--t4);font-size:11.5px">${esc(NOMBRE[s]||'')}</span></button>`).join('');
+  m.hidden = !m.hidden; };
+$('#menuBrTk').onclick = e => { const b = e.target.closest('[data-btk]'); if (!b) return; $('#menuBrTk').hidden = true; brTk = b.dataset.btk; pintaBridge(); };
+$('#brIn').addEventListener('input', pintaBridge);
+$('#brMax').onclick = () => { if (saldoNat){ $('#brIn').value = +saldoNat.toPrecision(8); pintaBridge(); } };
+$('#brBt').onclick = async () => {
+  if (!cuenta) return abreCartera();
+  const r = BR.find(x => x[0] === brRed);
+  if (redId !== brRed){
+    try{ await prov.request({method:'wallet_switchEthereumChain', params:[{chainId:brRed}]}); }
+    catch(e){ toast(e && e.code === 4902 ? r[1]+' is not added in your wallet yet.' : 'Network switch cancelled.'); }
+    return;
+  }
+  const v = num($('#brIn').value); if (!v) return sacude($('#brBt'));
+  if (brTk === 'native' && saldoNat != null && v > saldoNat) return sacude($('#brBt'));
+  toast('Bridging to NereumEVM opens with mainnet. Nothing was sent and your wallet was not asked to sign.');
+};
+
+/* ══ TOKENIZAR ══ */
+const TK_TIPOS = ['Real estate','Private credit','Invoices','Fund interests','Commodities','Other'];
+const TK_JUR = ['European Union','United States','United Kingdom','Switzerland','Singapore','UAE','Hong Kong','Latin America'];
+const TK_CLASES = ['Retail','Professional','Accredited','Institutional'];
+const TK_BLOQ = [0, 30, 90, 180, 365];
+const TK = carga('nereum-dex-tok', {paso:1, tipo:'Real estate', nombre:'', simbolo:'', uds:10000, valor:1000000, doc:'', cust:'',
+  att:'Independent auditor', huella:'', archivo:'', jur:['European Union'], clases:['Professional'], bloqueo:90, maxH:500, ok:false});
+const guardaTok = () => guarda('nereum-dex-tok', TK);
+const PASOS_TK = ['Asset','Documents','Policy','Review'];
+function pintaTok(){
+  $('#tkPasos').innerHTML = PASOS_TK.map((n,i) => `<button class="tk-paso ${TK.paso === i+1 ? 'on' : ''} ${TK.paso > i+1 ? 'hecho' : ''}" data-paso="${i+1}" ${TK.paso > i+1 ? '' : 'tabindex="-1"'}><i></i>${i+1}. ${n}</button>`).join('');
+  $('#tkCuerpo').innerHTML = [tk1, tk2, tk3, tk4][TK.paso-1]();
+  pintaPrev();
+}
+const campo = (k, label, ayuda, html) => `<div class="cmp" id="c-${k}"><label for="f-${k}">${label}</label>${ayuda ? `<small>${ayuda}</small>` : ''}${html}<span class="e" hidden></span></div>`;
+const inp = (k, extra='') => `<input class="inp" id="f-${k}" data-k="${k}" value="${esc(TK[k])}" ${extra}>`;
+function tk1(){
+  return `${campo('tipo', 'Asset type', 'Sets which documents are expected.', `<div class="chips-r">${TK_TIPOS.map(t => `<button class="chp ${TK.tipo === t ? 'on' : ''}" data-uno="tipo" data-val="${t}">${t}</button>`).join('')}</div>`)}
+    ${campo('nombre', 'Asset name', 'As it will appear in wallets and in the explorer.', inp('nombre', 'placeholder="Chamberi Building · Madrid" maxlength="60" autocomplete="off"'))}
+    <div class="dos-c">
+      ${campo('simbolo', 'Symbol', '2 to 6 letters.', inp('simbolo', 'placeholder="CHAM" maxlength="6" autocomplete="off" style="text-transform:uppercase"'))}
+      ${campo('uds', 'Units to issue', 'How many parts the asset is split into.', inp('uds', 'inputmode="numeric"'))}
+    </div>
+    ${campo('valor', 'Declared value (USD)', 'Valuation of the whole asset.', inp('valor', 'inputmode="decimal"'))}
+    <div class="tk-bts"><span></span><button class="accion" data-sig="1" style="flex:0 0 200px">Continue</button></div>`;
+}
+function tk2(){
+  return `<div class="aviso">${'<svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="9" cy="9" r="7"/><path d="M9 8v4.5M9 5.5v.1"/></svg>'}<span>The chain does not store your document. It stores <b>a reference and a fingerprint</b>; if the file is altered later, the fingerprint no longer matches.</span></div>
+    ${campo('doc', 'Backing document', 'Deed, loan agreement, invoice or fund certificate.', inp('doc', 'placeholder="Public deed 4821/2026" maxlength="80" autocomplete="off"'))}
+    ${campo('cust', 'Custodian of the original', 'Who holds the original off-chain.', inp('cust', 'placeholder="Alvarez Notary · Madrid" maxlength="80" autocomplete="off"'))}
+    ${campo('att', 'Attesting party', 'Confirms the document is what it claims to be.', `<select class="inp" id="f-att" data-k="att">${['Independent auditor','Notary','Depositary institution','Certified appraiser'].map(o => `<option ${TK.att === o ? 'selected' : ''}>${o}</option>`).join('')}</select>`)}
+    ${campo('arch', 'Document fingerprint', 'Optional. The file is hashed in your browser with SHA-256 and never leaves your device.',
+      `<label class="archivo"><input type="file" id="f-arch"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M12 18v-6M9 15l3-3 3 3"/></svg>
+        <span id="tkArch">${TK.huella ? `<b>${esc(TK.archivo)}</b><br><span class="huella">${TK.huella}</span>` : 'Choose a file to fingerprint'}</span></label>`)}
+    <div class="tk-bts"><button class="pill gris" data-atras>← Back</button><button class="accion" data-sig="2" style="flex:0 0 200px">Continue</button></div>`;
+}
+function tk3(){
+  return `<div class="aviso">${'<svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="9" cy="9" r="7"/><path d="M9 8v4.5M9 5.5v.1"/></svg>'}<span>This is what makes Nereum different: these rules are <b>bound to the asset</b>, and the protocol checks them on every later transfer.</span></div>
+    ${campo('jur', 'Jurisdictions allowed', 'Only holders in these places may hold the token.', `<div class="chips-r">${TK_JUR.map(j => `<button class="chp ${TK.jur.includes(j) ? 'on' : ''}" data-multi="jur" data-val="${j}">${j}</button>`).join('')}</div>`)}
+    ${campo('clases', 'Holder classes', 'Investor types allowed to hold it.', `<div class="chips-r">${TK_CLASES.map(j => `<button class="chp ${TK.clases.includes(j) ? 'on' : ''}" data-multi="clases" data-val="${j}">${j}</button>`).join('')}</div>`)}
+    <div class="dos-c">
+      ${campo('bloqueo', 'Holding period', 'Days a new holder must wait before transferring.', `<div class="chips-r">${TK_BLOQ.map(b => `<button class="chp ${+TK.bloqueo === b ? 'on' : ''}" data-uno="bloqueo" data-val="${b}">${b ? b+' d' : 'None'}</button>`).join('')}</div>`)}
+      ${campo('maxH', 'Holder cap', 'Maximum number of holders at any time.', inp('maxH', 'inputmode="numeric"'))}
+    </div>
+    <div class="tk-bts"><button class="pill gris" data-atras>← Back</button><button class="accion" data-sig="3" style="flex:0 0 200px">Review</button></div>`;
+}
+function tk4(){
+  return `<div class="aviso">${'<svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="9" cy="9" r="7"/><path d="M9 8v4.5M9 5.5v.1"/></svg>'}<span>Check every line. Once issued, the policy is <b>bound to the token</b> and enforced on every transfer.</span></div>
+    <table class="res">${resumenTok().map(([a,b]) => `<tr><td>${a}</td><td>${b}</td></tr>`).join('')}</table>
+    <label class="chk" style="margin-top:16px"><input type="checkbox" id="tkOk" ${TK.ok ? 'checked' : ''}><span>I hold the rights to tokenize this asset</span></label>
+    <div class="err" id="tkErr" hidden style="margin-top:8px"></div>
+    <div class="tk-bts"><button class="pill gris" data-atras>← Back</button>
+      <a class="pill borde" href="/explorer/#/tokenize">Try it on testnet</a>
+      <button class="accion" id="tkEmite" style="flex:1 1 200px">${cuenta ? 'Issue on NereumEVM' : 'Connect wallet to issue'}</button></div>
+    <p class="nota" style="text-align:right"><button class="lnk" data-reinicia style="font-size:11.5px">Start a new asset</button></p>`;
+}
+function resumenTok(){
+  const u = num(TK.uds), v = num(TK.valor);
+  return [['Asset', esc(TK.nombre) || '—'], ['Type', esc(TK.tipo)], ['Symbol', esc(TK.simbolo) || '—'],
+    ['Units', u ? nf(u, 0) : '—'], ['Declared value', v ? '$'+nf(v, 2) : '—'], ['Value per unit', u && v ? '$'+nf(v/u, v/u >= 1 ? 2 : 6) : '—'],
+    ['Document', esc(TK.doc) || '—'], ['Custodian', esc(TK.cust) || '—'], ['Attested by', esc(TK.att)],
+    ['Fingerprint', TK.huella ? `<span class="huella">${TK.huella.slice(0,16)}…${TK.huella.slice(-8)}</span>` : 'Not attached'],
+    ['Jurisdictions', TK.jur.length ? TK.jur.map(esc).join(', ') : '—'], ['Holder classes', TK.clases.length ? TK.clases.map(esc).join(', ') : '—'],
+    ['Holding period', +TK.bloqueo ? TK.bloqueo+' days' : 'None'], ['Holder cap', num(TK.maxH) ? nf(num(TK.maxH), 0) : '—']];
+}
+function pintaPrev(){
+  const sym = (TK.simbolo||'').toUpperCase();
+  $('#tkPrev').innerHTML = `<div class="prev-c"><span class="sym">${esc(sym || '—')}</span><div><b>${esc(TK.nombre) || 'Untitled asset'}</b><small>${esc(TK.tipo)} · NereumEVM</small></div><span class="tag">Draft</span></div>
+    <table class="res">${resumenTok().filter(([a]) => !['Asset','Type','Symbol','Custodian','Attested by'].includes(a)).map(([a,b]) => `<tr><td>${a}</td><td>${b}</td></tr>`).join('')}</table>`;
+}
+function errTok(k, msg){ const c = $('#c-'+k); if (!c) return; const e = c.querySelector('.e'); e.hidden = !msg; e.textContent = msg || ''; const i = c.querySelector('.inp'); if (i) i.classList.toggle('mal', !!msg); }
+function validaTok(p){
+  let ok = true; const m = (k, cond, msg) => { errTok(k, cond ? null : msg); if (!cond) ok = false; };
+  if (p === 1){ m('nombre', (TK.nombre||'').trim().length >= 3, 'Enter a name of at least 3 characters.');
+    m('simbolo', /^[A-Z]{2,6}$/.test((TK.simbolo||'').toUpperCase()), '2 to 6 letters, no spaces or numbers.');
+    m('uds', num(TK.uds) >= 1 && Number.isInteger(num(TK.uds)), 'A whole number of at least 1.');
+    m('valor', num(TK.valor) > 0, 'Must be greater than zero.'); }
+  if (p === 2){ m('doc', (TK.doc||'').trim().length >= 3, 'Say which document backs the asset.'); m('cust', (TK.cust||'').trim().length >= 3, 'Say who holds the original.'); }
+  if (p === 3){ m('jur', TK.jur.length > 0, 'Choose at least one jurisdiction.'); m('clases', TK.clases.length > 0, 'Choose at least one holder class.');
+    m('maxH', num(TK.maxH) >= 1 && Number.isInteger(num(TK.maxH)), 'A whole number of at least 1.'); }
+  return ok;
+}
+$('#vTok').addEventListener('input', e => { const k = e.target.dataset && e.target.dataset.k; if (!k) return;
+  TK[k] = k === 'simbolo' ? e.target.value.toUpperCase().replace(/[^A-Z]/g, '') : e.target.value;
+  if (k === 'simbolo' && e.target.value !== TK[k]) e.target.value = TK[k];
+  errTok(k, null); guardaTok(); pintaPrev(); });
+$('#vTok').addEventListener('change', async e => {
+  if (e.target.dataset && e.target.dataset.k === 'att'){ TK.att = e.target.value; guardaTok(); pintaPrev(); }
+  if (e.target.id === 'tkOk'){ TK.ok = e.target.checked; guardaTok(); $('#tkErr').hidden = true; }
+  if (e.target.id === 'f-arch'){ const f = e.target.files && e.target.files[0]; if (!f) return;
+    $('#tkArch').textContent = 'Fingerprinting…';
+    try{ const h = await crypto.subtle.digest('SHA-256', await f.arrayBuffer());
+      TK.huella = [...new Uint8Array(h)].map(b => b.toString(16).padStart(2, '0')).join(''); TK.archivo = f.name.slice(0, 80); }
+    catch(err){ TK.huella = ''; TK.archivo = ''; toast('This browser could not fingerprint the file.'); }
+    guardaTok(); pintaTok(); }
+});
+$('#vTok').addEventListener('click', e => {
+  const t = e.target.closest('button,[data-paso]'); if (!t) return;
+  if (t.dataset.uno){ TK[t.dataset.uno] = t.dataset.uno === 'bloqueo' ? +t.dataset.val : t.dataset.val; guardaTok(); pintaTok(); return; }
+  if (t.dataset.multi){ const k = t.dataset.multi, v = t.dataset.val; TK[k] = TK[k].includes(v) ? TK[k].filter(x => x !== v) : [...TK[k], v]; guardaTok(); pintaTok(); return; }
+  if (t.dataset.sig){ const p = +t.dataset.sig; if (validaTok(p)){ TK.paso = p+1; guardaTok(); pintaTok(); scrollTo({top:0, behavior:'smooth'}); } else sacude(t); return; }
+  if (t.dataset.atras !== undefined){ TK.paso = Math.max(1, TK.paso-1); guardaTok(); pintaTok(); return; }
+  if (t.dataset.paso && +t.dataset.paso < TK.paso){ TK.paso = +t.dataset.paso; guardaTok(); pintaTok(); return; }
+  if (t.dataset.reinicia !== undefined){ Object.assign(TK, {paso:1, nombre:'', simbolo:'', doc:'', cust:'', huella:'', archivo:'', ok:false}); guardaTok(); pintaTok(); return; }
+  if (t.id === 'tkEmite'){
+    for (const p of [1,2,3]) if (!validaTok(p)){ TK.paso = p; guardaTok(); pintaTok(); validaTok(p); return; }
+    if (!TK.ok){ const er = $('#tkErr'); er.textContent = 'Confirm that you hold the rights to tokenize this asset.'; er.hidden = false; return sacude(t); }
+    if (!cuenta) return abreCartera();
+    toast('Issuance on NereumEVM opens with mainnet. Your draft stays saved here; you can run the full flow on testnet today.');
+  }
+});
+
+/* ══ PORTFOLIO ══ */
+function pintaPort(){
+  const c = $('#portC');
+  if (!cuenta){
+    c.innerHTML = `<div class="card vacio-g"><svg viewBox="0 0 48 48" fill="none" stroke="#4A4A52" stroke-width="1.6"><rect x="6" y="12" width="36" height="26" rx="5"/><path d="M6 19h36M32 28h4"/></svg>
+      <b>Connect a wallet to see your portfolio</b><span>Your balance and network are read straight from your wallet. Nereum never holds your keys.</span>
+      <button class="pill blanco" id="portCon">Connect wallet</button></div>`;
+    $('#portCon').onclick = abreCartera; return;
+  }
+  const red = REDES[redId] || (redId ? 'Chain '+parseInt(redId, 16) : '—'), nat = NAT[redId] || 'ETH', p = pxU(nat);
+  const val = saldoNat != null && p ? saldoNat*p*usd : null;
+  c.innerHTML = `
+  <div class="card port-h"><i class="avatar" style="background:${avatar(cuenta)}"></i>
+    <div><b>${corta(cuenta)}</b><small>Wallet on ${esc(red)}</small></div>
+    <button class="pill gris chico" id="portCopia">Copy address</button>
+    <div class="port-v"><small>Wallet value on ${esc(red)}</small><b id="portVal">${val != null ? '$'+nf(val, 2) : '—'}</b></div></div>
+  <div class="stats4" style="margin-top:12px">
+    <div class="st4"><i>${esc(nat)} balance</i><b>${saldoNat != null ? fT(saldoNat, nat) : '—'}</b><s>On ${esc(red)}</s></div>
+    <div class="st4"><i>NereumEVM balance</i><b>0</b><s>Deposits open with mainnet</s></div>
+    <div class="st4"><i>Open orders</i><b>0</b><s>Spot · NereumEVM</s></div>
+    <div class="st4"><i>Liquidity positions</i><b>0</b><s>Pools · NereumEVM</s></div>
+  </div>
+  <section class="card" style="padding:0">
+    <div class="p-bar"><b>Wallet assets</b><span class="esp"></span><small>Native balance on ${esc(red)}</small></div>
+    <div class="tw"><table class="tb"><thead><tr><th>Asset</th><th class="d">Balance</th><th class="d">Price</th><th class="d">Value</th><th></th></tr></thead>
+      <tbody><tr><td><div class="par">${coinHtml(nat)}<span><b>${esc(nat)}</b> <span style="color:var(--t3)">${esc(NOMBRE[nat]||'')}</span></span></div></td>
+        <td class="d">${saldoNat != null ? fT(saldoNat, nat) : '—'}</td><td class="d" id="portPx">${p ? '$'+fp(p, nat) : '—'}</td>
+        <td class="d" id="portV2">${val != null ? '$'+nf(val, 2) : '—'}</td>
+        <td class="d"><button class="pill gris chico" data-ir2="bridge">Bridge</button></td></tr></tbody></table></div>
+  </section>
+  <section class="card" style="padding:0;margin-top:12px">
+    <div class="p-bar"><b>Watchlist</b><span class="esp"></span><small>Your favorite markets · ☆ in Spot</small></div>
+    <div class="tw"><table class="tb"><thead><tr><th>Market</th><th class="d">Price</th><th class="d">24h chg</th><th class="d">24h turnover</th><th></th></tr></thead>
+      <tbody id="portFav"></tbody></table></div>
+  </section>
+  <section class="card" style="margin-top:12px"><div class="card-h" style="margin-bottom:6px"><b>NereumEVM activity</b></div>
+    <p class="nota" style="margin-top:0">No activity yet. Trades, swaps, liquidity and bridge transfers on NereumEVM will appear here.</p></section>`;
+  pintaFavs();
+  $('#portCopia').onclick = () => { navigator.clipboard && navigator.clipboard.writeText(cuenta).then(() => toast('Address copied.'), () => toast(cuenta)); };
+}
+function pintaFavs(){
+  const t = $('#portFav'); if (!t) return;
+  t.innerHTML = favs.filter(s => NOMBRE[s] && PARES.some(p => p[0] === s)).map(s => { const d = datos[s];
+    return `<tr><td><div class="par">${coinHtml(s)}<span><b>${s}</b> / USDT</span></div></td><td class="d">${d ? fp(d.px, s) : '—'}</td>
+      <td class="d"><span class="${d && d.cam < 0 ? 'dn' : 'up'}">${d ? pct(d.cam) : '—'}</span></td><td class="d">${d ? '$'+corto(d.vol) : '—'}</td>
+      <td class="d"><button class="pill gris chico" data-trade="${s}">Trade</button></td></tr>`; }).join('')
+    || '<tr><td colspan="5" class="vacio-c">No favorites yet. Tap ☆ on any market in Spot.</td></tr>';
+}
+function vivoPort(){
+  if (!cuenta) return; pintaFavs();
+  const nat = NAT[redId] || 'ETH', p = pxU(nat), val = saldoNat != null && p ? saldoNat*p*usd : null;
+  if ($('#portPx')) $('#portPx').textContent = p ? '$'+fp(p, nat) : '—';
+  [$('#portVal'), $('#portV2')].forEach(e => { if (e) e.textContent = val != null ? '$'+nf(val, 2) : '—'; });
+}
+$('#portC').onclick = e => { const b = e.target.closest('[data-trade]'); if (b){ location.hash = '#/spot'; elige(b.dataset.trade); return; }
+  const r = e.target.closest('[data-ir2]'); if (r) location.hash = '#/'+r.dataset.ir2; };
+ruta();
 
 /* ══ ARRANQUE ══ */
 (async function(){
