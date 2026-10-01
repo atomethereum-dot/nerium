@@ -282,13 +282,18 @@ di(await mo.evaluate(() => document.querySelector('.ann').getBoundingClientRect(
 await mo.click('#burger'); await mo.waitForTimeout(600);
 const hoja = await mo.evaluate(() => {
   const s = document.getElementById('sheet');
+  /* «Launch app» (el DEX en /app) va solo en el menu del telefono: en la barra
+     es un boton aparte, junto a «Whitepaper». Se cuenta por separado. */
+  const app = s.querySelector('a[href="/app/"]');
   return { top: Math.round(s.getBoundingClientRect().top),
-           n: s.querySelectorAll('a').length, fichas: s.querySelectorAll('.chip').length,
-           cta: !!s.querySelector('.sheet-cta') };
+           n: s.querySelectorAll('a').length - (app ? 1 : 0),
+           fichas: s.querySelectorAll('.chip').length - (app && app.querySelector('.chip') ? 1 : 0),
+           cta: !!s.querySelector('.sheet-cta'), app: !!app };
 });
 di(hoja.n === menu.length + 1 && hoja.fichas === menu.length,
    'el menu del telefono trae las mismas que la barra y la llamada (' +
    hoja.fichas + ' + 1)');
+di(hoja.app, 'y la entrada «Launch app» que lleva al DEX');
 di(hoja.cta, 'con el boton de entrar en la ronda al final');
 /* El menu cuelga de «--ann + --bar»: lo que mida la franja mas lo que mida la
    barra. Se comprueba contra esa cuenta y no contra un numero fijo, que es lo

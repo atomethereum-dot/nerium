@@ -368,6 +368,8 @@ svg{flex:none}
 .pie{position:fixed;left:0;right:0;bottom:0;height:30px;z-index:30;display:flex;align-items:center;gap:14px;
   padding:0 14px;background:#060607;border-top:1px solid var(--linea);font-size:11.5px;color:var(--t3)}
 .pie-sep{width:1px;height:14px;background:var(--linea2);flex:none}
+/* el indicador de la fuente («Live · OKX · ms») va oculto: los datos siguen entrando igual */
+#estado,#estado + .pie-sep{display:none}
 .cinta{flex:1;overflow:hidden;min-width:0;mask:linear-gradient(90deg,transparent,#000 4%,#000 96%,transparent)}
 .cinta-in{display:flex;gap:30px;width:max-content;animation:cinta 70s linear infinite}
 .cinta:hover .cinta-in{animation-play-state:paused}
