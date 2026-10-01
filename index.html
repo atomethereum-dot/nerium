@@ -1694,6 +1694,10 @@ section{position:relative;z-index:1}
 .logos h2{font-size:clamp(15px,1.6vw,19px);font-weight:400;color:var(--ink);letter-spacing:-.02em}
 .chroma{height:min(58vw,520px);position:relative;overflow:hidden;background:#000}
 .chroma canvas{position:absolute;inset:0;width:100%;height:100%}
+/* p75 · la cinta oculta («hidden») seguia ocupando la banda entera: el
+   «display:block» de todos los lienzos le gana al atributo. Vacia no se ve,
+   pero se seguia maquetando, pintando y recortando. Oculta de verdad. */
+.chroma canvas[hidden]{display:none}
 .say{padding:var(--s6) 0}
 .say p{font-size:clamp(28px,5.4vw,72px);line-height:1.04;letter-spacing:-.05em;font-weight:400;
   color:var(--ink);max-width:24ch}
@@ -6621,6 +6625,8 @@ main>section#presale{
 /* el campo de rectangulos que decoraba el negro no funciona sobre saturado:
    se vuelve suciedad. Se apaga y el color queda limpio. */
 #presale .sale-field{opacity:.30;mix-blend-mode:normal;filter:saturate(0) brightness(1.9) opacity(.5)}
+/* p75 · con el tunel ya pintado encima (opaco), el campo no se ve: fuera */
+#presale.tapada .sale-field{display:none}
 
 #presale .sale-h{color:#FFFFFF !important}
 #presale .sale-sub{color:rgba(255,255,255,.80);max-width:46ch}
@@ -7568,7 +7574,14 @@ main>section.sx#security{background:#030409 !important;background-image:none !im
    entran asi- se quedaban quietos. Una capa que gira la mueve el
    compositor y no depende de repintar nada. */
 .sx-base,.sx-anillo{display:block;width:100%;height:100%}
-.sx-anillo{position:absolute;inset:0;animation:sxGira 26s linear infinite;will-change:transform}
+.sx-anillo{position:absolute;inset:0}
+/* p75 · y lo que gira es una caja HTML que envuelve al <svg>, no el <svg>.
+   Cuando cambia el «transform» de la raiz de un <svg>, Chrome vuelve a
+   maquetar todo el texto que lleva dentro: el aro entero de letras, en cada
+   cuadro, para sacar las mismas letras en el mismo sitio -girar no cambia
+   la escala-. Medido: un 28 % del hilo principal en «security». Girando la
+   caja de fuera, el <svg> no se entera. Misma capa, mismo centro, mismo giro. */
+.sx-giro{position:absolute;inset:0;display:block;animation:sxGira 26s linear infinite;will-change:transform}
 @keyframes sxGira{to{transform:rotate(360deg)}}
 .sx-tag{font-family:var(--f);font-weight:400;font-size:27px;letter-spacing:-.02em;fill:#fff}
 .sx-chk{fill:none;stroke:#2E86FF;stroke-width:5.5;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:1;stroke-dashoffset:1;
@@ -7718,7 +7731,7 @@ main>section.sx#security{background:#030409 !important;background-image:none !im
 }
 @media (prefers-reduced-motion:reduce){
   .sx-card,.sx-card.on,.sx-card.sale{transition:opacity .3s ease;transform:none !important;filter:none !important}
-  .sx-anillo{animation:none}
+  .sx-giro{animation:none}
   .sx-sello{transition:opacity .3s}
 }
 </style>
@@ -8369,7 +8382,7 @@ body.lock .flota{opacity:0 !important;pointer-events:none !important}
             <circle cx="100" cy="100" r="64" fill="#080C18" stroke="#2E86FF" stroke-width="1.8"/>
             <text class="sx-tag" x="100" y="88" text-anchor="middle">REG</text>
             <path class="sx-chk sx-proc" pathLength="1" d="M84 116h4M98 116h4M112 116h4"/>
-          </svg><svg class="sx-anillo" viewBox="0 0 200 200" data-no-traducir><defs><path id="sxA0" d="M100,100 m-83,0 a83,83 0 1,1 166,0 a83,83 0 1,1 -166,0"/></defs><text class="sx-arco"><textPath href="#sxA0" textLength="515">NEREUM FINANCE · REGISTRATION IN PROGRESS · REG · 2026 · </textPath></text></svg></div>
+          </svg><i class="sx-giro"><svg class="sx-anillo" viewBox="0 0 200 200" data-no-traducir><defs><path id="sxA0" d="M100,100 m-83,0 a83,83 0 1,1 166,0 a83,83 0 1,1 -166,0"/></defs><text class="sx-arco"><textPath href="#sxA0" textLength="515">NEREUM FINANCE · REGISTRATION IN PROGRESS · REG · 2026 · </textPath></text></svg></i></div>
             <ul class="sx-log"><li><i aria-hidden="true">&#8250;</i><span class="sx-l">Registration · State of Florida</span><b class="sx-en">In progress</b></li><li><i aria-hidden="true">&#8250;</i><span class="sx-l">Entity · Nereum Finance LLC</span><b class="sx-en">In progress</b></li><li><i aria-hidden="true">&#8250;</i><span class="sx-l">Document number</span><b class="sx-en">Pending</b></li><li><i aria-hidden="true">&#8250;</i><span class="sx-l">Public record</span><b class="sx-en">Pending</b></li></ul>
           </div>
         </div>
@@ -8396,7 +8409,7 @@ body.lock .flota{opacity:0 !important;pointer-events:none !important}
             <circle cx="100" cy="100" r="64" fill="#080C18" stroke="#2E86FF" stroke-width="1.8"/>
             <text class="sx-tag" x="100" y="88" text-anchor="middle">AUD</text>
             <path class="sx-chk sx-proc" pathLength="1" d="M84 116h4M98 116h4M112 116h4"/>
-          </svg><svg class="sx-anillo" viewBox="0 0 200 200" data-no-traducir><defs><path id="sxA1" d="M100,100 m-83,0 a83,83 0 1,1 166,0 a83,83 0 1,1 -166,0"/></defs><text class="sx-arco"><textPath href="#sxA1" textLength="515">NEREUM FINANCE · AUDIT IN PROGRESS · CYBERSCOPE · 2026 · </textPath></text></svg></div>
+          </svg><i class="sx-giro"><svg class="sx-anillo" viewBox="0 0 200 200" data-no-traducir><defs><path id="sxA1" d="M100,100 m-83,0 a83,83 0 1,1 166,0 a83,83 0 1,1 -166,0"/></defs><text class="sx-arco"><textPath href="#sxA1" textLength="515">NEREUM FINANCE · AUDIT IN PROGRESS · CYBERSCOPE · 2026 · </textPath></text></svg></i></div>
             <ul class="sx-log"><li><i aria-hidden="true">&#8250;</i><span class="sx-l">Auditor · CyberScope</span><b>OK</b></li><li><i aria-hidden="true">&#8250;</i><span class="sx-l">Scope · Sale, vesting, treasury</span><b class="sx-en">In progress</b></li><li><i aria-hidden="true">&#8250;</i><span class="sx-l">Findings</span><b class="sx-en">Pending</b></li><li><i aria-hidden="true">&#8250;</i><span class="sx-l">Public report</span><b class="sx-en">Pending</b></li></ul>
           </div>
         </div>
@@ -8423,7 +8436,7 @@ body.lock .flota{opacity:0 !important;pointer-events:none !important}
             <circle cx="100" cy="100" r="64" fill="#080C18" stroke="#2E86FF" stroke-width="1.8"/>
             <text class="sx-tag" x="100" y="88" text-anchor="middle">KYC</text>
             <path class="sx-chk sx-proc" pathLength="1" d="M84 116h4M98 116h4M112 116h4"/>
-          </svg><svg class="sx-anillo" viewBox="0 0 200 200" data-no-traducir><defs><path id="sxA2" d="M100,100 m-83,0 a83,83 0 1,1 166,0 a83,83 0 1,1 -166,0"/></defs><text class="sx-arco"><textPath href="#sxA2" textLength="515">NEREUM FINANCE · KYC IN PROGRESS · CYBERSCOPE · 2026 · </textPath></text></svg></div>
+          </svg><i class="sx-giro"><svg class="sx-anillo" viewBox="0 0 200 200" data-no-traducir><defs><path id="sxA2" d="M100,100 m-83,0 a83,83 0 1,1 166,0 a83,83 0 1,1 -166,0"/></defs><text class="sx-arco"><textPath href="#sxA2" textLength="515">NEREUM FINANCE · KYC IN PROGRESS · CYBERSCOPE · 2026 · </textPath></text></svg></i></div>
             <ul class="sx-log"><li><i aria-hidden="true">&#8250;</i><span class="sx-l">Provider · CyberScope</span><b>OK</b></li><li><i aria-hidden="true">&#8250;</i><span class="sx-l">Treasury signers</span><b class="sx-en">In progress</b></li><li><i aria-hidden="true">&#8250;</i><span class="sx-l">Identity documents</span><b class="sx-en">In progress</b></li><li><i aria-hidden="true">&#8250;</i><span class="sx-l">Certificate</span><b class="sx-en">Pending</b></li></ul>
           </div>
         </div>
@@ -11997,14 +12010,17 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
      alli y borrar aqui). Solo mientras el borde cruza la pantalla hacen
      falta los dos, y ahi sigue la copia. */
   let cvLimpio=false;
+  /* p75 · el lienzo del escenario, ya borrado, se queda sin capa: transparente
+     a pantalla completa no enseña nada, pero el compositor lo mezclaba encima
+     de la compra en cada cuadro */
   function pinta(p,T,borde,compraVe){
     if(compraVe&&fctx&&borde<=0){
-      if(!cvLimpio){ ctx0.save(); ctx0.setTransform(1,0,0,1,0,0); ctx0.clearRect(0,0,cv.width,cv.height); ctx0.restore(); cvLimpio=true }
+      if(!cvLimpio){ ctx0.save(); ctx0.setTransform(1,0,0,1,0,0); ctx0.clearRect(0,0,cv.width,cv.height); ctx0.restore(); cvLimpio=true; cv.style.visibility='hidden' }
       fondoListo();
       ctx=fctx; try{ draw(p,T,borde) } finally{ ctx=ctx0 }
       return;
     }
-    cvLimpio=false;
+    if(cvLimpio){ cvLimpio=false; cv.style.visibility='' }
     draw(p,T,borde);
     /* el cuadro entero, antes de borrarlo, pasa al fondo de la compra */
     if(compraVe) copia();
@@ -12035,9 +12051,17 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
      sobra por arriba o por abajo. Sin topes que calcular, no queda hueco
      ni al entrar ni al salir. p65 · el sitio sale de la cuenta (el borde de
      la compra en el documento menos el scroll), no de medir en cada cuadro */
-  let fondoY='';
+  let fondoY='', tapada=false;
   function fondoListo(){
     if(fondo.width!==cv.width||fondo.height!==cv.height){ fondo.width=cv.width; fondo.height=cv.height }
+    /* p75 · EL CAMPO DE DEBAJO, FUERA. El tunel pinta su fondo opaco a
+       pantalla completa, y debajo quedaban las cuatro manchas de «.sale-field»
+       -capas que se mueven, dentro de un filtro- que nadie veia: tapadas del
+       todo; como mucho asomaban de 1 a 4 niveles de 255 en la fila de pixeles
+       del borde, donde el lienzo cubre medio pixel. Pero el compositor las
+       rehacia en cada cuadro: la mitad de su trabajo en la compra (medido). En
+       cuanto el tunel pinta aqui, el campo se quita. */
+    if(!tapada){ tapada=true; const s=document.getElementById('presale'); if(s) s.classList.add('tapada') }
     const alto=H+'px'; if(fondo.style.height!==alto) fondo.style.height=alto;
     /* p67 · con tres decimales y no con uno: la seccion esta en medio pixel y
        el lienzo tiene que caer EXACTO en el cero de la pantalla. Con uno se
@@ -17595,7 +17619,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
     }
     return false;
   }
-  var libreDesde=0, reintento=0;
+  var libreDesde=0, reintento=0, ultMirada=0, tarde=0;
   function ve(){
     pend=0; if(saltando) return;
     var y=window.scrollY, vh=window.innerHeight;
@@ -17603,6 +17627,10 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
     var quiere = y > vh*.85 && !enCompra;
     if(quiere){
       var ahora=performance.now();
+      /* la mirada de debajo -doce sondeos- cuesta: como mucho cada 120 ms
+         mientras se baja, y una ultima al pararse */
+      if(ahora-ultMirada<120){ clearTimeout(tarde); tarde=setTimeout(ve,130); return }
+      ultMirada=ahora;
       if(tapa()){ quiere=false; libreDesde=0 }
       else{ if(!libreDesde) libreDesde=ahora;
         if(!on && ahora-libreDesde<220){ quiere=false; clearTimeout(reintento); reintento=setTimeout(ve,240) } }
