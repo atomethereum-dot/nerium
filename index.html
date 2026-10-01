@@ -280,6 +280,18 @@ body.light .scrollbtn svg{stroke:var(--ink)}
 .burger span:nth-child(1){top:12px}.burger span:nth-child(2){top:17px}
 .hd.open .burger span:nth-child(1){transform:translateY(2.5px) rotate(45deg)}
 .hd.open .burger span:nth-child(2){transform:translateY(-2.5px) rotate(-45deg)}
+/* p79 · TRES LINEAS, CENTRADAS. Las dos lineas iban a 12 y 17 px del borde de
+   arriba, medidas para la caja de 30 px; en el telefono la caja es de 44 y se
+   quedaban 7 px por encima del centro del boton «Whitepaper». Ahora las tres
+   se colocan desde el centro de la caja, sea cual sea su tamaño, y al abrir la
+   de en medio se apaga y las otras dos forman la equis. */
+.hd .burger span{left:50%;top:50%;width:18px;margin:-.7px 0 0 -9px;transition:transform .28s,opacity .2s}
+.hd .burger span:nth-child(1){transform:translateY(-6px)}
+.hd .burger span:nth-child(2){transform:none}
+.hd .burger span:nth-child(3){transform:translateY(6px)}
+.hd.open .burger span:nth-child(1){transform:rotate(45deg)}
+.hd.open .burger span:nth-child(2){opacity:0}
+.hd.open .burger span:nth-child(3){transform:rotate(-45deg)}
 .sheet{position:fixed;inset:var(--bar) 0 0;z-index:65;background:#000;padding:10px 18px 30px;
   display:flex;flex-direction:column;opacity:0;visibility:hidden;transition:opacity .22s,visibility .22s}
 .sheet.on{opacity:1;visibility:visible}
@@ -8189,7 +8201,7 @@ body.lock .flota{opacity:0 !important;pointer-events:none !important}
   </nav>
   <div class="hd-r">
     <a class="get" href="https://nereum.xyz/whitepaper" rel="noopener">Whitepaper</a>
-    <button class="burger" id="burger" type="button" aria-label="Menu" aria-expanded="false"><span></span><span></span></button>
+    <button class="burger" id="burger" type="button" aria-label="Menu" aria-expanded="false"><span></span><span></span><span></span></button>
   </div>
 </header>
 
