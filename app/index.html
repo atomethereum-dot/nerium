@@ -706,12 +706,62 @@ select.inp option{background:#141417}
   .tk-bts .pill{flex:1}
 }
 @media(max-width:419px){ .nav button{font-size:13.5px;padding:0 6px} }
+
+/* ══ portada: lo primero que se ve al abrir la app ══ */
+body.portada .top,body.portada .pie{display:none}
+.cv{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);min-height:100vh;min-height:100dvh}
+.cv-izq{display:flex;flex-direction:column;padding:0 0 40px;min-width:0}
+.cv-top{height:64px;display:flex;align-items:center;gap:12px;padding:0 48px}
+.cv-top .marca svg{width:28px;height:28px}
+.cv-top .marca b{display:inline;font-size:18px}
+.cv-top .marca em{display:inline}
+.cv-in{flex:1;display:flex;flex-direction:column;justify-content:center;padding:0 48px;max-width:720px}
+.cv-eye{align-self:flex-start;display:inline-flex;align-items:center;gap:9px;height:32px;padding:0 14px 0 10px;border-radius:999px;
+  background:var(--panel2);border:1px solid var(--linea2);font-size:12.5px;font-weight:600;color:var(--t2)}
+.cv-eye i{width:8px;height:8px;border-radius:50%;background:var(--up);box-shadow:0 0 0 4px var(--up-f2)}
+.cv h1{font-size:84px;line-height:.95;font-weight:800;letter-spacing:-.05em;color:#fff;margin:22px 0}
+.cv-sub{font-size:18px;line-height:1.5;color:var(--t3);max-width:500px}
+.cv-ctas{display:flex;gap:12px;margin-top:34px}
+.cv .pill.g{height:48px;padding:0 24px;font-size:15px;font-weight:700;gap:10px;text-decoration:none}
+.cv .pill.g svg{width:16px;height:16px}
+.cv-mon{display:flex;align-items:center;margin-top:56px}
+.cv-mon img{width:30px;height:30px;border-radius:50%;box-shadow:0 0 0 3px #000}
+.cv-mon img + img{margin-left:-10px}
+.cv-mon span{font-size:13px;color:var(--t3);margin-left:14px}
+.cv-der{background:var(--up);color:var(--up-t);position:relative;overflow:hidden;display:flex;flex-direction:column;justify-content:space-between;
+  gap:20px;padding:40px;min-width:0}
+.cv-k{display:flex;justify-content:space-between;font-size:13px;font-weight:700;letter-spacing:.12em;text-transform:uppercase}
+.cv-big{font-size:150px;line-height:.85;font-weight:800;letter-spacing:-.06em}
+.cv-big small{display:block;font-size:22px;line-height:1.25;letter-spacing:-.01em;font-weight:700;margin-top:14px}
+.cv-graf{position:relative;flex:1;min-height:220px;max-height:420px;margin:0 -40px}
+.cv-graf canvas{position:absolute;inset:0;width:100%;height:100%}
+.cv-vivo{display:flex;align-items:center;gap:10px;font-size:15px;font-weight:700}
+.cv-vivo img{width:24px;height:24px;border-radius:50%}
+.cv-vivo s{text-decoration:none;opacity:.6;font-weight:600}
+.cv-vivo b{margin-left:auto;font-size:20px;letter-spacing:-.02em}
+.cv-vivo em{font-style:normal;font-size:13px;padding:3px 8px;border-radius:6px;background:rgba(10,18,0,.12)}
+.cv-pie{display:flex;justify-content:space-between;font-size:13px;font-weight:700;border-top:1.5px solid rgba(10,18,0,.25);padding-top:16px}
+@media(max-width:1023px){
+  .cv{grid-template-columns:minmax(0,1fr)}
+  .cv-top,.cv-in{padding:0 20px}
+  .cv-top .marca b,.cv-top .marca em{display:inline !important}
+  .cv-in{padding-top:30px}
+  .cv h1{font-size:50px}
+  .cv-sub{font-size:16px}
+  .cv-ctas{flex-direction:column}
+  .cv-ctas .pill{justify-content:center}
+  .cv-mon{margin-top:40px}
+  .cv-der{padding:28px 20px;min-height:560px}
+  .cv-big{font-size:96px}
+  .cv-graf{margin:0 -20px;min-height:200px}
+  .cv-vivo s{display:none}
+}
 </style>
 </head>
 <body>
 
 <header class="top">
-  <a class="marca" href="/" aria-label="Nereum · nereum.xyz">
+  <a class="marca" href="#/" aria-label="Nereum DEX · home">
     <svg viewBox="0 0 672 672" aria-hidden="true"><defs>
       <linearGradient id="nrmPlata" gradientUnits="userSpaceOnUse" x1="63.94" y1="390.33" x2="608.06" y2="281.67"><stop offset="0" stop-color="#C6CAD7"/><stop offset="1" stop-color="#9498A1"/></linearGradient>
       <radialGradient id="nrmBrillo" gradientUnits="userSpaceOnUse" cx="0" cy="0" r="1" gradientTransform="translate(229.93 328.93) rotate(-9.60) scale(47.20 252.40)"><stop offset="0" stop-color="#fff" stop-opacity="0.92"/><stop offset=".36" stop-color="#fff" stop-opacity="0.43"/><stop offset=".70" stop-color="#fff" stop-opacity="0.10"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient></defs>
@@ -942,6 +992,30 @@ select.inp option{background:#141417}
   </section>
 </div>
 
+<!-- ══ portada ══ -->
+<main id="vCover" hidden>
+  <div class="cv">
+    <div class="cv-izq">
+      <header class="cv-top"><a class="marca" href="/" aria-label="Nereum · nereum.xyz"><svg viewBox="0 0 672 672" aria-hidden="true"><use href="#nlLogo"/></svg><b>Nereum</b><em>DEX</em></a><span class="esp"></span>
+        <button class="pill blanco" id="cvCartera">Connect wallet</button></header>
+      <div class="cv-in">
+        <span class="cv-eye"><i></i>Now on Nereum</span>
+        <h1>One screen.<br>Every market.</h1>
+        <p class="cv-sub">Trade spot, swap in a single step, provide liquidity, bridge in from six networks and tokenize real assets, without leaving the app.</p>
+        <div class="cv-ctas"><a class="pill blanco g" href="#/spot">Enter markets <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg></a><a class="pill borde g" href="#/tokenize">Tokenize an asset</a></div>
+        <div class="cv-mon"><img src="/app/coins/btc.svg" alt=""><img src="/app/coins/eth.svg" alt=""><img src="/app/coins/bnb.svg" alt=""><img src="/app/coins/sol.svg" alt=""><img src="/app/coins/xrp.svg" alt=""><img src="/app/coins/ada.svg" alt=""><img src="/app/coins/doge.svg" alt=""><img src="/app/coins/trx.svg" alt=""><img src="/app/coins/avax.svg" alt=""><span>+6 more · all quoted in USDT</span></div>
+      </div>
+    </div>
+    <div class="cv-der">
+      <div class="cv-k"><span>Nereum DEX</span><span>Spot · USDT</span></div>
+      <div class="cv-big">15<small>markets, live from public spot venues</small></div>
+      <div class="cv-graf"><canvas id="cvVelas" aria-label="Bitcoin, hourly candles"></canvas></div>
+      <div class="cv-vivo"><img src="/app/coins/btc.svg" alt="">BTC<s>/USDT · 1H</s><b id="cvPx">—</b><em id="cvCam">—</em></div>
+      <div class="cv-pie"><span>0.30% pool fee</span><span>Settles on NereumEVM</span></div>
+    </div>
+  </div>
+</main>
+
 <!-- ══ swap ══ -->
 <main class="vista" id="vSwap" hidden>
   <div class="v-cab"><div><h1>Swap</h1><p>Trade one coin for another in a single step at the live market rate. Swaps route through the Nereum AMM and settle on NereumEVM.</p></div></div>
@@ -1098,7 +1172,7 @@ select.inp option{background:#141417}
     <p class="mod-nota">Both sides are balanced at the live market price. The pool sets the final ratio and your share when NereumEVM mainnet opens.</p>
   </div>
 </div>
-<svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="nlLogo" viewBox="0 0 672 672"><g transform="translate(-43.88 -34.34) scale(1.0889)"><path fill="#8E939E" d="M336.00 53.16 L361.74 61.36 L644.58 344.20 L361.74 627.05 L336.00 618.84 L618.84 336.00 Z"/><path fill="url(#nrmPlata)" d="M53.16 336.00 L336.00 53.16 L618.84 336.00 L336.00 618.84 Z"/><path fill="url(#nrmBrillo)" d="M53.16 336.00 L336.00 53.16 L618.84 336.00 L336.00 618.84 Z"/><path fill="#FCFCFC" d="M283.67 566.52 L566.52 283.67 L618.84 336.00 L336.00 618.84 Z"/></g></symbol></svg>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><linearGradient id="nlPlata" gradientUnits="userSpaceOnUse" x1="63.94" y1="390.33" x2="608.06" y2="281.67"><stop offset="0" stop-color="#C6CAD7"/><stop offset="1" stop-color="#9498A1"/></linearGradient><radialGradient id="nlBrillo" gradientUnits="userSpaceOnUse" cx="0" cy="0" r="1" gradientTransform="translate(229.93 328.93) rotate(-9.60) scale(47.20 252.40)"><stop offset="0" stop-color="#fff" stop-opacity="0.92"/><stop offset=".36" stop-color="#fff" stop-opacity="0.43"/><stop offset=".70" stop-color="#fff" stop-opacity="0.10"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient></defs><symbol id="nlLogo" viewBox="0 0 672 672"><g transform="translate(-43.88 -34.34) scale(1.0889)"><path fill="#8E939E" d="M336.00 53.16 L361.74 61.36 L644.58 344.20 L361.74 627.05 L336.00 618.84 L618.84 336.00 Z"/><path fill="url(#nlPlata)" d="M53.16 336.00 L336.00 53.16 L618.84 336.00 L336.00 618.84 Z"/><path fill="url(#nlBrillo)" d="M53.16 336.00 L336.00 53.16 L618.84 336.00 L336.00 618.84 Z"/><path fill="#FCFCFC" d="M283.67 566.52 L566.52 283.67 L618.84 336.00 L336.00 618.84 Z"/></g></symbol></svg>
 
 <footer class="pie">
   <div class="vivo" id="estado"><i></i><span>Connecting</span></div>
@@ -1291,7 +1365,7 @@ async function precios(){
   if (usadas.length){
     fuente = usadas.join(' + ');
     if (primera){ pintaMercados(); armaCinta(); } else refrescaListas();
-    pintaCabecera(); calcula();
+    pintaCabecera(); calcula(); if (vista !== 'spot') vivoVista();
     if (datos[actual]) velaViva(datos[actual].px);
     pintaEstado(); return true;
   }
@@ -2069,8 +2143,8 @@ let rz; addEventListener('resize', () => { clearTimeout(rz); rz = setTimeout(() 
 Object.assign(COIN, {USDT:['#26A17B','#fff'], USDC:['#2775CA','#fff'], POL:['#8247E5','#fff'], SepoliaETH:['#627EEA','#fff']});
 Object.assign(NOMBRE, {USDT:'Tether USD', USDC:'USD Coin', POL:'Polygon', SepoliaETH:'Sepolia Ether'});
 const TOKS = [['USDT','Tether USD'], ...PARES];
-const VISTAS = {spot:'#app', swap:'#vSwap', pools:'#vPools', bridge:'#vBridge', tokenize:'#vTok', portfolio:'#vPort'};
-const TITULOS = {swap:'Swap', pools:'Pools', bridge:'Bridge', tokenize:'Tokenize', portfolio:'Portfolio'};
+const VISTAS = {cover:'#vCover', spot:'#app', swap:'#vSwap', pools:'#vPools', bridge:'#vBridge', tokenize:'#vTok', portfolio:'#vPort'};
+const TITULOS = {cover:'Nereum DEX · Spot, swap, pools, bridge and tokenization', swap:'Swap', pools:'Pools', bridge:'Bridge', tokenize:'Tokenize', portfolio:'Portfolio'};
 const FLECHA = '<svg viewBox="0 0 12 12"><path fill="currentColor" d="M1 3.5h10L6 9.5z"/></svg>';
 const esc = v => String(v == null ? '' : v).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const coinHtml = s => { const c = COIN[s]||['#333','#fff']; return `<i class="coin ${CON_LOGO.has(s) ? 'logo' : ''}" style="--c:${c[0]};--cf:${c[1]}">${coinIn(s)}</i>`; };
@@ -2082,20 +2156,21 @@ function sacude(b){ b.classList.remove('sacude'); void b.offsetWidth; b.classLis
 let vista = 'spot';
 function ruta(){
   const v = (location.hash.match(/^#\/([a-z]+)/)||[])[1];
-  vista = VISTAS[v] ? v : 'spot';
+  vista = VISTAS[v] ? v : 'cover';
+  document.body.classList.toggle('portada', vista === 'cover');
   for (const [n, sel] of Object.entries(VISTAS)) $(sel).hidden = n !== vista;
   $$('.nav button[data-v]').forEach(b => b.classList.toggle('on', b.dataset.v === vista));
   abreMk(false); ocultaTip();
   if (vista === 'spot'){ pintaCabecera(); requestAnimationFrame(() => { dibuja(); dibujaDepth(); pintaLibro(); pintaTrades(); }); }
-  else { document.title = TITULOS[vista]+' | Nereum DEX'; if (vista === 'bridge' || vista === 'portfolio') leeSaldo(); pintaVista(); }
+  else { document.title = vista === 'cover' ? TITULOS.cover : TITULOS[vista]+' | Nereum DEX'; if (vista === 'bridge' || vista === 'portfolio') leeSaldo(); pintaVista(); }
   scrollTo(0, 0);
 }
 function pintaVista(){
-  if (vista === 'swap') pintaSwap(); else if (vista === 'pools') pintaPools(); else if (vista === 'bridge') pintaBridge();
+  if (vista === 'cover') pintaCover(); else if (vista === 'swap') pintaSwap(); else if (vista === 'pools') pintaPools(); else if (vista === 'bridge') pintaBridge();
   else if (vista === 'tokenize') pintaTok(); else if (vista === 'portfolio') pintaPort();
 }
 function vivoVista(){
-  if (vista === 'swap'){ swCalc(); swInfo(false); } else if (vista === 'pools') vivoPools();
+  if (vista === 'cover') vivoCover(); else if (vista === 'swap'){ swCalc(); swInfo(false); } else if (vista === 'pools') vivoPools();
   else if (vista === 'bridge') pintaBridge(); else if (vista === 'portfolio') vivoPort();
 }
 $$('.nav button[data-v]').forEach(b => b.onclick = () => { location.hash = '#/'+b.dataset.v; });
@@ -2441,6 +2516,43 @@ function vivoPort(){
 }
 $('#portC').onclick = e => { const b = e.target.closest('[data-trade]'); if (b){ location.hash = '#/spot'; elige(b.dataset.trade); return; }
   const r = e.target.closest('[data-ir2]'); if (r) location.hash = '#/'+r.dataset.ir2; };
+
+/* ══ PORTADA ══
+   Velas reales de BTC por hora (OKX, Kraken de respaldo), dibujadas en negro
+   sobre el lima. Debajo, el precio en vivo del mismo flujo que usa el spot. */
+let cvVelas = null, cvT = 0;
+async function pintaCover(){
+  vivoCover(); $('#cvCartera').textContent = cuenta ? corta(cuenta) : 'Connect wallet';
+  if (!cvVelas || Date.now() - cvT > 300000){
+    let L = null;
+    try{ L = (await okx('/market/candles?instId=BTC-USDT&bar=1H&limit=60')).map(v => ({a:+v[1], h:+v[2], l:+v[3], c:+v[4]})).reverse().slice(-60); }
+    catch(e){ try{ L = (await kraken('OHLC', 'BTC', '&interval=60')).slice(-60).map(v => ({a:+v[1], h:+v[2], l:+v[3], c:+v[4]})); }catch(e2){} }
+    if (L && L.length){ cvVelas = L; cvT = Date.now(); }
+  }
+  dibCover();
+}
+function dibCover(){
+  if (vista !== 'cover') return;
+  const c = $('#cvVelas'), k = c.getContext('2d'), t = prepara(c, k); if (!t) return;
+  const {W, H} = t, L = cvVelas ? cvVelas.slice() : null;
+  if (L && L.length && datos.BTC){ const u = L[L.length-1], p = datos.BTC.px; u.c = p; if (p > u.h) u.h = p; if (p < u.l) u.l = p; }
+  if (!L || !L.length){ k.fillStyle = 'rgba(10,18,0,.45)'; k.font = '600 13px Inter, system-ui, sans-serif'; k.textAlign = 'center'; k.textBaseline = 'middle';
+    k.fillText(cvVelas === null ? 'Loading market…' : 'Chart unavailable right now', W/2, H/2); return; }
+  const mx = Math.max(...L.map(v => v.h)), mn = Math.min(...L.map(v => v.l)), r = mx - mn || 1, bw = W / L.length;
+  const Y = p => 8 + (mx - p) / r * (H - 16);
+  L.forEach((v, i) => { const x = i*bw + bw/2, sube = v.c >= v.a;
+    k.fillStyle = sube ? '#0A1200' : 'rgba(10,18,0,.35)';
+    k.fillRect(Math.round(x - .75), Y(v.h), 1.5, Math.max(1, Y(v.l) - Y(v.h)));
+    const y1 = Y(Math.max(v.a, v.c)), y2 = Y(Math.min(v.a, v.c));
+    k.fillRect(Math.round(x - bw*.32), Math.round(y1), Math.max(1, Math.round(bw*.64)), Math.max(2, Math.round(y2 - y1))); });
+}
+function vivoCover(){
+  const d = datos.BTC; $('#cvPx').textContent = d ? fp(d.px, 'BTC') : '—';
+  $('#cvCam').textContent = d ? pct(d.cam) : '—';
+  if (cvVelas) dibCover();
+}
+$('#cvCartera').onclick = () => cuenta ? (location.hash = '#/portfolio') : abreCartera();
+addEventListener('resize', () => { if (vista === 'cover') dibCover(); }, {passive:true});
 ruta();
 
 /* ══ ARRANQUE ══ */
