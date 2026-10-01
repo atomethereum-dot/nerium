@@ -237,7 +237,14 @@ for (const [a, b] of PEGADAS) {
      no son negros. La razon vale para las dos paletas. */
   const la = claro01(suelos[a].css), lb = claro01(suelos[b].css);
   const razon = (Math.max(la, lb) + 0.008) / (Math.min(la, lb) + 0.008);
-  di(razon >= 1.18, a + ' y ' + b + ', que van pegadas, no comparten suelo (razon ' +
+  /* p77 · UN SOLO NEGRO. El dueño pidio todas las secciones oscuras en el
+     mismo tono exacto -el de Security, #030409- por simetria. Asi que dos
+     bandas oscuras pegadas ya no tienen que diferenciarse: tienen que ser
+     IGUALES. Lo que sigue exigiendo salto es oscuro contra claro. */
+  const oscuras = la < 0.05 && lb < 0.05;
+  if (oscuras) di(razon <= 1.02, a + ' y ' + b + ', las dos oscuras, llevan el mismo negro (razon ' +
+     razon.toFixed(2) + ', maximo 1,02)');
+  else di(razon >= 1.18, a + ' y ' + b + ', que van pegadas, no comparten suelo (razon ' +
      razon.toFixed(2) + ', minimo 1,18)');
 }
 // Y el suelo pintado tiene que seguir siendo el que la banda anuncia, o vuelve

@@ -5450,6 +5450,14 @@ html body main>section.chroma::after{z-index:3}
 .chroma .ban-bar::after{content:"";position:absolute;left:50%;top:50%;width:7px;height:7px;transform:translate(-50%,-50%) scaleX(calc(1 / max(var(--ln,1),.001)));
   background:#63A9FF;opacity:calc(var(--ln,1) * 1.2)}
 .chroma .ban-v{width:100%;height:100%;object-fit:cover;display:block;background:#000}
+/* p77 · UN SOLO NEGRO. Todas las secciones oscuras con el mismo tono que
+   Security, la prensa y Token -#030409-: la pila, el globo, los proyectos, la
+   ruta, el suelo y la banda del video. Antes cada una traia el suyo (#0A0D14,
+   #06070A, #000) y al pasar de una a otra se veia el salto de tono. */
+html body main>section:is(#stack,#xfade,#xlight,#ruta,#builds,.chroma,#docs,#blog,#team,#network,#thesis,.kin){background-color:#030409 !important}
+html body main>section:is(#team,#network,#thesis):not(#presale){background-color:#030409 !important;background-image:none !important}
+html body :is(.xl-stage,#builds .tn-stage){background-color:#030409 !important}
+#stack{--stk-fondo:#030409}
 /* Aire entre «All coverage» y la cinta de transacciones, que empezaba pegada. */
 html body main>section.press{padding-bottom:clamp(96px,11vw,176px) !important}
 
@@ -8244,7 +8252,7 @@ body.lock .flota{opacity:0 !important;pointer-events:none !important}
      numero escrito.
      Se quita con «hidden» y no borrando el marcado, para que volver sea
      deshacer y no reescribir. -->
-<section class="paper logos" id="network" data-bg="#0D1017" data-acc="#0F6BFF" hidden><i class="via" aria-hidden="true"></i>
+<section class="paper logos" id="network" data-bg="#030409" data-acc="#0F6BFF" hidden><i class="via" aria-hidden="true"></i>
   <div class="wrap">
     <div class="k sk rv"><i class="sk-n">01</i>Network</div>
     <h2 class="rv lane-k">Compatible with</h2>
@@ -8297,7 +8305,7 @@ body.lock .flota{opacity:0 !important;pointer-events:none !important}
 </section>
 
 
-<section class="chroma" data-bg="#000000" data-acc="#2E86FF"><i class="via" aria-hidden="true"></i><i class="emb" aria-hidden="true" style="--emb:#000000"></i><!-- La cinta de transacciones se OCULTA (hidden): en su sitio va el banner en video. Volver = quitar «hidden» del lienzo y el bloque «.ban». --><canvas id="chroma" hidden></canvas>
+<section class="chroma" data-bg="#030409" data-acc="#2E86FF"><i class="via" aria-hidden="true"></i><i class="emb" aria-hidden="true" style="--emb:#000000"></i><!-- La cinta de transacciones se OCULTA (hidden): en su sitio va el banner en video. Volver = quitar «hidden» del lienzo y el bloque «.ban». --><canvas id="chroma" hidden></canvas>
   <div class="ban" role="img" aria-label="Nereum Finance, the chain for real-world assets. Seed Round 85% complete, 1 NRM = $0.20. Layer 1: one chain, every product. Settlement in seconds, not days."><video class="ban-v" id="banV" muted playsinline loop preload="none" poster="img/ledger-desk.webp" data-d="img/ledger-desk.mp4" data-t="img/ledger-tel.mp4" data-pd="img/ledger-desk.webp" data-pt="img/ledger-tel.webp" aria-hidden="true"></video></div><i class="ban-bar" aria-hidden="true"></i></section>
 
 
@@ -8310,7 +8318,7 @@ body.lock .flota{opacity:0 !important;pointer-events:none !important}
      estan en «display:none» en vez de llevar el numero escrito.
      Se quita con «hidden» y no borrando el marcado, para que volver sea
      deshacer y no reescribir. -->
-<section class="paper say" id="thesis" data-bg="#0D1017" data-acc="#0263FF" hidden><i class="via" aria-hidden="true"></i>
+<section class="paper say" id="thesis" data-bg="#030409" data-acc="#0263FF" hidden><i class="via" aria-hidden="true"></i>
   <div class="wrap">
     <div class="k sk rv"><i class="sk-n">03</i>The thesis</div>
     <p class="rv">When value moves, the rules have to move with it. <em>On Nereum the rules travel with the asset and hold at machine speed &mdash; for desks and contracts alike.</em></p>
@@ -8324,7 +8332,7 @@ body.lock .flota{opacity:0 !important;pointer-events:none !important}
      asi que esconderla no arrastra nada: ni renumera secciones ni deja un
      enlace apuntando al vacio. Se quita con «hidden» y no borrando el
      marcado, para que volver sea quitar una palabra. -->
-<section class="kin" data-bg="#0A0D14" data-acc="#1A7AFF" aria-hidden="true" hidden><i class="emb" aria-hidden="true" style="--emb:#050609"></i>
+<section class="kin" data-bg="#030409" data-acc="#1A7AFF" aria-hidden="true" hidden><i class="emb" aria-hidden="true" style="--emb:#050609"></i>
   <div class="kin-row" data-dir="1"><div class="kin-in">
     <span>Issuance</span><span class="o">Custody</span><span>Real assets</span><span class="o">Redemption</span>
     <span>Issuance</span><span class="o">Custody</span><span>Real assets</span><span class="o">Redemption</span>
@@ -8469,7 +8477,7 @@ body.lock .flota{opacity:0 !important;pointer-events:none !important}
 </section>
 
 
-<section class="stack stk-hold" id="stack" data-bg="#0A0D14" data-acc="#3381FF"><i class="via" aria-hidden="true"></i>
+<section class="stack stk-hold" id="stack" data-bg="#030409" data-acc="#3381FF"><i class="via" aria-hidden="true"></i>
   <div class="stk-stage">
     <canvas class="stk-cv" id="stkCv"></canvas>
     <i class="stk-velo" aria-hidden="true"></i>
@@ -8507,7 +8515,7 @@ body.lock .flota{opacity:0 !important;pointer-events:none !important}
     </div>
     <div class="stk-steps" hidden><i><b></b></i><i><b></b></i><i><b></b></i></div>
   </div>
-  <span class="hold" data-bg="#0A0D14" data-acc="#3381FF"></span>
+  <span class="hold" data-bg="#030409" data-acc="#3381FF"></span>
 </section>
 
 
@@ -8610,7 +8618,7 @@ body.lock .flota{opacity:0 !important;pointer-events:none !important}
 
     </div>
   </div>
-  <span class="hold" data-bg="#0D1017" data-acc="#0A5CF5"></span>
+  <span class="hold" data-bg="#030409" data-acc="#0A5CF5"></span>
 </section>
 
 
@@ -8690,7 +8698,7 @@ body.lock .flota{opacity:0 !important;pointer-events:none !important}
 
 
 
-<section class="xf" id="xfade" data-bg="#0A0D14" data-acc="#1A7AFF"><i class="emb" aria-hidden="true" style="--emb:#0B0D13"></i>
+<section class="xf" id="xfade" data-bg="#030409" data-acc="#1A7AFF"><i class="emb" aria-hidden="true" style="--emb:#0B0D13"></i>
   <div class="xf-stage" id="xfStage">
     <canvas class="xf-cv" id="xfCv"></canvas>
     <div class="xf-txt" id="xfEsq" aria-hidden="true">
@@ -8707,7 +8715,7 @@ body.lock .flota{opacity:0 !important;pointer-events:none !important}
 </section>
 
 
-<section class="builds" id="builds" data-bg="#000000" data-acc="#63A9FF"><i class="via" aria-hidden="true"></i>
+<section class="builds" id="builds" data-bg="#030409" data-acc="#63A9FF"><i class="via" aria-hidden="true"></i>
   <!-- p64 «Túnel de proyectos»: el vuelo por el túnel de cubos, con una
        estación por proyecto. El último cubo del túnel cae hasta la hebra de
        la ruta y se queda de índice. -->
@@ -8756,7 +8764,7 @@ body.lock .flota{opacity:0 !important;pointer-events:none !important}
 
 
 
-<section class="ruta" id="ruta" data-bg="#0A0D14" data-acc="#63A9FF">
+<section class="ruta" id="ruta" data-bg="#030409" data-acc="#63A9FF">
   <i class="ruta-marca" aria-hidden="true"><i class="ruta-marca-v"><i class="ruta-marca-x"><i class="ruta-marca-g"><i class="ruta-marca-l l-ar"></i><i class="ruta-marca-l l-ab"></i><i class="ruta-marca-l l-iz"></i><i class="ruta-marca-l l-de"></i><i class="ruta-marca-b"><svg viewBox="0 0 512 512"><path fill="#2D2F33" d="M6.0 6.0 506.0 6.0 472.0 40.0 40.0 40.0 Z"/><path fill="#0E0F10" d="M506.0 6.0 506.0 506.0 472.0 472.0 472.0 40.0 Z"/><path fill="#08090A" d="M506.0 506.0 6.0 506.0 40.0 472.0 472.0 472.0 Z"/><path fill="#222327" d="M6.0 506.0 6.0 6.0 40.0 40.0 40.0 472.0 Z"/><defs><linearGradient id="nr-plata-b" gradientUnits="userSpaceOnUse" x1="40.0" y1="40.0" x2="472.0" y2="472.0"><stop offset="0" stop-color="#4B4C4F"/><stop offset=".52" stop-color="#36373B"/><stop offset="1" stop-color="#181A1D"/></linearGradient><linearGradient id="nr-brillo-b" gradientUnits="userSpaceOnUse" x1="40.0" y1="40.0" x2="472.0" y2="472.0"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".42" stop-color="#fff" stop-opacity="0.07"/><stop offset=".55" stop-color="#fff" stop-opacity="0.02"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient></defs><rect x="40.0" y="40.0" width="432.0" height="432.0" fill="url(#nr-plata-b)"/><rect x="40.0" y="40.0" width="432.0" height="432.0" fill="url(#nr-brillo-b)"/><rect x="40.0" y="385.816" width="432.0" height="86.18400000000003" fill="#505050"/></svg></i><i class="ruta-marca-f"><svg viewBox="0 0 512 512"><path fill="#484A4D" d="M6.0 6.0 506.0 6.0 472.0 40.0 40.0 40.0 Z"/><path fill="#1D1F22" d="M506.0 6.0 506.0 506.0 472.0 472.0 472.0 40.0 Z"/><path fill="#101113" d="M506.0 506.0 6.0 506.0 40.0 472.0 472.0 472.0 Z"/><path fill="#3E3F43" d="M6.0 506.0 6.0 6.0 40.0 40.0 40.0 472.0 Z"/><defs><linearGradient id="nr-plata" gradientUnits="userSpaceOnUse" x1="40.0" y1="40.0" x2="472.0" y2="472.0"><stop offset="0" stop-color="#4B4C4F"/><stop offset=".52" stop-color="#36373B"/><stop offset="1" stop-color="#181A1D"/></linearGradient><linearGradient id="nr-brillo" gradientUnits="userSpaceOnUse" x1="40.0" y1="40.0" x2="472.0" y2="472.0"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".42" stop-color="#fff" stop-opacity="0.16"/><stop offset=".55" stop-color="#fff" stop-opacity="0.045"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient></defs><rect x="40.0" y="40.0" width="432.0" height="432.0" fill="url(#nr-plata)"/><rect x="40.0" y="40.0" width="432.0" height="432.0" fill="url(#nr-brillo)"/><rect x="40.0" y="385.816" width="432.0" height="86.18400000000003" fill="#505050"/></svg><i class="ruta-marca-luz"></i></i></i></i></i></i>
   <!-- r04: la hebra la pinta el lienzo .hb-lz -->
   <div class="wrap ruta-wrap">
@@ -8802,7 +8810,7 @@ body.lock .flota{opacity:0 !important;pointer-events:none !important}
   </div>
 </section>
 
-<section class="hpin" id="docs" data-bg="#0A0D14" data-acc="#166FFF">
+<section class="hpin" id="docs" data-bg="#030409" data-acc="#166FFF">
   <div class="hpin-hold" id="hpinHold">
     <div class="hpin-stage">
       <div class="hpin-track" id="hpinTrack">
@@ -8851,7 +8859,7 @@ body.lock .flota{opacity:0 !important;pointer-events:none !important}
 
 
 
-<section class="dark pad loop" id="blog" data-bg="#101828" data-acc="#166FFF">
+<section class="dark pad loop" id="blog" data-bg="#030409" data-acc="#166FFF">
   <div class="wrap">
     <h2 class="rv">Stay in the <i><svg viewBox="0 0 20 20"><path d="M10 3a5 5 0 0 0-5 5c0 4-2 5-2 5h14s-2-1-2-5a5 5 0 0 0-5-5ZM8.4 16a1.8 1.8 0 0 0 3.2 0"/></svg></i> loop</h2>
     <p class="sub rv"><s></s>Events, blogs, press, videos, podcasts and livestreams &mdash; all in one place</p>
@@ -8873,7 +8881,7 @@ body.lock .flota{opacity:0 !important;pointer-events:none !important}
 </section>
 
 
-<section class="xl" id="xlight" data-bg="#0A0D14" data-acc="#1A7AFF"><i class="emb" aria-hidden="true" style="--emb:#06070A"></i>
+<section class="xl" id="xlight" data-bg="#030409" data-acc="#1A7AFF"><i class="emb" aria-hidden="true" style="--emb:#06070A"></i>
   <div class="xl-stage" id="xlStage">
     <canvas class="xl-cv" id="xlCv"></canvas>
     <div class="xl-word">Nereum Finance</div>
@@ -8887,7 +8895,7 @@ body.lock .flota{opacity:0 !important;pointer-events:none !important}
 
 
 
-<section class="team" id="team" data-bg="#0D1017" data-acc="#0A5CF5">
+<section class="team" id="team" data-bg="#030409" data-acc="#0A5CF5">
   <div class="wrap">
     <div class="tm-head rv">
       <div class="tm-k"><i></i>The team</div>
@@ -10876,12 +10884,12 @@ function campo2D(){
   }
   /* p67 · a la densidad de la pantalla, con su guarda: los bloques caen en
      la reticula de pixel entero y a 1,5 cada canto caia en medio pixel */
-  const GU=__guarda(cv,()=>{ const d=__dens(cv); if(__mide(cv,W*d,H*d)){ dpr=d; ctx.setTransform(dpr,0,0,dpr,0,0); ctx.fillStyle='#000';ctx.fillRect(0,0,W,H) } });
+  const GU=__guarda(cv,()=>{ const d=__dens(cv); if(__mide(cv,W*d,H*d)){ dpr=d; ctx.setTransform(dpr,0,0,dpr,0,0); ctx.fillStyle='#030409';ctx.fillRect(0,0,W,H) } });
   function size(){
     dpr=__dens(cv);
     W=cv.clientWidth;H=cv.clientHeight;
     __mide(cv, W*dpr, H*dpr); ctx.setTransform(dpr,0,0,dpr,0,0);
-    ctx.fillStyle='#000';ctx.fillRect(0,0,W,H);
+    ctx.fillStyle='#030409';ctx.fillRect(0,0,W,H);
     U=Math.max(15,Math.round(Math.min(W,H)/26));
     const quiere=W<760?62:W<1300?94:122;
     while(P.length<quiere)P.push({});
@@ -11892,7 +11900,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
   let LUZG=null;
   function draw(p,T,borde){
     /* el lienzo pinta su propio fondo: su mascara es la que deja ver la dapp */
-    ctx.fillStyle='#0A0D14'; ctx.fillRect(0,0,W,H);
+    ctx.fillStyle='#030409'; ctx.fillRect(0,0,W,H);
     if(!cubos)siembra();
     const f=Math.max(W,H)*.62, mx=W/(2*f), my=H/(2*f);
     const tun=sube((p-.40)/.12);              /* los cubos a las paredes */
@@ -12423,7 +12431,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
       const k=Math.min(1, eOut(clm((close-t0)/(1-t0)))*1.06);
       if(k<=0) continue;
       const h=H*k, down=i%2===0, y=down?0:H-h;
-      ctx.fillStyle='#000000'; ctx.fillRect(x-.5,y,w+1,h);
+      ctx.fillStyle='#030409'; ctx.fillRect(x-.5,y,w+1,h);
       const borde=1-clm((k-.86)/.14);
       if(borde>.02){
         const ey=down?y+h:y;
@@ -12461,12 +12469,12 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
     return hornoG=o;
   }
   function draw(p,T){
-    ctx.fillStyle='#06070A'; ctx.fillRect(0,0,W,H);
+    ctx.fillStyle='#030409'; ctx.fillRect(0,0,W,H);
     /* 1 · LA ENTRADA, como estaba: «One chain, four layers.» con «Nereum»
        detras, y las persianas que se cierran */
     const q=clm(p/.21);
     if(esq) esq.style.opacity=clm((0.34-q*.8)/0.26).toFixed(3);
-    if(q<1) persianas(q); else { ctx.fillStyle='#000'; ctx.fillRect(0,0,W,H) }
+    if(q<1) persianas(q); else { ctx.fillStyle='#030409'; ctx.fillRect(0,0,W,H) }
     const entra=sube((p-.185)/.08);           /* 2 · de las persianas sale el globo */
     /* la camara: se acerca despacio al globo mientras gira, antes de estallar */
     const acerca=1+.14*sube((p-.26)/.30);
@@ -13028,8 +13036,9 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
   }
   function draw(p){
     const flood=eOut(clm(p/.46));
-    const bg=Math.round(PAPER[0]*flood);
-    ctx.fillStyle='rgb('+bg+','+Math.round(PAPER[1]*flood)+','+Math.round(PAPER[2]*flood)+')';
+    /* p77 · parte del negro de la casa (#030409), no del negro puro */
+    const bg=Math.round(3+(PAPER[0]-3)*flood);
+    ctx.fillStyle='rgb('+bg+','+Math.round(4+(PAPER[1]-4)*flood)+','+Math.round(9+(PAPER[2]-9)*flood)+')';
     ctx.fillRect(0,0,W,H);
     const fx=W*.5, fy=H*1.02;
     for(const q of cells){
@@ -13042,7 +13051,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
       const fly=k*k*U*2.4*q.push;
       const cx=q.x+U/2 + (dx/dl)*fly + Math.cos(q.ang)*fly*.2;
       const cy=q.y+U/2 + (dy/dl)*fly;
-      ctx.fillStyle='#000000';
+      ctx.fillStyle='#030409';
       ctx.fillRect(cx-w/2,cy-h/2,w+.8,h+.8);
       if(k>.02&&k<.72){
         const a=(1-k/.72)*.55;
@@ -14425,7 +14434,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
   function draw(p,T,pr){
     /* al final el fondo se va al negro de la ruta: el borde del escenario no se ve */
     const neg=sube((p-.84)/.1);
-    ctx.fillStyle='rgb('+Math.round(10*(1-neg))+','+Math.round(13*(1-neg))+','+Math.round(20*(1-neg))+')'; ctx.fillRect(0,0,W,H);
+    ctx.fillStyle='rgb('+Math.round(3*(1-neg))+','+Math.round(4*(1-neg))+','+Math.round(9*(1-neg))+')'; ctx.fillRect(0,0,W,H);
     if(!cubos) siembra();
     const mx=W/(2*f), my=HC/f;
     const FS=[forma(p,0),forma(p,1),forma(p,2)], LOC=[local(p,0),local(p,1),local(p,2)];
