@@ -7198,7 +7198,19 @@ html body .ruta-p{color:#AAB5CA !important}
        que al recargar o volver atras se empieza ya a 2, sin tropezar.
    En un aparato que aguanta 3 no cambia nada: nadie baja y todo va a 3. */
 window.__densTope = 0;
-try { var __dS = +sessionStorage.getItem('nrm-dens'); if (__dS === 2) window.__densTope = 2; } catch (e) {}
+try { var __dS = +sessionStorage.getItem('nrm-dens'); if (__dS > 0 && __dS < 3) window.__densTope = __dS; } catch (e) {}
+/* p76 · LA ESCALERA, SOLO PARA EQUIPOS LENTOS. El suelo era 2: un telefono de
+   densidad 2 o 2,6 y cualquier ordenador de densidad 1 no tenian adonde bajar,
+   y en gama media eran justo los que iban a tirones. Ahora, si un lienzo sigue
+   por encima del presupuesto tras bajar, baja otro peldaño: 2 · 1,5 · 1 · 0,75.
+   Nunca por debajo de 1,5 en una pantalla de densidad 2 o mas -un telefono-,
+   ni de 0,75 en un ordenador. Un equipo que va fluido no baja nunca y se ve
+   exactamente igual que antes. */
+window.__escalon = function(d){
+  var suelo = (window.devicePixelRatio || 1) >= 2 ? 1.5 : 0.75, P = [2, 1.5, 1, 0.75];
+  for (var i = 0; i < P.length; i++) if (P[i] < d - 0.001 && P[i] >= suelo) return P[i];
+  return d;
+};
 window.__densGen = 0;
 (function(){
   var an = window.innerWidth;
@@ -7243,6 +7255,7 @@ window.__guarda = function(cv, remide){
   if (cv.__g) { if (remide) cv.__g.remide = remide; return cv.__g; }
   var PRESU = 12,       /* ms de su propio cuadro, de media */
       LENTO = 80,       /* ms entre cuadros, de media (el reloj del telefono va a 33-66) */
+      TIRON = 55;       /* p76 · por debajo de 2: solo si de verdad se ve a tirones (<18 cuadros/s) */
       VENTANA = 1000;   /* un segundo seguido */
   var g = {remide: remide, t0: 0, prev: 0, n: 0, sc: 0, si: 0};
   function limpia(){ g.n = 0; g.sc = 0; g.si = 0; }
@@ -7256,11 +7269,16 @@ window.__guarda = function(cv, remide){
     g.prev = now; g.t0 = now;
     if (g.si >= VENTANA && g.n >= 8) {
       var coste = g.sc / g.n, paso = g.si / g.n;
-      if ((coste > PRESU || paso > LENTO) && __dens(cv) > 2) {
-        cv.__tope = 2;
+      var dAhora = __dens(cv), dSig = __escalon(dAhora);
+      /* hasta 2, como siempre: por lo que cuesta el lienzo o por lento. Por
+         debajo de 2 solo si la pagina entera va a tirones: que una escena sea
+         cara en un equipo que aun va fluido no es motivo para perder nitidez */
+      var baja = dAhora > 2 ? (coste > PRESU || paso > LENTO) : (paso > TIRON);
+      if (baja && dSig < dAhora) {
+        cv.__tope = dSig;
         window.__nitLog.push({cv: cv.id || cv.className, coste: +coste.toFixed(1), paso: +paso.toFixed(1), t: Math.round(now)});
         if (g.remide) try { g.remide(); } catch (e) {}
-        __bajaTodos(cv, now);
+        __bajaTodos(cv, now, dSig);
       }
       limpia();
     }
@@ -7272,10 +7290,11 @@ window.__guarda = function(cv, remide){
   return g;
 };
 /* p68 · la primera que baja, baja a las que no se ven (ver «__densTope») */
-function __bajaTodos(quien, now){
-  if (window.__densTope) return;
-  window.__densTope = 2;
-  try { sessionStorage.setItem('nrm-dens', '2'); } catch (e) {}
+function __bajaTodos(quien, now, nivel){
+  nivel = nivel || 2;
+  if (window.__densTope && window.__densTope <= nivel) return;
+  window.__densTope = nivel;
+  try { sessionStorage.setItem('nrm-dens', String(nivel)); } catch (e) {}
   /* con el visitante ya bajando, no se toca lo reservado: cada rehecho es
      memoria que se suelta y se vuelve a pedir, y la escena quiza no se llegue
      a ver. Lo que se cree o se remida desde aqui nace a 2 igualmente. */
@@ -7283,13 +7302,13 @@ function __bajaTodos(quien, now){
   var L = window.__lienzosG;
   for (var i = 0; i < L.length; i++) {
     var o = L[i], c = o.cv;
-    if (c === quien || c.__tope) continue;
+    if (c === quien || (c.__tope && c.__tope <= nivel)) continue;
     /* solo las que aun no han pintado nunca: estan reservadas desde la carga
        y nadie las ha visto. Las que ya se han visto -en pantalla ahora, o ya
        pasadas- siguen con lo suyo y las vigila su guarda: rehacer el mapa de
        bits de una escena que quiza no se vuelva a ver es gastar por gastar */
     if (o.prev) continue;
-    c.__tope = 2;
+    c.__tope = nivel;
     if (o.remide) try { o.remide(); } catch (e) {}
   }
 }
