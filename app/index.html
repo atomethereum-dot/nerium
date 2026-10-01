@@ -124,6 +124,11 @@ svg{flex:none}
 .coin{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;flex:none;
   font-style:normal;font-size:13px;font-weight:700;background:var(--c,#333);color:var(--cf,#fff)}
 .coin.sm{width:22px;height:22px;font-size:10.5px}
+.coin.logo{background:transparent !important}
+.coin img{width:100%;height:100%;border-radius:50%;display:block}
+.cart .coin.logo{border-radius:50%}
+.mk-a .coin{flex:none}
+.cinta-in span img{width:14px;height:14px;border-radius:50%;align-self:center}
 .px-blk{display:grid;gap:1px;flex:none}
 .px-blk b{font-size:20px;font-weight:700;letter-spacing:-.02em;transition:color .25s}
 .px-blk span{font-size:11.5px;color:var(--t3)}
@@ -905,7 +910,7 @@ select.inp option{background:#141417}
 
     <div class="cc">
       <div class="cc-t">Assets <span id="ccRed">NereumEVM</span></div>
-      <div class="fila"><span><i class="coin sm" style="--c:#26A17B">T</i>USDT</span><b id="aQ">—</b></div>
+      <div class="fila"><span><i class="coin sm logo"><img src="/app/coins/usdt.svg" alt=""></i>USDT</span><b id="aQ">—</b></div>
       <div class="fila"><span><i class="coin sm" id="aIco">B</i><span id="aBl">BTC</span></span><b id="aB">—</b></div>
       <div class="cc-bts">
         <button class="pill gris" data-ir="bridge">Deposit</button>
@@ -1174,6 +1179,10 @@ const COIN = {BTC:['#F7931A','#fff'], ETH:['#627EEA','#fff'], BNB:['#F3BA2F','#0
   XRP:['#3D4A5C','#fff'], ADA:['#0033AD','#fff'], DOGE:['#C2A633','#000'], TRX:['#EB0029','#fff'],
   AVAX:['#E84142','#fff'], LINK:['#2A5ADA','#fff'], DOT:['#E6007A','#fff'], LTC:['#345D9D','#fff'],
   SHIB:['#FFA409','#000'], UNI:['#FF007A','#fff'], FIL:['#0090FF','#fff']};
+/* logos de las monedas, servidos desde /app/coins (web3icons, MIT); sin logo queda el monograma */
+const CON_LOGO = new Set([...PARES.map(p => p[0]), 'USDT', 'USDC', 'POL', 'SepoliaETH']);
+const logoSrc = s => '/app/coins/' + (s === 'SepoliaETH' ? 'eth' : s.toLowerCase()) + '.svg';
+const coinIn = s => CON_LOGO.has(s) ? `<img src="${logoSrc(s)}" alt="" decoding="async">` : String(s[0]).replace(/[<>&"]/g, '');
 const API = 'https://www.okx.com/api/v5';
 const WS  = 'wss://ws.okx.com:8443/ws/v5/public';
 const COM = 0.003;
@@ -1210,7 +1219,8 @@ const pct = c => (c>=0?'+':'')+c.toFixed(2)+'%';
 const lim = (v,a,b) => Math.max(a, Math.min(b, v));
 const movil = () => matchMedia('(max-width:1023px)').matches;
 function col(n){ return getComputedStyle(document.body).getPropertyValue(n).trim(); }
-function ponCoin(el, s){ const c = COIN[s]||['#333','#fff']; el.style.setProperty('--c', c[0]); el.style.setProperty('--cf', c[1]); el.textContent = s[0]; }
+function ponCoin(el, s){ const c = COIN[s]||['#333','#fff']; el.style.setProperty('--c', c[0]); el.style.setProperty('--cf', c[1]);
+  el.classList.toggle('logo', CON_LOGO.has(s)); el.innerHTML = coinIn(s); }
 
 function estado(txt, malo){
   $('#estado').querySelector('span').textContent = txt; $('#estado').classList.toggle('malo', !!malo);
@@ -1325,7 +1335,7 @@ function pintaMercados(){
   $('#mercados').innerHTML = L.map(([s]) => { const d = datos[s], c = d ? d.cam : 0;
     return `<div class="mk-r ${s===actual?'on':''}" data-s="${s}">
       <div class="mk-a"><button class="st ${favs.includes(s)?'on':''}" data-fav="${s}" aria-label="Favorite ${s}">${ESTRELLA}</button>
-        <div><b>${s}</b><s>/USDT</s><small>Vol ${d?corto(d.vol):'—'}</small></div></div>
+        <i class="coin sm logo">${coinIn(s)}</i><div><b>${s}</b><s>/USDT</s><small>Vol ${d?corto(d.vol):'—'}</small></div></div>
       <div class="mk-p">${d?fp(d.px,s):'—'}</div>
       <div class="mk-c ${c>=0?'up':'dn'}">${d?pct(c):'—'}</div></div>`; }).join('')
     || `<div class="mk-vacio">${mkFiltro==='fav' ? 'Tap ☆ on any market to add it here' : 'No markets found'}</div>`;
@@ -1710,7 +1720,7 @@ cvD.addEventListener('pointerleave', () => { cruzD = null; dibujaDepth(); });
 function pintaInfo(){
   const d = datos[actual] || {}, s = actual, c = COIN[s]||['#333','#fff'];
   const f = (a,b) => `<div><i>${a}</i><b>${b}</b></div>`;
-  $('#gInfo').innerHTML = `<div class="inf-cab"><i class="coin" style="--c:${c[0]};--cf:${c[1]};width:40px;height:40px;font-size:17px">${s[0]}</i>
+  $('#gInfo').innerHTML = `<div class="inf-cab"><i class="coin ${CON_LOGO.has(s)?'logo':''}" style="--c:${c[0]};--cf:${c[1]};width:40px;height:40px;font-size:17px">${coinIn(s)}</i>
     <div><b>${NOMBRE[s]} <span style="color:var(--t3);font-weight:500">${s}/USDT</span></b><span>Spot market · quoted in USDT</span></div></div>
     <div class="inf-grid">
       ${f('Last price', d.px ? fp(d.px)+' USDT' : '—')}
@@ -2010,7 +2020,7 @@ pintaOrd();
 /* ══ BARRA DE ESTADO ══ */
 function armaCinta(){
   const una = PARES.map(([s]) => { const d = datos[s];
-    return `<span data-t="${s}">${s}/USDT <b>${d ? fp(d.px, s) : '—'}</b><em class="${d && d.cam < 0 ? 'dn' : 'up'}" style="font-style:normal">${d ? pct(d.cam) : ''}</em></span>`; }).join('');
+    return `<span data-t="${s}">${coinIn(s)}${s}/USDT <b>${d ? fp(d.px, s) : '—'}</b><em class="${d && d.cam < 0 ? 'dn' : 'up'}" style="font-style:normal">${d ? pct(d.cam) : ''}</em></span>`; }).join('');
   $('#cinta').innerHTML = una + una;
 }
 $('#cinta').addEventListener('click', e => { const s = e.target.closest('[data-t]'); if (s){ elige(s.dataset.t); scrollTo({top:0, behavior:'smooth'}); } });
@@ -2063,7 +2073,7 @@ const VISTAS = {spot:'#app', swap:'#vSwap', pools:'#vPools', bridge:'#vBridge', 
 const TITULOS = {swap:'Swap', pools:'Pools', bridge:'Bridge', tokenize:'Tokenize', portfolio:'Portfolio'};
 const FLECHA = '<svg viewBox="0 0 12 12"><path fill="currentColor" d="M1 3.5h10L6 9.5z"/></svg>';
 const esc = v => String(v == null ? '' : v).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const coinHtml = s => { const c = COIN[s]||['#333','#fff']; return `<i class="coin" style="--c:${c[0]};--cf:${c[1]}">${esc(s[0])}</i>`; };
+const coinHtml = s => { const c = COIN[s]||['#333','#fff']; return `<i class="coin ${CON_LOGO.has(s) ? 'logo' : ''}" style="--c:${c[0]};--cf:${c[1]}">${coinIn(s)}</i>`; };
 const pxU = s => s === 'USDT' || s === 'USDC' ? 1 : (datos[s] ? datos[s].px : 0);
 const estable = s => s === 'USDT' || s === 'USDC';
 function fT(v, s){ v = Number(v)||0; if (estable(s)) return nf(v, 2); if (v >= 1e6) return nf(v/1e6, 2)+'M'; if (v >= 1) return nf(v, v >= 1000 ? 2 : 4); return v ? String(+v.toPrecision(5)) : '0'; }
