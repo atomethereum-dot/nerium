@@ -140,7 +140,9 @@ for (const [W, H, mob] of [[1440, 900, 0], [390, 844, 1]]) {
     });
     di(!!r && !r.oculta && r.display !== 'none' && r.alto > H * 3, tag + 'la seccion existe y se ve (' + (r && r.alto) + ' px de recorrido)');
     di(r.padre === 'MAIN', tag + 'cuelga de «main», que es de donde la pagina lee los fondos');
-    di(/rgb\(0, 0, 0\)/.test(r.fondo), tag + 'la seccion es negra, la del globo de arriba (' + r.fondo + ')');
+    /* p77 · todas las secciones oscuras llevan ya el mismo negro de la casa,
+       #030409 -el de Security y el globo-: ese es el negro que toca */
+    di(/rgb\(3, 4, 9\)/.test(r.fondo), tag + 'la seccion es negra, el mismo negro del globo de arriba (' + r.fondo + ')');
     di(r.escala === 'none', tag + 'no se hunde ni se vela (' + r.escala + ')');
     di(r.sig === 'ruta' && r.iB >= 0 && r.iB < r.iR && r.iR < r.iJ,
        tag + 'va justo encima de la ruta, y las dos antes de «In the open» (' + [r.iB, r.iR, r.iJ].join(' < ') + ')');
