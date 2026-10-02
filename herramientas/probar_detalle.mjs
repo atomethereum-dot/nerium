@@ -71,7 +71,7 @@ di(peor === 0, 'bajando de golpe la pagina entera, no queda ni una pieza ' +
    'invisible a la vista' + (peor ? ' (' + peor + ' en y=' + donde + ')' : ''));
 
 // ── 4 · el paralaje se mueve, y no toca la maquetacion ──
-await pg.evaluate(() => document.getElementById('security').scrollIntoView());
+await pg.evaluate(() => document.getElementById('presale').scrollIntoView());
 await pg.waitForTimeout(700);
 const par = await pg.evaluate(async () => {
   /* el que este EN PANTALLA: el bucle solo toca lo que se ve, asi que

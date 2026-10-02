@@ -286,8 +286,8 @@ const hoja = await mo.evaluate(() => {
      es un boton aparte, junto a «Whitepaper». Se cuenta por separado. */
   const app = s.querySelector('a[href="/app/"]');
   return { top: Math.round(s.getBoundingClientRect().top),
-           n: s.querySelectorAll('a').length - (app ? 1 : 0),
-           fichas: s.querySelectorAll('.chip').length - (app && app.querySelector('.chip') ? 1 : 0),
+           n: s.querySelectorAll('a:not([hidden])').length - (app ? 1 : 0),
+           fichas: s.querySelectorAll('a:not([hidden]) .chip').length - (app && app.querySelector('.chip') ? 1 : 0),
            cta: !!s.querySelector('.sheet-cta'), app: !!app };
 });
 di(hoja.n === menu.length + 1 && hoja.fichas === menu.length,
