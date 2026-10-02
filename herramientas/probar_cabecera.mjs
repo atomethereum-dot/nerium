@@ -179,7 +179,7 @@ di(marca && Math.abs(marca.centroBarra - marca.centroCubo) < 0.6,
 // ── el menu ──
 await pg.evaluate(() => { try{ localStorage.removeItem('nrm:aviso') }catch(e){} });
 await pg.reload({ waitUntil:'load' }); await pg.waitForTimeout(2400);
-const menu = await pg.evaluate(() => [...document.querySelectorAll('.nav>a')].map(a => {
+const menu = await pg.evaluate(() => [...document.querySelectorAll('.nav>a:not([hidden])')].map(a => {
   const d = document.querySelector(a.getAttribute('href'));
   return { href: a.getAttribute('href'),
            txt: a.textContent.trim().replace(/^(.+?)\1$/,'$1'),
@@ -209,7 +209,7 @@ di(menu.length === enlazables,
 di(menu.every(m => m.ficha), 'cada una con su ficha');
 di(menu.every(m => m.destino), 'todas apuntan a una seccion que existe');
 di(menu.every(m => m.visible), 'y ninguna a una seccion oculta');
-const orden = await pg.evaluate(() => [...document.querySelectorAll('.nav>a')].map(a => {
+const orden = await pg.evaluate(() => [...document.querySelectorAll('.nav>a:not([hidden])')].map(a => {
   const e = document.querySelector(a.getAttribute('href'));
   let y = 0, n = e; while (n) { y += n.offsetTop; n = n.offsetParent } return y;
 }));
@@ -230,7 +230,7 @@ di((await pg.evaluate(() => document.querySelectorAll('.nav>a.on').length)) === 
    enlace del menu lleve a una seccion oculta o inexistente. Eso es lo que
    se rompe al esconder una seccion, y es lo que deja el subrayado marcando
    un sitio al que no se puede ir. */
-const delMenu = await pg.evaluate(() => [...document.querySelectorAll('.nav>a')]
+const delMenu = await pg.evaluate(() => [...document.querySelectorAll('.nav>a:not([hidden])')]
   .map(a => (a.getAttribute('href') || '').replace(/^#/, ''))
   .filter(Boolean));
 const vivos = await pg.evaluate(ids => ids.filter(i => {
@@ -262,7 +262,7 @@ const es = await (async () => {
   await pg.evaluate(() => document.querySelector('.lang-menu button[data-l="es"]').click());
   await pg.waitForTimeout(1600);
   return pg.evaluate(() => ({
-    nav: [...document.querySelectorAll('.nav>a')].map(a=>a.textContent.trim().replace(/^(.+?)\1$/,'$1')),
+    nav: [...document.querySelectorAll('.nav>a:not([hidden])')].map(a=>a.textContent.trim().replace(/^(.+?)\1$/,'$1')),
     ann: document.querySelector('.ann-in').innerText.replace(/\s+/g,' ') }));
 })();
 di(es.nav.includes('Seguridad') && es.nav.includes('Pila'), 'el menu se traduce: ' + es.nav.join(' '));
