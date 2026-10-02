@@ -6,7 +6,7 @@
 <title>Nereum DEX — Spot</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 :root{
   --f:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif;
@@ -723,20 +723,92 @@ select.inp option{background:#141417}
 .cv-foot .fgrid a{display:block;padding:4px 0;font-weight:400;white-space:normal;overflow-wrap:anywhere;font-family:NMo,ui-monospace,monospace;font-size:12px;line-height:1.5;color:rgba(232,236,244,.66);text-decoration:none;transition:color .18s,padding-left .3s var(--e)}
 .cv-foot .fgrid a::before{content:"└── ";color:rgba(232,236,244,.26)}
 .cv-foot .fgrid a:hover{color:#fff;padding-left:6px}
-.cv-foot .fmark{display:flex;align-items:flex-end;justify-content:space-between;gap:2vw;margin-top:72px}
-.cv-foot .fmark span{font-family:NSw,Inter,sans-serif;font-weight:300;font-size:clamp(84px,16.5vw,270px);line-height:.78;letter-spacing:-.02em;
+.cv-foot .fmark{display:flex;align-items:flex-end;justify-content:space-between;gap:2vw;margin-top:72px;container-type:inline-size;overflow:hidden}
+.cv-foot .fmark span{font-family:NSw,Inter,sans-serif;font-weight:300;font-size:min(14.5vw,230px);font-size:21cqi;white-space:nowrap;line-height:.78;letter-spacing:-.02em;
   background:linear-gradient(180deg,rgba(232,236,244,.26),rgba(232,236,244,.04));-webkit-background-clip:text;background-clip:text;color:transparent}
-.cv-foot .fmark svg{width:clamp(56px,12vw,200px);height:clamp(56px,12vw,200px);opacity:.2;flex:none}
+.cv-foot .fmark svg{width:min(10vw,160px);height:min(10vw,160px);width:13cqi;height:13cqi;opacity:.2;flex:none}
 .cv-foot .fend{display:flex;flex-wrap:wrap;justify-content:space-between;gap:14px;margin-top:48px;padding-top:20px;border-top:1px solid rgba(232,236,244,.14);
   font-family:NMo,ui-monospace,monospace;font-weight:400;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:rgba(232,236,244,.4)}
 @media(max-width:1023px){
   .cv-foot{padding:48px 0 calc(26px + env(safe-area-inset-bottom))}
   .cv-foot .wrap{padding:0 20px}
   .cv-foot .fgrid{grid-template-columns:1fr 1fr;gap:30px 16px}
-  .cv-foot .fmark{margin-top:52px;justify-content:flex-start}
-  .cv-foot .fmark span{font-size:23vw}
-  .cv-foot .fmark svg{width:14vw;height:14vw}
+  .cv-foot .fmark{margin-top:52px}
 }
+
+/* ══ portada 3D: la ciudad, la torre, las monedas y las velas reales de BTC (app/portada/escena.js) ══ */
+.c3{position:relative;height:100vh;height:100svh;min-height:560px;overflow:hidden;background:#020302;color:#E4E4E7;font-family:var(--f);isolation:isolate}
+.c3 .c3-gl{position:absolute;inset:0;width:100%;height:100%;z-index:0;display:block}
+.c3.sin3d{background:radial-gradient(ellipse 70% 60% at 68% 40%,rgba(166,240,60,.16),rgba(166,240,60,0) 60%),#020302}
+.c3-lin{position:absolute;inset:0;width:100%;height:100%;z-index:2;pointer-events:none}
+.c3-vin{position:absolute;inset:0;z-index:1;pointer-events:none;background:radial-gradient(ellipse 85% 75% at 62% 48%,rgba(0,0,0,0) 45%,rgba(0,0,0,.75) 100%)}
+.c3-izq{position:absolute;inset:0 auto 0 0;width:50%;z-index:1;pointer-events:none;background:linear-gradient(90deg,rgba(0,0,0,.9),rgba(0,0,0,.55) 58%,rgba(0,0,0,0))}
+.c3-negro{position:absolute;inset:0;background:#000;z-index:8;pointer-events:none;animation:c3fuera .8s 2.5s forwards}
+@keyframes c3fuera{to{opacity:0}}
+.c3-top{position:absolute;left:0;right:0;top:0;z-index:5;height:76px;display:flex;align-items:center;gap:14px;padding:0 44px}
+.c3-marca{font-size:22px;font-weight:800;letter-spacing:-.04em;color:#fff;text-decoration:none}
+.c3-marca span{color:var(--up)}
+.c3-nav{display:flex;gap:4px;margin-left:26px}
+.c3-nav a{font-size:14px;font-weight:600;color:#8E8E96;padding:8px 12px;border-radius:8px;text-decoration:none;transition:color .15s}
+.c3-nav a:hover{color:#fff}
+.c3 .esp{flex:1}
+.c3-pill{height:54px;padding:0 28px;border-radius:999px;font-size:16px;font-weight:700;display:inline-flex;align-items:center;gap:10px;white-space:nowrap;text-decoration:none;border:0}
+.c3-pill svg{width:16px;height:16px}
+.c3-pill.lima{background:var(--up);color:var(--up-t);box-shadow:0 0 0 6px rgba(166,240,60,.1),0 18px 50px -14px rgba(166,240,60,.7)}
+.c3-pill.blanco{background:#fff;color:#000}
+.c3-pill.borde{border:1px solid #2A2A31;color:#fff;background:rgba(0,0,0,.35);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.c3-pill.chico{height:40px;padding:0 18px;font-size:14px}
+.c3-hero{position:absolute;left:96px;top:0;bottom:0;display:flex;flex-direction:column;justify-content:center;z-index:4;max-width:820px;pointer-events:none}
+.c3-hero a{pointer-events:auto}
+.c3-eye{align-self:flex-start;display:inline-flex;align-items:center;gap:9px;height:32px;padding:0 14px 0 10px;border-radius:999px;background:rgba(17,17,20,.8);
+  border:1px solid #2A2A31;font-size:12.5px;font-weight:600;color:#E4E4E7;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.c3-eye i{width:8px;height:8px;border-radius:50%;background:var(--up);box-shadow:0 0 0 4px rgba(166,240,60,.18)}
+.c3 h1{font-size:clamp(50px,5.2vw,102px);line-height:.94;letter-spacing:-.06em;font-weight:800;color:#fff;margin:30px 0 28px;white-space:nowrap}
+.c3 .mask{display:inline-block;overflow:hidden;vertical-align:top;padding-bottom:.06em;margin-bottom:-.06em}
+.c3 .mask > span{display:inline-block}
+.c3 h1 .l2 .mask > span{background:linear-gradient(92deg,#D4FF8C 0%,#A6F03C 55%,#7CC625 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.c3-sub{font-size:20px;color:#A6A7AF;max-width:500px;line-height:1.5}
+.c3-ctas{display:flex;gap:12px;margin-top:40px}
+.c3-pasos{position:absolute;left:96px;bottom:7%;z-index:4;display:flex;gap:34px}
+.c3-pasos > *{display:grid;gap:8px;min-width:118px;text-decoration:none}
+.c3-pasos i{height:2px;border-radius:2px;background:#26262C;position:relative;overflow:hidden}
+.c3-pasos i b{position:absolute;inset:0 auto 0 0;background:var(--up);width:0}
+.c3-pasos span span,.c3-pasos a span{font-size:12px;font-weight:700;letter-spacing:.12em;color:#5E5E66;transition:color .2s}
+.c3-pasos .on{color:#fff !important}
+.c3-pasos a:hover span{color:var(--up) !important}
+.c3-etq,.c3-ficha{position:absolute;left:0;top:0;visibility:hidden;opacity:0}
+.c3-etq{z-index:3;padding:10px 14px;border-radius:12px;background:rgba(14,15,18,.72);border:1px solid rgba(255,255,255,.1);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  font-size:11px;font-weight:700;letter-spacing:.12em;color:#7A7B83;white-space:nowrap;box-shadow:0 20px 40px -20px #000;pointer-events:none}
+.c3-etq b{display:block;color:#fff;font-size:15px;letter-spacing:-.01em;margin-top:3px;font-weight:700;font-variant-numeric:tabular-nums}
+.c3-etq b i{font-style:normal;color:var(--up);font-size:.8em;margin-left:8px}
+.c3-etq b i.baja{color:var(--dn)}
+.c3-ficha{z-index:3;width:340px;padding:16px 18px;border-radius:20px;background:linear-gradient(160deg,rgba(32,33,38,.7),rgba(12,12,15,.78));
+  border:1px solid rgba(255,255,255,.1);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);box-shadow:0 40px 80px -30px #000}
+.c3-ficha .h{display:flex;align-items:center;gap:12px}
+.c3-ficha .h img{width:38px;height:38px;border-radius:50%}
+.c3-ficha .h b{display:block;color:#fff;font-size:16px} .c3-ficha .h small{font-size:12px;color:#7A7B83}
+.c3-ficha .h em{margin-left:auto;white-space:nowrap;font-style:normal;font-size:10.5px;font-weight:800;letter-spacing:.1em;color:var(--up)}
+.c3-ficha .seg{display:grid;grid-template-columns:1fr 1fr;gap:4px;padding:4px;margin-top:14px;border-radius:12px;background:rgba(255,255,255,.05)}
+.c3-ficha .seg span{height:32px;border-radius:9px;display:grid;place-items:center;font-size:13px;font-weight:800;color:#7A7B83}
+.c3-ficha .seg span.on{background:var(--up);color:var(--up-t)}
+.c3-ficha .f{display:flex;justify-content:space-between;font-size:12.5px;color:#7A7B83;padding:9px 0;border-top:1px solid rgba(255,255,255,.07);margin-top:10px}
+.c3-ficha .f.ex{margin-top:0}
+.c3-ficha .f b{color:#fff;font-weight:600;font-variant-numeric:tabular-nums}
+.c3-ficha .bt{margin-top:6px;height:40px;border-radius:12px;background:var(--up);color:var(--up-t);display:grid;place-items:center;font-weight:800;font-size:13.5px;text-decoration:none}
+/* teléfono (y cualquier pantalla vertical): la clase .m la pone escena.js con el mismo criterio que la cámara */
+.c3.m .c3-top{padding:0 18px;height:64px} .c3.m .c3-nav{display:none} .c3.m .c3-marca{font-size:19px} .c3.m .c3-pill.chico{height:36px;padding:0 14px;font-size:13px}
+.c3.m .c3-hero{left:20px;right:20px;top:78px;bottom:auto;max-width:none;justify-content:flex-start} .c3.m .c3-eye{font-size:11px;height:28px}
+.c3.m h1{font-size:min(10vw,72px);margin:16px 0 12px;letter-spacing:-.055em} .c3.m .c3-sub{font-size:14.5px;max-width:560px}
+.c3.m .c3-ctas{margin-top:18px;gap:8px} .c3.m .c3-pill.lima,.c3.m .c3-pill.borde{height:44px;padding:0 18px;font-size:14px} .c3.m .c3-izq{display:none}
+.c3.m .c3-vin{background:linear-gradient(180deg,rgba(0,0,0,.95) 0%,rgba(0,0,0,.82) 30%,rgba(0,0,0,0) 46%,rgba(0,0,0,0) 78%,rgba(0,0,0,.85) 100%)}
+.c3.m .c3-pasos{left:20px;right:20px;bottom:calc(22px + env(safe-area-inset-bottom));gap:7px} .c3.m .c3-pasos > *{min-width:0;flex:1}
+.c3.m .c3-pasos span span,.c3.m .c3-pasos a span{font-size:8.5px;letter-spacing:.04em}
+.c3.m .c3-etq{font-size:8px;letter-spacing:.06em;padding:7px 10px;border-radius:10px} .c3.m .c3-etq b{font-size:11px}
+.c3.m .c3-ficha{padding:12px 14px;border-radius:16px;margin-top:calc(-1 * env(safe-area-inset-bottom))} .c3.m .c3-ficha .f{padding:7px 0;font-size:11.5px} .c3.m .c3-ficha .bt{height:36px}
+.c3.m .c3-ficha .seg,.c3.m .c3-ficha .f.ex{display:none}
+@media(max-height:700px){ .c3.m .c3-sub{display:none} }
+@media(max-width:340px){ .c3.m .c3-ctas .borde{display:none} }
+@media(prefers-reduced-motion:reduce){ .c3-negro{animation:none;opacity:0} }
 
 /* ══ portada: lo primero que se ve al abrir la app ══ */
 body.portada .top,body.portada .pie{display:none}
@@ -1025,7 +1097,28 @@ body.portada .top,body.portada .pie{display:none}
 
 <!-- ══ portada ══ -->
 <main id="vCover" hidden>
-  <div class="cv">
+  <section class="c3" id="c3" aria-label="Nereum DEX">
+    <div class="c3-vin"></div><div class="c3-izq"></div><svg class="c3-lin" aria-hidden="true"></svg>
+    <header class="c3-top"><a class="c3-marca" href="/" aria-label="NereumEVM · nereum.xyz">Nereum<span>EVM</span></a>
+      <nav class="c3-nav"><a href="#/spot">Spot</a><a href="#/swap">Swap</a><a href="#/pools">Pools</a><a href="#/bridge">Bridge</a><a href="#/tokenize">Tokenize</a><a href="#/portfolio">Portfolio</a></nav>
+      <span class="esp"></span><a class="c3-pill blanco chico" href="#/spot">Launch app</a></header>
+    <div class="c3-hero">
+      <span class="c3-eye" data-fade=".5,1.1"><i></i>The exchange on NereumEVM</span>
+      <h1><span class="mask"><span data-t0="0.75">Trade</span></span> <span class="mask"><span data-t0="0.82">everything.</span></span><br><span class="l2"><span class="mask"><span data-t0="1.00">On</span></span> <span class="mask"><span data-t0="1.07">NereumEVM.</span></span></span></h1>
+      <p class="c3-sub" data-fade="1.5,2.1">Spot, swaps, P2P, pools, a bridge and real-asset tokenization. Everything an exchange does, in one app, settled on NereumEVM.</p>
+      <div class="c3-ctas" data-fade="1.75,2.35"><a class="c3-pill lima" href="#/spot">Start trading <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg></a><a class="c3-pill borde" href="#/spot">Launch app</a></div>
+    </div>
+    <nav class="c3-pasos" data-fade="2.0,2.6" aria-label="Products"><a href="#/spot"><i><b id="c3p1"></b></i><span id="c3s1">SPOT</span></a><a href="#/swap"><i><b id="c3p2"></b></i><span id="c3s2">SWAP</span></a><span><i><b id="c3p3"></b></i><span id="c3s3">P2P</span></span><a href="#/pools"><i><b id="c3p4"></b></i><span id="c3s4">POOLS</span></a><a href="#/bridge"><i><b id="c3p5"></b></i><span id="c3s5">BRIDGE</span></a><a href="#/tokenize"><i><b id="c3p6"></b></i><span id="c3s6">TOKENIZE</span></a></nav>
+    <div class="c3-etq" id="c3e1">BTC / USDT · SPOT<b><span id="c3Px">—</span><i id="c3Cam"></i></b></div>
+    <div class="c3-etq" id="c3e2">SWAP · POOL FEE<b>0.30%</b></div>
+    <div class="c3-etq" id="c3e3">TOKENIZE<b>Chamberi Tower · CHAM</b></div>
+    <div class="c3-ficha" id="c3fi"><div class="h"><img src="/app/coins/btc.svg" alt=""><div><b>BTC / USDT</b><small>Spot · Market order</small></div><em>● LIVE</em></div>
+      <div class="seg"><span class="on">Buy</span><span>Sell</span></div>
+      <div class="f"><span>Price</span><b id="c3Fp">—</b></div><div class="f ex"><span>Amount</span><b>0.25 BTC</b></div><div class="f ex"><span>Total</span><b id="c3Tot">—</b></div>
+      <a class="bt" href="#/spot">Buy BTC</a></div>
+    <div class="c3-negro"></div>
+  </section>
+  <div class="cv" hidden>
     <div class="cv-izq">
       <header class="cv-top"><a class="marca" href="/" aria-label="Nereum · nereum.xyz"><svg viewBox="0 0 672 672" aria-hidden="true"><use href="#nlLogo"/></svg><b>Nereum</b><em>DEX</em></a><span class="esp"></span>
         <button class="pill blanco" id="cvCartera">Connect wallet</button></header>
@@ -2206,6 +2299,7 @@ function ruta(){
   const v = (location.hash.match(/^#\/([a-z]+)/)||[])[1];
   vista = VISTAS[v] ? v : 'cover';
   document.body.classList.toggle('portada', vista === 'cover');
+  if (c3 && vista !== 'cover') c3.activa(false);
   for (const [n, sel] of Object.entries(VISTAS)) $(sel).hidden = n !== vista;
   $$('.nav button[data-v]').forEach(b => b.classList.toggle('on', b.dataset.v === vista));
   abreMk(false); ocultaTip();
@@ -2568,8 +2662,17 @@ $('#portC').onclick = e => { const b = e.target.closest('[data-trade]'); if (b){
 /* ══ PORTADA ══
    Velas reales de BTC por hora (OKX, Kraken de respaldo), dibujadas en negro
    sobre el lima. Debajo, el precio en vivo del mismo flujo que usa el spot. */
-let cvVelas = null, cvT = 0;
+let cvVelas = null, cvT = 0, c3 = null, c3Carga = null;
+/* la escena 3D (three.js, ~190 KB comprimida) solo se pide al abrir la portada */
+function c3Arranca(){
+  if (c3){ c3.activa(true); return; } if (c3Carga) return;
+  const sec = $('#c3'), w = sec.clientWidth, h = sec.clientHeight; sec.classList.toggle('m', w <= 700 || w / h < 1.05);
+  c3Carga = import('/app/portada/escena.js')
+    .then(m => { c3 = m.arrancar(sec, {velas: () => cvVelas, precio: () => datos.BTC ? datos.BTC.px : null}); if (vista !== 'cover') c3.activa(false); })
+    .catch(() => { sec.classList.add('sin3d'); });
+}
 async function pintaCover(){
+  c3Arranca();
   vivoCover(); $('#cvCartera').textContent = cuenta ? corta(cuenta) : 'Connect wallet';
   if (!cvVelas || Date.now() - cvT > 300000){
     let L = null;
@@ -2597,6 +2700,9 @@ function dibCover(){
 function vivoCover(){
   const d = datos.BTC; $('#cvPx').textContent = d ? fp(d.px, 'BTC') : '—';
   $('#cvCam').textContent = d ? pct(d.cam) : '—';
+  $('#c3Px').textContent = $('#c3Fp').textContent = d ? fp(d.px, 'BTC') : '—';
+  $('#c3Cam').textContent = d ? pct(d.cam) : ''; $('#c3Cam').classList.toggle('baja', !!d && d.cam < 0);
+  $('#c3Tot').textContent = d ? nf(d.px * .25, 2)+' USDT' : '—';
   if (cvVelas) dibCover();
 }
 $('#cvCartera').onclick = () => cuenta ? (location.hash = '#/portfolio') : abreCartera();
