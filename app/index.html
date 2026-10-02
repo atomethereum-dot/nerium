@@ -637,6 +637,51 @@ button.red-sel:hover{background:var(--campo2)}
 .chp.on{background:#fff;color:#000}
 .chp i{width:8px;height:8px;border-radius:50%;background:var(--c,#555)}
 .sep{height:1px;background:var(--linea);margin:16px 0}
+/* cloud mining */
+.mn-aviso{margin-bottom:16px}
+.dos.mn-l{grid-template-columns:minmax(0,1fr) minmax(0,400px)}
+.mn-col{display:grid;gap:16px;align-content:start;min-width:0}
+.mn-per{height:auto;gap:4px}
+.mn-per button{height:28px;padding:0 10px;border-radius:7px;font-size:12px}
+.mn-per button.on{background:var(--campo2)} .mn-per button.on::after{display:none}
+.mn-graf{position:relative;height:260px;margin:4px 0 14px}
+.mn-graf canvas{position:absolute;inset:0;width:100%;height:100%}
+.mn-ret{border-top:1px solid var(--linea);padding-top:14px;display:grid;gap:8px}
+.mn-ret-h{display:flex;justify-content:space-between;gap:10px;font-size:12.5px;color:var(--t2)} .mn-ret-h b{color:#fff;font-weight:600}
+.mn-ret-h.t3{color:var(--t3);font-size:11.5px}
+.mn-bar{height:6px;border-radius:6px;background:var(--campo2);overflow:hidden}
+.mn-bar i{display:block;height:100%;width:0;background:var(--up);border-radius:6px;transition:width .6s}
+.mn-lbl{display:block;font-size:12px;color:var(--t3);margin-bottom:6px}
+.mn-u{font-size:14px}
+.mn-chips{margin-top:8px}
+.mn-chips .chp{height:28px;padding:0 11px;font-size:12px}
+.mn-c .fld{margin-bottom:8px;min-width:0}
+.mn-c .fld input{width:0}
+.mn-c .dos-c{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px}
+.mn-res{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px}
+.mn-res > div{background:var(--campo);border-radius:12px;padding:11px 12px;display:grid;gap:3px;min-width:0}
+.mn-res span{font-size:11.5px;color:var(--t3)}
+.mn-res b{font-size:16px;font-weight:700;color:#fff;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mn-res b.sube{color:var(--up)} .mn-res b.baja{color:var(--dn)}
+.mn-res s{text-decoration:none;font-size:11.5px;color:var(--t3);font-variant-numeric:tabular-nums}
+.mn-halv{display:flex;align-items:baseline;gap:8px;margin-bottom:10px}
+.mn-halv b{font-size:30px;font-weight:700;color:#fff;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.mn-halv span{font-size:12.5px;color:var(--t3)}
+.mn-vac{font-size:12.5px;color:var(--t3);line-height:1.5}
+.mn-r{display:flex;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--linea)}
+.mn-r:first-child{border-top:0}
+.mn-r > div{flex:1;min-width:0;display:grid;gap:2px}
+.mn-r b{color:#fff;font-size:13px} .mn-r div span{font-size:11.5px;color:var(--t3)}
+.mn-tb{min-width:560px}
+.mn-como{margin-top:16px}
+.mn-pasos{display:grid;grid-template-columns:repeat(4,minmax(0,1fr))}
+@media(max-width:1023px){ .dos.mn-l{display:flex;flex-direction:column;align-items:stretch} .mn-col{display:contents} .mn-pasos{grid-template-columns:1fr 1fr} .mn-graf{height:210px}
+  /* en el teléfono, la calculadora justo después del gráfico */
+  .mn-l > .mn-col:first-child > :nth-child(1){order:1} .mn-l > aside > :nth-child(1){order:2} .mn-l > aside > :nth-child(2){order:3}
+  .mn-l > .mn-col:first-child > :nth-child(2){order:4} .mn-l > aside > :nth-child(3){order:5}
+  .nav.desborda{-webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 36px),transparent);mask-image:linear-gradient(90deg,#000 calc(100% - 36px),transparent)}
+  .nav.desborda.fin{-webkit-mask-image:none;mask-image:none} }
+@media(max-width:560px){ .mn-pasos{grid-template-columns:1fr} .mn-r{flex-wrap:wrap} .mn-tb{min-width:0} .mn-tb th:nth-child(4),.mn-tb td:nth-child(4){display:none} .mn-tb th,.mn-tb td{padding:0 10px} }
 /* p2p */
 .pp-fil{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:12px 16px;border-bottom:1px solid var(--linea)}
 .pp-fil .sel select{height:36px;padding:0 28px 0 12px;font-size:13px;font-weight:600;color:#fff}
@@ -920,6 +965,7 @@ body.portada .top,body.portada .pie{display:none}
   </a>
   <nav class="nav">
     <button data-v="spot" class="on">Spot</button>
+    <button data-v="mining">Cloud mining</button>
     <button data-v="swap">Swap</button>
     <button data-v="p2p">P2P</button>
     <button data-v="pools">Pools</button>
@@ -1143,7 +1189,7 @@ body.portada .top,body.portada .pie{display:none}
   <section class="c3" id="c3" aria-label="Nereum DEX">
     <div class="c3-vin"></div><div class="c3-izq"></div><svg class="c3-lin" aria-hidden="true"></svg>
     <header class="c3-top"><a class="c3-marca" href="/" aria-label="NereumEVM · nereum.xyz">Nereum<span>EVM</span></a>
-      <nav class="c3-nav"><a href="#/spot">Spot</a><a href="#/swap">Swap</a><a href="#/p2p">P2P</a><a href="#/pools">Pools</a><a href="#/bridge">Bridge</a><a href="#/tokenize">Tokenize</a><a href="#/portfolio">Portfolio</a></nav>
+      <nav class="c3-nav"><a href="#/spot">Spot</a><a href="#/mining">Cloud mining</a><a href="#/swap">Swap</a><a href="#/p2p">P2P</a><a href="#/pools">Pools</a><a href="#/bridge">Bridge</a><a href="#/tokenize">Tokenize</a><a href="#/portfolio">Portfolio</a></nav>
       <span class="esp"></span><a class="c3-pill blanco chico" href="#/spot">Launch app</a></header>
     <div class="c3-hero">
       <span class="c3-eye" data-fade=".5,1.1"><i></i>The exchange on NereumEVM</span>
@@ -1239,6 +1285,90 @@ body.portada .top,body.portada .pie{display:none}
       <p class="nota">Last 48 hours, hourly closes. Rates follow live public spot markets; the pool sets the final price when the swap executes.</p>
     </aside>
   </div>
+</main>
+
+<!-- ══ cloud mining ══ -->
+<main class="vista" id="vMine" hidden>
+  <div class="v-cab"><div><h1>Cloud mining</h1><p>Rent hashrate from machines Nereum owns and operates, powered by solar, and receive the bitcoin they mine. Everything on this page about the Bitcoin network is live.</p></div>
+    <button class="pill lima" id="mnReservar">Reserve hashrate</button></div>
+  <div class="aviso mn-aviso"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="9" cy="9" r="7"/><path d="M9 8v4.5M9 5.5v.1"/></svg>
+    <span><b>The farm is in development.</b> Contracts open when the machines are online. Until then nothing is sold or charged: you can size a contract with live network data and keep a reservation in this browser.</span></div>
+  <div class="stats4 mn-st">
+    <div class="st4"><i>BTC price</i><b id="mnPx">—</b><s id="mnPxS">Live market</s></div>
+    <div class="st4"><i>Network hashrate</i><b id="mnHash">—</b><s>3-day average</s></div>
+    <div class="st4"><i>Difficulty</i><b id="mnDif">—</b><s id="mnDifS">Next adjustment —</s></div>
+    <div class="st4"><i>Hashprice</i><b id="mnHp">—</b><s>Revenue per PH/s per day</s></div>
+  </div>
+  <div class="dos mn-l">
+    <div class="mn-col">
+      <section class="card">
+        <div class="card-h"><b>Network hashrate</b><div class="p-tabs mn-per" id="mnPer"><button data-per="1m">1M</button><button class="on" data-per="3m">3M</button><button data-per="1y">1Y</button></div></div>
+        <div class="mn-graf"><canvas id="mnGraf" aria-label="Bitcoin network hashrate"></canvas></div>
+        <div class="mn-ret">
+          <div class="mn-ret-h"><span>Difficulty adjustment</span><b id="mnRetC">—</b></div>
+          <div class="mn-bar"><i id="mnRetB"></i></div>
+          <div class="mn-ret-h t3"><span id="mnRetP">—</span><span id="mnRetF">—</span></div>
+        </div>
+      </section>
+      <section class="card" style="padding:0">
+        <div class="p-bar"><b>Latest blocks</b><span class="esp"></span><span class="vivo" id="mnVivo"><i></i><span>Bitcoin mainnet</span></span></div>
+        <div class="tw"><table class="tb mn-tb"><thead><tr><th>Height</th><th>Mined</th><th>Pool</th><th class="d">Transactions</th><th class="d">Reward</th></tr></thead><tbody id="mnBloques"><tr><td colspan="5" class="vacio-c">Loading blocks…</td></tr></tbody></table></div>
+      </section>
+    </div>
+    <aside class="mn-col">
+      <section class="card">
+        <div class="card-h"><b>Mining calculator</b><span class="vivo"><i></i><span>Live difficulty</span></span></div>
+        <div class="mn-c">
+          <label class="mn-lbl">Hashrate</label>
+          <div class="caja"><div class="caja-r"><input id="mnTh" inputmode="decimal" value="100" autocomplete="off" aria-label="Hashrate in TH/s"><span class="tk mn-u">TH/s</span></div></div>
+          <div class="chips-r mn-chips" id="mnThC"><button class="chp" data-th="50">50</button><button class="chp on" data-th="100">100</button><button class="chp" data-th="250">250</button><button class="chp" data-th="500">500</button><button class="chp" data-th="1000">1,000</button></div>
+          <div class="dos-c" style="margin-top:12px">
+            <label class="fld"><label for="mnEf">Efficiency</label><input id="mnEf" inputmode="decimal" value="17.5" autocomplete="off"><span class="u">J/TH</span></label>
+            <label class="fld"><label for="mnKwh">Power</label><input id="mnKwh" inputmode="decimal" value="0.05" autocomplete="off"><span class="u">$/kWh</span></label>
+          </div>
+          <label class="fld"><label for="mnFee">Pool fee</label><input id="mnFee" inputmode="decimal" value="2" autocomplete="off"><span class="u">%</span></label>
+          <label class="mn-lbl" style="margin-top:6px">Term</label>
+          <div class="chips-r mn-chips" id="mnTerm"><button class="chp" data-d="30">30 days</button><button class="chp" data-d="90">90 days</button><button class="chp on" data-d="180">180 days</button><button class="chp" data-d="365">1 year</button></div>
+        </div>
+        <div class="mn-res">
+          <div><span>Mined per day</span><b id="mnBtcD">—</b><s id="mnUsdD">—</s></div>
+          <div><span>Power per day</span><b id="mnPowD">—</b><s id="mnKwhD">—</s></div>
+          <div class="mn-net"><span>Net per day</span><b id="mnNetD">—</b><s id="mnMarg">—</s></div>
+          <div class="mn-net"><span>Net over the term</span><b id="mnNetT">—</b><s id="mnBtcT">—</s></div>
+        </div>
+        <div class="filas det">
+          <div class="fila"><span>Break-even power price</span><b id="mnBe">—</b></div>
+          <div class="fila"><span>Block subsidy · fees per block</span><b id="mnSub">—</b></div>
+          <div class="fila"><span>Settlement</span><b>BTC to your wallet</b></div>
+        </div>
+        <button class="accion" id="mnCalcBt">Reserve this hashrate</button>
+        <p class="nota">An estimate at today's difficulty, fees and BTC price. All three change: difficulty is reset every 2,016 blocks and the price moves every second. Mining revenue is never guaranteed.</p>
+      </section>
+      <section class="card">
+        <div class="card-h"><b>Next halving</b><span class="tag" id="mnHalvB">—</span></div>
+        <div class="mn-halv"><b id="mnHalvN">—</b><span>blocks to go</span></div>
+        <div class="mn-bar"><i id="mnHalvBar"></i></div>
+        <div class="filas det">
+          <div class="fila"><span>Estimated date</span><b id="mnHalvF">—</b></div>
+          <div class="fila"><span>Block subsidy</span><b id="mnHalvS">—</b></div>
+        </div>
+      </section>
+      <section class="card">
+        <div class="card-h"><b>Your reservations</b><span class="tag" id="mnResN">0</span></div>
+        <div id="mnMias"></div>
+      </section>
+    </aside>
+  </div>
+  <section class="card mn-como">
+    <div class="card-h"><b>How Nereum cloud mining will work</b></div>
+    <ol class="pasos-l mn-pasos">
+      <li><em>1</em><span><b>Choose your hashrate</b>Size the contract in TH/s and pick a term. You see the full price before anything is signed.</span></li>
+      <li><em>2</em><span><b>Our machines, our energy</b>Physical servers Nereum owns and operates in racks, powered by solar. Not rented hashrate and not a reseller's contract.</span></li>
+      <li><em>3</em><span><b>Bitcoin to your wallet</b>Your share of what the machines mine is paid in BTC to your wallet, with every payout visible on chain.</span></li>
+      <li><em>4</em><span><b>Live output</b>Your hashrate, blocks found by the pool and payouts, tracked here in real time.</span></li>
+    </ol>
+  </section>
+  <p class="nota">Network data from mempool.space (Bitcoin mainnet) and BTC price from live public spot markets. Contract prices and fees are published when contracts open; we do not estimate them in advance.</p>
 </main>
 
 <!-- ══ p2p ══ -->
@@ -2395,8 +2525,8 @@ let rz; addEventListener('resize', () => { clearTimeout(rz); rz = setTimeout(() 
 Object.assign(COIN, {USDT:['#26A17B','#fff'], USDC:['#2775CA','#fff'], POL:['#8247E5','#fff'], SepoliaETH:['#627EEA','#fff']});
 Object.assign(NOMBRE, {USDT:'Tether USD', USDC:'USD Coin', POL:'Polygon', SepoliaETH:'Sepolia Ether'});
 const TOKS = [['USDT','Tether USD'], ...PARES];
-const VISTAS = {cover:'#vCover', spot:'#app', swap:'#vSwap', p2p:'#vP2P', pools:'#vPools', bridge:'#vBridge', tokenize:'#vTok', portfolio:'#vPort'};
-const TITULOS = {cover:'Nereum DEX · Spot, swap, pools, bridge and tokenization', swap:'Swap', p2p:'P2P', pools:'Pools', bridge:'Bridge', tokenize:'Tokenize', portfolio:'Portfolio'};
+const VISTAS = {cover:'#vCover', spot:'#app', mining:'#vMine', swap:'#vSwap', p2p:'#vP2P', pools:'#vPools', bridge:'#vBridge', tokenize:'#vTok', portfolio:'#vPort'};
+const TITULOS = {cover:'Nereum DEX · Spot, swap, pools, bridge and tokenization', mining:'Cloud mining', swap:'Swap', p2p:'P2P', pools:'Pools', bridge:'Bridge', tokenize:'Tokenize', portfolio:'Portfolio'};
 const FLECHA = '<svg viewBox="0 0 12 12"><path fill="currentColor" d="M1 3.5h10L6 9.5z"/></svg>';
 const esc = v => String(v == null ? '' : v).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const coinHtml = s => { const c = COIN[s]||['#333','#fff']; return `<i class="coin ${CON_LOGO.has(s) ? 'logo' : ''}" style="--c:${c[0]};--cf:${c[1]}">${coinIn(s)}</i>`; };
@@ -2406,6 +2536,10 @@ function fT(v, s){ v = Number(v)||0; if (estable(s)) return nf(v, 2); if (v >= 1
 const corta = a => a.slice(0,6)+'…'+a.slice(-4);
 function sacude(b){ b.classList.remove('sacude'); void b.offsetWidth; b.classList.add('sacude'); }
 let vista = 'spot';
+/* el menú del teléfono: si no caben todos los botones, se desvanece a la derecha hasta llegar al final */
+function navBorde(){ const n = $('.top .nav'); if (!n) return; n.classList.toggle('desborda', n.scrollWidth > n.clientWidth + 1);
+  n.classList.toggle('fin', n.scrollLeft + n.clientWidth >= n.scrollWidth - 2); }
+$('.top .nav').addEventListener('scroll', navBorde, {passive: true}); addEventListener('resize', navBorde, {passive: true});
 function ruta(){
   const v = (location.hash.match(/^#\/([a-z0-9]+)/)||[])[1];
   vista = VISTAS[v] ? v : 'cover';
@@ -2413,17 +2547,18 @@ function ruta(){
   if (c3 && vista !== 'cover') c3.activa(false);
   for (const [n, sel] of Object.entries(VISTAS)) $(sel).hidden = n !== vista;
   $$('.nav button[data-v]').forEach(b => b.classList.toggle('on', b.dataset.v === vista));
+  { const bn = $('.nav button.on'); if (bn){ const n = bn.parentElement; n.scrollLeft = Math.max(0, bn.offsetLeft - (n.clientWidth - bn.offsetWidth) / 2); } navBorde(); }
   abreMk(false); ocultaTip();
   if (vista === 'spot'){ pintaCabecera(); requestAnimationFrame(() => { dibuja(); dibujaDepth(); pintaLibro(); pintaTrades(); }); }
   else { document.title = vista === 'cover' ? TITULOS.cover : TITULOS[vista]+' | Nereum DEX'; if (vista === 'bridge' || vista === 'portfolio') leeSaldo(); pintaVista(); }
   scrollTo(0, 0);
 }
 function pintaVista(){
-  if (vista === 'cover') pintaCover(); else if (vista === 'swap') pintaSwap(); else if (vista === 'p2p') pintaP2P(); else if (vista === 'pools') pintaPools(); else if (vista === 'bridge') pintaBridge();
+  if (vista === 'cover') pintaCover(); else if (vista === 'swap') pintaSwap(); else if (vista === 'p2p') pintaP2P(); else if (vista === 'mining'){ pintaMina(); mnCarga(); } else if (vista === 'pools') pintaPools(); else if (vista === 'bridge') pintaBridge();
   else if (vista === 'tokenize') pintaTok(); else if (vista === 'portfolio') pintaPort();
 }
 function vivoVista(){
-  if (vista === 'cover') vivoCover(); else if (vista === 'swap'){ swCalc(); swInfo(false); } else if (vista === 'p2p') ppRefPinta(); else if (vista === 'pools') vivoPools();
+  if (vista === 'cover') vivoCover(); else if (vista === 'swap'){ swCalc(); swInfo(false); } else if (vista === 'p2p') ppRefPinta(); else if (vista === 'mining'){ pintaMina(); mnCarga(); } else if (vista === 'pools') vivoPools();
   else if (vista === 'bridge') pintaBridge(); else if (vista === 'portfolio') vivoPort();
 }
 $$('.nav button[data-v]').forEach(b => b.onclick = () => { location.hash = '#/'+b.dataset.v; });
@@ -2769,6 +2904,152 @@ function vivoPort(){
 }
 $('#portC').onclick = e => { const b = e.target.closest('[data-trade]'); if (b){ location.hash = '#/spot'; elige(b.dataset.trade); return; }
   const r = e.target.closest('[data-ir2]'); if (r) location.hash = '#/'+r.dataset.ir2; };
+
+/* ══ CLOUD MINING ══
+   La red de Bitcoin, en vivo (mempool.space): hashrate, dificultad y su próximo
+   ajuste, últimos bloques, comisiones por bloque y halving. Con eso y el precio
+   del spot, la calculadora estima lo que mina un contrato. La granja está en
+   desarrollo: no se vende nada; las reservas se guardan en este navegador. */
+const MP = 'https://mempool.space/api', mnCl = (v, a, b) => Math.min(b, Math.max(a, v));
+const MN = carga('nereum-dex-mina', {th:'100', ef:'17.5', kwh:'0.05', fee:'2', dias:180, per:'3m'});
+let mnRes = (() => { try{ const v = JSON.parse(localStorage.getItem('nereum-dex-mina-res')); return Array.isArray(v) ? v : []; }catch(e){ return []; } })();
+const mnRed = {hash:null, dif:null, ret:null, alto:null, feeB:null, bloques:null, serie:{}, t:0};
+const mnJ = async u => { const r = await fetch(MP + u); if (!r.ok) throw 0; return r.json(); };
+const subsidio = h => 50 / Math.pow(2, Math.floor(h / 210000));
+const fHash = h => !h ? '—' : h >= 1e18 ? nf(h/1e18, 1)+' EH/s' : h >= 1e15 ? nf(h/1e15, 1)+' PH/s' : nf(h/1e12, 1)+' TH/s';
+const fDif = d => !d ? '—' : nf(d/1e12, 2)+' T';
+const fBtc = v => (v >= .01 ? nf(v, 5) : nf(v, 8))+' BTC';
+const fUsd = v => (v < 0 ? '−$' : '$')+nf(Math.abs(v), 2);
+const hace = ts => { const s = Math.max(0, Date.now()/1000 - ts); return s < 60 ? 'just now' : s < 3600 ? Math.round(s/60)+' min ago' : Math.round(s/3600)+' h ago'; };
+const fFecha = ms => new Date(ms).toLocaleDateString('en-US', {day:'numeric', month:'short', year:'numeric'});
+
+async function mnCarga(forzar){
+  if (!forzar && Date.now() - mnRed.t < 60000) return;
+  mnRed.t = Date.now();
+  await Promise.all([
+    mnJ('/v1/mining/hashrate/3d').then(j => { mnRed.hash = j.currentHashrate; mnRed.dif = j.currentDifficulty; }).catch(() => {}),
+    mnJ('/v1/difficulty-adjustment').then(j => { mnRed.ret = j; }).catch(() => {}),
+    mnJ('/blocks/tip/height').then(h => { mnRed.alto = +h; }).catch(() => {}),
+    mnJ('/v1/mining/reward-stats/144').then(j => { mnRed.feeB = +j.totalFee / 144 / 1e8; }).catch(() => {}),
+    mnJ('/v1/blocks').then(j => { mnRed.bloques = j; }).catch(() => {}),
+    mnSerie(MN.per),
+  ]);
+  if (vista === 'mining') pintaMina();
+}
+async function mnSerie(per){
+  const e = mnRed.serie[per]; if (e && Date.now() - e.t < 600000) return;
+  try{ const j = await mnJ('/v1/mining/hashrate/' + per);
+    mnRed.serie[per] = {t: Date.now(), L: (j.hashrates || []).map(h => [h.timestamp * 1000, h.avgHashrate])}; }catch(e2){ mnRed.serie[per] = {t: Date.now(), L: null}; }
+}
+/* BTC que mina 1 TH/s en un día: su parte del hashrate de la red × 144 bloques × (subsidio + comisiones) */
+function mnPorTh(){
+  if (!mnRed.hash || mnRed.alto == null) return 0;
+  return 1e12 / mnRed.hash * 144 * (subsidio(mnRed.alto) + (mnRed.feeB || 0));
+}
+function pintaMina(){
+  mnCampos();
+  const px = datos.BTC ? datos.BTC.px : 0, r = mnRed.ret;
+  $('#mnPx').textContent = px ? '$'+fp(px, 'BTC') : '—';
+  $('#mnPxS').textContent = datos.BTC ? pct(datos.BTC.cam)+' today' : 'Live market';
+  $('#mnHash').textContent = fHash(mnRed.hash); $('#mnDif').textContent = fDif(mnRed.dif);
+  $('#mnDifS').textContent = r ? `Next adjustment ${r.difficultyChange >= 0 ? '+' : ''}${nf(r.difficultyChange, 2)}%` : 'Next adjustment —';
+  const porTh = mnPorTh(); $('#mnHp').textContent = porTh && px ? '$'+nf(porTh * 1000 * px, 2) : '—';
+  /* ajuste de dificultad */
+  $('#mnRetC').textContent = r ? `${r.difficultyChange >= 0 ? '+' : ''}${nf(r.difficultyChange, 2)}% estimated` : '—';
+  $('#mnRetB').style.width = r ? mnCl(r.progressPercent, 0, 100)+'%' : '0';
+  $('#mnRetP').textContent = r ? `${nf(r.progressPercent, 1)}% of the epoch · ${nf(r.remainingBlocks, 0)} blocks left` : '—';
+  $('#mnRetF').textContent = r ? 'Around '+fFecha(r.estimatedRetargetDate) : '—';
+  /* halving */
+  if (mnRed.alto != null){
+    const sig = (Math.floor(mnRed.alto / 210000) + 1) * 210000, faltan = sig - mnRed.alto, hecho = 1 - faltan / 210000;
+    const min = r && r.timeAvg ? r.timeAvg / 60000 : 10;
+    $('#mnHalvN').textContent = nf(faltan, 0); $('#mnHalvB').textContent = 'Block '+nf(sig, 0);
+    $('#mnHalvBar').style.width = (hecho * 100).toFixed(1)+'%';
+    $('#mnHalvF').textContent = 'Around '+fFecha(Date.now() + faltan * min * 60000);
+    $('#mnHalvS').textContent = `${subsidio(mnRed.alto)} → ${subsidio(sig)} BTC`;
+  }
+  $('#mnSub').textContent = mnRed.alto != null ? `${subsidio(mnRed.alto)} · ${mnRed.feeB != null ? nf(mnRed.feeB, 3) : '—'} BTC` : '—';
+  /* bloques */
+  const B = mnRed.bloques;
+  $('#mnVivo').classList.toggle('malo', !B);
+  $('#mnBloques').innerHTML = !B ? `<tr><td colspan="5" class="vacio-c">${mnRed.t ? 'Blocks unavailable right now' : 'Loading blocks…'}</td></tr>`
+    : B.slice(0, 8).map(b => `<tr><td><b style="color:#fff">${nf(b.height, 0)}</b></td><td>${hace(b.timestamp)}</td><td>${esc((b.extras && b.extras.pool && b.extras.pool.name) || 'Unknown')}</td>
+      <td class="d">${nf(b.tx_count, 0)}</td><td class="d">${b.extras && b.extras.reward ? nf(b.extras.reward / 1e8, 3)+' BTC' : '—'}</td></tr>`).join('');
+  mnCalc(); mnGraf(); mnPintaRes();
+}
+function mnCampos(){
+  if (document.activeElement && document.activeElement.closest('#vMine')) return;
+  $('#mnTh').value = MN.th; $('#mnEf').value = MN.ef; $('#mnKwh').value = MN.kwh; $('#mnFee').value = MN.fee;
+  $$('#mnThC .chp').forEach(b => b.classList.toggle('on', b.dataset.th === String(MN.th)));
+  $$('#mnTerm .chp').forEach(b => b.classList.toggle('on', +b.dataset.d === +MN.dias));
+  $$('#mnPer button').forEach(b => b.classList.toggle('on', b.dataset.per === MN.per));
+}
+const mnN = v => { const n = parseFloat(String(v).replace(',', '.')); return isFinite(n) && n >= 0 ? n : 0; };
+function mnEstima(){
+  const th = mnN(MN.th), ef = mnN(MN.ef), kwh = mnN(MN.kwh), fee = Math.min(100, mnN(MN.fee)) / 100, px = datos.BTC ? datos.BTC.px : 0;
+  const btcD = th * mnPorTh() * (1 - fee), usdD = btcD * px, kwhD = th * ef * 24 / 1000, powD = kwhD * kwh, netD = usdD - powD;
+  return {th, px, btcD, usdD, kwhD, powD, netD, dias: +MN.dias, be: kwhD ? usdD / kwhD : 0};
+}
+function mnCalc(){
+  const e = mnEstima(), ok = e.btcD > 0 && e.px > 0;
+  $('#mnBtcD').textContent = ok ? fBtc(e.btcD) : '—'; $('#mnUsdD').textContent = ok ? fUsd(e.usdD) : '—';
+  $('#mnPowD').textContent = ok ? fUsd(e.powD) : '—'; $('#mnKwhD').textContent = nf(e.kwhD, 1)+' kWh';
+  $('#mnNetD').textContent = ok ? fUsd(e.netD) : '—'; $('#mnNetD').className = ok ? (e.netD >= 0 ? 'sube' : 'baja') : '';
+  $('#mnMarg').textContent = ok && e.usdD ? 'Margin '+nf(e.netD / e.usdD * 100, 1)+'%' : '—';
+  $('#mnNetT').textContent = ok ? fUsd(e.netD * e.dias) : '—'; $('#mnNetT').className = ok ? (e.netD >= 0 ? 'sube' : 'baja') : '';
+  $('#mnBtcT').textContent = ok ? fBtc(e.btcD * e.dias)+' in '+e.dias+' days' : '—';
+  $('#mnBe').textContent = ok ? '$'+nf(e.be, 3)+' / kWh' : '—';
+}
+function mnGraf(){
+  if (vista !== 'mining') return;
+  const c = $('#mnGraf'), k = c.getContext('2d'), t = prepara(c, k); if (!t) return;
+  const {W, H} = t, e = mnRed.serie[MN.per], L = e && e.L;
+  k.font = '11px Inter, system-ui, sans-serif'; k.fillStyle = '#8E8E96'; k.textAlign = 'center'; k.textBaseline = 'middle';
+  if (!L || L.length < 2){ k.fillText(e ? 'Chart unavailable right now' : 'Loading…', W/2, H/2); return; }
+  const v = L.map(p => p[1] / 1e18), mx = Math.max(...v), mn = Math.min(...v), r = mx - mn || 1, IZ = 0, DE = 66;
+  const X = i => IZ + i / (L.length - 1) * (W - IZ - DE), Y = x => 10 + (mx - x) / r * (H - 34);
+  /* rejilla y escala a la derecha */
+  k.textAlign = 'left'; k.font = '10.5px Inter, system-ui, sans-serif';
+  for (let j = 0; j <= 3; j++){ const val = mn + r * j / 3, y = Y(val);
+    k.strokeStyle = 'rgba(255,255,255,.06)'; k.lineWidth = 1; k.beginPath(); k.moveTo(0, Math.round(y)+.5); k.lineTo(W - DE + 6, Math.round(y)+.5); k.stroke();
+    k.fillStyle = '#6E6E76'; k.fillText(nf(val, 0)+' EH/s', W - DE + 10, y); }
+  /* fechas abajo */
+  k.textAlign = 'center'; k.fillStyle = '#6E6E76';
+  [0, .5, 1].forEach(f => { const i = Math.round(f * (L.length - 1)); k.fillText(new Date(L[i][0]).toLocaleDateString('en-US', {month:'short', day:'numeric'}), mnCl(X(i), 28, W - DE - 28), H - 9); });
+  const c1 = col('--up'), g = k.createLinearGradient(0, 0, 0, H);
+  g.addColorStop(0, c1+'38'); g.addColorStop(1, c1+'00');
+  k.beginPath(); v.forEach((x, i) => i ? k.lineTo(X(i), Y(x)) : k.moveTo(X(i), Y(x))); k.lineTo(X(v.length-1), H - 24); k.lineTo(X(0), H - 24); k.closePath(); k.fillStyle = g; k.fill();
+  k.beginPath(); v.forEach((x, i) => i ? k.lineTo(X(i), Y(x)) : k.moveTo(X(i), Y(x))); k.strokeStyle = c1; k.lineWidth = 1.8; k.lineJoin = 'round'; k.stroke();
+  const ux = X(v.length-1), uy = Y(v[v.length-1]); k.fillStyle = c1; k.beginPath(); k.arc(ux, uy, 3.5, 0, 7); k.fill();
+}
+function mnPintaRes(){
+  $('#mnResN').textContent = mnRes.length;
+  $('#mnMias').innerHTML = !mnRes.length
+    ? `<p class="mn-vac">No reservations yet. Size a contract in the calculator and reserve it: it stays in this browser until contracts open.</p>`
+    : mnRes.map(r => `<div class="mn-r"><div><b>${nf(r.th, 0)} TH/s · ${r.dias} days</b><span>${nf(r.ef, 1)} J/TH · est. ${fBtc(r.btcD)} per day at reservation</span></div>
+      <span class="tag">Waiting for the farm</span><button class="pp-borra" data-mnb="${r.id}">Delete</button></div>`).join('');
+}
+function mnReserva(){
+  const e = mnEstima();
+  if (!(e.th > 0)) { sacude($('#mnCalcBt')); return toast('Enter a hashrate above zero.'); }
+  mnRes.unshift({id: Date.now().toString(36), th: e.th, dias: e.dias, ef: mnN(MN.ef), btcD: e.btcD, creado: Date.now()});
+  guarda('nereum-dex-mina-res', mnRes); mnPintaRes();
+  toast('Reservation saved in this browser. Contracts open when the farm is online; nothing was charged.');
+}
+const mnGuarda = () => { guarda('nereum-dex-mina', MN); mnCalc(); };
+[['#mnTh','th'], ['#mnEf','ef'], ['#mnKwh','kwh'], ['#mnFee','fee']].forEach(([s, k]) => $(s).addEventListener('input', e => { MN[k] = e.target.value;
+  if (k === 'th') $$('#mnThC .chp').forEach(b => b.classList.toggle('on', b.dataset.th === MN.th)); mnGuarda(); }));
+$('#mnThC').onclick = e => { const b = e.target.closest('[data-th]'); if (!b) return; MN.th = b.dataset.th; $('#mnTh').value = MN.th;
+  $$('#mnThC .chp').forEach(x => x.classList.toggle('on', x === b)); mnGuarda(); };
+$('#mnTerm').onclick = e => { const b = e.target.closest('[data-d]'); if (!b) return; MN.dias = +b.dataset.d;
+  $$('#mnTerm .chp').forEach(x => x.classList.toggle('on', x === b)); mnGuarda(); };
+$('#mnPer').onclick = async e => { const b = e.target.closest('[data-per]'); if (!b) return; MN.per = b.dataset.per; guarda('nereum-dex-mina', MN);
+  $$('#mnPer button').forEach(x => x.classList.toggle('on', x === b)); mnGraf(); await mnSerie(MN.per); mnGraf(); };
+$('#mnCalcBt').onclick = mnReserva;
+$('#mnReservar').onclick = () => { $('#mnTh').scrollIntoView({behavior: 'smooth', block: 'center'}); $('#mnTh').focus({preventScroll: true}); };
+$('#mnMias').onclick = e => { const b = e.target.closest('[data-mnb]'); if (!b) return; mnRes = mnRes.filter(r => r.id !== b.dataset.mnb);
+  guarda('nereum-dex-mina-res', mnRes); mnPintaRes(); toast('Reservation deleted.'); };
+addEventListener('resize', () => { if (vista === 'mining') mnGraf(); }, {passive: true});
 
 /* ══ P2P ══
    Compra y venta directa entre personas, pagada en moneda local; las monedas del

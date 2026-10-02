@@ -55,5 +55,25 @@ await p.fill('[data-pf="min"]', '10'); await p.click('[data-pfm="SEPA"]'); await
 prueba('P2P: el anuncio queda en «My ads»', (await p.$$eval('#ppCuerpo tr', t => t.length)) === 1);
 await p.reload(); await p.waitForTimeout(800); prueba('P2P: el anuncio sigue tras recargar', (await p.$$eval('#ppCuerpo tr', t => t.length)) === 1);
 await p.click('[data-borra]'); prueba('P2P: se puede borrar', (await p.textContent('#ppVacioT')) === 'You have no ads');
+/* Cloud mining: red de Bitcoin simulada (mempool.space) */
+await p.route(/mempool\.space\/api/, r => { const u = r.request().url(), now = Math.floor(Date.now() / 1000); let o;
+  if (u.includes('/hashrate/3d')) o = {currentHashrate: 6.72e20, currentDifficulty: 9.21e13};
+  else if (/hashrate\/(1m|3m|1y)/.test(u)) o = {hashrates: Array.from({length: 60}, (_, i) => ({timestamp: now - (60 - i) * 86400, avgHashrate: 6e20 + i * 1e18}))};
+  else if (u.includes('difficulty-adjustment')) o = {progressPercent: 50, difficultyChange: 1.5, estimatedRetargetDate: Date.now() + 7 * 864e5, remainingBlocks: 1008, timeAvg: 6e5};
+  else if (u.includes('tip/height')) o = 865420;
+  else if (u.includes('reward-stats')) o = {totalFee: String(144 * 6250000)};
+  else if (u.includes('/v1/blocks')) o = [{height: 865420, timestamp: now - 60, tx_count: 3000, extras: {reward: 318750000, pool: {name: 'Foundry USA'}}}];
+  else return r.abort();
+  r.fulfill({contentType: 'application/json', body: JSON.stringify(o)}); });
+await p.evaluate(() => { localStorage.removeItem('nereum-dex-mina'); localStorage.removeItem('nereum-dex-mina-res'); location.hash = '#/mining'; });
+await p.waitForTimeout(1200);
+prueba('Cloud mining: está en el menú, justo después de Spot', await p.evaluate(() => [...document.querySelectorAll('.top .nav button')].map(b => b.dataset.v).slice(0, 2).join() === 'spot,mining'));
+prueba('Cloud mining: datos de la red en vivo', (await p.textContent('#mnHash')) === '672.0 EH/s' && (await p.textContent('#mnDif')) === '92.10 T');
+/* 100 TH/s, 2 % de pool: 1e14 / 6,72e20 × 144 × (3,125 + 0,0625) × 0,98 */
+const esper = 1e14 / 6.72e20 * 144 * 3.1875 * .98;
+prueba('Cloud mining: la calculadora estima lo minado por día', Math.abs(parseFloat((await p.textContent('#mnBtcD'))) - esper) < 1e-8);
+prueba('Cloud mining: próximo halving en el bloque 1.050.000', (await p.textContent('#mnHalvN')) === '184,580');
+await p.click('#mnCalcBt'); prueba('Cloud mining: la reserva se guarda en el navegador', (await p.$$eval('#mnMias .mn-r', e => e.length)) === 1);
+prueba('Portada: distintivos de App Store y Google Play con «Coming soon»', await p.evaluate(() => { location.hash = '#/'; return [...document.querySelectorAll('.c3-tiendas .tienda')].map(e => e.getAttribute('aria-label')).join('|') === 'App Store, coming soon|Google Play, coming soon'; }));
 await b.close(); s.close();
 console.log(`\n${ok}/${ok + mal}`); process.exit(mal ? 1 : 0);
