@@ -1,5 +1,5 @@
-/* Portada de Nereum DEX: la ciudad, la torre tokenizada, las monedas y un gráfico
-   de velas reales de BTC/USDT sobre el cielo. render(t) pinta el estado exacto del
+/* Portada de Nereum DEX: la ciudad, la torre tokenizada y las monedas de las
+   principales, con el precio en vivo de BTC. render(t) pinta el estado exacto del
    segundo t; la entrada dura ~9 s y después la escena sigue viva (cámara, monedas,
    precio). Solo dibuja mientras la portada está a la vista. */
 import * as THREE from 'three';
@@ -46,7 +46,7 @@ export function arrancar(sec, api){
     const pm = new THREE.PMREMGenerator(R); S.environment = pm.fromScene(new RoomEnvironment(), .04).texture; S.environmentIntensity = .5; pm.dispose();
     const C = new THREE.PerspectiveCamera(MOVIL ? 46 : 30, W / H, .1, 200);
     const rs = sec.getBoundingClientRect(), fin = (q('.c3-ctas').getBoundingClientRect().bottom - rs.top) / H;
-    const LY = Math.max(6.4, Math.min(8.0, 7.9 - (.40 - fin) * 27));
+    const LY = Math.max(6.0, Math.min(7.6, 7.4 - (.40 - fin) * 27));
     const espejo = new Reflector(new THREE.PlaneGeometry(140, 140), {textureWidth: W * PR * .5, textureHeight: H * PR * .5, color: 0x7a7a7a});
     espejo.rotation.x = -Math.PI / 2; S.add(espejo);
     const laca = new THREE.Mesh(new THREE.PlaneGeometry(140, 140), new THREE.MeshStandardMaterial({color: 0x030403, roughness: .5, metalness: .2, transparent: true, opacity: .8}));
@@ -115,43 +115,6 @@ export function arrancar(sec, api){
       const [x, y, z] = sitios[i]; g.userData = {x, y, z, f: i * 1.3}; S.add(g); return g;
     });
 
-    /* gráfico de velas reales de BTC/USDT sobre la ciudad */
-    const CH = MOVIL ? {x0: EX - 5.0, x1: EX + 5.0, y0: 8.6, y1: 11.2, z: -11} : {x0: EX - .5, x1: EX + 9.8, y0: 6.8, y1: 9.9, z: -10};
-    const NV = MOVIL ? 30 : 42, PV = (CH.x1 - CH.x0) / (NV - 1);
-    const mSube = new THREE.MeshStandardMaterial({color: 0xA6F03C, emissive: 0xA6F03C, emissiveIntensity: .75, transparent: true, opacity: .9, fog: false});
-    const mBaja = new THREE.MeshStandardMaterial({color: 0xFF4D6A, emissive: 0xFF4D6A, emissiveIntensity: .5, transparent: true, opacity: .8, fog: false});
-    const caja = new THREE.BoxGeometry(1, 1, 1);
-    const GV = new THREE.Group(); S.add(GV);
-    const rejilla = new THREE.Group(); S.add(rejilla);
-    for (let k = 0; k <= 4; k++){ const y = CH.y0 + (CH.y1 - CH.y0) * k / 4;
-      rejilla.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(CH.x0 - .4, y, CH.z - .1), new THREE.Vector3(CH.x1 + .4, y, CH.z - .1)]),
-        new THREE.LineBasicMaterial({color: 0xA6F03C, transparent: true, opacity: 0, fog: false}))); }
-    const V = {L: null, fuente: null, velas: [], tubo: null, total: 0, t0: null, aY: null, ult: [CH.x1, (CH.y0 + CH.y1) / 2, CH.z]};
-    const pone = (g, v, sube) => { const ya = V.aY(Math.min(v.a, v.c)), yb = V.aY(Math.max(v.a, v.c)), alto = Math.max(.06, yb - ya);
-      const [me, cu] = g.children; cu.material = me.material = sube ? mSube : mBaja;
-      cu.scale.set(PV * .58, alto, .12); cu.position.y = ya + alto / 2 - CH.y0;
-      const hy = V.aY(v.h), ly = V.aY(v.l); me.scale.set(.03, Math.max(.02, hy - ly), .03); me.position.y = (hy + ly) / 2 - CH.y0; };
-    function velas(fuente, t){
-      const L = fuente.slice(-NV).map(v => ({...v})); if (L.length < 2) return;
-      const mn = Math.min(...L.map(v => v.l)), mx = Math.max(...L.map(v => v.h)), r = mx - mn || 1;
-      V.aY = v => CH.y0 + (v - mn) / r * (CH.y1 - CH.y0);
-      while (V.velas.length < L.length){ const g = new THREE.Group(); g.add(new THREE.Mesh(caja, mSube), new THREE.Mesh(caja, mSube)); GV.add(g); V.velas.push(g); }
-      V.velas.forEach((g, i) => { g.visible = i < L.length; });
-      const x0 = CH.x1 - (L.length - 1) * PV;
-      L.forEach((v, i) => { const g = V.velas[i]; g.position.set(x0 + i * PV, CH.y0, CH.z); pone(g, v, v.c >= v.a); });
-      if (V.tubo){ GV.remove(V.tubo); V.tubo.geometry.dispose(); }
-      const curva = new THREE.CatmullRomCurve3(L.map((v, i) => new THREE.Vector3(x0 + i * PV, V.aY(v.c), CH.z + .2)));
-      const geo = new THREE.TubeGeometry(curva, 400, .025, 6, false);
-      V.tubo = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({color: new THREE.Color(0xC8FF6A).multiplyScalar(1.6), fog: false})); GV.add(V.tubo);
-      V.total = geo.index.count; V.L = L; V.fuente = fuente;
-      if (V.t0 === null) V.t0 = Math.max(t, 1.3) - (quieto ? 99 : 0);
-    }
-    function vivo(){
-      if (!V.L) return; const p = api.precio(); if (!p) return;
-      const u = {...V.L[V.L.length - 1]}; u.c = p; u.h = Math.max(u.h, p); u.l = Math.min(u.l, p);
-      pone(V.velas[V.L.length - 1], u, u.c >= u.a); V.ult = [CH.x1, V.aY(u.c), CH.z];
-    }
-
     /* anillo láser que recorre la torre */
     const anillo = new THREE.Mesh(new THREE.TorusGeometry(1.0, .012, 8, 96), new THREE.MeshBasicMaterial({color: new THREE.Color(0xA6F03C).multiplyScalar(3.2)}));
     anillo.rotation.x = Math.PI / 2; anillo.scale.set(1.62, 1.62, 1); S.add(anillo);
@@ -166,16 +129,14 @@ export function arrancar(sec, api){
     const v3 = new THREE.Vector3();
     const aPant = (x, y, z) => { v3.set(x, y, z).project(C); return [(v3.x * .5 + .5) * W, (-v3.y * .5 + .5) * H]; };
     const ETQ = MOVIL
-      ? [['#c3e1', 4.2, () => V.ult, [-12, 50]], ['#c3e2', 3.3, () => FLOT[1].position.toArray(), [-30, 26]], ['#c3e3', 4.9, () => [EX - .85, 4.2, -.6], [-12, 0]]]
-      : [['#c3e1', 4.2, () => V.ult, [-30, 70]], ['#c3e3', 4.9, () => [EX - .85, 1.8, -.6], [-70, 0]], ['#c3e2', 3.3, () => FLOT[1].position.toArray(), [-60, 95]]];
+      ? [['#c3e1', 3.0, () => FLOT[0].position.toArray(), [34, -30]], ['#c3e2', 3.3, () => FLOT[1].position.toArray(), [-30, 26]], ['#c3e3', 4.9, () => [EX - .85, 4.2, -.6], [-12, 0]]]
+      : [['#c3e1', 3.0, () => FLOT[0].position.toArray(), [-50, -40]], ['#c3e3', 4.9, () => [EX - .85, 1.8, -.6], [-70, 0]], ['#c3e2', 3.3, () => FLOT[1].position.toArray(), [-60, 95]]];
     const lin = q('.c3-lin'), fi = q('#c3fi'), vela = {};
     const caja2 = e => { const b = e.getBoundingClientRect(), rs = sec.getBoundingClientRect(); return {l: b.left - rs.left, t: b.top - rs.top, r: b.right - rs.left, b: b.bottom - rs.top}; };
     const choca = (a, b) => a.l < b.r + 8 && a.r > b.l - 8 && a.t < b.b + 8 && a.b > b.t - 8;
     let fijos = null;
 
     function render(t){
-      if (api.velas() && api.velas() !== V.fuente) velas(api.velas(), t);
-      vivo();
       const ent = e5(seg(t, 0, 3.4)), ang = lerp(-.55, -.18, ent) + Math.sin(t * .16) * .06;
       if (MOVIL){ const rm = lerp(19, 22, ent);
         C.position.set(EX + Math.sin(ang * .6) * rm, lerp(2.4, 4.2, ent), -.6 + Math.cos(ang * .6) * rm); C.lookAt(EX, LY, -.6); }
@@ -195,22 +156,18 @@ export function arrancar(sec, api){
       anillo.material.color.set(0xA6F03C).multiplyScalar(3.2 * (anillo.visible ? cl((t - 2.2) * 3) * (1 - seg(t, 4.8, 5.4)) : 0));
       plantas.forEach(p => { const enc = t > 4.8 ? 1 : (p.y > ys ? 1 : 0), k = enc * cl((t - 2.4) * 2);
         p.m.emissiveIntensity = (.1 + .38 * k) * (.85 + .15 * Math.sin(t * 2 + p.y)); });
-      const tv = V.t0 === null ? -1 : t - V.t0 + 1.3;
-      V.velas.forEach((g, i) => { const k = e5(seg(tv, 1.3 + i * .065, 1.8 + i * .065)); g.scale.y = Math.max(.001, k); if (V.L) g.visible = i < V.L.length && k > 0; });
-      if (V.tubo) V.tubo.geometry.setDrawRange(0, Math.floor(V.total * eio(seg(tv, 1.6, 4.4)) / 6) * 6);
-      rejilla.children.forEach(l => l.material.opacity = .13 * eo(seg(t, 1.0, 2.0)));
       comp.render();
       /* etiquetas con su línea al punto de la escena */
       let h = '';
       const kf = e5(seg(t, 5.6, 6.5)), fx = MOVIL ? 20 : W - 96 - 340, fy = MOVIL ? H - 58 : H * .86;
       if (!fijos && t > 2.4) fijos = [...qq('.c3-eye, .c3 h1 .mask, .c3-sub, .c3-ctas a')].filter(e => e.offsetWidth).map(caja2);
       const puestos = (fijos || []).slice(); if (kf > 0) puestos.push({l: fx, t: fy - fi.offsetHeight, r: fx + fi.offsetWidth, b: fy});
-      ETQ.forEach(([s, a, p, off]) => { const el = q(s), sin = s === '#c3e1' && !V.L;
+      ETQ.forEach(([s, a, p, off]) => { const el = q(s), sin = s === '#c3e1' && !api.precio();
         const [x, y] = aPant(...p()), ew = el.offsetWidth, eh = el.offsetHeight, ly = y + off[1];
         const izq = Math.max(8, Math.min(W - 8 - ew, off[0] < 0 ? x + off[0] - ew : x + off[0])), lx = off[0] < 0 ? izq + ew : izq;
         const rc = {l: izq, t: ly - eh / 2, r: izq + ew, b: ly + eh / 2}, libre = !puestos.some(o => choca(rc, o));
         vela[s] = lerp(vela[s] ?? (libre ? 1 : 0), libre ? 1 : 0, quieto ? 1 : .12); if (vela[s] > .5) puestos.push(rc);
-        const k = (sin ? 0 : e5(seg(s === '#c3e1' ? Math.min(t, tv) : t, a, a + .7)) * (MOVIL && s !== '#c3e1' ? 1 - e5(seg(t, 5.4, 5.9)) : 1)) * vela[s];
+        const k = (sin ? 0 : e5(seg(t, a, a + .7)) * (MOVIL && s !== '#c3e1' ? 1 - e5(seg(t, 5.4, 5.9)) : 1)) * vela[s];
         el.style.opacity = k; el.style.visibility = k > 0 ? 'visible' : 'hidden';
         el.style.transform = `translate(${izq}px,${ly}px) translate(0,-50%) scale(${.9 + .1 * k})`;
         if (k > 0) h += `<line x1="${x}" y1="${y}" x2="${lerp(x, lx, k)}" y2="${lerp(y, ly, k)}" stroke="rgba(166,240,60,${.7 * k})" stroke-width="1"/><circle cx="${x}" cy="${y}" r="${3.5 * k}" fill="#A6F03C"/>`; });

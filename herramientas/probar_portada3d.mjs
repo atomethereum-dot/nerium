@@ -1,5 +1,6 @@
-/* Portada 3D de /app y pie: la escena carga y se detiene fuera de la portada, los
-   enlaces llevan a su vista, y «NEREUM» + el logo del pie caben en cualquier ancho.
+/* Portada 3D de /app, pie y P2P: la escena carga y se detiene fuera de la portada, los
+   enlaces llevan a su vista, «NEREUM» + el logo del pie caben en cualquier ancho, y
+   P2P muestra la tasa de referencia y guarda, valida y borra anuncios.
    Uso: node herramientas/probar_portada3d.mjs (sirve la carpeta del repo). */
 import { chromium } from 'playwright'; import http from 'http'; import fs from 'fs'; import path from 'path';
 const R = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
@@ -38,8 +39,21 @@ const p = await b.newPage({viewport: {width: 1280, height: 800}}); await simula(
 await p.goto(URL0 + '#/spot'); await p.waitForTimeout(1500);
 prueba('el spot no carga la escena 3D', await p.evaluate(() => !document.querySelector('.c3-gl')));
 await p.evaluate(() => location.hash = '#/'); await p.waitForFunction(() => typeof c3 !== 'undefined' && c3, null, {timeout: 60000});
-for (const [sel, v] of [['.c3-pasos a[href="#/swap"]', 'swap'], ['.c3-nav a[href="#/pools"]', 'pools'], ['.c3-ctas .lima', 'spot']]){
+for (const [sel, v] of [['.c3-pasos a[href="#/p2p"]', 'p2p'], ['.c3-pasos a[href="#/swap"]', 'swap'], ['.c3-nav a[href="#/pools"]', 'pools'], ['.c3-ctas .lima', 'spot']]){
   await p.evaluate(() => location.hash = '#/'); await p.waitForTimeout(300); await p.click(sel); await p.waitForTimeout(300);
   prueba(`${sel} lleva a ${v}`, await p.evaluate(() => vista) === v); }
+/* P2P */
+await p.route(/api\.coinbase\.com\/v2\/exchange-rates/, r => r.fulfill({contentType: 'application/json', body: JSON.stringify({data: {rates: {USD: '1', EUR: '0.9312'}}})}));
+await p.evaluate(() => { localStorage.removeItem('nereum-dex-p2p'); localStorage.removeItem('nereum-dex-p2p-ads'); location.hash = '#/p2p'; }); await p.waitForTimeout(600);
+await p.selectOption('#ppFiat', 'EUR'); await p.waitForTimeout(400);
+prueba('P2P: tasa de referencia en vivo', (await p.textContent('#ppRef')).includes('0.9312 EUR'));
+await p.fill('#ppC1', '93.12'); prueba('P2P: la calculadora convierte a la tasa', (await p.inputValue('#ppC2')) === '100.00');
+prueba('P2P: libro vacío, sin ofertas inventadas', (await p.textContent('#ppVacioT')).startsWith('No sellers yet'));
+await p.click('#ppCalcBt'); await p.click('#ppPost');
+prueba('P2P: pide mínimo y método de pago', (await p.$$eval('#ppForm .e:not([hidden])', e => e.length)) === 2);
+await p.fill('[data-pf="min"]', '10'); await p.click('[data-pfm="SEPA"]'); await p.click('#ppPost'); await p.waitForTimeout(200);
+prueba('P2P: el anuncio queda en «My ads»', (await p.$$eval('#ppCuerpo tr', t => t.length)) === 1);
+await p.reload(); await p.waitForTimeout(800); prueba('P2P: el anuncio sigue tras recargar', (await p.$$eval('#ppCuerpo tr', t => t.length)) === 1);
+await p.click('[data-borra]'); prueba('P2P: se puede borrar', (await p.textContent('#ppVacioT')) === 'You have no ads');
 await b.close(); s.close();
 console.log(`\n${ok}/${ok + mal}`); process.exit(mal ? 1 : 0);

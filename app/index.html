@@ -637,6 +637,32 @@ button.red-sel:hover{background:var(--campo2)}
 .chp.on{background:#fff;color:#000}
 .chp i{width:8px;height:8px;border-radius:50%;background:var(--c,#555)}
 .sep{height:1px;background:var(--linea);margin:16px 0}
+/* p2p */
+.pp-fil{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:12px 16px;border-bottom:1px solid var(--linea)}
+.pp-fil .sel select{height:36px;padding:0 28px 0 12px;font-size:13px;font-weight:600;color:#fff}
+.pp-fil .fld{height:36px;margin:0;flex:1 1 180px;max-width:260px}
+#vP2P .vacio-g{padding:56px 20px}
+#vP2P .tb{min-width:820px}
+.pp-tipo{display:inline-flex;align-items:center;height:22px;padding:0 8px;border-radius:6px;font-size:11.5px;font-weight:700}
+.pp-tipo.c{background:var(--up-f);color:var(--up)} .pp-tipo.v{background:rgba(255,77,106,.12);color:var(--dn)}
+.pp-pagos{display:flex;flex-wrap:wrap;gap:4px;max-width:220px;white-space:normal}
+.pp-pagos span{font-size:11px;padding:2px 7px;border-radius:5px;background:var(--campo);color:var(--t2)}
+.pp-borra{font-size:12px;font-weight:600;color:var(--t3);padding:6px 10px;border-radius:8px}
+.pp-borra:hover{color:var(--dn);background:var(--panel2)}
+.pp-ref{font-size:11.5px;color:var(--t3);margin-top:2px} .pp-ref b{color:#fff;font-weight:600}
+#ppForm textarea.inp{height:84px;padding:10px 12px;resize:vertical;line-height:1.5;font-family:inherit}
+#ppForm .accion{margin-top:6px}
+@media(max-width:700px){
+  #vP2P .tb{min-width:0} #vP2P .tb thead{display:none}
+  #vP2P .tb tr{display:grid;grid-template-columns:1fr 1fr;gap:12px 14px;padding:16px;border-bottom:1px solid var(--linea)}
+  #vP2P .tb td{height:auto;padding:0;border:0;white-space:normal;text-align:left}
+  #vP2P .tb td[data-l]::before{content:attr(data-l);display:block;font-size:11px;color:var(--t3);margin-bottom:4px}
+  #vP2P .tb td:first-child::before,#vP2P .tb td:nth-child(2)::before{display:none}
+  #vP2P .tb td:first-child{order:2;justify-self:end} #vP2P .tb td:nth-child(2){order:1}
+  #vP2P .tb td:nth-child(n+3){order:3} #vP2P .tb td:last-child{order:4;grid-column:1/-1}
+  #vP2P .tb td:last-child .pp-borra{width:100%;height:36px;background:var(--campo)}
+}
+@media(max-width:1023px){ .pp-fil .fld{max-width:none;flex-basis:100%} .pp-fil .sel{flex:1 1 0} .pp-fil .sel select{width:100%} }
 /* tokenizar */
 .tk-pasos{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-bottom:20px}
 .tk-paso{display:grid;gap:8px;font-size:12px;color:var(--t4);font-weight:600;text-align:left}
@@ -697,7 +723,8 @@ select.inp option{background:#141417}
   .top{height:auto;flex-wrap:wrap;row-gap:0;padding-top:8px;padding-bottom:0}
   .top > .marca,.top > .ib,.top > .wal{height:36px}
   .nav{order:9;flex:0 0 calc(100% + 26px);margin:6px -12px 0 -14px;padding:0 6px;height:42px;align-items:center;border-top:1px solid var(--linea)}
-  .nav button{font-size:14px;padding:0 9px;height:32px}
+  .nav{justify-content:space-between}
+  .nav button{font-size:14px;padding:0 7px;height:32px}
   .stats4{grid-template-columns:1fr 1fr}
   .dos-c{grid-template-columns:1fr}
   .caja-r input{font-size:24px}
@@ -705,7 +732,8 @@ select.inp option{background:#141417}
   .tk-bts{flex-wrap:wrap}
   .tk-bts .pill{flex:1}
 }
-@media(max-width:419px){ .nav button{font-size:13.5px;padding:0 6px} }
+@media(max-width:419px){ .nav button{font-size:13px;padding:0 4px} }
+@media(max-width:359px){ .nav button{font-size:12px;padding:0 3px} }
 
 /* ══ pie de la web principal, en negro, bajo la portada ══ */
 @font-face{font-family:NSw;font-weight:300;font-display:swap;src:url(/assets/fonts/switzer-300-normal-latin.woff2) format('woff2')}
@@ -736,7 +764,7 @@ select.inp option{background:#141417}
   .cv-foot .fmark{margin-top:52px}
 }
 
-/* ══ portada 3D: la ciudad, la torre, las monedas y las velas reales de BTC (app/portada/escena.js) ══ */
+/* ══ portada 3D: la ciudad, la torre y las monedas, con el precio en vivo de BTC (app/portada/escena.js) ══ */
 .c3{position:relative;height:100vh;height:100svh;min-height:560px;overflow:hidden;background:#020302;color:#E4E4E7;font-family:var(--f);isolation:isolate}
 .c3 .c3-gl{position:absolute;inset:0;width:100%;height:100%;z-index:0;display:block}
 .c3.sin3d{background:radial-gradient(ellipse 70% 60% at 68% 40%,rgba(166,240,60,.16),rgba(166,240,60,0) 60%),#020302}
@@ -879,6 +907,7 @@ body.portada .top,body.portada .pie{display:none}
   <nav class="nav">
     <button data-v="spot" class="on">Spot</button>
     <button data-v="swap">Swap</button>
+    <button data-v="p2p">P2P</button>
     <button data-v="pools">Pools</button>
     <button data-v="bridge">Bridge</button>
     <button data-v="tokenize">Tokenize</button>
@@ -1100,7 +1129,7 @@ body.portada .top,body.portada .pie{display:none}
   <section class="c3" id="c3" aria-label="Nereum DEX">
     <div class="c3-vin"></div><div class="c3-izq"></div><svg class="c3-lin" aria-hidden="true"></svg>
     <header class="c3-top"><a class="c3-marca" href="/" aria-label="NereumEVM · nereum.xyz">Nereum<span>EVM</span></a>
-      <nav class="c3-nav"><a href="#/spot">Spot</a><a href="#/swap">Swap</a><a href="#/pools">Pools</a><a href="#/bridge">Bridge</a><a href="#/tokenize">Tokenize</a><a href="#/portfolio">Portfolio</a></nav>
+      <nav class="c3-nav"><a href="#/spot">Spot</a><a href="#/swap">Swap</a><a href="#/p2p">P2P</a><a href="#/pools">Pools</a><a href="#/bridge">Bridge</a><a href="#/tokenize">Tokenize</a><a href="#/portfolio">Portfolio</a></nav>
       <span class="esp"></span><a class="c3-pill blanco chico" href="#/spot">Launch app</a></header>
     <div class="c3-hero">
       <span class="c3-eye" data-fade=".5,1.1"><i></i>The exchange on NereumEVM</span>
@@ -1108,7 +1137,7 @@ body.portada .top,body.portada .pie{display:none}
       <p class="c3-sub" data-fade="1.5,2.1">Spot, swaps, P2P, pools, a bridge and real-asset tokenization. Everything an exchange does, in one app, settled on NereumEVM.</p>
       <div class="c3-ctas" data-fade="1.75,2.35"><a class="c3-pill lima" href="#/spot">Start trading <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg></a><a class="c3-pill borde" href="#/spot">Launch app</a></div>
     </div>
-    <nav class="c3-pasos" data-fade="2.0,2.6" aria-label="Products"><a href="#/spot"><i><b id="c3p1"></b></i><span id="c3s1">SPOT</span></a><a href="#/swap"><i><b id="c3p2"></b></i><span id="c3s2">SWAP</span></a><span><i><b id="c3p3"></b></i><span id="c3s3">P2P</span></span><a href="#/pools"><i><b id="c3p4"></b></i><span id="c3s4">POOLS</span></a><a href="#/bridge"><i><b id="c3p5"></b></i><span id="c3s5">BRIDGE</span></a><a href="#/tokenize"><i><b id="c3p6"></b></i><span id="c3s6">TOKENIZE</span></a></nav>
+    <nav class="c3-pasos" data-fade="2.0,2.6" aria-label="Products"><a href="#/spot"><i><b id="c3p1"></b></i><span id="c3s1">SPOT</span></a><a href="#/swap"><i><b id="c3p2"></b></i><span id="c3s2">SWAP</span></a><a href="#/p2p"><i><b id="c3p3"></b></i><span id="c3s3">P2P</span></a><a href="#/pools"><i><b id="c3p4"></b></i><span id="c3s4">POOLS</span></a><a href="#/bridge"><i><b id="c3p5"></b></i><span id="c3s5">BRIDGE</span></a><a href="#/tokenize"><i><b id="c3p6"></b></i><span id="c3s6">TOKENIZE</span></a></nav>
     <div class="c3-etq" id="c3e1">BTC / USDT · SPOT<b><span id="c3Px">—</span><i id="c3Cam"></i></b></div>
     <div class="c3-etq" id="c3e2">SWAP · POOL FEE<b>0.30%</b></div>
     <div class="c3-etq" id="c3e3">TOKENIZE<b>Chamberi Tower · CHAM</b></div>
@@ -1197,6 +1226,65 @@ body.portada .top,body.portada .pie{display:none}
   </div>
 </main>
 
+<!-- ══ p2p ══ -->
+<main class="vista" id="vP2P" hidden>
+  <div class="v-cab"><div><h1>P2P</h1><p>Buy and sell crypto directly with other people and pay in your own currency. The seller's coins wait in a NereumEVM escrow until the payment is confirmed, so neither side has to trust the other.</p></div>
+    <button class="pill lima" id="ppNuevo">+ Post an ad</button></div>
+  <div class="stats4">
+    <div class="st4"><i id="ppRefI">Reference rate · 1 USDT</i><b id="ppRef">—</b><s id="ppRefS">Live market rate</s></div>
+    <div class="st4"><i>Market</i><b id="ppMer">USDT / USD</b><s>Paid outside the chain, in your currency</s></div>
+    <div class="st4"><i>Escrow</i><b>NereumEVM</b><s>Coins locked until the seller confirms</s></div>
+    <div class="st4"><i>Your ads</i><b id="ppMias">0</b><s>Saved in this browser</s></div>
+  </div>
+  <div class="dos tk-l">
+    <section class="card" style="padding:0">
+      <div class="p-bar">
+        <div class="p-tabs" id="ppTabs"><button data-pt="buy">Buy</button><button data-pt="sell">Sell</button><button data-pt="mine">My ads</button></div>
+      </div>
+      <div class="pp-fil">
+        <span class="sel"><select id="ppCripto" aria-label="Crypto"></select><svg viewBox="0 0 12 12"><path fill="currentColor" d="M1 3.5h10L6 9.5z"/></svg></span>
+        <span class="sel"><select id="ppFiat" aria-label="Currency"></select><svg viewBox="0 0 12 12"><path fill="currentColor" d="M1 3.5h10L6 9.5z"/></svg></span>
+        <span class="sel"><select id="ppPago" aria-label="Payment method"></select><svg viewBox="0 0 12 12"><path fill="currentColor" d="M1 3.5h10L6 9.5z"/></svg></span>
+        <label class="fld pp-monto"><label for="ppMonto">Amount</label><input id="ppMonto" inputmode="decimal" placeholder="Any" autocomplete="off"><span class="u" id="ppMontoU">USD</span></label>
+      </div>
+      <div class="tw" id="ppTabla" hidden><table class="tb"><thead><tr><th>Type</th><th>Asset</th><th class="d">Price</th><th class="d">Amount</th><th class="d">Limits</th><th>Payment</th><th>Status</th><th></th></tr></thead><tbody id="ppCuerpo"></tbody></table></div>
+      <div class="vacio-g" id="ppVacio">
+        <svg viewBox="0 0 48 48" fill="none" stroke="#4A4A52" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="16" cy="17" r="6"/><circle cx="32" cy="17" r="6"/><path d="M6 38c0-6 4.5-10 10-10s10 4 10 10M22 38c0-6 4.5-10 10-10s10 4 10 10"/></svg>
+        <b id="ppVacioT">No offers yet</b><span id="ppVacioS"></span><button class="pill blanco" id="ppVacioB">Post an ad</button></div>
+    </section>
+    <aside>
+      <section class="card">
+        <div class="card-h"><b id="ppCalcT">Buy USDT</b><span class="vivo"><i></i><span>Reference rate</span></span></div>
+        <div class="caja">
+          <div class="caja-l"><span id="ppC1L">You pay</span></div>
+          <div class="caja-r"><input id="ppC1" inputmode="decimal" placeholder="0" autocomplete="off" aria-label="Amount"><span class="tk" id="ppC1U">USD</span></div>
+        </div>
+        <div class="caja" style="margin-top:8px">
+          <div class="caja-l"><span id="ppC2L">You receive</span><span>At the reference rate</span></div>
+          <div class="caja-r"><input id="ppC2" readonly placeholder="0" aria-label="Estimated amount"><span class="tk" id="ppC2U">USDT</span></div>
+        </div>
+        <div class="filas det">
+          <div class="fila"><span>Reference rate</span><b id="ppCRef">—</b></div>
+          <div class="fila"><span>Final price</span><b>Set by each ad</b></div>
+          <div class="fila"><span>Settlement</span><b>Escrow on NereumEVM</b></div>
+        </div>
+        <button class="accion" id="ppCalcBt">Post a buy ad at this rate</button>
+      </section>
+      <section class="card" style="margin-top:16px">
+        <div class="card-h"><b>How P2P works</b></div>
+        <ol class="pasos-l">
+          <li><em>1</em><span><b>Pick an offer</b>Choose a price, a limit that fits your amount and a payment method you use.</span></li>
+          <li><em>2</em><span><b>Coins go into escrow</b>The seller's coins are locked on NereumEVM for the length of the order. Nobody can move them.</span></li>
+          <li><em>3</em><span><b>Pay the seller directly</b>You send the money with the agreed method, outside the chain, and mark the order as paid.</span></li>
+          <li><em>4</em><span><b>Escrow releases</b>When the seller confirms the payment the coins are released to your wallet. If something goes wrong, the order goes to a dispute.</span></li>
+        </ol>
+        <p class="nota">Never release coins before the money is in your account, and never pay outside the method in the order. Nereum never asks you to move funds through chat.</p>
+      </section>
+    </aside>
+  </div>
+  <p class="nota" style="margin-top:12px">The reference rate is the live market rate for each currency. The P2P book opens with the NereumEVM mainnet: ads you post now are kept in this browser and nothing is published or locked until then.</p>
+</main>
+
 <!-- ══ pools ══ -->
 <main class="vista" id="vPools" hidden>
   <div class="v-cab"><div><h1>Pools</h1><p>Provide liquidity to Nereum AMM pools. Every trade routed through a pool pays it the 0.30% fee, shared by its liquidity providers.</p></div>
@@ -1280,6 +1368,14 @@ body.portada .top,body.portada .pie{display:none}
   <div class="v-cab"><div><h1>Portfolio</h1><p>Your wallet, its network and balance, and the markets you follow. Read straight from your wallet; Nereum never holds your keys.</p></div></div>
   <div id="portC"></div>
 </main>
+
+<!-- anuncio P2P -->
+<div class="modal" id="mP2P" role="dialog" aria-modal="true" aria-label="Post a P2P ad">
+  <div class="mod" style="width:min(560px,100%)">
+    <div class="mod-t"><b>Post a P2P ad</b><button class="ib" data-cierra aria-label="Close">✕</button></div>
+    <div id="ppForm"></div>
+  </div>
+</div>
 
 <!-- token -->
 <div class="modal" id="mTok" role="dialog" aria-modal="true" aria-label="Select a token">
@@ -2284,8 +2380,8 @@ let rz; addEventListener('resize', () => { clearTimeout(rz); rz = setTimeout(() 
 Object.assign(COIN, {USDT:['#26A17B','#fff'], USDC:['#2775CA','#fff'], POL:['#8247E5','#fff'], SepoliaETH:['#627EEA','#fff']});
 Object.assign(NOMBRE, {USDT:'Tether USD', USDC:'USD Coin', POL:'Polygon', SepoliaETH:'Sepolia Ether'});
 const TOKS = [['USDT','Tether USD'], ...PARES];
-const VISTAS = {cover:'#vCover', spot:'#app', swap:'#vSwap', pools:'#vPools', bridge:'#vBridge', tokenize:'#vTok', portfolio:'#vPort'};
-const TITULOS = {cover:'Nereum DEX · Spot, swap, pools, bridge and tokenization', swap:'Swap', pools:'Pools', bridge:'Bridge', tokenize:'Tokenize', portfolio:'Portfolio'};
+const VISTAS = {cover:'#vCover', spot:'#app', swap:'#vSwap', p2p:'#vP2P', pools:'#vPools', bridge:'#vBridge', tokenize:'#vTok', portfolio:'#vPort'};
+const TITULOS = {cover:'Nereum DEX · Spot, swap, pools, bridge and tokenization', swap:'Swap', p2p:'P2P', pools:'Pools', bridge:'Bridge', tokenize:'Tokenize', portfolio:'Portfolio'};
 const FLECHA = '<svg viewBox="0 0 12 12"><path fill="currentColor" d="M1 3.5h10L6 9.5z"/></svg>';
 const esc = v => String(v == null ? '' : v).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const coinHtml = s => { const c = COIN[s]||['#333','#fff']; return `<i class="coin ${CON_LOGO.has(s) ? 'logo' : ''}" style="--c:${c[0]};--cf:${c[1]}">${coinIn(s)}</i>`; };
@@ -2296,7 +2392,7 @@ const corta = a => a.slice(0,6)+'…'+a.slice(-4);
 function sacude(b){ b.classList.remove('sacude'); void b.offsetWidth; b.classList.add('sacude'); }
 let vista = 'spot';
 function ruta(){
-  const v = (location.hash.match(/^#\/([a-z]+)/)||[])[1];
+  const v = (location.hash.match(/^#\/([a-z0-9]+)/)||[])[1];
   vista = VISTAS[v] ? v : 'cover';
   document.body.classList.toggle('portada', vista === 'cover');
   if (c3 && vista !== 'cover') c3.activa(false);
@@ -2308,11 +2404,11 @@ function ruta(){
   scrollTo(0, 0);
 }
 function pintaVista(){
-  if (vista === 'cover') pintaCover(); else if (vista === 'swap') pintaSwap(); else if (vista === 'pools') pintaPools(); else if (vista === 'bridge') pintaBridge();
+  if (vista === 'cover') pintaCover(); else if (vista === 'swap') pintaSwap(); else if (vista === 'p2p') pintaP2P(); else if (vista === 'pools') pintaPools(); else if (vista === 'bridge') pintaBridge();
   else if (vista === 'tokenize') pintaTok(); else if (vista === 'portfolio') pintaPort();
 }
 function vivoVista(){
-  if (vista === 'cover') vivoCover(); else if (vista === 'swap'){ swCalc(); swInfo(false); } else if (vista === 'pools') vivoPools();
+  if (vista === 'cover') vivoCover(); else if (vista === 'swap'){ swCalc(); swInfo(false); } else if (vista === 'p2p') ppRefPinta(); else if (vista === 'pools') vivoPools();
   else if (vista === 'bridge') pintaBridge(); else if (vista === 'portfolio') vivoPort();
 }
 $$('.nav button[data-v]').forEach(b => b.onclick = () => { location.hash = '#/'+b.dataset.v; });
@@ -2659,6 +2755,169 @@ function vivoPort(){
 $('#portC').onclick = e => { const b = e.target.closest('[data-trade]'); if (b){ location.hash = '#/spot'; elige(b.dataset.trade); return; }
   const r = e.target.closest('[data-ir2]'); if (r) location.hash = '#/'+r.dataset.ir2; };
 
+/* ══ P2P ══
+   Compra y venta directa entre personas, pagada en moneda local; las monedas del
+   vendedor esperan en un escrow de NereumEVM. El libro abre con la mainnet: hasta
+   entonces la tasa de referencia es real (Coinbase; si no responde, el precio en USD
+   del spot por el cambio del día) y los anuncios se guardan en este navegador. */
+const PP_CRIPTO = ['USDT', 'USDC', 'BTC', 'ETH'];
+const PP_FIAT = [['USD','US dollar'], ['EUR','Euro'], ['GBP','British pound'], ['MXN','Mexican peso'], ['COP','Colombian peso'], ['ARS','Argentine peso'],
+  ['BRL','Brazilian real'], ['CLP','Chilean peso'], ['PEN','Peruvian sol'], ['VES','Venezuelan bolívar'], ['CAD','Canadian dollar'], ['INR','Indian rupee'],
+  ['NGN','Nigerian naira'], ['TRY','Turkish lira']];
+const PP_PAGO_LOCAL = {USD:['ACH','Wire transfer'], EUR:['SEPA','SEPA Instant'], GBP:['Faster Payments'], MXN:['SPEI'], BRL:['PIX'], INR:['UPI'], COP:['PSE'], ARS:['CVU / CBU'], PEN:['Interbank transfer']};
+const ppPagos = f => [...(PP_PAGO_LOCAL[f] || []), 'Bank transfer', 'Mobile wallet', 'Cash in person'];
+const PP_VENTANA = [15, 30, 45, 60];
+let PP = carga('nereum-dex-p2p', {tab:'buy', cripto:'USDT', fiat:'USD', pago:'', monto:''});
+let ppAds = (() => { try{ const v = JSON.parse(localStorage.getItem('nereum-dex-p2p-ads')); return Array.isArray(v) ? v : []; }catch(e){ return []; } })();
+const ppGuarda = () => { guarda('nereum-dex-p2p', PP); guarda('nereum-dex-p2p-ads', ppAds); };
+const ppTasas = {}; let ppUsdFiat = null;
+async function ppCargaTasa(c){
+  const e = ppTasas[c]; if (e && Date.now() - e.t < 60000) return;
+  try{ const j = await (await fetch('https://api.coinbase.com/v2/exchange-rates?currency=' + c)).json();
+    if (j.data && j.data.rates){ ppTasas[c] = {t: Date.now(), r: j.data.rates}; return; } }catch(e2){}
+  if (!ppUsdFiat || Date.now() - ppUsdFiat.t > 600000){
+    try{ const j = await (await fetch('https://open.er-api.com/v6/latest/USD')).json(); if (j.rates) ppUsdFiat = {t: Date.now(), r: j.rates}; }catch(e3){} }
+}
+/* cuánto vale 1 unidad de la cripto en la moneda elegida; 0 si no hay dato */
+function ppRef(c = PP.cripto, f = PP.fiat){
+  const e = ppTasas[c]; if (e && +e.r[f]) return +e.r[f];
+  const usd = estable(c) ? 1 : (datos[c] ? datos[c].px : 0); if (!usd) return 0;
+  if (f === 'USD') return usd;
+  return ppUsdFiat && +ppUsdFiat.r[f] ? usd * ppUsdFiat.r[f] : 0;
+}
+const ppF = v => !v ? '—' : nf(v, v >= 1e5 ? 0 : v < 10 ? 4 : 2);
+const ppPx = a => a.tipoPx === 'flot' ? ppRef(a.cripto, a.fiat) * a.pct / 100 : +a.px;
+
+function ppSelects(){
+  $('#ppCripto').innerHTML = PP_CRIPTO.map(c => `<option ${PP.cripto === c ? 'selected' : ''}>${c}</option>`).join('');
+  $('#ppFiat').innerHTML = PP_FIAT.map(([c, n]) => `<option value="${c}" ${PP.fiat === c ? 'selected' : ''}>${c} · ${n}</option>`).join('');
+  if (PP.pago && !ppPagos(PP.fiat).includes(PP.pago)) PP.pago = '';
+  $('#ppPago').innerHTML = `<option value="">All payment methods</option>` + ppPagos(PP.fiat).map(p => `<option ${PP.pago === p ? 'selected' : ''}>${esc(p)}</option>`).join('');
+  $('#ppMonto').value = PP.monto; $('#ppMontoU').textContent = PP.fiat;
+}
+async function pintaP2P(){
+  ppSelects(); ppLibro(); ppRefPinta();
+  await ppCargaTasa(PP.cripto); if (vista === 'p2p') ppRefPinta();
+}
+function ppRefPinta(){
+  const r = ppRef(), compra = PP.tab !== 'sell';
+  $('#ppRefI').textContent = `Reference rate · 1 ${PP.cripto}`; $('#ppRef').textContent = r ? `${ppF(r)} ${PP.fiat}` : '—';
+  $('#ppRefS').textContent = r ? 'Live market rate' : 'Rate unavailable right now';
+  $('#ppMer').textContent = `${PP.cripto} / ${PP.fiat}`; $('#ppMias').textContent = ppAds.length;
+  $('#ppCRef').textContent = r ? `${ppF(r)} ${PP.fiat}` : '—';
+  $('#ppCalcT').textContent = `${compra ? 'Buy' : 'Sell'} ${PP.cripto}`;
+  $('#ppC1L').textContent = compra ? 'You pay' : 'You sell'; $('#ppC2L').textContent = 'You receive';
+  $('#ppC1U').textContent = compra ? PP.fiat : PP.cripto; $('#ppC2U').textContent = compra ? PP.cripto : PP.fiat;
+  const v = parseFloat($('#ppC1').value.replace(',', '.')) || 0;
+  $('#ppC2').value = v && r ? (compra ? fT(v / r, PP.cripto) : ppF(v * r)) : '';
+  $('#ppCalcBt').textContent = `Post a ${compra ? 'buy' : 'sell'} ad at this rate`;
+  if (PP.tab === 'mine') ppLibro();
+}
+function ppLibro(){
+  $$('#ppTabs button').forEach(b => b.classList.toggle('on', b.dataset.pt === PP.tab));
+  $('#ppTabs [data-pt="mine"]').textContent = ppAds.length ? `My ads (${ppAds.length})` : 'My ads';
+  const mias = PP.tab === 'mine';
+  $('.pp-fil').hidden = mias;
+  if (!mias || !ppAds.length){
+    $('#ppTabla').hidden = true; $('#ppVacio').hidden = false;
+    $('#ppVacioT').textContent = mias ? 'You have no ads' : `No ${PP.tab === 'buy' ? 'sellers' : 'buyers'} yet for ${PP.cripto} / ${PP.fiat}`;
+    $('#ppVacioS').textContent = mias ? 'Post a buy or sell ad with your price, limits and payment methods. It is published when the P2P book opens.'
+      : 'The P2P book opens with the NereumEVM mainnet. Post your ad now: it is kept in this browser and goes live when the book opens.';
+    return;
+  }
+  $('#ppTabla').hidden = false; $('#ppVacio').hidden = true;
+  $('#ppCuerpo').innerHTML = ppAds.map(a => { const px = ppPx(a);
+    return `<tr><td data-l="Type"><span class="pp-tipo ${a.lado === 'buy' ? 'c' : 'v'}">${a.lado === 'buy' ? 'Buy' : 'Sell'}</span></td>
+      <td data-l="Asset"><div class="par">${coinHtml(a.cripto)}<b>${a.cripto}</b><span class="t4">/ ${a.fiat}</span></div></td>
+      <td class="d" data-l="Price"><b style="color:#fff">${ppF(px)} ${a.fiat}</b>${a.tipoPx === 'flot' ? `<div class="pp-ref">${nf(a.pct, 2)}% of market</div>` : ''}</td>
+      <td class="d" data-l="Amount">${fT(a.total, a.cripto)} ${a.cripto}</td>
+      <td class="d" data-l="Limits">${ppF(a.min)} – ${ppF(a.max)} ${a.fiat}</td>
+      <td data-l="Payment"><div class="pp-pagos">${a.pagos.map(p => `<span>${esc(p)}</span>`).join('')}</div></td>
+      <td data-l="Status"><span class="tag">Waiting for mainnet</span></td>
+      <td class="d"><button class="pp-borra" data-borra="${a.id}">Delete</button></td></tr>`; }).join('');
+}
+$('#ppTabs').onclick = e => { const b = e.target.closest('[data-pt]'); if (!b) return; PP.tab = b.dataset.pt; ppGuarda(); ppLibro(); ppRefPinta(); };
+$('#ppCripto').onchange = e => { PP.cripto = e.target.value; ppGuarda(); pintaP2P(); };
+$('#ppFiat').onchange = e => { PP.fiat = e.target.value; ppGuarda(); pintaP2P(); };
+$('#ppPago').onchange = e => { PP.pago = e.target.value; ppGuarda(); ppLibro(); };
+$('#ppMonto').oninput = e => { PP.monto = e.target.value; ppGuarda(); };
+$('#ppC1').oninput = ppRefPinta;
+$('#ppCuerpo').onclick = e => { const b = e.target.closest('[data-borra]'); if (!b) return;
+  ppAds = ppAds.filter(a => a.id !== b.dataset.borra); ppGuarda(); ppLibro(); ppRefPinta(); toast('Ad deleted.'); };
+
+/* formulario del anuncio */
+let PF = null;
+function ppAbre(pre = {}){
+  const r = ppRef();
+  PF = Object.assign({lado: PP.tab === 'sell' ? 'sell' : 'buy', cripto: PP.cripto, fiat: PP.fiat, tipoPx: 'fijo', px: r ? +r.toFixed(r < 10 ? 4 : 2) : '', pct: 100,
+    total: '', min: '', max: '', pagos: [], ventana: 15, terminos: ''}, pre);
+  ppForm(); abreModal('#mP2P');
+}
+function ppForm(){
+  const r = ppRef(PF.cripto, PF.fiat), px = PF.tipoPx === 'flot' ? r * (+PF.pct || 0) / 100 : +PF.px;
+  const cm = (k, label, ayuda, html) => `<div class="cmp" id="pc-${k}"><label>${label}</label>${ayuda ? `<small>${ayuda}</small>` : ''}${html}<span class="e" hidden></span></div>`;
+  const ip = (k, extra = '') => `<input class="inp" data-pf="${k}" value="${esc(PF[k])}" autocomplete="off" ${extra}>`;
+  const ch = (k, ops, fmt = v => v) => `<div class="chips-r">${ops.map(([v, n]) => `<button type="button" class="chp ${PF[k] === v ? 'on' : ''}" data-pf1="${k}" data-val="${v}">${fmt(n)}</button>`).join('')}</div>`;
+  $('#ppForm').innerHTML = `
+    ${cm('lado', 'I want to', '', ch('lado', [['buy', 'Buy crypto'], ['sell', 'Sell crypto']]))}
+    <div class="dos-c">
+      ${cm('cripto', 'Asset', '', `<select class="inp" data-pf="cripto">${PP_CRIPTO.map(c => `<option ${PF.cripto === c ? 'selected' : ''}>${c}</option>`).join('')}</select>`)}
+      ${cm('fiat', 'Currency', '', `<select class="inp" data-pf="fiat">${PP_FIAT.map(([c, n]) => `<option value="${c}" ${PF.fiat === c ? 'selected' : ''}>${c} · ${n}</option>`).join('')}</select>`)}
+    </div>
+    ${cm('tipoPx', 'Price', PF.tipoPx === 'flot' ? 'Follows the market: a percentage of the live reference rate.' : 'A fixed price per coin, in your currency.',
+      ch('tipoPx', [['fijo', 'Fixed'], ['flot', 'Floating']]) + `<div style="margin-top:8px">${PF.tipoPx === 'flot'
+        ? `<label class="fld" style="margin:0"><label>Of market</label>${`<input data-pf="pct" inputmode="decimal" value="${esc(PF.pct)}" autocomplete="off">`}<span class="u">%</span></label>`
+        : `<label class="fld" style="margin:0"><label>Price</label><input data-pf="px" inputmode="decimal" value="${esc(PF.px)}" autocomplete="off"><span class="u">${PF.fiat}</span></label>`}</div>
+      <div class="pp-ref" id="ppPxRef">Reference <b>${r ? ppF(r) + ' ' + PF.fiat : '—'}</b> · your price <b>${px ? ppF(px) + ' ' + PF.fiat : '—'}</b></div>`)}
+    ${cm('total', `Total amount (${PF.cripto})`, PF.lado === 'sell' ? 'Locked in escrow, order by order, when buyers take your ad.' : 'How much you want to buy in total.', ip('total', 'inputmode="decimal" placeholder="0"'))}
+    <div class="dos-c">
+      ${cm('min', `Min. order (${PF.fiat})`, '', ip('min', 'inputmode="decimal" placeholder="0"'))}
+      ${cm('max', `Max. order (${PF.fiat})`, '', ip('max', 'inputmode="decimal" placeholder="0"'))}
+    </div>
+    ${cm('pagos', 'Payment methods', 'Up to three.', `<div class="chips-r">${ppPagos(PF.fiat).map(p => `<button type="button" class="chp ${PF.pagos.includes(p) ? 'on' : ''}" data-pfm="${esc(p)}">${esc(p)}</button>`).join('')}</div>`)}
+    ${cm('ventana', 'Payment window', 'Time the buyer has to pay before the order is cancelled and the escrow returns the coins.', ch('ventana', PP_VENTANA.map(v => [v, v + ' min'])))}
+    ${cm('terminos', 'Terms', 'Optional. Shown to the other side before they open an order.', `<textarea class="inp" data-pf="terminos" maxlength="280" placeholder="Bank holder name must match your verified name.">${esc(PF.terminos)}</textarea>`)}
+    <button class="accion" id="ppPost">Post ad</button>`;
+}
+const ppNum = v => parseFloat(String(v).replace(',', '.'));
+function ppValida(){
+  const err = {}, px = PF.tipoPx === 'flot' ? ppRef(PF.cripto, PF.fiat) * ppNum(PF.pct) / 100 : ppNum(PF.px);
+  if (PF.tipoPx === 'flot' && !(ppNum(PF.pct) >= 50 && ppNum(PF.pct) <= 200)) err.tipoPx = 'Use between 50% and 200% of the market rate.';
+  else if (PF.tipoPx === 'flot' && !ppRef(PF.cripto, PF.fiat)) err.tipoPx = 'The reference rate is unavailable right now. Use a fixed price.';
+  else if (!(px > 0)) err.tipoPx = 'Enter a price above zero.';
+  const tot = ppNum(PF.total), mn = ppNum(PF.min), mx = ppNum(PF.max);
+  if (!(tot > 0)) err.total = 'Enter an amount above zero.';
+  if (!(mn > 0)) err.min = 'Enter a minimum above zero.';
+  if (!(mx > 0)) err.max = 'Enter a maximum above zero.';
+  else if (mn > 0 && mn > mx) err.max = 'The maximum must be at least the minimum.';
+  else if (tot > 0 && px > 0 && mx > tot * px * 1.0001) err.max = `The maximum cannot exceed the whole ad: ${ppF(tot * px)} ${PF.fiat}.`;
+  if (!PF.pagos.length) err.pagos = 'Choose at least one payment method.';
+  $$('#ppForm .cmp').forEach(c => { const k = c.id.slice(3), e = c.querySelector('.e'); e.hidden = !err[k]; e.textContent = err[k] || '';
+    c.querySelectorAll('.inp,.fld').forEach(i => i.classList.toggle('mal', !!err[k])); });
+  return Object.keys(err).length ? null : {px, tot, mn, mx};
+}
+$('#ppForm').addEventListener('input', e => { const k = e.target.dataset.pf; if (!k) return; PF[k] = e.target.value;
+  if (k === 'cripto' || k === 'fiat'){ if (k === 'fiat') PF.pagos = PF.pagos.filter(p => ppPagos(PF.fiat).includes(p)); ppCargaTasa(PF.cripto).then(() => { if ($('#mP2P').classList.contains('on')) ppForm(); }); ppForm(); return; }
+  if (k === 'px' || k === 'pct'){ const r = ppRef(PF.cripto, PF.fiat), px = PF.tipoPx === 'flot' ? r * (ppNum(PF.pct) || 0) / 100 : ppNum(PF.px);
+    $('#ppPxRef').innerHTML = `Reference <b>${r ? ppF(r) + ' ' + PF.fiat : '—'}</b> · your price <b>${px > 0 ? ppF(px) + ' ' + PF.fiat : '—'}</b>`; } });
+$('#ppForm').addEventListener('click', e => {
+  const u = e.target.closest('[data-pf1]'); if (u){ const k = u.dataset.pf1; PF[k] = k === 'ventana' ? +u.dataset.val : u.dataset.val; ppForm(); return; }
+  const m = e.target.closest('[data-pfm]'); if (m){ const p = m.dataset.pfm;
+    if (PF.pagos.includes(p)) PF.pagos = PF.pagos.filter(x => x !== p); else if (PF.pagos.length < 3) PF.pagos.push(p); else { toast('Up to three payment methods per ad.'); return; }
+    ppForm(); return; }
+  if (e.target.closest('#ppPost')){ const v = ppValida(); if (!v){ sacude(e.target.closest('#ppPost')); return; }
+    ppAds.unshift({id: Date.now().toString(36), lado: PF.lado, cripto: PF.cripto, fiat: PF.fiat, tipoPx: PF.tipoPx, px: v.px, pct: ppNum(PF.pct) || 100,
+      total: v.tot, min: v.mn, max: v.mx, pagos: PF.pagos.slice(), ventana: PF.ventana, terminos: PF.terminos.trim(), creado: Date.now()});
+    PP.tab = 'mine'; ppGuarda(); cierraModal('#mP2P'); ppLibro(); ppRefPinta();
+    toast('Ad saved in this browser. It is published when the P2P book opens with the NereumEVM mainnet.'); }
+});
+$('#ppNuevo').onclick = () => ppAbre();
+$('#ppVacioB').onclick = () => ppAbre();
+$('#ppCalcBt').onclick = () => { const v = ppNum($('#ppC1').value) || 0, r = ppRef(), compra = PP.tab !== 'sell';
+  const cant = compra ? (r ? v / r : 0) : v, fiat = compra ? v : v * r;
+  ppAbre({lado: compra ? 'buy' : 'sell', tipoPx: r ? 'flot' : 'fijo', pct: 100,
+    total: cant ? +cant.toFixed(estable(PP.cripto) ? 2 : 6) : '', max: fiat ? +fiat.toFixed(2) : ''}); };
+
 /* ══ PORTADA ══
    Velas reales de BTC por hora (OKX, Kraken de respaldo), dibujadas en negro
    sobre el lima. Debajo, el precio en vivo del mismo flujo que usa el spot. */
@@ -2668,13 +2927,13 @@ function c3Arranca(){
   if (c3){ c3.activa(true); return; } if (c3Carga) return;
   const sec = $('#c3'), w = sec.clientWidth, h = sec.clientHeight; sec.classList.toggle('m', w <= 700 || w / h < 1.05);
   c3Carga = import('/app/portada/escena.js')
-    .then(m => { c3 = m.arrancar(sec, {velas: () => cvVelas, precio: () => datos.BTC ? datos.BTC.px : null}); if (vista !== 'cover') c3.activa(false); })
+    .then(m => { c3 = m.arrancar(sec, {precio: () => datos.BTC ? datos.BTC.px : null}); if (vista !== 'cover') c3.activa(false); })
     .catch(() => { sec.classList.add('sin3d'); });
 }
 async function pintaCover(){
   c3Arranca();
   vivoCover(); $('#cvCartera').textContent = cuenta ? corta(cuenta) : 'Connect wallet';
-  if (!cvVelas || Date.now() - cvT > 300000){
+  if (!$('#vCover .cv').hidden && (!cvVelas || Date.now() - cvT > 300000)){
     let L = null;
     try{ L = (await okx('/market/candles?instId=BTC-USDT&bar=1H&limit=60')).map(v => ({a:+v[1], h:+v[2], l:+v[3], c:+v[4]})).reverse().slice(-60); }
     catch(e){ try{ L = (await kraken('OHLC', 'BTC', '&interval=60')).slice(-60).map(v => ({a:+v[1], h:+v[2], l:+v[3], c:+v[4]})); }catch(e2){} }
