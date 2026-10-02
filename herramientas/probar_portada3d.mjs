@@ -32,6 +32,7 @@ for (const [w, h] of [[320, 568], [375, 667], [390, 844], [430, 932], [820, 1180
   const pie = await p.evaluate(() => { const f = document.querySelector('.cv-foot .fmark'), c = f.getBoundingClientRect(), sv = f.querySelector('svg').getBoundingClientRect(), sp = f.querySelector('span').getBoundingClientRect();
     return sv.right <= c.right + .5 && sp.right <= sv.left && sv.right <= innerWidth && sp.left >= 0; });
   prueba(`${w}×${h}: NEREUM y el logo del pie caben enteros`, pie);
+  if (w <= 430) prueba(`${w}×${h}: los distintivos de las tiendas, pequeños (≤ 36 px de alto)`, await p.evaluate(() => [...document.querySelectorAll('.c3-tiendas .tienda')].every(e => e.offsetHeight <= 36)));
   prueba(`${w}×${h}: sin errores de página`, !errs.length);
   await p.close();
 }
@@ -65,10 +66,13 @@ await p.route(/mempool\.space\/api/, r => { const u = r.request().url(), now = M
   else if (u.includes('/v1/blocks')) o = [{height: 865420, timestamp: now - 60, tx_count: 3000, extras: {reward: 318750000, pool: {name: 'Foundry USA'}}}];
   else return r.abort();
   r.fulfill({contentType: 'application/json', body: JSON.stringify(o)}); });
-await p.evaluate(() => { localStorage.removeItem('nereum-dex-mina'); localStorage.removeItem('nereum-dex-mina-res'); location.hash = '#/mining'; });
+await p.evaluate(() => { localStorage.removeItem('nereum-dex-mina-2'); localStorage.removeItem('nereum-dex-mina-res'); location.hash = '#/mining'; });
 await p.waitForTimeout(1200);
 prueba('Cloud mining: está en el menú, justo después de Spot', await p.evaluate(() => [...document.querySelectorAll('.top .nav button')].map(b => b.dataset.v).slice(0, 2).join() === 'spot,mining'));
 prueba('Cloud mining: datos de la red en vivo', (await p.textContent('#mnHash')) === '672.0 EH/s' && (await p.textContent('#mnDif')) === '92.10 T');
+prueba('Cloud mining: aún no abre, todo lo comprado en 0', await p.evaluate(() => [...document.querySelectorAll('.mn-mio-g b')].map(e => e.textContent).join('|') === '0 TH/s|0|0.00000000 BTC|0.00000000 BTC'));
+prueba('Cloud mining: la calculadora empieza en 0 TH/s y da 0', (await p.inputValue('#mnTh')) === '0' && (await p.textContent('#mnBtcD')) === '0.00000000 BTC');
+await p.click('#mnThC [data-th="100"]');
 /* 100 TH/s, 2 % de pool: 1e14 / 6,72e20 × 144 × (3,125 + 0,0625) × 0,98 */
 const esper = 1e14 / 6.72e20 * 144 * 3.1875 * .98;
 prueba('Cloud mining: la calculadora estima lo minado por día', Math.abs(parseFloat((await p.textContent('#mnBtcD'))) - esper) < 1e-8);

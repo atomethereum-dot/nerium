@@ -202,7 +202,7 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
   border-radius:3px;box-shadow:0 0 0 3px rgba(47,107,255,.09)}
 
 /* los que salen del documento llevan además la flecha de salida */
-.enl[href^="https://nereum.xyz/explorer"]::after{
+.enl[href^="https://nereum.xyz/explorer"]::after,.enl[href^="https://nereum.xyz/app"]::after{
   content:'';display:inline-block;width:.6em;height:.6em;margin-left:.32em;
   background:currentColor;
   -webkit-mask:no-repeat center/contain url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' d='M6 3h7v7M13 3 3.5 12.5'/%3E%3C/svg%3E");
@@ -1910,7 +1910,8 @@ poder abrir. NereumEVM Explorer es donde la abre.</p>
 
 dex:{grupo:'Protocolo', titulo:'Nereum DEX', html:`
 <p><strong>Nereum DEX es la bolsa integrada en la red:</strong> donde se compran
-y venden los activos tokenizados, con precio continuo y liquidación en cadena.</p>
+y venden los activos tokenizados, con precio continuo y liquidación en cadena. La
+aplicación está en <a class="enl" href="https://nereum.xyz/app"><strong>nereum.xyz/app</strong></a>.</p>
 
 <h2 id="que">Qué hace</h2>
 <ul>
@@ -2857,7 +2858,8 @@ is where they open it.</p>
     grupo:'Protocol', titulo:'Nereum DEX',
     html:`
 <p><strong>Nereum DEX is the exchange built into the network:</strong> where
-tokenized assets are bought and sold, priced continuously and settled on-chain.</p>
+tokenized assets are bought and sold, priced continuously and settled on-chain. The
+app is at <a class="enl" href="https://nereum.xyz/app"><strong>nereum.xyz/app</strong></a>.</p>
 
 <h2 id="que">What it does</h2>
 <ul>
