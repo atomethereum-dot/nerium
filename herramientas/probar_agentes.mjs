@@ -26,13 +26,23 @@ for (const [w, h] of [[1440, 900], [390, 844], [320, 568], [820, 1180]]){
     pix: (() => { const c = document.querySelector('#agCv'), d = c.getContext('2d').getImageData(0, 0, c.width, c.height).data; let n = 0; for (let i = 3; i < d.length; i += 16) if (d[i] > 0) n++; return n; })()}));
   prueba(`${w}×${h}: Agents está en el menú y se abre`, v.vis && v.nav);
   prueba(`${w}×${h}: la escena dibuja y propone acciones (${v.cnt})`, v.pix > 500 && v.feed >= 1 && v.cnt >= 1);
-  prueba(`${w}×${h}: cinco trabajos`, v.jobs === 5);
+  prueba(`${w}×${h}: seis trabajos`, v.jobs === 6);
   prueba(`${w}×${h}: sin desbordar a lo ancho`, v.docW === w);
   if (CAP){ await p.screenshot({path: `${CAP}/ag_${w}_hero.png`}); await p.evaluate(() => document.querySelector('.ag-h2').scrollIntoView()); await p.waitForTimeout(2500); await p.screenshot({path: `${CAP}/ag_${w}_jobs.png`});
     await p.screenshot({path: `${CAP}/ag_${w}_full.png`, fullPage: true}); }
   if (w === 1440){
     const ver = () => p.evaluate(() => document.querySelector('#agRes > div:last-child b').textContent);
     const log = () => p.evaluate(() => document.querySelector('#agLog').textContent);
+    prueba('Trader por defecto: rejilla de 10 niveles ±5 %, compra límite en $63,644.4 y venta en $64,355.6, aprobadas', (await log()).includes('Buy limit') && (await log()).includes('63,644.4') && (await log()).includes('64,355.6') && (await ver()) === 'Approved');
+    await p.click('#agPar [data-pv="ruptura"]'); await p.waitForTimeout(300);
+    prueba('Trader breakout: por debajo del disparador (+2 %) espera', (await log()).includes('Waiting for the breakout'));
+    await p.fill('#agK_trigP', '63000'); await p.waitForTimeout(700);
+    prueba('Trader breakout: roto el nivel, compra $500 a mercado', (await log()).includes('Buy $500 of BTC at market') && (await ver()) === 'Approved');
+    await p.click('#agPar [data-pv="salida"]'); await p.waitForTimeout(300);
+    prueba('Trader TP/SL: con +3 % mantiene la posición', (await log()).includes('Holding at +3.09%'));
+    await p.fill('#agK_entry', '58000'); await p.waitForTimeout(700);
+    prueba('Trader TP/SL: con +10 % vende, pero 0.05 BTC ($3,200) pasa el límite de $1,000 y la cadena lo rechaza', (await log()).includes('take profit') && (await ver()) === 'Rejected by the chain');
+    await p.click('.ag-job[data-aj="rebal"]'); await p.waitForTimeout(300);
     prueba('Rebalancer: con BTC a $64,000 el BTC queda en 54 % y propone comprar BTC', (await log()).includes('BTC 54.2%') && (await log()).includes('BTC with NUSD'));
     await p.click('.ag-job[data-aj="dca"]'); await p.waitForTimeout(300);
     prueba('DCA: propone comprar $100 de BTC y lo aprueba', (await log()).includes('Buy $100 of BTC') && (await ver()) === 'Approved');

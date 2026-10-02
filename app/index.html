@@ -745,7 +745,7 @@ button.red-sel:hover{background:var(--campo2)}
 .ag-h2 h2{font-size:20px;font-weight:700;letter-spacing:-.02em;color:#fff}
 .ag-h2 span{font-size:12.5px;color:var(--t3)} .ag-h2 span b{color:#fff}
 /* job cards */
-.ag-jobs{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin-bottom:16px}
+.ag-jobs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-bottom:16px}
 .ag-job{position:relative;display:grid;gap:10px;align-content:start;text-align:left;padding:16px;border-radius:16px;background:var(--panel);border:1px solid var(--linea);
   transition:transform .35s var(--e),border-color .2s,background .2s;min-width:0;isolation:isolate}
 .ag-job:hover{transform:translateY(-3px);border-color:var(--linea2);background:var(--panel2)}
@@ -838,7 +838,7 @@ button.red-sel:hover{background:var(--campo2)}
 .ag-pasos span{font-size:12.5px;line-height:1.5;color:var(--t3)}
 .ag-pasos li::after{content:'';position:absolute;left:0;top:0;height:2px;width:40%;background:linear-gradient(90deg,transparent,var(--ok),transparent);animation:agBarrido 4s linear infinite;animation-delay:calc(var(--i) * 1s)}
 @keyframes agBarrido{from{transform:translateX(-100%)}to{transform:translateX(260%)}}
-@media(max-width:1180px){ .ag-jobs{grid-template-columns:repeat(3,minmax(0,1fr))} }
+@media(max-width:860px){ .ag-jobs{grid-template-columns:repeat(2,minmax(0,1fr))} }
 @media(max-width:1023px){ .ag-hero{grid-template-columns:1fr;padding:18px 16px 22px;gap:14px} .ag-esc{height:440px;order:-1} .ag-hero h1{font-size:36px}
   .dos.ag-l{display:flex;flex-direction:column-reverse;align-items:stretch} .ag-pasos{grid-template-columns:1fr 1fr} }
 @media(max-width:700px){ .ag-jobs{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;padding:4px 0 6px;scrollbar-width:none} .ag-jobs::-webkit-scrollbar{display:none}
@@ -1615,7 +1615,7 @@ body.portada .top,body.portada .pie{display:none}
     <div class="ag-hero-t">
       <span class="ag-eye"><i></i>AI agents on NereumEVM</span>
       <h1>Agents that work for you.<em>Inside your rules.</em></h1>
-      <p>They rebalance, buy on a schedule, guard your loans and pay your bills, from a wallet of their own. Every move is checked on chain before it happens: if it breaks one of your rules, NereumEVM rejects it.</p>
+      <p>They trade spot markets day and night, rebalance, buy on a schedule, guard your loans and pay your bills, from a wallet of their own. Every move is checked on chain before it happens: if it breaks one of your rules, NereumEVM rejects it.</p>
       <div class="ag-ctas"><button class="pill lima" id="agIr">Build an agent</button><button class="pill borde" id="agVer">Watch a dry run</button></div>
       <div class="ag-cont"><div><b id="agCP">0</b><span>proposed</span></div><div><b id="agCA" class="ok">0</b><span>approved</span></div><div><b id="agCR" class="no">0</b><span>rejected by the chain</span></div><s>In this demo</s></div>
     </div>
@@ -1627,7 +1627,7 @@ body.portada .top,body.portada .pie{display:none}
   </section>
   <div class="aviso"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="9" cy="9" r="7"/><path d="M9 8v4.5M9 5.5v.1"/></svg>
     <span><b>Nereum Agents opens with the NereumEVM mainnet.</b> Until then no agent holds funds, trades or pays: build one, set its rules, run it dry with live prices and keep it in this browser.</span></div>
-  <div class="ag-h2"><h2>Pick a job</h2><span>Five agents, ready to configure</span></div>
+  <div class="ag-h2"><h2>Pick a job</h2><span>Six agents, ready to configure</span></div>
   <div class="ag-jobs" id="agTrabajos"></div>
   <div class="dos ag-l">
     <section class="card ag-term" id="agTerm">
@@ -1660,7 +1660,7 @@ body.portada .top,body.portada .pie{display:none}
   <div class="ag-mios" id="agMios"></div>
   <div class="ag-h2"><h2>How it works</h2></div>
   <ol class="ag-pasos">
-    <li style="--i:0"><em>01</em><b>Pick a job</b><span>Rebalance, buy on a schedule, guard a Nereum Lend loan, park idle dollars or pay bills.</span></li>
+    <li style="--i:0"><em>01</em><b>Pick a job</b><span>Trade spot, rebalance, buy on a schedule, guard a Nereum Lend loan, park idle dollars or pay bills.</span></li>
     <li style="--i:1"><em>02</em><b>Set the rules</b><span>Limits per action and per day, the assets it may touch, where funds may go and when it must ask you.</span></li>
     <li style="--i:2"><em>03</em><b>Fund its wallet</b><span>The agent gets its own wallet with only what you move into it. Your main wallet stays out of reach.</span></li>
     <li style="--i:3"><em>04</em><b>Watch, pause, revoke</b><span>Every action and every rejected attempt is public on the explorer. One click stops it.</span></li>
@@ -3454,12 +3454,15 @@ $('#lnGuardar').onclick = () => { const r = lnCalc();
    y los agentes se guardan en este navegador. */
 const AG_SVG = b => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${b}</svg>`;
 const AG_ICO = {
+  trade: AG_SVG('<path d="M7 3v18M17 3v18"/><g><rect class="a-bar" x="4.5" y="7" width="5" height="9" rx="1"/><rect class="a-bar" x="14.5" y="5" width="5" height="8" rx="1"/></g>'),
   rebal: AG_SVG('<g class="a-rot"><path d="M20 12a8 8 0 0 1-13.7 5.6M4 12a8 8 0 0 1 13.7-5.6"/><path d="M18 3v3.6h-3.6M6 21v-3.6h3.6"/></g>'),
   dca: AG_SVG('<rect x="3.5" y="5" width="17" height="15" rx="3"/><path d="M3.5 9.5h17M8 3v4M16 3v4"/><circle class="a-cae" cx="12" cy="15" r="1.9" fill="currentColor" stroke="none"/>'),
   guard: AG_SVG('<path class="a-lat" d="M12 3l7.5 3v5.5c0 4.6-3.2 8.3-7.5 9.5-4.3-1.2-7.5-4.9-7.5-9.5V6z"/><path class="a-chk" d="M8.6 12.2l2.3 2.3 4.5-4.6"/>'),
   yield: AG_SVG('<g><rect class="a-bar" x="4" y="11" width="3.6" height="9" rx="1"/><rect class="a-bar" x="10.2" y="7" width="3.6" height="13" rx="1"/><rect class="a-bar" x="16.4" y="3.5" width="3.6" height="16.5" rx="1"/></g>'),
   pay: AG_SVG('<g class="a-vue"><path d="M21 3L10 14M21 3l-7 18-4-7-7-4z"/></g>')};
 const AG_JOBS = [
+  {id:'trade', n:'Trader', d:'Trades spot markets for you, day and night: grid, breakout, or take profit and stop loss.', r:'Trades spot, 24/7',
+    def:{coin:'BTC', est:'grid', rng:'5', niv:'10', size:'250', trigP:'', bsize:'500', sl:'3', qty:'0.05', entry:'', tp:'8', slx:'4', max:'1000', dia:'5000', pide:'2500', act:['BTC','ETH','USDT'], de:'mias', ex:'90'}},
   {id:'rebal', n:'Rebalancer', d:'Keeps your portfolio at the mix you choose.', r:'Trades when the mix drifts',
     def:{btc:'0.4', eth:'3', nusd:'12000', tb:'60', te:'20', band:'5', max:'10000', dia:'20000', pide:'8000', act:['BTC','ETH','NUSD'], de:'mias', ex:'90'}},
   {id:'dca', n:'DCA buyer', d:'Buys a fixed amount on a schedule, whatever the price.', r:'Buys on a schedule',
@@ -3470,8 +3473,8 @@ const AG_JOBS = [
     def:{bal:'25000', buf:'5000', max:'25000', dia:'50000', pide:'30000', act:['NUSD','T-bills'], de:'mias', ex:'365'}},
   {id:'pay', n:'Payments', d:'Pays a bill in NUSD on the same day every month.', r:'Pays allow-listed addresses',
     def:{quien:'Rent', amt:'1200', diaM:'1', dir:'', max:'1500', dia:'1500', pide:'2000', act:['NUSD'], de:'lista', ex:'365'}}];
-const AG_ACT = ['BTC', 'ETH', 'NUSD', 'USDT', 'T-bills'];
-const AG = carga('nereum-dex-agentes', {job:'rebal', p:{}});
+const AG_ACT = ['BTC', 'ETH', 'SOL', 'NUSD', 'USDT', 'T-bills'];
+const AG = carga('nereum-dex-agentes', {job:'trade', p:{}});
 let agMios = (() => { try{ const v = JSON.parse(localStorage.getItem('nereum-dex-agentes-mios')); return Array.isArray(v) ? v : []; }catch(e){ return []; } })();
 const agGuarda = () => { guarda('nereum-dex-agentes', AG); guarda('nereum-dex-agentes-mios', agMios); };
 const agJob = id => AG_JOBS.find(j => j.id === (id || AG.job)) || AG_JOBS[0];
@@ -3484,7 +3487,11 @@ function agDiaMes(D){ D = Math.min(28, Math.max(1, Math.round(agN(D)) || 1)); co
 const AG_CADA = {d: 'day', w: 'week', m: 'month'};
 function agResumen(id, p){
   const tn = Math.max(0, 100 - agN(p.tb) - agN(p.te));
-  return {rebal: `Keeps ${agN(p.tb)}% BTC, ${agN(p.te)}% ETH and ${tn}% NUSD, trading when the mix drifts more than ${agN(p.band)}%.`,
+  const c = p.coin, px = pxU(c), tg = agN(p.trigP) || px * 1.02, en = agN(p.entry) || px * .97;
+  const trade = p.est === 'ruptura' ? `Buys ${agUsd(agN(p.bsize))} of ${c} when it breaks above $${px ? fp(tg, c) : '—'}, with a ${agN(p.sl)}% stop.`
+    : p.est === 'salida' ? `Sells ${nf(agN(p.qty), 4)} ${c} at +${agN(p.tp)}% or −${agN(p.slx)}% from $${px ? fp(en, c) : '—'}.`
+    : `Trades a ${Math.round(agN(p.niv)) || 10}-level grid on ${c}/USDT, ±${agN(p.rng)}% around the price, ${agUsd(agN(p.size))} per order.`;
+  return {trade, rebal: `Keeps ${agN(p.tb)}% BTC, ${agN(p.te)}% ETH and ${tn}% NUSD, trading when the mix drifts more than ${agN(p.band)}%.`,
     dca: `Buys ${agUsd(agN(p.amt))} of ${p.coin} every ${AG_CADA[p.cada]}.`,
     guard: `Repays the loan when its health falls below ${nf(agN(p.trig), 2)}, back up to ${nf(agN(p.rest), 2)}.`,
     yield: `Keeps ${nf(agN(p.buf), 0)} NUSD as cash and parks the rest in tokenized T-bills.`,
@@ -3495,7 +3502,35 @@ function agResumen(id, p){
 function agPlan(id, p){
   const L = [], A = [], R = []; let nada = '';
   const pB = pxU('BTC'), pE = pxU('ETH');
-  if (id === 'rebal'){
+  if (id === 'trade'){
+    const c = p.coin, px = pxU(c), sg = v => (v >= 0 ? '+' : '−') + nf(Math.abs(v), 2) + '%';
+    if (!px){ L.push(['market', `${c}/USDT · waiting for live prices…`]); nada = 'Waiting for prices.'; return {L, A, R, nada}; }
+    L.push(['market', `${c}/USDT $${fp(px, c)}`]);
+    if (p.est === 'ruptura'){
+      const tg = agN(p.trigP) || px * 1.02, sz = agN(p.bsize), sl = agN(p.sl);
+      L.push(['strategy', `breakout above $${fp(tg, c)}`], ['stop', `${sl}% under the entry`]);
+      R.push(['Trigger', '$' + fp(tg, c), px >= tg ? 'Broken' : nf((tg / px - 1) * 100, 2) + '% above the price', px >= tg ? 'ok' : ''], ['Stop loss', '$' + fp(Math.min(px, tg) * (1 - sl / 100), c), `${sl}% under the entry`]);
+      if (!sz) nada = 'Enter an order size.';
+      else if (px < tg) nada = `${c} at $${fp(px, c)} is under the $${fp(tg, c)} trigger. Waiting for the breakout.`;
+      else A.push({txt: `Buy ${agUsd(sz)} of ${c} at market`, sub: `≈ ${nf(sz / px, 6)} ${c} · stop at $${fp(px * (1 - sl / 100), c)}`, val: sz, as: [c, 'USDT']});
+    } else if (p.est === 'salida'){
+      const q = agN(p.qty), en = agN(p.entry) || px * .97, tp = agN(p.tp), sl = agN(p.slx), pnl = (px / en - 1) * 100, tpP = en * (1 + tp / 100), slP = en * (1 - sl / 100), val = q * px;
+      L.push(['position', `${nf(q, 4)} ${c} from $${fp(en, c)}`], ['P&L now', `${sg(pnl)} · ${pnl >= 0 ? '' : '−'}${agUsd(Math.abs(q * (px - en)))}`], ['exits', `take profit $${fp(tpP, c)} · stop $${fp(slP, c)}`]);
+      R.push(['P&L now', sg(pnl), agUsd(val) + ' position', pnl >= 0 ? 'ok' : 'no'], ['Exits', `+${tp}% / −${sl}%`, `$${fp(tpP, c)} · $${fp(slP, c)}`]);
+      if (!q) nada = 'Enter the position.';
+      else if (px >= tpP) A.push({txt: `Sell ${nf(q, 4)} ${c} · take profit`, sub: sg(pnl), val, as: [c, 'USDT']});
+      else if (px <= slP) A.push({txt: `Sell ${nf(q, 4)} ${c} · stop loss`, sub: sg(pnl), val, as: [c, 'USDT']});
+      else nada = `Holding at ${sg(pnl)}. It sells at $${fp(tpP, c)} or $${fp(slP, c)}.`;
+    } else {
+      const r = agN(p.rng) || 5, n = Math.max(2, Math.min(50, Math.round(agN(p.niv)) || 10)), lo = px * (1 - r / 100), hi = px * (1 + r / 100), st = (hi - lo) / (n - 1), sz = agN(p.size);
+      const lv = Array.from({length: n}, (_, i) => lo + i * st), ab = lv.filter(v => v < px), ar = lv.filter(v => v > px), b1 = ab[ab.length - 1], s1 = ar[0];
+      L.push(['strategy', `grid · ${n} levels · $${fp(lo, c)} – $${fp(hi, c)}`], ['step', `$${fp(st, c)} · ${nf(st / px * 100, 2)}% apart`]);
+      R.push(['Grid range', `$${fp(lo, c)} – $${fp(hi, c)}`, `${n} levels · ±${r}%`], ['Resting orders', `${ab.length} buy · ${ar.length} sell`, `${agUsd(sz)} each`]);
+      if (!sz) nada = 'Enter an order size.';
+      else { if (b1) A.push({txt: `Buy limit ${nf(sz / b1, 6)} ${c} at $${fp(b1, c)}`, sub: 'next level below', val: sz, as: [c, 'USDT']});
+        if (s1) A.push({txt: `Sell limit ${nf(sz / s1, 6)} ${c} at $${fp(s1, c)}`, sub: 'next level above', val: sz, as: [c, 'USDT']}); }
+    }
+  } else if (id === 'rebal'){
     const tb = agN(p.tb), te = agN(p.te), tn = 100 - tb - te, band = agN(p.band) || 0;
     if (!pB || !pE){ L.push(['prices', 'waiting for live prices…']); nada = 'Waiting for prices.'; return {L, A, R, nada}; }
     const v = [agN(p.btc) * pB, agN(p.eth) * pE, agN(p.nusd)], tot = v[0] + v[1] + v[2], w = v.map(x => tot ? x / tot * 100 : 0);
@@ -3567,13 +3602,18 @@ function agPintaSim(anim){
   const log = $('#agLog'); log.innerHTML = h;
   if (anim){ log.classList.remove('ag-run'); void log.offsetWidth; log.classList.add('ag-run'); agUltRun = Date.now(); }
 }
-function agFld(k, l, u, v, txt){
-  return `<label class="fld"><label for="agK_${k}">${l}</label><input id="agK_${k}" data-k="${k}" ${txt ? '' : 'inputmode="decimal"'} autocomplete="off" value="${esc(v)}" ${txt ? 'maxlength="42"' : ''}>${u ? `<span class="u">${u}</span>` : ''}</label>`;
+function agFld(k, l, u, v, txt, ph){
+  return `<label class="fld"><label for="agK_${k}">${l}</label><input id="agK_${k}" data-k="${k}" ${txt ? '' : 'inputmode="decimal"'} autocomplete="off" value="${esc(v)}" ${txt ? 'maxlength="42"' : ''} ${ph ? `placeholder="${esc(ph)}"` : ''}>${u ? `<span class="u">${u}</span>` : ''}</label>`;
 }
 const agChips = (k, ops, v) => `<div class="chips-r mn-chips">${ops.map(([x, l]) => `<button class="chp ${x === v ? 'on' : ''}" data-pk="${k}" data-pv="${x}">${l}</button>`).join('')}</div>`;
 function agPintaPar(){
   const j = agJob(), p = agP(); let h = '';
-  if (j.id === 'rebal') h = `<div class="dc">${agFld('btc', 'BTC', 'BTC', p.btc)}${agFld('eth', 'ETH', 'ETH', p.eth)}</div>${agFld('nusd', 'NUSD held', 'NUSD', p.nusd)}
+  if (j.id === 'trade'){ const px = pxU(p.coin), c = p.coin;
+    h = agChips('coin', [['BTC', 'BTC/USDT'], ['ETH', 'ETH/USDT'], ['SOL', 'SOL/USDT']], p.coin) + agChips('est', [['grid', 'Grid'], ['ruptura', 'Breakout'], ['salida', 'Take profit · Stop loss']], p.est)
+      + (p.est === 'ruptura' ? agFld('trigP', 'Buy when it breaks above', '$', p.trigP, false, px ? fp(px * 1.02, c) : '') + `<div class="dc">${agFld('bsize', 'Size', 'USDT', p.bsize)}${agFld('sl', 'Stop', '%', p.sl)}</div>`
+        : p.est === 'salida' ? `<div class="dc">${agFld('qty', 'Position', c, p.qty)}${agFld('entry', 'Entry', '$', p.entry, false, px ? fp(px * .97, c) : '')}</div><div class="dc">${agFld('tp', 'Take profit', '%', p.tp)}${agFld('slx', 'Stop loss', '%', p.slx)}</div>`
+        : `<div class="dc">${agFld('rng', 'Range ±', '%', p.rng)}${agFld('niv', 'Levels', '', p.niv)}</div>` + agFld('size', 'Per order', 'USDT', p.size)); }
+  else if (j.id === 'rebal') h = `<div class="dc">${agFld('btc', 'BTC', 'BTC', p.btc)}${agFld('eth', 'ETH', 'ETH', p.eth)}</div>${agFld('nusd', 'NUSD held', 'NUSD', p.nusd)}
     <div class="dc">${agFld('tb', 'Target BTC', '%', p.tb)}${agFld('te', 'Target ETH', '%', p.te)}</div>${agFld('band', 'Trade when drift is over', '%', p.band)}`;
   else if (j.id === 'dca') h = agChips('coin', [['BTC', 'Bitcoin'], ['ETH', 'Ether']], p.coin) + agFld('amt', 'Buy', 'USD', p.amt) + agChips('cada', [['d', 'Every day'], ['w', 'Every week'], ['m', 'Every month']], p.cada);
   else if (j.id === 'guard'){ const c = LN_COL.find(x => x.id === p.ca) || LN_COL[0];
@@ -3638,14 +3678,18 @@ const agDemo = (() => {
   const NODOS = ['BTC', 'ETH', 'NUSD', 'T-BILLS', 'LEND', 'PAY'], PUERTAS = [['PER ACTION', -60], ['PER DAY', 60], ['ASSETS', 120], ['SEND TO', 240]];
   const q = (usd, s) => pxU(s) ? nf(usd / pxU(s), 4) + ' ' + s : '$' + nf(usd, 0) + ' of ' + s;
   const EV = [
+    {a: 'Trader', t: () => `Grid buy ${q(250, 'BTC')} at the next level`, n: 0, ok: 1, r: 'Grid order · within limits'},
     {a: 'Rebalancer', t: () => `Sell ${q(800, 'BTC')} → NUSD`, n: 0, ok: 1, r: 'Within $1,000 per action'},
+    {a: 'Trader', t: () => 'Buy $3,000 of SOL on a breakout', n: 2, ok: 0, g: 2, r: 'SOL is not on the allowed assets'},
     {a: 'DCA buyer', t: () => 'Buy $250 of ETH', n: 1, ok: 1, r: 'On schedule · within limits'},
     {a: 'DCA buyer', t: () => 'Buy $4,800 of BTC', n: 0, ok: 0, g: 0, r: 'Above $1,000 per action'},
     {a: 'Idle cash', t: () => 'Move 5,000 NUSD → T-bills', n: 3, ok: 1, r: 'Asset allowed · own wallet'},
     {a: 'Payments', t: () => 'Pay 950 NUSD to 0x9f3…e21', n: 5, ok: 0, g: 3, r: 'Address not on the allow-list'},
     {a: 'Loan guardian', t: () => 'Repay 1,200 NUSD on a loan', n: 4, ok: 1, r: 'Health 1.24 → 1.60'},
     {a: 'Rebalancer', t: () => 'Swap NUSD into an unlisted token', n: 2, ok: 0, g: 2, r: 'Asset not allowed'},
+    {a: 'Trader', t: () => `Breakout: buy ${q(500, 'ETH')}`, n: 1, ok: 1, r: 'Within $1,000 per action'},
     {a: 'Payments', t: () => 'Pay 1,200 NUSD · Rent', n: 5, ok: 1, r: 'Allow-listed address'},
+    {a: 'Trader', t: () => `Take profit: sell ${q(900, 'ETH')}`, n: 1, ok: 1, r: '+8% reached · within limits'},
     {a: 'DCA buyer', t: () => 'Buy $600 of ETH, third time today', n: 1, ok: 0, g: 1, r: 'Daily limit reached'},
     {a: 'Rebalancer', t: () => `Buy ${q(500, 'ETH')} with NUSD`, n: 1, ok: 1, r: 'Within limits'}];
   let w = 0, h = 0, raf = 0, visto = false, ult = 0, sig = 0, iEv = 0, t0 = performance.now();
