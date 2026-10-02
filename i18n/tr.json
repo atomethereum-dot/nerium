@@ -321,5 +321,10 @@
  "Every buyer pays the same $0.20 per NRM. Crypto assets are volatile: only put in what you can afford to lose.": "Her alıcı aynı fiyatı öder: NRM başına $0.20. Kripto varlıklar oynaktır: yalnızca kaybetmeyi göze alabileceğiniz tutarı yatırın.",
  "The contract deployed and verified, and the company registration, the audit and the team KYC under way. Each step will be checkable by someone who is not us.": "Sözleşme dağıtıldı ve doğrulandı; şirket tescili, denetim ve ekip KYC'si sürüyor. Her adım bizden olmayan biri tarafından kontrol edilebilecek.",
  "SEED ROUND": "SEED ROUND",
- "Launch app": "Uygulamayı aç"
+ "Launch app": "Uygulamayı aç",
+ "Four pieces, three already running.": "Dört parça, üçü zaten çalışıyor.",
+ "App live · 75% to mainnet": "Uygulama yayında · mainnet'e %75",
+ "Spot, swaps, P2P, pools and a bridge in one app, quoted live against USDT. Every trade settles on NereumEVM, the same chain the assets live on.": "Spot, swap, P2P, havuzlar ve bir köprü tek uygulamada, USDT karşısında canlı fiyatlarla. Her işlem, varlıkların bulunduğu zincir olan NereumEVM üzerinde kapanır.",
+ "Open the DEX →": "DEX'i aç →",
+ "Bids and asks, in depth": "Alış ve satışlar, derinlikte"
 }

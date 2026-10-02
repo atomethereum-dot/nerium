@@ -321,5 +321,10 @@
  "Every buyer pays the same $0.20 per NRM. Crypto assets are volatile: only put in what you can afford to lose.": "Mọi người mua đều trả như nhau: $0.20 cho mỗi NRM. Tài sản tiền mã hóa biến động mạnh: chỉ bỏ vào số tiền bạn có thể chấp nhận mất.",
  "The contract deployed and verified, and the company registration, the audit and the team KYC under way. Each step will be checkable by someone who is not us.": "Hợp đồng đã triển khai và xác minh; việc đăng ký công ty, kiểm toán và KYC đội ngũ đang tiến hành. Mỗi bước đều sẽ được bên thứ ba kiểm chứng.",
  "SEED ROUND": "SEED ROUND",
- "Launch app": "Mở ứng dụng"
+ "Launch app": "Mở ứng dụng",
+ "Four pieces, three already running.": "Bốn phần, ba phần đã vận hành.",
+ "App live · 75% to mainnet": "Ứng dụng đã chạy · 75% tới mainnet",
+ "Spot, swaps, P2P, pools and a bridge in one app, quoted live against USDT. Every trade settles on NereumEVM, the same chain the assets live on.": "Spot, swap, P2P, pool và cầu nối trong một ứng dụng, báo giá trực tiếp theo USDT. Mọi giao dịch được thanh toán trên NereumEVM, chính chuỗi nơi tài sản tồn tại.",
+ "Open the DEX →": "Mở DEX →",
+ "Bids and asks, in depth": "Lệnh mua và bán, theo độ sâu"
 }

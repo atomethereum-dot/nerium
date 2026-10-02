@@ -1,6 +1,7 @@
 // probar_proyectos: «06 · What we are building» es el tunel de cubos (d64):
 // un escenario anclado con un lienzo que vuela por un tunel de cubos y frena
-// en tres estaciones -la cadena, la tokenizacion de activos y la mineria-,
+// en cuatro estaciones -la cadena, la tokenizacion de activos, el DEX y la
+// mineria-,
 // con los textos de la web y todo en azules. Al final los cubos implosionan
 // en UN cubo azul cargado (mira de 1 px y cifra «NN / NN»); quedan unos pocos
 // cubos lejanos y apagados a la deriva, debajo se dibuja la hebra hacia un
@@ -46,17 +47,19 @@ if (fs.readFileSync(path.join(RAIZ, 'index.html'), 'utf8').includes('id="builds"
 }
 const di = (c, t) => { if (c) { ok++; console.log('  ok  ' + t) } else { mal++; console.log('  MAL ' + t) } };
 
-/* Los textos de las tres estaciones, como los tenia la seccion antes del
+/* Los textos de las cuatro estaciones, como los tenia la seccion antes del
    tunel: el rediseño cambio el dibujo, no lo que se promete. */
 const ESTACIONES = [
   { t:'The chain', est:'Testnet · 75% to mainnet', cta:'https://nereum.xyz/explorer',
     p:'Own validators, own consensus, EVM-compatible. Every transfer is cleared against the asset\'s policy before it is written — in the protocol, not in a contract on top.' },
   { t:'Asset tokenization', est:'Testnet · 75% to mainnet', cta:'https://nereum.xyz/explorer/#/tokenize',
     p:'Describe the asset, attach its documentation, choose the conditions that travel with it, and issue. No custom contract to write and no audit to commission for every issuance.' },
+  { t:'NereumEVM DEX', est:'App live · 75% to mainnet', cta:'https://nereum.xyz/app/',
+    p:'Spot, swaps, P2P, pools and a bridge in one app, quoted live against USDT. Every trade settles on NereumEVM, the same chain the assets live on.' },
   { t:'Bitcoin mining', est:'In development', cta:null,
     p:'Physical servers we own and operate, powered by solar. Not rented hashrate and not a reseller\'s contract: machines in racks, with their own energy behind them.' },
 ];
-const PARADAS = [.2, .44, .68];          // donde la camara frena en cada estacion
+const PARADAS = [.18, .34, .5, .66];          // donde la camara frena en cada estacion
 
 /* Lo que se hace DENTRO de la pagina, una vez por contexto. */
 const AYUDA = () => {
@@ -161,9 +164,9 @@ for (const [W, H, mob] of [[1440, 900, 0], [390, 844, 1]]) {
         t:s.querySelector('.tn-t').textContent.trim(), p:s.querySelector('.tn-p').textContent.trim().replace(/\s+/g, ' '),
         est:s.querySelector('.tn-lk span').textContent.replace(/^\s*\d\d/, '').trim(),
         cta:s.querySelector('.tn-cta') ? s.querySelector('.tn-cta').getAttribute('href') : null })) }));
-    di(r.h === 'Three pieces, two already running.', tag + 'el titular: «' + r.h + '»');
+    di(r.h === 'Four pieces, three already running.', tag + 'el titular: «' + r.h + '»');
     di(/\/whitepaper\/?$/.test(r.papel), tag + 'y el enlace lleva al whitepaper (' + r.papel + ')');
-    di(r.sta.length === 3, tag + 'tres estaciones (' + r.sta.length + ')');
+    di(r.sta.length === 4, tag + 'cuatro estaciones (' + r.sta.length + ')');
     ESTACIONES.forEach((e, i) => {
       const s = r.sta[i] || {};
       di(s.t === e.t && s.p === e.p, tag + 'estacion ' + (i + 1) + ' · «' + e.t + '» con su texto, letra por letra');
@@ -213,7 +216,7 @@ for (const [W, H, mob] of [[1440, 900, 0], [390, 844, 1]]) {
                  figTxt:fig.querySelector('b').textContent, ambar, vw:innerWidth, vh:innerHeight };
       }));
     }
-    di(vistas.map(v => v.on).join('') === '012', tag + 'al bajar se lee una estacion cada vez (' + vistas.map(v => v.on).join(' → ') + ')');
+    di(vistas.map(v => v.on).join('') === '0123', tag + 'al bajar se lee una estacion cada vez (' + vistas.map(v => v.on).join(' → ') + ')');
     di(vistas.every((v, i) => v.op.every((o, j) => j === i ? o > .95 : o < .05)),
        tag + 'entera la que toca y apagadas las otras, sin fundidos a medias');
     di(vistas.every((v, i) => v.railOn === i && v.figTxt === 'FIG. 0' + (i + 1)),

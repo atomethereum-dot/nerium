@@ -321,5 +321,10 @@
  "Every buyer pays the same $0.20 per NRM. Crypto assets are volatile: only put in what you can afford to lose.": "Todos os compradores pagam o mesmo: $0.20 por NRM. Criptoativos são voláteis: coloque apenas o que pode se dar ao luxo de perder.",
  "The contract deployed and verified, and the company registration, the audit and the team KYC under way. Each step will be checkable by someone who is not us.": "O contrato implantado e verificado, e em andamento o registo da empresa, a auditoria e o KYC da equipa. Cada passo poderá ser verificado por alguém que não somos nós.",
  "SEED ROUND": "SEED ROUND",
- "Launch app": "Abrir app"
+ "Launch app": "Abrir app",
+ "Four pieces, three already running.": "Quatro peças, três já em funcionamento.",
+ "App live · 75% to mainnet": "App no ar · 75% rumo à mainnet",
+ "Spot, swaps, P2P, pools and a bridge in one app, quoted live against USDT. Every trade settles on NereumEVM, the same chain the assets live on.": "Spot, swaps, P2P, pools e uma ponte num só app, cotados ao vivo contra USDT. Cada operação é liquidada na NereumEVM, a mesma cadeia onde vivem os ativos.",
+ "Open the DEX →": "Abrir o DEX →",
+ "Bids and asks, in depth": "Compras e vendas, em profundidade"
 }

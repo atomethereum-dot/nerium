@@ -321,5 +321,10 @@
  "Every buyer pays the same $0.20 per NRM. Crypto assets are volatile: only put in what you can afford to lose.": "購入者は全員同じ価格、1 NRM あたり $0.20 を支払います。暗号資産は値動きが大きいため、失っても困らない額だけにしてください。",
  "The contract deployed and verified, and the company registration, the audit and the team KYC under way. Each step will be checkable by someone who is not us.": "コントラクトはデプロイと検証を完了し、会社登記・監査・チームの KYC を進行中です。どの段階も私たち以外の第三者が確認できるようになります。",
  "SEED ROUND": "SEED ROUND",
- "Launch app": "アプリを開く"
+ "Launch app": "アプリを開く",
+ "Four pieces, three already running.": "4つの要素、うち3つはすでに稼働中。",
+ "App live · 75% to mainnet": "アプリ稼働中 · メインネットまで75%",
+ "Spot, swaps, P2P, pools and a bridge in one app, quoted live against USDT. Every trade settles on NereumEVM, the same chain the assets live on.": "スポット、スワップ、P2P、プール、ブリッジをひとつのアプリで。USDT建てのライブ価格。すべての取引は、資産が存在する同じチェーン NereumEVM で決済されます。",
+ "Open the DEX →": "DEXを開く →",
+ "Bids and asks, in depth": "買いと売り、板の厚み"
 }

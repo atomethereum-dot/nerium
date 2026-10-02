@@ -321,5 +321,10 @@
  "Every buyer pays the same $0.20 per NRM. Crypto assets are volatile: only put in what you can afford to lose.": "يدفع كل مشترٍ السعر نفسه: $0.20 لكل NRM. الأصول المشفرة متقلبة: لا تضع إلا ما يمكنك تحمّل خسارته.",
  "The contract deployed and verified, and the company registration, the audit and the team KYC under way. Each step will be checkable by someone who is not us.": "العقد منشور ومُتحقَّق منه، وتسجيل الشركة والتدقيق وKYC الفريق قيد التنفيذ. وسيمكن لجهة ليست نحن التحقق من كل خطوة.",
  "SEED ROUND": "SEED ROUND",
- "Launch app": "افتح التطبيق"
+ "Launch app": "افتح التطبيق",
+ "Four pieces, three already running.": "أربعة أجزاء، ثلاثة منها تعمل بالفعل.",
+ "App live · 75% to mainnet": "التطبيق متاح · 75% نحو الشبكة الرئيسية",
+ "Spot, swaps, P2P, pools and a bridge in one app, quoted live against USDT. Every trade settles on NereumEVM, the same chain the assets live on.": "التداول الفوري والمبادلات وP2P والمجمّعات وجسر في تطبيق واحد، بأسعار حية مقابل USDT. تُسوّى كل صفقة على NereumEVM، السلسلة نفسها التي تعيش عليها الأصول.",
+ "Open the DEX →": "افتح DEX ←",
+ "Bids and asks, in depth": "أوامر الشراء والبيع، بعمقها"
 }
