@@ -49,8 +49,8 @@ export function arrancar(sec, api){
     const S = new THREE.Scene(); S.background = new THREE.Color(0x020302); S.fog = new THREE.FogExp2(0x020302, .022);
     const pm = new THREE.PMREMGenerator(R); S.environment = pm.fromScene(new RoomEnvironment(), .04).texture; S.environmentIntensity = .5; pm.dispose();
     const C = new THREE.PerspectiveCamera(MOVIL ? 46 : 30, W / H, .1, 200);
-    const rs = sec.getBoundingClientRect(), fin = (q('.c3-ctas').getBoundingClientRect().bottom - rs.top) / H;
-    const LY = Math.max(6.0, Math.min(7.6, 7.4 - (.40 - fin) * 27));
+    const rs = sec.getBoundingClientRect(), fin = ((q('.c3-tiendas') || q('.c3-ctas')).getBoundingClientRect().bottom - rs.top) / H;
+    const LY = Math.max(6.0, Math.min(8.6, 7.4 - (.40 - fin) * 27));
     const espejo = new Reflector(new THREE.PlaneGeometry(140, 140), {textureWidth: W * PR * .5, textureHeight: H * PR * .5, color: 0x7a7a7a});
     espejo.rotation.x = -Math.PI / 2; S.add(espejo);
     const laca = new THREE.Mesh(new THREE.PlaneGeometry(140, 140), new THREE.MeshStandardMaterial({color: 0x030403, roughness: .5, metalness: .2, transparent: true, opacity: .8}));
@@ -164,7 +164,7 @@ export function arrancar(sec, api){
       /* etiquetas con su línea al punto de la escena */
       let h = '';
       const kf = e5(seg(t, 5.6, 6.5)), fx = MOVIL ? 20 : W - 96 - 340, fy = MOVIL ? H - 58 : H * .86;
-      if (!fijos && t > 2.4) fijos = [...qq('.c3-eye, .c3 h1 .mask, .c3-sub, .c3-ctas a')].filter(e => e.offsetWidth).map(caja2);
+      if (!fijos && t > 2.4) fijos = [...qq('.c3-eye, .c3 h1 .mask, .c3-sub, .c3-ctas a, .c3-tiendas .tienda')].filter(e => e.offsetWidth).map(caja2);
       const puestos = (fijos || []).slice(); if (kf > 0) puestos.push({l: fx, t: fy - fi.offsetHeight, r: fx + fi.offsetWidth, b: fy});
       ETQ.forEach(([s, a, p, off]) => { const el = q(s), sin = s === '#c3e1' && !api.precio();
         const [x, y] = aPant(...p()), ew = el.offsetWidth, eh = el.offsetHeight, ly = y + off[1];
