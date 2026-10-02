@@ -27,10 +27,13 @@ const LOGOS = ['btc', 'eth', 'sol', 'usdt', 'bnb', 'xrp'];
 export function arrancar(sec, api){
   const q = s => sec.querySelector(s), qq = s => [...sec.querySelectorAll(s)];
   const quieto = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const negro = q('.c3-negro'); negro.style.animation = 'none';
+  const negro = q('.c3-negro'); let pintado = false;
   let E = null, activa = true, vis = true, reloj = quieto ? 9.4 : 0, prev = null, pend = false, imgs = null;
 
   /* ── la escena entera, para un tamaño dado ── */
+  /* si algo falla, la portada queda en su versión fija (imagen + textos), nunca en negro */
+  function sin3d(err){ if (err) console.error('Portada 3D:', err); try { if (E && !E.sin) E.suelta(); } catch (e){}
+    sec.querySelectorAll('.c3-gl').forEach(c => c.remove()); sec.classList.add('sin3d'); E = {W: sec.clientWidth, H: sec.clientHeight, MOVIL: sec.classList.contains('m'), sin: true}; }
   function monta(){
     const W = sec.clientWidth, H = sec.clientHeight, MOVIL = esMovil(W, H);
     sec.classList.toggle('m', MOVIL);
@@ -39,6 +42,7 @@ export function arrancar(sec, api){
     let R;
     try { R = new THREE.WebGLRenderer({antialias: false, powerPreference: 'high-performance'}); }
     catch (e){ sec.classList.add('sin3d'); return {W, H, MOVIL, sin: true}; }
+    if (!R.getContext()){ R.dispose(); sec.classList.add('sin3d'); return {W, H, MOVIL, sin: true}; }
     R.setPixelRatio(PR); R.setSize(W, H); R.domElement.className = 'c3-gl';
     R.toneMapping = THREE.ACESFilmicToneMapping; R.toneMappingExposure = 1.0; R.outputColorSpace = THREE.SRGBColorSpace;
     sec.prepend(R.domElement);
@@ -195,19 +199,22 @@ export function arrancar(sec, api){
   function cuadro(ahora){
     pend = false; if (!activa || !vis || document.hidden){ prev = null; return; }
     if (!quieto){ if (prev !== null) reloj += Math.min(.1, (ahora - prev) / 1000); prev = ahora; }
-    dom(reloj); if (E && !E.sin) E.render(reloj);
+    try { if (E && !E.sin) E.render(reloj); } catch (e){ sin3d(e); }
+    if (!pintado){ pintado = true; negro.style.animation = 'none'; }
+    dom(reloj);
     pend = true; if (quieto) setTimeout(() => requestAnimationFrame(cuadro), 1000); else requestAnimationFrame(cuadro);
   }
   const sigue = () => { if (!pend){ pend = true; requestAnimationFrame(cuadro); } };
   let ro = null;
   function redimensiona(){
     if (!E) return; const W = sec.clientWidth, H = sec.clientHeight; if (!W || !H || (W === E.W && H === E.H)) return;
-    if (E.sin || esMovil(W, H) !== E.MOVIL || (!E.MOVIL && (W / H > 1.3) !== (E.W / E.H > 1.3))){ if (!E.sin) E.suelta(); E = monta(); sigue(); return; }
+    if (E.sin) return;
+    if (esMovil(W, H) !== E.MOVIL || (!E.MOVIL && (W / H > 1.3) !== (E.W / E.H > 1.3))){ E.suelta(); try { E = monta(); } catch (e){ sin3d(e); } sigue(); return; }
     E.W = W; E.H = H; E.R.setSize(W, H); E.comp.setSize(W, H); E.C.aspect = W / H; E.C.updateProjectionMatrix();
     E.espejo.getRenderTarget().setSize(W * E.PR * .5, H * E.PR * .5); E.olvida(); sigue();
   }
   Promise.all(LOGOS.map(s => imagen('/app/coins/' + s + '.svg'))).then(i => {
-    imgs = i; E = monta(); sigue();
+    imgs = i; try { E = monta(); } catch (e){ sin3d(e); } sigue();
     ro = new ResizeObserver(() => redimensiona()); ro.observe(sec);
     new IntersectionObserver(es => { vis = es[0].isIntersecting; if (vis) sigue(); }).observe(sec);
     document.addEventListener('visibilitychange', () => { if (!document.hidden) sigue(); });

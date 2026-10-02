@@ -767,7 +767,12 @@ select.inp option{background:#141417}
 /* ══ portada 3D: la ciudad, la torre y las monedas, con el precio en vivo de BTC (app/portada/escena.js) ══ */
 .c3{position:relative;height:100vh;height:100svh;min-height:560px;overflow:hidden;background:#020302;color:#E4E4E7;font-family:var(--f);isolation:isolate}
 .c3 .c3-gl{position:absolute;inset:0;width:100%;height:100%;z-index:0;display:block}
-.c3.sin3d{background:radial-gradient(ellipse 70% 60% at 68% 40%,rgba(166,240,60,.16),rgba(166,240,60,0) 60%),#020302}
+.c3.sin3d{background:#020302 url(/app/portada/ciudad.jpg) center/cover no-repeat}
+.c3.m.sin3d{background-image:url(/app/portada/ciudad-movil.jpg);background-position:center bottom}
+/* sin 3D: la ficha queda fija en su sitio final */
+.c3.sin3d .c3-ficha{visibility:visible !important;opacity:1 !important;transform:none !important;left:auto;top:auto;right:96px;bottom:14%}
+.c3.m.sin3d .c3-ficha{left:20px;right:20px;width:auto !important;bottom:calc(58px + env(safe-area-inset-bottom))}
+.c3.sin3d .c3-etq,.c3.sin3d .c3-lin{display:none}
 .c3-lin{position:absolute;inset:0;width:100%;height:100%;z-index:2;pointer-events:none}
 .c3-vin{position:absolute;inset:0;z-index:1;pointer-events:none;background:radial-gradient(ellipse 85% 75% at 62% 48%,rgba(0,0,0,0) 45%,rgba(0,0,0,.75) 100%)}
 .c3-izq{position:absolute;inset:0 auto 0 0;width:50%;z-index:1;pointer-events:none;background:linear-gradient(90deg,rgba(0,0,0,.9),rgba(0,0,0,.55) 58%,rgba(0,0,0,0))}
