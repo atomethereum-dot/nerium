@@ -638,7 +638,14 @@ button.red-sel:hover{background:var(--campo2)}
 .chp i{width:8px;height:8px;border-radius:50%;background:var(--c,#555)}
 .sep{height:1px;background:var(--linea);margin:16px 0}
 /* cloud mining */
-.mn-aviso{margin-bottom:16px}
+.mn-aviso{margin-bottom:12px}
+.mn-lanz{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-bottom:16px;padding:16px 18px;border-radius:14px;background:var(--panel);border:1px solid var(--linea)}
+.mn-hito{position:relative;display:grid;gap:3px;padding-left:24px;min-width:0}
+.mn-hito i{position:absolute;left:0;top:3px;width:12px;height:12px;border-radius:50%;border:2px solid #4A4A52;background:var(--panel)}
+.mn-hito.on i{border-color:var(--up);background:var(--up);box-shadow:0 0 0 4px var(--up-f2)}
+.mn-hito.fin i{border-color:#fff}
+.mn-hito b{font-size:13px;font-weight:600;color:#fff}
+.mn-hito span{font-size:11.5px;color:var(--t3)}
 .dos.mn-l{grid-template-columns:minmax(0,1fr) minmax(0,400px)}
 .mn-col{display:grid;gap:16px;align-content:start;min-width:0}
 .mn-per{height:auto;gap:4px}
@@ -681,7 +688,7 @@ button.red-sel:hover{background:var(--campo2)}
   .mn-l > .mn-col:first-child > :nth-child(2){order:4} .mn-l > aside > :nth-child(3){order:5}
   .nav.desborda{-webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 36px),transparent);mask-image:linear-gradient(90deg,#000 calc(100% - 36px),transparent)}
   .nav.desborda.fin{-webkit-mask-image:none;mask-image:none} }
-@media(max-width:560px){ .mn-pasos{grid-template-columns:1fr} .mn-r{flex-wrap:wrap} .mn-tb{min-width:0} .mn-tb th:nth-child(4),.mn-tb td:nth-child(4){display:none} .mn-tb th,.mn-tb td{padding:0 10px} }
+@media(max-width:560px){ .mn-lanz{grid-template-columns:1fr} .mn-pasos{grid-template-columns:1fr} .mn-r{flex-wrap:wrap} .mn-tb{min-width:0} .mn-tb th:nth-child(4),.mn-tb td:nth-child(4){display:none} .mn-tb th,.mn-tb td{padding:0 10px} }
 /* p2p */
 .pp-fil{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:12px 16px;border-bottom:1px solid var(--linea)}
 .pp-fil .sel select{height:36px;padding:0 28px 0 12px;font-size:13px;font-weight:600;color:#fff}
@@ -1292,7 +1299,12 @@ body.portada .top,body.portada .pie{display:none}
   <div class="v-cab"><div><h1>Cloud mining</h1><p>Rent hashrate from machines Nereum owns and operates, powered by solar, and receive the bitcoin they mine. Everything on this page about the Bitcoin network is live.</p></div>
     <button class="pill lima" id="mnReservar">Reserve hashrate</button></div>
   <div class="aviso mn-aviso"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="9" cy="9" r="7"/><path d="M9 8v4.5M9 5.5v.1"/></svg>
-    <span><b>The farm is in development.</b> Contracts open when the machines are online. Until then nothing is sold or charged: you can size a contract with live network data and keep a reservation in this browser.</span></div>
+    <span><b>Cloud mining opens 10 days after the Seed Round closes and NRM is listed on Uniswap.</b> Until then nothing is sold or charged: you can size a contract with live network data and keep a reservation in this browser.</span></div>
+  <div class="mn-lanz" aria-label="Launch timeline">
+    <div class="mn-hito on"><i></i><b>Seed Round closes</b><span>In progress</span></div>
+    <div class="mn-hito"><i></i><b>NRM listed on Uniswap</b><span>Right after the Seed Round</span></div>
+    <div class="mn-hito fin"><i></i><b>Cloud mining opens</b><span>10 days after the listing</span></div>
+  </div>
   <div class="stats4 mn-st">
     <div class="st4"><i>BTC price</i><b id="mnPx">—</b><s id="mnPxS">Live market</s></div>
     <div class="st4"><i>Network hashrate</i><b id="mnHash">—</b><s>3-day average</s></div>
@@ -3025,16 +3037,16 @@ function mnGraf(){
 function mnPintaRes(){
   $('#mnResN').textContent = mnRes.length;
   $('#mnMias').innerHTML = !mnRes.length
-    ? `<p class="mn-vac">No reservations yet. Size a contract in the calculator and reserve it: it stays in this browser until contracts open.</p>`
+    ? `<p class="mn-vac">No reservations yet. Size a contract in the calculator and reserve it: it stays in this browser until cloud mining opens.</p>`
     : mnRes.map(r => `<div class="mn-r"><div><b>${nf(r.th, 0)} TH/s · ${r.dias} days</b><span>${nf(r.ef, 1)} J/TH · est. ${fBtc(r.btcD)} per day at reservation</span></div>
-      <span class="tag">Waiting for the farm</span><button class="pp-borra" data-mnb="${r.id}">Delete</button></div>`).join('');
+      <span class="tag">Waiting for launch</span><button class="pp-borra" data-mnb="${r.id}">Delete</button></div>`).join('');
 }
 function mnReserva(){
   const e = mnEstima();
   if (!(e.th > 0)) { sacude($('#mnCalcBt')); return toast('Enter a hashrate above zero.'); }
   mnRes.unshift({id: Date.now().toString(36), th: e.th, dias: e.dias, ef: mnN(MN.ef), btcD: e.btcD, creado: Date.now()});
   guarda('nereum-dex-mina-res', mnRes); mnPintaRes();
-  toast('Reservation saved in this browser. Contracts open when the farm is online; nothing was charged.');
+  toast('Reservation saved in this browser. Cloud mining opens 10 days after the Seed Round closes and NRM is listed on Uniswap; nothing was charged.');
 }
 const mnGuarda = () => { guarda('nereum-dex-mina', MN); mnCalc(); };
 [['#mnTh','th'], ['#mnEf','ef'], ['#mnKwh','kwh'], ['#mnFee','fee']].forEach(([s, k]) => $(s).addEventListener('input', e => { MN[k] = e.target.value;

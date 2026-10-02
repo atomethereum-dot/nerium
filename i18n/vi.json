@@ -326,5 +326,7 @@
  "App live · 75% to mainnet": "Ứng dụng đã chạy · 75% tới mainnet",
  "Spot, swaps, P2P, pools and a bridge in one app, quoted live against USDT. Every trade settles on NereumEVM, the same chain the assets live on.": "Spot, swap, P2P, pool và cầu nối trong một ứng dụng, báo giá trực tiếp theo USDT. Mọi giao dịch được thanh toán trên NereumEVM, chính chuỗi nơi tài sản tồn tại.",
  "Open the DEX →": "Mở DEX →",
- "Bids and asks, in depth": "Lệnh mua và bán, theo độ sâu"
+ "Bids and asks, in depth": "Lệnh mua và bán, theo độ sâu",
+ "Cloud mining opens 10 days after the Seed Round closes and NRM is listed on Uniswap.": "Đào coin trên đám mây mở 10 ngày sau khi Seed Round kết thúc và NRM được niêm yết trên Uniswap.",
+ "Open cloud mining →": "Mở đào trên đám mây →"
 }

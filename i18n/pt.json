@@ -326,5 +326,7 @@
  "App live · 75% to mainnet": "App no ar · 75% rumo à mainnet",
  "Spot, swaps, P2P, pools and a bridge in one app, quoted live against USDT. Every trade settles on NereumEVM, the same chain the assets live on.": "Spot, swaps, P2P, pools e uma ponte num só app, cotados ao vivo contra USDT. Cada operação é liquidada na NereumEVM, a mesma cadeia onde vivem os ativos.",
  "Open the DEX →": "Abrir o DEX →",
- "Bids and asks, in depth": "Compras e vendas, em profundidade"
+ "Bids and asks, in depth": "Compras e vendas, em profundidade",
+ "Cloud mining opens 10 days after the Seed Round closes and NRM is listed on Uniswap.": "A mineração em nuvem abre 10 dias depois do fecho da Seed Round e da listagem do NRM na Uniswap.",
+ "Open cloud mining →": "Abrir a mineração em nuvem →"
 }

@@ -56,7 +56,7 @@ const ESTACIONES = [
     p:'Describe the asset, attach its documentation, choose the conditions that travel with it, and issue. No custom contract to write and no audit to commission for every issuance.' },
   { t:'NereumEVM DEX', est:'App live · 75% to mainnet', cta:'https://nereum.xyz/app/',
     p:'Spot, swaps, P2P, pools and a bridge in one app, quoted live against USDT. Every trade settles on NereumEVM, the same chain the assets live on.' },
-  { t:'Bitcoin mining', est:'In development', cta:null,
+  { t:'Bitcoin mining', est:'In development', cta:'https://nereum.xyz/app/#/mining',
     p:'Physical servers we own and operate, powered by solar. Not rented hashrate and not a reseller\'s contract: machines in racks, with their own energy behind them.' },
 ];
 const PARADAS = [.18, .34, .5, .66];          // donde la camara frena en cada estacion

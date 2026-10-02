@@ -326,5 +326,7 @@
  "App live · 75% to mainnet": "アプリ稼働中 · メインネットまで75%",
  "Spot, swaps, P2P, pools and a bridge in one app, quoted live against USDT. Every trade settles on NereumEVM, the same chain the assets live on.": "スポット、スワップ、P2P、プール、ブリッジをひとつのアプリで。USDT建てのライブ価格。すべての取引は、資産が存在する同じチェーン NereumEVM で決済されます。",
  "Open the DEX →": "DEXを開く →",
- "Bids and asks, in depth": "買いと売り、板の厚み"
+ "Bids and asks, in depth": "買いと売り、板の厚み",
+ "Cloud mining opens 10 days after the Seed Round closes and NRM is listed on Uniswap.": "クラウドマイニングは、シードラウンド終了とNRMのUniswap上場から10日後に開始します。",
+ "Open cloud mining →": "クラウドマイニングを開く →"
 }

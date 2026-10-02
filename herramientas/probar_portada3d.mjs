@@ -73,7 +73,8 @@ prueba('Cloud mining: datos de la red en vivo', (await p.textContent('#mnHash'))
 const esper = 1e14 / 6.72e20 * 144 * 3.1875 * .98;
 prueba('Cloud mining: la calculadora estima lo minado por día', Math.abs(parseFloat((await p.textContent('#mnBtcD'))) - esper) < 1e-8);
 prueba('Cloud mining: próximo halving en el bloque 1.050.000', (await p.textContent('#mnHalvN')) === '184,580');
-await p.click('#mnCalcBt'); prueba('Cloud mining: la reserva se guarda en el navegador', (await p.$$eval('#mnMias .mn-r', e => e.length)) === 1);
+await p.click('#mnCalcBt'); prueba('Cloud mining: dice cuándo abre', (await p.textContent('.mn-aviso b')).includes('10 days after the Seed Round closes and NRM is listed on Uniswap'));
+prueba('Cloud mining: la reserva se guarda en el navegador', (await p.$$eval('#mnMias .mn-r', e => e.length)) === 1);
 prueba('Portada: distintivos de App Store y Google Play con «Coming soon»', await p.evaluate(() => { location.hash = '#/'; return [...document.querySelectorAll('.c3-tiendas .tienda')].map(e => e.getAttribute('aria-label')).join('|') === 'App Store, coming soon|Google Play, coming soon'; }));
 await b.close(); s.close();
 console.log(`\n${ok}/${ok + mal}`); process.exit(mal ? 1 : 0);
