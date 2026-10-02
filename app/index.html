@@ -707,6 +707,37 @@ select.inp option{background:#141417}
 }
 @media(max-width:419px){ .nav button{font-size:13.5px;padding:0 6px} }
 
+/* ══ pie de la web principal, en negro, bajo la portada ══ */
+@font-face{font-family:NSw;font-weight:300;font-display:swap;src:url(/assets/fonts/switzer-300-normal-latin.woff2) format('woff2')}
+@font-face{font-family:NSw;font-weight:500;font-display:swap;src:url(/assets/fonts/switzer-500-normal-latin.woff2) format('woff2')}
+@font-face{font-family:NMo;font-weight:400;font-display:swap;src:url(/assets/fonts/dmmono-400-normal-latin.woff2) format('woff2')}
+@font-face{font-family:NMo;font-weight:500;font-display:swap;src:url(/assets/fonts/dmmono-500-normal-latin.woff2) format('woff2')}
+.cv-foot{background:#000;color:#E3E6EE;border-top:1px solid #16161A;padding:72px 0 26px;overflow:hidden}
+.cv-foot .wrap{max-width:1340px;margin:0 auto;padding:0 48px}
+.cv-foot .ftop{display:flex;flex-direction:column;gap:10px;margin-bottom:48px}
+.cv-foot .fbrand{display:inline-flex;align-items:center;gap:12px;color:#E3E6EE;text-decoration:none;font-family:NSw,Inter,sans-serif;font-weight:500;font-size:30px;letter-spacing:-.03em}
+.cv-foot .fbrand svg{width:34px;height:34px;flex:none}
+.cv-foot .fcopy{font-weight:400;font-family:NMo,ui-monospace,monospace;font-size:11px;letter-spacing:.06em;color:rgba(232,236,244,.5)}
+.cv-foot .fgrid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:28px 18px}
+.cv-foot .fgrid h3{font-family:NMo,ui-monospace,monospace;font-size:11px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:rgba(232,236,244,.5);margin-bottom:14px}
+.cv-foot .fgrid a{display:block;padding:4px 0;font-weight:400;white-space:normal;overflow-wrap:anywhere;font-family:NMo,ui-monospace,monospace;font-size:12px;line-height:1.5;color:rgba(232,236,244,.66);text-decoration:none;transition:color .18s,padding-left .3s var(--e)}
+.cv-foot .fgrid a::before{content:"└── ";color:rgba(232,236,244,.26)}
+.cv-foot .fgrid a:hover{color:#fff;padding-left:6px}
+.cv-foot .fmark{display:flex;align-items:flex-end;justify-content:space-between;gap:2vw;margin-top:72px}
+.cv-foot .fmark span{font-family:NSw,Inter,sans-serif;font-weight:300;font-size:clamp(84px,16.5vw,270px);line-height:.78;letter-spacing:-.02em;
+  background:linear-gradient(180deg,rgba(232,236,244,.26),rgba(232,236,244,.04));-webkit-background-clip:text;background-clip:text;color:transparent}
+.cv-foot .fmark svg{width:clamp(56px,12vw,200px);height:clamp(56px,12vw,200px);opacity:.2;flex:none}
+.cv-foot .fend{display:flex;flex-wrap:wrap;justify-content:space-between;gap:14px;margin-top:48px;padding-top:20px;border-top:1px solid rgba(232,236,244,.14);
+  font-family:NMo,ui-monospace,monospace;font-weight:400;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:rgba(232,236,244,.4)}
+@media(max-width:1023px){
+  .cv-foot{padding:48px 0 calc(26px + env(safe-area-inset-bottom))}
+  .cv-foot .wrap{padding:0 20px}
+  .cv-foot .fgrid{grid-template-columns:1fr 1fr;gap:30px 16px}
+  .cv-foot .fmark{margin-top:52px;justify-content:flex-start}
+  .cv-foot .fmark span{font-size:23vw}
+  .cv-foot .fmark svg{width:14vw;height:14vw}
+}
+
 /* ══ portada: lo primero que se ve al abrir la app ══ */
 body.portada .top,body.portada .pie{display:none}
 .cv{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);min-height:100vh;min-height:100dvh}
@@ -1014,6 +1045,23 @@ body.portada .top,body.portada .pie{display:none}
       <div class="cv-pie"><span>0.30% pool fee</span><span>Settles on NereumEVM</span></div>
     </div>
   </div>
+  <footer class="cv-foot">
+    <div class="wrap">
+      <div class="ftop">
+        <a class="fbrand" href="/"><svg viewBox="0 0 672 672" aria-hidden="true"><use href="#nlLogo"/></svg><span>Nereum</span></a>
+        <p class="fcopy">&copy;2026 Nereum Finance. All rights reserved.</p>
+      </div>
+      <div class="fgrid">
+      <div><h3>Overview</h3><a href="https://nereum.xyz/whitepaper#/introduction">Introduction</a><a href="https://nereum.xyz/whitepaper#/vision">Vision</a></div>
+      <div><h3>Trust</h3><a href="https://nereum.xyz/whitepaper#/legal">Legal Document — Miami, FL</a><a href="https://nereum.xyz/whitepaper#/audit">Audit</a><a href="https://nereum.xyz/whitepaper#/kyc">Team KYC</a></div>
+      <div><h3>Token</h3><a href="https://nereum.xyz/whitepaper#/seedround">Join the Seed Round</a><a href="https://nereum.xyz/whitepaper#/dexscreener">DexScreener</a></div>
+      <div><h3>Protocol</h3><a href="https://nereum.xyz/whitepaper#/network">NereumEVM — Blockchain</a><a href="https://nereum.xyz/whitepaper#/scan">NereumEVM — Explorer</a><a href="https://nereum.xyz/whitepaper#/tokenization">Asset tokenization</a><a href="https://nereum.xyz/whitepaper#/dex">Nereum DEX</a><a href="https://nereum.xyz/whitepaper#/nusd">NUSD</a></div><div><h3>Products</h3><a href="https://nereum.xyz/whitepaper#/forge">Nereum Forge</a><a href="https://nereum.xyz/whitepaper#/vaults">Nereum Vaults</a><a href="https://nereum.xyz/whitepaper#/feed">Nereum Feed</a><a href="https://nereum.xyz/whitepaper#/link">Nereum Link</a><a href="https://nereum.xyz/whitepaper#/wallet">Wallet and tooling</a></div>
+      <div><h3>Company</h3><a href="https://nereum.xyz/whitepaper#/team">Team</a><a href="https://nereum.xyz/whitepaper#/press">News and mentions</a><a href="https://nereum.xyz/whitepaper#/links">Official links</a><a href="https://nereum.xyz/whitepaper#/faq">Questions</a></div>
+    </div>
+      <div class="fmark" aria-hidden="true"><span>NEREUM</span><svg viewBox="0 0 672 672"><use href="#nlLogo"/></svg></div>
+      <div class="fend"><span>Nereum Finance &#183; Real-world asset chain</span></div>
+    </div>
+  </footer>
 </main>
 
 <!-- ══ swap ══ -->
