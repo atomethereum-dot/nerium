@@ -171,7 +171,7 @@ chk('cadena tras el cambio', await pg.evaluate(()=>window.__prov._cid), '0x38');
 
 // ── 6 · compra con USDT (aprobación + compra) ────────────────────────────────
 await pg.evaluate(()=>{ window.__prov._cid='0x1'; window.__prov._emitir('chainChanged','0x1'); });
-await pg.locator('#wPay button').nth(3).click();   // USDT ERC-20
+await pg.locator('#wPay button').nth(2).click();   // USDT ERC-20
 await pg.waitForTimeout(400);
 chk('la unidad cambia a USDT', await pg.locator('#presale .w-field em').first().textContent(), 'USDT');
 await pg.locator('#wUsd').fill('500');
@@ -196,33 +196,12 @@ if (txs.length === 2) {
   chk('compra sin ether adjunto', txs[1].value === undefined || BigInt(txs[1].value)===0n, true);
 }
 
-// ── 6b · Robinhood Chain: las dos vias, contra SU contrato ───────────────────
-// Robinhood no comparte direccion de venta con Ethereum y BNB. Si alguien
-// vuelve a colgar esta cadena de la constante VENTA, el comprador firmaria
-// contra un contrato que en la 4663 no existe: salta aqui.
-await pg.evaluate(()=>{ window.__prov._cid='0x1237'; window.__prov._emitir('chainChanged','0x1237'); });
-await pg.locator('#wPay button').nth(2).click();   // ETH en Robinhood
-await pg.waitForTimeout(400);
-chk('en Robinhood el equivalente nombra la red',
-    (await pg.locator('#wEq').textContent()).endsWith('on Robinhood Chain'), true);
-await pg.evaluate(()=>{ window.__tx.length=0; });
-await pg.locator('#wCta').click();
-await pg.waitForTimeout(1500);
-const txR = (await pg.evaluate(()=>window.__tx))[0] || {};
-chk('ETH/Robinhood va a la venta de Robinhood', (txR.to||'').toLowerCase(),
-    '0xd9beedfbeb9778f0954f3a5016c3fff99bcfd4b6');
-chk('  y no a la de Ethereum', (txR.to||'').toLowerCase() === VENTA_ETH, false);
-chk('  con buyWithNative', (txR.data||'').slice(0,10), '0x31ad36ab');
-
-// Sobre Robinhood no se ofrece USDT: la direccion esta comprobada y el
-// contrato la acepta, pero en esa red apenas hay USDT puenteado. La decision
-// se guarda aqui para que no se deshaga sin querer — si alguien anade un sexto
-// boton, esta cuenta lo caza.
-chk('cinco medios de pago, no seis', await pg.locator('#wPay button').count(), 5);
-chk('y ninguno es USDT sobre Robinhood',
-    await pg.locator('#wPay button[data-sym="USDT"][data-net="Robinhood Chain"]').count(), 0);
-await pg.evaluate(()=>{ window.__prov._cid='0x1'; window.__prov._emitir('chainChanged','0x1'); });
-await pg.waitForTimeout(300);
+// ── 6b · Robinhood Chain ya no es medio de pago ─────────────────────────────
+// Desde que NRM vive en Ethereum, la venta se ofrece en Ethereum y BNB Chain:
+// cuatro medios. La 4663 sigue en CADENAS solo para leer compras pasadas.
+chk('cuatro medios de pago', await pg.locator('#wPay button').count(), 4);
+chk('y ninguno sobre Robinhood Chain',
+    await pg.locator('#wPay button[data-net="Robinhood Chain"]').count(), 0);
 
 // ── 7 · límites ──────────────────────────────────────────────────────────────
 await pg.locator('#wPay button').nth(0).click();   // vuelta a ETH

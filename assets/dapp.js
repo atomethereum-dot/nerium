@@ -61,7 +61,8 @@
         'https://rpc.ankr.com/bsc'
       ]
     },
-    /* Robinhood Chain. Su moneda de gas es ETH, igual que en Ethereum, asi que
+    /* Robinhood Chain: ya no es medio de pago (ver BOTONES), se conserva para
+       leer las compras que se hicieron alli. Su moneda de gas es ETH, igual que en Ethereum, asi que
        el simbolo se repite: lo que cambia es la RED, y por eso esta cadena
        lleva su propia insignia («marca») en vez de heredar la del simbolo.
        Sin eso, «USDT en Ethereum» y «USDT en Robinhood» llevarian el mismo
@@ -1044,14 +1045,13 @@
   /* El orden es el del marcado y no al reves: primero las tres monedas de red
      y debajo los tres USDT. Agrupar por tipo y no por cadena es lo que deja
      cada fila leyendose sola. */
-  /* Cinco medios, no seis. Falta USDT sobre Robinhood Chain, y falta a
-     proposito: la direccion esta comprobada y el contrato la acepta, pero en
-     esa red apenas hay USDT puenteado, asi que ofrecerlo seria vender una
-     puerta por la que casi nadie puede entrar. Sobre Robinhood se compra con
-     ETH, que es su moneda de gas y la tiene todo el que opera alli. El dia que
-     haya liquidez, esta linea vuelve y la rejilla se recoloca sola. */
+  /* Cuatro medios: ETH y BNB, y el USDT de cada una. Robinhood Chain dejo de
+     ser medio de pago cuando NRM paso a vivir en Ethereum: ya no se vende alli.
+     Sigue en CADENAS solo para leer, para que quien ya compro en la 4663 vea su
+     compra, su tope y lo que le queda por reclamar, y para que lo vendido alli
+     siga sumando en la barra. */
   var BOTONES = [
-    { cid: 1, usdt: false }, { cid: 56, usdt: false }, { cid: 4663, usdt: false },
+    { cid: 1, usdt: false }, { cid: 56, usdt: false },
     { cid: 1, usdt: true  }, { cid: 56, usdt: true  }
   ];
   var botones = [].slice.call(pay.querySelectorAll('button'));

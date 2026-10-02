@@ -1091,6 +1091,8 @@ main>section#presale::after{display:none !important}
    solo actuan cuando el quinto es el ultimo, asi que el dia que vuelva a haber
    seis botones se apagan solas sin que nadie tenga que acordarse. */
 .w-pay button:nth-child(5):last-child{grid-column:1/-1}
+/* cuatro medios (ETH y BNB arriba, sus USDT abajo): dos filas de dos en cualquier ancho */
+.w-pay:has(button:nth-child(4):last-child){grid-template-columns:repeat(2,1fr)}
 @media(min-width:480px){
   .w-pay:has(button:nth-child(5):last-child){grid-template-columns:repeat(6,1fr)}
   .w-pay:has(button:nth-child(5):last-child) button{grid-column:span 2}
@@ -2299,8 +2301,8 @@ html[dir="rtl"] .subir{left:16px !important;right:auto !important}
   transition:opacity 1s ease .72s,transform 1.1s cubic-bezier(.16,.84,.26,1) .72s}
 .ready .hero-pr{opacity:1;transform:none}
 .hero-pr li{display:flex;align-items:center;gap:8px;white-space:nowrap}
-/* con Robinhood Chain la linea de redes ya no cabe en 320-360 px: ahi puede
-   partirse, centrada, en vez de salirse y descentrar la lista */
+/* si la linea de redes no cabe en 320-360 px, ahi puede partirse, centrada,
+   en vez de salirse y descentrar la lista */
 @media(max-width:400px){.hero-pr li{white-space:normal;text-align:center;justify-content:center;max-width:100%}}
 .hero-pr li:first-child{color:#6FE3A8}
 .hero-pr i{width:5px;height:5px;border-radius:50%;background:currentColor;
@@ -8257,7 +8259,7 @@ body.lock .flota{opacity:0 !important;pointer-events:none !important}
       <li><i></i><span class="pc">Seed Round open</span><span class="ps">Seed Round</span></li>
       <li class="hp-pct"><b id="heroPct">Starts soon</b> <span class="pc">complete</span></li>
       <li>1 NRM = $0.20</li>
-      <li>Ethereum &middot; BNB Chain &middot; Robinhood Chain</li>
+      <li>Ethereum &middot; BNB Chain</li>
       <li>Contracts verified</li>
     </ul>
     <i class="lq-sweep" aria-hidden="true"></i></div>
@@ -8566,7 +8568,7 @@ body.lock .flota{opacity:0 !important;pointer-events:none !important}
   <div class="wrap">
     <div class="sale-top rv">
       <span class="sale-live sk"><i class="sk-n">04</i><i></i><span class="pc">Seed Round open</span><span class="ps">Seed Round</span></span>
-      <span class="sale-net mono">Ethereum &#183; BNB Chain &#183; Robinhood Chain</span>
+      <span class="sale-net mono">Ethereum &#183; BNB Chain</span>
     </div>
 
     <div class="sale-grid">
@@ -8608,7 +8610,6 @@ body.lock .flota{opacity:0 !important;pointer-events:none !important}
         <div class="w-pay" id="wPay">
           <button class="on" data-sym="ETH"  data-net="Ethereum"  data-rate="3420">ETH<em>Ethereum</em></button>
           <button data-sym="BNB"  data-net="BNB Chain" data-rate="610">BNB<em>BNB Chain</em></button>
-          <button data-sym="ETH"  data-net="Robinhood Chain" data-rate="3420">ETH<em>Robinhood</em></button>
           <button data-sym="USDT" data-net="Ethereum"  data-rate="1">USDT<em>ERC-20</em></button>
           <button data-sym="USDT" data-net="BNB Chain" data-rate="1">USDT<em>BEP-20</em></button>
         </div>
