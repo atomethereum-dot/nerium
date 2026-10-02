@@ -80,5 +80,14 @@ prueba('Cloud mining: próximo halving en el bloque 1.050.000', (await p.textCon
 await p.click('#mnCalcBt'); prueba('Cloud mining: dice cuándo abre', (await p.textContent('.mn-aviso b')).includes('10 days after the Seed Round closes and NRM is listed on Uniswap'));
 prueba('Cloud mining: la reserva se guarda en el navegador', (await p.$$eval('#mnMias .mn-r', e => e.length)) === 1);
 prueba('Portada: distintivos de App Store y Google Play con «Coming soon»', await p.evaluate(() => { location.hash = '#/'; return [...document.querySelectorAll('.c3-tiendas .tienda')].map(e => e.getAttribute('aria-label')).join('|') === 'App Store, coming soon|Google Play, coming soon'; }));
+/* Lend: préstamo con colateral BTC a precio en vivo */
+await p.evaluate(() => { localStorage.removeItem('nereum-dex-lend'); localStorage.removeItem('nereum-dex-lend-mias'); location.hash = '#/lend'; }); await p.waitForTimeout(600);
+prueba('Lend: está en el menú', await p.evaluate(() => !!document.querySelector('.top .nav button[data-v="lend"]')));
+await p.fill('#lnAmt', '1'); await p.click('#lnPct [data-p="50"]');
+const ln = await p.evaluate(() => ({d: +$('#lnDebt').value, hf: $('#lnHf').textContent, px: datos.BTC.px}));
+prueba('Lend: 50 % del máximo (70 %) y factor de salud con umbral 78 %', Math.abs(ln.d - ln.px * .35) < .02 && ln.hf.startsWith((ln.px * .78 / ln.d).toFixed(2)));
+await p.click('#lnGuardar'); prueba('Lend: el préstamo se guarda', (await p.$$eval('#lnMias .mn-r', e => e.length)) === 1);
+await p.click('#lnColSel [data-ln="RE"]'); await p.fill('#lnAmt', '100000'); await p.fill('#lnDebt', '60000');
+prueba('Lend: no deja pasar del LTV máximo', await p.evaluate(() => $('#lnGuardar').disabled));
 await b.close(); s.close();
 console.log(`\n${ok}/${ok + mal}`); process.exit(mal ? 1 : 0);

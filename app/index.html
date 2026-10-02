@@ -694,6 +694,24 @@ button.red-sel:hover{background:var(--campo2)}
   .nav.desborda{-webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 36px),transparent);mask-image:linear-gradient(90deg,#000 calc(100% - 36px),transparent)}
   .nav.desborda.fin{-webkit-mask-image:none;mask-image:none} }
 @media(max-width:560px){ .mn-mio-g{grid-template-columns:1fr 1fr} .mn-mio-g b{font-size:15px} .mn-lanz{grid-template-columns:1fr} .mn-pasos{grid-template-columns:1fr} .mn-r{flex-wrap:wrap} .mn-tb{min-width:0} .mn-tb th:nth-child(4),.mn-tb td:nth-child(4){display:none} .mn-tb th,.mn-tb td{padding:0 10px} }
+/* lend */
+.dos.ln-l{grid-template-columns:minmax(0,1fr) minmax(0,400px)}
+.ln-tb{min-width:720px}
+.ln-ico{width:26px;height:26px;border-radius:50%;background:rgba(166,240,60,.12);color:var(--up);display:inline-grid;place-items:center;flex:none}
+.ln-ico svg{width:15px;height:15px}
+.ln-sel{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.ln-opt{display:flex;align-items:center;gap:8px;height:42px;padding:0 10px;border-radius:12px;background:var(--campo);border:1px solid transparent;color:var(--t2);font-size:12.5px;font-weight:600;min-width:0}
+.ln-opt span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ln-opt .coin,.ln-opt .ln-ico{width:22px;height:22px}
+.ln-opt:hover{border-color:#3A3A42}
+.ln-opt.on{border-color:var(--up);color:#fff;background:rgba(166,240,60,.06)}
+.ln-asset{flex:none;gap:4px} .ln-asset .chp{height:30px;padding:0 10px;font-size:12px}
+.ln-gauge{margin:14px auto 2px;max-width:300px}
+.ln-gauge svg{display:block;width:100%;height:auto}
+#vLend .sube{color:var(--up)} #vLend .baja{color:var(--dn)}
+#lnGuardar:disabled{background:var(--campo2);color:var(--t3);cursor:not-allowed}
+@media(max-width:1023px){ .dos.ln-l{display:flex;flex-direction:column-reverse;align-items:stretch} }
+@media(max-width:560px){ .ln-tb{min-width:0} .ln-tb th:nth-child(2),.ln-tb td:nth-child(2),.ln-tb th:nth-child(6),.ln-tb td:nth-child(6){display:none} .ln-tb th,.ln-tb td{padding:0 8px} .ln-tb .par b{font-size:12px} }
 /* p2p */
 .pp-fil{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:12px 16px;border-bottom:1px solid var(--linea)}
 .pp-fil .sel select{height:36px;padding:0 28px 0 12px;font-size:13px;font-weight:600;color:#fff}
@@ -979,6 +997,7 @@ body.portada .top,body.portada .pie{display:none}
     <button data-v="spot" class="on">Spot</button>
     <button data-v="mining">Cloud mining</button>
     <button data-v="swap">Swap</button>
+    <button data-v="lend">Lend</button>
     <button data-v="p2p">P2P</button>
     <button data-v="pools">Pools</button>
     <button data-v="bridge">Bridge</button>
@@ -1201,7 +1220,7 @@ body.portada .top,body.portada .pie{display:none}
   <section class="c3" id="c3" aria-label="Nereum DEX">
     <div class="c3-vin"></div><div class="c3-izq"></div><svg class="c3-lin" aria-hidden="true"></svg>
     <header class="c3-top"><a class="c3-marca" href="/" aria-label="NereumEVM · nereum.xyz">Nereum<span>EVM</span></a>
-      <nav class="c3-nav"><a href="#/spot">Spot</a><a href="#/mining">Cloud mining</a><a href="#/swap">Swap</a><a href="#/p2p">P2P</a><a href="#/pools">Pools</a><a href="#/bridge">Bridge</a><a href="#/tokenize">Tokenize</a><a href="#/portfolio">Portfolio</a></nav>
+      <nav class="c3-nav"><a href="#/spot">Spot</a><a href="#/mining">Cloud mining</a><a href="#/swap">Swap</a><a href="#/lend">Lend</a><a href="#/p2p">P2P</a><a href="#/pools">Pools</a><a href="#/bridge">Bridge</a><a href="#/tokenize">Tokenize</a><a href="#/portfolio">Portfolio</a></nav>
       <span class="esp"></span><a class="c3-pill blanco chico" href="#/spot">Launch app</a></header>
     <div class="c3-hero">
       <span class="c3-eye" data-fade=".5,1.1"><i></i>The exchange on NereumEVM</span>
@@ -1395,6 +1414,64 @@ body.portada .top,body.portada .pie{display:none}
     </ol>
   </section>
   <p class="nota">Network data from mempool.space (Bitcoin mainnet) and BTC price from live public spot markets. Contract prices and fees are published when contracts open; we do not estimate them in advance.</p>
+</main>
+
+<!-- ══ lend ══ -->
+<main class="vista" id="vLend" hidden>
+  <div class="v-cab"><div><h1>Lend</h1><p>Borrow NUSD or USDT against crypto and tokenized real assets, without selling them. Every loan is collateralised on NereumEVM and its health is public, block by block.</p></div>
+    <button class="pill lima" id="lnIr">Model a loan</button></div>
+  <div class="aviso"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="9" cy="9" r="7"/><path d="M9 8v4.5M9 5.5v.1"/></svg>
+    <span><b>Nereum Lend opens with the NereumEVM mainnet.</b> Until then nothing is lent, borrowed or locked: you can model a loan with live prices and keep it in this browser. Risk parameters below are the proposed launch values.</span></div>
+  <div class="stats4">
+    <div class="st4"><i>Collateral types</i><b>6</b><s>Crypto and tokenized real assets</s></div>
+    <div class="st4"><i>Borrow in</i><b>NUSD · USDT</b><s>Stable, dollar-denominated</s></div>
+    <div class="st4"><i>Max loan-to-value</i><b>Up to 80%</b><s>Tokenized treasuries</s></div>
+    <div class="st4"><i>Your loans</i><b id="lnMiasN">0</b><s>Saved in this browser</s></div>
+  </div>
+  <div class="dos ln-l">
+    <section class="card" style="padding:0">
+      <div class="p-bar"><b>Collateral markets</b><span class="esp"></span><span class="tag">Proposed launch parameters</span></div>
+      <div class="tw"><table class="tb ln-tb"><thead><tr><th>Collateral</th><th>Type</th><th class="d">Price</th><th class="d">Max LTV</th><th class="d">Liquidation</th><th class="d">Borrow APR</th><th></th></tr></thead><tbody id="lnMercados"></tbody></table></div>
+    </section>
+    <aside class="card ln-c" id="lnBuilder">
+      <div class="card-h"><b>Model a loan</b><span class="vivo"><i></i><span>Live prices</span></span></div>
+      <label class="mn-lbl">Collateral</label>
+      <div class="ln-sel" id="lnColSel"></div>
+      <div class="caja" style="margin-top:8px">
+        <div class="caja-l"><span id="lnAmtL">Amount</span><span id="lnValUsd">≈ $0.00</span></div>
+        <div class="caja-r"><input id="lnAmt" inputmode="decimal" placeholder="0" autocomplete="off" aria-label="Collateral amount"><span class="tk" id="lnAmtU">BTC</span></div>
+      </div>
+      <label class="mn-lbl" style="margin-top:12px">Borrow</label>
+      <div class="caja">
+        <div class="caja-l"><span>You borrow</span><span id="lnMaxB">Max —</span></div>
+        <div class="caja-r"><input id="lnDebt" inputmode="decimal" placeholder="0" autocomplete="off" aria-label="Amount to borrow"><span class="chips-r ln-asset" id="lnAsset"><button class="chp on" data-a="NUSD">NUSD</button><button class="chp" data-a="USDT">USDT</button></span></div>
+      </div>
+      <div class="chips-r mn-chips" id="lnPct"><button class="chp" data-p="25">25%</button><button class="chp" data-p="50">50%</button><button class="chp" data-p="75">75%</button><button class="chp" data-p="100">Max</button></div>
+      <div class="ln-gauge" id="lnGauge"></div>
+      <div class="filas det">
+        <div class="fila"><span>Loan-to-value</span><b id="lnLtv">—</b></div>
+        <div class="fila"><span>Health factor</span><b id="lnHf">—</b></div>
+        <div class="fila"><span id="lnLiqL">Liquidation price</span><b id="lnLiq">—</b></div>
+        <div class="fila"><span>Interest</span><b>Variable, published at launch</b></div>
+      </div>
+      <button class="accion" id="lnGuardar">Save this loan</button>
+      <p class="nota">Health factor = collateral value × liquidation threshold ÷ debt. Below 1.00 the loan can be liquidated. Prices of tokenized assets come from Nereum Feed valuations.</p>
+    </aside>
+  </div>
+  <section class="card" style="margin-top:16px">
+    <div class="card-h"><b>Your loans</b><span class="tag" id="lnMiasT">0</span></div>
+    <div id="lnMias"></div>
+  </section>
+  <section class="card mn-como">
+    <div class="card-h"><b>How Nereum Lend works</b></div>
+    <ol class="pasos-l mn-pasos">
+      <li><em>1</em><span><b>Deposit collateral</b>BTC, ETH or a tokenized asset issued on Nereum. It stays yours and keeps earning what it earns.</span></li>
+      <li><em>2</em><span><b>Borrow stable dollars</b>Take NUSD or USDT up to the asset's loan-to-value. The asset's own policy still applies: only eligible wallets can borrow against it.</span></li>
+      <li><em>3</em><span><b>Keep your health above 1</b>Prices and valuations update on chain. Add collateral or repay part of the loan to stay safe.</span></li>
+      <li><em>4</em><span><b>Repay and withdraw</b>Repay the loan plus interest and your collateral is released in the same transaction.</span></li>
+    </ol>
+  </section>
+  <p class="nota">BTC and ETH prices are live from public spot markets. Interest rates, pool sizes and utilisation are published when Nereum Lend opens; we do not estimate them in advance.</p>
 </main>
 
 <!-- ══ p2p ══ -->
@@ -2551,8 +2628,8 @@ let rz; addEventListener('resize', () => { clearTimeout(rz); rz = setTimeout(() 
 Object.assign(COIN, {USDT:['#26A17B','#fff'], USDC:['#2775CA','#fff'], POL:['#8247E5','#fff'], SepoliaETH:['#627EEA','#fff']});
 Object.assign(NOMBRE, {USDT:'Tether USD', USDC:'USD Coin', POL:'Polygon', SepoliaETH:'Sepolia Ether'});
 const TOKS = [['USDT','Tether USD'], ...PARES];
-const VISTAS = {cover:'#vCover', spot:'#app', mining:'#vMine', swap:'#vSwap', p2p:'#vP2P', pools:'#vPools', bridge:'#vBridge', tokenize:'#vTok', portfolio:'#vPort'};
-const TITULOS = {cover:'Nereum DEX · Spot, swap, pools, bridge and tokenization', mining:'Cloud mining', swap:'Swap', p2p:'P2P', pools:'Pools', bridge:'Bridge', tokenize:'Tokenize', portfolio:'Portfolio'};
+const VISTAS = {cover:'#vCover', spot:'#app', mining:'#vMine', swap:'#vSwap', lend:'#vLend', p2p:'#vP2P', pools:'#vPools', bridge:'#vBridge', tokenize:'#vTok', portfolio:'#vPort'};
+const TITULOS = {cover:'Nereum DEX · Spot, swap, pools, bridge and tokenization', mining:'Cloud mining', swap:'Swap', lend:'Lend', p2p:'P2P', pools:'Pools', bridge:'Bridge', tokenize:'Tokenize', portfolio:'Portfolio'};
 const FLECHA = '<svg viewBox="0 0 12 12"><path fill="currentColor" d="M1 3.5h10L6 9.5z"/></svg>';
 const esc = v => String(v == null ? '' : v).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const coinHtml = s => { const c = COIN[s]||['#333','#fff']; return `<i class="coin ${CON_LOGO.has(s) ? 'logo' : ''}" style="--c:${c[0]};--cf:${c[1]}">${coinIn(s)}</i>`; };
@@ -2580,11 +2657,11 @@ function ruta(){
   scrollTo(0, 0);
 }
 function pintaVista(){
-  if (vista === 'cover') pintaCover(); else if (vista === 'swap') pintaSwap(); else if (vista === 'p2p') pintaP2P(); else if (vista === 'mining'){ pintaMina(); mnCarga(); } else if (vista === 'pools') pintaPools(); else if (vista === 'bridge') pintaBridge();
+  if (vista === 'cover') pintaCover(); else if (vista === 'swap') pintaSwap(); else if (vista === 'p2p') pintaP2P(); else if (vista === 'lend') pintaLend(); else if (vista === 'mining'){ pintaMina(); mnCarga(); } else if (vista === 'pools') pintaPools(); else if (vista === 'bridge') pintaBridge();
   else if (vista === 'tokenize') pintaTok(); else if (vista === 'portfolio') pintaPort();
 }
 function vivoVista(){
-  if (vista === 'cover') vivoCover(); else if (vista === 'swap'){ swCalc(); swInfo(false); } else if (vista === 'p2p') ppRefPinta(); else if (vista === 'mining'){ pintaMina(); mnCarga(); } else if (vista === 'pools') vivoPools();
+  if (vista === 'cover') vivoCover(); else if (vista === 'swap'){ swCalc(); swInfo(false); } else if (vista === 'p2p') ppRefPinta(); else if (vista === 'lend') pintaLend(); else if (vista === 'mining'){ pintaMina(); mnCarga(); } else if (vista === 'pools') vivoPools();
   else if (vista === 'bridge') pintaBridge(); else if (vista === 'portfolio') vivoPort();
 }
 $$('.nav button[data-v]').forEach(b => b.onclick = () => { location.hash = '#/'+b.dataset.v; });
@@ -3076,6 +3153,104 @@ $('#mnReservar').onclick = () => { $('#mnTh').scrollIntoView({behavior: 'smooth'
 $('#mnMias').onclick = e => { const b = e.target.closest('[data-mnb]'); if (!b) return; mnRes = mnRes.filter(r => r.id !== b.dataset.mnb);
   guarda('nereum-dex-mina-res', mnRes); mnPintaRes(); toast('Reservation deleted.'); };
 addEventListener('resize', () => { if (vista === 'mining') mnGraf(); }, {passive: true});
+
+/* ══ LEND ══
+   Préstamos con colateral: cripto (precio en vivo del spot) y activos tokenizados
+   (valorados por Nereum Feed, aquí se introduce el valor). Los parámetros de riesgo
+   son la propuesta de lanzamiento; nada se presta hasta la mainnet y los préstamos
+   modelados se guardan en este navegador. */
+const LN_ICO = {
+  bond: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9h18M5 9v8M9.5 9v8M14.5 9v8M19 9v8M3 20h18M12 3l9 5H3z"/></svg>',
+  casa: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21V9l8-5 8 5v12M9 21v-6h6v6M8 11h.01M16 11h.01"/></svg>',
+  cred: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"/><path d="M14.5 9.5c-.6-.9-1.5-1.3-2.5-1.3-1.5 0-2.6.8-2.6 2s1.2 1.6 2.6 1.9 2.7.8 2.7 2-1.2 2-2.7 2c-1.1 0-2-.4-2.6-1.3M12 6.5v1.7M12 15.8v1.7"/></svg>',
+  fact: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h9l4 4v14H6zM14 3v5h5M9 12h7M9 16h5"/></svg>'};
+const LN_COL = [
+  {id:'BTC', n:'Bitcoin', tipo:'Crypto', ltv:70, liq:78, vivo:'BTC'},
+  {id:'ETH', n:'Ether', tipo:'Crypto', ltv:70, liq:78, vivo:'ETH'},
+  {id:'TBILL', n:'Tokenized US treasuries', tipo:'Treasuries', c:'T-bills', ltv:80, liq:86, ico:'bond'},
+  {id:'RE', n:'Tokenized real estate', tipo:'Real estate', c:'Property', ltv:50, liq:60, ico:'casa'},
+  {id:'CRED', n:'Private credit', tipo:'Private credit', c:'Credit', ltv:40, liq:50, ico:'cred'},
+  {id:'INV', n:'Invoices', tipo:'Invoices', c:'Invoices', ltv:40, liq:50, ico:'fact'}];
+const LN = carga('nereum-dex-lend', {col:'BTC', amt:'', debt:'', asset:'NUSD'});
+let lnMias = (() => { try{ const v = JSON.parse(localStorage.getItem('nereum-dex-lend-mias')); return Array.isArray(v) ? v : []; }catch(e){ return []; } })();
+const lnGuarda = () => { guarda('nereum-dex-lend', LN); guarda('nereum-dex-lend-mias', lnMias); };
+const lnCol = () => LN_COL.find(c => c.id === LN.col) || LN_COL[0];
+const lnN = v => { const n = parseFloat(String(v).replace(/,/g, '')); return isFinite(n) && n > 0 ? n : 0; };
+const lnIco = c => c.vivo ? coinHtml(c.vivo) : `<i class="ln-ico">${LN_ICO[c.ico]}</i>`;
+const lnPx = c => c.vivo ? pxU(c.vivo) : 1;
+function lnCalc(){
+  const c = lnCol(), px = lnPx(c), val = c.vivo ? lnN(LN.amt) * px : lnN(LN.amt), debt = lnN(LN.debt);
+  const ltv = val ? debt / val * 100 : 0, hf = debt ? val * c.liq / 100 / debt : Infinity;
+  const liqPx = c.vivo && debt && lnN(LN.amt) ? debt / (lnN(LN.amt) * c.liq / 100) : 0, liqVal = debt ? debt / (c.liq / 100) : 0;
+  return {c, px, val, debt, ltv, hf, liqPx, liqVal, max: val * c.ltv / 100};
+}
+const lnHfTxt = hf => !isFinite(hf) ? '∞' : nf(hf, 2);
+const lnEstado = hf => !isFinite(hf) ? ['', 'No debt'] : hf >= 1.5 ? ['sube', 'Safe'] : hf >= 1.1 ? ['', 'Watch'] : ['baja', 'At risk'];
+function pintaLend(){
+  $('#lnMercados').innerHTML = LN_COL.map(c => `<tr><td><div class="par">${lnIco(c)}<b>${esc(c.n)}</b>${c.vivo ? `<span class="t4">${c.vivo}</span>` : ''}</div></td>
+    <td><span class="tag">${c.tipo}</span></td>
+    <td class="d">${c.vivo ? (pxU(c.vivo) ? '$'+fp(pxU(c.vivo), c.vivo) : '—') : '<span class="t4">Nereum Feed</span>'}</td>
+    <td class="d"><b style="color:#fff">${c.ltv}%</b></td><td class="d">${c.liq}%</td><td class="d t4">At launch</td>
+    <td class="d"><button class="pill chico borde" data-ln="${c.id}">Use</button></td></tr>`).join('');
+  $('#lnColSel').innerHTML = LN_COL.map(c => `<button class="ln-opt ${c.id === LN.col ? 'on' : ''}" data-ln="${c.id}">${lnIco(c)}<span>${c.vivo || c.c}</span></button>`).join('');
+  const c = lnCol();
+  if (document.activeElement !== $('#lnAmt')) $('#lnAmt').value = LN.amt;
+  if (document.activeElement !== $('#lnDebt')) $('#lnDebt').value = LN.debt;
+  $('#lnAmtL').textContent = c.vivo ? 'Collateral amount' : 'Collateral value (Nereum Feed)';
+  $('#lnAmtU').textContent = c.vivo ? c.vivo : 'USD';
+  $$('#lnAsset .chp').forEach(b => b.classList.toggle('on', b.dataset.a === LN.asset));
+  lnPintaCalc(); lnPintaMias();
+}
+function lnPintaCalc(){
+  const r = lnCalc(), [cls, est] = lnEstado(r.hf);
+  $('#lnValUsd').textContent = '≈ $'+nf(r.val, 2);
+  $('#lnMaxB').textContent = r.val ? `Max ${nf(r.max, 2)} ${LN.asset}` : 'Max —';
+  $('#lnLtv').textContent = r.debt && r.val ? `${nf(r.ltv, 1)}% of ${r.c.ltv}% max` : `0% of ${r.c.ltv}% max`;
+  $('#lnHf').innerHTML = r.debt && r.val ? `<span class="${cls}">${lnHfTxt(r.hf)} · ${est}</span>` : '—';
+  $('#lnLiqL').textContent = r.c.vivo ? `Liquidation price (${r.c.vivo})` : 'Liquidation if value falls below';
+  $('#lnLiq').textContent = !r.debt || !r.val ? '—' : r.c.vivo ? '$'+fp(r.liqPx, r.c.vivo) : '$'+nf(r.liqVal, 2);
+  const sobre = r.debt > r.max + 1e-9 && r.val > 0;
+  $('#lnGuardar').textContent = sobre ? `Above the ${r.c.ltv}% limit` : 'Save this loan';
+  $('#lnGuardar').disabled = sobre;
+  $('#lnGauge').innerHTML = lnGauge(r);
+}
+/* semicírculo: 0 % a 100 % de LTV; tramo seguro hasta el máximo, aviso hasta la liquidación, rojo después */
+function lnGauge(r){
+  const cx = 150, cy = 142, R = 112, P = p => { const a = Math.PI * (1 - Math.min(100, p) / 100); return [cx + R * Math.cos(a), cy - R * Math.sin(a)]; };
+  const arc = (a, b, col, w) => { const [x0, y0] = P(a), [x1, y1] = P(b); return `<path d="M${x0.toFixed(1)} ${y0.toFixed(1)}A${R} ${R} 0 0 1 ${x1.toFixed(1)} ${y1.toFixed(1)}" stroke="${col}" stroke-width="${w}" fill="none" stroke-linecap="butt"/>`; };
+  const v = Math.min(100, r.ltv), [nx, ny] = P(v), [cls, est] = lnEstado(r.hf), col = r.debt ? (cls === 'baja' ? 'var(--dn)' : cls === 'sube' ? 'var(--up)' : '#fff') : '#4A4A52';
+  return `<svg viewBox="0 0 300 168" aria-label="Loan-to-value gauge">
+    ${arc(0, r.c.ltv, 'rgba(166,240,60,.22)', 14)}${arc(r.c.ltv, r.c.liq, 'rgba(255,255,255,.16)', 14)}${arc(r.c.liq, 100, 'rgba(255,77,106,.28)', 14)}
+    ${r.debt && r.val ? arc(0, Math.max(.5, v), col, 4) : ''}
+    <circle cx="${nx.toFixed(1)}" cy="${ny.toFixed(1)}" r="7" fill="${col}" stroke="#0B0B0D" stroke-width="3"/>
+    <text x="150" y="122" text-anchor="middle" fill="#fff" font-size="34" font-weight="700" font-family="Inter,system-ui">${r.debt && r.val ? nf(v, 1) + '%' : '0%'}</text>
+    <text x="150" y="146" text-anchor="middle" fill="#8E8E96" font-size="12" font-family="Inter,system-ui">${r.debt && r.val ? 'Loan-to-value · ' + est : 'Loan-to-value'}</text>
+    <text x="30" y="164" text-anchor="middle" fill="#5E5E66" font-size="10.5" font-family="Inter,system-ui">0%</text>
+    <text x="270" y="164" text-anchor="middle" fill="#5E5E66" font-size="10.5" font-family="Inter,system-ui">100%</text></svg>`;
+}
+function lnPintaMias(){
+  $('#lnMiasN').textContent = $('#lnMiasT').textContent = lnMias.length;
+  $('#lnMias').innerHTML = !lnMias.length
+    ? `<p class="mn-vac">No loans yet. Model one with the panel above and save it: it stays in this browser until Nereum Lend opens.</p>`
+    : lnMias.map(m => { const c = LN_COL.find(x => x.id === m.col) || LN_COL[0], val = c.vivo ? m.amt * (pxU(c.vivo) || m.px) : m.amt, hf = m.debt ? val * c.liq / 100 / m.debt : Infinity, [cls, est] = lnEstado(hf);
+      return `<div class="mn-r"><div class="par" style="flex:none">${lnIco(c)}</div><div><b>${nf(m.debt, 2)} ${m.asset} against ${c.vivo ? nf(m.amt, 4)+' '+c.vivo : '$'+nf(m.amt, 0)+' of '+c.tipo.toLowerCase()}</b>
+        <span>Health <span class="${cls}">${lnHfTxt(hf)} · ${est}</span> at today's price</span></div><span class="tag">Waiting for mainnet</span><button class="pp-borra" data-lnb="${m.id}">Delete</button></div>`; }).join('');
+}
+$('#vLend').addEventListener('click', e => {
+  const u = e.target.closest('[data-ln]'); if (u){ LN.col = u.dataset.ln; LN.amt = ''; LN.debt = ''; lnGuarda(); pintaLend();
+    if (u.closest('#lnMercados')) $('#lnBuilder').scrollIntoView({behavior: 'smooth', block: 'start'}); return; }
+  const a = e.target.closest('#lnAsset [data-a]'); if (a){ LN.asset = a.dataset.a; lnGuarda(); pintaLend(); return; }
+  const p = e.target.closest('#lnPct [data-p]'); if (p){ const r = lnCalc(); if (!r.val){ sacude($('#lnAmt').closest('.caja')); return; }
+    LN.debt = String(Math.floor(r.max * (+p.dataset.p) / 100 * 100) / 100); lnGuarda(); pintaLend(); return; }
+  const b = e.target.closest('[data-lnb]'); if (b){ lnMias = lnMias.filter(m => m.id !== b.dataset.lnb); lnGuarda(); lnPintaMias(); toast('Loan deleted.'); }
+});
+['#lnAmt', '#lnDebt'].forEach((s, i) => $(s).addEventListener('input', e => { LN[i ? 'debt' : 'amt'] = e.target.value; lnGuarda(); lnPintaCalc(); }));
+$('#lnIr').onclick = () => { $('#lnBuilder').scrollIntoView({behavior: 'smooth', block: 'start'}); $('#lnAmt').focus({preventScroll: true}); };
+$('#lnGuardar').onclick = () => { const r = lnCalc();
+  if (!r.val || !r.debt){ sacude($('#lnGuardar')); return toast('Enter the collateral and the amount to borrow.'); }
+  if (r.debt > r.max + 1e-9){ sacude($('#lnGuardar')); return; }
+  lnMias.unshift({id: Date.now().toString(36), col: r.c.id, amt: lnN(LN.amt), debt: r.debt, asset: LN.asset, px: r.px, creado: Date.now()});
+  lnGuarda(); lnPintaMias(); toast('Loan saved in this browser. Nereum Lend opens with the NereumEVM mainnet; nothing was borrowed or locked.'); };
 
 /* ══ P2P ══
    Compra y venta directa entre personas, pagada en moneda local; las monedas del
