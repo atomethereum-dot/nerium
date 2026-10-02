@@ -2,6 +2,7 @@
 <html lang="en"><head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<script>/* /app/?azul: la portada en los colores de la web principal */ if (/[?&]azul\b/.test(location.search)) document.documentElement.classList.add('c3azul');</script>
 <meta name="theme-color" content="#000000">
 <title>Nereum DEX — Spot</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -1045,6 +1046,30 @@ select.inp option{background:#141417}
 .c3-ficha .f.ex{margin-top:0}
 .c3-ficha .f b{color:#fff;font-weight:600;font-variant-numeric:tabular-nums}
 .c3-ficha .bt{margin-top:6px;height:40px;border-radius:12px;background:var(--up);color:var(--up-t);display:grid;place-items:center;font-weight:800;font-size:13.5px;text-decoration:none}
+/* versión azul de la portada (/app/?azul): el fondo y los azules de nereum.xyz en lugar del lima */
+.c3azul .c3{background:#030409}
+.c3azul .c3.sin3d{background:#030409 url(/app/portada/ciudad-azul.jpg) center/cover no-repeat}
+.c3azul .c3.m.sin3d{background-image:url(/app/portada/ciudad-azul-movil.jpg);background-position:center bottom}
+.c3azul .c3-negro{background:#030409}
+.c3azul .c3-vin{background:radial-gradient(ellipse 85% 75% at 62% 48%,rgba(3,4,9,0) 45%,rgba(3,4,9,.78) 100%)}
+.c3azul .c3-izq{background:linear-gradient(90deg,rgba(3,4,9,.92),rgba(3,4,9,.55) 58%,rgba(3,4,9,0))}
+.c3azul .c3.m .c3-vin{background:linear-gradient(180deg,rgba(3,4,9,.95) 0%,rgba(3,4,9,.82) 30%,rgba(3,4,9,0) 46%,rgba(3,4,9,0) 78%,rgba(3,4,9,.85) 100%)}
+.c3azul .c3-marca span{color:#2E86FF}
+.c3azul .c3-nav a{color:#8E97AA} .c3azul .c3-nav a:hover{color:#fff}
+.c3azul .c3-pill.lima{background:#2E86FF;color:#fff;box-shadow:0 0 0 6px rgba(46,134,255,.12),0 18px 50px -14px rgba(46,134,255,.8)}
+.c3azul .c3-pill.lima:hover{background:#4C98FF}
+.c3azul .c3-pill.borde{border-color:#1E2638;background:rgba(3,4,9,.4)}
+.c3azul .c3-eye{background:rgba(10,14,24,.82);border-color:rgba(46,134,255,.28)}
+.c3azul .c3-eye i{background:#2E86FF;box-shadow:0 0 0 4px rgba(46,134,255,.22)}
+.c3azul .c3 h1 .l2 .mask > span{background:linear-gradient(92deg,#A9D0FF 0%,#4C9BFF 48%,#1A6BFF 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.c3azul .c3-sub{color:#A3ABBD}
+.c3azul .c3-pasos i{background:#1A2030} .c3azul .c3-pasos i b{background:#2E86FF}
+.c3azul .c3-pasos span span,.c3azul .c3-pasos a span{color:#5D6578} .c3azul .c3-pasos a:hover span{color:#63A9FF !important}
+.c3azul .c3-etq{background:rgba(8,12,22,.74);border-color:rgba(99,169,255,.18)}
+.c3azul .c3-etq b i{color:#63A9FF}
+.c3azul .c3-ficha{background:linear-gradient(160deg,rgba(20,28,46,.72),rgba(5,7,13,.82));border-color:rgba(99,169,255,.16)}
+.c3azul .c3-ficha .h em{color:#63A9FF}
+.c3azul .c3-ficha .seg span.on,.c3azul .c3-ficha .bt{background:#2E86FF;color:#fff}
 /* teléfono (y cualquier pantalla vertical): la clase .m la pone escena.js con el mismo criterio que la cámara */
 .c3.m .c3-top{padding:0 18px;height:64px} .c3.m .c3-nav{display:none} .c3.m .c3-marca{font-size:19px} .c3.m .c3-pill.chico{height:36px;padding:0 14px;font-size:13px}
 .c3.m .c3-hero{left:20px;right:20px;top:78px;bottom:auto;max-width:none;justify-content:flex-start} .c3.m .c3-eye{font-size:11px;height:28px}
@@ -3921,12 +3946,14 @@ $('#ppCalcBt').onclick = () => { const v = ppNum($('#ppC1').value) || 0, r = ppR
    Velas reales de BTC por hora (OKX, Kraken de respaldo), dibujadas en negro
    sobre el lima. Debajo, el precio en vivo del mismo flujo que usa el spot. */
 let cvVelas = null, cvT = 0, c3 = null, c3Carga = null;
+/* la paleta de la web principal para la escena 3D (/app/?azul) */
+const C3_AZUL = {acento: 0x2E86FF, fondo: 0x030409, laca: 0x04060C, lin: '46,134,255', punto: '#2E86FF', ventana: '190,215,255', ventanaOff: '36,42,56', brillo: '225,232,245'};
 /* la escena 3D (three.js, ~190 KB comprimida) solo se pide al abrir la portada */
 function c3Arranca(){
   if (c3){ c3.activa(true); return; } if (c3Carga) return;
   const sec = $('#c3'), w = sec.clientWidth, h = sec.clientHeight; sec.classList.toggle('m', w <= 700 || w / h < 1.05);
   c3Carga = import('/app/portada/escena.js')
-    .then(m => { c3 = m.arrancar(sec, {precio: () => datos.BTC ? datos.BTC.px : null}); if (vista !== 'cover') c3.activa(false); })
+    .then(m => { c3 = m.arrancar(sec, {precio: () => datos.BTC ? datos.BTC.px : null, tema: document.documentElement.classList.contains('c3azul') ? C3_AZUL : null}); if (vista !== 'cover') c3.activa(false); })
     .catch(() => { sec.classList.add('sin3d'); });
 }
 async function pintaCover(){

@@ -89,5 +89,14 @@ prueba('Lend: 50 % del máximo (70 %) y factor de salud con umbral 78 %', Math.a
 await p.click('#lnGuardar'); prueba('Lend: el préstamo se guarda', (await p.$$eval('#lnMias .mn-r', e => e.length)) === 1);
 await p.click('#lnColSel [data-ln="RE"]'); await p.fill('#lnAmt', '100000'); await p.fill('#lnDebt', '60000');
 prueba('Lend: no deja pasar del LTV máximo', await p.evaluate(() => $('#lnGuardar').disabled));
+/* /app/?azul: la misma app con la portada en los colores de la web principal */
+const colores = async q => { const pz = await b.newPage({viewport: {width: 1280, height: 800}}); await simula(pz); const er = []; pz.on('pageerror', e => er.push(e.message));
+  await pz.goto(URL0 + q); await pz.waitForTimeout(1500);
+  const r = await pz.evaluate(() => ({cl: document.documentElement.classList.contains('c3azul'), cta: getComputedStyle(document.querySelector('.c3-ctas .lima')).backgroundColor, fondo: getComputedStyle(document.querySelector('#c3')).backgroundColor}));
+  await pz.close(); return {...r, er}; };
+const verde = await colores(''), azul = await colores('?azul');
+prueba('Portada: sin ?azul sigue en lima', !verde.cl && verde.cta === 'rgb(166, 240, 60)');
+prueba('Portada ?azul: botón azul #2E86FF y fondo #030409 de la web principal', azul.cl && azul.cta === 'rgb(46, 134, 255)' && azul.fondo === 'rgb(3, 4, 9)');
+prueba('Portada ?azul: sin errores de página', !azul.er.length);
 await b.close(); s.close();
 console.log(`\n${ok}/${ok + mal}`); process.exit(mal ? 1 : 0);
