@@ -712,6 +712,140 @@ button.red-sel:hover{background:var(--campo2)}
 #lnGuardar:disabled{background:var(--campo2);color:var(--t3);cursor:not-allowed}
 @media(max-width:1023px){ .dos.ln-l{display:flex;flex-direction:column-reverse;align-items:stretch} }
 @media(max-width:560px){ .ln-tb{min-width:0} .ln-tb th:nth-child(2),.ln-tb td:nth-child(2),.ln-tb th:nth-child(6),.ln-tb td:nth-child(6){display:none} .ln-tb th,.ln-tb td{padding:0 8px} .ln-tb .par b{font-size:12px} }
+/* agents */
+#vAgents{--ok:#A6F03C;--no:#FF4D6A}
+.ag-hero{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:24px;align-items:center;margin-bottom:18px;padding:28px 28px 28px 32px;border-radius:22px;
+  background:radial-gradient(120% 140% at 85% 30%,rgba(166,240,60,.09),transparent 55%),linear-gradient(180deg,#0E0E11,#09090B);border:1px solid var(--linea);position:relative;overflow:hidden}
+.ag-eye{display:inline-flex;align-items:center;gap:8px;height:28px;padding:0 12px;border-radius:999px;background:rgba(166,240,60,.08);border:1px solid rgba(166,240,60,.25);color:var(--ok);font-size:12px;font-weight:600;letter-spacing:.02em}
+.ag-eye i{width:7px;height:7px;border-radius:50%;background:var(--ok);box-shadow:0 0 0 0 rgba(166,240,60,.6);animation:agPing 1.8s infinite}
+@keyframes agPing{0%{box-shadow:0 0 0 0 rgba(166,240,60,.55)}80%,100%{box-shadow:0 0 0 9px rgba(166,240,60,0)}}
+.ag-hero h1{font-size:44px;line-height:1.04;font-weight:700;letter-spacing:-.04em;color:#fff;margin:16px 0 14px}
+.ag-hero h1 em{display:block;font-style:normal;color:var(--ok)}
+.ag-hero p{font-size:14.5px;line-height:1.6;color:var(--t3);max-width:520px}
+.ag-ctas{display:flex;flex-wrap:wrap;gap:10px;margin-top:20px}
+.ag-cont{display:flex;flex-wrap:wrap;align-items:flex-end;gap:8px 26px;margin-top:24px}
+.ag-cont div{display:grid;gap:2px}
+.ag-cont b{font-size:26px;font-weight:700;color:#fff;letter-spacing:-.03em;font-variant-numeric:tabular-nums}
+.ag-cont b.ok{color:var(--ok)} .ag-cont b.no{color:var(--no)}
+.ag-cont span{font-size:12px;color:var(--t3)} .ag-cont s{text-decoration:none;font-size:11px;color:var(--t4);flex-basis:100%}
+.ag-esc{position:relative;height:470px;min-width:0}
+.ag-esc canvas{position:absolute;inset:0;width:100%;height:100%}
+.ag-demo{position:absolute;top:4px;right:4px;font-size:10.5px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--t4)}
+.ag-feed{position:absolute;left:0;right:0;bottom:0;display:grid;gap:6px;pointer-events:none}
+.ag-ev{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:12px;background:rgba(17,17,20,.86);border:1px solid var(--linea2);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+  animation:agEv .5s var(--e) both;min-width:0}
+.ag-ev:nth-last-child(2){opacity:.6}
+@keyframes agEv{from{opacity:0;transform:translateY(14px) scale(.98)}}
+.ag-ev > div{flex:1;min-width:0;display:grid;gap:1px}
+.ag-ev b{font-size:12.5px;color:#fff;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ag-ev span{font-size:11px;color:var(--t3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ag-st{flex:none;display:inline-flex;align-items:center;gap:5px;height:22px;padding:0 8px;border-radius:999px;font-size:11px;font-weight:700;white-space:nowrap}
+.ag-st.ok{background:rgba(166,240,60,.13);color:var(--ok)} .ag-st.no{background:rgba(255,77,106,.13);color:var(--no)} .ag-st.pi{background:var(--campo2);color:#fff}
+.ag-h2{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin:26px 0 12px}
+.ag-h2 h2{font-size:20px;font-weight:700;letter-spacing:-.02em;color:#fff}
+.ag-h2 span{font-size:12.5px;color:var(--t3)} .ag-h2 span b{color:#fff}
+/* job cards */
+.ag-jobs{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin-bottom:16px}
+.ag-job{position:relative;display:grid;gap:10px;align-content:start;text-align:left;padding:16px;border-radius:16px;background:var(--panel);border:1px solid var(--linea);
+  transition:transform .35s var(--e),border-color .2s,background .2s;min-width:0;isolation:isolate}
+.ag-job:hover{transform:translateY(-3px);border-color:var(--linea2);background:var(--panel2)}
+.ag-job b{font-size:14.5px;font-weight:700;color:#fff;letter-spacing:-.01em}
+.ag-job span{font-size:12px;line-height:1.45;color:var(--t3)}
+.ag-job s{text-decoration:none;font-size:11px;font-weight:600;color:var(--t4);letter-spacing:.04em}
+.ag-job.on{border-color:transparent;background:#0F120B}
+@property --agA{syntax:'<angle>';inherits:false;initial-value:0deg}
+.ag-job.on::before{content:'';position:absolute;inset:-1px;border-radius:17px;padding:1px;z-index:-1;
+  background:conic-gradient(from var(--agA),rgba(166,240,60,.15),var(--ok),rgba(166,240,60,.15) 40%,rgba(166,240,60,.15));
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;animation:agGira 3.2s linear infinite}
+@keyframes agGira{to{--agA:360deg}}
+.ag-job.on s{color:var(--ok)}
+.ag-ico{width:42px;height:42px;border-radius:13px;background:rgba(166,240,60,.09);color:var(--ok);display:grid;place-items:center;flex:none;overflow:hidden}
+.ag-ico svg{width:22px;height:22px;overflow:visible}
+.ag-ico.chico{width:34px;height:34px;border-radius:11px} .ag-ico.chico svg{width:18px;height:18px}
+/* animated glyphs (only while their card is active or hovered) */
+.ag-job:hover .a-rot,.ag-job.on .a-rot,.ag-m.vivo .a-rot{animation:agRot 3s linear infinite;transform-origin:12px 12px}
+@keyframes agRot{to{transform:rotate(360deg)}}
+.ag-job:hover .a-cae,.ag-job.on .a-cae,.ag-m.vivo .a-cae{animation:agCae 1.6s var(--e) infinite}
+@keyframes agCae{0%{transform:translateY(-8px);opacity:0}35%{opacity:1}70%,100%{transform:translateY(0);opacity:1}}
+.ag-job:hover .a-lat,.ag-job.on .a-lat,.ag-m.vivo .a-lat{animation:agLat 1.6s ease-in-out infinite;transform-origin:12px 12px}
+@keyframes agLat{50%{transform:scale(1.12)}}
+.a-chk{stroke-dasharray:12;stroke-dashoffset:0}
+.ag-job:hover .a-chk,.ag-job.on .a-chk,.ag-m.vivo .a-chk{animation:agChk 1.6s ease-in-out infinite}
+@keyframes agChk{0%,15%{stroke-dashoffset:12}55%,100%{stroke-dashoffset:0}}
+.a-bar{transform-box:fill-box;transform-origin:bottom}
+.ag-job:hover .a-bar,.ag-job.on .a-bar,.ag-m.vivo .a-bar{animation:agBar 1.4s ease-in-out infinite}
+.a-bar:nth-child(2){animation-delay:.15s!important} .a-bar:nth-child(3){animation-delay:.3s!important}
+@keyframes agBar{50%{transform:scaleY(.45)}}
+.ag-job:hover .a-vue,.ag-job.on .a-vue,.ag-m.vivo .a-vue{animation:agVue 1.8s var(--e) infinite}
+@keyframes agVue{0%{transform:translate(-7px,7px);opacity:0}30%{opacity:1}70%{transform:translate(0,0);opacity:1}100%{transform:translate(7px,-7px);opacity:0}}
+/* dry run terminal */
+.dos.ag-l{grid-template-columns:minmax(0,1fr) minmax(0,400px)}
+.ag-term .card-h{gap:12px} .ag-term .esp{flex:1}
+.ag-res{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:12px}
+.ag-res > div{background:var(--campo);border-radius:12px;padding:12px 13px;display:grid;gap:3px;min-width:0}
+.ag-res span{font-size:11.5px;color:var(--t3)} .ag-res b{font-size:18px;font-weight:700;color:#fff;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ag-res b.ok{color:var(--ok)} .ag-res b.no{color:var(--no)}
+.ag-res s{text-decoration:none;font-size:11.5px;color:var(--t3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ag-log{border-radius:14px;background:#060607;border:1px solid var(--linea);padding:14px 16px;font:12.5px/1.75 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--t2);min-height:250px;overflow-x:auto}
+.ag-ln{display:flex;gap:12px;white-space:nowrap}
+.ag-ln i{font-style:normal;color:var(--t4);min-width:92px;flex:none}
+.ag-ln .ok{color:var(--ok)} .ag-ln .no{color:var(--no)} .ag-ln .pi{color:#fff} .ag-ln .t3{color:var(--t3)}
+.ag-ln.sub{padding-left:14px}
+.ag-ln.fin{margin-top:8px;padding-top:8px;border-top:1px dashed var(--linea2)}
+.ag-run .ag-ln{opacity:0;animation:agLn .32s var(--e) forwards;animation-delay:calc(var(--i) * 190ms + 380ms)}
+@keyframes agLn{from{opacity:0;transform:translateX(-6px)}to{opacity:1;transform:none}}
+.ag-pens{display:flex;gap:5px;align-items:center;height:22px;color:var(--t3)}
+.ag-pens b{width:6px;height:6px;border-radius:50%;background:var(--ok);animation:agPen 1s infinite ease-in-out}
+.ag-pens b:nth-child(2){animation-delay:.15s} .ag-pens b:nth-child(3){animation-delay:.3s}
+@keyframes agPen{0%,80%,100%{opacity:.2;transform:scale(.8)}40%{opacity:1;transform:none}}
+.ag-run .ag-pens{animation:agFuera .2s 380ms forwards}
+.ag-log:not(.ag-run) .ag-pens{display:none}
+@keyframes agFuera{to{opacity:0;height:0;margin:0}}
+.ag-cur{display:inline-block;width:7px;height:14px;background:var(--ok);vertical-align:-2px;animation:agCur 1s steps(1) infinite}
+@keyframes agCur{50%{opacity:0}}
+/* builder */
+.ag-par{display:grid;gap:8px}
+.ag-par .fld,.ag-c .fld{margin:0}
+.ag-dc,.ag-par .dc{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px;margin-bottom:8px}
+.ag-par .dc{margin:0}
+#vAgents .fld input{width:0}
+#vAgents .fld label{min-width:0}
+.ag-par .mn-chips{margin-top:0}
+.ag-c .accion{margin-top:16px}
+/* your agents */
+.ag-mios{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:10px}
+.ag-m{display:grid;gap:12px;padding:16px;border-radius:16px;background:var(--panel);border:1px solid var(--linea);animation:agEv .45s var(--e) both;min-width:0}
+.ag-m-h{display:flex;align-items:center;gap:11px;min-width:0}
+.ag-m-h > div{flex:1;min-width:0;display:grid;gap:2px}
+.ag-m-h b{font-size:14px;color:#fff;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ag-m-h span{font-size:11.5px;color:var(--t3)}
+.ag-m p{font-size:12.5px;line-height:1.5;color:var(--t2)}
+.ag-m-r{display:flex;flex-wrap:wrap;gap:6px}
+.ag-m-r span{height:24px;display:inline-flex;align-items:center;padding:0 9px;border-radius:7px;background:var(--campo);font-size:11.5px;color:var(--t2)}
+.ag-m-f{display:flex;align-items:center;gap:10px;border-top:1px solid var(--linea);padding-top:12px}
+.ag-est{display:inline-flex;align-items:center;gap:7px;font-size:12px;color:var(--t2);flex:1;min-width:0}
+.ag-est i{width:7px;height:7px;border-radius:50%;background:var(--ok);animation:agPing 1.8s infinite}
+.ag-m.pausa{opacity:.6} .ag-m.pausa .ag-est i{background:var(--t4);animation:none}
+.ag-sw{width:38px;height:22px;border-radius:999px;background:var(--campo2);position:relative;flex:none;transition:background .2s}
+.ag-sw::after{content:'';position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:#fff;transition:transform .25s var(--e)}
+.ag-sw.on{background:var(--ok)} .ag-sw.on::after{transform:translateX(16px);background:#0A1200}
+.ag-vac{grid-column:1/-1;display:flex;align-items:center;gap:14px;padding:22px;border-radius:16px;border:1px dashed var(--linea2);color:var(--t3);font-size:13px}
+/* steps */
+.ag-pasos{list-style:none;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:0 0 4px;padding:0;position:relative}
+.ag-pasos li{position:relative;display:grid;gap:6px;padding:18px 16px 16px;border-radius:16px;background:var(--panel);border:1px solid var(--linea);overflow:hidden}
+.ag-pasos em{font-style:normal;font-size:12px;font-weight:700;letter-spacing:.1em;color:var(--ok)}
+.ag-pasos b{font-size:15px;font-weight:700;color:#fff}
+.ag-pasos span{font-size:12.5px;line-height:1.5;color:var(--t3)}
+.ag-pasos li::after{content:'';position:absolute;left:0;top:0;height:2px;width:40%;background:linear-gradient(90deg,transparent,var(--ok),transparent);animation:agBarrido 4s linear infinite;animation-delay:calc(var(--i) * 1s)}
+@keyframes agBarrido{from{transform:translateX(-100%)}to{transform:translateX(260%)}}
+@media(max-width:1180px){ .ag-jobs{grid-template-columns:repeat(3,minmax(0,1fr))} }
+@media(max-width:1023px){ .ag-hero{grid-template-columns:1fr;padding:18px 16px 22px;gap:14px} .ag-esc{height:440px;order:-1} .ag-hero h1{font-size:36px}
+  .dos.ag-l{display:flex;flex-direction:column-reverse;align-items:stretch} .ag-pasos{grid-template-columns:1fr 1fr} }
+@media(max-width:700px){ .ag-jobs{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;padding:4px 0 6px;scrollbar-width:none} .ag-jobs::-webkit-scrollbar{display:none}
+  .ag-job{flex:0 0 72%;scroll-snap-align:start} }
+@media(max-width:560px){ .ag-ev{align-items:flex-start} .ag-ev b{white-space:normal;line-height:1.3} .ag-hero h1{font-size:31px} .ag-esc{height:410px} .ag-res{grid-template-columns:1fr 1fr} .ag-res > div:last-child{grid-column:1/-1} .ag-pasos{grid-template-columns:1fr}
+  .ag-cont b{font-size:22px} .ag-log{font-size:11.5px;padding:12px} .ag-ln i{min-width:78px} .ag-term .card-h .vivo{display:none} }
+@media(prefers-reduced-motion:reduce){ #vAgents *,#vAgents *::before,#vAgents *::after{animation:none!important} .ag-run .ag-ln{opacity:1} }
 /* p2p */
 .pp-fil{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:12px 16px;border-bottom:1px solid var(--linea)}
 .pp-fil .sel select{height:36px;padding:0 28px 0 12px;font-size:13px;font-weight:600;color:#fff}
@@ -998,6 +1132,7 @@ body.portada .top,body.portada .pie{display:none}
     <button data-v="mining">Cloud mining</button>
     <button data-v="swap">Swap</button>
     <button data-v="lend">Lend</button>
+    <button data-v="agents">Agents</button>
     <button data-v="p2p">P2P</button>
     <button data-v="pools">Pools</button>
     <button data-v="bridge">Bridge</button>
@@ -1220,7 +1355,7 @@ body.portada .top,body.portada .pie{display:none}
   <section class="c3" id="c3" aria-label="Nereum DEX">
     <div class="c3-vin"></div><div class="c3-izq"></div><svg class="c3-lin" aria-hidden="true"></svg>
     <header class="c3-top"><a class="c3-marca" href="/" aria-label="NereumEVM · nereum.xyz">Nereum<span>EVM</span></a>
-      <nav class="c3-nav"><a href="#/spot">Spot</a><a href="#/mining">Cloud mining</a><a href="#/swap">Swap</a><a href="#/lend">Lend</a><a href="#/p2p">P2P</a><a href="#/pools">Pools</a><a href="#/bridge">Bridge</a><a href="#/tokenize">Tokenize</a><a href="#/portfolio">Portfolio</a></nav>
+      <nav class="c3-nav"><a href="#/spot">Spot</a><a href="#/mining">Cloud mining</a><a href="#/swap">Swap</a><a href="#/lend">Lend</a><a href="#/agents">Agents</a><a href="#/p2p">P2P</a><a href="#/pools">Pools</a><a href="#/bridge">Bridge</a><a href="#/tokenize">Tokenize</a><a href="#/portfolio">Portfolio</a></nav>
       <span class="esp"></span><a class="c3-pill blanco chico" href="#/spot">Launch app</a></header>
     <div class="c3-hero">
       <span class="c3-eye" data-fade=".5,1.1"><i></i>The exchange on NereumEVM</span>
@@ -1473,6 +1608,66 @@ body.portada .top,body.portada .pie{display:none}
   </section>
   <p class="nota">BTC and ETH prices are live from public spot markets. Interest rates, pool sizes and utilisation are published when Nereum Lend opens; we do not estimate them in advance.</p>
 </main>
+
+<!-- ══ agents ══ -->
+<main class="vista" id="vAgents" hidden>
+  <section class="ag-hero">
+    <div class="ag-hero-t">
+      <span class="ag-eye"><i></i>AI agents on NereumEVM</span>
+      <h1>Agents that work for you.<em>Inside your rules.</em></h1>
+      <p>They rebalance, buy on a schedule, guard your loans and pay your bills, from a wallet of their own. Every move is checked on chain before it happens: if it breaks one of your rules, NereumEVM rejects it.</p>
+      <div class="ag-ctas"><button class="pill lima" id="agIr">Build an agent</button><button class="pill borde" id="agVer">Watch a dry run</button></div>
+      <div class="ag-cont"><div><b id="agCP">0</b><span>proposed</span></div><div><b id="agCA" class="ok">0</b><span>approved</span></div><div><b id="agCR" class="no">0</b><span>rejected by the chain</span></div><s>In this demo</s></div>
+    </div>
+    <div class="ag-esc" id="agEsc">
+      <canvas id="agCv" aria-label="An agent proposes actions; the rules on chain approve or reject each one"></canvas>
+      <span class="ag-demo">Live demo · simulated actions</span>
+      <div class="ag-feed" id="agFeed" aria-live="polite"></div>
+    </div>
+  </section>
+  <div class="aviso"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="9" cy="9" r="7"/><path d="M9 8v4.5M9 5.5v.1"/></svg>
+    <span><b>Nereum Agents opens with the NereumEVM mainnet.</b> Until then no agent holds funds, trades or pays: build one, set its rules, run it dry with live prices and keep it in this browser.</span></div>
+  <div class="ag-h2"><h2>Pick a job</h2><span>Five agents, ready to configure</span></div>
+  <div class="ag-jobs" id="agTrabajos"></div>
+  <div class="dos ag-l">
+    <section class="card ag-term" id="agTerm">
+      <div class="card-h"><b>Dry run</b><span class="esp"></span><span class="vivo"><i></i><span>Live prices · nothing executes</span></span><button class="pill chico borde" id="agRun">Run again</button></div>
+      <div class="ag-res" id="agRes"></div>
+      <div class="ag-log" id="agLog"></div>
+    </section>
+    <aside class="card ag-c" id="agBuilder">
+      <div class="card-h"><b>Build your agent</b><span class="tag" id="agJobT">—</span></div>
+      <label class="fld"><label for="agNombre">Name</label><input id="agNombre" maxlength="32" autocomplete="off" style="text-align:right"></label>
+      <label class="mn-lbl" style="margin-top:12px">What it does</label>
+      <div class="ag-par" id="agPar"></div>
+      <label class="mn-lbl" style="margin-top:14px">Rules on chain</label>
+      <div class="ag-dc">
+        <label class="fld"><label for="agMax">Per action</label><input id="agMax" inputmode="decimal" autocomplete="off"><span class="u">$</span></label>
+        <label class="fld"><label for="agDia">Per day</label><input id="agDia" inputmode="decimal" autocomplete="off"><span class="u">$</span></label>
+      </div>
+      <label class="fld"><label for="agPide">Ask me above</label><input id="agPide" inputmode="decimal" autocomplete="off"><span class="u">$</span></label>
+      <label class="mn-lbl" style="margin-top:6px">Assets it may touch</label>
+      <div class="chips-r mn-chips" id="agActivos"></div>
+      <label class="mn-lbl" style="margin-top:10px">Can send funds to</label>
+      <div class="chips-r mn-chips" id="agDest"><button class="chp" data-de="mias">Only my wallets</button><button class="chp" data-de="lista">An allow-list</button></div>
+      <label class="mn-lbl" style="margin-top:10px">Expires after</label>
+      <div class="chips-r mn-chips" id="agExp"><button class="chp" data-ex="30">30 days</button><button class="chp" data-ex="90">90 days</button><button class="chp" data-ex="365">1 year</button></div>
+      <button class="accion" id="agGuardar">Save this agent</button>
+      <p class="nota">The agent's model runs off chain and only proposes. Its wallet and these rules live on NereumEVM, so anything outside them is rejected by the chain, whatever the agent decides. Pause or revoke it at any time.</p>
+    </aside>
+  </div>
+  <div class="ag-h2"><h2>Your agents</h2><span><b id="agMiosN">0</b> saved in this browser</span></div>
+  <div class="ag-mios" id="agMios"></div>
+  <div class="ag-h2"><h2>How it works</h2></div>
+  <ol class="ag-pasos">
+    <li style="--i:0"><em>01</em><b>Pick a job</b><span>Rebalance, buy on a schedule, guard a Nereum Lend loan, park idle dollars or pay bills.</span></li>
+    <li style="--i:1"><em>02</em><b>Set the rules</b><span>Limits per action and per day, the assets it may touch, where funds may go and when it must ask you.</span></li>
+    <li style="--i:2"><em>03</em><b>Fund its wallet</b><span>The agent gets its own wallet with only what you move into it. Your main wallet stays out of reach.</span></li>
+    <li style="--i:3"><em>04</em><b>Watch, pause, revoke</b><span>Every action and every rejected attempt is public on the explorer. One click stops it.</span></li>
+  </ol>
+  <p class="nota">BTC and ETH prices are live from public spot markets. The animation above is a simulation of how rules work, not real activity. Dry runs show what an agent would propose at today's prices; nothing is traded, lent or paid until Nereum Agents opens with the mainnet.</p>
+</main>
+
 
 <!-- ══ p2p ══ -->
 <main class="vista" id="vP2P" hidden>
@@ -2628,8 +2823,8 @@ let rz; addEventListener('resize', () => { clearTimeout(rz); rz = setTimeout(() 
 Object.assign(COIN, {USDT:['#26A17B','#fff'], USDC:['#2775CA','#fff'], POL:['#8247E5','#fff'], SepoliaETH:['#627EEA','#fff']});
 Object.assign(NOMBRE, {USDT:'Tether USD', USDC:'USD Coin', POL:'Polygon', SepoliaETH:'Sepolia Ether'});
 const TOKS = [['USDT','Tether USD'], ...PARES];
-const VISTAS = {cover:'#vCover', spot:'#app', mining:'#vMine', swap:'#vSwap', lend:'#vLend', p2p:'#vP2P', pools:'#vPools', bridge:'#vBridge', tokenize:'#vTok', portfolio:'#vPort'};
-const TITULOS = {cover:'Nereum DEX · Spot, swap, pools, bridge and tokenization', mining:'Cloud mining', swap:'Swap', lend:'Lend', p2p:'P2P', pools:'Pools', bridge:'Bridge', tokenize:'Tokenize', portfolio:'Portfolio'};
+const VISTAS = {cover:'#vCover', spot:'#app', mining:'#vMine', swap:'#vSwap', lend:'#vLend', agents:'#vAgents', p2p:'#vP2P', pools:'#vPools', bridge:'#vBridge', tokenize:'#vTok', portfolio:'#vPort'};
+const TITULOS = {cover:'Nereum DEX · Spot, swap, pools, bridge and tokenization', mining:'Cloud mining', swap:'Swap', lend:'Lend', agents:'AI agents', p2p:'P2P', pools:'Pools', bridge:'Bridge', tokenize:'Tokenize', portfolio:'Portfolio'};
 const FLECHA = '<svg viewBox="0 0 12 12"><path fill="currentColor" d="M1 3.5h10L6 9.5z"/></svg>';
 const esc = v => String(v == null ? '' : v).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const coinHtml = s => { const c = COIN[s]||['#333','#fff']; return `<i class="coin ${CON_LOGO.has(s) ? 'logo' : ''}" style="--c:${c[0]};--cf:${c[1]}">${coinIn(s)}</i>`; };
@@ -2657,11 +2852,11 @@ function ruta(){
   scrollTo(0, 0);
 }
 function pintaVista(){
-  if (vista === 'cover') pintaCover(); else if (vista === 'swap') pintaSwap(); else if (vista === 'p2p') pintaP2P(); else if (vista === 'lend') pintaLend(); else if (vista === 'mining'){ pintaMina(); mnCarga(); } else if (vista === 'pools') pintaPools(); else if (vista === 'bridge') pintaBridge();
+  if (vista === 'cover') pintaCover(); else if (vista === 'swap') pintaSwap(); else if (vista === 'p2p') pintaP2P(); else if (vista === 'lend') pintaLend(); else if (vista === 'agents') pintaAgents(); else if (vista === 'mining'){ pintaMina(); mnCarga(); } else if (vista === 'pools') pintaPools(); else if (vista === 'bridge') pintaBridge();
   else if (vista === 'tokenize') pintaTok(); else if (vista === 'portfolio') pintaPort();
 }
 function vivoVista(){
-  if (vista === 'cover') vivoCover(); else if (vista === 'swap'){ swCalc(); swInfo(false); } else if (vista === 'p2p') ppRefPinta(); else if (vista === 'lend') pintaLend(); else if (vista === 'mining'){ pintaMina(); mnCarga(); } else if (vista === 'pools') vivoPools();
+  if (vista === 'cover') vivoCover(); else if (vista === 'swap'){ swCalc(); swInfo(false); } else if (vista === 'p2p') ppRefPinta(); else if (vista === 'lend') pintaLend(); else if (vista === 'agents'){ if (agFaltaPx) agPintaSim(true); else if (Date.now() - agUltRun > 4000) agPintaSim(false); } else if (vista === 'mining'){ pintaMina(); mnCarga(); } else if (vista === 'pools') vivoPools();
   else if (vista === 'bridge') pintaBridge(); else if (vista === 'portfolio') vivoPort();
 }
 $$('.nav button[data-v]').forEach(b => b.onclick = () => { location.hash = '#/'+b.dataset.v; });
@@ -3251,6 +3446,269 @@ $('#lnGuardar').onclick = () => { const r = lnCalc();
   if (r.debt > r.max + 1e-9){ sacude($('#lnGuardar')); return; }
   lnMias.unshift({id: Date.now().toString(36), col: r.c.id, amt: lnN(LN.amt), debt: r.debt, asset: LN.asset, px: r.px, creado: Date.now()});
   lnGuarda(); lnPintaMias(); toast('Loan saved in this browser. Nereum Lend opens with the NereumEVM mainnet; nothing was borrowed or locked.'); };
+
+/* ══ Agents ══
+   Agentes de IA con cartera propia que actúan dentro de reglas que viven en NereumEVM:
+   el modelo propone, la cadena aprueba o rechaza. Abre con la mainnet: hasta entonces la
+   escena de arriba es una simulación (lo dice en pantalla), el ensayo usa precios reales
+   y los agentes se guardan en este navegador. */
+const AG_SVG = b => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${b}</svg>`;
+const AG_ICO = {
+  rebal: AG_SVG('<g class="a-rot"><path d="M20 12a8 8 0 0 1-13.7 5.6M4 12a8 8 0 0 1 13.7-5.6"/><path d="M18 3v3.6h-3.6M6 21v-3.6h3.6"/></g>'),
+  dca: AG_SVG('<rect x="3.5" y="5" width="17" height="15" rx="3"/><path d="M3.5 9.5h17M8 3v4M16 3v4"/><circle class="a-cae" cx="12" cy="15" r="1.9" fill="currentColor" stroke="none"/>'),
+  guard: AG_SVG('<path class="a-lat" d="M12 3l7.5 3v5.5c0 4.6-3.2 8.3-7.5 9.5-4.3-1.2-7.5-4.9-7.5-9.5V6z"/><path class="a-chk" d="M8.6 12.2l2.3 2.3 4.5-4.6"/>'),
+  yield: AG_SVG('<g><rect class="a-bar" x="4" y="11" width="3.6" height="9" rx="1"/><rect class="a-bar" x="10.2" y="7" width="3.6" height="13" rx="1"/><rect class="a-bar" x="16.4" y="3.5" width="3.6" height="16.5" rx="1"/></g>'),
+  pay: AG_SVG('<g class="a-vue"><path d="M21 3L10 14M21 3l-7 18-4-7-7-4z"/></g>')};
+const AG_JOBS = [
+  {id:'rebal', n:'Rebalancer', d:'Keeps your portfolio at the mix you choose.', r:'Trades when the mix drifts',
+    def:{btc:'0.4', eth:'3', nusd:'12000', tb:'60', te:'20', band:'5', max:'10000', dia:'20000', pide:'8000', act:['BTC','ETH','NUSD'], de:'mias', ex:'90'}},
+  {id:'dca', n:'DCA buyer', d:'Buys a fixed amount on a schedule, whatever the price.', r:'Buys on a schedule',
+    def:{coin:'BTC', amt:'100', cada:'w', max:'500', dia:'500', pide:'1000', act:['BTC','ETH','NUSD'], de:'mias', ex:'365'}},
+  {id:'guard', n:'Loan guardian', d:'Watches a Nereum Lend loan and repays before it gets risky.', r:'Protects your health factor',
+    def:{ca:'BTC', col:'1', debt:'40000', trig:'1.25', rest:'1.6', max:'15000', dia:'25000', pide:'20000', act:['BTC','NUSD'], de:'mias', ex:'90'}},
+  {id:'yield', n:'Idle cash', d:'Parks the dollars you are not using in tokenized T-bills.', r:'Keeps a cash buffer',
+    def:{bal:'25000', buf:'5000', max:'25000', dia:'50000', pide:'30000', act:['NUSD','T-bills'], de:'mias', ex:'365'}},
+  {id:'pay', n:'Payments', d:'Pays a bill in NUSD on the same day every month.', r:'Pays allow-listed addresses',
+    def:{quien:'Rent', amt:'1200', diaM:'1', dir:'', max:'1500', dia:'1500', pide:'2000', act:['NUSD'], de:'lista', ex:'365'}}];
+const AG_ACT = ['BTC', 'ETH', 'NUSD', 'USDT', 'T-bills'];
+const AG = carga('nereum-dex-agentes', {job:'rebal', p:{}});
+let agMios = (() => { try{ const v = JSON.parse(localStorage.getItem('nereum-dex-agentes-mios')); return Array.isArray(v) ? v : []; }catch(e){ return []; } })();
+const agGuarda = () => { guarda('nereum-dex-agentes', AG); guarda('nereum-dex-agentes-mios', agMios); };
+const agJob = id => AG_JOBS.find(j => j.id === (id || AG.job)) || AG_JOBS[0];
+const agP = (id = AG.job) => { const j = agJob(id); AG.p[j.id] = Object.assign({nombre: 'My ' + j.n.toLowerCase()}, j.def, AG.p[j.id]); return AG.p[j.id]; };
+const agN = v => { const n = parseFloat(String(v).replace(/,/g, '')); return isFinite(n) && n > 0 ? n : 0; };
+const agUsd = v => '$' + nf(v, v >= 100 ? 0 : 2);
+const agFecha = d => d.toLocaleDateString('en-US', {weekday: 'short', month: 'short', day: 'numeric'});
+function agProx(cada){ const d = new Date(); if (cada === 'd') d.setDate(d.getDate() + 1); else if (cada === 'w') d.setDate(d.getDate() + ((8 - d.getDay()) % 7 || 7)); else d.setMonth(d.getMonth() + 1, 1); return d; }
+function agDiaMes(D){ D = Math.min(28, Math.max(1, Math.round(agN(D)) || 1)); const h = new Date(); let d = new Date(h.getFullYear(), h.getMonth(), D); if (d <= h) d = new Date(h.getFullYear(), h.getMonth() + 1, D); return d; }
+const AG_CADA = {d: 'day', w: 'week', m: 'month'};
+function agResumen(id, p){
+  const tn = Math.max(0, 100 - agN(p.tb) - agN(p.te));
+  return {rebal: `Keeps ${agN(p.tb)}% BTC, ${agN(p.te)}% ETH and ${tn}% NUSD, trading when the mix drifts more than ${agN(p.band)}%.`,
+    dca: `Buys ${agUsd(agN(p.amt))} of ${p.coin} every ${AG_CADA[p.cada]}.`,
+    guard: `Repays the loan when its health falls below ${nf(agN(p.trig), 2)}, back up to ${nf(agN(p.rest), 2)}.`,
+    yield: `Keeps ${nf(agN(p.buf), 0)} NUSD as cash and parks the rest in tokenized T-bills.`,
+    pay: `Pays ${nf(agN(p.amt), 0)} NUSD to ${p.quien || 'a payee'} on day ${Math.min(28, Math.max(1, Math.round(agN(p.diaM)) || 1))} of every month.`}[id];
+}
+
+/* what the agent would propose right now, with live prices */
+function agPlan(id, p){
+  const L = [], A = [], R = []; let nada = '';
+  const pB = pxU('BTC'), pE = pxU('ETH');
+  if (id === 'rebal'){
+    const tb = agN(p.tb), te = agN(p.te), tn = 100 - tb - te, band = agN(p.band) || 0;
+    if (!pB || !pE){ L.push(['prices', 'waiting for live prices…']); nada = 'Waiting for prices.'; return {L, A, R, nada}; }
+    const v = [agN(p.btc) * pB, agN(p.eth) * pE, agN(p.nusd)], tot = v[0] + v[1] + v[2], w = v.map(x => tot ? x / tot * 100 : 0);
+    L.push(['prices', `BTC $${fp(pB, 'BTC')} · ETH $${fp(pE, 'ETH')}`], ['portfolio', agUsd(tot)], ['mix now', `BTC ${nf(w[0], 1)}% · ETH ${nf(w[1], 1)}% · NUSD ${nf(w[2], 1)}%`], ['target', `${tb} / ${te} / ${Math.max(0, tn)} · band ±${band}%`]);
+    const der = Math.max(Math.abs(w[0] - tb), Math.abs(w[1] - te), Math.abs(w[2] - tn));
+    R.push(['Portfolio', agUsd(tot), 'At live prices'], ['Largest drift', nf(der, 1) + '%', `Band ±${band}%`]);
+    if (tn < 0) nada = 'Targets add up to more than 100%.';
+    else if (!tot) nada = 'Enter what you hold.';
+    else [['BTC', pB, tb, 0], ['ETH', pE, te, 1]].forEach(([s, px, t, i]) => { const d = t * tot / 100 - v[i];
+      if (Math.abs(w[i] - t) > band && Math.abs(d) > 1) A.push(d < 0 ? {txt: `Sell ${nf(-d / px, 4)} ${s} → NUSD`, val: -d, as: [s, 'NUSD']} : {txt: `Buy ${nf(d / px, 4)} ${s} with NUSD`, val: d, as: [s, 'NUSD']}); });
+    if (!nada && !A.length) nada = `The mix is inside the ±${band}% band. Nothing to trade.`;
+  } else if (id === 'dca'){
+    const px = pxU(p.coin), amt = agN(p.amt), mes = amt * {d: 30, w: 52 / 12, m: 1}[p.cada];
+    L.push(['price', px ? `${p.coin} $${fp(px, p.coin)}` : 'waiting for live prices…'], ['schedule', `${agUsd(amt)} every ${AG_CADA[p.cada]}`], ['next buy', agFecha(agProx(p.cada))]);
+    R.push(['Next buy', agFecha(agProx(p.cada)), 'At the market price'], ['Per month', '≈ ' + agUsd(mes), `${p.coin} at any price`]);
+    if (!amt) nada = 'Enter an amount.'; else A.push({txt: `Buy ${agUsd(amt)} of ${p.coin}`, sub: px ? `≈ ${nf(amt / px, 6)} ${p.coin}` : '', val: amt, as: [p.coin, 'NUSD']});
+  } else if (id === 'guard'){
+    const c = LN_COL.find(x => x.id === p.ca) || LN_COL[0], px = c.vivo ? pxU(c.vivo) : 1, val = agN(p.col) * px, debt = agN(p.debt), trig = agN(p.trig), rest = agN(p.rest);
+    const hf = debt ? val * c.liq / 100 / debt : Infinity, gat = c.vivo && agN(p.col) ? trig * debt / (agN(p.col) * c.liq / 100) : trig * debt / (c.liq / 100);
+    L.push(['collateral', c.vivo ? `${nf(agN(p.col), 4)} ${c.vivo} · ${agUsd(val)}` : `${agUsd(val)} of ${c.tipo.toLowerCase()}`], ['debt', `${nf(debt, 0)} NUSD`], ['health now', debt ? nf(hf, 2) : '∞'], ['acts below', `${nf(trig, 2)} → back to ${nf(rest, 2)}`]);
+    R.push(['Health now', debt && val ? nf(hf, 2) : '—', hf >= trig ? 'Above the trigger' : 'Below the trigger', hf >= trig ? 'ok' : 'no'], [c.vivo ? `Acts if ${c.vivo} falls below` : 'Acts if value falls below', debt ? '$' + (c.vivo ? fp(gat, c.vivo) : nf(gat, 0)) : '—', 'At today’s debt']);
+    if (c.vivo && !px) nada = 'Waiting for prices.';
+    else if (!debt || !val) nada = 'Enter the collateral and the debt.';
+    else if (rest <= trig) nada = 'Restore-to must be above the trigger.';
+    else if (hf >= trig) nada = `Health ${nf(hf, 2)} is above ${nf(trig, 2)}. Nothing to do; the agent keeps watching every block.`;
+    else { const r = debt - val * c.liq / 100 / rest; A.push({txt: `Repay ${nf(r, 0)} NUSD on the loan`, sub: `health ${nf(hf, 2)} → ${nf(rest, 2)}`, val: r, as: ['NUSD']}); }
+  } else if (id === 'yield'){
+    const bal = agN(p.bal), buf = agN(p.buf), ex = bal - buf;
+    L.push(['NUSD idle', nf(bal, 0)], ['keep as cash', nf(buf, 0)]);
+    R.push(['To park', ex > 0 ? nf(ex, 0) + ' NUSD' : '0', 'Into tokenized T-bills'], ['Cash kept', nf(Math.min(bal, buf), 0) + ' NUSD', 'Ready to spend']);
+    if (ex > 0) A.push({txt: `Move ${nf(ex, 0)} NUSD → T-bills`, val: ex, as: ['NUSD', 'T-bills']}); else nada = 'Nothing above the cash buffer.';
+  } else if (id === 'pay'){
+    const amt = agN(p.amt), f = agDiaMes(p.diaM), dirOk = /^0x[0-9a-fA-F]{40}$/.test(String(p.dir).trim());
+    L.push(['payee', `${p.quien || '—'} · ${dirOk ? p.dir.slice(0, 6) + '…' + p.dir.slice(-4) : 'no address yet'}`], ['amount', `${nf(amt, 0)} NUSD`], ['next payment', agFecha(f)]);
+    R.push(['Next payment', agFecha(f), `Day ${f.getDate()} of each month`], ['Per year', nf(amt * 12, 0) + ' NUSD', 'Twelve payments']);
+    if (!amt) nada = 'Enter an amount.'; else A.push({txt: `Pay ${nf(amt, 0)} NUSD to ${p.quien || 'payee'}`, val: amt, as: ['NUSD'], fuera: true, dirOk});
+  }
+  return {L, A, R, nada};
+}
+/* the rules, checked like the chain would */
+function agChequea(p, A){
+  const max = agN(p.max), dia = agN(p.dia), pide = agN(p.pide); let acum = 0;
+  return A.map(a => { const c = []; acum += a.val;
+    c.push(a.val <= max ? ['ok', 'per action', `${agUsd(a.val)} ≤ ${agUsd(max)}`] : ['no', 'per action', `${agUsd(a.val)} is above ${agUsd(max)}`]);
+    c.push(acum <= dia ? ['ok', 'per day', `${agUsd(acum)} ≤ ${agUsd(dia)}`] : ['no', 'per day', `${agUsd(acum)} would pass ${agUsd(dia)}`]);
+    const falta = a.as.filter(s => !(p.act || []).includes(s));
+    c.push(!falta.length ? ['ok', 'assets', a.as.join(', ') + ' allowed'] : ['no', 'assets', falta.join(', ') + ' not allowed']);
+    if (a.fuera) c.push(p.de !== 'lista' ? ['no', 'send to', 'only your wallets: this payee is not one'] : a.dirOk ? ['ok', 'send to', 'address on the allow-list'] : ['no', 'send to', 'add a valid 0x address to the allow-list']);
+    else c.push(['ok', 'send to', 'stays in your wallets']);
+    const no = c.some(x => x[0] === 'no'), pi = !no && a.val > pide;
+    if (pi) c.push(['pi', 'ask me', `above ${agUsd(pide)}: waits for your signature`]);
+    return {...a, c, est: no ? 'no' : pi ? 'pi' : 'ok'}; });
+}
+const AG_EST = {ok: ['ok', 'Approved'], no: ['no', 'Rejected by the chain'], pi: ['pi', 'Needs your signature']};
+let agUltRun = 0, agFaltaPx = false;
+function agPintaSim(anim){
+  const j = agJob(), p = agP(), pl = agPlan(j.id, p), ch = agChequea(p, pl.A);
+  agFaltaPx = pl.nada === 'Waiting for prices.' || pl.L.some(l => /waiting/.test(l[1]));
+  const ver = !ch.length ? ['', 'Nothing to do'] : ch.some(a => a.est === 'no') ? AG_EST.no : ch.some(a => a.est === 'pi') ? AG_EST.pi : AG_EST.ok;
+  $('#agRes').innerHTML = [...pl.R, ['Verdict', ver[1], ch.length ? `${ch.length} action${ch.length > 1 ? 's' : ''} proposed` : 'No action proposed', ver[0]]]
+    .map(([l, v, s, c]) => `<div><span>${l}</span><b class="${c || ''}">${esc(v)}</b><s>${esc(s || '')}</s></div>`).join('');
+  let k = 0; const ln = (i, t, cls = '') => `<div class="ag-ln ${cls}" style="--i:${k++}"><i>${i}</i><span>${t}</span></div>`;
+  let h = `<div class="ag-pens"><b></b><b></b><b></b></div>` + ln('› agent', `${esc(p.nombre || j.n)} <span class="t3">· ${j.n.toLowerCase()}</span>`);
+  pl.L.forEach(([a, b]) => { h += ln('› ' + a, esc(b)); });
+  if (!ch.length) h += ln('› proposes', `<span class="t3">${esc(pl.nada)}</span>`);
+  ch.forEach(a => { h += ln('› proposes', `<span class="pi">${esc(a.txt)}</span>${a.sub ? ` <span class="t3">${esc(a.sub)}</span>` : ''}`);
+    a.c.forEach(([e, n, t]) => { h += ln(`<span class="${e}">${e === 'ok' ? '✓' : e === 'no' ? '✕' : '!'}</span> ${n}`, `<span class="${e === 'pi' ? 'pi' : e === 'no' ? 'no' : 't3'}">${esc(t)}</span>`, 'sub'); }); });
+  h += ln('› result', `<span class="${ver[0] || 't3'}">${ch.length ? ver[1] + (ver[0] === 'ok' ? ' · would execute at mainnet' : '') : 'Watching. Nothing executes'}</span> <span class="ag-cur"></span>`, 'fin');
+  const log = $('#agLog'); log.innerHTML = h;
+  if (anim){ log.classList.remove('ag-run'); void log.offsetWidth; log.classList.add('ag-run'); agUltRun = Date.now(); }
+}
+function agFld(k, l, u, v, txt){
+  return `<label class="fld"><label for="agK_${k}">${l}</label><input id="agK_${k}" data-k="${k}" ${txt ? '' : 'inputmode="decimal"'} autocomplete="off" value="${esc(v)}" ${txt ? 'maxlength="42"' : ''}>${u ? `<span class="u">${u}</span>` : ''}</label>`;
+}
+const agChips = (k, ops, v) => `<div class="chips-r mn-chips">${ops.map(([x, l]) => `<button class="chp ${x === v ? 'on' : ''}" data-pk="${k}" data-pv="${x}">${l}</button>`).join('')}</div>`;
+function agPintaPar(){
+  const j = agJob(), p = agP(); let h = '';
+  if (j.id === 'rebal') h = `<div class="dc">${agFld('btc', 'BTC', 'BTC', p.btc)}${agFld('eth', 'ETH', 'ETH', p.eth)}</div>${agFld('nusd', 'NUSD held', 'NUSD', p.nusd)}
+    <div class="dc">${agFld('tb', 'Target BTC', '%', p.tb)}${agFld('te', 'Target ETH', '%', p.te)}</div>${agFld('band', 'Trade when drift is over', '%', p.band)}`;
+  else if (j.id === 'dca') h = agChips('coin', [['BTC', 'Bitcoin'], ['ETH', 'Ether']], p.coin) + agFld('amt', 'Buy', 'USD', p.amt) + agChips('cada', [['d', 'Every day'], ['w', 'Every week'], ['m', 'Every month']], p.cada);
+  else if (j.id === 'guard'){ const c = LN_COL.find(x => x.id === p.ca) || LN_COL[0];
+    h = (lnMias.length ? `<div class="chips-r mn-chips">${lnMias.slice(0, 3).map((m, i) => `<button class="chp" data-agl="${m.id}">Use my Lend loan ${i + 1}</button>`).join('')}</div>` : '')
+      + agChips('ca', LN_COL.map(x => [x.id, x.vivo || x.c]), p.ca)
+      + `<div class="dc">${agFld('col', 'Collateral', c.vivo || 'USD', p.col)}${agFld('debt', 'Debt', 'NUSD', p.debt)}</div><div class="dc">${agFld('trig', 'Act below', 'health', p.trig)}${agFld('rest', 'Restore to', 'health', p.rest)}</div>`; }
+  else if (j.id === 'yield') h = agFld('bal', 'NUSD idle', 'NUSD', p.bal) + agFld('buf', 'Keep as cash', 'NUSD', p.buf);
+  else if (j.id === 'pay') h = agFld('quien', 'Pay to', '', p.quien, true) + `<div class="dc">${agFld('amt', 'Amount', 'NUSD', p.amt)}${agFld('diaM', 'Day of month', '', p.diaM)}</div>` + agFld('dir', 'Address', '', p.dir, true).replace('value=', 'placeholder="0x…" value=');
+  $('#agPar').innerHTML = h;
+}
+function agPintaReglas(){
+  const p = agP();
+  [['#agNombre', 'nombre'], ['#agMax', 'max'], ['#agDia', 'dia'], ['#agPide', 'pide']].forEach(([s, k]) => { if (document.activeElement !== $(s)) $(s).value = p[k]; });
+  $('#agActivos').innerHTML = AG_ACT.map(a => `<button class="chp ${(p.act || []).includes(a) ? 'on' : ''}" data-aa="${a}">${a}</button>`).join('');
+  $$('#agDest .chp').forEach(b => b.classList.toggle('on', b.dataset.de === p.de));
+  $$('#agExp .chp').forEach(b => b.classList.toggle('on', b.dataset.ex === p.ex));
+}
+function pintaAgents(anim = true){
+  const j = agJob();
+  $('#agTrabajos').innerHTML = AG_JOBS.map(x => `<button class="ag-job ${x.id === j.id ? 'on' : ''}" data-aj="${x.id}"><i class="ag-ico">${AG_ICO[x.id]}</i><b>${x.n}</b><span>${x.d}</span><s>${x.id === j.id ? 'SELECTED' : x.r.toUpperCase()}</s></button>`).join('');
+  $('#agJobT').textContent = j.n;
+  agPintaPar(); agPintaReglas(); agPintaSim(anim); agPintaMios(); agDemo.on();
+}
+function agPintaMios(){
+  $('#agMiosN').textContent = agMios.length;
+  $('#agMios').innerHTML = !agMios.length
+    ? `<div class="ag-vac"><i class="ag-ico chico">${AG_ICO.guard}</i><span>No agents yet. Pick a job, set its rules and save it: it waits here until Nereum Agents opens.</span></div>`
+    : agMios.map(m => { const j = agJob(m.job), p = m.p;
+      return `<div class="ag-m ${m.on ? 'vivo' : 'pausa'}"><div class="ag-m-h"><i class="ag-ico chico">${AG_ICO[j.id]}</i><div><b>${esc(p.nombre || j.n)}</b><span>${j.n}</span></div></div>
+        <p>${esc(agResumen(j.id, p))}</p>
+        <div class="ag-m-r"><span>≤ ${agUsd(agN(p.max))} / action</span><span>≤ ${agUsd(agN(p.dia))} / day</span><span>${esc((p.act || []).join(' · ') || 'No assets')}</span><span>${p.ex === '365' ? '1 year' : p.ex + ' days'}</span></div>
+        <div class="ag-m-f"><span class="ag-est"><i></i>${m.on ? 'Ready · waiting for mainnet' : 'Paused'}</span><button class="ag-sw ${m.on ? 'on' : ''}" data-ags="${m.id}" aria-label="${m.on ? 'Pause' : 'Resume'} agent"></button><button class="pp-borra" data-agb="${m.id}">Delete</button></div></div>`; }).join('');
+}
+let agTm = 0;
+const agCambia = () => { agGuarda(); clearTimeout(agTm); agTm = setTimeout(() => agPintaSim(true), 450); };
+$('#vAgents').addEventListener('click', e => {
+  const jb = e.target.closest('[data-aj]'); if (jb){ if (AG.job !== jb.dataset.aj){ AG.job = jb.dataset.aj; agGuarda(); pintaAgents(); } $('#agTerm').scrollIntoView({behavior: 'smooth', block: 'start'}); return; }
+  const pk = e.target.closest('[data-pk]'); if (pk){ agP()[pk.dataset.pk] = pk.dataset.pv; agGuarda(); agPintaPar(); agPintaSim(true); return; }
+  const aa = e.target.closest('[data-aa]'); if (aa){ const p = agP(), s = new Set(p.act || []); s.has(aa.dataset.aa) ? s.delete(aa.dataset.aa) : s.add(aa.dataset.aa); p.act = AG_ACT.filter(a => s.has(a)); agGuarda(); agPintaReglas(); agPintaSim(true); return; }
+  const de = e.target.closest('[data-de]'); if (de){ agP().de = de.dataset.de; agGuarda(); agPintaReglas(); agPintaSim(true); return; }
+  const ex = e.target.closest('[data-ex]'); if (ex){ agP().ex = ex.dataset.ex; agGuarda(); agPintaReglas(); return; }
+  const lo = e.target.closest('[data-agl]'); if (lo){ const m = lnMias.find(x => x.id === lo.dataset.agl); if (m){ Object.assign(agP(), {ca: m.col, col: String(m.amt), debt: String(m.debt)}); agGuarda(); agPintaPar(); agPintaSim(true); } return; }
+  const sw = e.target.closest('[data-ags]'); if (sw){ const m = agMios.find(x => x.id === sw.dataset.ags); if (m){ m.on = !m.on; agGuarda(); agPintaMios(); toast(m.on ? 'Agent resumed.' : 'Agent paused. It will not propose anything until you resume it.'); } return; }
+  const b = e.target.closest('[data-agb]'); if (b){ agMios = agMios.filter(m => m.id !== b.dataset.agb); agGuarda(); agPintaMios(); toast('Agent deleted.'); }
+});
+$('#vAgents').addEventListener('input', e => {
+  const k = e.target.dataset.k; if (k){ agP()[k] = e.target.value; return agCambia(); }
+  const r = {agNombre: 'nombre', agMax: 'max', agDia: 'dia', agPide: 'pide'}[e.target.id]; if (r){ agP()[r] = e.target.value; agCambia(); }
+});
+$('#agIr').onclick = () => { $('#agBuilder').scrollIntoView({behavior: 'smooth', block: 'start'}); $('#agNombre').focus({preventScroll: true}); };
+$('#agVer').onclick = () => { $('#agTerm').scrollIntoView({behavior: 'smooth', block: 'start'}); setTimeout(() => agPintaSim(true), 350); };
+$('#agRun').onclick = () => agPintaSim(true);
+$('#agGuardar').onclick = () => { const j = agJob(), p = agP();
+  if (!agN(p.max) || !agN(p.dia)){ sacude($('#agGuardar')); return toast('Set a limit per action and per day: an agent without limits cannot be saved.'); }
+  if (!(p.act || []).length){ sacude($('#agActivos')); return toast('Allow at least one asset.'); }
+  agMios.unshift({id: Date.now().toString(36), job: j.id, p: JSON.parse(JSON.stringify(p)), on: true, creado: Date.now()});
+  agGuarda(); agPintaMios(); toast('Agent saved in this browser. Nereum Agents opens with the NereumEVM mainnet; it holds no funds and executes nothing until then.'); };
+
+/* the scene: an agent proposes, the rule ring on chain approves or rejects (a simulation, labelled on screen) */
+const agDemo = (() => {
+  const OK = '#A6F03C', NO = '#FF4D6A', cv = $('#agCv'), x = cv.getContext('2d'), quieto = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const NODOS = ['BTC', 'ETH', 'NUSD', 'T-BILLS', 'LEND', 'PAY'], PUERTAS = [['PER ACTION', -60], ['PER DAY', 60], ['ASSETS', 120], ['SEND TO', 240]];
+  const q = (usd, s) => pxU(s) ? nf(usd / pxU(s), 4) + ' ' + s : '$' + nf(usd, 0) + ' of ' + s;
+  const EV = [
+    {a: 'Rebalancer', t: () => `Sell ${q(800, 'BTC')} → NUSD`, n: 0, ok: 1, r: 'Within $1,000 per action'},
+    {a: 'DCA buyer', t: () => 'Buy $250 of ETH', n: 1, ok: 1, r: 'On schedule · within limits'},
+    {a: 'DCA buyer', t: () => 'Buy $4,800 of BTC', n: 0, ok: 0, g: 0, r: 'Above $1,000 per action'},
+    {a: 'Idle cash', t: () => 'Move 5,000 NUSD → T-bills', n: 3, ok: 1, r: 'Asset allowed · own wallet'},
+    {a: 'Payments', t: () => 'Pay 950 NUSD to 0x9f3…e21', n: 5, ok: 0, g: 3, r: 'Address not on the allow-list'},
+    {a: 'Loan guardian', t: () => 'Repay 1,200 NUSD on a loan', n: 4, ok: 1, r: 'Health 1.24 → 1.60'},
+    {a: 'Rebalancer', t: () => 'Swap NUSD into an unlisted token', n: 2, ok: 0, g: 2, r: 'Asset not allowed'},
+    {a: 'Payments', t: () => 'Pay 1,200 NUSD · Rent', n: 5, ok: 1, r: 'Allow-listed address'},
+    {a: 'DCA buyer', t: () => 'Buy $600 of ETH, third time today', n: 1, ok: 0, g: 1, r: 'Daily limit reached'},
+    {a: 'Rebalancer', t: () => `Buy ${q(500, 'ETH')} with NUSD`, n: 1, ok: 1, r: 'Within limits'}];
+  let w = 0, h = 0, raf = 0, visto = false, ult = 0, sig = 0, iEv = 0, t0 = performance.now();
+  const P = [], FX = [], GL = {}, ND = {}, cnt = {p: 0, a: 0, r: 0};
+  function medir(){ const r = cv.getBoundingClientRect(), d = Math.min(2, devicePixelRatio || 1); if (!r.width) return false;
+    if (r.width !== w || r.height !== h){ w = r.width; h = r.height; cv.width = Math.round(w * d); cv.height = Math.round(h * d); } x.setTransform(cv.width / w, 0, 0, cv.height / h, 0, 0); return true; }
+  const geo = () => { const fh = $('#agFeed').offsetHeight || 0, area = h - Math.max(fh, w < 520 ? 96 : 120) - 18, cy = area / 2 + 24, Rn = Math.max(60, Math.min(w * .4, area / 2 - 22)); return {cx: w / 2, cy, Rn, Rg: Rn * .56, rn: w < 520 ? 17 : 21}; };
+  const ang = i => (-90 + i * 60) * Math.PI / 180;
+  function feed(ev){ const f = $('#agFeed'), d = document.createElement('div'); d.className = 'ag-ev';
+    d.innerHTML = `<span class="ag-st ${ev.ok ? 'ok' : 'no'}">${ev.ok ? '✓ Approved' : '✕ Rejected'}</span><div><b>${esc(ev.a)} · ${esc(ev.t())}</b><span>${esc(ev.r)}</span></div>`;
+    f.appendChild(d); while (f.children.length > 2) f.firstElementChild.remove();
+    cnt.p++; ev.ok ? cnt.a++ : cnt.r++; $('#agCP').textContent = cnt.p; $('#agCA').textContent = cnt.a; $('#agCR').textContent = cnt.r; }
+  function lanza(){ const ev = EV[iEv++ % EV.length]; P.push({ev, s: 0, hecho: false}); }
+  function cuadro(now){
+    const t = (now - t0) / 1000, dt = Math.min(.05, (now - (ult || now)) / 1000); ult = now;
+    if (!medir()) return;
+    const {cx, cy, Rn, Rg, rn} = geo(); x.clearRect(0, 0, w, h);
+    /* spokes and nodes */
+    NODOS.forEach((n, i) => { const a = ang(i), nx = cx + Math.cos(a) * Rn, ny = cy + Math.sin(a) * Rn;
+      x.setLineDash([2, 5]); x.strokeStyle = 'rgba(255,255,255,.09)'; x.lineWidth = 1; x.beginPath(); x.moveTo(cx + Math.cos(a) * 44, cy + Math.sin(a) * 44); x.lineTo(nx - Math.cos(a) * rn, ny - Math.sin(a) * rn); x.stroke(); x.setLineDash([]);
+      const hit = ND[i] ? Math.max(0, 1 - (t - ND[i]) / .9) : 0;
+      if (hit){ x.beginPath(); x.arc(nx, ny, rn + 4 + 16 * (1 - hit), 0, 7); x.strokeStyle = `rgba(166,240,60,${.5 * hit})`; x.lineWidth = 2; x.stroke(); }
+      x.beginPath(); x.arc(nx, ny, rn, 0, 7); x.fillStyle = '#111114'; x.fill(); x.strokeStyle = hit ? `rgba(166,240,60,${.35 + .65 * hit})` : '#2A2A31'; x.lineWidth = 1.5; x.stroke();
+      x.font = `700 ${w < 520 ? 8.5 : 9.5}px Inter,system-ui`; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillStyle = hit ? '#fff' : '#8E8E96'; x.letterSpacing = '.5px'; x.fillText(n, nx, ny + .5); });
+    /* the rule ring */
+    x.beginPath(); x.arc(cx, cy, Rg, 0, 7); x.strokeStyle = 'rgba(255,255,255,.1)'; x.lineWidth = 6; x.stroke();
+    x.save(); x.translate(cx, cy); x.rotate(t * .25); x.setLineDash([3, 9]); x.beginPath(); x.arc(0, 0, Rg + 9, 0, 7); x.strokeStyle = 'rgba(166,240,60,.18)'; x.lineWidth = 1; x.stroke(); x.restore();
+    for (const k in GL){ const g = GL[k], f = Math.max(0, 1 - (t - g.t) / .8); if (!f){ delete GL[k]; continue; }
+      x.beginPath(); x.arc(cx, cy, Rg, g.a - .32, g.a + .32); x.strokeStyle = g.ok ? `rgba(166,240,60,${f})` : `rgba(255,77,106,${f})`; x.lineWidth = 6; x.lineCap = 'round'; x.stroke(); x.lineCap = 'butt'; }
+    PUERTAS.forEach(([l, d], i) => { const a = d * Math.PI / 180, rl = (Rg + Rn) / 2 - 2, lx = cx + Math.cos(a) * rl, ly = cy + Math.sin(a) * rl, act = GL['p' + i];
+      x.font = `700 ${w < 520 ? 8 : 9}px Inter,system-ui`; x.letterSpacing = '1px'; const tw = x.measureText(l).width + 14;
+      x.beginPath(); x.roundRect(lx - tw / 2, ly - 9, tw, 18, 9); x.fillStyle = act ? 'rgba(255,77,106,.18)' : '#0B0B0D'; x.fill(); x.strokeStyle = act ? NO : 'rgba(255,255,255,.14)'; x.lineWidth = 1; x.stroke();
+      if (act){ x.beginPath(); x.moveTo(cx + Math.cos(a) * (Rg + 4), cy + Math.sin(a) * (Rg + 4)); x.lineTo(lx - Math.cos(a) * 10, ly - Math.sin(a) * 10); x.strokeStyle = NO; x.stroke(); }
+      x.fillStyle = act ? NO : '#8E8E96'; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText(l, lx, ly + .5); });
+    x.letterSpacing = '0px';
+    /* proposals in flight */
+    for (let i = P.length - 1; i >= 0; i--){ const p = P[i], a = ang(p.ev.n), sg = Rg / Rn, ok = p.ev.ok;
+      p.s += dt / 1.5; const s = ok ? p.s : Math.min(p.s, sg), e = 1 - Math.pow(1 - Math.min(1, s), 2), r = 40 + (Rn - rn - 40) * Math.min(1, s);
+      if (!p.hecho && p.s >= sg){ p.hecho = true; GL[Math.random()] = {a, ok, t}; if (!ok){ GL['p' + p.ev.g] = {a: PUERTAS[p.ev.g][1] * Math.PI / 180, ok: 0, t}; for (let k = 0; k < 14; k++){ const b = a + Math.PI + (Math.random() - .5) * 2.2; FX.push({x: cx + Math.cos(a) * Rg, y: cy + Math.sin(a) * Rg, vx: Math.cos(b) * (40 + Math.random() * 70), vy: Math.sin(b) * (40 + Math.random() * 70), t}); } FX.push({x: cx + Math.cos(a) * (Rg - 22), y: cy + Math.sin(a) * (Rg - 22) + 4, txt: 'REJECTED', t}); } feed(p.ev); }
+      if (ok && p.s >= 1){ ND[p.ev.n] = t; P.splice(i, 1); continue; }
+      if (!ok && p.s > sg + .25){ P.splice(i, 1); continue; }
+      const px = cx + Math.cos(a) * r, py = cy + Math.sin(a) * r, col = p.hecho ? (ok ? OK : NO) : '#FFFFFF', al = !ok && p.hecho ? Math.max(0, 1 - (p.s - sg) / .25) : 1;
+      for (let k = 1; k <= 6; k++){ const rr = r - k * 6; if (rr < 40) break; x.beginPath(); x.arc(cx + Math.cos(a) * rr, cy + Math.sin(a) * rr, 3.2 - k * .4, 0, 7); x.fillStyle = (p.hecho && ok ? 'rgba(166,240,60,' : 'rgba(255,255,255,') + (.35 - k * .05) * al + ')'; x.fill(); }
+      x.save(); x.shadowColor = col; x.shadowBlur = 14; x.beginPath(); x.arc(px, py, 4.2, 0, 7); x.globalAlpha = al; x.fillStyle = col; x.fill(); x.restore(); }
+    for (let i = FX.length - 1; i >= 0; i--){ const f = FX[i], k = (t - f.t) / (f.txt ? 1.1 : .6); if (k >= 1){ FX.splice(i, 1); continue; }
+      if (f.txt){ x.font = '800 10px Inter,system-ui'; x.letterSpacing = '1.5px'; x.textAlign = 'center'; x.fillStyle = `rgba(255,77,106,${1 - k})`; x.fillText(f.txt, f.x, f.y - 10 * k); x.letterSpacing = '0px'; }
+      else { const tt = t - f.t; x.beginPath(); x.arc(f.x + f.vx * tt, f.y + f.vy * tt, 2.2 * (1 - k), 0, 7); x.fillStyle = `rgba(255,77,106,${1 - k})`; x.fill(); } }
+    /* the agent */
+    const pul = .5 + .5 * Math.sin(t * 2.4), gl = x.createRadialGradient(cx, cy, 0, cx, cy, 90); gl.addColorStop(0, `rgba(166,240,60,${.16 + .08 * pul})`); gl.addColorStop(1, 'rgba(166,240,60,0)');
+    x.fillStyle = gl; x.fillRect(cx - 90, cy - 90, 180, 180);
+    x.save(); x.translate(cx, cy); x.rotate(-t * .8); x.setLineDash([10, 6]); x.beginPath(); x.arc(0, 0, 40, 0, 7); x.strokeStyle = 'rgba(166,240,60,.45)'; x.lineWidth = 1.2; x.stroke(); x.restore();
+    for (let k = 0; k < 3; k++){ const b = t * 1.6 + k * 2.09; x.beginPath(); x.arc(cx + Math.cos(b) * 40, cy + Math.sin(b) * 40, 2.4, 0, 7); x.fillStyle = OK; x.fill(); }
+    x.beginPath(); x.arc(cx, cy, 30, 0, 7); const gi = x.createLinearGradient(cx, cy - 30, cx, cy + 30); gi.addColorStop(0, '#1A2410'); gi.addColorStop(1, '#0A0D07'); x.fillStyle = gi; x.fill(); x.strokeStyle = OK; x.lineWidth = 2; x.stroke();
+    x.font = '800 15px Inter,system-ui'; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillStyle = OK; x.fillText('AI', cx, cy + 1);
+    if (!quieto && t > sig){ lanza(); sig = t + 1.25 + Math.random() * .5; }
+  }
+  function bucle(now){ raf = 0; if (!visto || vista !== 'agents' || document.hidden) return; cuadro(now); raf = requestAnimationFrame(bucle); }
+  new IntersectionObserver(es => { visto = es[0].isIntersecting; on(); }).observe($('#agEsc'));
+  document.addEventListener('visibilitychange', () => { ult = 0; on(); });
+  function on(){ if (quieto){ requestAnimationFrame(n => { if (!$('#agFeed').children.length) [0, 2].forEach(i => feed(EV[i])); cuadro(n); }); return; }
+    if (!raf && visto && vista === 'agents' && !document.hidden){ ult = 0; raf = requestAnimationFrame(bucle); } }
+  return {on};
+})();
 
 /* ══ P2P ══
    Compra y venta directa entre personas, pagada en moneda local; las monedas del
