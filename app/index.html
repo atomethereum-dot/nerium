@@ -3525,7 +3525,7 @@ function agPlan(id, p){
       const r = agN(p.rng) || 5, n = Math.max(2, Math.min(50, Math.round(agN(p.niv)) || 10)), lo = px * (1 - r / 100), hi = px * (1 + r / 100), st = (hi - lo) / (n - 1), sz = agN(p.size);
       const lv = Array.from({length: n}, (_, i) => lo + i * st), ab = lv.filter(v => v < px), ar = lv.filter(v => v > px), b1 = ab[ab.length - 1], s1 = ar[0];
       L.push(['strategy', `grid · ${n} levels · $${fp(lo, c)} – $${fp(hi, c)}`], ['step', `$${fp(st, c)} · ${nf(st / px * 100, 2)}% apart`]);
-      R.push(['Grid range', `$${fp(lo, c)} – $${fp(hi, c)}`, `${n} levels · ±${r}%`], ['Resting orders', `${ab.length} buy · ${ar.length} sell`, `${agUsd(sz)} each`]);
+      R.push(['Grid range', px >= 100 ? `$${nf(lo, 0)} – $${nf(hi, 0)}` : `$${fp(lo, c)} – $${fp(hi, c)}`, `${n} levels · ±${r}%`], ['Resting orders', `${ab.length} buy · ${ar.length} sell`, `${agUsd(sz)} each`]);
       if (!sz) nada = 'Enter an order size.';
       else { if (b1) A.push({txt: `Buy limit ${nf(sz / b1, 6)} ${c} at $${fp(b1, c)}`, sub: 'next level below', val: sz, as: [c, 'USDT']});
         if (s1) A.push({txt: `Sell limit ${nf(sz / s1, 6)} ${c} at $${fp(s1, c)}`, sub: 'next level above', val: sz, as: [c, 'USDT']}); }
