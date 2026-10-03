@@ -58,7 +58,7 @@ await pg.route('**explorer-api.walletconnect.com/v3/logo/**', r=>r.abort());
 await pg.route('**api.web3modal.org/**', r=>r.abort());
 await pg.route('**/assets/walletconnect.js', r=>r.fulfill({status:200,contentType:'text/javascript',body:SDK}));
 await pg.goto('http://127.0.0.1:8947/index.html',{waitUntil:'load'});
-await pg.locator('#presale').scrollIntoViewIfNeeded(); await pg.waitForTimeout(1500);
+await pg.locator('#seed-round').scrollIntoViewIfNeeded(); await pg.waitForTimeout(1500);
 await pg.evaluate(()=>document.getElementById('wCta').click()); await pg.waitForTimeout(900);
 await pg.locator('.nrm-w',{hasText:'MetaMask'}).first().click(); await pg.waitForTimeout(700);
 await pg.evaluate(()=>window.__aprobar()); await pg.waitForTimeout(1800);

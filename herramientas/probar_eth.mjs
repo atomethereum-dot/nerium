@@ -96,7 +96,7 @@ async function abrir(op={}){
   await pg.route('**/assets/walletconnect.js', r=>
     r.fulfill({status:200,contentType:'text/javascript',body:SDK}));
   await pg.goto('http://127.0.0.1:8941/index.html',{waitUntil:'load'});
-  await pg.locator('#presale').scrollIntoViewIfNeeded(); await pg.waitForTimeout(1500);
+  await pg.locator('#seed-round').scrollIntoViewIfNeeded(); await pg.waitForTimeout(1500);
   return {ctx,pg};
 }
 
@@ -192,7 +192,7 @@ await pg2.evaluate(()=>document.getElementById('wCta').click()); await pg2.waitF
 await pg2.locator('.nrm-w', {hasText:'MetaMask'}).first().click(); await pg2.waitForTimeout(700);
 await pg2.evaluate(()=>window.__aprobar()); await pg2.waitForTimeout(1800);
 await pg2.evaluate(()=>{ window.__txs=[];
-  document.querySelectorAll('#presale .w-pay button')[2].click(); });   // USDT ERC-20
+  document.querySelectorAll('#seed-round .w-pay button')[2].click(); });   // USDT ERC-20
 await pg2.waitForTimeout(900);
 await pg2.locator('#wUsd').fill('1');
 await pg2.waitForTimeout(600);

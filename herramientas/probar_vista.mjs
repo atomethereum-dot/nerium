@@ -28,9 +28,9 @@ await pg.goto('http://127.0.0.1:8940/index.html',{waitUntil:'load'});
 await pg.waitForTimeout(1800);
 
 // ── el importe arranca vacío ─────────────────────────────────────────────────
-await pg.locator('#presale').scrollIntoViewIfNeeded();
+await pg.locator('#seed-round').scrollIntoViewIfNeeded();
 await pg.waitForTimeout(1800);
-await pg.locator('#presale .widget').screenshot({path:'/tmp/vacio.png'});
+await pg.locator('#seed-round .widget').screenshot({path:'/tmp/vacio.png'});
 await pg.locator('#wPay').screenshot({path:'/tmp/monedas.png'});
 // Cuatro medios: ETH · BNB arriba y sus dos USDT abajo. Robinhood Chain ya no
 // es medio de pago desde que NRM vive en Ethereum.
@@ -80,7 +80,7 @@ chk('un atajo lo rellena', await pg.locator('#wEq').textContent(), '≈ $100 on 
 
 // ── recargar estando en la sección de compra ────────────────────────────────
 const antes = await pg.evaluate(()=>{
-  const s=document.getElementById('presale');
+  const s=document.getElementById('seed-round');
   let y=0,n=s; while(n){y+=n.offsetTop;n=n.offsetParent;}
   window.scrollTo(0, y+120); return y+120;
 });
@@ -89,7 +89,7 @@ await pg.reload({waitUntil:'load'});
 await pg.waitForTimeout(2600);
 const despues = await pg.evaluate(()=>window.scrollY);
 const seccion = await pg.evaluate(()=>{
-  const s=document.getElementById('presale');
+  const s=document.getElementById('seed-round');
   let y=0,n=s; while(n){y+=n.offsetTop;n=n.offsetParent;}
   return {top:y, alto:s.offsetHeight, y:window.scrollY};
 });

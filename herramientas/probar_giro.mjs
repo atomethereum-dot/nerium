@@ -270,7 +270,7 @@ const caja = await pg.evaluate(() => {
   const u = document.querySelector('.umb'); if (!u) return null;
   const r = u.getBoundingClientRect();
   return { top: r.top + scrollY, alto: r.height, vh: innerHeight,
-           antesDeLaRonda: !!(u.nextElementSibling && u.nextElementSibling.id === 'presale') };
+           antesDeLaRonda: !!(u.nextElementSibling && u.nextElementSibling.id === 'seed-round') };
 });
 di(!!caja, 'el umbral esta puesto');
 di(caja && caja.antesDeLaRonda, 'y esta justo delante de la ronda, no en otro sitio');
@@ -725,7 +725,7 @@ di(cuadros[1].desv >= 0.010 || cuadros[2].desv >= 0.010,
     c.width = cv.width >> 2; c.height = cv.height >> 2;
     const g = c.getContext('2d'); g.drawImage(cv, 0, 0, c.width, c.height);
     const px = (x, y) => Array.from(g.getImageData(Math.round(x * (c.width - 1)), Math.round(y * (c.height - 1)), 1, 1).data);
-    const bg = getComputedStyle(document.getElementById('presale')).backgroundColor.match(/\d+/g).map(Number);
+    const bg = getComputedStyle(document.getElementById('seed-round')).backgroundColor.match(/\d+/g).map(Number);
     return { centro: px(.5, .5), esquinas: [px(.03, .03), px(.97, .03), px(.03, .97), px(.97, .97)], bg };
   }, p);
   const luz = c => (0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2]) / 255;
@@ -741,10 +741,10 @@ di(cuadros[1].desv >= 0.010 || cuadros[2].desv >= 0.010,
        de pantalla-, no por el avance del tunel: asi no depende del alto de
        la seccion */
     const st = document.querySelector('.stk-stage');
-    const pre0 = document.getElementById('presale').getBoundingClientRect().top + scrollY;
+    const pre0 = document.getElementById('seed-round').getBoundingClientRect().top + scrollY;
     const mira = async bv => { scrollTo(0, Math.round(pre0 - bv * innerHeight)); await new Promise(s => setTimeout(s, 700));
-      const borde = document.getElementById('presale').getBoundingClientRect().top;
-      const t = document.querySelector('#presale h2') || document.getElementById('presale');
+      const borde = document.getElementById('seed-round').getBoundingClientRect().top;
+      const t = document.querySelector('#seed-round h2') || document.getElementById('seed-round');
       const cv = document.getElementById('stkCv'), c = document.createElement('canvas');
       c.width = cv.width >> 3; c.height = cv.height >> 3;
       const g = c.getContext('2d'); g.drawImage(cv, 0, 0, c.width, c.height);

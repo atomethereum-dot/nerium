@@ -111,14 +111,14 @@ const R = [];
 const chk = (n, real, esp) => R.push({ n, ok: String(real)===String(esp), real, esp });
 
 // ── 1 · lectura de cadena y cálculo ──────────────────────────────────────────
-await pg.locator('#presale').scrollIntoViewIfNeeded();
+await pg.locator('#seed-round').scrollIntoViewIfNeeded();
 await pg.waitForTimeout(1500);
 
 chk('precio por NRM', await pg.locator('#wRate').textContent(), '1 NRM = $0.20');
 
 // El campo arranca vacío y va en la moneda de pago.
 chk('arranca sin importe', await pg.locator('#wUsd').inputValue(), '');
-chk('y la unidad lo dice',  await pg.locator('#presale .w-field em').first().textContent(), 'ETH');
+chk('y la unidad lo dice',  await pg.locator('#seed-round .w-field em').first().textContent(), 'ETH');
 chk('nota de límites',    await pg.locator('#wNote').textContent(),
     'Min $0.20 · max $10,000 per wallet · live oracle price');
 
@@ -130,7 +130,7 @@ await pg.locator('#wUsd').blur();
 await pg.waitForTimeout(350);
 chk('los dólares van debajo', await pg.locator('#wEq').textContent(), '≈ $501 on Ethereum');
 chk('NRM por ese importe', await pg.locator('#wNrm').inputValue(), '2,506');
-chk('pie de la barra',    (await pg.locator('#presale .raise-foot').textContent()).trim(),
+chk('pie de la barra',    (await pg.locator('#seed-round .raise-foot').textContent()).trim(),
     'Minimum $0.20Maximum $10,000 per wallet');
 
 // ── 2 · la barra de la ronda privada NO se toca ──────────────────────────────
@@ -173,7 +173,7 @@ chk('cadena tras el cambio', await pg.evaluate(()=>window.__prov._cid), '0x38');
 await pg.evaluate(()=>{ window.__prov._cid='0x1'; window.__prov._emitir('chainChanged','0x1'); });
 await pg.locator('#wPay button').nth(2).click();   // USDT ERC-20
 await pg.waitForTimeout(400);
-chk('la unidad cambia a USDT', await pg.locator('#presale .w-field em').first().textContent(), 'USDT');
+chk('la unidad cambia a USDT', await pg.locator('#seed-round .w-field em').first().textContent(), 'USDT');
 await pg.locator('#wUsd').fill('500');
 await pg.locator('#wUsd').blur();
 await pg.waitForTimeout(300);

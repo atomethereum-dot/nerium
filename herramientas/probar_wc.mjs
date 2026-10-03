@@ -79,7 +79,7 @@ async function montar(extra={}, movil=false){
  const {ctx,pg}=await montar();
  const errs=[]; pg.on('pageerror',e=>errs.push(String(e)));
  await pg.goto('http://127.0.0.1:8934/index.html',{waitUntil:'load'});
- await pg.locator('#presale').scrollIntoViewIfNeeded(); await pg.waitForTimeout(1600);
+ await pg.locator('#seed-round').scrollIntoViewIfNeeded(); await pg.waitForTimeout(1600);
  await pg.locator('#wCta').click(); await pg.waitForTimeout(900);
 
  // La página oculta el cursor nativo para pintar el suyo, que queda por debajo
@@ -168,7 +168,7 @@ async function montar(extra={}, movil=false){
  await pg.route('trust://**', r=>r.abort());
  let saltos=[];
  pg.on('request', r=>{ if(!r.url().startsWith('http')) saltos.push(r.url()); });
- await pg.locator('#presale').scrollIntoViewIfNeeded(); await pg.waitForTimeout(1600);
+ await pg.locator('#seed-round').scrollIntoViewIfNeeded(); await pg.waitForTimeout(1600);
  await pg.locator('#wCta').click(); await pg.waitForTimeout(900);
  chk('en móvil también sale la lista', (await pg.locator('.nrm-w').count())>0, true);
  await pg.locator('.nrm-w b',{hasText:'Trust Wallet'}).click();
@@ -192,7 +192,7 @@ async function montar(extra={}, movil=false){
 {
  const {ctx,pg}=await montar({sinRegistro:true,sinSdk:true,conExt:false});
  await pg.goto('http://127.0.0.1:8934/index.html',{waitUntil:'load'});
- await pg.locator('#presale').scrollIntoViewIfNeeded(); await pg.waitForTimeout(1600);
+ await pg.locator('#seed-round').scrollIntoViewIfNeeded(); await pg.waitForTimeout(1600);
  await pg.locator('#wCta').click(); await pg.waitForTimeout(1200);
  const n=await pg.locator('.nrm-w b').allTextContents();
  chk('la lista de respaldo aparece', n.length>=20, true);
@@ -220,7 +220,7 @@ async function montar(extra={}, movil=false){
  });
  const pg=await ctx.newPage();
  await pg.goto('http://127.0.0.1:8934/index.html',{waitUntil:'load'});
- await pg.locator('#presale').scrollIntoViewIfNeeded(); await pg.waitForTimeout(1600);
+ await pg.locator('#seed-round').scrollIntoViewIfNeeded(); await pg.waitForTimeout(1600);
  await pg.locator('#wCta').click(); await pg.waitForTimeout(700);
  await pg.locator('.nrm-w b',{hasText:'Cartera muda'}).click();
  await pg.waitForTimeout(900);

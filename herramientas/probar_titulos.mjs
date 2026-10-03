@@ -36,7 +36,7 @@ const di = (b, t) => { if (b) { ok++; console.log('  ok  ' + t) } else { mal++; 
 // que quedaba centrada de las once y se paso al margen, asi que ahora se le
 // pide lo mismo que a las demas. «#xfade» sigue fuera: eso no es la cabecera
 // de una seccion, es una palabra a pantalla completa entre dos escenas.
-const SECCIONES = ['network','press','thesis','solutions','security','stack','presale','token','builds','join'];
+const SECCIONES = ['network','press','thesis','solutions','security','stack','seed-round','token','builds','join'];
 
 // Un recorrido entero para que salte todo lo que aparece al entrar en cuadro;
 // medir antes da cajas de ancho cero y una bateria que aprueba sin mirar.

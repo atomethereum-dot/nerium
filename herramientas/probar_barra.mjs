@@ -44,7 +44,7 @@ async function ver(eth,bsc,rh){
  },{eth,bsc,rh});
  const pg=await ctx.newPage();
  await pg.goto('http://127.0.0.1:8938/index.html',{waitUntil:'load'});
- await pg.locator('#presale').scrollIntoViewIfNeeded();
+ await pg.locator('#seed-round').scrollIntoViewIfNeeded();
  await pg.waitForTimeout(3200);
  return {ctx,pg};
 }

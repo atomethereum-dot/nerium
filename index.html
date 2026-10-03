@@ -718,7 +718,7 @@ main>section.logos::after{display:none}
 }
 /* «hidden» en una seccion no basta: las reglas de «main>section» le dan
    «display» y lo pisan. Se refuerza aqui. */
-.kin[hidden],#thesis[hidden],#builds[hidden],#press[hidden],#presale [hidden],#ruta [hidden]{display:none !important}
+.kin[hidden],#thesis[hidden],#builds[hidden],#press[hidden],#seed-round [hidden],#ruta [hidden]{display:none !important}
 .nav a[hidden],.mnav a[hidden],a[href="#builds"][hidden]{display:none !important}
 .kin{background:#050609;padding:var(--s6) 0;overflow:hidden;
   border-block:1px solid rgba(255,255,255,.08)}
@@ -1018,7 +1018,7 @@ html body .tkp-n{fill:#E3E6EE}
 .stk-velo{display:none !important}
 /* y sin la linea azul de separacion arriba: acababa a 40 px de cada lado y,
    con el tunel pasando por detras, parecia cortada con tijera */
-main>section#presale::after{display:none !important}
+main>section#seed-round::after{display:none !important}
 .sale-top{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;
   padding-bottom:20px;margin-bottom:var(--s3);border-bottom:1px solid rgba(232,236,244,.12)}
 .sale-live{display:inline-flex;align-items:center;gap:9px;font-family:var(--m);font-size:10.5px;
@@ -2226,7 +2226,7 @@ html[dir="rtl"] .subir{left:16px !important;right:auto !important}
   section.say   {contain-intrinsic-size:auto 175px}
   section.kin   {contain-intrinsic-size:auto 94px}
   #solutions{contain-intrinsic-size:auto 280px}
-  #presale  {contain-intrinsic-size:auto 1452px}
+  #seed-round  {contain-intrinsic-size:auto 1452px}
   #token    {contain-intrinsic-size:auto 922px}
   #builds   {contain-intrinsic-size:auto 559px}
   #join     {contain-intrinsic-size:auto 470px}
@@ -2238,7 +2238,7 @@ html[dir="rtl"] .subir{left:16px !important;right:auto !important}
   section.say   {contain-intrinsic-size:auto 360px}
   section.kin   {contain-intrinsic-size:auto 248px}
   #solutions{contain-intrinsic-size:auto 407px}
-  #presale  {contain-intrinsic-size:auto 743px}
+  #seed-round  {contain-intrinsic-size:auto 743px}
   #token    {contain-intrinsic-size:auto 1055px}
   #builds   {contain-intrinsic-size:auto 818px}
   #join     {contain-intrinsic-size:auto 580px}
@@ -3474,7 +3474,7 @@ footer :is(.fcopy,.f-legal){color:#9EA2AB}
 /* La ronda se queda como esta: su titular convive con el widget a la derecha
    y centrarlo lo dejaria hablando solo. Ahi la via entra igual y la estacion
    se centra; el resto, no. */
-#presale .sale-top{justify-content:center;gap:clamp(14px,2vw,28px)}
+#seed-round .sale-top{justify-content:center;gap:clamp(14px,2vw,28px)}
 
 /* ── el telefono ──
    En vertical la linea es mas corta: la pantalla mide un tercio y una via de
@@ -3688,10 +3688,10 @@ footer .fgrid h3,footer .tec-real{color:#9EA2AB}
 /* ── 3 · el epigrafe numerado ──
    «.sk» es un flex al 100 % del ancho: no se mueve con «text-align», se
    mueve con «justify-content». Es el mismo sitio donde el paso 20 lo centro. */
-#network .sk,#press .sk,#thesis .sk,#solutions .sk,#security .sk,#presale .sk,#token .sk,#builds .sk,#join .sk{justify-content:flex-start}
+#network .sk,#press .sk,#thesis .sk,#solutions .sk,#security .sk,#seed-round .sk,#token .sk,#builds .sk,#join .sk{justify-content:flex-start}
 /* La ronda tiene su propia fila —el epigrafe y las dos cadenas— y se centraba
    con «justify-content» desde el identificador: hace falta el mismo peso. */
-#presale .sale-top{justify-content:flex-start}
+#seed-round .sale-top{justify-content:flex-start}
 
 /* ── 4 · la fila de compatibles ──
    Aqui el centrado no venia del paso 20 sino de la hoja original, que centra
@@ -5481,7 +5481,7 @@ html body main>section.chroma::after{z-index:3}
    (margin-bottom:-200vh, z-index 3). Con el negro aqui la dapp quedaba tapada.
    El negro de la pila ya lo pone su degradado con --stk-fondo. */
 html body main>section:is(#xfade,#xlight,#ruta,#builds,.chroma,#docs,#blog,#team,#network,#thesis,.kin){background-color:#030409 !important}
-html body main>section:is(#team,#network,#thesis):not(#presale){background-color:#030409 !important}
+html body main>section:is(#team,#network,#thesis):not(#seed-round){background-color:#030409 !important}
 html body :is(.xl-stage,#builds .tn-stage){background-color:#030409 !important}
 #stack{--stk-fondo:#030409}
 /* Aire entre «All coverage» y la cinta de transacciones, que empezaba pegada. */
@@ -6642,7 +6642,7 @@ footer .fmark-logo{filter:none}
    La ficha de precios se queda blanca, que sobre azul saturado es lo que la
    convierte en el objeto mas importante de la pagina. */
 
-main>section#presale{
+main>section#seed-round{
   background-color:#0E3AC4 !important;
   background-image:
     radial-gradient(118% 92% at 16% -14%, #1E52EC 0%, rgba(30,82,236,0) 58%),
@@ -6658,37 +6658,37 @@ main>section#presale{
 
 /* el campo de rectangulos que decoraba el negro no funciona sobre saturado:
    se vuelve suciedad. Se apaga y el color queda limpio. */
-#presale .sale-field{opacity:.30;mix-blend-mode:normal;filter:saturate(0) brightness(1.9) opacity(.5)}
+#seed-round .sale-field{opacity:.30;mix-blend-mode:normal;filter:saturate(0) brightness(1.9) opacity(.5)}
 /* p75 · con el tunel ya pintado encima (opaco), el campo no se ve: fuera */
-#presale.tapada .sale-field{display:none}
+#seed-round.tapada .sale-field{display:none}
 
-#presale .sale-h{color:#FFFFFF !important}
-#presale .sale-sub{color:rgba(255,255,255,.80);max-width:46ch}
-#presale .sale-live,#presale .sale-live .sk-n{color:#FFFFFF !important}
-#presale .sale-net{color:rgba(255,255,255,.72)}
-#presale .sk::after,#presale .sk i:last-child{background:rgba(255,255,255,.28)}
+#seed-round .sale-h{color:#FFFFFF !important}
+#seed-round .sale-sub{color:rgba(255,255,255,.80);max-width:46ch}
+#seed-round .sale-live,#seed-round .sale-live .sk-n{color:#FFFFFF !important}
+#seed-round .sale-net{color:rgba(255,255,255,.72)}
+#seed-round .sk::after,#seed-round .sk i:last-child{background:rgba(255,255,255,.28)}
 
 /* ── la ficha de precios, en su columna ──
    Se saco a cruzar la pagina entera para poder agrandar el precio y fue un
    error por partida doble: el cuerpo no era lo que hacia falta, y sacarla de
    ahi la separaba del panel de compra, con el que se lee en pareja. Vuelve a
    su sitio y a su tamaño. */
-#presale .prices{
+#seed-round .prices{
   background:#FFFDF9;
   border:0;border-radius:4px;
   box-shadow:0 2px 2px rgba(6,16,54,.16),
              0 26px 48px -22px rgba(4,12,44,.46),
              0 70px 120px -60px rgba(3,9,36,.55)}
 
-#presale .pr-k{color:rgba(10,14,24,.52)}
-#presale .pr-n{color:rgba(10,14,24,.44)}
-#presale .pr-v{color:#0A0D14 !important}
-#presale .pr.up{background:#070A10}
-#presale .pr.up .pr-k{color:rgba(255,255,255,.52)}
-#presale .pr.up .pr-n{color:rgba(255,255,255,.44)}
-#presale .pr.up .pr-v{color:#8FBBFF !important}
-#presale .pr-arrow{border-inline-color:rgba(10,14,24,.12)}
-#presale .pr-mult{color:#0B3AC2}
+#seed-round .pr-k{color:rgba(10,14,24,.52)}
+#seed-round .pr-n{color:rgba(10,14,24,.44)}
+#seed-round .pr-v{color:#0A0D14 !important}
+#seed-round .pr.up{background:#070A10}
+#seed-round .pr.up .pr-k{color:rgba(255,255,255,.52)}
+#seed-round .pr.up .pr-n{color:rgba(255,255,255,.44)}
+#seed-round .pr.up .pr-v{color:#8FBBFF !important}
+#seed-round .pr-arrow{border-inline-color:rgba(10,14,24,.12)}
+#seed-round .pr-mult{color:#0B3AC2}
 
 /* ── el resto del aparato, sobre azul ──
    OJO CON EL «!important»: la ronda «tier 1 dark» dejo un bloque que pinta de
@@ -6697,75 +6697,75 @@ main>section#presale{
    un selector con id pierde igual: en la cascada, «!important» gana ANTES de
    que se mire la especificidad. Medido: la ficha de precios se quedaba negra
    sobre el campo azul y el precio daba 1,01 de contraste. Invisible. */
-#presale .prices{
+#seed-round .prices{
   background-color:#FFFDF9 !important;
   background-image:none !important;
   border:0 !important;border-color:transparent !important}
-#presale .pr{background-color:transparent !important;background-image:none !important}
-#presale .pr.up{background-color:#070A10 !important;background-image:none !important}
-#presale .pr-k{color:rgba(10,14,24,.60) !important}
-#presale .pr-n{color:rgba(10,14,24,.52) !important}
-#presale .pr.up .pr-k{color:rgba(255,255,255,.62) !important}
-#presale .pr.up .pr-n{color:rgba(255,255,255,.52) !important}
-#presale .pr-arrow{border-inline-color:rgba(10,14,24,.14) !important}
-#presale .pr-mult{color:#0B3AC2 !important;background:transparent !important;
+#seed-round .pr{background-color:transparent !important;background-image:none !important}
+#seed-round .pr.up{background-color:#070A10 !important;background-image:none !important}
+#seed-round .pr-k{color:rgba(10,14,24,.60) !important}
+#seed-round .pr-n{color:rgba(10,14,24,.52) !important}
+#seed-round .pr.up .pr-k{color:rgba(255,255,255,.62) !important}
+#seed-round .pr.up .pr-n{color:rgba(255,255,255,.52) !important}
+#seed-round .pr-arrow{border-inline-color:rgba(10,14,24,.14) !important}
+#seed-round .pr-mult{color:#0B3AC2 !important;background:transparent !important;
   background-image:none !important}
-#presale .pr-mult *{color:rgba(10,14,24,.62) !important}
-#presale .pr-mult b,#presale .pr-mult .o{color:#0B3AC2 !important}
+#seed-round .pr-mult *{color:rgba(10,14,24,.62) !important}
+#seed-round .pr-mult b,#seed-round .pr-mult .o{color:#0B3AC2 !important}
 
-#presale .sale-sub,#presale p.sale-sub{color:rgba(255,255,255,.88) !important}
-#presale .sale-net,#presale .sale-net.mono{color:rgba(255,255,255,.84) !important}
+#seed-round .sale-sub,#seed-round p.sale-sub{color:rgba(255,255,255,.88) !important}
+#seed-round .sale-net,#seed-round .sale-net.mono{color:rgba(255,255,255,.84) !important}
 /* el punto de «Seed Round», en verde lima y con halo: el verde oscuro de
    antes se perdia sobre el azul de la compra */
-#presale .sale-live>i:not(.sk-n){width:8px;height:8px;background:#A6FF1A !important;
+#seed-round .sale-live>i:not(.sk-n){width:8px;height:8px;background:#A6FF1A !important;
   box-shadow:0 0 0 4px rgba(166,255,26,.2),0 0 12px rgba(166,255,26,.8) !important;
   animation:saleLima 2.2s ease-in-out infinite}
 @keyframes saleLima{0%,100%{opacity:1}50%{opacity:.62}}
-@media(prefers-reduced-motion:reduce){#presale .sale-live>i:not(.sk-n){animation:none}}
-#presale .sale-live,#presale .sale-live .sk-n,
-#presale .sk,#presale .k{color:#FFFFFF !important}
+@media(prefers-reduced-motion:reduce){#seed-round .sale-live>i:not(.sk-n){animation:none}}
+#seed-round .sale-live,#seed-round .sale-live .sk-n,
+#seed-round .sk,#seed-round .k{color:#FFFFFF !important}
 /* El «.mono» blanco es para lo que va SOBRE el azul. Dentro de la ficha de
    precios —que es papel— hay tres «.mono» mas: la clave, la unidad y el
    multiplicador. Blanco sobre papel da 1,01: invisible. Van excluidos. */
-#presale :is(.mono,.raise-head,.raise-foot,.raise-foot span,.raise-foot em):not(.prices *){
+#seed-round :is(.mono,.raise-head,.raise-foot,.raise-foot span,.raise-foot em):not(.prices *){
   color:rgba(255,255,255,.86) !important}
-#presale .prices .mono,#presale .prices :is(.pr-k,.pr-n){
+#seed-round .prices .mono,#seed-round .prices :is(.pr-k,.pr-n){
   color:rgba(10,14,24,.62) !important}
-#presale .prices .pr.up :is(.pr-k,.pr-n,.mono){
+#seed-round .prices .pr.up :is(.pr-k,.pr-n,.mono){
   color:rgba(255,255,255,.62) !important}
-#presale .raise-bar{background:rgba(255,255,255,.24) !important}
-#presale .raise-bar>i,#presale .raise-bar b,#presale .lk-bar{
+#seed-round .raise-bar{background:rgba(255,255,255,.24) !important}
+#seed-round .raise-bar>i,#seed-round .raise-bar b,#seed-round .lk-bar{
   background:#FFFFFF !important;background-image:none !important}
-#presale .raise-bar .raise-tip{background:#061436 !important;
+#seed-round .raise-bar .raise-tip{background:#061436 !important;
   border-color:rgba(255,255,255,.4) !important}
-#presale .raise-bar .raise-tip,#presale .raise-bar .raise-tip *{
+#seed-round .raise-bar .raise-tip,#seed-round .raise-bar .raise-tip *{
   color:#FFFFFF !important}
 
-#presale .widget{background-color:#060C22 !important;
+#seed-round .widget{background-color:#060C22 !important;
   background-image:none !important;
   border-color:rgba(255,255,255,.22) !important;
   box-shadow:0 30px 64px -28px rgba(2,6,28,.7) !important}
-#presale .w-lab,#presale .w-note,#presale .w-rate,
-#presale .w-top,#presale .w-top *{color:rgba(255,255,255,.78) !important}
+#seed-round .w-lab,#seed-round .w-note,#seed-round .w-rate,
+#seed-round .w-top,#seed-round .w-top *{color:rgba(255,255,255,.78) !important}
 /* «button:not(.on)» tambien caza al boton de accion, y con (1,2,1) le gana a
-   «#presale .w-cta» (1,1,0): el boton blanco se quedaba negro con tinta azul
+   «#seed-round .w-cta» (1,1,0): el boton blanco se quedaba negro con tinta azul
    marino encima. 1,51 de contraste. Se excluye. */
-#presale .w-field,#presale .w-out,#presale .w-out div,
-#presale .widget button:not(.on):not(.w-cta){
+#seed-round .w-field,#seed-round .w-out,#seed-round .w-out div,
+#seed-round .widget button:not(.on):not(.w-cta){
   background-color:#0A1330 !important;background-image:none !important;
   border-color:rgba(255,255,255,.18) !important}
-#presale .w-out,#presale .w-out *{color:rgba(255,255,255,.76) !important}
-#presale .w-out dd,#presale .w-out .up,#presale .w-out em,
-#presale .w-out b,#presale .w-out strong{color:#FFFFFF !important}
-#presale .w-chips button{border-color:rgba(255,255,255,.26) !important;
+#seed-round .w-out,#seed-round .w-out *{color:rgba(255,255,255,.76) !important}
+#seed-round .w-out dd,#seed-round .w-out .up,#seed-round .w-out em,
+#seed-round .w-out b,#seed-round .w-out strong{color:#FFFFFF !important}
+#seed-round .w-chips button{border-color:rgba(255,255,255,.26) !important;
   color:rgba(255,255,255,.86) !important}
-#presale .w-chips button.on{background-color:#FFFFFF !important;
+#seed-round .w-chips button.on{background-color:#FFFFFF !important;
   background-image:none !important;color:#0B2A8E !important;
   border-color:#FFFFFF !important}
-#presale .w-cta{background-color:#FFFFFF !important;background-image:none !important;
+#seed-round .w-cta{background-color:#FFFFFF !important;background-image:none !important;
   color:#0B2A8E !important;border-color:#FFFFFF !important;
   box-shadow:0 14px 30px -14px rgba(2,8,34,.7) !important}
-#presale .w-cta:hover{background-color:#E9F0FF !important;color:#08206E !important}
+#seed-round .w-cta:hover{background-color:#E9F0FF !important;color:#08206E !important}
 
 
 
@@ -6836,14 +6836,14 @@ main>section.claro.claro{
   --n-placa2:#171B23;  /* la de encima de esa */
   --n-canto:rgba(255,255,255,.085);
 }
-main>section:not(.claro):not(#presale) :is(.sec-card,.bcd,.pcd){
+main>section:not(.claro):not(#seed-round) :is(.sec-card,.bcd,.pcd){
   background-color:var(--n-placa);
   border:1px solid var(--n-canto);
   box-shadow:inset 0 1px 0 rgba(255,255,255,.055),
              0 2px 3px rgba(0,0,0,.5),
              0 18px 30px -12px rgba(0,0,0,.62),
              0 52px 80px -34px rgba(0,0,0,.72)}
-main>section:not(.claro):not(#presale) :is(.sec-card,.bcd):hover{
+main>section:not(.claro):not(#seed-round) :is(.sec-card,.bcd):hover{
   background-color:var(--n-placa2);
   border-color:rgba(255,255,255,.15);
   box-shadow:inset 0 1px 0 rgba(255,255,255,.08),
@@ -6992,7 +6992,7 @@ footer .fmark-logo{--fmg-a:.15;--fmg-b:.025}
    los dos, con lo que las dos secciones pegadas —red y prensa— acababan con
    EL MISMO suelo y la costura entre ellas desaparecia. Van a suelos distintos
    a proposito: es lo que hace que se note el cambio de seccion. */
-main>section:is(.paper,.paper2,.secure,.sale,.team):not(#presale):not(.claro):not(.press),
+main>section:is(.paper,.paper2,.secure,.sale,.team):not(#seed-round):not(.claro):not(.press),
 .team, footer{
   background-color:#0D1017 !important;
   background-image:
@@ -7003,7 +7003,7 @@ main>section:is(.paper,.paper2,.secure,.sale,.team):not(#presale):not(.claro):no
     linear-gradient(168deg,#1A1F2E 0%,#10141D 46%,#080A10 100%),
     var(--grano) !important;
   --tapa:#0D1017}
-main>section#presale{--tapa:#0E3AC4}
+main>section#seed-round{--tapa:#0E3AC4}
 
 main>section:is(.tkp,.join):not(.claro){
   background-color:#0A0D14 !important;
@@ -7096,9 +7096,9 @@ html body .ruta-p{color:#AAB5CA !important}
 
 /* el campo azul de la ronda NO entra en esto: tiene su propio color y sus
    propias reglas, que ya se escribieron aparte */
-#presale .prices,#presale .pr,#presale .pr.up,#presale .widget,
-#presale .w-field,#presale .w-out,#presale .w-out div,
-#presale .widget button:not(.on):not(.w-cta){border-color:rgba(255,255,255,.20) !important}
+#seed-round .prices,#seed-round .pr,#seed-round .pr.up,#seed-round .widget,
+#seed-round .w-field,#seed-round .w-out,#seed-round .w-out div,
+#seed-round .widget button:not(.on):not(.w-cta){border-color:rgba(255,255,255,.20) !important}
 
 /* ══ EL PANEL DE COMPRA, SOBRE EL CAMPO AZUL ══
    Medido en el sitio, antes de tocarlo:
@@ -7117,18 +7117,18 @@ html body .ruta-p{color:#AAB5CA !important}
 
    Ahora hay tres escalones, los tres en la misma familia azul que el campo de
    la ronda, y la entrada no pinta nada. */
-#presale .widget{background-color:#17244E !important}
-#presale .w-field,#presale .w-out,
-#presale .widget button:not(.on):not(.w-cta){
+#seed-round .widget{background-color:#17244E !important}
+#seed-round .w-field,#seed-round .w-out,
+#seed-round .widget button:not(.on):not(.w-cta){
   background-color:#213163 !important}
-#presale .w-out div{background-color:#293A70 !important}
-#presale .w-field input,#presale .widget input,#presale .widget select{
+#seed-round .w-out div{background-color:#293A70 !important}
+#seed-round .w-field input,#seed-round .widget input,#seed-round .widget select{
   background-color:transparent !important;
   background-image:none !important;
   border-color:transparent !important}
-#presale .prices,#presale .pr,#presale .pr.up,#presale .widget,
-#presale .w-field,#presale .w-out,#presale .w-out div,
-#presale .widget button:not(.on):not(.w-cta){border-color:rgba(255,255,255,.26) !important}
+#seed-round .prices,#seed-round .pr,#seed-round .pr.up,#seed-round .widget,
+#seed-round .w-field,#seed-round .w-out,#seed-round .w-out div,
+#seed-round .widget button:not(.on):not(.w-cta){border-color:rgba(255,255,255,.26) !important}
 
 /* ══ LA PLACA DE LA TERCERA TARJETA ══
    No lleva captura: no hay producto que enseñar todavia, y una captura
@@ -7167,24 +7167,24 @@ html body .ruta-p{color:#AAB5CA !important}
    El minimo legible son 4,5. Eso no era «oscuro»: era invisible, y lo causo el
    cambio de anoche. Aqui se fija la tarjeta ENTERA -placa y tinta juntas- para
    que no vuelva a quedarse media convertida. */
-#presale .prices{
+#seed-round .prices{
   background-color:#F7F8FB !important;
   border-color:rgba(10,16,32,.14) !important;
   box-shadow:0 26px 60px -34px rgba(6,14,40,.55) !important}
-#presale .pr{background-color:transparent !important}
-#presale .pr .pr-k{color:#59637A !important}
-#presale .pr .pr-v{color:#0B1020 !important}
-#presale .pr .pr-n{color:#636D81 !important}   /* 4,43 se queda corto: el minimo son 4,5 */
-#presale .pr-arrow{border-color:rgba(10,16,32,.12) !important}
-#presale .pr.up{background-color:#0B1020 !important}
-#presale .pr.up .pr-k{color:rgba(233,238,247,.62) !important}
-#presale .pr.up .pr-v{color:#7FB0FF !important}
-#presale .pr.up .pr-n{color:rgba(233,238,247,.52) !important}
-#presale .pr-mult{
+#seed-round .pr{background-color:transparent !important}
+#seed-round .pr .pr-k{color:#59637A !important}
+#seed-round .pr .pr-v{color:#0B1020 !important}
+#seed-round .pr .pr-n{color:#636D81 !important}   /* 4,43 se queda corto: el minimo son 4,5 */
+#seed-round .pr-arrow{border-color:rgba(10,16,32,.12) !important}
+#seed-round .pr.up{background-color:#0B1020 !important}
+#seed-round .pr.up .pr-k{color:rgba(233,238,247,.62) !important}
+#seed-round .pr.up .pr-v{color:#7FB0FF !important}
+#seed-round .pr.up .pr-n{color:rgba(233,238,247,.52) !important}
+#seed-round .pr-mult{
   background-color:#EAF2EC !important;
   border-color:rgba(10,16,32,.10) !important}
-#presale .pr-mult b{color:#0A4BD0 !important}
-#presale .pr-mult .mono{color:#4B5568 !important}
+#seed-round .pr-mult b{color:#0A4BD0 !important}
+#seed-round .pr-mult .mono{color:#4B5568 !important}
 </style>
 <script>
 /* ══════════════════════════════════════════════════════════════════════════
@@ -8035,7 +8035,7 @@ main>section#ruta{z-index:2}
 /* ── EL CAMINO A LA COMPRA ──
    Un boton flotante que aparece al salir de la portada y se esconde cuando la
    compra esta en pantalla, y un salto directo: todos los «Join the Seed Round»
-   y los enlaces a #presale llevan a la compra SIN recorrer las secciones de
+   y los enlaces a #seed-round llevan a la compra SIN recorrer las secciones de
    en medio. El salto se tapa con un velo del negro de la casa que se abre ya
    sobre la compra. */
 .flota{position:fixed;top:16px;right:16px;z-index:62;
@@ -8138,10 +8138,10 @@ body.lock .flota{opacity:0 !important;pointer-events:none !important}
   <svg viewBox="0 0 12 12"><path d="M6 1v10M2.5 7.5L6 11l3.5-3.5"/></svg>
 </button>
 
-<a class="flota" id="flota" href="#presale" aria-hidden="true" tabindex="-1"><i class="flota-dot" aria-hidden="true"></i><span class="fl-l">Join the Seed Round</span><span class="fl-c">Seed Round</span><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M1 6h9M6.5 2.5 10 6l-3.5 3.5"/></svg></a>
+<a class="flota" id="flota" href="#seed-round" aria-hidden="true" tabindex="-1"><i class="flota-dot" aria-hidden="true"></i><span class="fl-l">Join the Seed Round</span><span class="fl-c">Seed Round</span><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M1 6h9M6.5 2.5 10 6l-3.5 3.5"/></svg></a>
 <div id="salto" aria-hidden="true"></div>
 <div class="ann" id="ann">
-  <a class="ann-in" href="#presale">
+  <a class="ann-in" href="#seed-round">
     <span class="ann-k"><i class="ann-dot" aria-hidden="true"></i>Seed Round</span>
     <span class="ann-bar" aria-hidden="true"><i class="ann-fill" id="annFill" style="width:0%"></i></span>
     <span class="ann-n"><b id="annPct">Starts soon</b> <span class="pc">complete</span></span>
@@ -8207,7 +8207,7 @@ body.lock .flota{opacity:0 !important;pointer-events:none !important}
     <a href="#press">Press<i class="chip" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4.6 6.4h14.8v8.8h-8.1L7.4 18.6v-3.4H4.6Z"/></svg></i></a>
     <a href="#security">Security<i class="chip" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3.5 5.2 6.4v4.8c0 4 2.8 6.8 6.8 7.6 4-.8 6.8-3.6 6.8-7.6V6.4L12 3.5Z"/></svg></i></a>
     <a href="#stack">Stack<i class="chip" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 4 4 8l8 4 8-4-8-4Z"/><path d="M4 14l8 4 8-4"/></svg></i></a>
-    <a href="#presale">Seed Round<i class="chip" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4.6 18.4h14.8"/><path d="M8 18.4v-4.2M12 18.4v-8.6M16 18.4v-6.2"/></svg></i></a>
+    <a href="#seed-round">Seed Round<i class="chip" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4.6 18.4h14.8"/><path d="M8 18.4v-4.2M12 18.4v-8.6M16 18.4v-6.2"/></svg></i></a>
     <a href="#token">Token<i class="chip" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="7.6"/><circle cx="12" cy="12" r="3"/></svg></i></a>
     <a href="#join">In the open<i class="chip" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="2.2"/><path d="M7.6 7.6a6.2 6.2 0 0 0 0 8.8"/><path d="M16.4 7.6a6.2 6.2 0 0 1 0 8.8"/></svg></i></a>
   </nav>
@@ -8222,11 +8222,11 @@ body.lock .flota{opacity:0 !important;pointer-events:none !important}
   <a href="#press">Press<i class="chip" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4.6 6.4h14.8v8.8h-8.1L7.4 18.6v-3.4H4.6Z"/></svg></i></a>
   <a href="#security">Security<i class="chip" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3.5 5.2 6.4v4.8c0 4 2.8 6.8 6.8 7.6 4-.8 6.8-3.6 6.8-7.6V6.4L12 3.5Z"/></svg></i></a>
   <a href="#stack">Stack<i class="chip" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 4 4 8l8 4 8-4-8-4Z"/><path d="M4 14l8 4 8-4"/></svg></i></a>
-  <a href="#presale">Seed Round<i class="chip" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4.6 18.4h14.8"/><path d="M8 18.4v-4.2M12 18.4v-8.6M16 18.4v-6.2"/></svg></i></a>
+  <a href="#seed-round">Seed Round<i class="chip" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4.6 18.4h14.8"/><path d="M8 18.4v-4.2M12 18.4v-8.6M16 18.4v-6.2"/></svg></i></a>
   <a href="#token">Token<i class="chip" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="7.6"/><circle cx="12" cy="12" r="3"/></svg></i></a>
   <a href="#join">In the open<i class="chip" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="2.2"/><path d="M7.6 7.6a6.2 6.2 0 0 0 0 8.8"/><path d="M16.4 7.6a6.2 6.2 0 0 1 0 8.8"/></svg></i></a>
   <a href="/app/">Launch app<i class="chip" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6.5 17.5 17.5 6.5"/><path d="M9 6.5h8.5V15"/></svg></i></a>
-  <a class="sheet-cta" href="#presale">Join the Seed Round</a>
+  <a class="sheet-cta" href="#seed-round">Join the Seed Round</a>
 </div>
 
 <div id="scroll"><main id="contenido" tabindex="-1">
@@ -8251,7 +8251,7 @@ body.lock .flota{opacity:0 !important;pointer-events:none !important}
   <div class="hero-in">
     <h1>A chain for real assets</h1>
     <div class="hero-act">
-      <a class="hb blue" href="#presale">Join the Seed Round</a>
+      <a class="hb blue" href="#seed-round">Join the Seed Round</a>
       <a class="hb white" href="#security">Audit in progress</a>
     </div>
     <div class="lq" id="lq"><i class="lq-rail" aria-hidden="true"></i>
@@ -8562,7 +8562,7 @@ body.lock .flota{opacity:0 !important;pointer-events:none !important}
     <span class="umb-cifra" id="umbPct">0</span>
   </div>
 </div>
-<section class="sale" id="presale" data-bg="#0E3AC4" data-acc="#7FB0FF"><i class="via" aria-hidden="true"></i>
+<section class="sale" id="seed-round" data-bg="#0E3AC4" data-acc="#7FB0FF"><i class="via" aria-hidden="true"></i>
   <div class="sale-field" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
   <div class="sale-tunel" aria-hidden="true"><canvas id="saleTunel" data-sin-vigia></canvas></div>
   <div class="wrap">
@@ -11363,7 +11363,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
   const NICE={top:'Where value settles',network:'Backed by',logos:'Backed by',press:'In the press',
     chroma:'Spectrum',say:'The thesis',paper:'The thesis',kin:'Primitives',
     solutions:'What it guarantees',stack:'The stack',security:'Security',
-    presale:'Seed Round',sale:'Seed Round',token:'Tokenomics',tkp:'Tokenomics',
+    'seed-round':'Seed Round',sale:'Seed Round',token:'Tokenomics',tkp:'Tokenomics',
     docs:'Get started',
     blog:'Stay in the loop',footer:'Nereum'};
   const bands=[...document.querySelectorAll('main>section[data-bg], footer[data-bg]')]
@@ -11730,7 +11730,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
   const rail=document.getElementById('srail');if(!rail)return;
   const NICE={top:'Where value settles',network:'Backed by',press:'In the press',chroma:'Spectrum',
     say:'The thesis',paper:'The thesis',kin:'Primitives',solutions:'Guarantees',stack:'The stack',security:'Security',
-    token:'Tokenomics',presale:'Seed Round',sale:'Seed Round',docs:'Get started',builds:'What is running',
+    token:'Tokenomics','seed-round':'Seed Round',sale:'Seed Round',docs:'Get started',builds:'What is running',
     people:'Behind the network',blog:'Stay in the loop'};
   const bands=[...document.querySelectorAll('main>section[data-bg]')]
     .filter(el=>getComputedStyle(el).display!=='none').map(el=>{
@@ -11843,7 +11843,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
   /* p65 · los sitios en el documento de la compra y del escenario (ver «cvTop») */
   var compraTop=0, compraAlto=0, escNat=0, escFin=0;
   function sitios(){
-    const cm=document.getElementById('presale'), es=cv.parentElement; if(!cm) return;
+    const cm=document.getElementById('seed-round'), es=cv.parentElement; if(!cm) return;
     /* con decimales, como el «getBoundingClientRect» de antes: la costura
        entre los dos lienzos cae en el mismo medio pixel */
     const y0=scrollY, rc=cm.getBoundingClientRect();
@@ -12125,7 +12125,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
        del borde, donde el lienzo cubre medio pixel. Pero el compositor las
        rehacia en cada cuadro: la mitad de su trabajo en la compra (medido). En
        cuanto el tunel pinta aqui, el campo se quita. */
-    if(!tapada){ tapada=true; const s=document.getElementById('presale'); if(s) s.classList.add('tapada') }
+    if(!tapada){ tapada=true; const s=document.getElementById('seed-round'); if(s) s.classList.add('tapada') }
     const alto=H+'px'; if(fondo.style.height!==alto) fondo.style.height=alto;
     /* p67 · con tres decimales y no con uno: la seccion esta en medio pixel y
        el lienzo tiene que caer EXACTO en el cero de la pantalla. Con uno se
@@ -12143,13 +12143,13 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
     fctx.drawImage(cv,0,0);
   }
   if(fondo) new IntersectionObserver(es=>{ enCompra=es[0].isIntersecting; if(enCompra){ size(); dirty=true; despiertaPila() } },
-    {rootMargin:'10% 0px'}).observe(document.getElementById('presale'));
+    {rootMargin:'10% 0px'}).observe(document.getElementById('seed-round'));
   /* el rotulo lo va escribiendo el scroll: el titulo, luego la barra que
      se llena hasta la cifra, luego la linea de abajo. Y la flecha de seguir
      bajando se ve hasta casi el final del tramo. */
   const ronda=document.getElementById('stkRonda'), escena=cv.parentElement;
   let rondaP=-1, flecha=null, oculto=false;
-  const compra=document.getElementById('presale');
+  const compra=document.getElementById('seed-round');
   /* p65 · EL BORDE DE LA COMPRA SIN MEDIR POR CUADRO. Antes: dos
      «getBoundingClientRect» por cuadro, cada uno un layout forzado. Ahora se
      guardan los sitios en el documento (al medir y cuando cambia el alto de
@@ -13436,7 +13436,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
   const NOMBRE={
     top:'Portada', network:'Compatible with', press:'In the press',
     paper:'The thesis', solutions:'What it guarantees', stack:'The stack',
-    security:'Security', presale:'Seed Round', token:'Tokenomics',
+    security:'Security', 'seed-round':'Seed Round', token:'Tokenomics',
     thesis:'The thesis', builds:'What is running',
     thesis:'The thesis', builds:'What is running',
     join:'In the open', ruta:'Roadmap'
@@ -17636,7 +17636,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
 </script>
 <script id="compra-directa-js">
 (function(){
-  var pre=document.getElementById('presale'), fl=document.getElementById('flota'),
+  var pre=document.getElementById('seed-round'), fl=document.getElementById('flota'),
       velo=document.getElementById('salto');
   if(!pre) return;
   var CALMA=matchMedia('(prefers-reduced-motion:reduce)').matches;
@@ -17674,7 +17674,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
      -el del menu del telefono lo cierra- y despues el salto manda sobre el
      desplazamiento suave, que ya no recorre la pagina. */
   document.addEventListener('click',function(e){
-    var a=e.target.closest&&e.target.closest('a[href="#presale"]');
+    var a=e.target.closest&&e.target.closest('a[href="#seed-round"]');
     if(!a||e.button>0||e.metaKey||e.ctrlKey||e.shiftKey) return;
     e.preventDefault(); salta();
   });

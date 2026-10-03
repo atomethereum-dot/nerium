@@ -42,7 +42,7 @@ for(const c of CASOS){
   const pg=await ctx.newPage(); const errs=[];
   pg.on('pageerror',e=>errs.push(String(e)));
   await pg.goto('http://127.0.0.1:8932/index.html',{waitUntil:'load'});
-  await pg.locator('#presale').scrollIntoViewIfNeeded();
+  await pg.locator('#seed-round').scrollIntoViewIfNeeded();
   await pg.waitForTimeout(c.r?1800:9000);
   const txt=(await pg.locator('#wCta').textContent()).trim();
   const off=await pg.locator('#wCta').isDisabled();

@@ -73,7 +73,7 @@ await pg.route('**/assets/walletconnect.js', r=>r.fulfill({status:200,contentTyp
 
 
 await pg.goto('http://127.0.0.1:8952/index.html',{waitUntil:'load'});
-await pg.locator('#presale').scrollIntoViewIfNeeded(); await pg.waitForTimeout(1700);
+await pg.locator('#seed-round').scrollIntoViewIfNeeded(); await pg.waitForTimeout(1700);
 await pg.locator('#wPay button').nth(1).click();            // BNB
 await pg.waitForTimeout(300);
 await pg.locator('#wCta').click(); await pg.waitForTimeout(900);   // abre el selector

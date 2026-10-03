@@ -46,7 +46,7 @@ const av = await pg.evaluate(() => {
 di(!!av, 'la franja sigue en el marcado, montada o no');
 di(av && /Seed Round/.test(av.txt), 'dice de que ronda habla');
 di(av && /8[0-9]%|9[0-9]%|100%/.test(av.pct), 'lleva el porcentaje: ' + (av && av.pct));
-di(av && av.destino === '#presale', 'y lleva a la ronda al pulsarlo');
+di(av && av.destino === '#seed-round', 'y lleva a la ronda al pulsarlo');
 
 // El aviso y la barra de recaudacion tienen que decir lo mismo.
 const par = await pg.evaluate(() => {

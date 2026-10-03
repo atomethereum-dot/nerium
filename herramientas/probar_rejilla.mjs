@@ -27,7 +27,7 @@ for(const [nombre,op] of [['iPhone 14 Pro',{viewport:{width:393,height:852},devi
   },{R});
   const pg=await ctx.newPage();
   await pg.goto('http://127.0.0.1:8951/index.html',{waitUntil:'load'});
-  await pg.locator('#presale').scrollIntoViewIfNeeded(); await pg.waitForTimeout(1600);
+  await pg.locator('#seed-round').scrollIntoViewIfNeeded(); await pg.waitForTimeout(1600);
   await pg.locator('#wCta').click(); await pg.waitForTimeout(900);
   const m = await pg.evaluate(()=>{
     const rej=document.querySelector('.nrm-rej'), caja=document.querySelector('.nrm-caja');

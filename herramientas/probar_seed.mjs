@@ -33,7 +33,7 @@ const botes = await pg.locator('button, a').filter({hasText:/Español|ES/}).coun
 // ── la portada ──────────────────────────────────────────────────────────────
 await pg.goto('http://127.0.0.1:8942/index.html',{waitUntil:'load'});
 await pg.waitForTimeout(1200);
-await pg.locator('#presale').scrollIntoViewIfNeeded();
+await pg.locator('#seed-round').scrollIntoViewIfNeeded();
 await pg.waitForTimeout(1400);
 // textContent y no innerText: las secciones fuera de vista no se renderizan y
 // innerText solo devuelve lo pintado.

@@ -62,7 +62,7 @@ async function abrir(modo, registroLento=0){
   await pg.route('**/assets/walletconnect.js', r=>r.fulfill({status:200,
     contentType:'text/javascript',body:'window.NereumWC={EthereumProvider:{init:async()=>({on(){},removeListener(){},connect:()=>new Promise(()=>{}),request:async()=>{throw new Error("x")}})}};'}));
   await pg.goto('http://127.0.0.1:8943/index.html',{waitUntil:'load'});
-  await pg.locator('#presale').scrollIntoViewIfNeeded(); await pg.waitForTimeout(1400);
+  await pg.locator('#seed-round').scrollIntoViewIfNeeded(); await pg.waitForTimeout(1400);
   return {ctx,pg};
 }
 
@@ -82,7 +82,7 @@ async function abrir(modo, registroLento=0){
   const {ctx,pg}=await abrir('pendiente');
   await pg.evaluate(()=>document.getElementById('wCta').click()); await pg.waitForTimeout(800);
   await pg.locator('.nrm-w',{hasText:'MetaMask'}).first().click(); await pg.waitForTimeout(1500);
-  const nota=await pg.evaluate(()=>{const e=document.querySelector('#presale .w-note');
+  const nota=await pg.evaluate(()=>{const e=document.querySelector('#seed-round .w-note');
     return e?e.textContent.trim():'';});
   chk('el aviso dice qué hacer', /already has a connection request open/i.test(nota), true);
   chk('  y no suelta el texto crudo de la extensión', /already pending for origin/i.test(nota), false);

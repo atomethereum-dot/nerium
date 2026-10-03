@@ -58,7 +58,7 @@ async function abrir(eth, bsc, rbh=null, cerrarPanel=false){
   },{eth,bsc,rbh});
   const pg=await ctx.newPage();
   await pg.goto('http://127.0.0.1:8937/index.html',{waitUntil:'load'});
-  await pg.locator('#presale').scrollIntoViewIfNeeded(); await pg.waitForTimeout(1500);
+  await pg.locator('#seed-round').scrollIntoViewIfNeeded(); await pg.waitForTimeout(1500);
   await pg.locator('#wCta').click(); await pg.waitForTimeout(500);
   await pg.locator('.nrm-w').first().click(); await pg.waitForTimeout(1600);
   return {ctx,pg};
@@ -93,7 +93,7 @@ async function abrir(eth, bsc, rbh=null, cerrarPanel=false){
  chk('al cambiar de red cambia el tope', await pg.locator('.nrm-pos .pos-pie').last().textContent(),
      '$9,500 of your $10,000 left on BNB Chain.');
  await pg.locator('#wPay button').nth(0).click(); await pg.waitForTimeout(400);
- await pg.locator('#presale .widget').screenshot({path:'/tmp/p_pos.png'});
+ await pg.locator('#seed-round .widget').screenshot({path:'/tmp/p_pos.png'});
  await ctx.close();
 }
 // ── 3 · solo una red: sin desglose que repita ────────────────────────────────
@@ -111,11 +111,11 @@ async function abrir(eth, bsc, rbh=null, cerrarPanel=false){
  chk('y el botón invita a reclamar', await pg.locator('#wCta').textContent(), 'Claim your NRM');
  chk('la calculadora se retira', await pg.locator('#wPay').isVisible(), false);
  chk('y el importe también', await pg.locator('#wUsd').isVisible(), false);
- chk('el rótulo lo dice', await pg.locator('#presale .w-top span').first().textContent(), 'Seed Round closed');
+ chk('el rótulo lo dice', await pg.locator('#seed-round .w-top span').first().textContent(), 'Seed Round closed');
  chk('y el pie explica el reparto', await pg.locator('#wNote').textContent(),
      'Claims are open. Your NRM goes straight to this wallet.');
  chk('el panel sigue ahí', await pg.locator('.nrm-pos').isVisible(), true);
- await pg.locator('#presale .widget').screenshot({path:'/tmp/p_claim.png'});
+ await pg.locator('#seed-round .widget').screenshot({path:'/tmp/p_claim.png'});
  await ctx.close();
 }
 // ── 4b · los saldos de la cartera ────────────────────────────────────────────
@@ -132,7 +132,7 @@ async function abrir(eth, bsc, rbh=null, cerrarPanel=false){
  await pg.locator('#wPay button').nth(3).click(); await pg.waitForTimeout(400);
  chk('USDT de BNB Chain', await pg.locator('.nrm-saldo').textContent(), 'Balance 50 USDT on BNB Chain');
  chk('y el panel ya no repite los saldos', await pg.locator('.pos-saldos').count(), 0);
- await pg.locator('#presale .widget').screenshot({path:'/tmp/saldos.png'});
+ await pg.locator('#seed-round .widget').screenshot({path:'/tmp/saldos.png'});
  await ctx.close();
 }
 
@@ -152,7 +152,7 @@ async function abrir(eth, bsc, rbh=null, cerrarPanel=false){
  chk('y lo invertido tambien',
      (await pg.locator('.pos-gran span').textContent().catch(()=>'')).includes('$28'), true);
  chk('con una sola red no hay desglose', await pg.locator('.pos-redes').count(), 0);
- await pg.locator('#presale .widget').screenshot({path:'/tmp/p_robinhood.png'});
+ await pg.locator('#seed-round .widget').screenshot({path:'/tmp/p_robinhood.png'});
  await ctx.close();
 }
 // ── 4d · comprado en dos redes, una de ellas Robinhood ───────────────────────

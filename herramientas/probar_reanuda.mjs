@@ -73,7 +73,7 @@ await pg.route('**api.web3modal.org/**', r=>r.abort());
 await pg.route('**/assets/walletconnect.js', r=>r.fulfill({status:200,contentType:'text/javascript',body:SDK}));
 
 const ir=async()=>{ await pg.goto('http://127.0.0.1:8945/index.html',{waitUntil:'load'});
-  await pg.locator('#presale').scrollIntoViewIfNeeded(); await pg.waitForTimeout(1600); };
+  await pg.locator('#seed-round').scrollIntoViewIfNeeded(); await pg.waitForTimeout(1600); };
 
 await ir();
 await pg.evaluate(()=>document.getElementById('wCta').click()); await pg.waitForTimeout(900);

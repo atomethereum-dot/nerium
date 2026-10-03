@@ -1026,7 +1026,7 @@
   /* La maqueta también anima la barra de recaudación hasta una cifra fija.
      Se le quitan las escuchas igual, porque ahora esa cifra tiene que subir
      con las compras. */
-  relevar(document.querySelector('#presale .raise'));
+  relevar(document.querySelector('#seed-round .raise'));
   pay = document.getElementById('wPay');
 
   var usdIn  = document.getElementById('wUsd'),
@@ -1218,7 +1218,7 @@
      dólares se muestran debajo, que es el sentido correcto de la conversión
      porque el precio del oráculo se mueve y el importe firmado no. */
 
-  var unidad = document.querySelector('#presale .w-field em');
+  var unidad = document.querySelector('#seed-round .w-field em');
 
   function decimales() { return medio().usdt ? red().usdtDec : 18; }
   function cifras()    { return medio().usdt ? 2 : 6; }
@@ -2684,7 +2684,7 @@
        contrato acepta desde $0,20: dejarlo mal solo sirve para que alguien
        intente comprar $0,50 y no lo haga. La recaudación de la barra no se
        toca, es de la ronda privada y no vive en la cadena. */
-    var pie = document.querySelector('#presale .raise-foot');
+    var pie = document.querySelector('#seed-round .raise-foot');
     if (pie) {
       var ss = pie.querySelectorAll('span');
       if (ss[0]) ss[0].textContent = 'Minimum ' + dinero(minUsd(), minUsd() < 1 ? 2 : 0);
@@ -2695,7 +2695,7 @@
 
   /* Refresco mientras la sección está a la vista. Fuera de ella no se pide nada:
      son dos redes por vuelta y la página no tiene por qué sonar a minero. */
-  var seccion = document.getElementById('presale');
+  var seccion = document.getElementById('seed-round');
   if (seccion && 'IntersectionObserver' in window) {
     var reloj = null;
     new IntersectionObserver(function (es) {
