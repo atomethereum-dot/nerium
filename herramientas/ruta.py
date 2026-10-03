@@ -427,7 +427,7 @@ CSS = """
 /* EL AIRE ENTRE LAS DOS SECCIONES.
    Medido de tinta a tinta —el ultimo renglon de una al primero de la otra— el
    hueco era de 223 px. No es poco comparado con los pares de dentro de un
-   mismo capitulo (214 entre tesis y kin, 233 entre preventa y token), pero
+   mismo capitulo (214 entre tesis y kin, 233 entre Seed Round y token), pero
    estas dos son capitulos distintos, y los saltos de capitulo de esta pagina
    van entre 690 y 820. Por eso se leian pegadas aunque el numero pareciera
    normal: el listón que le corresponde no era ese.

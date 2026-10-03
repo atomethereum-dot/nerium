@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
-"""Un solo suelo para todas las secciones: el de la preventa.
+"""Un solo suelo para todas las secciones: el de la Seed Round.
 
 Dos cosas, y las dos vienen del mismo sitio: la pagina se leia como trozos
 sueltos porque cada trozo tenia su propio suelo. Siete tonos de papel distintos
 y tres secciones enteras en negro. Por bien resuelta que estuviera cada una, al
 bajar la pagina el suelo cambiaba doce veces.
 
-Ahora hay uno. El de la preventa, que es el que se eligio: papel claro con las
+Ahora hay uno. El de la Seed Round, que es el que se eligio: papel claro con las
 placas, el grano y las auroras azules muy abiertas por detras. Las tres
 secciones que eran oscuras —lo que construimos, la documentacion y el diario—
 pasan a ese mismo suelo y se les rehace la tinta; sus laminas de arte se quedan
@@ -35,13 +35,13 @@ FONDOS = []
 CSS = """
 /* ══ un solo suelo ═════════════════════════════════════════════════════════
    Siete tonos de papel y tres secciones en negro: al bajar la pagina el suelo
-   cambiaba doce veces. Ahora hay uno, el de la preventa. */
+   cambiaba doce veces. Ahora hay uno, el de la Seed Round. */
 
 :root{--suelo:#F5F8FC}
 
 /* ── el suelo, y es el mismo para todas ──
    Papel claro, las auroras muy abiertas por detras —lo que hacia que la
-   preventa se viera mejor que el resto—, las placas y el grano. En ese orden:
+   Seed Round se viera mejor que el resto—, las placas y el grano. En ese orden:
    el grano va arriba del todo porque es lo que quita el ultimo resto de
    blanco de plantilla. */
 :is(.paper,.paper2,.secure,.sale,.tkp,.join,.press){
@@ -54,7 +54,7 @@ CSS = """
   background-repeat:no-repeat,no-repeat,no-repeat,repeat,no-repeat;
   /* Las placas, a TAMANO FIJO. Con «cover» el navegador estira el dibujo hasta
      tapar la seccion, y las secciones miden cosas muy distintas: medido, la
-     misma placa salia a 36 px en la tesis, 39 en seguridad, 40 en la preventa,
+     misma placa salia a 36 px en la tesis, 39 en seguridad, 40 en la Seed Round,
      47 en build y 56 en token. O sea que el fondo cambiaba de escala un 55 %
      de una seccion a otra. Eso es lo que se ve como «un fondo que no va con
      los demas», y no se arregla retocando un color: se arregla no dejando que
@@ -73,7 +73,7 @@ CSS = """
     background-size:auto,auto,auto,auto,100% 100%;
     background-position:0 0,0 0,0 0,0 0,left top}
 }
-/* La preventa traia sus auroras como elementos animados. Se quedan: son las
+/* La Seed Round traia sus auroras como elementos animados. Se quedan: son las
    mismas, moviendose despacio, y es la seccion de la que salio el suelo. */
 
 /* Y la rosca llevaba ademas un velo blanco propio de una ronda anterior, que

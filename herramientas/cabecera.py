@@ -18,7 +18,7 @@ PCT = 85
 
 AVISO = """
 <div class="ann" id="ann">
-  <a class="ann-in" href="#presale">
+  <a class="ann-in" href="#seed-round">
     <i class="ann-dot" aria-hidden="true"></i>
     <span class="ann-k">Seed Round</span>
     <i class="ann-p ann-p1" aria-hidden="true"></i>
@@ -79,8 +79,8 @@ ANCLAS = [
   '<section class="press paper" id="press" data-bg="#FFFFFF" data-acc="#1D6AFF">'),
  ('<section class="paper say" data-bg="#FFFFFF" data-acc="#2E60FF">',
   '<section class="paper say" id="thesis" data-bg="#FFFFFF" data-acc="#2E60FF">'),
- ("    security:'Security', presale:'Seed Round', token:'Tokenomics',",
-  "    security:'Security', presale:'Seed Round', token:'Tokenomics',\n"
+ ("    security:'Security', 'seed-round':'Seed Round', token:'Tokenomics',",
+  "    security:'Security', 'seed-round':'Seed Round', token:'Tokenomics',\n"
   "    thesis:'The thesis', builds:'What is running',"),
 
  # La palabra de la marca, en su propia caja: suelta, como nodo de texto, no
@@ -98,7 +98,7 @@ ICONOS = {
                  'M4.5 14h5.5v5.5H4.5zM14 14h5.5v5.5H14z"/>',
     'stack':     '<path d="M12 4 4 8l8 4 8-4-8-4Z"/><path d="M4 14l8 4 8-4"/>',
     'security':  '<path d="M12 3.5 5.2 6.4v4.8c0 4 2.8 6.8 6.8 7.6 4-.8 6.8-3.6 6.8-7.6V6.4L12 3.5Z"/>',
-    'presale':   '<path d="M4.6 18.4h14.8"/><path d="M8 18.4v-4.2M12 18.4v-8.6M16 18.4v-6.2"/>',
+    'seed-round':   '<path d="M4.6 18.4h14.8"/><path d="M8 18.4v-4.2M12 18.4v-8.6M16 18.4v-6.2"/>',
     'token':     '<circle cx="12" cy="12" r="7.6"/><circle cx="12" cy="12" r="3"/>',
     'builds':    '<path d="M9.2 8 5 12l4.2 4"/><path d="M14.8 8 19 12l-4.2 4"/>',
     'join':      '<circle cx="12" cy="12" r="2.2"/>'
@@ -117,7 +117,7 @@ ENTRADAS = [
     ('solutions', 'Solutions'),
     ('stack',     'Stack'),
     ('security',  'Security'),
-    ('presale',   'Seed Round'),
+    ('seed-round',   'Seed Round'),
     ('token',     'Token'),
     ('builds',    'Build'),
     ('join',      'In the open'),
@@ -145,7 +145,7 @@ NAV_VIEJO = """  <nav class="nav">
 HOJA = '<div class="sheet" id="sheet">\n' + ''.join(
     '  <a href="#%s">%s%s</a>\n' % (sid, txt, _ficha(sid))
     for sid, txt in ENTRADAS) + \
-    '  <a class="sheet-cta" href="#presale">Join the Seed Round</a>\n</div>'
+    '  <a class="sheet-cta" href="#seed-round">Join the Seed Round</a>\n</div>'
 
 HOJA_VIEJA = """<div class="sheet" id="sheet">
   <a href="#stack">Stack</a><a href="#solutions">Solutions</a><a href="#network">Network</a>

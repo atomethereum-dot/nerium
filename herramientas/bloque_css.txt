@@ -57,7 +57,7 @@ html[dir="rtl"] .subir{left:16px !important;right:auto !important}
   section.say   {contain-intrinsic-size:auto 175px}
   section.kin   {contain-intrinsic-size:auto 94px}
   #solutions{contain-intrinsic-size:auto 280px}
-  #presale  {contain-intrinsic-size:auto 1452px}
+  #seed-round  {contain-intrinsic-size:auto 1452px}
   #token    {contain-intrinsic-size:auto 922px}
   #builds   {contain-intrinsic-size:auto 559px}
   #join     {contain-intrinsic-size:auto 470px}
@@ -69,7 +69,7 @@ html[dir="rtl"] .subir{left:16px !important;right:auto !important}
   section.say   {contain-intrinsic-size:auto 360px}
   section.kin   {contain-intrinsic-size:auto 248px}
   #solutions{contain-intrinsic-size:auto 407px}
-  #presale  {contain-intrinsic-size:auto 743px}
+  #seed-round  {contain-intrinsic-size:auto 743px}
   #token    {contain-intrinsic-size:auto 1055px}
   #builds   {contain-intrinsic-size:auto 818px}
   #join     {contain-intrinsic-size:auto 580px}

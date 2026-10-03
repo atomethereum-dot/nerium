@@ -302,7 +302,7 @@ di(titulares.every(t => t.px >= 70),
 /* EL DENOMINADOR ERA LA SECCION, Y NO TODAS LAS SECCIONES SON UNA COLUMNA.
    Lo que esto defiende sigue valiendo entero: que a un titular no se le ponga
    la medida de LEER —55-70 caracteres— y se quede ahogado. Pero se medaba
-   contra el ancho de la seccion, y la preventa va a DOS columnas: titular a la
+   contra el ancho de la seccion, y la Seed Round va a DOS columnas: titular a la
    izquierda, panel de compra a la derecha. Medido, su titular ocupa el 100 %
    de su columna —637 de 637— y aun asi daba 44 % de la seccion y suspendia.
    No estaba ahogado: estaba lleno. El listón se mide ahora contra la caja en

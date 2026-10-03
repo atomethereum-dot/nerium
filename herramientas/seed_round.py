@@ -6,14 +6,14 @@
 
    Son CINCO piezas, y la quinta es la que costo seis rondas encontrar:
 
-     1 · <section id="presale">   la seccion entera, con la dapp de compra
+     1 · <section id="seed-round">   la seccion entera, con la dapp de compra
      2 · #lq                       la fila de la portada (Seed Round open, 85%…)
      3 · #ann                       la barra de aviso del 85%
      4 · .umb                       el 85% GIGANTE a pantalla completa — y este
                                     NO vive dentro de la seccion: es un bloque
                                     suelto entre Security y Token. Esconder la
                                     seccion no lo quitaba nunca.
-     5 · los enlaces a #presale     menu, hoja del movil, boton de portada
+     5 · los enlaces a #seed-round     menu, hoja del movil, boton de portada
 
    Y un candado extra en assets/dapp.js, que viaja aparte del HTML: asi la
    pagina queda tapada aunque el navegador este sirviendo una copia vieja.
@@ -27,8 +27,8 @@ import io, re, sys
 RAIZ = '/home/user/nerium/'
 
 PIEZAS = [
-    ('<section class="sale" id="presale" data-bg="#0E3AC4" data-acc="#7FB0FF">',
-     '<section class="sale" id="presale" data-bg="#0E3AC4" data-acc="#7FB0FF" hidden style="display:none">',
+    ('<section class="sale" id="seed-round" data-bg="#0E3AC4" data-acc="#7FB0FF">',
+     '<section class="sale" id="seed-round" data-bg="#0E3AC4" data-acc="#7FB0FF" hidden style="display:none">',
      'la seccion de la venta'),
     ('<div class="lq" id="lq">',
      '<div class="lq" id="lq" style="display:none">',
@@ -48,8 +48,8 @@ REGLA = '''
        python3 herramientas/seed_round.py devolver
    «.umb» es el 85% gigante y NO esta dentro de la seccion: es un bloque
    suelto. Los enlaces se esconden porque apuntarian a algo que no se ve. */
-#presale[hidden]{display:none !important}
-.ann, #lq, .umb, a[href="#presale"]{display:none !important}'''
+#seed-round[hidden]{display:none !important}
+.ann, #lq, .umb, a[href="#seed-round"]{display:none !important}'''
 
 ANCLA_JS = '(function () {'
 CANDADO = '''/* ══ LA VENTA, ESCONDIDA ══════════════════════════════════════════════════
@@ -58,7 +58,7 @@ CANDADO = '''/* ══ LA VENTA, ESCONDIDA ════════════�
    sirviendo una copia vieja de la pagina — que es lo que pasaba. */
 (function () {
   function tapa() {
-    ['presale', 'lq', 'ann'].forEach(function (id) {
+    ['seed-round', 'lq', 'ann'].forEach(function (id) {
       var e = document.getElementById(id);
       if (e) { e.style.setProperty('display', 'none', 'important'); }
     });
@@ -88,7 +88,7 @@ def esconder():
         h = h.replace(viejo, nuevo, 1)
     if ANCLA_CSS not in h: faltan.append('el sitio donde va la regla')
     if faltan: return faltan
-    if '#presale[hidden]{display:none !important}' not in h:
+    if '#seed-round[hidden]{display:none !important}' not in h:
         h = h.replace(ANCLA_CSS, ANCLA_CSS + REGLA, 1)
     if 'LA VENTA, ESCONDIDA' not in j:
         j = j.replace(ANCLA_JS, CANDADO, 1)
@@ -101,8 +101,8 @@ def devolver():
         if viejo in h and nuevo not in h: continue   # ya devuelta
         if nuevo not in h: faltan.append(que); continue
         h = h.replace(nuevo, viejo, 1)
-    n = re.sub(r'\n/\* ══ SEED ROUND ESCONDIDA ═+\n.*?a\[href="#presale"\]\{display:none !important\}', '', h, flags=re.S)
-    if n == h and '#presale[hidden]' in h: faltan.append('la regla de la hoja')
+    n = re.sub(r'\n/\* ══ SEED ROUND ESCONDIDA ═+\n.*?a\[href="#seed-round"\]\{display:none !important\}', '', h, flags=re.S)
+    if n == h and '#seed-round[hidden]' in h: faltan.append('la regla de la hoja')
     h = n
     k = re.sub(r'/\* ══ LA VENTA, ESCONDIDA.*?\n\}\)\(\);\n\n', '', j, flags=re.S)
     if k == j and 'LA VENTA, ESCONDIDA' in j: faltan.append('el candado de dapp.js')

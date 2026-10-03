@@ -26,7 +26,7 @@ def cambia(texto, viejo, nuevo, que):
 
 # ── 1 · el bloque vuelve a su sitio ─────────────────────────────────────────
 g = io.open(RAIZ + 'herramientas/seed-round.guardada.html', encoding='utf-8').read()
-bloque = g[g.index('<section class="sale" id="presale"'):].rstrip() + '\n'
+bloque = g[g.index('<section class="sale" id="seed-round"'):].rstrip() + '\n'
 # El bloque se guardo CUANDO YA ESTABA ESCONDIDO, asi que trae el candado
 # dentro. Si no se le quita, la seccion vuelve al archivo pero sigue sin verse
 # —pasó en el primer ensayo—.
@@ -34,14 +34,14 @@ bloque = bloque.replace(' hidden style="display:none"><i class="via"',
                         '><i class="via"', 1)
 
 h = io.open(RAIZ + 'index.html', encoding='utf-8').read()
-marca = ('<!-- AQUI IBA LA SECCION DE LA VENTA (id="presale").\n'
+marca = ('<!-- AQUI IBA LA SECCION DE LA VENTA (id="seed-round").\n'
          '     Guardada entera en herramientas/seed-round.guardada.html, con las\n'
          '     instrucciones para devolverla. -->')
 h = cambia(h, marca, bloque, 'el hueco donde iba la seccion')
 
 # ── 2 · fuera la regla que esconde las puertas y el 85% ─────────────────────
 antes = h
-h = re.sub(r'/\* «\.umb» es el 85% gigante.*?\.ann, #lq, \.umb, a\[href="#presale"\]\{display:none !important\}\n',
+h = re.sub(r'/\* «\.umb» es el 85% gigante.*?\.ann, #lq, \.umb, a\[href="#seed-round"\]\{display:none !important\}\n',
            '', h, flags=re.S)
 if h == antes:
     fallos.append('la regla que esconde .ann, #lq, .umb y los enlaces')

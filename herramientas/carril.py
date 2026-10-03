@@ -7,7 +7,7 @@ LA QUE NO SE VE. El indice dibuja una raya de 34 px a 10 px del borde, pero la
 CAJA de cada boton medía 159: la etiqueta ocupaba sitio en la fila -aunque
 estuviera invisible- y encima habia 26 px de relleno por la izquierda. Esos
 159 px de <nav> quedan por delante de la pagina. En «security» no se podia
-seleccionar el parrafo, en «presale» tampoco el precio y el enlace «News and
+seleccionar el parrafo, en «seed-round» tampoco el precio y el enlace «News and
 mentions» no se podia pinchar: el indice se comia el clic de un texto que ni
 siquiera tapaba. Ahora la etiqueta sale del flujo -absoluta, a la izquierda de
 su raya- y la caja pasa de 159 a 54.

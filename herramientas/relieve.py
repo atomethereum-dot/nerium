@@ -4,7 +4,7 @@
 Puesta la pagina entera en una hoja de contactos, el problema salta: nueve de
 las diecinueve bandas son claras y las nueve comparten EXACTAMENTE el mismo
 gris. Da igual donde pares, el fondo es el mismo plano vacio, y dos secciones
-claras seguidas -network y press, o security, presale y token- se leen como una
+claras seguidas -network y press, o security, seed-round y token- se leen como una
 sola losa de tres pantallas de largo. El contenido flota sobre nada.
 
 Tres cosas, y ninguna decora: las tres son de plano tecnico.
@@ -63,7 +63,7 @@ FIN = '/* ══ fin: relieve ══ */'
 
 # El suelo hondo, para las claras que van pegadas a otra clara.
 SUELO_B = '#D6DEEE'
-# press va detras de network; token detras de presale; join detras de team.
+# press va detras de network; token detras de seed-round; join detras de team.
 HONDAS = ('press', 'token', 'join')
 
 # El grano, y SOLO el grano. Aqui hubo una rejilla de ingenieria -fina cada 34

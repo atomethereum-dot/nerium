@@ -27,7 +27,7 @@ todo lo que se hizo aqui y el archivo subido no trae:
  19. la portada liquida: el rail de todo-o-nada y los botones
  20. la via: una linea cose la pagina y las bandas dejan de cortarse
  21. calma: la ronda que resta, porque se veia cargada
- 22. un solo suelo: el de la preventa, en todas las secciones
+ 22. un solo suelo: el de la Seed Round, en todas las secciones
  23. los logotipos de verdad en la fila de compatibilidad
  24. los titulos a la izquierda, todos menos el de la portada
  25. las garantias: aire arriba y los dos textos en la misma linea

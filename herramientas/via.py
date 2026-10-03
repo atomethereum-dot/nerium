@@ -24,7 +24,7 @@ FIN = '/* ══ fin: via ══ */'
 # ── las estaciones ───────────────────────────────────────────────────────────
 # Las diez del menu, en orden. La via entra por arriba de cada una.
 ESTACIONES = ['network', 'press', 'thesis', 'solutions', 'stack',
-              'security', 'presale', 'token', 'builds', 'join']
+              'security', 'seed-round', 'token', 'builds', 'join']
 
 # ── los empalmes ─────────────────────────────────────────────────────────────
 # Cada banda animada y el suelo de la seccion que le sigue. El embudo se pinta
@@ -120,7 +120,7 @@ CSS = """
 /* La ronda se queda como esta: su titular convive con el widget a la derecha
    y centrarlo lo dejaria hablando solo. Ahi la via entra igual y la estacion
    se centra; el resto, no. */
-#presale .sale-top{justify-content:center;gap:clamp(14px,2vw,28px)}
+#seed-round .sale-top{justify-content:center;gap:clamp(14px,2vw,28px)}
 
 /* ── el telefono ──
    En vertical la linea es mas corta: la pantalla mide un tercio y una via de

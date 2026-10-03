@@ -40,7 +40,7 @@ FIN = '/* ══ fin: titulos a la izquierda ══ */'
 # Las secciones cuyo epigrafe numerado se alinea con su titular. «#stack» no
 # esta: su epigrafe vive dentro de la escena animada y se queda con ella.
 SECCIONES = ['#network', '#press', '#thesis', '#solutions', '#security',
-             '#presale', '#token', '#builds', '#join']
+             '#seed-round', '#token', '#builds', '#join']
 
 _SEL = ','.join('%s .sk' % s for s in SECCIONES)
 
@@ -79,7 +79,7 @@ CSS = """
 __SEL__{justify-content:flex-start}
 /* La ronda tiene su propia fila —el epigrafe y las dos cadenas— y se centraba
    con «justify-content» desde el identificador: hace falta el mismo peso. */
-#presale .sale-top{justify-content:flex-start}
+#seed-round .sale-top{justify-content:flex-start}
 
 /* ── 4 · la fila de compatibles ──
    Aqui el centrado no venia del paso 20 sino de la hoja original, que centra

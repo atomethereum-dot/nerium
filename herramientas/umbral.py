@@ -778,7 +778,7 @@ def aplicar(html):
         html = html.replace('\n</style>', '\n' + CSS.strip('\n') + '\n</style>', 1)
 
     if 'class="umb"' not in html:
-        ancla = '<section class="sale" id="presale"'
+        ancla = '<section class="sale" id="seed-round"'
         assert html.count(ancla) == 1, 'no esta la seccion de la ronda'
         html = html.replace(ancla, HTML + ancla, 1)
 

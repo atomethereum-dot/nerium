@@ -29,8 +29,8 @@ CAMBIOS = [
  # Con la ronda abierta, la accion principal es entrar en ella; «registrado y
  # auditado» es la prueba que la respalda, no la llamada.
  ('<a class="hb blue" href="#security">Registered &amp; audited</a>\n'
-  '      <a class="hb white" href="#presale">Join the Seed Round</a>',
-  '<a class="hb blue" href="#presale">Join the Seed Round</a>\n'
+  '      <a class="hb white" href="#seed-round">Join the Seed Round</a>',
+  '<a class="hb blue" href="#seed-round">Join the Seed Round</a>\n'
   '      <a class="hb white" href="#security">Registered &amp; audited</a>'),
 
 ]

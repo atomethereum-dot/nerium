@@ -35,7 +35,7 @@ FIN = '/* ══ fin: sistema ══ */'
 # ve, no como funciona.
 PCT = 85
 
-AVISO_VIEJO = """  <a class="ann-in" href="#presale">
+AVISO_VIEJO = """  <a class="ann-in" href="#seed-round">
     <i class="ann-dot" aria-hidden="true"></i>
     <span class="ann-k">Seed Round</span>
     <i class="ann-p ann-p1" aria-hidden="true"></i>
@@ -46,7 +46,7 @@ AVISO_VIEJO = """  <a class="ann-in" href="#presale">
   </a>
   <i class="ann-track" aria-hidden="true"><i class="ann-fill" id="annFill" style="width:%d%%"></i></i>""" % (PCT, PCT)
 
-AVISO_NUEVO = """  <a class="ann-in" href="#presale">
+AVISO_NUEVO = """  <a class="ann-in" href="#seed-round">
     <span class="ann-k"><i class="ann-dot" aria-hidden="true"></i>Seed Round</span>
     <span class="ann-bar" aria-hidden="true"><i class="ann-fill" id="annFill" style="width:%d%%"></i></span>
     <span class="ann-n"><b id="annPct">%d%%</b> <span>complete</span></span>
