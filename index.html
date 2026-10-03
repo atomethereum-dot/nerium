@@ -10025,6 +10025,23 @@ const CALM=matchMedia('(prefers-reduced-motion: reduce)').matches;
       if(smooth){S.t=dest}else scrollTo({top:dest,behavior:CALM?'auto':'smooth'});
     });
   });
+  /* nereum.xyz/seed-round (y los enlaces viejos con #seed-round): baja directo a la Seed Round.
+     El desplazamiento suave de esta pagina arranca en 0 y se comia el salto del navegador al
+     ancla, asi que el salto se hace aqui, contra el mismo S, y se repite mientras la pagina
+     termina de medirse (portada, tuneles), hasta que la persona toque la rueda, el dedo o
+     una tecla. En la barra queda «nereum.xyz/seed-round», sin «#». */
+  (function(){
+    const q=new URLSearchParams(location.search);
+    const id=q.get('ir')||(location.hash==='#seed-round'?'seed-round':'')||(/^\/seed-round\/?$/.test(location.pathname)?'seed-round':'');
+    const t=id&&document.getElementById(id); if(!t) return;
+    try{ history.replaceState(null,'','/'+id); }catch(e){}
+    let tocado=false; const corta=()=>{tocado=true};
+    ['wheel','touchstart','keydown','pointerdown'].forEach(ev=>addEventListener(ev,corta,{once:true,passive:true}));
+    const ir=()=>{ if(tocado) return; const d=Math.max(0,docTop(t)-46);
+      if(smooth){S.t=S.y=d} scrollTo(0,d); window.__y=scrollY; };
+    ir(); [120,400,900,1600,2400,3400].forEach(ms=>setTimeout(ir,ms));
+    addEventListener('load',()=>setTimeout(ir,60),{once:true});
+  })();
   (function(){
     const pre=document.getElementById('pre'),num=document.getElementById('preN'),
           bar=document.getElementById('preBar');
