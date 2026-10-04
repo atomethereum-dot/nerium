@@ -736,6 +736,81 @@ button.red-sel:hover{background:var(--campo2)}
 #lnGuardar:disabled{background:var(--campo2);color:var(--t3);cursor:not-allowed}
 @media(max-width:1023px){ .dos.ln-l{display:flex;flex-direction:column-reverse;align-items:stretch} }
 @media(max-width:560px){ .ln-tb{min-width:0} .ln-tb th:nth-child(2),.ln-tb td:nth-child(2),.ln-tb th:nth-child(6),.ln-tb td:nth-child(6){display:none} .ln-tb th,.ln-tb td{padding:0 8px} .ln-tb .par b{font-size:12px} }
+/* predict */
+#vPred{--ag:#2E86FF;--ag-l:#63A9FF;--red:#FF4D6A;--blu:#2E86FF}
+.pr-hero{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.05fr);gap:28px;align-items:center;margin-bottom:18px;padding:30px 30px 30px 34px;border-radius:22px;
+  background:radial-gradient(110% 130% at 80% 20%,rgba(46,134,255,.16),transparent 55%),linear-gradient(180deg,#0B0E15,#06070B);border:1px solid var(--linea);position:relative;overflow:hidden}
+.pr-hero::after{content:"";position:absolute;inset:auto -10% -60% 40%;height:120%;background:radial-gradient(closest-side,rgba(46,134,255,.12),transparent);pointer-events:none}
+.pr-eye{display:inline-flex;align-items:center;gap:8px;height:28px;padding:0 12px;border-radius:999px;background:rgba(46,134,255,.1);border:1px solid rgba(46,134,255,.32);color:var(--ag-l);font-size:12px;font-weight:600;letter-spacing:.02em}
+.pr-eye i{width:7px;height:7px;border-radius:50%;background:var(--ag);animation:agPing 1.8s infinite}
+.pr-hero h1{font-size:46px;line-height:1.03;font-weight:700;letter-spacing:-.04em;color:#fff;margin:16px 0 14px}
+.pr-hero h1 em{display:block;font-style:normal;color:var(--ag)}
+.pr-hero p{font-size:14.5px;line-height:1.6;color:var(--t3);max-width:520px}
+.pr-soon{display:flex;gap:12px;align-items:flex-start;margin-top:22px;padding:14px 16px;border-radius:14px;background:rgba(46,134,255,.07);border:1px solid rgba(46,134,255,.28);max-width:520px}
+.pr-soon b{display:block;font-size:15px;color:#fff;letter-spacing:-.01em}
+.pr-soon span{font-size:12.5px;color:var(--t3);line-height:1.5}
+.pr-dot{flex:none;width:10px;height:10px;margin-top:5px;border-radius:50%;background:var(--ag);box-shadow:0 0 0 0 rgba(46,134,255,.6);animation:agPing 1.8s infinite}
+.pr-sports{display:flex;gap:8px;margin-top:16px;flex-wrap:wrap}
+.pr-sports span{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--t4);padding:6px 10px;border:1px solid var(--linea2);border-radius:999px}
+/* featured match */
+.pr-stage{position:relative;min-width:0}
+.pr-feat{position:relative;border-radius:20px;padding:20px 20px 18px;background:linear-gradient(180deg,rgba(17,19,26,.92),rgba(9,10,14,.96));border:1px solid var(--linea2);box-shadow:0 30px 80px -30px rgba(46,134,255,.35)}
+.pr-feat::before{content:"";position:absolute;inset:-1px;border-radius:21px;padding:1px;background:linear-gradient(140deg,rgba(99,169,255,.7),transparent 40%,transparent 60%,rgba(46,134,255,.5));
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none}
+.pr-fh{display:flex;align-items:center;gap:10px;font-size:11.5px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--t3)}
+.pr-fh .esp{flex:1}
+.pr-live{display:inline-flex;align-items:center;gap:6px;color:var(--ag-l)} .pr-live i{width:6px;height:6px;border-radius:50%;background:var(--ag);animation:agPing 1.8s infinite}
+.pr-vs{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:10px;margin:18px 0 16px}
+.pr-team{display:grid;justify-items:center;gap:10px;text-align:center}
+.pr-team svg{width:86px;height:98px;filter:drop-shadow(0 10px 24px rgba(0,0,0,.5))}
+.pr-team b{font-size:17px;color:#fff;letter-spacing:-.01em}
+.pr-team span{font-size:11.5px;color:var(--t4)}
+.pr-mid{display:grid;justify-items:center;gap:6px}
+.pr-mid b{font-size:13px;font-weight:800;letter-spacing:.2em;color:var(--t3)}
+.pr-mid span{font-size:12px;color:#fff;font-variant-numeric:tabular-nums;padding:5px 10px;border-radius:8px;background:var(--campo)}
+.pr-out{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.pr-o{position:relative;display:grid;gap:4px;padding:11px 12px 10px;border-radius:12px;background:var(--campo);border:1px solid var(--linea2);color:#fff;text-align:left;cursor:pointer;overflow:hidden;transition:border-color .2s,transform .2s var(--e)}
+.pr-o:hover{border-color:rgba(99,169,255,.6);transform:translateY(-1px)}
+.pr-o small{font-size:11px;color:var(--t3);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pr-o b{font-size:20px;font-weight:700;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.pr-o em{font-style:normal;font-size:11px;color:var(--t4);font-variant-numeric:tabular-nums}
+.pr-o i{position:absolute;left:0;bottom:0;height:3px;background:var(--ag);transition:width .8s var(--e)}
+.pr-o.r i{background:var(--red)} .pr-o.n i{background:#8E8E96}
+.pr-chart{position:relative;height:110px;margin-top:14px;border-radius:12px;background:rgba(255,255,255,.02);border:1px solid var(--linea)}
+.pr-chart canvas{position:absolute;inset:0;width:100%;height:100%}
+.pr-leg{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:10px;font-size:11.5px;color:var(--t3)}
+.pr-leg span{display:inline-flex;align-items:center;gap:6px} .pr-leg i{width:8px;height:8px;border-radius:2px}
+/* toolbar */
+.pr-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:6px 0 12px}
+.pr-ill{display:inline-flex;align-items:center;gap:8px;font-size:11.5px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--t4)}
+.pr-ill i{width:6px;height:6px;border-radius:50%;background:var(--t4)}
+/* market cards */
+.pr-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px;margin-bottom:22px}
+.pr-card{position:relative;display:grid;gap:12px;padding:16px;border-radius:16px;background:var(--panel);border:1px solid var(--linea);overflow:hidden;animation:prIn .6s var(--e) both;animation-delay:calc(var(--i)*55ms)}
+.pr-card:hover{border-color:var(--linea2)}
+@keyframes prIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.pr-ch{display:flex;align-items:center;gap:8px;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--t3)}
+.pr-ch span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis} .pr-ch .esp{flex:1} .pr-ch .t{color:var(--t4);font-weight:600;letter-spacing:.04em;flex:none}
+.pr-card::before{content:"";position:absolute;left:0;right:0;top:0;height:2px;background:linear-gradient(90deg,transparent,rgba(46,134,255,.7),transparent)}
+.pr-card[data-s=boxing]::before,.pr-card[data-s=mma]::before{background:linear-gradient(90deg,var(--red),transparent 45%,transparent 55%,var(--blu))}
+.pr-ch svg{width:16px;height:16px;color:var(--ag-l)}
+.pr-row{display:flex;align-items:center;gap:10px;min-width:0}
+.pr-row svg.cr{flex:none;width:30px;height:34px}
+.pr-row b{font-size:15px;color:#fff;font-weight:650;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pr-row .p{margin-left:auto;font-size:13px;color:var(--t3);font-variant-numeric:tabular-nums}
+.pr-corner{flex:none;width:30px;height:30px;border-radius:8px;display:grid;place-items:center}
+.pr-corner svg{width:18px;height:18px}
+.pr-corner.r{background:rgba(255,77,106,.14);color:var(--red)} .pr-corner.b{background:rgba(46,134,255,.14);color:var(--blu)}
+.pr-q{font-size:13px;color:var(--t2);font-weight:600}
+.pr-split{position:relative;height:8px;border-radius:999px;background:var(--campo);overflow:hidden;display:flex}
+.pr-split i{height:100%;transition:width .8s var(--e)}
+.pr-o2{display:grid;grid-template-columns:repeat(var(--n,3),minmax(0,1fr));gap:6px}
+.pr-o2 .pr-o{padding:9px 10px 8px}.pr-o2 .pr-o b{font-size:16px}
+.pr-cf{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--t4)}
+.pr-cf svg{width:13px;height:13px}
+.pr-cf .esp{flex:1}
+@media(max-width:1023px){ .pr-hero{grid-template-columns:1fr;padding:22px} .pr-hero h1{font-size:36px} }
+@media(max-width:560px){ .pr-hero h1{font-size:30px} .pr-team svg{width:64px;height:74px} .pr-team b{font-size:14px} .pr-o b{font-size:17px} .pr-grid{grid-template-columns:1fr} .pr-pasos{grid-template-columns:1fr 1fr} }
 /* agents */
 #vAgents{--ok:#A6F03C;--no:#FF4D6A;--ag:#2E86FF;--ag-l:#63A9FF}
 .ag-hero{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:24px;align-items:center;margin-bottom:18px;padding:28px 28px 28px 32px;border-radius:22px;
@@ -1181,6 +1256,7 @@ body.portada .top,body.portada .pie{display:none}
     <button data-v="swap">Swap</button>
     <button data-v="lend">Lend</button>
     <button data-v="agents">Agents</button>
+    <button data-v="predict">Predict</button>
     <button data-v="p2p">P2P</button>
     <button data-v="pools">Pools</button>
     <button data-v="bridge">Bridge</button>
@@ -1403,7 +1479,7 @@ body.portada .top,body.portada .pie{display:none}
   <section class="c3" id="c3" aria-label="Nereum DEX">
     <div class="c3-vin"></div><div class="c3-izq"></div><svg class="c3-lin" aria-hidden="true"></svg>
     <header class="c3-top"><a class="c3-marca" href="/" aria-label="NereumEVM · nereum.xyz">Nereum<span>EVM</span></a>
-      <nav class="c3-nav"><a href="#/spot">Spot</a><a href="#/mining">Cloud mining</a><a href="#/swap">Swap</a><a href="#/lend">Lend</a><a href="#/agents">Agents</a><a href="#/p2p">P2P</a><a href="#/pools">Pools</a><a href="#/bridge">Bridge</a><a href="#/tokenize">Tokenize</a><a href="#/portfolio">Portfolio</a></nav>
+      <nav class="c3-nav"><a href="#/spot">Spot</a><a href="#/mining">Cloud mining</a><a href="#/swap">Swap</a><a href="#/lend">Lend</a><a href="#/agents">Agents</a><a href="#/predict">Predict</a><a href="#/p2p">P2P</a><a href="#/pools">Pools</a><a href="#/bridge">Bridge</a><a href="#/tokenize">Tokenize</a><a href="#/portfolio">Portfolio</a></nav>
       <span class="esp"></span><a class="c3-pill blanco chico" href="#/spot">Launch app</a></header>
     <div class="c3-hero">
       <span class="c3-eye" data-fade=".5,1.1"><i></i>The exchange on NereumEVM</span>
@@ -1716,6 +1792,36 @@ body.portada .top,body.portada .pie{display:none}
   <p class="nota">BTC and ETH prices are live from public spot markets. The animation above is a simulation of how rules work, not real activity. Dry runs show what an agent would propose at today's prices; nothing is traded, lent or paid until Nereum Agents opens with the mainnet.</p>
 </main>
 
+
+<!-- ══ predict ══ -->
+<main class="vista" id="vPred" hidden>
+  <section class="pr-hero">
+    <div class="pr-hero-t">
+      <span class="pr-eye"><i></i>Nereum Predict · Coming soon</span>
+      <h1>Call the result.<em>Settle it on chain.</em></h1>
+      <p>Prediction markets on football, boxing and MMA. Take a side in USDT, watch the odds move with every pick, and get paid by NereumEVM as soon as the official result is in.</p>
+      <div class="ag-ctas"><button class="pill lima" id="prAvisa">Notify me at launch</button><button class="pill borde" id="prVer">Preview the markets</button></div>
+      <div class="pr-soon"><span class="pr-dot"></span><div><b>Opening to the public soon</b><span>Every market below is a preview with illustrative odds. Nothing can be traded yet.</span></div></div>
+      <div class="pr-sports"><span>Football</span><span>Boxing</span><span>MMA</span></div>
+    </div>
+    <div class="pr-stage" id="prFeat"></div>
+  </section>
+  <div class="aviso"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="9" cy="9" r="7"/><path d="M9 8v4.5M9 5.5v.1"/></svg>
+    <span><b>Nereum Predict opens to the public soon.</b> Until then the markets are a preview: odds are illustrative, there is no order book and no position can be opened.</span></div>
+  <div class="pr-bar" id="prMarkets">
+    <div class="chips-r" id="prCats"><button class="chp on" data-c="all">All markets</button><button class="chp" data-c="football">Football</button><button class="chp" data-c="boxing">Boxing</button><button class="chp" data-c="mma">MMA</button></div>
+    <span class="pr-ill"><i></i>Illustrative odds · preview</span>
+  </div>
+  <div class="pr-grid" id="prGrid"></div>
+  <div class="ag-h2"><h2>How it will work</h2></div>
+  <ol class="ag-pasos pr-pasos">
+    <li style="--i:0"><em>01</em><b>Pick a market</b><span>A match, a fight or a single question: who wins, a draw, a finish inside the distance.</span></li>
+    <li style="--i:1"><em>02</em><b>Take a side in USDT</b><span>The price of each side is its probability. Buy at 0.44 and the side pays 1.00 if it happens.</span></li>
+    <li style="--i:2"><em>03</em><b>Follow it live</b><span>Odds move as people pick. Sell your side before the end if you change your mind.</span></li>
+    <li style="--i:3"><em>04</em><b>Settled by the chain</b><span>When the official result is published, NereumEVM pays the winning side. No one holds your funds in between.</span></li>
+  </ol>
+  <p class="nota">Nereum Predict is not open yet. Teams, fights and odds on this page are a preview of the interface: the odds are illustrative, not prices from a market, and the crests are drawn for this preview, not official club badges. Prediction markets may not be available in every country.</p>
+</main>
 
 <!-- ══ p2p ══ -->
 <main class="vista" id="vP2P" hidden>
@@ -2871,8 +2977,8 @@ let rz; addEventListener('resize', () => { clearTimeout(rz); rz = setTimeout(() 
 Object.assign(COIN, {USDT:['#26A17B','#fff'], USDC:['#2775CA','#fff'], POL:['#8247E5','#fff'], SepoliaETH:['#627EEA','#fff']});
 Object.assign(NOMBRE, {USDT:'Tether USD', USDC:'USD Coin', POL:'Polygon', SepoliaETH:'Sepolia Ether'});
 const TOKS = [['USDT','Tether USD'], ...PARES];
-const VISTAS = {cover:'#vCover', spot:'#app', mining:'#vMine', swap:'#vSwap', lend:'#vLend', agents:'#vAgents', p2p:'#vP2P', pools:'#vPools', bridge:'#vBridge', tokenize:'#vTok', portfolio:'#vPort'};
-const TITULOS = {cover:'Nereum DEX · Spot, swap, pools, bridge and tokenization', mining:'Cloud mining', swap:'Swap', lend:'Lend', agents:'AI agents', p2p:'P2P', pools:'Pools', bridge:'Bridge', tokenize:'Tokenize', portfolio:'Portfolio'};
+const VISTAS = {cover:'#vCover', spot:'#app', mining:'#vMine', swap:'#vSwap', lend:'#vLend', agents:'#vAgents', predict:'#vPred', p2p:'#vP2P', pools:'#vPools', bridge:'#vBridge', tokenize:'#vTok', portfolio:'#vPort'};
+const TITULOS = {cover:'Nereum DEX · Spot, swap, pools, bridge and tokenization', mining:'Cloud mining', swap:'Swap', lend:'Lend', agents:'AI agents', predict:'Predict', p2p:'P2P', pools:'Pools', bridge:'Bridge', tokenize:'Tokenize', portfolio:'Portfolio'};
 const FLECHA = '<svg viewBox="0 0 12 12"><path fill="currentColor" d="M1 3.5h10L6 9.5z"/></svg>';
 const esc = v => String(v == null ? '' : v).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const coinHtml = s => { const c = COIN[s]||['#333','#fff']; return `<i class="coin ${CON_LOGO.has(s) ? 'logo' : ''}" style="--c:${c[0]};--cf:${c[1]}">${coinIn(s)}</i>`; };
@@ -2900,7 +3006,7 @@ function ruta(){
   scrollTo(0, 0);
 }
 function pintaVista(){
-  if (vista === 'cover') pintaCover(); else if (vista === 'swap') pintaSwap(); else if (vista === 'p2p') pintaP2P(); else if (vista === 'lend') pintaLend(); else if (vista === 'agents') pintaAgents(); else if (vista === 'mining'){ pintaMina(); mnCarga(); } else if (vista === 'pools') pintaPools(); else if (vista === 'bridge') pintaBridge();
+  if (vista === 'cover') pintaCover(); else if (vista === 'swap') pintaSwap(); else if (vista === 'p2p') pintaP2P(); else if (vista === 'lend') pintaLend(); else if (vista === 'agents') pintaAgents(); else if (vista === 'predict') pintaPred(); else if (vista === 'mining'){ pintaMina(); mnCarga(); } else if (vista === 'pools') pintaPools(); else if (vista === 'bridge') pintaBridge();
   else if (vista === 'tokenize') pintaTok(); else if (vista === 'portfolio') pintaPort();
 }
 function vivoVista(){
@@ -3679,6 +3785,112 @@ function agPintaReglas(){
   $$('#agDest .chp').forEach(b => b.classList.toggle('on', b.dataset.de === p.de));
   $$('#agExp .chp').forEach(b => b.classList.toggle('on', b.dataset.ex === p.ex));
 }
+/* ══ Nereum Predict (preview) ══
+   Football, boxing and MMA markets shown as a preview of the interface. The crests are drawn here in each club's
+   colours, they are not official badges. The odds are illustrative: they drift a little on their own so the page
+   feels alive, and are labelled as such everywhere. Nothing can be traded until Predict opens. */
+const PR_EQ = {
+  RMA:['Real Madrid','#F4F4F6','#2A3F8F','RM'], BAR:['Barcelona','#A50044','#0B4FA3','FCB'], MCI:['Man City','#6CABDD','#1C2C5B','MC'],
+  LIV:['Liverpool','#C8102E','#F4F4F6','LFC'], BAY:['Bayern','#DC052D','#0A5BB0','FCB'], PSG:['Paris SG','#0B2D5B','#DA291C','PSG'],
+  INT:['Inter','#0068A8','#111318','IM'], JUV:['Juventus','#F4F4F6','#111318','JV'], ARS:['Arsenal','#E3121B','#F4F4F6','AFC'], CHE:['Chelsea','#0A4AA0','#F4F4F6','CFC']
+};
+/* an original crest: a shield split in the club's two colours, its initials, a thin rim */
+function prCrest(k, cls = ''){
+  const [ , c1, c2, ini] = PR_EQ[k], id = 'cr' + k + Math.random().toString(36).slice(2, 7), dark = c => { const n = parseInt(c.slice(1), 16); return ((n >> 16) * .3 + ((n >> 8) & 255) * .59 + (n & 255) * .11) > 150; };
+  const tc = dark(c1) ? '#0B0D12' : '#fff', fs = ini.length > 2 ? 22 : 27;
+  return `<svg class="${cls}" viewBox="0 0 86 98" aria-hidden="true"><defs><clipPath id="${id}"><path d="M43 3 80 15v33c0 23-15 38-37 47C21 86 6 71 6 48V15z"/></clipPath>
+    <linearGradient id="${id}g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".22"/><stop offset=".5" stop-color="#fff" stop-opacity="0"/></linearGradient></defs>
+    <g clip-path="url(#${id})"><rect width="86" height="98" fill="${c1}"/><path d="M86 0v98H50L86 30z" fill="${c2}"/><rect y="64" width="86" height="7" fill="${c2}" opacity=".85"/>
+    <rect width="86" height="98" fill="url(#${id}g)"/></g>
+    <path d="M43 3 80 15v33c0 23-15 38-37 47C21 86 6 71 6 48V15z" fill="none" stroke="rgba(255,255,255,.55)" stroke-width="2"/>
+    <text x="43" y="${fs > 24 ? 52 : 50}" text-anchor="middle" font-family="system-ui,-apple-system,Segoe UI,sans-serif" font-weight="800" font-size="${fs}" letter-spacing="-.5" fill="${tc}">${ini}</text></svg>`;
+}
+const PR_ICO = {
+  ball:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="m12 7 4 3-1.5 4.5h-5L8 10z"/><path d="M12 3v4M21 10l-5 0M3 10h5M7 20l2.5-5.5M17 20l-2.5-5.5"/></svg>',
+  glove:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M7 20v-3.5C5 15 4 13 4 10.5 4 6 7.5 3 12 3s7 2.5 7 6.5v3c0 2-1 3.5-3 4.5V20z"/><path d="M8 9.5h5.5c1.2 0 2 .8 2 2s-.8 2-2 2H10M7 20h9"/></svg>',
+  oct:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M8 3h8l5 5v8l-5 5H8l-5-5V8z"/><path d="M9.5 7h5l2.5 2.5v5L14.5 17h-5L7 14.5v-5z" opacity=".5"/></svg>',
+  chain:'<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="1.5" y="5" width="7" height="6" rx="3"/><rect x="7.5" y="5" width="7" height="6" rx="3"/></svg>'
+};
+/* the markets: [sport, title, when, …] — illustrative odds in percent */
+const PR_MK = [
+  {s:'football', lg:'La Liga', t:'Sat · 21:00', h:'RMA', a:'BAR', p:[44,26,30], feat:true},
+  {s:'football', lg:'Premier League', t:'Sun · 17:30', h:'MCI', a:'LIV', p:[41,27,32]},
+  {s:'boxing', lg:'Heavyweight title', t:'12 rds · Main event', q:'Who wins?', o:['Red corner','Draw','Blue corner'], p:[56,4,40]},
+  {s:'football', lg:'Champions League', t:'Tue · 21:00', h:'BAY', a:'PSG', p:[46,24,30]},
+  {s:'mma', lg:'Lightweight title', t:'5 rds · Main card', q:'Finish inside the distance?', o:['Yes','No'], p:[62,38]},
+  {s:'football', lg:'Serie A', t:'Sun · 20:45', h:'INT', a:'JUV', p:[39,31,30]},
+  {s:'boxing', lg:'Middleweight', t:'10 rds · Co-main', q:'Wins by KO / TKO?', o:['Yes','No'], p:[47,53]},
+  {s:'mma', lg:'Welterweight', t:'3 rds · Main card', q:'Who wins?', o:['Red corner','Blue corner'], p:[51,49]},
+  {s:'football', lg:'Premier League', t:'Sat · 13:30', h:'ARS', a:'CHE', p:[49,27,24]}
+];
+let prCat = 'all', prTick = null, prHist = null;
+const prSide = (m, i) => m.h ? (i === 0 ? PR_EQ[m.h][0] : i === 1 ? 'Draw' : PR_EQ[m.a][0]) : m.o[i];
+const prCls = (m, i) => m.o ? (m.o[i] === 'Red corner' ? 'r' : (m.o[i] === 'Draw' || m.o[i] === 'No') ? 'n' : '') : (i === 1 ? 'n' : i === 2 ? 'r' : '');
+function prBtns(m, idx){
+  return m.p.map((v, i) => `<button class="pr-o ${prCls(m, i)}" data-m="${idx}" data-i="${i}"><small>${esc(prSide(m, i))}</small><b>${v}%</b><em>${(v / 100).toFixed(2)} USDT</em><i style="width:${v}%"></i></button>`).join('');
+}
+function prCard(m, idx, n){
+  const ico = m.s === 'football' ? PR_ICO.ball : m.s === 'boxing' ? PR_ICO.glove : PR_ICO.oct;
+  let body;
+  if (m.h) body = `<div class="pr-row">${prCrest(m.h, 'cr')}<b>${PR_EQ[m.h][0]}</b><span class="p">Home</span></div>
+      <div class="pr-row">${prCrest(m.a, 'cr')}<b>${PR_EQ[m.a][0]}</b><span class="p">Away</span></div>`;
+  else body = `<div class="pr-row"><span class="pr-corner r">${PR_ICO.glove}</span><b>Red corner</b><span class="p">vs</span><b style="margin-left:0">Blue corner</b><span class="pr-corner b">${PR_ICO.glove}</span></div>
+      <div class="pr-q">${esc(m.q)}</div>
+      <div class="pr-split">${m.p.map((v, i) => `<i style="width:${v}%;background:${prCls(m, i) === 'r' ? 'var(--red)' : prCls(m, i) === 'n' ? '#8E8E96' : 'var(--blu)'}"></i>`).join('')}</div>`;
+  return `<article class="pr-card" style="--i:${n}" data-s="${m.s}"><div class="pr-ch">${ico}<span>${esc(m.lg)}</span><span class="esp"></span><span class="t">${esc(m.t)}</span></div>
+    ${body}<div class="pr-o2" style="--n:${m.p.length}">${prBtns(m, idx)}</div>
+    <div class="pr-cf">${PR_ICO.chain}<span>Settles on NereumEVM from the official result</span><span class="esp"></span><span>Preview</span></div></article>`;
+}
+function prFeat(){
+  const i = PR_MK.findIndex(m => m.feat), m = PR_MK[i];
+  $('#prFeat').innerHTML = `<div class="pr-feat"><div class="pr-fh"><span>${esc(m.lg)} · Featured</span><span class="esp"></span><span class="pr-live"><i></i>Preview</span></div>
+    <div class="pr-vs"><div class="pr-team">${prCrest(m.h)}<b>${PR_EQ[m.h][0]}</b><span>Home</span></div>
+      <div class="pr-mid"><b>VS</b><span>${esc(m.t)}</span></div>
+      <div class="pr-team">${prCrest(m.a)}<b>${PR_EQ[m.a][0]}</b><span>Away</span></div></div>
+    <div class="pr-out">${prBtns(m, i)}</div>
+    <div class="pr-chart"><canvas id="prCv" aria-label="Illustrative odds over time"></canvas></div>
+    <div class="pr-leg"><span><i style="background:var(--blu)"></i>${PR_EQ[m.h][0]}</span><span><i style="background:#8E8E96"></i>Draw</span><span><i style="background:var(--red)"></i>${PR_EQ[m.a][0]}</span><span style="margin-left:auto">Illustrative odds</span></div></div>`;
+  if (!prHist){ prHist = []; let p = m.p.slice(); for (let k = 0; k < 60; k++){ p = prJit(p, 1.2); prHist.push(p); } prHist.push(m.p.slice()); }
+  prDraw();
+}
+function prJit(p, a){ /* a small random walk that keeps the sides summing to 100 */
+  const q = p.map(v => Math.max(3, v + (Math.random() - .5) * a * 2)), s = q.reduce((x, y) => x + y, 0);
+  const r = q.map(v => Math.round(v / s * 100)); r[0] += 100 - r.reduce((x, y) => x + y, 0); return r;
+}
+function prDraw(){
+  const cv = $('#prCv'); if (!cv) return; const dpr = devicePixelRatio || 1, w = cv.clientWidth, h = cv.clientHeight; if (!w) return;
+  cv.width = w * dpr; cv.height = h * dpr; const g = cv.getContext('2d'); g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, w, h);
+  const cols = ['#2E86FF', '#8E8E96', '#FF4D6A'], n = prHist.length, all = prHist.flat(), lo = Math.min(...all) - 3, hi = Math.max(...all) + 3, X = k => 10 + (w - 20) * k / (n - 1), Y = v => h - 12 - (h - 24) * (v - lo) / (hi - lo);
+  g.strokeStyle = 'rgba(255,255,255,.05)'; g.lineWidth = 1; for (let k = 1; k < 4; k++){ const y = 12 + (h - 24) * k / 4; g.beginPath(); g.moveTo(0, y); g.lineTo(w, y); g.stroke(); }
+  for (let s = 0; s < 3; s++){ g.beginPath(); prHist.forEach((p, k) => k ? g.lineTo(X(k), Y(p[s])) : g.moveTo(X(k), Y(p[s]))); g.strokeStyle = cols[s]; g.lineWidth = 2; g.lineJoin = 'round'; g.stroke();
+    const p = prHist[n - 1][s]; g.beginPath(); g.arc(X(n - 1), Y(p), 3.5, 0, 7); g.fillStyle = cols[s]; g.fill(); }
+}
+function prGrid(){
+  $('#prGrid').innerHTML = PR_MK.map((m, i) => [m, i]).filter(([m]) => prCat === 'all' || m.s === prCat).map(([m, i], n) => prCard(m, i, n)).join('');
+}
+function prUpd(){ /* refresh the numbers in place, without rebuilding the cards */
+  $$('#vPred .pr-o').forEach(b => { const m = PR_MK[b.dataset.m], v = m.p[b.dataset.i]; b.querySelector('b').textContent = v + '%'; b.querySelector('em').textContent = (v / 100).toFixed(2) + ' USDT'; b.querySelector('i').style.width = v + '%'; });
+  $$('#prGrid .pr-card').forEach(c => { const sp = c.querySelector('.pr-split'); if (!sp) return; const idx = +c.querySelector('.pr-o').dataset.m; [...sp.children].forEach((e, i) => e.style.width = PR_MK[idx].p[i] + '%'); });
+}
+function pintaPred(){
+  prFeat(); prGrid();
+  if (localStorage.getItem('nereum-predict-aviso')) $('#prAvisa').textContent = 'You will be notified';
+  clearInterval(prTick);
+  prTick = setInterval(() => {
+    if (vista !== 'predict' || document.hidden) return;
+    PR_MK.forEach(m => { if (Math.random() < .45) m.p = prJit(m.p, m.feat ? .9 : .6); });
+    const f = PR_MK.find(m => m.feat); prHist.push(f.p.slice()); if (prHist.length > 61) prHist.shift();
+    prUpd(); prDraw();
+  }, 2200);
+}
+$('#prCats').addEventListener('click', e => { const b = e.target.closest('.chp'); if (!b) return; prCat = b.dataset.c;
+  $$('#prCats .chp').forEach(x => x.classList.toggle('on', x === b)); prGrid(); });
+$('#vPred').addEventListener('click', e => { if (e.target.closest('.pr-o')) toast('Nereum Predict opens to the public soon. These odds are a preview; nothing is traded yet.'); });
+$('#prAvisa').onclick = () => { try { localStorage.setItem('nereum-predict-aviso', '1'); } catch(_){} $('#prAvisa').textContent = 'You will be notified';
+  toast('Saved in this browser: you will see it here when Nereum Predict opens to the public.'); };
+$('#prVer').onclick = () => $('#prMarkets').scrollIntoView({behavior: 'smooth', block: 'start'});
+addEventListener('resize', () => { if (vista === 'predict') prDraw(); }, {passive: true});
+
 function pintaAgents(anim = true){
   const j = agJob();
   $('#agTrabajos').innerHTML = AG_JOBS.map(x => `<button class="ag-job ${x.id === j.id ? 'on' : ''}" data-aj="${x.id}"><i class="ag-ico">${AG_ICO[x.id]}</i><b>${x.n}</b><span>${x.d}</span><s>${x.id === j.id ? 'SELECTED' : x.r.toUpperCase()}</s></button>`).join('');
