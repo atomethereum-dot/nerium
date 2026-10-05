@@ -41,7 +41,8 @@ for (const [W, H, movil] of [[440,956,1],[430,932,1],[414,896,1],[390,844,1],[37
       const rc = c.getBoundingClientRect(), area = document.querySelector('#security .sx-cards').getBoundingClientRect();
       const go = c.querySelector('.sx-go').getBoundingClientRect();
       /* lo que el boton tiene encima: los datos, o en telefono el registro */
-      const encima = Math.max(...['.sx-kv', '.sx-log'].map(q => c.querySelector(q).getBoundingClientRect())
+      /* la nota de verificacion, si la tarjeta la lleva, es lo que queda encima del boton */
+      const encima = Math.max(...['.sx-kv', '.sx-log', '.sx-ver'].map(q => c.querySelector(q)).filter(Boolean).map(e => e.getBoundingClientRect())
         .filter(b => b.bottom <= go.top + 1).map(b => b.bottom));
       const pie = c.querySelector('.sx-foot').getBoundingClientRect();
       const linea = e => { const s = document.createElement('span');
