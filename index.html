@@ -7233,6 +7233,11 @@ html body .ruta-p{color:#AAB5CA !important}
    En un aparato que aguanta 3 no cambia nada: nadie baja y todo va a 3. */
 window.__densTope = 0;
 try { var __dS = +sessionStorage.getItem('nrm-dens'); if (__dS > 0 && __dS < 3) window.__densTope = __dS; } catch (e) {}
+/* p77 · un equipo de gama media -cuatro nucleos o menos, tres gigas o menos, o
+   ya marcado como lento en esta visita- empieza con los lienzos a 2, sin
+   esperar a que la guarda lo descubra a tirones */
+try { if ((navigator.hardwareConcurrency || 8) <= 4 || (navigator.deviceMemory || 8) <= 3 || sessionStorage.getItem('nrm-lento') === '1') {
+  if (!window.__densTope || window.__densTope > 2) window.__densTope = (window.devicePixelRatio || 1) >= 2 ? 2 : 1; } } catch (e) {}
 /* p76 · LA ESCALERA, SOLO PARA EQUIPOS LENTOS. El suelo era 2: un telefono de
    densidad 2 o 2,6 y cualquier ordenador de densidad 1 no tenian adonde bajar,
    y en gama media eran justo los que iban a tirones. Ahora, si un lienzo sigue
@@ -9153,16 +9158,55 @@ setTimeout(function(){ PINTAN.forEach(function(m){ if(orig[m])P[m]=orig[m]; }); 
    leia despues de que el anterior hubiese escrito estilos, y cada lectura
    pagaba un layout entero (medido: 38-63 % de los cuadros largos). */
 var yCuadro=-1;
-window.requestAnimationFrame=function(cb){
-  return rAF(function(t){
-    if(t!==yCuadro){ yCuadro=t; window.__y=window.scrollY||window.pageYOffset||0; }
+/* p77 · EL MODO LIGERO, para equipos de gama media.
+   La escalera de densidad baja los pixeles de cada lienzo, pero en un equipo
+   de gama media lo que se acaba no son los pixeles: es el hilo principal. Ahi
+   cada lienzo pinta a sesenta por segundo y entre todos no dejan cuadro para
+   lo demas, asi que todo va a tirones a la vez.
+   Si el equipo no sostiene unos cuarenta cuadros por segundo con la pagina
+   en marcha -o tiene cuatro nucleos o menos, o tres gigas o menos-, los
+   lienzos pasan a pintar UNO DE CADA DOS cuadros, la mitad en los pares y la
+   otra mitad en los impares. Su gasto se parte por dos y el resto de la
+   pagina vuelve a ir a sesenta. Un equipo rapido no lo nota nunca: nunca
+   entra. Y se recuerda en la sesion, para no empezar a tirones al recargar. */
+var lento=false, cuadro=0, ultT=0, gSum=0, gN=0, malos=0, nPar=0;
+try{ if(sessionStorage.getItem('nrm-lento')==='1') lento=true; }catch(e){}
+if((navigator.hardwareConcurrency||8)<=4||(navigator.deviceMemory||8)<=3) lento=true;
+function ponLento(){
+  lento=true; window.__lento=true;
+  try{ sessionStorage.setItem('nrm-lento','1'); }catch(e){}
+  document.documentElement.classList.add('ligero');
+  window.dispatchEvent(new Event('nrm:ligero'));
+}
+if(lento){ window.__lento=true; document.documentElement.classList.add('ligero'); }
+function mideCuadro(t){
+  var iv=t-ultT; ultT=t; cuadro++;
+  if(lento||document.hidden||!(iv>0&&iv<250)) return;
+  gSum+=iv; gN++;
+  if(gN>=45){ var m=gSum/gN; gSum=0; gN=0;
+    if(m>24){ if(++malos>=2) ponLento(); } else malos=0; }
+}
+/* Los numeros de cuadro son propios: un lienzo que se salta un cuadro vuelve a
+   pedir el siguiente con otro numero del navegador, y el bucle que lo quisiera
+   cancelar tendria el viejo. Con estos, «cancelAnimationFrame» sigue valiendo. */
+var nid=0, vivos=new Map(), cAF=window.cancelAnimationFrame.bind(window);
+function programa(cb,id){
+  vivos.set(id, rAF(function(t){
+    vivos.delete(id);
+    if(t!==yCuadro){ yCuadro=t; window.__y=window.scrollY||window.pageYOffset||0; mideCuadro(t); }
     var c=lienzo.get(cb);
     if(c && visible.get(c)===false){ aparca(c,cb); return; }
     if(document.hidden && c){ aparca(c,cb); return; }
+    if(lento && c){
+      if(c.__par===undefined) c.__par=(nPar++)%2;
+      if((cuadro+c.__par)%2){ programa(cb,id); return; }
+    }
     var ant=actual; actual=cb;
     try{ return cb(t); } finally{ actual=ant; }
-  });
-};
+  }));
+}
+window.requestAnimationFrame=function(cb){ var id=++nid; programa(cb,id); return id; };
+window.cancelAnimationFrame=function(id){ var n=vivos.get(id); if(n!==undefined){ cAF(n); vivos.delete(id); } };
 })();
 const CALM=matchMedia('(prefers-reduced-motion: reduce)').matches;
 (function(){
@@ -9170,7 +9214,7 @@ const CALM=matchMedia('(prefers-reduced-motion: reduce)').matches;
   const lerp=(a,b,n)=>a+(b-a)*n;
   const fine=matchMedia('(hover:hover) and (pointer:fine)').matches;
   const wide=matchMedia('(min-width:1000px)').matches;
-  const smooth=fine&&wide&&!CALM;
+  let smooth=fine&&wide&&!CALM&&!window.__lento;
   const el=document.getElementById('scroll');
   const S={y:0,t:0,v:0,vh:innerHeight,h:0};
   const jobs=[];
@@ -9185,11 +9229,14 @@ const CALM=matchMedia('(prefers-reduced-motion: reduce)').matches;
     document.body.classList.add('sm');
     S.t=S.y=scrollY;
     addEventListener('wheel',e=>{
-      if(e.ctrlKey)return;
+      /* p77 · en modo ligero, el scroll del navegador: va en su propio hilo y
+         no se para aunque el principal vaya cargado */
+      if(e.ctrlKey||!smooth)return;
       e.preventDefault();
       S.t=cl(S.t+e.deltaY*(e.deltaMode===1?18:1),0,maxScroll());
     },{passive:false});
     addEventListener('keydown',e=>{
+      if(!smooth)return;
       const k=e.key,step=S.vh*.86;
       if(k==='PageDown'||k===' '&&!e.shiftKey)S.t=cl(S.t+step,0,maxScroll());
       else if(k==='PageUp'||k===' '&&e.shiftKey)S.t=cl(S.t-step,0,maxScroll());
@@ -9211,6 +9258,7 @@ const CALM=matchMedia('(prefers-reduced-motion: reduce)').matches;
   new ResizeObserver(measure).observe(el);
   let antesT=0;
   function frame(ahora){
+    if(smooth&&window.__lento){ smooth=false; document.body.classList.remove('sm'); S.t=S.y=scrollY; }
     if(smooth){
       const prev=S.y;
       /* El paso, por TIEMPO y no por cuadro. Antes era un 0,11 fijo por
@@ -10192,8 +10240,12 @@ const CALM=matchMedia('(prefers-reduced-motion: reduce)').matches;
          A catorce se escriben menos de la mitad de veces y en movimiento no
          se distingue: un 5 % de color entre cuadro y cuadro, con la pagina
          corriendo. Parada sigue siendo exacta, que es cuando se mira. */
-      if(c2!==puesto&&(c2===lastAcc||
-         Math.max(Math.abs(ca[0]-ap[0]),Math.abs(ca[1]-ap[1]),Math.abs(ca[2]-ap[2]))>=14)){
+      /* p77 · Y EN MOVIMIENTO, NUNCA. Aun a catorce puntos se escribia 43 veces
+         en una bajada, y cada una rehacia el estilo de 1.851 elementos: en un
+         equipo de gama media eran los tirones de las bandas. Los acentos de
+         las secciones son todos azules vecinos, asi que mientras la pagina
+         corre se queda el de antes y se pone el exacto en cuanto se para. */
+      if(c2!==puesto&&Math.abs(S.v)<.5&&c2===lastAcc){
         puesto=c2; ap=[ca[0],ca[1],ca[2]];
         document.documentElement.style.setProperty('--blue',c2);
       }
@@ -13384,8 +13436,11 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
   const soporta = window.CSS && CSS.supports && CSS.supports('height','100dvh');
   if(soporta)return;
   const vv=window.visualViewport;
+  /* p77 · solo si cambia: cada escritura en la raiz rehace el estilo entero */
+  let ultH=-1;
   const set=()=>{
     const h=Math.round(vv?vv.height:innerHeight);
+    if(h===ultH)return; ultH=h;
     document.documentElement.style.setProperty('--vh',h+'px');
   };
   set();
@@ -17758,18 +17813,25 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
     }
     return false;
   }
-  var libreDesde=0, reintento=0, ultMirada=0, tarde=0;
+  var libreDesde=0, reintento=0, ultMov=0, tarde=0;
   function ve(){
     pend=0; if(saltando) return;
-    var y=window.scrollY, vh=window.innerHeight;
+    /* p77 · el scroll publicado del cuadro, no «scrollY»: leerlo aqui, despues
+       de que los bucles hayan escrito estilos, rehacia el estilo entero */
+    var y=window.__y!=null?window.__y:window.scrollY, vh=window.__vh||window.innerHeight;
     var enCompra = y+vh > top+vh*.25 && y < top+alto-vh*.25;
     var quiere = y > vh*.85 && !enCompra;
     if(quiere){
       var ahora=performance.now();
-      /* la mirada de debajo -doce sondeos- cuesta: como mucho cada 120 ms
-         mientras se baja, y una ultima al pararse */
-      if(ahora-ultMirada<120){ clearTimeout(tarde); tarde=setTimeout(ve,130); return }
-      ultMirada=ahora;
+      /* p77 · LA MIRADA DE DEBAJO, SOLO CON LA PAGINA QUIETA. Cada mirada -doce
+         sondeos- pedia la geometria justo despues de que los bucles de cuadro
+         hubiesen escrito sus estilos, asi que el navegador rehacia el estilo
+         de la pagina entera antes de contestar. Medido con el perfilador en
+         escritorio a un cuarto de velocidad: el 22 % de todo el hilo principal
+         mientras se baja, el mayor gasto de la pagina. Mientras se baja el
+         boton se queda como esta; cuando el scroll lleva 160 ms quieto, se
+         mira una vez, fuera del cuadro, con la maquetacion ya limpia. */
+      if(ahora-ultMov<160){ clearTimeout(tarde); tarde=setTimeout(ve,170); if(!on) return; quiere=on; return }
       if(tapa()){ quiere=false; libreDesde=0 }
       else{ if(!libreDesde) libreDesde=ahora;
         if(!on && ahora-libreDesde<220){ quiere=false; clearTimeout(reintento); reintento=setTimeout(ve,240) } }
@@ -17778,7 +17840,7 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
       fl.setAttribute('aria-hidden',on?'false':'true'); fl.tabIndex=on?0:-1 }
   }
   mide(); ve();
-  addEventListener('scroll',function(){ if(!pend) pend=requestAnimationFrame(ve) },{passive:true});
+  addEventListener('scroll',function(){ ultMov=performance.now(); if(!pend) pend=requestAnimationFrame(ve) },{passive:true});
   addEventListener('resize',function(){ mide(); ve() },{passive:true});
   if(window.ResizeObserver) new ResizeObserver(function(){ mide(); if(!pend) pend=requestAnimationFrame(ve) }).observe(document.body);
 })();
