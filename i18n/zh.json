@@ -328,5 +328,14 @@
  "Open the DEX →": "打开 DEX →",
  "Bids and asks, in depth": "买单与卖单，按深度排列",
  "Cloud mining opens 10 days after the Seed Round closes and NRM is listed on Uniswap.": "云挖矿将在种子轮结束且 NRM 在 Uniswap 上线后 10 天开放。",
- "Open cloud mining →": "打开云挖矿 →"
+ "Open cloud mining →": "打开云挖矿 →",
+ "Registered": "已注册",
+ "Nereum Finance LLC is registered with the State of Florida. Its certificate of status can be downloaded from the state registry, Sunbiz, with the tracking number below.": "Nereum Finance LLC 已在佛罗里达州注册。可在州注册系统 Sunbiz 上凭下方的追踪号码下载其存续证明。",
+ "Tracking no.": "追踪号码",
+ "Download the certificate": "下载证明",
+ "Public record · Sunbiz": "公开记录 · Sunbiz",
+ "proofs complete · audit and KYC under way": "项证明已完成 · 审计和 KYC 进行中",
+ "Certificate of status · 6697114960CU": "存续证明 · 6697114960CU",
+ "The contract deployed and verified and the company registered in Florida, with the audit and the team KYC under way. Each step is checkable by someone who is not us.": "合约已部署并验证，公司已在佛罗里达州注册；审计和团队 KYC 正在进行。每一步都可由我们以外的人核查。",
+ "Company registered in Florida · Nereum Finance LLC": "公司已在佛罗里达州注册 · Nereum Finance LLC"
 }

@@ -328,5 +328,14 @@
  "Open the DEX →": "DEX'i aç →",
  "Bids and asks, in depth": "Alış ve satışlar, derinlikte",
  "Cloud mining opens 10 days after the Seed Round closes and NRM is listed on Uniswap.": "Bulut madenciliği, Seed Round kapandıktan ve NRM Uniswap'ta listelendikten 10 gün sonra açılır.",
- "Open cloud mining →": "Bulut madenciliğini aç →"
+ "Open cloud mining →": "Bulut madenciliğini aç →",
+ "Registered": "Tescilli",
+ "Nereum Finance LLC is registered with the State of Florida. Its certificate of status can be downloaded from the state registry, Sunbiz, with the tracking number below.": "Nereum Finance LLC, Florida Eyaleti'nde tescillidir. Durum belgesi, eyaletin sicil sistemi Sunbiz'den aşağıdaki takip numarasıyla indirilebilir.",
+ "Tracking no.": "Takip no.",
+ "Download the certificate": "Belgeyi indir",
+ "Public record · Sunbiz": "Kamu kaydı · Sunbiz",
+ "proofs complete · audit and KYC under way": "kanıt tamamlandı · denetim ve KYC sürüyor",
+ "Certificate of status · 6697114960CU": "Durum belgesi · 6697114960CU",
+ "The contract deployed and verified and the company registered in Florida, with the audit and the team KYC under way. Each step is checkable by someone who is not us.": "Sözleşme dağıtıldı ve doğrulandı, şirket Florida'da tescil edildi; denetim ve ekip KYC'si sürüyor. Her adım bizden olmayan biri tarafından kontrol edilebilir.",
+ "Company registered in Florida · Nereum Finance LLC": "Şirket Florida'da tescil edildi · Nereum Finance LLC"
 }

@@ -328,5 +328,14 @@
  "Open the DEX →": "DEX 열기 →",
  "Bids and asks, in depth": "매수와 매도, 깊이별로",
  "Cloud mining opens 10 days after the Seed Round closes and NRM is listed on Uniswap.": "클라우드 채굴은 시드 라운드 종료와 NRM의 Uniswap 상장 후 10일 뒤에 시작됩니다.",
- "Open cloud mining →": "클라우드 채굴 열기 →"
+ "Open cloud mining →": "클라우드 채굴 열기 →",
+ "Registered": "등록 완료",
+ "Nereum Finance LLC is registered with the State of Florida. Its certificate of status can be downloaded from the state registry, Sunbiz, with the tracking number below.": "Nereum Finance LLC는 플로리다주에 등록되어 있습니다. 상태 증명서는 주 등록 시스템 Sunbiz에서 아래 추적 번호로 내려받을 수 있습니다.",
+ "Tracking no.": "추적 번호",
+ "Download the certificate": "증명서 다운로드",
+ "Public record · Sunbiz": "공개 기록 · Sunbiz",
+ "proofs complete · audit and KYC under way": "증명 완료 · 감사와 KYC 진행 중",
+ "Certificate of status · 6697114960CU": "상태 증명서 · 6697114960CU",
+ "The contract deployed and verified and the company registered in Florida, with the audit and the team KYC under way. Each step is checkable by someone who is not us.": "컨트랙트는 배포·검증되었고 회사는 플로리다주에 등록되었으며, 감사와 팀 KYC가 진행 중입니다. 모든 단계는 우리가 아닌 누군가가 확인할 수 있습니다.",
+ "Company registered in Florida · Nereum Finance LLC": "플로리다주 회사 등록 완료 · Nereum Finance LLC"
 }

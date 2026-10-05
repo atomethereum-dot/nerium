@@ -328,5 +328,14 @@
  "Open the DEX →": "Abrir el DEX →",
  "Bids and asks, in depth": "Compras y ventas, en profundidad",
  "Cloud mining opens 10 days after the Seed Round closes and NRM is listed on Uniswap.": "La minería en la nube abre 10 días después de que cierre la Seed Round y NRM cotice en Uniswap.",
- "Open cloud mining →": "Abrir la minería en la nube →"
+ "Open cloud mining →": "Abrir la minería en la nube →",
+ "Registered": "Registrada",
+ "Nereum Finance LLC is registered with the State of Florida. Its certificate of status can be downloaded from the state registry, Sunbiz, with the tracking number below.": "Nereum Finance LLC está registrada en el Estado de Florida. Su certificado de estado se descarga desde el registro estatal, Sunbiz, con el número de seguimiento de abajo.",
+ "Tracking no.": "N.º de seguimiento",
+ "Download the certificate": "Descargar el certificado",
+ "Public record · Sunbiz": "Registro público · Sunbiz",
+ "proofs complete · audit and KYC under way": "pruebas completas · auditoría y KYC en marcha",
+ "Certificate of status · 6697114960CU": "Certificado de estado · 6697114960CU",
+ "The contract deployed and verified and the company registered in Florida, with the audit and the team KYC under way. Each step is checkable by someone who is not us.": "El contrato desplegado y verificado y la empresa registrada en Florida, con la auditoría y el KYC del equipo en marcha. Cada paso lo puede comprobar alguien que no somos nosotros.",
+ "Company registered in Florida · Nereum Finance LLC": "Empresa registrada en Florida · Nereum Finance LLC"
 }

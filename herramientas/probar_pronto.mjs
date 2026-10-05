@@ -26,6 +26,7 @@ const r = await pg.evaluate(() => {
     annW: document.getElementById('annFill').style.width, stkP: document.getElementById('stkBar').style.getPropertyValue('--p'),
     pcVisibles, raised: t('saleRaised'), meta: document.querySelector('#saleRaised + span').textContent,
     enProceso: (sec.match(/In progress/gi) || []).length, cyber: /CyberScope/.test(sec),
+    registrada: /Registered/.test(sec) && /6697114960CU/.test(sec) && !!document.querySelector('#security a.sx-go[href*="sunbiz.org"]'),
     viejo: /Halborn|Assure DeFi|KYC passed|Audited|L26000341887/.test(document.getElementById('security').innerHTML + document.getElementById('top').innerHTML),
     hb: document.querySelector('.hb.white').textContent.trim(),
     ruta: [...document.querySelectorAll('#ruta .ruta-est')].map(e => e.textContent.trim()),
@@ -37,11 +38,12 @@ di([r.ann, r.hero, r.stk].every(x => x === 'Starts soon'), 'aviso, portada y tun
 di(r.pcVisibles === 0, 'y no asoma «complete», «Seed Round open» ni «Launching soon» (' + r.pcVisibles + ')');
 di(parseFloat(r.annW) === 0 && parseFloat(r.stkP) === 0, 'las barras estan vacias (' + r.annW + ', ' + r.stkP + ')');
 di(r.raised === '$0' && /\$500,000/.test(r.meta), 'la dapp enseña $0 recaudados de una meta de $500,000 (temporal, pruebas) (' + r.raised + ' ' + r.meta + ')');
-di(r.enProceso >= 6 && r.cyber, 'Seguridad: registro, auditoria y KYC en proceso, con CyberScope (' + r.enProceso + ')');
+di(r.enProceso >= 2 && r.cyber, 'Seguridad: auditoria y KYC en proceso, con CyberScope (' + r.enProceso + ')');
+di(r.registrada, 'Seguridad: Nereum Finance LLC registrada, con su numero de seguimiento y el enlace a Sunbiz');
 di(!r.viejo, 'Seguridad y la portada ya no dicen Halborn, Assure DeFi, «passed» ni el numero de registro');
 di(r.hb === 'Audit in progress', 'el boton de la portada tampoco dice ya «audited» (' + r.hb + ')');
-di(r.ruta[0] === 'In progress' && r.ruta[1] === 'In progress' && !r.rutaPasado && r.rutaProc === 3,
-   'el Roadmap: fases 01 y 02 en proceso; auditoria, KYC y registro en proceso, sin hitos de recaudacion (' + r.ruta.join(' / ') + ', ' + r.rutaProc + ' en proceso)');
+di(r.ruta[0] === 'In progress' && r.ruta[1] === 'In progress' && !r.rutaPasado && r.rutaProc === 2,
+   'el Roadmap: fases 01 y 02 en proceso; auditoria y KYC en proceso (el registro ya hecho), sin hitos de recaudacion (' + r.ruta.join(' / ') + ', ' + r.rutaProc + ' en proceso)');
 di(errs.length === 0, 'sin errores de pagina' + (errs.length ? ': ' + errs[0] : ''));
 await nav.close(); srv.close();
 console.log(mal ? `\n${ok} bien, ${mal} MAL` : `\n${ok}/${ok} correctas`);
