@@ -7236,7 +7236,12 @@ try { var __dS = +sessionStorage.getItem('nrm-dens'); if (__dS > 0 && __dS < 3) 
 /* p77 · un equipo de gama media -cuatro nucleos o menos, tres gigas o menos, o
    ya marcado como lento en esta visita- empieza con los lienzos a 2, sin
    esperar a que la guarda lo descubra a tirones */
-try { if ((navigator.hardwareConcurrency || 8) <= 4 || (navigator.deviceMemory || 8) <= 3 || sessionStorage.getItem('nrm-lento') === '1') {
+/* p79 · Y EL IPHONE TAMBIEN. Safari no dice la memoria del aparato y en
+   pantallas de densidad 3 cada lienzo a pantalla completa son 14 MB: con
+   varios a la vez el iPhone iba lento aunque su procesador sobre. En iOS
+   (iPhone y iPad) se empieza en modo ligero, con los lienzos a 2. */
+window.__ios = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+try { if (window.__ios || (navigator.hardwareConcurrency || 8) <= 4 || (navigator.deviceMemory || 8) <= 3 || sessionStorage.getItem('nrm-lento') === '1') {
   if (!window.__densTope || window.__densTope > 2) window.__densTope = (window.devicePixelRatio || 1) >= 2 ? 2 : 1; } } catch (e) {}
 /* p76 · LA ESCALERA, SOLO PARA EQUIPOS LENTOS. El suelo era 2: un telefono de
    densidad 2 o 2,6 y cualquier ordenador de densidad 1 no tenian adonde bajar,
@@ -7823,6 +7828,15 @@ main>section.sx#security{background:#030409 !important;background-image:none !im
   .sx-giro{animation:none}
   .sx-sello{transition:opacity .3s}
 }
+</style>
+<style id="ligero-css">
+/* p79 · MODO LIGERO: lo que en un iPhone o un equipo de gama media cuesta mas
+   de lo que luce. Los desenfoques detras de los botones fijos se rehacen en
+   cada cuadro sobre lo que pasa por debajo; los desenfoques de entrada se
+   animan elemento a elemento. Fuera los dos: los fondos ya son casi opacos y
+   las entradas conservan su fundido y su desplazamiento. */
+html.ligero *{-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
+html.ligero .rv,html.ligero .hero h1 .ws>.wi,html.ligero .sx-card,html.ligero .sx-card.sale,html.ligero .sx-sello{filter:none!important}
 </style>
 <style id="pronto-css">
 /* la ronda en espera: sin «complete» ni «Launching soon» junto al rotulo */
@@ -9170,8 +9184,17 @@ var yCuadro=-1;
    pagina vuelve a ir a sesenta. Un equipo rapido no lo nota nunca: nunca
    entra. Y se recuerda en la sesion, para no empezar a tirones al recargar. */
 var lento=false, cuadro=0, ultT=0, gSum=0, gN=0, malos=0, nPar=0;
-try{ if(sessionStorage.getItem('nrm-lento')==='1') lento=true; }catch(e){}
-if((navigator.hardwareConcurrency||8)<=4||(navigator.deviceMemory||8)<=3) lento=true;
+/* p79 · EN EL TELEFONO, NUNCA. El telefono ya lleva su propio techo en la
+   cabecera -30 cuadros con el dedo, 20 quieta- y este medidor lo leia como
+   «equipo lento»: cuadros de 33 ms de media. Entraba siempre, y encima de
+   ese techo partia los lienzos a la mitad otra vez: quince cuadros por
+   segundo. Se veia MAS lento que antes. En el telefono no se parte nada; lo
+   que se aligera alli es la densidad de los lienzos y los desenfoques. */
+var TEL=innerWidth<900;
+if(!TEL){
+  try{ if(sessionStorage.getItem('nrm-lento')==='1') lento=true; }catch(e){}
+  if((navigator.hardwareConcurrency||8)<=4||(navigator.deviceMemory||8)<=3) lento=true;
+}
 function ponLento(){
   lento=true; window.__lento=true;
   try{ sessionStorage.setItem('nrm-lento','1'); }catch(e){}
@@ -9179,12 +9202,18 @@ function ponLento(){
   window.dispatchEvent(new Event('nrm:ligero'));
 }
 if(lento){ window.__lento=true; document.documentElement.classList.add('ligero'); }
+/* el telefono y el iPhone llevan los desenfoques fuera (ver «ligero-css»),
+   sin tocar sus cuadros */
+if(TEL||window.__ios) document.documentElement.classList.add('ligero');
+var gTiron=0;
 function mideCuadro(t){
   var iv=t-ultT; ultT=t; cuadro++;
-  if(lento||document.hidden||!(iv>0&&iv<250)) return;
-  gSum+=iv; gN++;
-  if(gN>=45){ var m=gSum/gN; gSum=0; gN=0;
-    if(m>24){ if(++malos>=2) ponLento(); } else malos=0; }
+  if(TEL||lento||document.hidden||!(iv>0&&iv<250)) return;
+  gSum+=iv; gN++; if(iv>28) gTiron++;
+  /* p79 · lento de media, o a tirones: uno de cada cinco cuadros por encima
+     de 28 ms se nota aunque la media salga buena */
+  if(gN>=45){ var m=gSum/gN, tir=gTiron/gN; gSum=0; gN=0; gTiron=0;
+    if(m>24||tir>.2){ if(++malos>=2) ponLento(); } else malos=0; }
 }
 /* Los numeros de cuadro son propios: un lienzo que se salta un cuadro vuelve a
    pedir el siguiente con otro numero del navegador, y el bucle que lo quisiera

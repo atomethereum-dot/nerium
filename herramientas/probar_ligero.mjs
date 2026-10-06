@@ -58,5 +58,21 @@ async function abre(nucleos){
   di(n===0,'bajando, el acento de la raiz no se reescribe ('+n+' veces)');
   di(!errs.length,'sin errores de pagina'+(errs.length?': '+errs[0]:''));
   await ctx.close(); }
+/* p79 · EL TELEFONO NO SE PARTE. Tiene su propio techo de cuadros en la
+   cabecera; el modo ligero lo leia como «lento» y bajaba los lienzos a quince
+   por segundo. En el telefono -aun con cuatro nucleos- los lienzos pintan en
+   todos los cuadros de su reloj, y solo se quitan los desenfoques. */
+{ const ctx=await nav.newContext({viewport:{width:390,height:844},deviceScaleFactor:3,isMobile:true,hasTouch:true});
+  await ctx.addInitScript(()=>{Object.defineProperty(navigator,'hardwareConcurrency',{get:()=>4});window.fetch=async()=>new Response('{}',{status:200})});
+  const pg=await ctx.newPage();const errs=[];pg.on('pageerror',e=>errs.push(e.message));
+  await pg.goto(URL_,{waitUntil:'load'});await pg.waitForTimeout(4600);
+  await pg.evaluate(()=>scrollTo(0,document.getElementById('stack').getBoundingClientRect().top+scrollY+300));await pg.waitForTimeout(800);
+  const r=await pg.evaluate(()=>({lento:!!window.__lento,lig:document.documentElement.classList.contains('ligero')}));
+  di(!r.lento,'telefono con cuatro nucleos: no parte los cuadros');
+  di(r.lig,'y si quita los desenfoques (clase «ligero»)');
+  const k=await pg.evaluate(cuenta);
+  di(k.frac>.85,'el lienzo de «The stack», bajando, pinta en cada cuadro de su reloj ('+Math.round(k.frac*100)+' %)');
+  di(!errs.length,'sin errores de pagina'+(errs.length?': '+errs[0]:''));
+  await ctx.close(); }
 console.log(mal?`${ok} bien, ${mal} MAL`:`${ok}/${ok} correctas`);
 await nav.close();srv.close();process.exit(mal?1:0);
