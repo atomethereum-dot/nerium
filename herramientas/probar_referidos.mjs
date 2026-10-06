@@ -51,7 +51,7 @@ const nav = await chromium.launch({ executablePath:'/opt/pw-browsers/chromium-11
   nav.newContext = async o => { const c = await nc(o); await c.addInitScript(() => { window.NRM_PRONTO = false }); return c } }
 const ctx = await nav.newContext({ viewport:{width:1400,height:1000}, permissions:['clipboard-read','clipboard-write'] });
 
-await ctx.addInitScript(({RESP}) => {
+const mockCartera = ({RESP}) => {
   window.__rpc = [];
   window.__tx  = [];
   const origFetch = window.fetch;
@@ -94,7 +94,8 @@ await ctx.addInitScript(({RESP}) => {
       { detail: Object.freeze({ info, provider: prov }) }));
   });
   window.__prov = prov;
-}, { RESP });
+};
+await ctx.addInitScript(mockCartera, { RESP });
 
 const pg = await ctx.newPage();
 const errores = [];
@@ -163,6 +164,41 @@ await pg.evaluate(() => { window.__tx.length = 0 });
 await pg.locator('#wCta').click(); await pg.waitForTimeout(1200);
 tx = (await pg.evaluate(() => window.__tx))[0] || {};
 chk('caducado: la compra va sin referido', (tx.data||'').length, 10 + 64);
+
+
+/* ── EN EL ACTO: con REF_EN_CONTRATO (la version del contrato que reparte) la
+   compra llama a buyWithNativeRef / buyWithUsdtRef con el referidor como
+   argumento, sin nada pegado detras, y el widget lee lo ganado ── */
+{
+  const fuente = fs.readFileSync(path.join(RAIZ, 'assets/dapp.js'), 'utf8').replace('var REF_EN_CONTRATO = false;', 'var REF_EN_CONTRATO = true;');
+  const ctx2 = await nav.newContext({ viewport:{width:1400,height:1000} });
+  const p2 = await ctx2.newPage();
+  await p2.route('**/assets/dapp.js', r => r.fulfill({ status:200, contentType:'text/javascript', body: fuente }));
+  await p2.route('**explorer-api.walletconnect.com/**', r => r.fulfill({ status:200, contentType:'application/json', body:JSON.stringify({listings:{}}) }));
+  await ctx2.addInitScript(mockCartera, { RESP: { ...RESP, '0x75ce6548':'0x'+(10n**17n).toString(16).padStart(64,'0'), '0x27ccc760':'0x'+(10n*10n**6n).toString(16).padStart(64,'0'), '0xdb74559b':'0x'+(2n).toString(16).padStart(64,'0') } });
+  const err2 = []; p2.on('pageerror', e => err2.push(String(e)));
+  await p2.goto('http://127.0.0.1:8957/index.html?ref=' + REF, { waitUntil:'load' });
+  await p2.waitForTimeout(1200);
+  await p2.locator('#seed-round').scrollIntoViewIfNeeded(); await p2.waitForTimeout(1500);
+  await p2.locator('#wUsd').fill('0.2'); await p2.locator('#wUsd').blur(); await p2.waitForTimeout(300);
+  await p2.locator('#wCta').click(); await p2.waitForTimeout(400);
+  await p2.locator('.nrm-w').first().click(); await p2.waitForTimeout(1500);
+  chk('en el acto: el texto dice que se envia al instante', (await p2.locator('.w-ref p').textContent()).includes('instantly'), true);
+  chk('en el acto: lo ganado sale del contrato', (await p2.locator('.w-ref-gan b').textContent()), '0.1 ETH · 10 USDT · 2 purchases');
+  await p2.evaluate(() => { window.__tx.length = 0 });
+  await p2.locator('#wCta').click(); await p2.waitForTimeout(1200);
+  let t2 = (await p2.evaluate(() => window.__tx))[0] || {};
+  chk('en el acto: ETH llama a buyWithNativeRef', (t2.data||'').slice(0,10), '0xcad6ab48');
+  chk('en el acto: con el referidor como argumento', (t2.data||'').slice(74), REF.slice(2).padStart(64,'0'));
+  await p2.locator('#wPay button').nth(2).click(); await p2.waitForTimeout(400);
+  await p2.locator('#wUsd').fill('500'); await p2.locator('#wUsd').blur(); await p2.waitForTimeout(300);
+  await p2.evaluate(() => { window.__tx.length = 0 });
+  await p2.locator('#wCta').click(); await p2.waitForTimeout(2500);
+  const ts2 = await p2.evaluate(() => window.__tx);
+  chk('en el acto: USDT llama a buyWithUsdtRef con el referidor', ts2.length === 2 ? (ts2[1].data||'').slice(0,10) + (ts2[1].data||'').slice(138) : '', '0xe7c75ea1' + REF.slice(2).padStart(64,'0'));
+  chk('en el acto: sin errores de pagina', err2.join(' | '), '');
+  await ctx2.close();
+}
 
 chk('sin errores de pagina', errores.join(' | '), '');
 

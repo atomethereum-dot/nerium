@@ -24,6 +24,7 @@ Ethereum y 18 en BNB Chain.
 | `setMaxPriceAge(segundos)` | A partir de aquí se descarta un oráculo. Por defecto 24 h |
 | `setFeeds([...])` | Reemplaza la lista de oráculos, en orden de preferencia |
 | `pause()` / `unpause()` | Detiene compras sin cerrar la venta |
+| `setReferralBps(bps)` | Comisión de referidos. `1000` = 10 % (por defecto), `0` la apaga, techo 20 % |
 | `withdrawNative(a, importe)` | Retira ETH/BNB. Cero = todo |
 | `withdrawUsdt(a, importe)` | Retira USDT. Cero = todo |
 | `setSaleToken(token)` | Fija el NRM cuando exista. Solo una vez |
@@ -38,6 +39,10 @@ Ethereum y 18 en BNB Chain.
 | `buyWithNative(minTokens)` | Compra con ETH/BNB |
 | `buyWithUsdt(importe, minTokens)` | Compra con USDT |
 | `claim()` | Retira sus tokens cuando el reparto está abierto |
+| `buyWithNativeRef(minTokens, referidor)` | Compra con ETH/BNB; el 10 % sale **en el acto** hacia el referidor |
+| `buyWithUsdtRef(importe, minTokens, referidor)` | Compra con USDT; el 10 % sale en el acto, en USDT |
+| `claimReferral(destino)` | El referidor cobra lo que no se pudo entregar en el acto |
+| `referralEarnedNative/Usdt(dir)`, `referralCount(dir)` | Lo ganado por un referidor y cuántas compras trajo |
 | `quoteNative(wei)` / `quoteUsdt(importe)` | Cuántos tokens saldrían |
 | `nativeForUsd(usd)` | Cuánto ETH son X dólares. Para pintar la web |
 | `nativeUsdPrice()` | Cotización actual y si viene de un oráculo vivo |
@@ -275,3 +280,19 @@ USDT), sin contar a quien se refiere a sí mismo, y deja en `referidos/`:
   «CSV Airdrop» de Safe, para pagar todo en un solo lote desde el multisig.
 
 Lo ya pagado se apunta en `referidos/pagados.json` y se descuenta la vez siguiente.
+
+### Referidos pagados en el acto (versión actual del contrato)
+
+`buyWithNativeRef` y `buyWithUsdtRef` reparten en la misma transacción de la
+compra: el comprador recibe exactamente los mismos tokens, el 10 % de lo pagado
+va al referidor en la misma moneda y el 90 % queda en el contrato. Sin
+referidor, a uno mismo o al propio contrato no hay comisión. Si el envío no se
+puede hacer (una cartera que rechaza ETH, una dirección bloqueada por USDT), la
+compra no se cae: la comisión queda apartada, el referidor la cobra con
+`claimReferral(destino)` y `withdrawNative` / `withdrawUsdt` nunca la tocan
+(`test/referidos_directo.js`).
+
+Esta versión hay que **desplegarla** (Ethereum y BNB Chain) para que funcione:
+el contrato que hay hoy en `0xaCbf1Add…04A89` no la tiene. Después, en
+`assets/dapp.js`, se pone su dirección en `VENTA` y `REF_EN_CONTRATO = true`.
+Hasta entonces la web usa la marca al final de la compra y el script de arriba.

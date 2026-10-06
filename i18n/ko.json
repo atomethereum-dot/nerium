@@ -345,5 +345,7 @@
  "Your referral link": "내 추천 링크",
  "Copy": "복사",
  "Copied": "복사됨",
- "Earn 10% of every purchase made through your link, paid in the same currency (ETH, BNB or USDT) after the Seed Round closes. Self-referrals do not count.": "내 링크로 이루어진 모든 구매의 10%를 Seed Round 종료 후 같은 통화(ETH, BNB 또는 USDT)로 지급합니다. 자기 자신 추천은 인정되지 않습니다."
+ "Earn 10% of every purchase made through your link, paid in the same currency (ETH, BNB or USDT) after the Seed Round closes. Self-referrals do not count.": "내 링크로 이루어진 모든 구매의 10%를 Seed Round 종료 후 같은 통화(ETH, BNB 또는 USDT)로 지급합니다. 자기 자신 추천은 인정되지 않습니다.",
+ "Earned": "수익",
+ "Earn 10% of every purchase made through your link, sent to your wallet instantly in the same currency (ETH, BNB or USDT). Self-referrals do not count.": "내 링크로 이루어진 모든 구매의 10%를 같은 통화(ETH, BNB 또는 USDT)로 즉시 지갑에 보내드립니다. 자기 자신 추천은 인정되지 않습니다."
 }

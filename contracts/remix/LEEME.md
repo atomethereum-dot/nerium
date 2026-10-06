@@ -5,7 +5,7 @@ con las dependencias de OpenZeppelin incrustadas, para que Remix no tenga que
 resolver ningún import. **La lógica no cambia ni una línea.**
 
 Comprobado: compila con **0 errores y 0 avisos**, y produce **exactamente el
-mismo bytecode** que el proyecto de Hardhat — 12 397 bytes, idénticos salvo los
+mismo bytecode** que el proyecto de Hardhat — 14 901 bytes, idénticos salvo los
 últimos 53, que son la huella de los nombres de archivo y no ejecutan nada.
 
 Si se toca `../src/NereumSeedRound.sol`, hay que regenerarlo:

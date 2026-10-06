@@ -138,6 +138,13 @@
   /* lo que se pega al final de los datos de la compra: nada si no hay referido */
   function colaRef() { var a = referidor(); return a ? REF_MARCA + a.slice(2) : ''; }
 
+  /* EN EL ACTO. Con la version del contrato que reparte -contracts/src,
+     funciones buyWithNativeRef y buyWithUsdtRef-, el 10 % sale hacia el
+     referidor en la MISMA transaccion de la compra. Se pone a true el dia que
+     esa version este desplegada y VENTA apunte a ella; mientras tanto la web
+     usa la marca al final de la compra y el pago se hace con el script. */
+  var REF_EN_CONTRATO = false;
+
   /* ─────────────────────────── selectores (keccak) ────────────────────────── */
 
   var SEL = {
@@ -160,6 +167,15 @@
     buyWithNative:   '0x31ad36ab',
     buyWithUsdt:     '0x7789e96e',
     claim:           '0x4e71d92d',
+    /* p78 · referidos pagados en el acto (version del contrato con referidos) */
+    buyWithNativeRef:     '0xcad6ab48',   /* buyWithNativeRef(uint256,address) */
+    buyWithUsdtRef:       '0xe7c75ea1',   /* buyWithUsdtRef(uint256,uint256,address) */
+    referralEarnedNative: '0x75ce6548',
+    referralEarnedUsdt:   '0x27ccc760',
+    referralCount:        '0xdb74559b',
+    referralOwedNative:   '0xd16d3f70',
+    referralOwedUsdt:     '0x2fc84246',
+    claimReferral:        '0xe61aee51',   /* claimReferral(address) */
     allowance:       '0xdd62ed3e',
     approve:         '0x095ea7b3',
     balanceOf:       '0x70a08231'
@@ -1387,7 +1403,9 @@
       '.w-ref-fila button{flex:none;padding:0 14px;border-radius:6px;border:1px solid rgba(99,169,255,.5);',
       'background:rgba(46,134,255,.1);color:#AACBFF;font-size:12px;cursor:pointer}',
       '.w-ref-fila button:hover{background:rgba(46,134,255,.18)}',
-      '.w-ref p{margin:8px 0 0;font-size:11.5px;line-height:1.5;color:rgba(232,236,244,.5)}'
+      '.w-ref p{margin:8px 0 0;font-size:11.5px;line-height:1.5;color:rgba(232,236,244,.5)}',
+      '.w-ref-gan{margin-top:10px;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:rgba(232,236,244,.5)}',
+      '.w-ref-gan b{font-weight:400;color:#E3E6EE;letter-spacing:.02em;text-transform:none}'
     ].join('');
     document.head.appendChild(e);
   }
@@ -1403,7 +1421,10 @@
         '<div class="w-ref-por mono" hidden><span>Referred by</span> <b data-no-traducir></b></div>' +
         '<div class="w-ref-mio" hidden><span class="mono">Your referral link</span>' +
         '<div class="w-ref-fila"><code data-no-traducir></code><button type="button" class="mono">Copy</button></div>' +
-        '<p>Earn 10% of every purchase made through your link, paid in the same currency (ETH, BNB or USDT) after the Seed Round closes. Self-referrals do not count.</p></div>';
+        '<div class="w-ref-gan mono" hidden><span>Earned</span> <b data-no-traducir></b></div>' +
+        (REF_EN_CONTRATO
+          ? '<p>Earn 10% of every purchase made through your link, sent to your wallet instantly in the same currency (ETH, BNB or USDT). Self-referrals do not count.</p></div>'
+          : '<p>Earn 10% of every purchase made through your link, paid in the same currency (ETH, BNB or USDT) after the Seed Round closes. Self-referrals do not count.</p></div>');
       nota.parentNode.insertBefore(refCaja, nota.nextSibling);
       var boton = refCaja.querySelector('.w-ref-fila button');
       boton.addEventListener('click', function () {
@@ -1420,6 +1441,29 @@
     mio.hidden = !c;
     if (c) refCaja.querySelector('code').textContent = enlaceRef();
     refCaja.hidden = !a && !c;
+    if (c && REF_EN_CONTRATO) ganado();
+  }
+
+  /* Lo ganado por esta cartera en la red elegida, leido del contrato. Una
+     lectura por cartera y red, y otra despues de cada compra. */
+  var ganadoClave = '';
+  function ganado(forzar) {
+    var c = red(), cuenta = sesion.cuenta;
+    if (!refCaja || !cuenta) return;
+    var clave = c.id + ':' + cuenta;
+    if (!forzar && clave === ganadoClave) return;
+    ganadoClave = clave;
+    Promise.all([
+      llamar(c.id, c.venta, SEL.referralEarnedNative + encA(cuenta)),
+      llamar(c.id, c.venta, SEL.referralEarnedUsdt + encA(cuenta)),
+      llamar(c.id, c.venta, SEL.referralCount + encA(cuenta))
+    ]).then(function (rs) {
+      var n = decU(palabras(rs[0])[0]), u = decU(palabras(rs[1])[0]), k = decU(palabras(rs[2])[0]);
+      var linea = refCaja.querySelector('.w-ref-gan');
+      linea.hidden = false;
+      linea.querySelector('b').textContent = humano(n, 18, 6) + ' ' + c.simbolo + ' · ' +
+        humano(u, c.usdtDec, 2) + ' USDT · ' + k.toString() + (k === 1n ? ' purchase' : ' purchases');
+    }).catch(function () {});
   }
 
   function pintar(desdeInput) {
@@ -2068,7 +2112,9 @@
     return enviar({
       to: c.venta,
       value: '0x' + wei.toString(16),
-      data: SEL.buyWithNative + encU(minimo) + colaRef()
+      data: REF_EN_CONTRATO
+        ? SEL.buyWithNativeRef + encU(minimo) + encA(referidor() || '0x' + '0'.repeat(40))
+        : SEL.buyWithNative + encU(minimo) + colaRef()
     }).then(function (h) { return confirmar(h); });
   }
 
@@ -2107,7 +2153,9 @@
         trabajando('Confirm the purchase…');
         return enviar({
           to: c.venta,
-          data: SEL.buyWithUsdt + encU(cantidad) + encU(minimo) + colaRef()
+          data: REF_EN_CONTRATO
+            ? SEL.buyWithUsdtRef + encU(cantidad) + encU(minimo) + encA(referidor() || '0x' + '0'.repeat(40))
+            : SEL.buyWithUsdt + encU(cantidad) + encU(minimo) + colaRef()
         });
       })
       .then(function (h) { return confirmar(h); });

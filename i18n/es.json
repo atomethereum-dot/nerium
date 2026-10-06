@@ -345,5 +345,7 @@
  "Your referral link": "Tu enlace de referido",
  "Copy": "Copiar",
  "Copied": "Copiado",
- "Earn 10% of every purchase made through your link, paid in the same currency (ETH, BNB or USDT) after the Seed Round closes. Self-referrals do not count.": "Gana el 10 % de cada compra hecha con tu enlace, pagado en la misma moneda (ETH, BNB o USDT) al cerrar la Seed Round. Referirte a ti mismo no cuenta."
+ "Earn 10% of every purchase made through your link, paid in the same currency (ETH, BNB or USDT) after the Seed Round closes. Self-referrals do not count.": "Gana el 10 % de cada compra hecha con tu enlace, pagado en la misma moneda (ETH, BNB o USDT) al cerrar la Seed Round. Referirte a ti mismo no cuenta.",
+ "Earned": "Ganado",
+ "Earn 10% of every purchase made through your link, sent to your wallet instantly in the same currency (ETH, BNB or USDT). Self-referrals do not count.": "Gana el 10 % de cada compra hecha con tu enlace, enviado a tu wallet al instante en la misma moneda (ETH, BNB o USDT). Referirte a ti mismo no cuenta."
 }

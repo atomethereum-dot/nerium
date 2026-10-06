@@ -345,5 +345,7 @@
  "Your referral link": "Davet bağlantınız",
  "Copy": "Kopyala",
  "Copied": "Kopyalandı",
- "Earn 10% of every purchase made through your link, paid in the same currency (ETH, BNB or USDT) after the Seed Round closes. Self-referrals do not count.": "Bağlantınız üzerinden yapılan her alımın %10'unu, Seed Round kapandıktan sonra aynı para biriminde (ETH, BNB veya USDT) kazanın. Kendinizi davet etmeniz sayılmaz."
+ "Earn 10% of every purchase made through your link, paid in the same currency (ETH, BNB or USDT) after the Seed Round closes. Self-referrals do not count.": "Bağlantınız üzerinden yapılan her alımın %10'unu, Seed Round kapandıktan sonra aynı para biriminde (ETH, BNB veya USDT) kazanın. Kendinizi davet etmeniz sayılmaz.",
+ "Earned": "Kazanılan",
+ "Earn 10% of every purchase made through your link, sent to your wallet instantly in the same currency (ETH, BNB or USDT). Self-referrals do not count.": "Bağlantınız üzerinden yapılan her alımın %10'u, aynı para biriminde (ETH, BNB veya USDT) anında cüzdanınıza gönderilir. Kendinizi davet etmeniz sayılmaz."
 }

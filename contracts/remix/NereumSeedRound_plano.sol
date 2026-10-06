@@ -1,12 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.24;
-
 // Sources flattened with hardhat v2.29.1 https://hardhat.org
+
 
 // File @openzeppelin/contracts/utils/Context.sol@v5.6.1
 
 // Original license: SPDX_License_Identifier: MIT
 // OpenZeppelin Contracts (last updated v5.0.1) (utils/Context.sol)
+
 
 /**
  * @dev Provides information about the current execution context, including the
@@ -32,10 +33,12 @@ abstract contract Context {
     }
 }
 
+
 // File @openzeppelin/contracts/access/Ownable.sol@v5.6.1
 
 // Original license: SPDX_License_Identifier: MIT
 // OpenZeppelin Contracts (last updated v5.0.0) (access/Ownable.sol)
+
 
 /**
  * @dev Contract module which provides a basic access control mechanism, where
@@ -131,10 +134,12 @@ abstract contract Ownable is Context {
     }
 }
 
+
 // File @openzeppelin/contracts/access/Ownable2Step.sol@v5.6.1
 
 // Original license: SPDX_License_Identifier: MIT
 // OpenZeppelin Contracts (last updated v5.1.0) (access/Ownable2Step.sol)
+
 
 /**
  * @dev Contract module which provides access control mechanism, where
@@ -197,10 +202,12 @@ abstract contract Ownable2Step is Ownable {
     }
 }
 
+
 // File @openzeppelin/contracts/utils/introspection/IERC165.sol@v5.6.1
 
 // Original license: SPDX_License_Identifier: MIT
 // OpenZeppelin Contracts (last updated v5.4.0) (utils/introspection/IERC165.sol)
+
 
 /**
  * @dev Interface of the ERC-165 standard, as defined in the
@@ -223,15 +230,19 @@ interface IERC165 {
     function supportsInterface(bytes4 interfaceId) external view returns (bool);
 }
 
+
 // File @openzeppelin/contracts/interfaces/IERC165.sol@v5.6.1
 
 // Original license: SPDX_License_Identifier: MIT
 // OpenZeppelin Contracts (last updated v5.4.0) (interfaces/IERC165.sol)
 
+
+
 // File @openzeppelin/contracts/token/ERC20/IERC20.sol@v5.6.1
 
 // Original license: SPDX_License_Identifier: MIT
 // OpenZeppelin Contracts (last updated v5.4.0) (token/ERC20/IERC20.sol)
+
 
 /**
  * @dev Interface of the ERC-20 standard as defined in the ERC.
@@ -308,15 +319,20 @@ interface IERC20 {
     function transferFrom(address from, address to, uint256 value) external returns (bool);
 }
 
+
 // File @openzeppelin/contracts/interfaces/IERC20.sol@v5.6.1
 
 // Original license: SPDX_License_Identifier: MIT
 // OpenZeppelin Contracts (last updated v5.4.0) (interfaces/IERC20.sol)
 
+
+
 // File @openzeppelin/contracts/interfaces/IERC1363.sol@v5.6.1
 
 // Original license: SPDX_License_Identifier: MIT
 // OpenZeppelin Contracts (last updated v5.4.0) (interfaces/IERC1363.sol)
+
+
 
 /**
  * @title IERC1363
@@ -397,10 +413,12 @@ interface IERC1363 is IERC20, IERC165 {
     function approveAndCall(address spender, uint256 value, bytes calldata data) external returns (bool);
 }
 
+
 // File @openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol@v5.6.1
 
 // Original license: SPDX_License_Identifier: MIT
 // OpenZeppelin Contracts (last updated v5.4.0) (token/ERC20/extensions/IERC20Metadata.sol)
+
 
 /**
  * @dev Interface for the optional metadata functions from the ERC-20 standard.
@@ -422,10 +440,13 @@ interface IERC20Metadata is IERC20 {
     function decimals() external view returns (uint8);
 }
 
+
 // File @openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol@v5.6.1
 
 // Original license: SPDX_License_Identifier: MIT
 // OpenZeppelin Contracts (last updated v5.5.0) (token/ERC20/utils/SafeERC20.sol)
+
+
 
 /**
  * @title SafeERC20
@@ -700,10 +721,12 @@ library SafeERC20 {
     }
 }
 
+
 // File @openzeppelin/contracts/utils/Pausable.sol@v5.6.1
 
 // Original license: SPDX_License_Identifier: MIT
 // OpenZeppelin Contracts (last updated v5.3.0) (utils/Pausable.sol)
+
 
 /**
  * @dev Contract module which allows children to implement an emergency stop
@@ -811,11 +834,13 @@ abstract contract Pausable is Context {
     }
 }
 
+
 // File @openzeppelin/contracts/utils/StorageSlot.sol@v5.6.1
 
 // Original license: SPDX_License_Identifier: MIT
 // OpenZeppelin Contracts (last updated v5.1.0) (utils/StorageSlot.sol)
 // This file was procedurally generated from scripts/generate/templates/StorageSlot.js.
+
 
 /**
  * @dev Library for reading and writing primitive types to specific storage slots.
@@ -955,10 +980,12 @@ library StorageSlot {
     }
 }
 
+
 // File @openzeppelin/contracts/utils/ReentrancyGuard.sol@v5.6.1
 
 // Original license: SPDX_License_Identifier: MIT
 // OpenZeppelin Contracts (last updated v5.5.0) (utils/ReentrancyGuard.sol)
+
 
 /**
  * @dev Contract module that helps prevent reentrant calls to a function.
@@ -1073,9 +1100,15 @@ abstract contract ReentrancyGuard {
     }
 }
 
+
 // File src/NereumSeedRound.sol
 
 // Original license: SPDX_License_Identifier: MIT
+
+
+
+
+
 
 /// @notice Lo mínimo de un oráculo de Chainlink. Se declara aquí en vez de traer
 ///         el paquete entero: son cuatro líneas y deja el contrato sin más
@@ -1108,6 +1141,14 @@ interface AggregatorV3Interface {
  *
  *         La compra anota lo que corresponde a cada dirección; el reparto se
  *         abre cuando la ronda ha terminado y el token está depositado.
+ *
+ *         REFERIDOS, PAGADOS EN EL ACTO. Quien compra desde el enlace de otro
+ *         paga lo mismo y recibe los mismos tokens; de lo que paga, un 10 %
+ *         sale en la MISMA transacción hacia quien lo trajo, en la misma moneda
+ *         (ETH, BNB o USDT). Si ese envío no se puede hacer -una cartera que
+ *         rechaza ETH, una dirección bloqueada por USDT-, la compra no se cae:
+ *         la comisión queda apartada y el referidor la retira con
+ *         claimReferral(destino). El dueño nunca puede retirar lo apartado.
  */
 contract NereumSeedRound is Ownable2Step, ReentrancyGuard, Pausable {
     using SafeERC20 for IERC20;
@@ -1189,6 +1230,32 @@ contract NereumSeedRound is Ownable2Step, ReentrancyGuard, Pausable {
     ///         poder aplicar el tope por cartera.
     mapping(address => uint256) public spentUsd;
 
+    // ────────────────────────────── referidos ─────────────────────────────────
+
+    /// @notice Comisión del referidor sobre lo pagado, en puntos básicos.
+    ///         1000 = 10 %. Nunca por encima de MAX_REFERRAL_BPS.
+    uint256 public referralBps = 1000;
+    uint256 public constant MAX_REFERRAL_BPS = 2000;
+
+    /// @notice Lo ganado por cada referidor, en moneda nativa y en USDT, y
+    ///         cuántas compras trajo. Es lo que enseña la web.
+    mapping(address => uint256) public referralEarnedNative;
+    mapping(address => uint256) public referralEarnedUsdt;
+    mapping(address => uint256) public referralCount;
+    uint256 public totalReferralNative;
+    uint256 public totalReferralUsdt;
+
+    /// @notice Lo que no se pudo entregar en el acto y espera a claimReferral().
+    mapping(address => uint256) public referralOwedNative;
+    mapping(address => uint256) public referralOwedUsdt;
+    uint256 public totalReferralOwedNative;
+    uint256 public totalReferralOwedUsdt;
+
+    /// @dev Gas para el envío en el acto. Basta para una cartera normal o un
+    ///      Safe; un receptor que gaste más no puede encarecer ni tumbar la
+    ///      compra: su comisión queda apartada.
+    uint256 private constant REFERRAL_GAS = 30_000;
+
     // ─────────────────────────────── eventos ──────────────────────────────────
 
     event RoundScheduled(uint64 startTime, uint64 endTime);
@@ -1212,6 +1279,10 @@ contract NereumSeedRound is Ownable2Step, ReentrancyGuard, Pausable {
     event UsdtWithdrawn(address indexed to, uint256 amount);
     event UnsoldTokensWithdrawn(address indexed to, uint256 amount);
     event ForeignTokenRescued(address indexed token, address indexed to, uint256 amount);
+    /// @notice Comisión de un referido. delivered=false: quedó apartada.
+    event ReferralPaid(address indexed referrer, address indexed buyer, bool inUsdt, uint256 amount, bool delivered);
+    event ReferralClaimed(address indexed referrer, uint256 nativeAmount, uint256 usdtAmount);
+    event ReferralBpsUpdated(uint256 bps);
 
     // ─────────────────────────────── errores ──────────────────────────────────
 
@@ -1237,6 +1308,8 @@ contract NereumSeedRound is Ownable2Step, ReentrancyGuard, Pausable {
     error ZeroAddress();
     error NativeTransferFailed();
     error UseBuyFunction();
+    error ReferralTooHigh(uint256 bps, uint256 maximum);
+    error AboveFreeBalance(uint256 requested, uint256 free);
 
     // ───────────────────────────── constructor ────────────────────────────────
 
@@ -1363,6 +1436,13 @@ contract NereumSeedRound is Ownable2Step, ReentrancyGuard, Pausable {
     function pause() external onlyOwner { _pause(); }
     function unpause() external onlyOwner { _unpause(); }
 
+    /// @notice Comisión de referidos en puntos básicos. 1000 = 10 %, 0 la apaga.
+    function setReferralBps(uint256 bps) external onlyOwner {
+        if (bps > MAX_REFERRAL_BPS) revert ReferralTooHigh(bps, MAX_REFERRAL_BPS);
+        referralBps = bps;
+        emit ReferralBpsUpdated(bps);
+    }
+
     // ─────────────────────────────── oráculo ──────────────────────────────────
 
     /**
@@ -1434,6 +1514,18 @@ contract NereumSeedRound is Ownable2Step, ReentrancyGuard, Pausable {
     function buyWithNative(uint256 minTokensOut)
         external payable nonReentrant whenNotPaused returns (uint256 tokens)
     {
+        return _buyNative(minTokensOut, address(0));
+    }
+
+    /// @notice Como buyWithNative, y el 10 % de lo pagado sale en el acto hacia
+    ///         `referrer`. Quien compra recibe exactamente los mismos tokens.
+    function buyWithNativeRef(uint256 minTokensOut, address referrer)
+        external payable nonReentrant whenNotPaused returns (uint256 tokens)
+    {
+        return _buyNative(minTokensOut, referrer);
+    }
+
+    function _buyNative(uint256 minTokensOut, address referrer) private returns (uint256 tokens) {
         _requireLive();
 
         /* Se lee aquí y no en la vista porque esta sí puede escribir: cada compra
@@ -1455,11 +1547,24 @@ contract NereumSeedRound is Ownable2Step, ReentrancyGuard, Pausable {
 
         totalRaisedNative += msg.value;
         emit Purchased(msg.sender, false, msg.value, usdValue, tokens);
+        _payReferral(referrer, false, msg.value);
     }
 
     function buyWithUsdt(uint256 amount, uint256 minTokensOut)
         external nonReentrant whenNotPaused returns (uint256 tokens)
     {
+        return _buyUsdt(amount, minTokensOut, address(0));
+    }
+
+    /// @notice Como buyWithUsdt, y el 10 % de lo pagado sale en el acto hacia
+    ///         `referrer`, en USDT.
+    function buyWithUsdtRef(uint256 amount, uint256 minTokensOut, address referrer)
+        external nonReentrant whenNotPaused returns (uint256 tokens)
+    {
+        return _buyUsdt(amount, minTokensOut, referrer);
+    }
+
+    function _buyUsdt(uint256 amount, uint256 minTokensOut, address referrer) private returns (uint256 tokens) {
         _requireLive();
 
         /* Se mide lo que entra de verdad, por si USDT activase algún día una
@@ -1475,6 +1580,58 @@ contract NereumSeedRound is Ownable2Step, ReentrancyGuard, Pausable {
 
         totalRaisedUsdt += received;
         emit Purchased(msg.sender, true, received, usdValue, tokens);
+        _payReferral(referrer, true, received);
+    }
+
+    /**
+     * @dev La comisión del referido, despues de anotar la compra (el estado ya
+     *      esta escrito y la funcion que llama es nonReentrant). Sin referidor,
+     *      a uno mismo o al propio contrato no hay comision. Si el envio falla,
+     *      la compra sigue y la comision queda apartada para claimReferral().
+     */
+    function _payReferral(address referrer, bool inUsdt, uint256 paid) private {
+        if (referrer == address(0) || referrer == msg.sender || referrer == address(this)) return;
+        uint256 cut = (paid * referralBps) / 10_000;
+        if (cut == 0) return;
+
+        bool delivered;
+        if (inUsdt) {
+            referralEarnedUsdt[referrer] += cut;
+            totalReferralUsdt += cut;
+            /* Llamada a mano en vez de safeTransfer: un fallo aqui no debe
+               revertir la compra. Vale para USDT de Ethereum, que no devuelve
+               nada, y para el de BNB Chain, que devuelve un bool. */
+            (bool ok, bytes memory ret) = address(usdt).call(abi.encodeCall(IERC20.transfer, (referrer, cut)));
+            delivered = ok && (ret.length == 0 || abi.decode(ret, (bool)));
+            if (!delivered) { referralOwedUsdt[referrer] += cut; totalReferralOwedUsdt += cut; }
+        } else {
+            referralEarnedNative[referrer] += cut;
+            totalReferralNative += cut;
+            (delivered, ) = referrer.call{value: cut, gas: REFERRAL_GAS}("");
+            if (!delivered) { referralOwedNative[referrer] += cut; totalReferralOwedNative += cut; }
+        }
+        referralCount[referrer] += 1;
+        emit ReferralPaid(referrer, msg.sender, inUsdt, cut, delivered);
+    }
+
+    /// @notice Retira las comisiones que no se pudieron entregar en el acto, a la
+    ///         dirección que elija el referidor: si la suya rechazaba ETH, puede
+    ///         cobrar en otra.
+    function claimReferral(address payable to) external nonReentrant {
+        if (to == address(0)) revert ZeroAddress();
+        uint256 n = referralOwedNative[msg.sender];
+        uint256 u = referralOwedUsdt[msg.sender];
+        if (n == 0 && u == 0) revert NothingToClaim();
+        referralOwedNative[msg.sender] = 0;
+        referralOwedUsdt[msg.sender] = 0;
+        totalReferralOwedNative -= n;
+        totalReferralOwedUsdt -= u;
+        if (u != 0) usdt.safeTransfer(to, u);
+        if (n != 0) {
+            (bool ok, ) = to.call{value: n}("");
+            if (!ok) revert NativeTransferFailed();
+        }
+        emit ReferralClaimed(msg.sender, n, u);
     }
 
     function _record(address buyer, uint256 usdValue, uint256 minTokensOut)
@@ -1559,7 +1716,10 @@ contract NereumSeedRound is Ownable2Step, ReentrancyGuard, Pausable {
 
     function withdrawNative(address payable to, uint256 amount) external onlyOwner nonReentrant {
         if (to == address(0)) revert ZeroAddress();
-        uint256 value = amount == 0 ? address(this).balance : amount;
+        /* lo apartado para referidos no es del dueño */
+        uint256 free = address(this).balance - totalReferralOwedNative;
+        uint256 value = amount == 0 ? free : amount;
+        if (value > free) revert AboveFreeBalance(value, free);
         (bool ok, ) = to.call{value: value}("");
         if (!ok) revert NativeTransferFailed();
         emit NativeWithdrawn(to, value);
@@ -1567,7 +1727,9 @@ contract NereumSeedRound is Ownable2Step, ReentrancyGuard, Pausable {
 
     function withdrawUsdt(address to, uint256 amount) external onlyOwner nonReentrant {
         if (to == address(0)) revert ZeroAddress();
-        uint256 value = amount == 0 ? usdt.balanceOf(address(this)) : amount;
+        uint256 free = usdt.balanceOf(address(this)) - totalReferralOwedUsdt;
+        uint256 value = amount == 0 ? free : amount;
+        if (value > free) revert AboveFreeBalance(value, free);
         usdt.safeTransfer(to, value);
         emit UsdtWithdrawn(to, value);
     }
