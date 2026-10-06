@@ -103,6 +103,41 @@
 
   var LISTADO = 1.00;               /* precio de listado, solo informativo */
 
+  /* ───────────────────────────── referidos ────────────────────────────────
+     p78 · EL 10 % POR TRAER COMPRADORES, SIN TOCAR EL CONTRATO.
+     El contrato de la venta no sabe de referidos y no hace falta que sepa: al
+     final de la transaccion de compra se pegan cuatro bytes de marca, «NRMR»,
+     y la direccion de quien la trajo. Solidity lee sus argumentos y no mira lo
+     que sobra detras, asi que la compra es exactamente la misma -lo prueba
+     contracts/test/referidos.js- pero el referido queda escrito para siempre
+     en la cadena, a la vista en Etherscan o BscScan.
+     contracts/scripts/referidos.js lee esas compras al cerrar la ronda y saca
+     lo que se debe a cada uno: el 10 % de lo pagado, en la misma moneda
+     (ETH, BNB o USDT). Referirse a uno mismo no cuenta.
+     El enlace es nereum.xyz/?ref=0x…: se guarda 60 dias en este navegador y
+     manda el ultimo que se haya abierto. */
+  var REF_MARCA = '4e524d52';        /* «NRMR» */
+  var REF_CLAVE = 'nrm-ref', REF_DIAS = 60;
+  var REF_WEB = 'https://nereum.xyz/';
+  function esDireccion(a) { return /^0x[0-9a-fA-F]{40}$/.test(a || ''); }
+  (function () {
+    try {
+      var m = /[?&]ref=(0x[0-9a-fA-F]{40})(?![0-9a-fA-F])/.exec(location.search + '&' + location.hash.replace(/^#/, ''));
+      if (m) localStorage.setItem(REF_CLAVE, JSON.stringify({ a: m[1].toLowerCase(), t: Date.now() }));
+    } catch (e) {}
+  })();
+  function referidor() {
+    try {
+      var o = JSON.parse(localStorage.getItem(REF_CLAVE) || 'null');
+      if (!o || !esDireccion(o.a)) return null;
+      if (Date.now() - o.t > REF_DIAS * 864e5) { localStorage.removeItem(REF_CLAVE); return null; }
+      if (sesion.cuenta && o.a === sesion.cuenta.toLowerCase()) return null;
+      return o.a;
+    } catch (e) { return null; }
+  }
+  /* lo que se pega al final de los datos de la compra: nada si no hay referido */
+  function colaRef() { var a = referidor(); return a ? REF_MARCA + a.slice(2) : ''; }
+
   /* ─────────────────────────── selectores (keccak) ────────────────────────── */
 
   var SEL = {
@@ -1332,8 +1367,64 @@
       : 'The round is closed. Claims open once the tokens are deposited.';
   }
 
+  /* El enlace propio y, si se llego por uno, quien lo trajo. Debajo de la nota,
+     dentro del mismo widget. Con la ronda cerrada ya no tiene sentido y se
+     esconde. */
+  var refCaja = null;
+  function estilosRef() {
+    if (document.getElementById('nrmRef')) return;
+    var e = document.createElement('style');
+    e.id = 'nrmRef';
+    e.textContent = [
+      '.w-ref{margin-top:14px;padding-top:14px;border-top:1px solid rgba(232,236,244,.09)}',
+      '.w-ref-por{text-align:center;font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:rgba(232,236,244,.5)}',
+      '.w-ref-por b{font-weight:400;color:#AACBFF;letter-spacing:.04em;text-transform:none}',
+      '.w-ref-por + .w-ref-mio{margin-top:12px}',
+      '.w-ref-mio > span{display:block;margin-bottom:8px;font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:rgba(232,236,244,.5)}',
+      '.w-ref-fila{display:flex;gap:8px;align-items:stretch}',
+      '.w-ref-fila code{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:10px;border-radius:6px;',
+      'border:1px solid rgba(232,236,244,.1);background:rgba(232,236,244,.04);color:#E3E6EE;font-size:11.5px;line-height:14px}',
+      '.w-ref-fila button{flex:none;padding:0 14px;border-radius:6px;border:1px solid rgba(99,169,255,.5);',
+      'background:rgba(46,134,255,.1);color:#AACBFF;font-size:12px;cursor:pointer}',
+      '.w-ref-fila button:hover{background:rgba(46,134,255,.18)}',
+      '.w-ref p{margin:8px 0 0;font-size:11.5px;line-height:1.5;color:rgba(232,236,244,.5)}'
+    ].join('');
+    document.head.appendChild(e);
+  }
+  function enlaceRef() { return REF_WEB + '?ref=' + sesion.cuenta + '#seed-round'; }
+  function pintarReferidos(cerrada) {
+    if (!nota || !nota.parentNode) return;
+    if (!refCaja) {
+      estilosRef();
+      refCaja = document.createElement('div');
+      refCaja.className = 'w-ref';
+      refCaja.hidden = true;
+      refCaja.innerHTML =
+        '<div class="w-ref-por mono" hidden><span>Referred by</span> <b data-no-traducir></b></div>' +
+        '<div class="w-ref-mio" hidden><span class="mono">Your referral link</span>' +
+        '<div class="w-ref-fila"><code data-no-traducir></code><button type="button" class="mono">Copy</button></div>' +
+        '<p>Earn 10% of every purchase made through your link, paid in the same currency (ETH, BNB or USDT) after the Seed Round closes. Self-referrals do not count.</p></div>';
+      nota.parentNode.insertBefore(refCaja, nota.nextSibling);
+      var boton = refCaja.querySelector('.w-ref-fila button');
+      boton.addEventListener('click', function () {
+        var t = enlaceRef();
+        var hecho = function () { boton.textContent = 'Copied'; setTimeout(function () { boton.textContent = 'Copy'; }, 1600); };
+        if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(hecho, function () {});
+        else { var r = document.createRange(); r.selectNodeContents(refCaja.querySelector('code')); var sel = getSelection(); sel.removeAllRanges(); sel.addRange(r); }
+      });
+    }
+    var a = cerrada ? null : referidor(), c = cerrada ? null : sesion.cuenta;
+    var por = refCaja.querySelector('.w-ref-por'), mio = refCaja.querySelector('.w-ref-mio');
+    por.hidden = !a;
+    if (a) por.querySelector('b').textContent = a.slice(0, 6) + '…' + a.slice(-4);
+    mio.hidden = !c;
+    if (c) refCaja.querySelector('code').textContent = enlaceRef();
+    refCaja.hidden = !a && !c;
+  }
+
   function pintar(desdeInput) {
     var ec = est();
+    pintarReferidos(ec.ok && ec.terminada);
     if (ec.ok && ec.terminada) {
       modoCerrada(true, ec.reparto);
       pintarCta();
@@ -1977,7 +2068,7 @@
     return enviar({
       to: c.venta,
       value: '0x' + wei.toString(16),
-      data: SEL.buyWithNative + encU(minimo)
+      data: SEL.buyWithNative + encU(minimo) + colaRef()
     }).then(function (h) { return confirmar(h); });
   }
 
@@ -2016,7 +2107,7 @@
         trabajando('Confirm the purchase…');
         return enviar({
           to: c.venta,
-          data: SEL.buyWithUsdt + encU(cantidad) + encU(minimo)
+          data: SEL.buyWithUsdt + encU(cantidad) + encU(minimo) + colaRef()
         });
       })
       .then(function (h) { return confirmar(h); });

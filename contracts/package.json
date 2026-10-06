@@ -6,7 +6,8 @@
   "scripts": {
     "build": "hardhat compile",
     "test": "hardhat test",
-    "abi": "node scripts/abi.js"
+    "abi": "node scripts/abi.js",
+    "referidos": "node scripts/referidos.js"
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-toolbox": "^5.0.0",

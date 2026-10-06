@@ -253,3 +253,25 @@ Los de la verificación prueban **la misma función que ejecuta el despliegue**,
 una copia: que acepta un oráculo correcto y que rechaza el par equivocado, un
 precio absurdo, un oráculo parado, un precio cero, una dirección sin contrato y
 un contrato que no es un oráculo.
+
+## Referidos (10 %)
+
+La web pega al final de cada compra hecha desde un enlace `nereum.xyz/?ref=0x…`
+la marca `NRMR` (`0x4e524d52`) y la dirección de quien la trajo. El contrato no
+la lee y la compra es idéntica (`test/referidos.js`); queda en la cadena.
+
+Al cerrar la ronda:
+
+```
+RPC_ETH=https://… DESDE_ETH=<bloque de despliegue> \
+RPC_BSC=https://… DESDE_BSC=<bloque de despliegue> npm run referidos
+```
+
+Calcula el 10 % de cada compra referida **en la moneda pagada** (ETH, BNB o
+USDT), sin contar a quien se refiere a sí mismo, y deja en `referidos/`:
+
+- `resumen.json`: compra a compra, con la transacción de cada una.
+- `safe-ethereum.csv` y `safe-bnb.csv`: lo pendiente, en el formato de la app
+  «CSV Airdrop» de Safe, para pagar todo en un solo lote desde el multisig.
+
+Lo ya pagado se apunta en `referidos/pagados.json` y se descuenta la vez siguiente.
