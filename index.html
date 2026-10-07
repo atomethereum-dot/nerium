@@ -7739,7 +7739,8 @@ main>section.sx#security{background:#030409 !important;background-image:none !im
   #security .sx-ver b{display:inline;margin:0 .6em 0 0}
   /* el registro lleva ademas la nota de verificacion: para que quepa todo,
      su tarjeta va un punto mas compacta -filas mas bajas; en los telefonos de
-     alto medio, tambien sin el icono- */
+     alto medio, tambien sin el icono-. En los bajos se aprieta mas, pero no
+     se quita nada. */
   #security .sx-card[data-i="0"] .sx-kv>div{min-height:28px}
   #security .sx-card[data-i="0"] .sx-p{font-size:13px;line-height:1.42}
   #security .sx-card[data-i="0"] .sx-log li{padding:4px 0}
@@ -7798,11 +7799,15 @@ main>section.sx#security{background:#030409 !important;background-image:none !im
   #security .sx-card[data-i="0"] .sx-p{font-size:12.5px;line-height:1.4}
   .sx-foot{margin-top:8px}
 }
-/* telefonos pequeños (iPhone mini, SE): en el registro no caben a la vez los
-   datos, el registro de lineas y la nota; se quita el registro de lineas, que
-   repite lo que dicen los datos */
+/* telefonos bajos -y cualquier iPhone con las barras de Safari a la vista-:
+   en el registro caben datos, registro de lineas y nota si se aprietan un
+   punto. Antes aqui se quitaba el registro de lineas. */
 @media (max-width:899px) and (max-height:830px){
-  #security .sx-card[data-i="0"] .sx-log{display:none}
+  /* p81 · el registro de lineas SE QUEDA: se aprieta en vez de quitarse */
+  #security .sx-card[data-i="0"] .sx-log{padding-top:6px;margin-bottom:8px}
+  #security .sx-card[data-i="0"] .sx-log li{padding:2px 0;font-size:10px;line-height:1.25}
+  #security .sx-card[data-i="0"] .sx-kv>div{min-height:26px}
+  #security .sx-card[data-i="0"] .sx-ver{font-size:10px;line-height:1.35;padding:.35em .6em}
 }
 /* pantallas bajas: fuera lo que se puede perder sin perder la prueba */
 @media (max-width:899px) and (max-height:760px){
@@ -7822,6 +7827,32 @@ main>section.sx#security{background:#030409 !important;background-image:none !im
 }
 @media (max-width:899px) and (max-height:620px){
   #security .sx-p{display:none}
+}
+/* p81 · el registro, con su nota, en los telefonos mas bajos -un iPhone con las
+   barras de Safari a la vista anda por 660 de alto-: un punto mas apretado, y
+   por debajo de 660 sin la entradilla, que es lo unico que repiten los datos */
+@media (max-width:899px) and (max-height:700px){
+  #security .sx-card[data-i="0"]{padding-top:12px;padding-bottom:10px}
+  #security .sx-card[data-i="0"] .sx-t{font-size:24px}
+  #security .sx-card[data-i="0"] .sx-p{font-size:11.5px;line-height:1.35}
+  #security .sx-card[data-i="0"] .sx-kv>div{min-height:21px}
+  #security .sx-card[data-i="0"] .sx-log{padding-top:4px;margin-bottom:6px}
+  #security .sx-card[data-i="0"] .sx-log li{padding:1px 0;font-size:9.5px}
+  #security .sx-card[data-i="0"] .sx-ver{font-size:9.5px;margin-bottom:5px}
+  #security .sx-card[data-i="0"] .sx-go{padding:.38em 1em;font-size:12.5px}
+  #security .sx-card[data-i="0"] .sx-foot{margin-top:6px}
+}
+@media (max-width:899px) and (max-height:660px){
+  #security .sx-card[data-i="0"] .sx-p{display:none}
+}
+/* y en los mas bajos de todos (un SE con las barras, 550 de alto) fuera la
+   linea de la fuente, que el registro de lineas ya dice -«Public record ·
+   Sunbiz»- y filas un punto mas bajas */
+@media (max-width:899px) and (max-height:600px){
+  #security .sx-card[data-i="0"] .sx-foot{display:none}
+  #security .sx-card[data-i="0"] .sx-kv>div{min-height:18px}
+  #security .sx-card[data-i="0"] .sx-t{font-size:21px}
+  #security .sx-card[data-i="0"] .sx-sello{width:56px}
 }
 @media (prefers-reduced-motion:reduce){
   .sx-card,.sx-card.on,.sx-card.sale{transition:opacity .3s ease;transform:none !important;filter:none !important}
@@ -8488,8 +8519,8 @@ body.lock .flota{opacity:0 !important;pointer-events:none !important}
             <circle cx="100" cy="100" r="97" fill="#0F1526"/><circle cx="100" cy="100" r="97" fill="url(#sxP0)"/>
             <circle cx="100" cy="100" r="96.5" fill="none" stroke="rgba(46,134,255,.28)"/>
             <circle cx="100" cy="100" r="64" fill="#080C18" stroke="#2E86FF" stroke-width="1.8"/>
-            <text class="sx-tag" x="100" y="88" text-anchor="middle">REG</text>
-            <path class="sx-chk" pathLength="1" d="M83 106l12 12 23-25"/>
+            <text class="sx-tag" x="100" y="84" text-anchor="middle">REG</text>
+            <path class="sx-chk" pathLength="1" d="M85 112l11 11 21-22"/>
           </svg><i class="sx-giro"><svg class="sx-anillo" viewBox="0 0 200 200" data-no-traducir><defs><path id="sxA0" d="M100,100 m-83,0 a83,83 0 1,1 166,0 a83,83 0 1,1 -166,0"/></defs><text class="sx-arco"><textPath href="#sxA0" textLength="515">NEREUM FINANCE · REGISTERED IN FLORIDA · REG · 2026 · </textPath></text></svg></i></div>
             <ul class="sx-log"><li><i aria-hidden="true">&#8250;</i><span class="sx-l">Registration · State of Florida</span><b>OK</b></li><li><i aria-hidden="true">&#8250;</i><span class="sx-l">Entity · Nereum Finance LLC</span><b>OK</b></li><li><i aria-hidden="true">&#8250;</i><span class="sx-l">Certificate of status · 6697114960CU</span><b>OK</b></li><li><i aria-hidden="true">&#8250;</i><span class="sx-l">Public record · Sunbiz</span><b>OK</b></li></ul>
           </div>
