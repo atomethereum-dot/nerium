@@ -7745,6 +7745,15 @@ main>section.sx#security{background:#030409 !important;background-image:none !im
   #security .sx-card[data-i="0"] .sx-p{font-size:13px;line-height:1.42}
   #security .sx-card[data-i="0"] .sx-log li{padding:4px 0}
   .sx-go{grid-area:10/1/11/3;justify-self:start}
+  /* p82 · LA NOTA, CENTRADA. Detras de la ultima fila «1fr» la nota caia pegada
+     al boton, con todo el aire encima. En el registro lleva su propia fila de
+     aire debajo -ocho pixeles como poco- y el sobrante se reparte por igual
+     arriba y abajo: queda en medio entre el registro de lineas y el boton. */
+  #security .sx-card[data-i="0"] .sx-body{grid-template-rows:auto auto auto 1fr auto 1fr auto minmax(8px,1fr) auto minmax(8px,1fr) auto}
+  #security .sx-card[data-i="0"] .sx-go{grid-area:11/1/12/3}
+  #security .sx-card[data-i="0"] .sx-ver{margin-bottom:0!important}
+  #security .sx-card[data-i="0"] .sx-log{margin-bottom:0!important}
+  #security .sx-card[data-i="0"] .sx-body{row-gap:0}
   .sx-ic svg{width:34px}
   .sx-t{font-size:clamp(26px,7.6vw,32px);margin-top:8px}
   /* el sello, a la derecha del icono y del titular, con aire debajo */
