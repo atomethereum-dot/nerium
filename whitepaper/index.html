@@ -1032,7 +1032,7 @@ const DIAG={
                   'Nereum Finance LLC · Miami, Florida', 'TRUST',
                   {escala:270, cx:850, cy:30, ax:-0.30, ay:0.70}),
   audit:        figuraCard('m','corte',      'Audit',
-                  'In progress · CyberScope', 'TRUST',
+                  'Completed · CyberScope', 'TRUST',
                   {escala:390, cx:880, cy:0, ax:-0.26, ay:0.88}),
   kyc:          figuraCard('n','prisma',     'Team KYC',
                   'In progress · CyberScope', 'TRUST',
@@ -1434,7 +1434,7 @@ toda transferencia, en cualquier mercado y durante toda la vida del activo.</p>
       <td>Ver <a class="enl" href="#/legal">Documento legal — Miami, FL</a></td></tr>
   <tr><td><b>KYC del equipo</b><br><span style="color:var(--ink-3)">Con CyberScope · en proceso</span></td>
       <td>Ver <a class="enl" href="#/kyc">KYC del equipo</a></td></tr>
-  <tr><td><b>Auditoría del contrato</b><br><span style="color:var(--ink-3)">Con CyberScope · en proceso</span></td>
+  <tr><td><b>Auditoría del contrato</b><br><span style="color:var(--ink-3)">CyberScope · completada · 6 de 6 comprobaciones superadas</span></td>
       <td>Ver <a class="enl" href="#/audit">Auditoría</a></td></tr>
 </table>
 
@@ -1479,7 +1479,7 @@ red no resulta utilizable de extremo a extremo.</p>
 <table>
   <tr><th>Fase</th><th>Qué abarca</th></tr>
   <tr><td><b>Cimientos</b></td>
-      <td>El contrato desplegado y verificado y la empresa registrada en Florida, con la auditoría y el KYC del equipo en marcha. Cada paso lo puede comprobar alguien que no somos nosotros.</td></tr>
+      <td>El contrato desplegado, verificado y auditado por CyberScope, y la empresa registrada en Florida, con el KYC del equipo en marcha. Cada paso lo puede comprobar alguien que no somos nosotros.</td></tr>
   <tr><td><b>Expansión</b></td>
       <td>La cadena y las interfaces que van encima, construidas y a la vista, con un precio que cualquiera puede consultar.</td></tr>
   <tr><td><b>Integración</b></td>
@@ -1492,7 +1492,7 @@ red no resulta utilizable de extremo a extremo.</p>
   <li><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20 6 9 17l-5-5"/></svg><span>Contrato desplegado</span></li>
   <li><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20 6 9 17l-5-5"/></svg><span>Código verificado en Etherscan</span></li>
   <li><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20 6 9 17l-5-5"/></svg><span>Empresa registrada en Florida · Nereum Finance LLC</span></li>
-  <li class="proc"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="7"/></svg><span>Auditoría en proceso · CyberScope</span></li>
+  <li><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20 6 9 17l-5-5"/></svg><span>Auditoría del contrato completada · CyberScope</span></li>
   <li class="proc"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="7"/></svg><span>KYC del equipo en proceso · CyberScope</span></li>
   <li class="proc" hidden><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="7"/></svg><span>Seed Round de 5 M$ · en proceso</span></li>
 </ul>
@@ -1616,22 +1616,64 @@ que ambas importan: <strong>Nereum no tiene dueño</strong>. Una vez que el cód
 está corriendo, nadie —nosotros incluidos— puede cambiarlo. Eso convierte a la
 auditoría en la última línea de defensa, no en una de varias.</p>
 
-<p>La auditoría la está haciendo <strong>CyberScope</strong> y está <strong>en
-proceso</strong>. El informe y sus datos se publicarán aquí cuando termine.</p>
+<p>La auditoría está <strong>completada</strong>. <strong>CyberScope</strong> revisó
+el contrato del token NRM —<strong>Nereum.sol</strong>, desplegado en Ethereum— y
+publicó su informe el <strong>6 de octubre de 2026</strong>. El contrato superó
+<strong>las 6 comprobaciones</strong> del análisis, sin hallazgos críticos ni
+medios y con <strong>una única observación menor/informativa</strong>, que se
+explica más abajo.</p>
 
 <h2 id="informe">La revisión</h2>
 <table>
   <tr><th>Elemento</th><th>Valor</th></tr>
   <tr><td>Firma</td><td><b>CyberScope</b></td></tr>
-  <tr><td>Estado</td><td><b>En proceso</b></td></tr>
-  <tr><td><b>Informe completo</b></td><td>${PEND('enlace público al informe')}</td></tr>
-  <tr><td><b>Informe en la web del auditor</b></td><td>${PEND('enlace en el dominio de la propia firma')}</td></tr>
-  <tr><td>Alcance</td><td>${PEND('qué contratos se revisaron')}</td></tr>
-  <tr><td>Commit revisado</td><td>${PEND('hash exacto del commit')}</td></tr>
-  <tr><td>Fecha</td><td>${PEND('fecha del informe')}</td></tr>
-  <tr><td>Hallazgos</td><td>${PEND('críticos / altos / medios / bajos')}</td></tr>
-  <tr><td>Resueltos</td><td>${PEND('cuántos, y cuáles siguen abiertos')}</td></tr>
+  <tr><td>Estado</td><td><b>Completada</b></td></tr>
+  <tr><td><b>Informe completo</b></td><td><a class="enl" href="https://github.com/cyberscope-io/audits/blob/main/nrm/audit.pdf" target="_blank" rel="noopener">PDF en el repositorio público de CyberScope</a></td></tr>
+  <tr><td><b>Informe en la web del auditor</b></td><td><a class="enl" href="https://app.cyberscope.io/audits/nrm#security" target="_blank" rel="noopener">app.cyberscope.io/audits/nrm</a></td></tr>
+  <tr><td>Alcance</td><td>El contrato del token NRM: <b>Nereum</b> (<code>Nereum.sol</code>). El contrato de venta de la Seed Round no forma parte de este informe; todavía no está desplegado.</td></tr>
+  <tr><td>Dirección auditada</td><td><a href="https://etherscan.io/address/0x9eAb4Ab3D08d0cAc72ACAcEA19904aF2f0D69228#code" target="_blank" rel="noopener"><code>0x9eAb4Ab3D08d0cAc72ACAcEA19904aF2f0D69228</code></a> · Ethereum</td></tr>
+  <tr><td>Compilador</td><td><code>v0.8.30+commit.73712a01</code> · optimización a 200 runs</td></tr>
+  <tr><td>Código revisado</td><td>SHA256 del archivo <code>Nereum.sol</code>, tal como figura en el informe:<br><code>692aa74a20ad4dae285b13517147926406f32b549ce7bacf096cff03e5eedb4a</code></td></tr>
+  <tr><td>Fecha</td><td>6 de octubre de 2026 · <i>Initial Audit</i></td></tr>
+  <tr><td>Comprobaciones</td><td><b>6 de 6 superadas</b></td></tr>
+  <tr><td>Hallazgos</td><td>0 críticos · 0 medios · 1 menor/informativo</td></tr>
+  <tr><td>Estado del hallazgo</td><td>Reconocido por el equipo (<i>Acknowledged</i>) — ver <a class="enl" href="#hallazgo">la observación</a></td></tr>
+  <tr><td>Reauditoría</td><td>No aplica: el informe tiene una sola versión, y su única observación es informativa y se reconoció sin cambios en el código</td></tr>
 </table>
+
+<div class="nota"><b>Verificación oficial</b>
+<p>El informe puede comprobarse directamente en la fuente, sin depender de
+nosotros. Abre la <a class="enl" href="https://app.cyberscope.io/audits/nrm#security" target="_blank" rel="noopener">página pública de la
+auditoría</a> en la web de CyberScope y comprueba que la dirección auditada
+coincide, carácter por carácter, con la del contrato desplegado:
+<code>0x9eAb4Ab3D08d0cAc72ACAcEA19904aF2f0D69228</code>. El PDF original está
+también en el <a class="enl" href="https://github.com/cyberscope-io/audits/blob/main/nrm/audit.pdf" target="_blank" rel="noopener">repositorio público de auditorías
+de CyberScope</a> en GitHub.</p></div>
+
+<h2 id="comprobaciones">Las seis comprobaciones</h2>
+<p>El análisis del informe recoge seis comprobaciones sobre el contrato, y el
+contrato las superó todas:</p>
+<ul class="hitos">
+  <li><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20 6 9 17l-5-5"/></svg><span><b>ST</b> · Detener transacciones (<i>Stops Transactions</i>) — superada</span></li>
+  <li><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20 6 9 17l-5-5"/></svg><span><b>OTUT</b> · Transferir tokens de los usuarios (<i>Transfers User's Tokens</i>) — superada</span></li>
+  <li><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20 6 9 17l-5-5"/></svg><span><b>ELFM</b> · Superar el límite de comisiones (<i>Exceeds Fees Limit</i>) — superada</span></li>
+  <li><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20 6 9 17l-5-5"/></svg><span><b>MT</b> · Acuñar tokens (<i>Mints Tokens</i>) — superada</span></li>
+  <li><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20 6 9 17l-5-5"/></svg><span><b>BT</b> · Quemar tokens (<i>Burns Tokens</i>) — superada</span></li>
+  <li><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20 6 9 17l-5-5"/></svg><span><b>BC</b> · Poner direcciones en lista negra (<i>Blacklists Addresses</i>) — superada</span></li>
+</ul>
+
+<h2 id="hallazgo">La observación informativa</h2>
+<p>El informe recoge una sola observación, de severidad menor/informativa:
+<strong>ROF · Redundant Ownable Functionality</strong> (<code>Nereum.sol#L724</code>).
+Señala que el contrato hereda <code>Ownable</code> y define un propietario, pero
+que ese propietario no tiene ninguna función administrativa: solo puede transferir
+o renunciar a la propiedad, sin ningún privilegio sobre el suministro, las
+transferencias, las autorizaciones ni las comisiones.</p>
+<p>El equipo la reconoció y explicó en el propio informe por qué se mantuvo: el
+propietario se conservó únicamente para poder <strong>renunciar a la propiedad en
+cadena</strong>, como prueba pública. Decir que un contrato no tiene dueño no es lo
+mismo que demostrarlo con un evento de renuncia, y la propiedad se renunció —
+<a class="enl" href="https://etherscan.io/address/0x9eAb4Ab3D08d0cAc72ACAcEA19904aF2f0D69228#readContract" target="_blank" rel="noopener">compruébalo en Etherscan</a>.</p>
 
 <h2 id="descentralizado">Esto no tiene dueño</h2>
 <p>Nereum está construida para pertenecer a quienes la tienen —su comunidad y sus
@@ -2575,7 +2617,7 @@ every transfer, in every venue, for the life of the asset.</p>
       <td>See <a class="enl" href="#/legal">Legal Document — Miami, FL</a></td></tr>
   <tr><td><b>Team KYC</b><br><span style="color:var(--ink-3)">With CyberScope · in progress</span></td>
       <td>See <a class="enl" href="#/kyc">Team KYC</a></td></tr>
-  <tr><td><b>Contract audit</b><br><span style="color:var(--ink-3)">With CyberScope · in progress</span></td>
+  <tr><td><b>Contract audit</b><br><span style="color:var(--ink-3)">CyberScope · completed · 6 of 6 checks passed</span></td>
       <td>See <a class="enl" href="#/audit">Audit</a></td></tr>
 </table>
 
@@ -2621,7 +2663,7 @@ the network is not usable end to end.</p>
 <table>
   <tr><th>Phase</th><th>What it covers</th></tr>
   <tr><td><b>Foundation</b></td>
-      <td>The contract deployed and verified and the company registered in Florida, with the audit and the team KYC under way. Each step is checkable by someone who is not us.</td></tr>
+      <td>The contract deployed, verified and audited by CyberScope, and the company registered in Florida, with the team KYC under way. Each step is checkable by someone who is not us.</td></tr>
   <tr><td><b>Expansion</b></td>
       <td>The chain and the interfaces that sit on top of it, built and out in the open, with a price anyone can look up.</td></tr>
   <tr><td><b>Integration</b></td>
@@ -2634,7 +2676,7 @@ the network is not usable end to end.</p>
   <li><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20 6 9 17l-5-5"/></svg><span>Contract deployed</span></li>
   <li><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20 6 9 17l-5-5"/></svg><span>Code verified on Etherscan</span></li>
   <li><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20 6 9 17l-5-5"/></svg><span>Company registered in Florida · Nereum Finance LLC</span></li>
-  <li class="proc"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="7"/></svg><span>Audit in progress · CyberScope</span></li>
+  <li><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20 6 9 17l-5-5"/></svg><span>Contract audit completed · CyberScope</span></li>
   <li class="proc"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="7"/></svg><span>Team KYC in progress · CyberScope</span></li>
   <li class="proc" hidden><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="7"/></svg><span>$5M Seed Round · in progress</span></li>
 </ul>
@@ -3271,24 +3313,62 @@ matter: <strong>Nereum has no owner</strong>. Once the code is running, nobody �
 including us — can change it. That makes the audit the last line of defence
 rather than one of several.</p>
 
-<p>The audit is being carried out by <strong>CyberScope</strong> and is
-<strong>in progress</strong>. The report and its details will be published here
-when it is complete.</p>
+<p>The audit is <strong>complete</strong>. <strong>CyberScope</strong> reviewed the
+NRM token contract — <strong>Nereum.sol</strong>, deployed on Ethereum — and issued
+its report on <strong>6 October 2026</strong>. The contract passed <strong>all 6
+checks</strong> in the analysis, with no critical or medium findings and
+<strong>a single minor/informative note</strong>, explained below.</p>
 
 <h2 id="informe">The review</h2>
 <table>
   <tr><th>Item</th><th>Value</th></tr>
   <tr><td>Firm</td><td><b>CyberScope</b></td></tr>
-  <tr><td>Status</td><td><b>In progress</b></td></tr>
-  <tr><td><b>Full report</b></td><td>${PEND('public link to the report')}</td></tr>
-  <tr><td><b>Report on the auditor site</b></td><td>${PEND('link on the firm own domain')}</td></tr>
-  <tr><td>Scope</td><td>${PEND('which contracts were reviewed')}</td></tr>
-  <tr><td>Commit reviewed</td><td>${PEND('exact commit hash')}</td></tr>
-  <tr><td>Date</td><td>${PEND('date of the report')}</td></tr>
-  <tr><td>Findings</td><td>${PEND('critical / high / medium / low')}</td></tr>
-  <tr><td>Resolved</td><td>${PEND('how many, and which remain open')}</td></tr>
-  <tr><td>Re-audit after fixes</td><td>${PEND('yes or no, and link')}</td></tr>
+  <tr><td>Status</td><td><b>Completed</b></td></tr>
+  <tr><td><b>Full report</b></td><td><a class="enl" href="https://github.com/cyberscope-io/audits/blob/main/nrm/audit.pdf" target="_blank" rel="noopener">PDF in CyberScope's public repository</a></td></tr>
+  <tr><td><b>Report on the auditor site</b></td><td><a class="enl" href="https://app.cyberscope.io/audits/nrm#security" target="_blank" rel="noopener">app.cyberscope.io/audits/nrm</a></td></tr>
+  <tr><td>Scope</td><td>The NRM token contract: <b>Nereum</b> (<code>Nereum.sol</code>). The Seed Round sale contract is not part of this report; it has not been deployed yet.</td></tr>
+  <tr><td>Audited address</td><td><a href="https://etherscan.io/address/0x9eAb4Ab3D08d0cAc72ACAcEA19904aF2f0D69228#code" target="_blank" rel="noopener"><code>0x9eAb4Ab3D08d0cAc72ACAcEA19904aF2f0D69228</code></a> · Ethereum</td></tr>
+  <tr><td>Compiler</td><td><code>v0.8.30+commit.73712a01</code> · optimization at 200 runs</td></tr>
+  <tr><td>Code reviewed</td><td>SHA256 of the <code>Nereum.sol</code> source file, as stated in the report:<br><code>692aa74a20ad4dae285b13517147926406f32b549ce7bacf096cff03e5eedb4a</code></td></tr>
+  <tr><td>Date</td><td>6 October 2026 · <i>Initial Audit</i></td></tr>
+  <tr><td>Checks</td><td><b>6 of 6 passed</b></td></tr>
+  <tr><td>Findings</td><td>0 critical · 0 medium · 1 minor/informative</td></tr>
+  <tr><td>Finding status</td><td>Acknowledged by the team — see <a class="enl" href="#hallazgo">the note</a></td></tr>
+  <tr><td>Re-audit after fixes</td><td>Not applicable: the report has a single version, and its only note is informative and was acknowledged without code changes</td></tr>
 </table>
+
+<div class="nota"><b>Official verification</b>
+<p>The report can be verified at the source, without relying on us. Open the
+<a class="enl" href="https://app.cyberscope.io/audits/nrm#security" target="_blank" rel="noopener">public audit page</a> on CyberScope's
+website and check that the audited address matches, character by character, the
+deployed contract: <code>0x9eAb4Ab3D08d0cAc72ACAcEA19904aF2f0D69228</code>. The
+original PDF is also in <a class="enl" href="https://github.com/cyberscope-io/audits/blob/main/nrm/audit.pdf" target="_blank" rel="noopener">CyberScope's public audit
+repository</a> on GitHub.</p></div>
+
+<h2 id="comprobaciones">The six checks</h2>
+<p>The analysis in the report runs six checks on the contract, and the contract
+passed all of them:</p>
+<ul class="hitos">
+  <li><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20 6 9 17l-5-5"/></svg><span><b>ST</b> · Stops Transactions — passed</span></li>
+  <li><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20 6 9 17l-5-5"/></svg><span><b>OTUT</b> · Transfers User's Tokens — passed</span></li>
+  <li><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20 6 9 17l-5-5"/></svg><span><b>ELFM</b> · Exceeds Fees Limit — passed</span></li>
+  <li><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20 6 9 17l-5-5"/></svg><span><b>MT</b> · Mints Tokens — passed</span></li>
+  <li><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20 6 9 17l-5-5"/></svg><span><b>BT</b> · Burns Tokens — passed</span></li>
+  <li><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20 6 9 17l-5-5"/></svg><span><b>BC</b> · Blacklists Addresses — passed</span></li>
+</ul>
+
+<h2 id="hallazgo">The informative note</h2>
+<p>The report contains a single note, of minor/informative severity:
+<strong>ROF · Redundant Ownable Functionality</strong> (<code>Nereum.sol#L724</code>).
+It points out that the contract inherits <code>Ownable</code> and defines an
+owner, but that owner has no administrative functions: it can only transfer or
+renounce ownership, with no privileges over supply, transfers, allowances or
+fees.</p>
+<p>The team acknowledged it and explained in the report itself why it was kept:
+the owner was retained only so that ownership could be <strong>renounced
+on-chain</strong>, as public proof. Saying a contract has no owner is not the same
+as proving it with a renunciation event, and ownership was renounced —
+<a class="enl" href="https://etherscan.io/address/0x9eAb4Ab3D08d0cAc72ACAcEA19904aF2f0D69228#readContract" target="_blank" rel="noopener">check it on Etherscan</a>.</p>
 
 <h2 id="descentralizado">Nobody owns this</h2>
 <p>Nereum is built to belong to the people who hold it — its community and its

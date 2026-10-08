@@ -22,8 +22,8 @@ for (const [lang, frase] of Object.entries(ESPERA)) {
   const d = dic[lang] || {};
   di(d['Seed Round open'] === frase, `${lang}: "Seed Round open" -> ${JSON.stringify(d['Seed Round open'])}`);
   di(!Object.keys(d).some(k => /hitelist/.test(k)), `${lang}: quedan claves con Whitelist`);
-  const larga = Object.entries(d).find(([k]) => k.startsWith('Every contract that touches'));
-  di(larga && larga[0].includes('Seed Round funds'), `${lang}: la clave larga sigue en whitelist`);
+  const larga = Object.entries(d).find(([k]) => k.startsWith('CyberScope, an independent security firm, audited'));
+  di(larga && larga[0].includes('NRM token contract') && larga[1] && larga[1] !== larga[0], `${lang}: falta traducir el parrafo de la auditoria`);
   di(larga && !/lista blanca|liste blanche|Whitelist-|lista branca|Beyaz liste|daftar putih|danh sách trắng|белого списка|القائمة البيضاء|ホワイトリスト|화이트리스트|白名单/.test(larga[1]),
      `${lang}: el valor largo aun dice lista blanca -> ${larga && larga[1].slice(0,60)}`);
 }
