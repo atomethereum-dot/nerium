@@ -7698,12 +7698,14 @@ main>section.sx#security{background:#030409 !important;background-image:none !im
      a un 4,6 % bajo las pestañas -en cada telefono se ve igual de
      ordenado, sin quedar pegada a la barra-; la tarjeta, hasta 14 px del
      pie. */
-  .sx-stage{height:100svh;height:100lvh;padding:7svh 0 calc(var(--hud-b,14px) + 58px);padding-top:7lvh;align-items:stretch;
-    /* p84 · el escenario mide la pantalla SIN barras (lvh) pero, con las barras
-       de Safari a la vista, solo se ve su parte de arriba (svh): lo que sobra
-       por debajo quedaba tapado por la barra y el pie se montaba sobre la
-       tarjeta y su boton. La tarjeta termina siempre dentro de lo que se ve. */
-    padding-bottom:calc(var(--hud-b,14px) + 58px + 100lvh - 100svh)}
+  /* p85 · LA PANTALLA ENTERA, CON Y SIN BARRAS. Con «lvh» el escenario media la
+     pantalla sin barras: con las de Safari a la vista, el pie se montaba sobre
+     la tarjeta. Con un margen fijo para las barras quedaba un hueco negro al
+     recogerse. Ahora mide lo que se ve en cada momento («dvh»): la tarjeta va
+     siempre de las pestañas al pie. Al crecer o encoger solo cambian los aires
+     entre sus bloques -filas «1fr»-, nunca se monta un texto sobre otro. Las
+     pestañas, arriba, a un 7 % fijo de la pantalla grande: no se mueven. */
+  .sx-stage{height:100vh;height:100svh;height:100dvh;padding:7svh 0 calc(var(--hud-b,14px) + 58px);padding-top:7lvh;align-items:stretch}
   .sx-grid{display:flex;flex-direction:column;width:100%;gap:4.6svh;gap:4.6lvh;height:100%}
   .sx-rail{display:block;padding:0;flex:none}
   .sx-list{flex-direction:row;gap:0;margin:0;padding:0;border-left:0;border-bottom:1px solid rgba(255,255,255,.08)}
@@ -7777,99 +7779,108 @@ main>section.sx#security{background:#030409 !important;background-image:none !im
   .sx-go{order:6;margin-top:10px;font-size:13.5px;padding:.5em 1.1em}
   .sx-foot{margin-top:14px;flex-direction:column;gap:4px;font-size:9px;letter-spacing:.08em}
 }
+/* p85 · EL ALTO QUE MANDA ES EL DEL ESCENARIO, NO EL DE LA PANTALLA. El
+   escenario mide ahora lo que se ve («dvh»), con o sin las barras de Safari.
+   Estas reglas, que aprietan la tarjeta en los telefonos bajos, se elegian por
+   el alto de la pantalla, y en el iPhone ese alto no siempre es el que se ve:
+   con las barras a la vista la tarjeta podia tener las reglas de una pantalla
+   mas alta y los textos se montaban. Ahora el guion de la seccion mide el
+   escenario y pone en #security la clase de su alto -a899, a830, a760, a700,
+   a660, a620, a600 (como mucho) y h800, h920 (como poco)-, y cada bloque
+   cuelga de su clase. Mismos umbrales y mismas reglas que antes. */
 /* telefonos altos: la tarjeta crece un punto para no quedarse chica en el
    centro de una pantalla grande */
-@media (max-width:899px) and (min-height:800px){
-  .sx-it b{font-size:19px}
-  .sx-card{padding:20px 18px 18px}
+@media (max-width:899px){ /* (min-height:800px) del escenario */
+  #security.h800 .sx-it b{font-size:19px}
+  #security.h800 .sx-card{padding:20px 18px 18px}
   /* un titular de una linea guarda el alto del sello: si no, el parrafo
      se metia debajo */
-  .sx-t{font-size:clamp(30px,8.4vw,36px)}
-  #security .sx-p{font-size:14.5px;line-height:1.5}
-  .sx-kv>div{min-height:36px}
-  #security .sx-kv dd{font-size:14.5px}
-  .sx-log li{padding:7px 0;font-size:11px}
-  .sx-go{font-size:14.5px;margin-top:14px}
-  .sx-ver{font-size:11px}
-  .sx-sello{width:88px}
+  #security.h800 .sx-t{font-size:clamp(30px,8.4vw,36px)}
+  #security.h800 .sx-p{font-size:14.5px;line-height:1.5}
+  #security.h800 .sx-kv>div{min-height:36px}
+  #security.h800 .sx-kv dd{font-size:14.5px}
+  #security.h800 .sx-log li{padding:7px 0;font-size:11px}
+  #security.h800 .sx-go{font-size:14.5px;margin-top:14px}
+  #security.h800 .sx-ver{font-size:11px}
+  #security.h800 .sx-sello{width:88px}
 }
 /* telefonos muy altos: un punto mas, para que el reparto no deje huecos grandes */
-@media (max-width:899px) and (min-height:920px){
-  .sx-it b{font-size:21px}
-  .sx-card{padding:24px 20px 20px}
-  .sx-cat,.sx-pill{font-size:10.5px}
-  .sx-ic svg{width:40px}
-  .sx-t{font-size:clamp(34px,9.4vw,42px)}
-  #security .sx-p{font-size:16px;line-height:1.5}
-  .sx-kv>div{min-height:40px}
-  #security .sx-kv dt{font-size:11px}
-  #security .sx-kv dd{font-size:16px}
-  .sx-log li{padding:8px 0;font-size:12px}
-  .sx-go{font-size:16px}
-  .sx-sello{width:100px}
-  .sx-foot{font-size:10px}
+@media (max-width:899px){ /* (min-height:920px) del escenario */
+  #security.h920 .sx-it b{font-size:21px}
+  #security.h920 .sx-card{padding:24px 20px 20px}
+  #security.h920 .sx-cat,#security.h920 .sx-pill{font-size:10.5px}
+  #security.h920 .sx-ic svg{width:40px}
+  #security.h920 .sx-t{font-size:clamp(34px,9.4vw,42px)}
+  #security.h920 .sx-p{font-size:16px;line-height:1.5}
+  #security.h920 .sx-kv>div{min-height:40px}
+  #security.h920 .sx-kv dt{font-size:11px}
+  #security.h920 .sx-kv dd{font-size:16px}
+  #security.h920 .sx-log li{padding:8px 0;font-size:12px}
+  #security.h920 .sx-go{font-size:16px}
+  #security.h920 .sx-sello{width:100px}
+  #security.h920 .sx-foot{font-size:10px}
 }
 /* telefonos de alto medio: la nota de verificacion, un punto mas apretada */
-@media (max-width:899px) and (max-height:899px){
-  .sx-ver{padding:.4em .65em;margin-bottom:6px}
-  #security .sx-card:is([data-i="0"],[data-i="1"]) .sx-ic{display:none}
-  #security .sx-card:is([data-i="0"],[data-i="1"]) .sx-p{font-size:12.5px;line-height:1.4}
-  .sx-foot{margin-top:8px}
+@media (max-width:899px){ /* (max-height:899px) del escenario */
+  #security.a899 .sx-ver{padding:.4em .65em;margin-bottom:6px}
+  #security.a899 .sx-card:is([data-i="0"],[data-i="1"]) .sx-ic{display:none}
+  #security.a899 .sx-card:is([data-i="0"],[data-i="1"]) .sx-p{font-size:12.5px;line-height:1.4}
+  #security.a899 .sx-foot{margin-top:8px}
 }
 /* telefonos bajos -y cualquier iPhone con las barras de Safari a la vista-:
    en el registro caben datos, registro de lineas y nota si se aprietan un
    punto. Antes aqui se quitaba el registro de lineas. */
-@media (max-width:899px) and (max-height:830px){
+@media (max-width:899px){ /* (max-height:830px) del escenario */
   /* p81 · el registro de lineas SE QUEDA: se aprieta en vez de quitarse */
-  #security .sx-card:is([data-i="0"],[data-i="1"]) .sx-log{padding-top:6px;margin-bottom:8px}
-  #security .sx-card:is([data-i="0"],[data-i="1"]) .sx-log li{padding:2px 0;font-size:10px;line-height:1.25}
-  #security .sx-card:is([data-i="0"],[data-i="1"]) .sx-kv>div{min-height:26px}
-  #security .sx-card:is([data-i="0"],[data-i="1"]) .sx-ver{font-size:10px;line-height:1.35;padding:.35em .6em}
+  #security.a830 .sx-card:is([data-i="0"],[data-i="1"]) .sx-log{padding-top:6px;margin-bottom:8px}
+  #security.a830 .sx-card:is([data-i="0"],[data-i="1"]) .sx-log li{padding:2px 0;font-size:10px;line-height:1.25}
+  #security.a830 .sx-card:is([data-i="0"],[data-i="1"]) .sx-kv>div{min-height:26px}
+  #security.a830 .sx-card:is([data-i="0"],[data-i="1"]) .sx-ver{font-size:10px;line-height:1.35;padding:.35em .6em}
 }
 /* pantallas bajas: fuera lo que se puede perder sin perder la prueba */
-@media (max-width:899px) and (max-height:760px){
+@media (max-width:899px){ /* (max-height:760px) del escenario */
   /* aqui no cabe el 7 % de arriba: el boton pisaria la fuente */
-  .sx-stage{padding-top:4.5lvh}
-  .sx-grid{gap:3.6lvh}
-  .sx-ic{display:none}
-  .sx-sello{width:70px}
-  #security .sx-p{font-size:12.5px;line-height:1.4}
-  .sx-kv>div{min-height:24px}
-  .sx-log li{padding:2px 0}
-  .sx-foot .sx-3p{display:none}
-  .sx-ver{font-size:10px;line-height:1.35;padding:.35em .6em;margin-bottom:6px}
-  #security .sx-card:is([data-i="0"],[data-i="1"]) .sx-p{font-size:12.5px;line-height:1.4}
-  #security .sx-card:is([data-i="0"],[data-i="1"]) .sx-kv>div{min-height:24px}
-  .sx-foot{margin-top:8px}
+  #security.a760 .sx-stage{padding-top:4.5lvh}
+  #security.a760 .sx-grid{gap:3.6lvh}
+  #security.a760 .sx-ic{display:none}
+  #security.a760 .sx-sello{width:70px}
+  #security.a760 .sx-p{font-size:12.5px;line-height:1.4}
+  #security.a760 .sx-kv>div{min-height:24px}
+  #security.a760 .sx-log li{padding:2px 0}
+  #security.a760 .sx-foot .sx-3p{display:none}
+  #security.a760 .sx-ver{font-size:10px;line-height:1.35;padding:.35em .6em;margin-bottom:6px}
+  #security.a760 .sx-card:is([data-i="0"],[data-i="1"]) .sx-p{font-size:12.5px;line-height:1.4}
+  #security.a760 .sx-card:is([data-i="0"],[data-i="1"]) .sx-kv>div{min-height:24px}
+  #security.a760 .sx-foot{margin-top:8px}
 }
-@media (max-width:899px) and (max-height:620px){
-  #security .sx-p{display:none}
+@media (max-width:899px){ /* (max-height:620px) del escenario */
+  #security.a620 .sx-p{display:none}
 }
 /* p81 · el registro, con su nota, en los telefonos mas bajos -un iPhone con las
    barras de Safari a la vista anda por 660 de alto-: un punto mas apretado, y
    por debajo de 660 sin la entradilla, que es lo unico que repiten los datos */
-@media (max-width:899px) and (max-height:700px){
-  #security .sx-card:is([data-i="0"],[data-i="1"]){padding-top:12px;padding-bottom:10px}
-  #security .sx-card:is([data-i="0"],[data-i="1"]) .sx-t{font-size:24px}
-  #security .sx-card:is([data-i="0"],[data-i="1"]) .sx-p{font-size:11.5px;line-height:1.35}
-  #security .sx-card:is([data-i="0"],[data-i="1"]) .sx-kv>div{min-height:21px}
-  #security .sx-card:is([data-i="0"],[data-i="1"]) .sx-log{padding-top:4px;margin-bottom:6px}
-  #security .sx-card:is([data-i="0"],[data-i="1"]) .sx-log li{padding:1px 0;font-size:9.5px}
-  #security .sx-card:is([data-i="0"],[data-i="1"]) .sx-ver{font-size:9.5px;margin-bottom:5px}
-  #security .sx-card:is([data-i="0"],[data-i="1"]) .sx-go{padding:.38em 1em;font-size:12.5px}
-  #security .sx-card:is([data-i="0"],[data-i="1"]) .sx-foot{margin-top:6px}
+@media (max-width:899px){ /* (max-height:700px) del escenario */
+  #security.a700 .sx-card:is([data-i="0"],[data-i="1"]){padding-top:12px;padding-bottom:10px}
+  #security.a700 .sx-card:is([data-i="0"],[data-i="1"]) .sx-t{font-size:24px}
+  #security.a700 .sx-card:is([data-i="0"],[data-i="1"]) .sx-p{font-size:11.5px;line-height:1.35}
+  #security.a700 .sx-card:is([data-i="0"],[data-i="1"]) .sx-kv>div{min-height:21px}
+  #security.a700 .sx-card:is([data-i="0"],[data-i="1"]) .sx-log{padding-top:4px;margin-bottom:6px}
+  #security.a700 .sx-card:is([data-i="0"],[data-i="1"]) .sx-log li{padding:1px 0;font-size:9.5px}
+  #security.a700 .sx-card:is([data-i="0"],[data-i="1"]) .sx-ver{font-size:9.5px;margin-bottom:5px}
+  #security.a700 .sx-card:is([data-i="0"],[data-i="1"]) .sx-go{padding:.38em 1em;font-size:12.5px}
+  #security.a700 .sx-card:is([data-i="0"],[data-i="1"]) .sx-foot{margin-top:6px}
 }
-@media (max-width:899px) and (max-height:660px){
-  #security .sx-card:is([data-i="0"],[data-i="1"]) .sx-p{display:none}
+@media (max-width:899px){ /* (max-height:660px) del escenario */
+  #security.a660 .sx-card:is([data-i="0"],[data-i="1"]) .sx-p{display:none}
 }
 /* y en los mas bajos de todos (un SE con las barras, 550 de alto) fuera la
    linea de la fuente, que el registro de lineas ya dice -«Public record ·
    Sunbiz»- y filas un punto mas bajas */
-@media (max-width:899px) and (max-height:600px){
-  #security .sx-card:is([data-i="0"],[data-i="1"]) .sx-foot{display:none}
-  #security .sx-card:is([data-i="0"],[data-i="1"]) .sx-kv>div{min-height:18px}
-  #security .sx-card:is([data-i="0"],[data-i="1"]) .sx-t{font-size:21px}
-  #security .sx-card:is([data-i="0"],[data-i="1"]) .sx-sello{width:56px}
+@media (max-width:899px){ /* (max-height:600px) del escenario */
+  #security.a600 .sx-card:is([data-i="0"],[data-i="1"]) .sx-foot{display:none}
+  #security.a600 .sx-card:is([data-i="0"],[data-i="1"]) .sx-kv>div{min-height:18px}
+  #security.a600 .sx-card:is([data-i="0"],[data-i="1"]) .sx-t{font-size:21px}
+  #security.a600 .sx-card:is([data-i="0"],[data-i="1"]) .sx-sello{width:56px}
 }
 @media (prefers-reduced-motion:reduce){
   .sx-card,.sx-card.on,.sx-card.sale{transition:opacity .3s ease;transform:none !important;filter:none !important}
@@ -17807,8 +17818,15 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
     new ResizeObserver(function(){ if(!ocupado) requestAnimationFrame(encaja) }).observe(grid);
   }
   if(document.fonts && document.fonts.ready) document.fonts.ready.then(encaja);
+  /* p85 · las clases del alto del escenario (ver «EL ALTO QUE MANDA») */
+  var ALTOS=[['a899',899,1],['a830',830,1],['a760',760,1],['a700',700,1],['a660',660,1],['a620',620,1],['a600',600,1],['h800',800,0],['h920',920,0]];
+  function altos(){
+    var h=stage?stage.offsetHeight:innerHeight, tel=!ANCHO.matches;
+    ALTOS.forEach(function(a){ sec.classList.toggle(a[0], tel && (a[2]?h<=a[1]:h>=a[1])) });
+  }
+  if(window.ResizeObserver && stage) new ResizeObserver(function(){ altos() }).observe(stage);
   function modo(){
-    mide(); encaja();
+    altos(); mide(); encaja();
     cards.forEach(function(c,i){ c.classList.toggle('on',i===cur) }); marca(cur);
   }
   addEventListener('scroll',alScroll,{passive:true});
