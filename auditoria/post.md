@@ -1,5 +1,3 @@
-#Nereum #NRM #SmartContractAudit #CyberScope #RWA
-
 The NRM token contract has passed its security audit by CyberScope.
 
 0 critical findings. 0 medium findings.
@@ -13,9 +11,9 @@ https://github.com/cyberscope-io/audits/blob/main/nrm/audit.pdf
 Contract (Ethereum): 0x9eAb4Ab3D08d0cAc72ACAcEA19904aF2f0D69228
 https://nereum.xyz
 
----
-
 #Nereum #NRM #SmartContractAudit #CyberScope #RWA
+
+---
 
 El contrato del token NRM ha superado su auditoría de seguridad con CyberScope.
 
@@ -29,3 +27,5 @@ https://github.com/cyberscope-io/audits/blob/main/nrm/audit.pdf
 
 Contrato (Ethereum): 0x9eAb4Ab3D08d0cAc72ACAcEA19904aF2f0D69228
 https://nereum.xyz
+
+#Nereum #NRM #SmartContractAudit #CyberScope #RWA
