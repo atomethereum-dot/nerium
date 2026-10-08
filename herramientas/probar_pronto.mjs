@@ -27,7 +27,7 @@ const r = await pg.evaluate(() => {
     annW: document.getElementById('annFill').style.width, stkP: document.getElementById('stkBar').style.getPropertyValue('--p'),
     pcVisibles, raised: t('saleRaised'), meta: document.querySelector('#saleRaised + span').textContent,
     enProceso: (sec.match(/In progress/gi) || []).length, cyber: /CyberScope/.test(sec),
-    auditada: /Audited/i.test(sec) && /6 of 6 passed/.test(document.getElementById('security').textContent) && !!document.querySelector('#security a.sx-go[href*="cyberscope.io/audits/nrm"]'),
+    auditada: /Audited/i.test(sec) && /6 of 6 passed/.test(document.getElementById('security').textContent) && !!document.querySelector('#security a.sx-go[href*="cyberscope-io/audits/blob/main/nrm/audit.pdf"]'),
     registrada: /Registered/.test(sec) && /6697114960CU/.test(sec) && !!document.querySelector('#security a.sx-go[href*="sunbiz.org"]'),
     viejo: /Halborn|Assure DeFi|KYC passed|Audit in progress|Sale, vesting, treasury|L26000341887/.test(document.getElementById('security').innerHTML + document.getElementById('top').innerHTML),
     hb: document.querySelector('.hb.white').textContent.trim(),
