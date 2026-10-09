@@ -349,8 +349,5 @@
  "Earn 10% of every purchase made through your link, paid in the same currency (ETH, BNB or USDT) after the Seed Round closes. Self-referrals do not count.": "通过你的链接完成的每笔购买，你都可获得 10%，在 Seed Round 结束后以相同币种（ETH、BNB 或 USDT）支付。推荐自己不计入。",
  "Earned": "已赚取",
  "Earn 10% of every purchase made through your link, sent to your wallet instantly in the same currency (ETH, BNB or USDT). Self-referrals do not count.": "通过你的链接完成的每笔购买，你都可即时获得 10%，以相同币种（ETH、BNB 或 USDT）直接发送到你的钱包。推荐自己不计入。",
- "Add to MetaMask": "添加到 MetaMask",
- "Added to MetaMask": "已添加到 MetaMask",
- "Request rejected": "请求已被拒绝",
- "Could not add the token": "无法添加代币"
+ "Add to MetaMask": "添加到 MetaMask"
 }

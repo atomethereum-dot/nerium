@@ -54,11 +54,11 @@ a{color:var(--azul)}
   var TK={address:'0x9eAb4Ab3D08d0cAc72ACAcEA19904aF2f0D69228',symbol:'NRM',decimals:18,image:'https://nereum.xyz/nrm-token.png'};
   var ES=/^es/i.test(navigator.language||'');
   var T=ES?{tit:'Añade NRM a tu cartera',add:'Añadir a MetaMask',copy:'Copiar dirección',copied:'Dirección copiada',wait:'Abriendo MetaMask…',
-      ok:'NRM añadido a tu cartera.',no:'Solicitud rechazada.',fail:'No se pudo añadir el token',tap:'Toca el botón para añadir NRM.',
+      ok:'NRM añadido a tu cartera.',no:'Solicitud rechazada.',fail:'No se pudo añadir el token',tap:'Toca el botón para añadir NRM.',red:'MetaMask está en otra red. Arriba en MetaMask cambia la red a Ethereum y vuelve a tocar el botón. Si no aparece, usa la importación manual de abajo.',
       mano:'Si no se abre ninguna ventana: en MetaMask ve a <b>Tokens → Importar tokens</b>, elige <b>Ethereum</b> y pega la dirección de arriba. El símbolo y los decimales se rellenan solos.',
       dec:'18 decimales'}
     :{tit:'Add NRM to your wallet',add:'Add to MetaMask',copy:'Copy address',copied:'Address copied',wait:'Opening MetaMask…',
-      ok:'NRM added to your wallet.',no:'Request rejected.',fail:'Could not add the token',tap:'Tap the button to add NRM.',mano:null,dec:null};
+      ok:'NRM added to your wallet.',no:'Request rejected.',fail:'Could not add the token',tap:'Tap the button to add NRM.',red:'MetaMask is on another network. Switch MetaMask to Ethereum at the top and tap the button again. If it still does not appear, use the manual import below.',mano:null,dec:null};
   var $=function(i){return document.getElementById(i)};
   $('tit').textContent=T.tit; $('addT').textContent=T.add; $('copT').textContent=T.copy;
   if(T.mano) $('mano').innerHTML=T.mano; if(T.dec) document.querySelectorAll('.dat .k')[1].textContent=T.dec;
@@ -75,19 +75,29 @@ a{color:var(--azul)}
     try{ window.dispatchEvent(new Event('eip6963:requestProvider')) }catch(e){}
     var t0=Date.now(); (function mira(){ if(hecho) return; if(window.ethereum) return fin(elige(window.ethereum)); if(Date.now()-t0>ms) return fin(null); setTimeout(mira,150) })(); }) }
 
-  var ocupado=false;
+  /* p89 · «This token is not supported on this network» (-32603). MetaMask movil comprueba que el contrato exista
+     en la red que tiene ACTIVA; si la cartera esta en otra red, o la acaba de cambiar y aun no la ha asentado, lo
+     rechaza aunque la pagina ya vea Ethereum. Por eso: se pide Ethereum siempre, se espera a que la cartera diga
+     0x1 y, si aun asi lo rechaza, se reintenta una vez tras forzar el cambio. Si sigue, se explica que hacer. */
+  var ocupado=false, dormir=function(ms){ return new Promise(function(r){ setTimeout(r,ms) }) };
   function agrega(){
     if(!prov){ location.href='https://metamask.app.link/dapp/'+location.host+'/nrm/'; return }
     if(ocupado) return; ocupado=true; di(T.wait,'va');
     var pide=function(m,pr){ return prov.request(pr===undefined?{method:m}:{method:m,params:pr}) };
+    var aEth=function(){ return pide('wallet_switchEthereumChain',[{chainId:'0x1'}]).catch(function(e){ if(e&&e.code===4001) throw e })
+      .then(function(){ var t0=Date.now(); return (function mira(){ return pide('eth_chainId').then(function(c){
+        if(String(c).toLowerCase()==='0x1'||Date.now()-t0>4000) return; return dormir(250).then(mira) }) })() }).then(function(){ return dormir(700) }) };
     var token=function(){ return pide('wallet_watchAsset',{type:'ERC20',options:TK}).catch(function(e){
-      if(e&&(e.code===-32602||e.code===-32600)) return pide('wallet_watchAsset',[{type:'ERC20',options:TK}]); throw e }) };
+      if(e&&(e.code===-32602||e.code===-32600)&&!/network/i.test(e.message||'')) return pide('wallet_watchAsset',[{type:'ERC20',options:TK}]); throw e }) };
+    var red=function(e){ return e&&/network/i.test(String(e.message||'')) };
     pide('eth_accounts').catch(function(){ return [] }).then(function(a){ if(!a||!a.length) return pide('eth_requestAccounts') })
-      .then(function(){ return pide('eth_chainId') })
-      .then(function(c){ if(String(c).toLowerCase()!=='0x1') return pide('wallet_switchEthereumChain',[{chainId:'0x1'}]) })
-      .then(token)
+      .then(aEth).then(token)
+      .catch(function(e){ if(!red(e)) throw e; return aEth().then(function(){ return dormir(1200) }).then(token) })
       .then(function(ok){ ocupado=false; if(ok===false) di(T.no,'no'); else { di(T.ok,'ok'); $('addT').textContent=T.ok.replace(/\.$/,'') } })
-      .catch(function(e){ ocupado=false; di(e&&e.code===4001?T.no:T.fail+(e&&e.code?' · '+e.code:'')+(e&&e.message?' · '+String(e.message).slice(0,90):''),'no') });
+      .catch(function(e){ ocupado=false;
+        if(e&&e.code===4001) return di(T.no,'no');
+        if(red(e)) return di(T.red,'no');
+        di(T.fail+(e&&e.code?' · '+e.code:'')+(e&&e.message?' · '+String(e.message).slice(0,90):''),'no') });
   }
   bt.addEventListener('click',agrega);
   $('copia').addEventListener('click',function(){
