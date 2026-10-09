@@ -992,6 +992,8 @@ html body .tkp-n{fill:#E3E6EE}
 .tkp-ctr-mm[data-st="ok"]{border-color:rgba(63,214,140,.6);color:#7BE7B4}
 .tkp-ctr-mm[data-st="no"]{border-color:rgba(232,236,244,.3);color:#9EA2AB}
 .tkp-ctr-mm[data-st="va"]{opacity:.75;cursor:progress}
+.tkp-ctr-mm-c{font:inherit;letter-spacing:.08em;color:#6E7280}
+.tkp-ctr-mm-c:empty{display:none}
 @media(max-width:560px){.tkp-ctr{gap:4px 14px}.tkp-ctr-k{flex:1 0 100%}.tkp-ctr-mm{margin-top:10px}}
 @media(max-width:880px){
   .tkp-svg{display:none}
@@ -17872,21 +17874,34 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
   var b=document.getElementById('addMM'); if(!b) return;
   var TK={address:'0x9eAb4Ab3D08d0cAc72ACAcEA19904aF2f0D69228',symbol:'NRM',decimals:18,image:'https://nereum.xyz/nrm-token.png'};
   var txt=b.querySelector('span'), BASE='Add to MetaMask', reloj=0;
-  function di(s,k){ clearTimeout(reloj); txt.textContent=s; b.setAttribute('data-st',k||'');
-    if(k&&k!=='va') reloj=setTimeout(function(){ txt.textContent=BASE; b.setAttribute('data-st','') },4200); }
+  /* el codigo del fallo, al lado del texto y fuera del traductor: con una captura del telefono se sabe que paso */
+  var cod=document.createElement('small'); cod.className='tkp-ctr-mm-c'; cod.setAttribute('data-no-traducir',''); b.appendChild(cod);
+  function di(s,k,c){ clearTimeout(reloj); txt.textContent=s; b.setAttribute('data-st',k||''); cod.textContent=c?'· '+c:'';
+    if(k&&k!=='va') reloj=setTimeout(function(){ txt.textContent=BASE; cod.textContent=''; b.setAttribute('data-st','') },k==='no'?7000:4200); }
   function cartera(){ var e=window.ethereum; if(!e) return null;
     if(e.providers&&e.providers.length){ for(var i=0;i<e.providers.length;i++) if(e.providers[i].isMetaMask) return e.providers[i]; }
     return e; }
+  /* p87 · En el telefono el token no se añadia («Could not add the token»). MetaMask
+     movil puede exigir que la web este CONECTADA antes de wallet_watchAsset
+     -si no, responde «Unauthorized», codigo 4100-. Ahora se conecta primero
+     (eth_requestAccounts, solo si aun no lo esta), luego pasa a Ethereum y despues
+     pide el token. Si una cartera no entiende los parametros como objeto, se
+     reintenta con la forma antigua, en lista. El codigo del fallo queda en el
+     «title» del boton para poder verlo. */
   function agrega(){
     var p=cartera();
     if(!p){ location.href='https://metamask.app.link/dapp/'+location.host+location.pathname+'?nrm=add'; return; }
     if(b.getAttribute('data-st')==='va') return; di('Add to MetaMask','va');
-    p.request({method:'eth_chainId'}).then(function(c){
-      if(String(c).toLowerCase()!=='0x1') return p.request({method:'wallet_switchEthereumChain',params:[{chainId:'0x1'}]});
-    }).then(function(){
-      return p.request({method:'wallet_watchAsset',params:{type:'ERC20',options:TK}});
-    }).then(function(ok){ di(ok===false?'Request rejected':'Added to MetaMask',ok===false?'no':'ok') })
-      .catch(function(e){ di(e&&e.code===4001?'Request rejected':'Could not add the token','no') });
+    var pide=function(m,pr){ return p.request(pr===undefined?{method:m}:{method:m,params:pr}) };
+    var token=function(){ return pide('wallet_watchAsset',{type:'ERC20',options:TK}).catch(function(e){
+      if(e&&(e.code===-32602||e.code===-32600)) return pide('wallet_watchAsset',[{type:'ERC20',options:TK}]); throw e }) };
+    pide('eth_accounts').catch(function(){ return [] }).then(function(a){
+      if(!a||!a.length) return pide('eth_requestAccounts');
+    }).then(function(){ return pide('eth_chainId') }).then(function(c){
+      if(String(c).toLowerCase()!=='0x1') return pide('wallet_switchEthereumChain',[{chainId:'0x1'}]);
+    }).then(token).then(function(ok){ di(ok===false?'Request rejected':'Added to MetaMask',ok===false?'no':'ok') })
+      .catch(function(e){ try{ b.title='Error '+(e&&e.code)+': '+(e&&e.message) }catch(_){}
+        di(e&&e.code===4001?'Request rejected':'Could not add the token','no',e&&e.code!==4001?(e.code||'?'):'') });
   }
   b.addEventListener('click',agrega);
   if(/[?&]nrm=add\b/.test(location.search)){
