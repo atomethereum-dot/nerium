@@ -17890,7 +17890,9 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
      «title» del boton para poder verlo. */
   function agrega(){
     var p=cartera();
-    if(!p){ location.href='https://metamask.app.link/dapp/'+location.host+location.pathname+'?nrm=add'; return; }
+    /* sin cartera aqui (Chrome o Safari en el telefono): a la pagina pequeña /nrm/ dentro de la app de MetaMask, que
+       espera a la cartera y pide el token sola (p88) */
+    if(!p){ location.href='https://metamask.app.link/dapp/'+location.host+'/nrm/'; return; }
     if(b.getAttribute('data-st')==='va') return; di('Add to MetaMask','va');
     var pide=function(m,pr){ return p.request(pr===undefined?{method:m}:{method:m,params:pr}) };
     var token=function(){ return pide('wallet_watchAsset',{type:'ERC20',options:TK}).catch(function(e){
@@ -17904,10 +17906,8 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
         di(e&&e.code===4001?'Request rejected':'Could not add the token','no',e&&e.code!==4001?(e.code||'?'):'') });
   }
   b.addEventListener('click',agrega);
-  if(/[?&]nrm=add\b/.test(location.search)){
-    try{ history.replaceState(null,'',location.pathname+location.hash) }catch(e){}
-    if(cartera()) setTimeout(agrega,900);
-  }
+  /* los enlaces viejos con «?nrm=add» van a la pagina pequeña */
+  if(/[?&]nrm=add\b/.test(location.search)) location.replace('/nrm/');
 })();
 </script>
 <!-- p64: el guion de las particulas de #builds se retira; el tunel va antes de la hebra -->

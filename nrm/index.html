@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Add NRM to your wallet · Nereum</title>
+<meta name="description" content="Add the NRM token (Ethereum, ERC-20) to MetaMask in one tap.">
+<meta name="theme-color" content="#030409">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="stylesheet" href="/assets/fonts.css">
+<style>
+/* p88 · AÑADIR NRM, EN UNA PAGINA PROPIA. Desde Chrome o Safari en el telefono el boton de la portada abre la web
+   dentro de la app de MetaMask; la portada es grande y alli la cartera puede tardar en estar lista, asi que la
+   peticion se perdia y «no salia nada». Esta pagina es pequeña: espera a la cartera, pide el token sola y, si la
+   cartera necesita un toque, deja un boton grande. Si aun asi no sale, explica como importarlo a mano. */
+:root{--bg:#030409;--ink:#ECEEF3;--gris:#9EA2AB;--azul:#2E86FF;--verde:#3FD68C}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:'Inter Tight',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+main{min-height:100svh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;padding:40px 22px calc(40px + env(safe-area-inset-bottom));text-align:center}
+img.logo{width:min(46vw,190px);height:auto;border-radius:50%}
+h1{margin:0;font-weight:400;font-size:clamp(28px,7vw,40px);letter-spacing:-.03em;line-height:1.05}
+.k{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.3em;text-transform:uppercase;color:var(--gris)}
+.dir{font-family:'DM Mono',monospace;font-size:clamp(11px,3.3vw,14px);color:var(--ink);overflow-wrap:anywhere;max-width:30em}
+.dat{display:flex;gap:18px;justify-content:center;flex-wrap:wrap}
+button{all:unset;box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;gap:12px;cursor:pointer;
+  min-width:min(86vw,340px);padding:18px 26px;border-radius:999px;background:#F6851B;color:#14100A;
+  font-family:'DM Mono',monospace;font-size:14px;letter-spacing:.18em;text-transform:uppercase;font-weight:500}
+button img{width:24px;height:auto}
+button[data-st="va"]{opacity:.7;cursor:progress}
+button[data-st="ok"]{background:var(--verde)}
+button.sec{background:transparent;color:var(--ink);border:1px solid rgba(236,238,243,.25);padding:13px 22px;min-width:0;font-size:12px}
+#est{min-height:1.4em;font-size:15px;color:var(--gris);max-width:28em}
+#est.ok{color:var(--verde)}
+.mano{max-width:30em;font-size:14px;line-height:1.5;color:var(--gris)}
+.mano b{color:var(--ink);font-weight:500}
+a{color:var(--azul)}
+</style>
+</head>
+<body>
+<main>
+  <img class="logo" src="/nrm-token.png" alt="NRM" width="512" height="512">
+  <span class="k">Nereum · NRM · Ethereum</span>
+  <h1 id="tit">Add NRM to your wallet</h1>
+  <div class="dat"><span class="k">ERC-20</span><span class="k">18 decimals</span></div>
+  <code class="dir">0x9eAb4Ab3D08d0cAc72ACAcEA19904aF2f0D69228</code>
+  <button id="add" type="button"><img src="/img/marcas/metamask.svg" alt="" aria-hidden="true"><span id="addT">Add to MetaMask</span></button>
+  <p id="est" role="status" aria-live="polite"></p>
+  <button class="sec" id="copia" type="button"><span id="copT">Copy address</span></button>
+  <p class="mano" id="mano">If no window opens: in MetaMask go to <b>Tokens → Import tokens</b>, choose <b>Ethereum</b> and paste the address above. Symbol and decimals fill in by themselves.</p>
+  <a class="k" href="/">nereum.xyz</a>
+</main>
+<script>
+(function(){
+  var TK={address:'0x9eAb4Ab3D08d0cAc72ACAcEA19904aF2f0D69228',symbol:'NRM',decimals:18,image:'https://nereum.xyz/nrm-token.png'};
+  var ES=/^es/i.test(navigator.language||'');
+  var T=ES?{tit:'Añade NRM a tu cartera',add:'Añadir a MetaMask',copy:'Copiar dirección',copied:'Dirección copiada',wait:'Abriendo MetaMask…',
+      ok:'NRM añadido a tu cartera.',no:'Solicitud rechazada.',fail:'No se pudo añadir el token',tap:'Toca el botón para añadir NRM.',
+      mano:'Si no se abre ninguna ventana: en MetaMask ve a <b>Tokens → Importar tokens</b>, elige <b>Ethereum</b> y pega la dirección de arriba. El símbolo y los decimales se rellenan solos.',
+      dec:'18 decimales'}
+    :{tit:'Add NRM to your wallet',add:'Add to MetaMask',copy:'Copy address',copied:'Address copied',wait:'Opening MetaMask…',
+      ok:'NRM added to your wallet.',no:'Request rejected.',fail:'Could not add the token',tap:'Tap the button to add NRM.',mano:null,dec:null};
+  var $=function(i){return document.getElementById(i)};
+  $('tit').textContent=T.tit; $('addT').textContent=T.add; $('copT').textContent=T.copy;
+  if(T.mano) $('mano').innerHTML=T.mano; if(T.dec) document.querySelectorAll('.dat .k')[1].textContent=T.dec;
+  var bt=$('add'), est=$('est');
+  function di(s,k){ est.textContent=s; est.className=k==='ok'?'ok':''; bt.setAttribute('data-st',k||'') }
+
+  /* la cartera: la inyectada, la que anuncia EIP-6963 o la que llega tarde (ethereum#initialized) */
+  var prov=null;
+  function elige(e){ if(!e) return null; if(e.providers&&e.providers.length){ for(var i=0;i<e.providers.length;i++) if(e.providers[i].isMetaMask) return e.providers[i] } return e }
+  function espera(ms){ return new Promise(function(res){ var hecho=false; function fin(p){ if(!hecho){ hecho=true; res(p) } }
+    if(window.ethereum) return fin(elige(window.ethereum));
+    window.addEventListener('ethereum#initialized',function(){ fin(elige(window.ethereum)) },{once:true});
+    window.addEventListener('eip6963:announceProvider',function(ev){ var d=ev.detail||{}; if(d.provider&&(!d.info||/metamask/i.test((d.info.rdns||'')+(d.info.name||'')))) fin(d.provider) });
+    try{ window.dispatchEvent(new Event('eip6963:requestProvider')) }catch(e){}
+    var t0=Date.now(); (function mira(){ if(hecho) return; if(window.ethereum) return fin(elige(window.ethereum)); if(Date.now()-t0>ms) return fin(null); setTimeout(mira,150) })(); }) }
+
+  var ocupado=false;
+  function agrega(){
+    if(!prov){ location.href='https://metamask.app.link/dapp/'+location.host+'/nrm/'; return }
+    if(ocupado) return; ocupado=true; di(T.wait,'va');
+    var pide=function(m,pr){ return prov.request(pr===undefined?{method:m}:{method:m,params:pr}) };
+    var token=function(){ return pide('wallet_watchAsset',{type:'ERC20',options:TK}).catch(function(e){
+      if(e&&(e.code===-32602||e.code===-32600)) return pide('wallet_watchAsset',[{type:'ERC20',options:TK}]); throw e }) };
+    pide('eth_accounts').catch(function(){ return [] }).then(function(a){ if(!a||!a.length) return pide('eth_requestAccounts') })
+      .then(function(){ return pide('eth_chainId') })
+      .then(function(c){ if(String(c).toLowerCase()!=='0x1') return pide('wallet_switchEthereumChain',[{chainId:'0x1'}]) })
+      .then(token)
+      .then(function(ok){ ocupado=false; if(ok===false) di(T.no,'no'); else { di(T.ok,'ok'); $('addT').textContent=T.ok.replace(/\.$/,'') } })
+      .catch(function(e){ ocupado=false; di(e&&e.code===4001?T.no:T.fail+(e&&e.code?' · '+e.code:'')+(e&&e.message?' · '+String(e.message).slice(0,90):''),'no') });
+  }
+  bt.addEventListener('click',agrega);
+  $('copia').addEventListener('click',function(){
+    var ok=function(){ $('copT').textContent=T.copied; setTimeout(function(){ $('copT').textContent=T.copy },2500) };
+    if(navigator.clipboard&&navigator.clipboard.writeText) navigator.clipboard.writeText(TK.address).then(ok,function(){});
+    else { var r=document.createRange(); r.selectNodeContents(document.querySelector('.dir')); var s=getSelection(); s.removeAllRanges(); s.addRange(r); try{ document.execCommand('copy'); ok() }catch(e){} } });
+
+  /* dentro de una cartera se pide sola al llegar; si la cartera exige un toque, queda el boton */
+  espera(6000).then(function(p){ prov=p; if(p){ agrega() } else di(T.tap,'') });
+})();
+</script>
+</body>
+</html>
