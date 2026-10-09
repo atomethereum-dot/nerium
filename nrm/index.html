@@ -81,7 +81,7 @@ a{color:var(--azul)}
      0x1 y, si aun asi lo rechaza, se reintenta una vez tras forzar el cambio. Si sigue, se explica que hacer. */
   var ocupado=false, dormir=function(ms){ return new Promise(function(r){ setTimeout(r,ms) }) };
   function agrega(){
-    if(!prov){ location.href='https://metamask.app.link/dapp/'+location.host+'/nrm/'; return }
+    if(!prov){ location.href='https://metamask.app.link/dapp/'+location.host+'/nrm/?v=89'; return }
     if(ocupado) return; ocupado=true; di(T.wait,'va');
     var pide=function(m,pr){ return prov.request(pr===undefined?{method:m}:{method:m,params:pr}) };
     var aEth=function(){ return pide('wallet_switchEthereumChain',[{chainId:'0x1'}]).catch(function(e){ if(e&&e.code===4001) throw e })

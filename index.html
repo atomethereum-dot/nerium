@@ -17869,7 +17869,9 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
   var b=document.getElementById('addMM'); if(!b) return;
   b.addEventListener('click',function(){
     var hay=!!window.ethereum;
-    location.href=hay?'/nrm/':'https://metamask.app.link/dapp/'+location.host+'/nrm/';
+    /* «?v=» con la version: la CDN de GitHub Pages y el navegador de MetaMask guardan la pagina 10 minutos, y tras
+       un arreglo seguian enseñando la vieja */
+    location.href=hay?'/nrm/?v=89':'https://metamask.app.link/dapp/'+location.host+'/nrm/?v=89';
   });
   /* los enlaces viejos con «?nrm=add» van a la pagina pequeña */
   if(/[?&]nrm=add\b/.test(location.search)) location.replace('/nrm/');
