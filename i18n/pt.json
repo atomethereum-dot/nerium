@@ -348,5 +348,9 @@
  "Copied": "Copiado",
  "Earn 10% of every purchase made through your link, paid in the same currency (ETH, BNB or USDT) after the Seed Round closes. Self-referrals do not count.": "Ganhe 10% de cada compra feita pelo seu link, pagos na mesma moeda (ETH, BNB ou USDT) quando a Seed Round terminar. Indicar a si mesmo não conta.",
  "Earned": "Ganho",
- "Earn 10% of every purchase made through your link, sent to your wallet instantly in the same currency (ETH, BNB or USDT). Self-referrals do not count.": "Ganhe 10% de cada compra feita pelo seu link, enviados na hora para sua carteira na mesma moeda (ETH, BNB ou USDT). Indicar a si mesmo não conta."
+ "Earn 10% of every purchase made through your link, sent to your wallet instantly in the same currency (ETH, BNB or USDT). Self-referrals do not count.": "Ganhe 10% de cada compra feita pelo seu link, enviados na hora para sua carteira na mesma moeda (ETH, BNB ou USDT). Indicar a si mesmo não conta.",
+ "Add to MetaMask": "Adicionar ao MetaMask",
+ "Added to MetaMask": "Adicionado ao MetaMask",
+ "Request rejected": "Pedido recusado",
+ "Could not add the token": "Não foi possível adicionar o token"
 }

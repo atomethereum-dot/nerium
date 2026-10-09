@@ -348,5 +348,9 @@
  "Copied": "コピーしました",
  "Earn 10% of every purchase made through your link, paid in the same currency (ETH, BNB or USDT) after the Seed Round closes. Self-referrals do not count.": "あなたのリンク経由の購入ごとに 10% を、Seed Round 終了後に同じ通貨（ETH、BNB または USDT）でお支払いします。自分自身の紹介は対象外です。",
  "Earned": "獲得額",
- "Earn 10% of every purchase made through your link, sent to your wallet instantly in the same currency (ETH, BNB or USDT). Self-referrals do not count.": "あなたのリンク経由の購入ごとに 10% を、同じ通貨（ETH、BNB または USDT）で即座にウォレットへ送ります。自分自身の紹介は対象外です。"
+ "Earn 10% of every purchase made through your link, sent to your wallet instantly in the same currency (ETH, BNB or USDT). Self-referrals do not count.": "あなたのリンク経由の購入ごとに 10% を、同じ通貨（ETH、BNB または USDT）で即座にウォレットへ送ります。自分自身の紹介は対象外です。",
+ "Add to MetaMask": "MetaMask に追加",
+ "Added to MetaMask": "MetaMask に追加しました",
+ "Request rejected": "リクエストが拒否されました",
+ "Could not add the token": "トークンを追加できませんでした"
 }
