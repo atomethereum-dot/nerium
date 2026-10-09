@@ -54,11 +54,11 @@ a{color:var(--azul)}
   var TK={address:'0x9eAb4Ab3D08d0cAc72ACAcEA19904aF2f0D69228',symbol:'NRM',decimals:18,image:'https://nereum.xyz/nrm-token.png'};
   var ES=/^es/i.test(navigator.language||'');
   var T=ES?{tit:'Añade NRM a tu cartera',add:'Añadir a MetaMask',copy:'Copiar dirección',copied:'Dirección copiada',wait:'Abriendo MetaMask…',
-      ok:'NRM añadido a tu cartera.',no:'Solicitud rechazada.',fail:'No se pudo añadir el token',tap:'Toca el botón para añadir NRM.',red:'MetaMask está en otra red. Arriba en MetaMask cambia la red a Ethereum y vuelve a tocar el botón. Si no aparece, usa la importación manual de abajo.',
+      ok:'NRM añadido a tu cartera.',no:'Solicitud rechazada.',fail:'No se pudo añadir el token',tap:'Toca el botón para añadir NRM.',red:'MetaMask comprueba el token en la red que tiene elegida en la pantalla principal, y con «Todas las redes» o «Redes populares» no lo encuentra. En la pantalla principal de MetaMask toca el selector de redes (arriba) y elige solo «Ethereum». Después vuelve aquí y toca el botón.',
       mano:'Si no se abre ninguna ventana: en MetaMask ve a <b>Tokens → Importar tokens</b>, elige <b>Ethereum</b> y pega la dirección de arriba. El símbolo y los decimales se rellenan solos.',
       dec:'18 decimales'}
     :{tit:'Add NRM to your wallet',add:'Add to MetaMask',copy:'Copy address',copied:'Address copied',wait:'Opening MetaMask…',
-      ok:'NRM added to your wallet.',no:'Request rejected.',fail:'Could not add the token',tap:'Tap the button to add NRM.',red:'MetaMask is on another network. Switch MetaMask to Ethereum at the top and tap the button again. If it still does not appear, use the manual import below.',mano:null,dec:null};
+      ok:'NRM added to your wallet.',no:'Request rejected.',fail:'Could not add the token',tap:'Tap the button to add NRM.',red:'MetaMask checks the token on the network selected on its home screen, and with «All networks» or «Popular networks» it cannot find it. On the MetaMask home screen tap the network selector (top) and pick «Ethereum» only. Then come back here and tap the button.',mano:null,dec:null};
   var $=function(i){return document.getElementById(i)};
   $('tit').textContent=T.tit; $('addT').textContent=T.add; $('copT').textContent=T.copy;
   if(T.mano) $('mano').innerHTML=T.mano; if(T.dec) document.querySelectorAll('.dat .k')[1].textContent=T.dec;
@@ -81,7 +81,7 @@ a{color:var(--azul)}
      0x1 y, si aun asi lo rechaza, se reintenta una vez tras forzar el cambio. Si sigue, se explica que hacer. */
   var ocupado=false, dormir=function(ms){ return new Promise(function(r){ setTimeout(r,ms) }) };
   function agrega(){
-    if(!prov){ location.href='https://metamask.app.link/dapp/'+location.host+'/nrm/?v=89'; return }
+    if(!prov){ location.href='https://metamask.app.link/dapp/'+location.host+'/nrm/?v=90'; return }
     if(ocupado) return; ocupado=true; di(T.wait,'va');
     var pide=function(m,pr){ return prov.request(pr===undefined?{method:m}:{method:m,params:pr}) };
     var aEth=function(){ return pide('wallet_switchEthereumChain',[{chainId:'0x1'}]).catch(function(e){ if(e&&e.code===4001) throw e })
