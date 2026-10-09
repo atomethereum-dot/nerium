@@ -400,6 +400,9 @@ td b{color:var(--ink)}
 .pdf-b svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:1.7;
   stroke-linecap:round;stroke-linejoin:round}
 @media(max-width:520px){.pdf-b span{display:none}.pdf-b{width:34px;padding:0;justify-content:center}}
+/* Telegram, junto al PDF: el mismo boton de la cabecera, con el icono relleno */
+.tg-b{text-decoration:none}
+.tg-b svg{fill:currentColor;stroke:none;flex:0 0 auto}
 
 /* La versión impresa se arma con TODAS las secciones al pulsar, se imprime y
    se vacía: el documento normal no carga con ella y el PDF sale completo. */
@@ -634,6 +637,10 @@ td b{color:var(--ink)}
     <svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="7.2"/><path d="M3 10h14M10 3a15 15 0 0 1 0 14M10 3a15 15 0 0 0 0 14"/></svg>
     <span id="langT">ES</span>
   </button>
+  <a class="pdf-b tg-b" href="https://t.me/nereumfinance" target="_blank" rel="noopener" title="Telegram" aria-label="Nereum on Telegram">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21.94 4.3 18.9 19.06c-.23 1.02-.84 1.27-1.7.79l-4.7-3.46-2.27 2.18c-.25.25-.46.46-.95.46l.34-4.8 8.73-7.89c.38-.34-.08-.53-.59-.19L6.98 13.13l-4.64-1.45c-1.01-.32-1.03-1.01.21-1.5L20.61 3.1c.84-.31 1.58.2 1.33 1.2Z"/></svg>
+    <span>Telegram</span>
+  </a>
   <button class="pdf-b" id="pdfB" type="button" title="Descargar en PDF">
     <svg viewBox="0 0 20 20"><path d="M10 3v9M6.5 8.5 10 12l3.5-3.5"/><path d="M4 15h12"/></svg>
     <span>PDF</span>
@@ -2430,6 +2437,8 @@ gente no tiene un sitio autorizado donde comprobar.</p>
       <td><a class="enl" href="https://nereum.xyz">nereum.xyz</a> — el único sitio donde la ronda está abierta</td></tr>
   <tr><td><b>X</b></td>
       <td><a class="enl" href="https://x.com/nereuml1">x.com/nereuml1</a> — la única cuenta desde la que publicamos</td></tr>
+  <tr><td><b>Telegram</b></td>
+      <td><a class="enl" href="https://t.me/nereumfinance" target="_blank" rel="noopener">t.me/nereumfinance</a> — el grupo oficial; el equipo nunca te escribe primero por privado</td></tr>
 </table>
 
 <h2 id="patrones">Cómo funciona la suplantación de verdad</h2>
@@ -3749,6 +3758,8 @@ people have nowhere authoritative to check.</p>
       <td><a class="enl" href="https://nereum.xyz">nereum.xyz</a> — the only place the round is open</td></tr>
   <tr><td><b>X</b></td>
       <td><a class="enl" href="https://x.com/nereuml1">x.com/nereuml1</a> — the only account we post from</td></tr>
+  <tr><td><b>Telegram</b></td>
+      <td><a class="enl" href="https://t.me/nereumfinance" target="_blank" rel="noopener">t.me/nereumfinance</a> — the official group; the team never messages you first in private</td></tr>
 </table>
 
 <h2 id="contratos">Contract addresses</h2>
