@@ -312,7 +312,6 @@
  "Identity documents": "Documentos de identidade",
  "Source · CyberScope · Third-party KYC": "Fonte · CyberScope · KYC de terceiros",
  "Company registration": "Registo da empresa",
- "Audited by CyberScope": "Auditado pela CyberScope",
  "Token contract audited · CyberScope": "Contrato do token auditado · CyberScope",
  "Legal registration in the United States · in progress": "Registo legal nos Estados Unidos · em andamento",
  "$5M Seed Round · in progress": "Seed Round de 5 M$ · em andamento",
@@ -356,5 +355,6 @@
  "KYC certificate · 14 Oct 2026": "Certificado de KYC · 14 out 2026",
  "Public certificate · CyberScope": "Certificado público · CyberScope",
  "The token contract deployed, verified and audited by CyberScope, the company registered in Florida and the team KYC verified by CyberScope. Each step is checkable by someone who is not us.": "O contrato do token implantado, verificado e auditado pela CyberScope, a empresa registrada na Flórida e o KYC da equipe verificado pela CyberScope. Cada etapa pode ser conferida por alguém que não somos nós.",
- "Team KYC verified · CyberScope": "KYC da equipe verificado · CyberScope"
+ "Team KYC verified · CyberScope": "KYC da equipe verificado · CyberScope",
+ "Audit & KYC by CyberScope": "Auditoria e KYC pela CyberScope"
 }

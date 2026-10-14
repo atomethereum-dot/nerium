@@ -312,7 +312,6 @@
  "Identity documents": "身份文件",
  "Source · CyberScope · Third-party KYC": "来源 · CyberScope · 第三方 KYC",
  "Company registration": "公司注册",
- "Audited by CyberScope": "已通过 CyberScope 审计",
  "Token contract audited · CyberScope": "代币合约已审计 · CyberScope",
  "Legal registration in the United States · in progress": "美国法律注册 · 进行中",
  "$5M Seed Round · in progress": "500 万美元 Seed Round · 进行中",
@@ -356,5 +355,6 @@
  "KYC certificate · 14 Oct 2026": "KYC 证书 · 2026年10月14日",
  "Public certificate · CyberScope": "公开证书 · CyberScope",
  "The token contract deployed, verified and audited by CyberScope, the company registered in Florida and the team KYC verified by CyberScope. Each step is checkable by someone who is not us.": "代币合约已部署、验证并经 CyberScope 审计，公司已在佛罗里达州注册，团队 KYC 已由 CyberScope 验证。每一步都可以由我们以外的人核实。",
- "Team KYC verified · CyberScope": "团队 KYC 已验证 · CyberScope"
+ "Team KYC verified · CyberScope": "团队 KYC 已验证 · CyberScope",
+ "Audit & KYC by CyberScope": "CyberScope 审计与 KYC"
 }

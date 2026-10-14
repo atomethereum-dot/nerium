@@ -312,7 +312,6 @@
  "Identity documents": "Kimlik belgeleri",
  "Source · CyberScope · Third-party KYC": "Kaynak · CyberScope · Üçüncü taraf KYC",
  "Company registration": "Şirket tescili",
- "Audited by CyberScope": "CyberScope tarafından denetlendi",
  "Token contract audited · CyberScope": "Token sözleşmesi denetlendi · CyberScope",
  "Legal registration in the United States · in progress": "ABD'de yasal tescil · sürüyor",
  "$5M Seed Round · in progress": "5 milyon $'lık Seed Round · sürüyor",
@@ -356,5 +355,6 @@
  "KYC certificate · 14 Oct 2026": "KYC sertifikası · 14 Eki 2026",
  "Public certificate · CyberScope": "Açık sertifika · CyberScope",
  "The token contract deployed, verified and audited by CyberScope, the company registered in Florida and the team KYC verified by CyberScope. Each step is checkable by someone who is not us.": "Token sözleşmesi dağıtıldı, doğrulandı ve CyberScope tarafından denetlendi; şirket Florida'da tescil edildi ve ekip KYC'si CyberScope tarafından doğrulandı. Her adım bizden başka biri tarafından kontrol edilebilir.",
- "Team KYC verified · CyberScope": "Ekip KYC doğrulandı · CyberScope"
+ "Team KYC verified · CyberScope": "Ekip KYC doğrulandı · CyberScope",
+ "Audit & KYC by CyberScope": "CyberScope denetimi ve KYC"
 }

@@ -312,7 +312,6 @@
  "Identity documents": "Giấy tờ tùy thân",
  "Source · CyberScope · Third-party KYC": "Nguồn · CyberScope · KYC của bên thứ ba",
  "Company registration": "Đăng ký công ty",
- "Audited by CyberScope": "Đã được CyberScope kiểm toán",
  "Token contract audited · CyberScope": "Hợp đồng token đã được kiểm toán · CyberScope",
  "Legal registration in the United States · in progress": "Đăng ký pháp lý tại Hoa Kỳ · đang tiến hành",
  "$5M Seed Round · in progress": "Seed Round 5 triệu USD · đang tiến hành",
@@ -356,5 +355,6 @@
  "KYC certificate · 14 Oct 2026": "Chứng chỉ KYC · 14/10/2026",
  "Public certificate · CyberScope": "Chứng chỉ công khai · CyberScope",
  "The token contract deployed, verified and audited by CyberScope, the company registered in Florida and the team KYC verified by CyberScope. Each step is checkable by someone who is not us.": "Hợp đồng token đã được triển khai, xác minh và kiểm toán bởi CyberScope, công ty đã đăng ký tại Florida và KYC của đội ngũ đã được CyberScope xác minh. Mỗi bước đều có thể được kiểm chứng bởi người không phải chúng tôi.",
- "Team KYC verified · CyberScope": "KYC đội ngũ đã xác minh · CyberScope"
+ "Team KYC verified · CyberScope": "KYC đội ngũ đã xác minh · CyberScope",
+ "Audit & KYC by CyberScope": "Kiểm toán & KYC bởi CyberScope"
 }

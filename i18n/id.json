@@ -312,7 +312,6 @@
  "Identity documents": "Dokumen identitas",
  "Source · CyberScope · Third-party KYC": "Sumber · CyberScope · KYC pihak ketiga",
  "Company registration": "Pendaftaran perusahaan",
- "Audited by CyberScope": "Diaudit oleh CyberScope",
  "Token contract audited · CyberScope": "Kontrak token diaudit · CyberScope",
  "Legal registration in the United States · in progress": "Pendaftaran hukum di Amerika Serikat · sedang berjalan",
  "$5M Seed Round · in progress": "Seed Round $5 juta · sedang berjalan",
@@ -356,5 +355,6 @@
  "KYC certificate · 14 Oct 2026": "Sertifikat KYC · 14 Okt 2026",
  "Public certificate · CyberScope": "Sertifikat publik · CyberScope",
  "The token contract deployed, verified and audited by CyberScope, the company registered in Florida and the team KYC verified by CyberScope. Each step is checkable by someone who is not us.": "Kontrak token telah di-deploy, diverifikasi, dan diaudit oleh CyberScope, perusahaan terdaftar di Florida, dan KYC tim telah diverifikasi oleh CyberScope. Setiap langkah dapat diperiksa oleh pihak selain kami.",
- "Team KYC verified · CyberScope": "KYC tim terverifikasi · CyberScope"
+ "Team KYC verified · CyberScope": "KYC tim terverifikasi · CyberScope",
+ "Audit & KYC by CyberScope": "Audit & KYC oleh CyberScope"
 }

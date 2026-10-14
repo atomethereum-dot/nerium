@@ -312,7 +312,6 @@
  "Identity documents": "本人確認書類",
  "Source · CyberScope · Third-party KYC": "出典 · CyberScope · 第三者による KYC",
  "Company registration": "会社登記",
- "Audited by CyberScope": "CyberScope の監査済み",
  "Token contract audited · CyberScope": "トークンコントラクトの監査完了 · CyberScope",
  "Legal registration in the United States · in progress": "米国での法人登記 · 進行中",
  "$5M Seed Round · in progress": "500 万ドルの Seed Round · 進行中",
@@ -356,5 +355,6 @@
  "KYC certificate · 14 Oct 2026": "KYC 証明書 · 2026年10月14日",
  "Public certificate · CyberScope": "公開証明書 · CyberScope",
  "The token contract deployed, verified and audited by CyberScope, the company registered in Florida and the team KYC verified by CyberScope. Each step is checkable by someone who is not us.": "トークンコントラクトはデプロイ・検証され CyberScope の監査を完了、会社はフロリダ州で登記済み、チームの KYC は CyberScope が確認済みです。各ステップは私たち以外の誰でも確認できます。",
- "Team KYC verified · CyberScope": "チームの KYC 確認済み · CyberScope"
+ "Team KYC verified · CyberScope": "チームの KYC 確認済み · CyberScope",
+ "Audit & KYC by CyberScope": "CyberScope による監査と KYC"
 }

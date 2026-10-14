@@ -45,7 +45,7 @@ di(r.auditada, 'Seguridad: contrato del token auditado por CyberScope, 6 de 6, c
 di(r.enProceso === 0 && r.cyber && r.kyc, 'Seguridad: KYC verificado por CyberScope, 3 / 3, con el certificado y la ficha enlazados (' + r.enProceso + ' en proceso)');
 di(r.registrada, 'Seguridad: Nereum Finance LLC registrada, con su numero de seguimiento y el enlace a Sunbiz');
 di(!r.viejo, 'Seguridad y la portada ya no dicen Halborn, Assure DeFi, «passed», la auditoria en proceso ni el numero de registro');
-di(r.hb === 'Audited by CyberScope', 'el boton de la portada dice que esta auditado por CyberScope (' + r.hb + ')');
+di(r.hb === 'Audit & KYC by CyberScope', 'el boton de la portada dice auditoria y KYC por CyberScope (' + r.hb + ')');
 di(r.ruta[0] === 'In progress' && r.ruta[1] === 'In progress' && !r.rutaPasado && r.rutaProc === 0,
    'el Roadmap: fases 01 y 02 en proceso; registro, auditoria y KYC hechos, sin hitos de recaudacion (' + r.ruta.join(' / ') + ', ' + r.rutaProc + ' en proceso)');
 di(errs.length === 0, 'sin errores de pagina' + (errs.length ? ': ' + errs[0] : ''));
