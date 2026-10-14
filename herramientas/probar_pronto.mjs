@@ -2,8 +2,8 @@
 // venta se anuncia como «Starts soon» en el aviso, la portada y el tunel, sin
 // cifra ni «complete»; la dapp enseña $0 recaudados y la meta de siempre; y
 // Seguridad y el Roadmap dicen que la empresa esta registrada, que CyberScope
-// ya audito el contrato del token -con su informe enlazado- y que el KYC sigue
-// en proceso.
+// ya audito el contrato del token -con su informe enlazado- y que verifico el
+// KYC -con su certificado y su ficha enlazados-.
 import { chromium } from 'playwright';
 import http from 'node:http'; import fs from 'node:fs'; import path from 'node:path';
 const RAIZ = '/home/user/nerium';
@@ -27,6 +27,7 @@ const r = await pg.evaluate(() => {
     annW: document.getElementById('annFill').style.width, stkP: document.getElementById('stkBar').style.getPropertyValue('--p'),
     pcVisibles, raised: t('saleRaised'), meta: document.querySelector('#saleRaised + span').textContent,
     enProceso: (sec.match(/In progress/gi) || []).length, cyber: /CyberScope/.test(sec),
+    kyc: /3 \/ 3/.test(sec) && !!document.querySelector('#security .sx-card[data-i="2"] a.sx-go[href="https://github.com/cyberscope-io/kyc/blob/main/nrm/kyc.png"]') && !!document.querySelector('#security .sx-card[data-i="2"] a[href="https://app.cyberscope.io/audits/nrm#fundamentals"]'),
     auditada: /Audited/i.test(sec) && /6 of 6 passed/.test(document.getElementById('security').textContent) && !!document.querySelector('#security a.sx-go[href*="cyberscope-io/audits/blob/main/nrm/audit.pdf"]'),
     registrada: /Registered/.test(sec) && /6697114960CU/.test(sec) && !!document.querySelector('#security a.sx-go[href*="sunbiz.org"]'),
     viejo: /Halborn|Assure DeFi|KYC passed|Audit in progress|Sale, vesting, treasury|L26000341887/.test(document.getElementById('security').innerHTML + document.getElementById('top').innerHTML),
@@ -41,12 +42,12 @@ di(r.pcVisibles === 0, 'y no asoma «complete», «Seed Round open» ni «Launch
 di(parseFloat(r.annW) === 0 && parseFloat(r.stkP) === 0, 'las barras estan vacias (' + r.annW + ', ' + r.stkP + ')');
 di(r.raised === '$0' && /\$500,000/.test(r.meta), 'la dapp enseña $0 recaudados de una meta de $500,000 (temporal, pruebas) (' + r.raised + ' ' + r.meta + ')');
 di(r.auditada, 'Seguridad: contrato del token auditado por CyberScope, 6 de 6, con el enlace al informe');
-di(r.enProceso >= 1 && r.cyber, 'Seguridad: el KYC sigue en proceso, con CyberScope (' + r.enProceso + ')');
+di(r.enProceso === 0 && r.cyber && r.kyc, 'Seguridad: KYC verificado por CyberScope, 3 / 3, con el certificado y la ficha enlazados (' + r.enProceso + ' en proceso)');
 di(r.registrada, 'Seguridad: Nereum Finance LLC registrada, con su numero de seguimiento y el enlace a Sunbiz');
 di(!r.viejo, 'Seguridad y la portada ya no dicen Halborn, Assure DeFi, «passed», la auditoria en proceso ni el numero de registro');
 di(r.hb === 'Audited by CyberScope', 'el boton de la portada dice que esta auditado por CyberScope (' + r.hb + ')');
-di(r.ruta[0] === 'In progress' && r.ruta[1] === 'In progress' && !r.rutaPasado && r.rutaProc === 1,
-   'el Roadmap: fases 01 y 02 en proceso; solo el KYC en proceso (registro y auditoria hechos), sin hitos de recaudacion (' + r.ruta.join(' / ') + ', ' + r.rutaProc + ' en proceso)');
+di(r.ruta[0] === 'In progress' && r.ruta[1] === 'In progress' && !r.rutaPasado && r.rutaProc === 0,
+   'el Roadmap: fases 01 y 02 en proceso; registro, auditoria y KYC hechos, sin hitos de recaudacion (' + r.ruta.join(' / ') + ', ' + r.rutaProc + ' en proceso)');
 di(errs.length === 0, 'sin errores de pagina' + (errs.length ? ': ' + errs[0] : ''));
 await nav.close(); srv.close();
 console.log(mal ? `\n${ok} bien, ${mal} MAL` : `\n${ok}/${ok} correctas`);
