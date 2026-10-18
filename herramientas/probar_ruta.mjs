@@ -54,7 +54,7 @@ const di = (b, t) => { if (b) { ok++; console.log('  ok  ' + t) } else { mal++; 
   // cazo cuando se movio la portada y no la tabla del whitepaper.
   const FASES = ['Foundation', 'Expansion', 'Integration'];
   const OBJ = [
-    'The contract deployed and verified and the company registered in Florida, with the audit and the team KYC under way. Each step is checkable by someone who is not us.',
+    'The token contract deployed, verified and audited by CyberScope, the company registered in Florida and the team KYC verified by CyberScope. Each step is checkable by someone who is not us.',
     'The chain and the interfaces that sit on top of it, built and out in the open, with a price anyone can look up.',
     'The infrastructure ceases to be a decision factor for the issuer, in the same way interbank payment rails are not one today.',
   ];
@@ -383,8 +383,9 @@ await indice(pg, 1440, 900);
     di(hechos.length > 0 && hechos.every(x => x.centro >= .5 && x.aro <= .08),
        W + 'px · hecho = cubo azul lleno, sin aro (centro ' + hechos.map(x => (100 * x.centro).toFixed(0)).join('/') +
        ' %, aro ' + hechos.map(x => (100 * x.aro).toFixed(0)).join('/') + ' %)');
-    di(proc.length > 0 && proc.every(x => x.aro >= .12 && x.aro <= .7),
-       W + 'px · en proceso = aro azul discontinuo (' + proc.map(x => (100 * x.aro).toFixed(0)).join('/') + ' % del anillo pintado)');
+    /* registro, auditoria y KYC ya estan hechos: puede no quedar ningun hito en proceso */
+    di(proc.every(x => x.aro >= .12 && x.aro <= .7),
+       W + 'px · en proceso = aro azul discontinuo (' + (proc.length ? proc.map(x => (100 * x.aro).toFixed(0)).join('/') + ' % del anillo pintado' : 'ninguno en proceso') + ')');
     /* la trenza: ruta centrada, y se mira el tramo de la hebra ya crecido */
     await p3.evaluate(() => { const r = document.getElementById('ruta').getBoundingClientRect();
       scrollBy(0, r.top + r.height / 2 - innerHeight / 2); });
