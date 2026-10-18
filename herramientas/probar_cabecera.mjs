@@ -265,7 +265,8 @@ const es = await (async () => {
     nav: [...document.querySelectorAll('.nav>a')].map(a=>a.textContent.trim().replace(/^(.+?)\1$/,'$1')),
     ann: document.querySelector('.ann-in').innerText.replace(/\s+/g,' ') }));
 })();
-di(es.nav.includes('Seguridad') && es.nav.includes('Pila'), 'el menu se traduce: ' + es.nav.join(' '));
+/* sin The Stack, «Pila» ya no esta en el menu: se mira «Prensa» */
+di(es.nav.includes('Seguridad') && es.nav.includes('Prensa'), 'el menu se traduce: ' + es.nav.join(' '));
 di(/completado/.test(es.ann), 'y el aviso tambien: ' + es.ann.trim());
 await ctx.close();
 
@@ -376,9 +377,11 @@ await ctx2.close();
      pAz.toFixed(1) + ' % de pixeles azules, limite 6)');
   /* Es una MEDIA de todas las fichas. Con Proyectos oculta sale del menu la
      ficha de «Build», la de trazo mas lleno, y la media baja de 11 a 10,6 sin
-     que ninguna de las que quedan haya cambiado: el limite pasa a 10. */
-  di(pMa >= 10, 'y el trazo tiene cuerpo a 20 px, no es niebla (' + pMa.toFixed(1) +
-     ' % macizo frente a ' + (niebla / tot * 100).toFixed(1) + ' % de niebla, limite 10)');
+     que ninguna de las que quedan haya cambiado: el limite pasa a 10.
+     p94 · Lo mismo al quitar The Stack: sale la ficha de las capas y la media
+     baja de 10,6 a 9,2 con las demas intactas. El limite pasa a 9. */
+  di(pMa >= 9, 'y el trazo tiene cuerpo a 20 px, no es niebla (' + pMa.toFixed(1) +
+     ' % macizo frente a ' + (niebla / tot * 100).toFixed(1) + ' % de niebla, limite 9)');
   await ctx3.close();
 }
 

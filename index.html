@@ -719,7 +719,7 @@ main>section.logos::after{display:none}
 /* «hidden» en una seccion no basta: las reglas de «main>section» le dan
    «display» y lo pisan. Se refuerza aqui. */
 .kin[hidden],#thesis[hidden],#builds[hidden],#press[hidden],#stack[hidden],#seed-round [hidden],#ruta [hidden]{display:none !important}
-.nav a[hidden],.mnav a[hidden],a[href="#builds"][hidden]{display:none !important}
+.nav a[hidden],.mnav a[hidden],a[href="#builds"][hidden],a[href="#stack"][hidden]{display:none !important}
 .kin{background:#050609;padding:var(--s6) 0;overflow:hidden;
   border-block:1px solid rgba(255,255,255,.08)}
 .kin-row{overflow:hidden}
@@ -7004,10 +7004,50 @@ main>section:is(.paper,.paper2,.secure,.sale,.team):not(#seed-round):not(.claro)
     var(--grano) !important;
   --tapa:#0D1017}
 main>section#seed-round{--tapa:#0E3AC4}
-.sale-fundido{height:70vh;height:70svh;pointer-events:none;
-  background-color:#0E3AC4;
-  background-image:linear-gradient(180deg,#030409 0%,#04081A 18%,#071447 46%,#0B2C9A 76%,#0E3AC4 100%),var(--grano-claro);
-  background-repeat:no-repeat,repeat;background-size:100% 100%,auto}
+.alba{position:relative;height:260vh;background:#030409}
+.alba-stage{position:sticky;top:0;overflow:hidden;background:#030409;--a:0;
+  height:100vh;height:100svh;height:100dvh;height:var(--vh,100dvh)}
+.alba-stage>i{position:absolute;pointer-events:none;display:block}
+/* el azul de la compra, que acaba cubriendolo todo */
+.alba-azul{inset:0;background:#0E3AC4;opacity:calc(var(--a)*var(--a))}
+/* dos mantos de luz que derivan solos, despacio: lo que hace que el azul no
+   sea un relleno. Solo «transform», en el compositor */
+.alba-aurora{width:120vmax;height:120vmax;left:50%;top:50%;margin:-60vmax 0 0 -60vmax;border-radius:50%;
+  opacity:calc(var(--a)*.9);will-change:transform}
+.alba-aurora.a1{background:radial-gradient(closest-side,rgba(46,107,255,.55),rgba(46,107,255,0) 70%);
+  animation:albaDeriva1 19s ease-in-out infinite alternate}
+.alba-aurora.a2{background:radial-gradient(closest-side,rgba(10,36,120,.75),rgba(10,36,120,0) 70%);
+  animation:albaDeriva2 23s ease-in-out infinite alternate}
+@keyframes albaDeriva1{0%{transform:translate3d(-22%,18%,0) scale(.9)}100%{transform:translate3d(18%,-8%,0) scale(1.15)}}
+@keyframes albaDeriva2{0%{transform:translate3d(20%,24%,0) scale(1.1)}100%{transform:translate3d(-16%,-14%,0) scale(.85)}}
+/* el resplandor que sube desde abajo, como un sol que asoma */
+.alba-sol{left:50%;bottom:0;width:180vmax;height:120vmax;margin-left:-90vmax;border-radius:50%;
+  background:radial-gradient(closest-side,rgba(64,126,255,.95),rgba(30,82,236,.55) 38%,rgba(14,58,196,0) 72%);
+  transform:translate3d(0,calc(62% - var(--a)*62%),0) scale(calc(.55 + var(--a)*.75));
+  transform-origin:50% 100%;opacity:calc(var(--a)*2.2)}
+/* la linea del horizonte: un filo de luz que barre la pantalla de abajo arriba */
+.alba-horizonte{left:-10%;right:-10%;top:0;height:2px;
+  background:linear-gradient(90deg,rgba(143,182,255,0),rgba(214,229,255,.95) 50%,rgba(143,182,255,0));
+  box-shadow:0 0 24px 6px rgba(80,140,255,.55),0 0 80px 20px rgba(46,107,255,.35);
+  transform:translate3d(0,calc(100vh - var(--a)*112vh),0);
+  opacity:calc(var(--a)*(1 - var(--a))*4)}
+/* un haz diagonal que cruza mientras amanece */
+.alba-haz{top:-30%;bottom:-30%;left:0;width:34vmax;
+  background:linear-gradient(90deg,rgba(160,196,255,0),rgba(160,196,255,.22) 50%,rgba(160,196,255,0));
+  transform:translate3d(calc(-40vmax + var(--a)*150vw),0,0) rotate(18deg);
+  opacity:calc(var(--a)*(1 - var(--a))*3.2)}
+/* el negro de los bordes, como en una sala: se abre al llegar el azul */
+.alba-vela{inset:0;background:radial-gradient(120% 90% at 50% 55%,rgba(0,0,0,0) 40%,rgba(0,0,0,.72) 100%);
+  opacity:calc(1 - var(--a))}
+.alba-stage::after{content:"";position:absolute;inset:0;pointer-events:none;background:var(--grano-claro)}
+.alba-stage .stk-ronda{z-index:4}
+/* sobre el azul la barra se aclara para no perderse */
+.alba-stage .stk-ronda-bar b{background-color:#2E86FF;
+  background-image:linear-gradient(rgba(255,255,255,calc(var(--a)*.85)),rgba(255,255,255,calc(var(--a)*.85)))}
+.alba-stage .stk-ronda-bar{background:rgba(255,255,255,calc(.12 + var(--a)*.14))}
+.alba-stage .xf-go{z-index:4;mix-blend-mode:normal;color:#fff}   /* «difference» sobre azul daria amarillo */
+.alba-stage.go .xf-go{opacity:.85}
+@media(prefers-reduced-motion:reduce){.alba-aurora.a1,.alba-aurora.a2{animation:none}}
 /* la compra empieza exactamente en el azul con que acaba la franja: su luz de
    arriba a la izquierda asoma poco a poco y no marca una linea */
 main>section#seed-round::before{content:"";position:absolute;left:0;right:0;top:0;height:min(34vh,320px);
@@ -8345,7 +8385,7 @@ body.lock .flota{opacity:0 !important;pointer-events:none !important}
   <nav class="nav">
     <a href="#press">Press<i class="chip" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4.6 6.4h14.8v8.8h-8.1L7.4 18.6v-3.4H4.6Z"/></svg></i></a>
     <a href="#security">Security<i class="chip" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3.5 5.2 6.4v4.8c0 4 2.8 6.8 6.8 7.6 4-.8 6.8-3.6 6.8-7.6V6.4L12 3.5Z"/></svg></i></a>
-    <a href="#stack">Stack<i class="chip" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 4 4 8l8 4 8-4-8-4Z"/><path d="M4 14l8 4 8-4"/></svg></i></a>
+    <!-- p94 · «Stack» fuera del menu: la seccion ya no esta -->
     <a href="#seed-round">Seed Round<i class="chip" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4.6 18.4h14.8"/><path d="M8 18.4v-4.2M12 18.4v-8.6M16 18.4v-6.2"/></svg></i></a>
     <a href="#token">Token<i class="chip" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="7.6"/><circle cx="12" cy="12" r="3"/></svg></i></a>
     <a href="#join">In the open<i class="chip" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="2.2"/><path d="M7.6 7.6a6.2 6.2 0 0 0 0 8.8"/><path d="M16.4 7.6a6.2 6.2 0 0 1 0 8.8"/></svg></i></a>
@@ -8360,7 +8400,7 @@ body.lock .flota{opacity:0 !important;pointer-events:none !important}
 <div class="sheet" id="sheet">
   <a href="#press">Press<i class="chip" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4.6 6.4h14.8v8.8h-8.1L7.4 18.6v-3.4H4.6Z"/></svg></i></a>
   <a href="#security">Security<i class="chip" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3.5 5.2 6.4v4.8c0 4 2.8 6.8 6.8 7.6 4-.8 6.8-3.6 6.8-7.6V6.4L12 3.5Z"/></svg></i></a>
-  <a href="#stack">Stack<i class="chip" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 4 4 8l8 4 8-4-8-4Z"/><path d="M4 14l8 4 8-4"/></svg></i></a>
+  <!-- p94 · «Stack» fuera del menu: la seccion ya no esta -->
   <a href="#seed-round">Seed Round<i class="chip" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4.6 18.4h14.8"/><path d="M8 18.4v-4.2M12 18.4v-8.6M16 18.4v-6.2"/></svg></i></a>
   <a href="#token">Token<i class="chip" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="7.6"/><circle cx="12" cy="12" r="3"/></svg></i></a>
   <a href="#join">In the open<i class="chip" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="2.2"/><path d="M7.6 7.6a6.2 6.2 0 0 0 0 8.8"/><path d="M16.4 7.6a6.2 6.2 0 0 1 0 8.8"/></svg></i></a>
@@ -8657,11 +8697,7 @@ body.lock .flota{opacity:0 !important;pointer-events:none !important}
          «Real-world asset chain» -mono, pequeña, muy espaciada- y una barra
          de un pixel. La cifra y la barra las mueve __aviso, el mismo dato
          que la franja de arriba y la portada. -->
-    <div class="stk-ronda" id="stkRonda">
-      <p class="stk-ronda-t">Join the Seed Round</p>
-      <div class="stk-ronda-bar" role="progressbar" aria-label="Seed Round" aria-valuemin="0" aria-valuemax="100" aria-valuenow="85"><b id="stkBar" style="--p:85%"></b></div>
-      <p class="stk-ronda-m"><span><b id="stkPct">85%</b> <span class="pc">complete</span></span><i class="pc" aria-hidden="true">&#183;</i><span class="pc">Launching soon</span></p>
-    </div>
+    <!-- p94 · el rotulo de la ronda se fue al paso de negro a azul («#alba») -->
     <!-- la señal de seguir bajando, la misma de las otras secciones fijas -->
     <div class="xf-go" aria-hidden="true">
       <i></i>
@@ -8704,10 +8740,34 @@ body.lock .flota{opacity:0 !important;pointer-events:none !important}
     <span class="umb-cifra" id="umbPct">0</span>
   </div>
 </div>
-<!-- p93 · DE NEGRO A AZUL. Sin tunel ni cubos: entre Security y la compra
-     solo cambia el color. La franja va del negro de la pagina al azul de la
-     compra, con el mismo grano, y la compra empieza ya en su azul. -->
-<div class="sale-fundido" aria-hidden="true"></div>
+<!-- p94 · EL AMANECER. Sin tunel ni cubos: entre Security y la compra la
+     pantalla se queda quieta y el azul sube desde abajo como una luz que
+     amanece -un resplandor, una linea de horizonte y un haz que la cruza-,
+     con el rotulo de la ronda en el centro, el de siempre. Todo son capas
+     que solo se mueven con «transform» y «opacity»; el scroll mueve dos
+     variables y nada mas. Al final la pantalla es el azul de la compra, que
+     empieza justo en ese azul. -->
+<div class="alba" id="alba" data-bg="#030409" data-acc="#3381FF">
+  <div class="alba-stage">
+    <i class="alba-azul" aria-hidden="true"></i>
+    <i class="alba-aurora a1" aria-hidden="true"></i>
+    <i class="alba-aurora a2" aria-hidden="true"></i>
+    <i class="alba-sol" aria-hidden="true"></i>
+    <i class="alba-horizonte" aria-hidden="true"></i>
+    <i class="alba-haz" aria-hidden="true"></i>
+    <i class="alba-vela" aria-hidden="true"></i>
+    <div class="stk-ronda" id="stkRonda">
+      <p class="stk-ronda-t">Join the Seed Round</p>
+      <div class="stk-ronda-bar" role="progressbar" aria-label="Seed Round" aria-valuemin="0" aria-valuemax="100" aria-valuenow="85"><b id="stkBar" style="--p:85%"></b></div>
+      <p class="stk-ronda-m"><span><b id="stkPct">85%</b> <span class="pc">complete</span></span><i class="pc" aria-hidden="true">&#183;</i><span class="pc">Launching soon</span></p>
+    </div>
+    <div class="xf-go" aria-hidden="true">
+      <i></i>
+      <svg viewBox="0 0 24 24"><path d="M12 4v13M6 12l6 6 6-6"/></svg>
+      <b>Keep scrolling</b>
+    </div>
+  </div>
+</div>
 <section class="sale" id="seed-round" data-bg="#0E3AC4" data-acc="#7FB0FF"><i class="via" aria-hidden="true"></i>
   <div class="sale-field" aria-hidden="true" hidden><i></i><i></i><i></i><i></i></div>
   <div class="sale-tunel" aria-hidden="true" hidden><canvas id="saleTunel" data-sin-vigia></canvas></div>
@@ -12050,6 +12110,35 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
     }
     requestAnimationFrame(tick);
   })();
+})();
+/* p94 · EL AMANECER: el recorrido de «#alba» mueve «--a» (cuanto azul) en el
+   escenario y las cuatro variables del rotulo, las mismas de siempre. Sin
+   lienzo: solo estilos en dos elementos, y dormido fuera de la pantalla. */
+(function(){
+  const sec=document.getElementById('alba'); if(!sec) return;
+  const st=sec.querySelector('.alba-stage'), ronda=document.getElementById('stkRonda');
+  const clm=v=>v<0?0:v>1?1:v, sube=v=>{v=clm(v);return v*v*(3-2*v)}, ease=v=>{v=clm(v);return 1-Math.pow(1-v,3)};
+  let top=0, run=1, vis=false, last=-1, pend=0, flecha=null;
+  function mide(){ let y=0,n=sec; while(n){ y+=n.offsetTop; n=n.offsetParent } top=y; run=Math.max(1,sec.offsetHeight-st.offsetHeight); last=-1; pide(); }
+  function pinta(){
+    pend=0; if(!vis) return;
+    const p=clm(((window.scrollY||0)-top)/run);
+    if(Math.abs(p-last)<.0008) return; last=p;
+    st.style.setProperty('--a',sube((p-.26)/.62).toFixed(4));   /* curva suave: el azul entra despacio, se acelera y se asienta */
+    if(ronda){
+      ronda.style.setProperty('--t1',sube((p-.02)/.12).toFixed(3));
+      ronda.style.setProperty('--t2',sube((p-.10)/.07).toFixed(3));
+      ronda.style.setProperty('--k', ease(clm((p-.13)/.20)).toFixed(3));
+      ronda.style.setProperty('--t3',sube((p-.28)/.09).toFixed(3));
+    }
+    const va=p<.82; if(va!==flecha){ flecha=va; st.classList.toggle('go',va) }
+  }
+  function pide(){ if(!pend) pend=requestAnimationFrame(pinta) }
+  new IntersectionObserver(es=>{ vis=es[0].isIntersecting; if(vis){ mide() } },{rootMargin:'30% 0px'}).observe(sec);
+  addEventListener('scroll',pide,{passive:true});
+  addEventListener('resize',mide,{passive:true});
+  if(window.ResizeObserver){ let rz=0; new ResizeObserver(()=>{ if(rz) return; rz=requestAnimationFrame(()=>{ rz=0; mide() }) }).observe(document.body) }
+  mide();
 })();
 (function(){
   const hold=document.getElementById('stack'), cv=document.getElementById('stkCv');
