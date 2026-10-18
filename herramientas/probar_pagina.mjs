@@ -37,13 +37,18 @@ await pg.waitForTimeout(2600);
 /* Y «.tkp» (Token) tampoco: paso al negro plano de la prensa y seguridad,
    #030409, sin los degradados azules. Que sea ese negro plano se afirma aqui
    abajo, donde antes se media su suelo de metal. */
-const papel = await pg.evaluate(() => ['.paper', '.paper2', '.sale', '.join']
+/* Y «.sale» (la compra) tampoco: el paso de negro a azul, como los de Monad,
+   es la PANTALLA entera cambiando de tono, y eso solo es posible si Seguridad,
+   la ronda, la compra y el token pintan el MISMO fondo -un tono compartido y
+   el mismo grano-; con degradados propios en la compra se ve la costura. Que
+   compartan ese fondo se afirma aqui abajo y en «probar_detalle». */
+const papel = await pg.evaluate(() => ['.paper', '.paper2', '.join']
   .map(s => { const e = document.querySelector(s); if (!e) return null;
     const c = getComputedStyle(e);
     return { sel: s, claro: e.classList.contains('claro'), col: c.backgroundColor,
              img: c.backgroundImage, capas: c.backgroundImage.split(/,(?![^()]*\))/).length }; })
   .filter(Boolean));
-di(papel.length >= 4, 'estan las secciones claras (' + papel.length + ')');
+di(papel.length >= 3, 'estan las secciones claras (' + papel.length + ')');
 di(papel.every(p => p.img !== 'none'),
    'ninguna es ya un color plano: todas llevan luz encima');
 di(papel.every(p => /feTurbulence/.test(p.img)),
@@ -103,9 +108,11 @@ di(papel.every(p => /gradient/.test(p.img)),
    y ademas medir el archivo siempre fue medir menos: el archivo podia estar
    perfecto y el resultado no, si algo se le ponia encima. Se fotografia una
    seccion clara y se mide ahi. */
-const tkpPlano = await pg.evaluate(() => { const e = document.querySelector('.tkp');
-  const c = e && getComputedStyle(e); return !!c && c.backgroundImage === 'none' && c.backgroundColor === 'rgb(3, 4, 9)'; });
-di(tkpPlano, 'Token va en el negro plano de la prensa y seguridad (#030409, sin degradados)');
+const tkpPlano = await pg.evaluate(() => {
+  const f = s => { const e = document.querySelector(s), c = e && getComputedStyle(e); return c ? c.backgroundColor + '|' + c.backgroundImage : '' };
+  const tkp = f('.tkp');
+  return tkp.startsWith('rgb(3, 4, 9)|') && !/gradient/.test(tkp) && ['#security', '#alba', '.sale'].every(s => f(s) === tkp); });
+di(tkpPlano, 'Token va en el negro plano de seguridad (#030409, sin degradados), el mismo fondo que la ronda y la compra');
 const suelo = tkpPlano ? null : await (async () => {
   /* el suelo de metal se fotografia en Tokenomics: seguridad era la que se
      usaba y ya es negro plano */

@@ -119,35 +119,48 @@ await ctx2.close();
 // ── 7 · antes de la compra, sin tunel ni cubos: el paso de negro a azul ──
 //
 // The Stack era un campo de cubos que llevaba a la compra como un tunel. Se
-// pidio quitarlo y dejar solo un cambio de color, de cine: la pantalla se
-// queda quieta, el rotulo de la ronda en el centro, y el azul sube desde
-// abajo hasta ser el de la compra. Se comprueba lo que se VE: negro al
-// entrar, azul al salir, el rotulo a la vista y la luz moviendose sola.
+// pidio quitarlo y dejar un cambio de color de cine, como los de Monad: no
+// hay dos fondos que se toquen, es la PANTALLA entera la que pasa de negro a
+// azul cuando la seccion de la ronda cruza el centro, y vuelve a negro al
+// llegar al token. Se comprueba lo que se VE: negro en Seguridad, todo azul
+// —Seguridad incluida, sin costura— con el rotulo de la ronda contandose
+// hasta su cifra, la luz moviendose sola, y negro otra vez en el token.
 const ctx3 = await nav.newContext({ viewport:{width:1523,height:772} });
 const w = await ctx3.newPage();
 await w.goto('http://127.0.0.1:9017/', { waitUntil:'load' }); await w.waitForTimeout(2000);
-const mira = (p) => w.evaluate(async (p) => {
-  const sec = document.getElementById('alba'), st = sec.querySelector('.alba-stage');
-  /* el recorrido del amanecer empieza cuando la seccion asoma por abajo */
-  const top = sec.getBoundingClientRect().top + scrollY - innerHeight;
-  scrollTo(0, Math.round(top + p * (sec.offsetHeight - st.offsetHeight + innerHeight)));
-  await new Promise(s => setTimeout(s, 700));
-  const a = +getComputedStyle(st).getPropertyValue('--a') || 0;
+const mira = (id, f) => w.evaluate(async ([id, f]) => {
+  const el = document.getElementById(id);
+  /* lleva el punto f de la pieza al centro de la pantalla */
+  scrollTo(0, Math.round(el.getBoundingClientRect().top + scrollY + el.offsetHeight * f - innerHeight / 2));
+  await new Promise(s => setTimeout(s, 2300));
+  const fondo = x => getComputedStyle(document.getElementById(x)).backgroundColor;
+  const azul = c => { const m = c.match(/\d+/g).map(Number); return m[2] > 150 && m[2] > m[0] * 2 };
   const r = document.getElementById('stkRonda').getBoundingClientRect();
-  return { a, ronda: r.width > 0 && r.top > 0 && r.bottom < innerHeight,
+  return { azul: document.documentElement.classList.contains('tono-azul'),
+           fondos: ['security', 'alba', 'seed-round', 'token'].map(fondo),
+           pantalla: azul(fondo(id)),
+           ronda: r.width > 0 && r.top > 0 && r.bottom < innerHeight,
+           cifra: (document.getElementById('albaCifra') || {}).textContent,
            texto: document.getElementById('stkRonda').textContent.replace(/\s+/g,' ').trim(),
            vivas: document.getAnimations().filter(x => x.playState === 'running' && x.effect && x.effect.target && x.effect.target.classList && x.effect.target.classList.contains('alba-aurora')).length };
-}, p);
+}, [id, f]);
 const sinTunel = await w.evaluate(() => ({ stack: getComputedStyle(document.getElementById('stack')).display,
   cubosCompra: [...document.querySelectorAll('#seed-round .sale-tunel, #seed-round .sale-field')].every(e => getComputedStyle(e).display === 'none') }));
 di(sinTunel.stack === 'none' && sinTunel.cubosCompra, 'sin tunel de cubos ni cubos de fondo en la compra');
-const e1 = await mira(0.30), e2 = await mira(0.97);
-di(e1.a < 0.15, 'al entrar la pantalla es aun negra (' + e1.a.toFixed(2) + ' de azul)');
-di(e2.a > 0.98, 'y al salir es el azul de la compra (' + e2.a.toFixed(2) + ')');
-di(/Join the Seed Round/i.test(e2.texto) && /\d+%/.test(e2.texto), 'con el rotulo de la ronda: «' + e2.texto.slice(0, 60) + '»');
-const e3 = await mira(0.48);
-di(e3.ronda && e2.ronda, 'y el rotulo se ve entero en la pantalla mientras el azul sube y al final');
-di(e3.a > 0.15 && e3.a < 0.95 && e3.vivas >= 2, 'a medio camino el azul va subiendo y la luz se mueve sola (' + e3.a.toFixed(2) + ', ' + e3.vivas + ' capas vivas)');
+const e1 = await mira('security', 0.3);
+di(!e1.azul && !e1.pantalla, 'en Seguridad la pantalla es negra (' + e1.fondos[0] + ')');
+const e2 = await mira('alba', 0.5);
+di(e2.azul && e2.pantalla, 'con la ronda en el centro, la pantalla entera es azul (' + e2.fondos[1] + ')');
+di(new Set(e2.fondos).size === 1, 'y Seguridad, la ronda, la compra y el token comparten el mismo color: sin costura (' + [...new Set(e2.fondos)].join(' / ') + ')');
+di(/Join the Seed Round/i.test(e2.texto) && /complete/.test(e2.texto) && e2.ronda, 'con el rotulo de la ronda entero a la vista: «' + e2.texto.slice(0, 60) + '»');
+di(e2.cifra === (await w.evaluate(() => document.getElementById('stkPct').textContent)), 'y la cifra grande se cuenta hasta la de la ronda (' + e2.cifra + ')');
+di(e2.vivas >= 2, 'y la luz se mueve sola (' + e2.vivas + ' capas vivas)');
+const e3 = await mira('seed-round', 0.4);
+di(e3.azul && e3.pantalla, 'la compra sigue en el mismo azul');
+const e4 = await mira('token', 0.4);
+di(!e4.azul && !e4.pantalla, 'y al llegar al token la pantalla vuelve a negro (' + e4.fondos[3] + ')');
+const e5 = await mira('alba', 0.5);
+di(e5.azul && e5.cifra === e2.cifra, 'subiendo, vuelve el azul y la cifra se cuenta otra vez');
 await ctx3.close();
 
 // con movimiento reducido la luz no deriva
