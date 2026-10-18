@@ -7006,12 +7006,16 @@ main>section:is(.paper,.paper2,.secure,.sale,.team):not(#seed-round):not(.claro)
 main>section#seed-round{--tapa:#0E3AC4}
 /* p95 · tras el amanecer la compra no abre con un hueco azul */
 main>section#seed-round{padding-top:clamp(36px,6vh,72px)}
-/* el color de la pantalla en este tramo: uno solo para las cuatro piezas */
+/* el color de la pantalla en este tramo: uno solo para la ronda, la compra y
+   el token. p97 · Seguridad queda quieta: su negro de siempre, con el mismo
+   grano, asi que en negro no hay costura con el rotulo */
 html{--tono:#030409}
 html.tono-azul{--tono:#0E3AC4}
-html main#contenido>:is(section#security,div#alba,section#seed-round,section#token){
+html main#contenido>section#security{background-color:#030409 !important;background-image:var(--grano-claro) !important}
+html main#contenido>:is(div#alba,section#seed-round,section#token){
   background-color:var(--tono) !important;background-image:var(--grano-claro) !important;
-  transition:background-color 1.1s cubic-bezier(.65,0,.35,1)}
+  transition:background-color .7s cubic-bezier(.65,0,.35,1)}
+html.tono-azul main#contenido>:is(div#alba,section#seed-round,section#token){transition-duration:1.1s}
 .alba{position:relative;min-height:100vh;min-height:100svh;display:flex;align-items:center;justify-content:center;
   overflow:hidden;padding:12vh 0}
 .alba>i{position:absolute;pointer-events:none;display:block}
@@ -7056,7 +7060,7 @@ html.tono-azul #alba .stk-ronda-bar b{background:#CFE0FF;box-shadow:0 0 10px rgb
 @media(prefers-reduced-motion:reduce){
   .alba-aurora.a1,.alba-aurora.a2{animation:none}
   html.tono-azul .alba-haz{animation:none}
-  html main#contenido>:is(section#security,div#alba,section#seed-round,section#token){transition-duration:.3s}
+  html main#contenido>:is(div#alba,section#seed-round,section#token){transition-duration:.3s !important}
 }
 
 
@@ -12111,22 +12115,25 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
     requestAnimationFrame(tick);
   })();
 })();
-/* p96 · EL VIRAJE: manda la pieza que cruza el centro de la pantalla. El
-   rotulo y la compra piden azul; Security y Token, negro. Un solo vigia, sin
-   nada por cuadro: el fundido lo hace el navegador con una transicion. */
+/* p97 · EL VIRAJE, con Seguridad quieta: Seguridad se queda en su negro y es
+   la pantalla del rotulo la que se vuelve azul, con la compra detras. Para que
+   nunca se vea el borde entre las dos, el azul llega con Seguridad ya fuera de
+   la pantalla (bajando, en cuanto sale) y se va antes de que vuelva (subiendo,
+   con el 40 % de una pantalla de margen). Con el Token en el centro, negro
+   otra vez. El fundido lo hace el navegador con una transicion. */
 (function(){
-  const G=[['security',0],['alba',1],['seed-round',1],['token',0]]
-    .map(([id,azul])=>({el:document.getElementById(id),azul})).filter(x=>x.el);
-  if(!G.length) return;
-  const raiz=document.documentElement, dentro=new Set(); let tono=-1;
-  function decide(){ let t=0; for(const g of G) if(dentro.has(g.el)) t=g.azul;
+  const alba=document.getElementById('alba'), tok=document.getElementById('token');
+  if(!alba) return;
+  const raiz=document.documentElement; let tono=-1, ult=scrollY, dir=1;
+  function decide(){
+    const y=scrollY; if(Math.abs(y-ult)>48){ dir=y>ult?1:-1; ult=y }
+    const H=innerHeight, at=alba.getBoundingClientRect().top, token=!!tok&&tok.getBoundingClientRect().top<=H*.5;
+    const t=token||at>0||(dir<0&&at>-H*.4)?0:1;
     if(t!==tono){ tono=t; raiz.classList.toggle('tono-azul',!!t) } }
-  const io=new IntersectionObserver(es=>{ for(const e of es){ if(e.isIntersecting) dentro.add(e.target); else dentro.delete(e.target) } decide() },
-    {rootMargin:'-50% 0px -50% 0px'});
-  G.forEach(g=>io.observe(g.el));
+  addEventListener('scroll',decide,{passive:true}); addEventListener('resize',decide); decide();
   /* el rotulo entra al asomar y la cifra se cuenta hasta la de la ronda */
-  const alba=document.getElementById('alba'), cifra=document.getElementById('albaCifra'), pct=document.getElementById('stkPct');
-  if(!alba||!cifra) return;
+  const cifra=document.getElementById('albaCifra'), pct=document.getElementById('stkPct');
+  if(!cifra) return;
   const CALMA=matchMedia('(prefers-reduced-motion: reduce)').matches;
   function cuenta(){
     const meta=parseFloat(pct&&pct.textContent)||0;

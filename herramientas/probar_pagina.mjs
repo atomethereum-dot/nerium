@@ -38,10 +38,11 @@ await pg.waitForTimeout(2600);
    #030409, sin los degradados azules. Que sea ese negro plano se afirma aqui
    abajo, donde antes se media su suelo de metal. */
 /* Y «.sale» (la compra) tampoco: el paso de negro a azul, como los de Monad,
-   es la PANTALLA entera cambiando de tono, y eso solo es posible si Seguridad,
-   la ronda, la compra y el token pintan el MISMO fondo -un tono compartido y
-   el mismo grano-; con degradados propios en la compra se ve la costura. Que
-   compartan ese fondo se afirma aqui abajo y en «probar_detalle». */
+   es la PANTALLA entera cambiando de tono, y eso solo es posible si la ronda,
+   la compra y el token pintan el MISMO fondo -un tono compartido y el mismo
+   grano-, y si Seguridad, que se queda quieta, pinta ese mismo fondo en
+   negro; con degradados propios en la compra se ve la costura. Que compartan
+   ese fondo se afirma aqui abajo y en «probar_detalle». */
 const papel = await pg.evaluate(() => ['.paper', '.paper2', '.join']
   .map(s => { const e = document.querySelector(s); if (!e) return null;
     const c = getComputedStyle(e);

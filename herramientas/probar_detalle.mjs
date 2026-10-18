@@ -119,12 +119,12 @@ await ctx2.close();
 // ── 7 · antes de la compra, sin tunel ni cubos: el paso de negro a azul ──
 //
 // The Stack era un campo de cubos que llevaba a la compra como un tunel. Se
-// pidio quitarlo y dejar un cambio de color de cine, como los de Monad: no
-// hay dos fondos que se toquen, es la PANTALLA entera la que pasa de negro a
-// azul cuando la seccion de la ronda cruza el centro, y vuelve a negro al
-// llegar al token. Se comprueba lo que se VE: negro en Seguridad, todo azul
-// —Seguridad incluida, sin costura— con el rotulo de la ronda contandose
-// hasta su cifra, la luz moviendose sola, y negro otra vez en el token.
+// pidio quitarlo y dejar un cambio de color de cine, como los de Monad: es la
+// PANTALLA entera la que pasa de negro a azul, no dos fondos que se tocan. Y
+// despues, que Seguridad -la auditoria- se quede quieta en su negro y sea la
+// pantalla del rotulo de la ronda la que cambie. Para que nunca se vea el
+// borde entre las dos, el azul llega con Seguridad ya fuera de la pantalla y,
+// subiendo, se va antes de que vuelva. Se comprueba lo que se VE.
 const ctx3 = await nav.newContext({ viewport:{width:1523,height:772} });
 const w = await ctx3.newPage();
 await w.goto('http://127.0.0.1:9017/', { waitUntil:'load' }); await w.waitForTimeout(2000);
@@ -139,19 +139,25 @@ const mira = (id, f) => w.evaluate(async ([id, f]) => {
   return { azul: document.documentElement.classList.contains('tono-azul'),
            fondos: ['security', 'alba', 'seed-round', 'token'].map(fondo),
            pantalla: azul(fondo(id)),
+           at: document.getElementById('alba').getBoundingClientRect().top / innerHeight,
            ronda: r.width > 0 && r.top > 0 && r.bottom < innerHeight,
            cifra: (document.getElementById('albaCifra') || {}).textContent,
            texto: document.getElementById('stkRonda').textContent.replace(/\s+/g,' ').trim(),
            vivas: document.getAnimations().filter(x => x.playState === 'running' && x.effect && x.effect.target && x.effect.target.classList && x.effect.target.classList.contains('alba-aurora')).length };
 }, [id, f]);
+const NEGRO = 'rgb(3, 4, 9)';
 const sinTunel = await w.evaluate(() => ({ stack: getComputedStyle(document.getElementById('stack')).display,
   cubosCompra: [...document.querySelectorAll('#seed-round .sale-tunel, #seed-round .sale-field')].every(e => getComputedStyle(e).display === 'none') }));
 di(sinTunel.stack === 'none' && sinTunel.cubosCompra, 'sin tunel de cubos ni cubos de fondo en la compra');
 const e1 = await mira('security', 0.3);
-di(!e1.azul && !e1.pantalla, 'en Seguridad la pantalla es negra (' + e1.fondos[0] + ')');
-const e2 = await mira('alba', 0.5);
-di(e2.azul && e2.pantalla, 'con la ronda en el centro, la pantalla entera es azul (' + e2.fondos[1] + ')');
-di(new Set(e2.fondos).size === 1, 'y Seguridad, la ronda, la compra y el token comparten el mismo color: sin costura (' + [...new Set(e2.fondos)].join(' / ') + ')');
+di(!e1.azul && e1.fondos[0] === NEGRO, 'en Seguridad la pantalla es negra (' + e1.fondos[0] + ')');
+const e1b = await mira('alba', 0.2);
+di(!e1b.azul && e1b.fondos[0] === NEGRO && e1b.fondos[1] === NEGRO,
+   'con Seguridad aun asomando arriba, todo sigue negro: no hay borde azul contra la auditoria (rotulo en y=' + (e1b.at * 100).toFixed(0) + ' %)');
+const e2 = await mira('alba', 0.55);
+di(e2.azul && e2.pantalla, 'con el rotulo llenando la pantalla, se vuelve azul (' + e2.fondos[1] + ')');
+di(e2.fondos[0] === NEGRO, 'y Seguridad se queda quieta en su negro (' + e2.fondos[0] + ')');
+di(new Set(e2.fondos.slice(1)).size === 1, 'la ronda, la compra y el token comparten el mismo azul: sin costura (' + [...new Set(e2.fondos.slice(1))].join(' / ') + ')');
 di(/Join the Seed Round/i.test(e2.texto) && /complete/.test(e2.texto) && e2.ronda, 'con el rotulo de la ronda entero a la vista: «' + e2.texto.slice(0, 60) + '»');
 di(e2.cifra === (await w.evaluate(() => document.getElementById('stkPct').textContent)), 'y la cifra grande se cuenta hasta la de la ronda (' + e2.cifra + ')');
 di(e2.vivas >= 2, 'y la luz se mueve sola (' + e2.vivas + ' capas vivas)');
@@ -159,8 +165,13 @@ const e3 = await mira('seed-round', 0.4);
 di(e3.azul && e3.pantalla, 'la compra sigue en el mismo azul');
 const e4 = await mira('token', 0.4);
 di(!e4.azul && !e4.pantalla, 'y al llegar al token la pantalla vuelve a negro (' + e4.fondos[3] + ')');
-const e5 = await mira('alba', 0.5);
-di(e5.azul && e5.cifra === e2.cifra, 'subiendo, vuelve el azul y la cifra se cuenta otra vez');
+const e5 = await mira('seed-round', 0.4);
+di(e5.azul, 'subiendo, la compra vuelve a ser azul');
+const e6 = await mira('alba', 1);
+di(e6.azul && e6.cifra === e2.cifra, 'y el rotulo tambien, con la cifra contada otra vez (' + e6.cifra + ')');
+const e7 = await mira('alba', 0.72);
+di(!e7.azul && e7.fondos[1] === NEGRO && e7.at < 0,
+   'y antes de que vuelva a asomar Seguridad, el azul ya se ha ido (rotulo en y=' + (e7.at * 100).toFixed(0) + ' %)');
 await ctx3.close();
 
 // con movimiento reducido la luz no deriva
