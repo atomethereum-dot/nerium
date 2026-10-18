@@ -7263,9 +7263,23 @@ window.__densGen = 0;
      navegador solo cambia el alto y no cuenta. */
   addEventListener('resize', function(){ if (window.innerWidth !== an) { an = window.innerWidth; window.__densGen++; } }, {passive: true});
 })();
+/* p92 · LIGERA. Las escenas que ocupan la pantalla -los cubos de The Stack y
+   de la compra, el tunel, el globo, la portada- se pintan a un pixel de lienzo
+   por pixel CSS, en cualquier pantalla. Medido recorriendo la pagina con el
+   procesador a la cuarta parte (un telefono): a densidad 2 The Stack iba a 21
+   cuadros por segundo con 169 tirones, a 1,5 a 28 con 109, y a 1 a 45 con 11;
+   en un portatil de densidad 2, de 20 a 43-50. Lo que se paga es nitidez en
+   cubos que se estan moviendo, y en movimiento no se distingue. Los lienzos
+   pequeños -la hebra del roadmap, la tarta de tokenomics, los rotulos- siguen
+   a la densidad de la pantalla: ahi el detalle si se ve y casi no cuestan. */
+window.__esEscena = function(cv){
+  var r = cv.getBoundingClientRect(), w = r.width || cv.clientWidth, h = r.height || cv.clientHeight;
+  return w >= innerWidth * 0.6 && h >= innerHeight * 0.5;
+};
 window.__dens = function(cv){
   var d = Math.min(window.devicePixelRatio || 1, 3);
   if (!cv) return d;
+  if (d > 1 && window.__esEscena(cv)) { cv.__dUlt = 1; return 1; }
   if (cv.__tope && d > cv.__tope) return cv.__tope;
   var g = window.__densTope;
   if (g && d > g) {
@@ -7439,11 +7453,15 @@ window.__mide = function(cv, w, h){
    Va en la cabecera a proposito: tiene que estar puesto antes de que arranque
    la primera escena. */
 (function(){
-  if(innerWidth >= 900) return;                 /* el problema es de telefono */
+  /* p92 · EN EL ORDENADOR, SOLO EL RALENTI. Con la pagina quieta los bucles
+     corrian a 60 cuadros: parada en la portada gastaba mas de la mitad del
+     procesador sin que nadie mirara nada distinto. Quieta va a 30; en cuanto
+     hay raton, rueda o teclado vuelve a 60, el ritmo de la pantalla. */
+  var ESC = innerWidth >= 900;
   var raf = window.requestAnimationFrame && window.requestAnimationFrame.bind(window);
   if(!raf) return;
   var CALLADO = 900;      /* ms sin actividad para entrar en ralenti */
-  var PASO    = 50;       /* 20 cuadros por segundo, quieta */
+  var PASO    = ESC ? 33 : 50;   /* quieta: 30 cuadros en el ordenador, 20 en el telefono */
   var PASO_ACTIVO = 22;   /* 30 cuadros por segundo, con el dedo encima */
   var activo = 0;
   function toca(){ activo = Date.now() }
@@ -7453,7 +7471,7 @@ window.__mide = function(cv, w, h){
   });
   toca();
 
-  var cola = [], prog = false, id = 1, muertos = null;
+  var cola = [], prog = false, id = 1e7, muertos = null;   /* lejos de los numeros del navegador */
   try{ muertos = new Set() }catch(e){ muertos = null }
 
   window.requestAnimationFrame = function(cb){
@@ -7470,6 +7488,8 @@ window.__mide = function(cv, w, h){
        campo de «#burst» ya apagado debajo. */
     var vivo = (Date.now() - activo < CALLADO) ||
                (window.__tunelVivo === true && (window.__tunel||0) > 0.02);
+    if(ESC) window.__ralenti = !vivo; /* el medidor de equipos lentos no cuenta los cuadros del ralenti */
+    if(ESC && vivo) return raf(cb);   /* ordenador con actividad: el ritmo de la pantalla */
     var paso = vivo ? PASO_ACTIVO : PASO;
     var mio = id++;
     cola.push([mio, cb]);
@@ -9271,7 +9291,7 @@ if(TEL||window.__ios) document.documentElement.classList.add('ligero');
 var gTiron=0;
 function mideCuadro(t){
   var iv=t-ultT; ultT=t; cuadro++;
-  if(TEL||lento||document.hidden||!(iv>0&&iv<250)) return;
+  if(TEL||lento||document.hidden||window.__ralenti||!(iv>0&&iv<250)) return;
   gSum+=iv; gN++; if(iv>28) gTiron++;
   /* p79 · lento de media, o a tirones: uno de cada cinco cuadros por encima
      de 28 ms se nota aunque la media salga buena */
@@ -17748,8 +17768,10 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
      · De una en una: si el scroll llega de golpe a la tercera, se pasa por la
        segunda y cada una se queda al menos 450 ms -el registro ya no salta
        directo al KYC-.
-     · En el telefono, al soltar el dedo la pagina se asienta en el centro del
-       tramo de la tarjeta que se ve -salvo saliendo por arriba o por abajo-. */
+     · p92 · La pagina NO se mueve sola: antes, al soltar el dedo, se asentaba
+       en el centro del tramo de la tarjeta, y ese desplazamiento que nadie
+       pidio se sentia como un tiron (probar_salto: -297 px en el escritorio,
+       -152 en el telefono). Se queda donde la deja el lector. */
   var HIST=.035, ESTANCIA=450, ultimo=0, espera=0;
   function objetivo(p){
     var k=cur;
@@ -17765,23 +17787,6 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
     muestra(cur+(k>cur?1:-1)); ultimo=performance.now();
     if(objetivo((__y-top)/rec)!==cur && !espera) espera=setTimeout(function(){ espera=0; alScroll() },ESTANCIA);
   }
-  var dedo=false, reposo=0;
-  function asienta(){
-    if(dedo||CALMA||document.body.classList.contains('sm')) return;
-    var y=scrollY, p=(y-top)/rec; if(p<=0||p>=1) return;
-    /* se asienta en la tarjeta que toca ahi -no en la que aun se esta
-       mostrando de paso- y solo cuando ya se ve */
-    var k=objetivo(p); if(k!==cur){ enReposo(); return }
-    var c=(k+.5)/3;
-    if((k===0&&p<c)||(k===2&&p>c)) return;
-    var d=Math.round(top+c*rec);
-    if(Math.abs(y-d)>6) scrollTo({top:d,behavior:'smooth'});
-  }
-  function enReposo(){ clearTimeout(reposo); reposo=setTimeout(asienta,180) }
-  addEventListener('touchstart',function(){ dedo=true; clearTimeout(reposo) },{passive:true});
-  addEventListener('touchend',function(){ dedo=false; enReposo() },{passive:true});
-  addEventListener('touchcancel',function(){ dedo=false; enReposo() },{passive:true});
-  addEventListener('scroll',enReposo,{passive:true});
   /* tocar una pestaña lleva a su prueba */
   items.forEach(function(it,i){ it.addEventListener('click',function(){
     mide(); scrollTo({top:Math.round(top+(i+.5)/3*rec),behavior:CALMA?'auto':'smooth'}) }) });
