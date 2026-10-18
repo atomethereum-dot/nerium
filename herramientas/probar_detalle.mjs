@@ -128,8 +128,9 @@ const w = await ctx3.newPage();
 await w.goto('http://127.0.0.1:9017/', { waitUntil:'load' }); await w.waitForTimeout(2000);
 const mira = (p) => w.evaluate(async (p) => {
   const sec = document.getElementById('alba'), st = sec.querySelector('.alba-stage');
-  const top = sec.getBoundingClientRect().top + scrollY;
-  scrollTo(0, Math.round(top + p * (sec.offsetHeight - st.offsetHeight)));
+  /* el recorrido del amanecer empieza cuando la seccion asoma por abajo */
+  const top = sec.getBoundingClientRect().top + scrollY - innerHeight;
+  scrollTo(0, Math.round(top + p * (sec.offsetHeight - st.offsetHeight + innerHeight)));
   await new Promise(s => setTimeout(s, 700));
   const a = +getComputedStyle(st).getPropertyValue('--a') || 0;
   const r = document.getElementById('stkRonda').getBoundingClientRect();
@@ -140,12 +141,12 @@ const mira = (p) => w.evaluate(async (p) => {
 const sinTunel = await w.evaluate(() => ({ stack: getComputedStyle(document.getElementById('stack')).display,
   cubosCompra: [...document.querySelectorAll('#seed-round .sale-tunel, #seed-round .sale-field')].every(e => getComputedStyle(e).display === 'none') }));
 di(sinTunel.stack === 'none' && sinTunel.cubosCompra, 'sin tunel de cubos ni cubos de fondo en la compra');
-const e1 = await mira(0.08), e2 = await mira(0.97);
-di(e1.a < 0.02, 'al entrar la pantalla es negra (' + e1.a.toFixed(2) + ' de azul)');
+const e1 = await mira(0.30), e2 = await mira(0.97);
+di(e1.a < 0.15, 'al entrar la pantalla es aun negra (' + e1.a.toFixed(2) + ' de azul)');
 di(e2.a > 0.98, 'y al salir es el azul de la compra (' + e2.a.toFixed(2) + ')');
 di(/Join the Seed Round/i.test(e2.texto) && /\d+%/.test(e2.texto), 'con el rotulo de la ronda: «' + e2.texto.slice(0, 60) + '»');
-di(e1.ronda && e2.ronda, 'y el rotulo se ve en el centro de la pantalla');
-const e3 = await mira(0.55);
+const e3 = await mira(0.48);
+di(e3.ronda && e2.ronda, 'y el rotulo se ve entero en la pantalla mientras el azul sube y al final');
 di(e3.a > 0.15 && e3.a < 0.95 && e3.vivas >= 2, 'a medio camino el azul va subiendo y la luz se mueve sola (' + e3.a.toFixed(2) + ', ' + e3.vivas + ' capas vivas)');
 await ctx3.close();
 

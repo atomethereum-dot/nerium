@@ -7004,7 +7004,9 @@ main>section:is(.paper,.paper2,.secure,.sale,.team):not(#seed-round):not(.claro)
     var(--grano) !important;
   --tapa:#0D1017}
 main>section#seed-round{--tapa:#0E3AC4}
-.alba{position:relative;height:260vh;background:#030409}
+/* p95 · tras el amanecer la compra no abre con un hueco azul */
+main>section#seed-round{padding-top:clamp(36px,6vh,72px)}
+.alba{position:relative;height:170vh;background:#030409}
 .alba-stage{position:sticky;top:0;overflow:hidden;background:#030409;--a:0;
   height:100vh;height:100svh;height:100dvh;height:var(--vh,100dvh)}
 .alba-stage>i{position:absolute;pointer-events:none;display:block}
@@ -7040,7 +7042,18 @@ main>section#seed-round{--tapa:#0E3AC4}
 .alba-vela{inset:0;background:radial-gradient(120% 90% at 50% 55%,rgba(0,0,0,0) 40%,rgba(0,0,0,.72) 100%);
   opacity:calc(1 - var(--a))}
 .alba-stage::after{content:"";position:absolute;inset:0;pointer-events:none;background:var(--grano-claro)}
-.alba-stage .stk-ronda{z-index:4}
+.alba-stage .stk-ronda{z-index:4;width:min(640px,calc(100% - 40px))}
+/* p95 · LLENO, NO VACIO. El rotulo era de 10 px en medio de una pantalla
+   entera: se veia negro o azul y casi nada. Ahora la cifra va grande en el
+   centro y se cuenta al bajar; titulo, barra y linea crecen con ella. */
+.alba-stage .stk-ronda-t{font-size:clamp(11px,1.5vw,15px);color:rgba(255,255,255,calc(.86*var(--t1)))}
+.alba-cifra{display:block;margin:clamp(10px,2vh,22px) 0 clamp(4px,1vh,10px);font-family:var(--f);font-weight:200;
+  font-size:clamp(88px,30vw,300px);line-height:.88;letter-spacing:-.055em;text-transform:none;color:#fff;
+  font-variant-numeric:tabular-nums;opacity:var(--t2);transform:translateY(calc((1 - var(--t2))*24px)) scale(calc(.94 + var(--t2)*.06));
+  text-shadow:0 0 calc(var(--a)*60px) rgba(120,170,255,calc(var(--a)*.55))}
+.alba-stage .stk-ronda-bar{width:min(560px,82%);height:2px;margin-top:clamp(14px,2.4vh,26px)}
+.alba-stage .stk-ronda-m{font-size:clamp(10px,1.2vw,13px);color:rgba(255,255,255,calc(.7*var(--t3)))}
+.alba-stage .stk-ronda-m b{color:rgba(190,212,255,calc(.95*var(--t3)))}
 /* sobre el azul la barra se aclara para no perderse */
 .alba-stage .stk-ronda-bar b{background-color:#2E86FF;
   background-image:linear-gradient(rgba(255,255,255,calc(var(--a)*.85)),rgba(255,255,255,calc(var(--a)*.85)))}
@@ -8758,6 +8771,7 @@ body.lock .flota{opacity:0 !important;pointer-events:none !important}
     <i class="alba-vela" aria-hidden="true"></i>
     <div class="stk-ronda" id="stkRonda">
       <p class="stk-ronda-t">Join the Seed Round</p>
+      <b class="alba-cifra" id="albaCifra" aria-hidden="true">0%</b>
       <div class="stk-ronda-bar" role="progressbar" aria-label="Seed Round" aria-valuemin="0" aria-valuemax="100" aria-valuenow="85"><b id="stkBar" style="--p:85%"></b></div>
       <p class="stk-ronda-m"><span><b id="stkPct">85%</b> <span class="pc">complete</span></span><i class="pc" aria-hidden="true">&#183;</i><span class="pc">Launching soon</span></p>
     </div>
@@ -12118,20 +12132,27 @@ if(!campoGL()){ window.__campo='canvas'; campo2D(); }
   const sec=document.getElementById('alba'); if(!sec) return;
   const st=sec.querySelector('.alba-stage'), ronda=document.getElementById('stkRonda');
   const clm=v=>v<0?0:v>1?1:v, sube=v=>{v=clm(v);return v*v*(3-2*v)}, ease=v=>{v=clm(v);return 1-Math.pow(1-v,3)};
-  let top=0, run=1, vis=false, last=-1, pend=0, flecha=null;
-  function mide(){ let y=0,n=sec; while(n){ y+=n.offsetTop; n=n.offsetParent } top=y; run=Math.max(1,sec.offsetHeight-st.offsetHeight); last=-1; pide(); }
+  const cifra=document.getElementById('albaCifra'), pct=document.getElementById('stkPct');
+  let top=0, run=1, vh=1, vis=false, last=-1, pend=0, flecha=null, nAntes=-1;
+  /* p95 · el recorrido empieza cuando la seccion ASOMA por abajo, no cuando
+     ya llena la pantalla: asi el rotulo y el amanecer entran con ella y no
+     queda una pantalla negra vacia antes */
+  function mide(){ let y=0,n=sec; while(n){ y+=n.offsetTop; n=n.offsetParent } vh=innerHeight; top=y-vh; run=Math.max(1,sec.offsetHeight-st.offsetHeight+vh); last=-1; pide(); }
   function pinta(){
     pend=0; if(!vis) return;
     const p=clm(((window.scrollY||0)-top)/run);
     if(Math.abs(p-last)<.0008) return; last=p;
-    st.style.setProperty('--a',sube((p-.26)/.62).toFixed(4));   /* curva suave: el azul entra despacio, se acelera y se asienta */
+    st.style.setProperty('--a',sube((p-.22)/.62).toFixed(4));   /* curva suave: el azul entra despacio, se acelera y se asienta */
+    const k=ease(clm((p-.30)/.30));
     if(ronda){
-      ronda.style.setProperty('--t1',sube((p-.02)/.12).toFixed(3));
-      ronda.style.setProperty('--t2',sube((p-.10)/.07).toFixed(3));
-      ronda.style.setProperty('--k', ease(clm((p-.13)/.20)).toFixed(3));
-      ronda.style.setProperty('--t3',sube((p-.28)/.09).toFixed(3));
+      ronda.style.setProperty('--t1',sube((p-.12)/.12).toFixed(3));
+      ronda.style.setProperty('--t2',sube((p-.18)/.12).toFixed(3));
+      ronda.style.setProperty('--k', k.toFixed(3));
+      ronda.style.setProperty('--t3',sube((p-.40)/.10).toFixed(3));
     }
-    const va=p<.82; if(va!==flecha){ flecha=va; st.classList.toggle('go',va) }
+    /* la cifra grande se cuenta hasta la de la ronda, la misma del aviso */
+    if(cifra){ const meta=parseFloat(pct&&pct.textContent)||0, n=Math.round(meta*k); if(n!==nAntes){ nAntes=n; cifra.textContent=n+'%' } }
+    const va=p<.86; if(va!==flecha){ flecha=va; st.classList.toggle('go',va) }
   }
   function pide(){ if(!pend) pend=requestAnimationFrame(pinta) }
   new IntersectionObserver(es=>{ vis=es[0].isIntersecting; if(vis){ mide() } },{rootMargin:'30% 0px'}).observe(sec);
