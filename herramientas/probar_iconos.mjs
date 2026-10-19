@@ -34,6 +34,14 @@ for (const pagina of ['/index.html','/whitepaper/index.html','/explorer/index.ht
     }
   }
 }
+/* p99 · EL LOGO ES LA PIRAMIDE en todas las paginas: ni una copia del rombo
+   viejo -que iba pegado a mano en diez sitios- y el favicon tambien */
+for (const pagina of ['index.html','app/index.html','explorer/index.html','whitepaper/index.html']) {
+  const s = fs.readFileSync(path.join(RAIZ, pagina), 'utf8');
+  chk(pagina+': lleva la piramide', /data-logo="piramide"/.test(s), true);
+  chk(pagina+': sin el rombo viejo', /M53\.16 336\.00|translate\(-43\.88 -34\.34\)/.test(s), false);
+}
+chk('favicon.svg es la piramide', /id="cTL"/.test(fs.readFileSync(path.join(RAIZ, 'favicon.svg'), 'utf8')), true);
 await nav.close(); srv.close();
 let mal=0; for(const r of Rs){ if(!r.ok)mal++;
  console.log((r.ok?'  ok  ':'  MAL ')+r.n+(r.ok?'':`  (${r.a})`)); }

@@ -3,9 +3,15 @@
 import io, struct, cairosvg
 from PIL import Image
 
+# Se dibuja cuatro veces mas grande y se reduce: los biseles de la piramide
+# son mas finos que un pixel a tamaño de icono y, pintados a su tamaño, se
+# escalonan en vez de fundirse.
 def png(fuente, px):
-    b = cairosvg.svg2png(url=fuente, output_width=px, output_height=px)
-    return Image.open(io.BytesIO(b)).convert('RGBA')
+    g = max(px * 4, 512)
+    b = cairosvg.svg2png(url=fuente, output_width=g, output_height=g)
+    # premultiplicado al reducir: si no, el negro de los pixeles vacios se mete
+    # en el borde y la silueta sale con un halo oscuro
+    return Image.open(io.BytesIO(b)).convert('RGBa').resize((px, px), Image.LANCZOS).convert('RGBA')
 
 # Por debajo de 48 px el brillo y los matices del degradado se convierten en
 # ruido: ahí va la versión sencilla, que a ese tamaño se lee mejor.

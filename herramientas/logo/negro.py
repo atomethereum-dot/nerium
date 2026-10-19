@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""El mismo rombo, pero asentado sobre negro.
+"""La piramide, asentada sobre negro (y suelta, sin fondo).
 
 Robinhood pinta la ficha del token sobre su propio fondo; un PNG transparente
 queda a merced de ese fondo. Aqui el negro va dentro del archivo.
@@ -25,3 +25,14 @@ for px in (48, 256, 512):
     ruta = '%snrm-%d-negro.png' % (SALIDA, px)
     lienzo.save(ruta, 'PNG', optimize=True)
     print(' ', ruta)
+    # y la misma ficha sin fondo, para quien pinte la suya sobre su color
+    suelto = rombo.convert('RGBa').resize((px, px), Image.LANCZOS).convert('RGBA')
+    ruta = '%snrm-%d.png' % (SALIDA, px)
+    suelto.save(ruta, 'PNG', optimize=True)
+    print(' ', ruta)
+    # la ficha del token en la raiz -la que se da a carteras y listados-,
+    # sobre negro como siempre
+    if px in (256, 512):
+        ruta = '/home/user/nerium/nrm-token%s.png' % ('' if px == 512 else '-256')
+        lienzo.save(ruta, 'PNG', optimize=True)
+        print(' ', ruta)

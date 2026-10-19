@@ -1,5 +1,9 @@
 # -*- coding: utf-8 -*-
-"""El cubo de Nereum, reconstruido como vector desde el render entregado.
+"""YA NO ES EL LOGO. Desde octubre de 2026 el logo es la piramide: lo hace
+«piramide.py». Esto queda como registro del cubo de antes; no lo pases, que
+reescribe los iconos con el logo viejo.
+
+El cubo de Nereum, reconstruido como vector desde el render entregado.
 
 Todo lo de aqui esta medido sobre nereum_cube_logo_v4_polished.png (787x785),
 no estimado a ojo. La cara se ajusto como cuadrado girado: lado 517,9 px,
