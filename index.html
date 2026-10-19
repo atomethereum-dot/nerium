@@ -371,9 +371,9 @@ main>section.dark,main>section.stack{background:var(--wash)}
 @media(prefers-reduced-motion:reduce){.sh-mesh i{animation:none}}
 /* EL CORREDOR DE LA PORTADA.
    La cortina terminaba en cuatro manchas azules que se mueven muy despacio:
-   sobre negro eso no es un fondo, es un hueco. Entra aqui el mismo enjambre
-   de cubos que ya vive en «#xfade» —la misma lengua, no otra—, pero volando
-   de frente: el corredor va hacia quien mira, no de lado.
+   sobre negro eso no es un fondo, es un hueco. Entra aqui el corredor: desde
+   p100, estelas de luz que salen del fondo -donde esta la palabra- y pasan
+   de largo, de frente: el corredor va hacia quien mira, no de lado.
    Encima de la malla y debajo del lockup, y con su propio agujero en el
    centro para que «Nereum» no compita con nada. */
 .sh-tunel{position:absolute;inset:0;width:100%;height:100%;opacity:0;
@@ -9521,151 +9521,44 @@ const CALM=matchMedia('(prefers-reduced-motion: reduce)').matches;
     for(const j of jobs)j.run(S);
     requestAnimationFrame(frame);
   }
-  /* ══ EL CORREDOR DE LA PORTADA ════════════════════════════════════════════
-   Un TUNEL, no un enjambre. La diferencia no es de cantidad: es de orden.
+  /* ══ EL CORREDOR DE LA PORTADA: LAS ESTELAS ═══════════════════════════════
+   p100 · el pasillo de cubos se cambio por la propuesta 04 de las diez que
+   se enseñaron: pocas estelas de luz que salen del fondo del tunel -justo
+   donde esta «Nereum»- y pasan de largo por los bordes de la pantalla, como
+   al entrar a velocidad. Minimalista: plata sobre el negro, y una de cada
+   diez en el azul de la casa.
 
-   Antes los cubos salian en sitios al azar y volaban de frente; se veia una
-   nube acercandose. Aqui las piezas viven en las CUATRO PAREDES de un pasillo
-   —arriba, abajo, izquierda, derecha— y se reparten en columnas que corren a
-   lo largo de la z. La perspectiva hace el resto: las de delante salen por
-   los bordes de la pantalla, las del fondo convergen en el centro, y en medio
-   queda el hueco negro del pasillo, que es donde se apoya el lockup. El
-   agujero ya no hay que recortarlo: no se pone nada ahi.
-
-   Las piezas son LAS NUESTRAS: rectangulos planos con su filo claro arriba,
-   los mismos de «#xfade». Ni biselados ni brillos de plastico.
-
-   Tres cosas que hacen que parezca un sitio y no una cuadricula:
-     · cada columna arranca con su propia fase, asi que las filas no llegan
-       a la vez y no se ve el aro;
-     · el pasillo gira despacio sobre su eje —ocho grados por vuelta—, que es
-       lo que hace que las paredes se lean como paredes;
-     · una de cada nueve piezas va en el azul claro de la casa, y esas son
-       las que dan la profundidad. */
+   Cada estela es un trozo de recta entre dos profundidades: su punta y su
+   cola, un poco mas atras. De lejos es un punto; al acercarse se alarga y
+   se ensancha, y pegada a la pantalla se apaga. Al bajar la portada van mas
+   deprisa y la cola se estira, que es lo que hace que la velocidad se VEA.
+   El hueco del centro se sigue recortando, asi que nada pasa por encima de
+   la palabra. */
 (function(){
   const cv=document.getElementById('shTunel'); if(!cv)return;
   const ctx=cv.getContext('2d'); if(!ctx)return;
   const quieto=matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  /* LA MISMA PALETA QUE «#xfade», la de las secciones de abajo.
-     La de aqui eran seis azules saturados y la portada salia de un azul que
-     no se repite en ningun otro sitio de la pagina. Esta trae dos azules
-     vivos, dos apagados y dos casi negros —y esos ultimos son los que hacen
-     el trabajo: sin piezas oscuras un pasillo no tiene sombra, tiene color.
-     Los claros van en el gris plata de la casa, no en blanco: en «#xfade» se
-     pinta sumando luz y un claro se apaga solo; aqui se pinta solido y un
-     blanco seria una mancha. */
-  /* LA PALETA DE «THE STACK», la seccion 04, traida de su fuente.
-     Alli los tonos estan escritos en HSL —«{h:219,s:100,l:56}» y ocho mas— y
-     los cubos se pintan SOLIDOS, igual que aqui: por eso esta si se puede
-     copiar numero a numero, cosa que con la de «#xfade» no pasaba. Son estos
-     nueve, pasados a RGB:
-       tres azules vivos, un azul hondo, dos pizarras oscuras, un marino casi
-       negro y dos claros —blanco y gris plata—.
-     Van con PESO, no a partes iguales: los azules salen cuatro veces mas que
-     los claros. Repartidos a la par, los blancos mandan y la escena se lava;
-     contados asi, son lo que son alli: el acento que separa una pieza de su
-     vecina. */
-  const PAL=[
-    /* Mismos tonos de «The Stack», con el rojo bajado y el azul subido: la
-       misma familia, un punto mas saturada. Con los bloques ya opacos el
-       color llega entero a la pantalla y se puede pedir mas sin que
-       chille. */
-    [12,104,255],[12,104,255],[12,104,255],[12,104,255],    /* azul vivo      */
-    [0,56,236],  [0,56,236],  [0,56,236],  [0,56,236],      /* azul fuerte    */
-    [4,72,190],  [4,72,190],  [4,72,190],                   /* azul hondo     */
-    [44,128,255],[44,128,255],[44,128,255],                 /* azul claro     */
-    /* UNA sola pizarra, y ninguna oscura. Con las caras laterales al 50 %
-       de luz y el fondo yendose a negro, cada gris de la paleta se multiplica
-       por tres —cara, costado y techo— y el pasillo acaba siendo gris con
-       algo de azul en vez de azul con algo de gris. */
-    [66,75,87],                                             /* pizarra        */
-    [3,21,78],   [3,21,78]                                  /* marino, sombra */
-  ];
-  const CLAROS=[[233,235,237],[186,193,202]];               /* blanco y plata */
-  const HONDO=9.6, CERCA=0.42, RANGO=HONDO-CERCA;
+  const PLATA='rgb(198,202,215)', AZUL='rgb(46,134,255)';
+  const HONDO=10, CERCA=0.3, RANGO=HONDO-CERCA;
   let W=0,H=0,piezas=null,giro=0,raf=0,ultimo=0,t=0,hueco=null,huecoW=0,huecoH=0,PX1=1;
   const GU=__guarda(cv,()=>{ mide() });
   let vt=0, raton=0, ratonY=0, mira=0, miraY=0, anclaX=0, anclaY=0;
   const FINO=matchMedia('(hover:hover) and (pointer:fine)').matches;
+  const sube=(e0,e1,x)=>{ const q=Math.min(1,Math.max(0,(x-e0)/(e1-e0))); return q*q*(3-2*q) };
 
-  /* El pasillo: media anchura y media altura en unidades del mundo. Se
-     estiran con la forma de la pantalla para que las paredes de los lados no
-     se salgan de cuadro en un monitor ancho ni aplasten el hueco en un
-     telefono. */
-  function medidas(){
-    const r=W/Math.max(1,H);
-    /* En una pantalla estrecha el pasillo se cerraba de lado y las paredes
-       se subian encima del lockup: se le pone suelo al ancho. */
-    /* EN ESCRITORIO, EL HUECO MAS GRANDE. El pasillo gira, y con un final
-       ajustado a la palabra cada esquina que pasaba cerca de «Nereum» lo
-       hacia parecer torcido. Un 30 % mas de pasillo deja el negro del fondo
-       holgado alrededor del rotulo y el giro se lee como giro, no como
-       desajuste. En el telefono se queda como estaba. */
-    const k = W<760 ? 1 : 1.3;
-    return { a: k*Math.max(1.95, 1.55*Math.min(1.7, r)),
-             b: k*Math.max(1.55, 1.55*Math.min(1.4, 1/r)) };
-  }
-
-  /* Cada pieza guarda su FASE, no su z. La z sale de un solo reloj:
-       z = CERCA + ((fase - t) modulo recorrido)
-     Con eso no hay que mover nada ni reordenar nada: el orden de pintado se
-     saca de la fase, que no cambia nunca. Se vera abajo por que importa. */
+  /* Cada estela guarda su direccion, a que distancia del eje pasa, su fase
+     y su velocidad; la profundidad sale de un solo reloj, como en el
+     pasillo: z = CERCA + (fase - t·velocidad) modulo recorrido. Pocas: en el
+     telefono, ochenta. */
   function siembra(){
-    const {a,b}=medidas();
-    const paso = W<760 ? 0.88 : 0.52;
-    const dz   = W<760 ? 0.92 : 0.50;
-    const filas= Math.ceil(RANGO/dz);
+    const n = W<760 ? 80 : 130;
     piezas=[]; t=0;
-    /* ══ LA PARED SE RECORRE, NO SE SUMA ═════════════════════════════════
-       Antes las cuatro paredes se generaban cada una por su lado, sumando
-       «paso» desde un extremo hasta el otro. Eso solo cierra si el largo de
-       la pared es multiplo exacto del paso, y casi nunca lo es: la ultima
-       columna se queda corta y falta un trozo de pared. En perspectiva una
-       columna que falta no es un hueco pequeño —es una RECTA NEGRA que sale
-       del centro y cruza la pantalla entera, porque esa columna falta a TODAS
-       las profundidades a la vez. Dos de esas se veian.
-
-       Ahora el perimetro se recorre como lo que es: una vuelta cerrada. Se
-       mide su largo, se decide cuantas columnas caben y se reparten a
-       distancia igual a lo largo de la vuelta. Cierra siempre, sea cual sea
-       la forma de la pantalla, y las esquinas no se cuentan dos veces. */
-    const cols=[];
-    const vuelta=4*a+4*b;                       /* 2·(2a) + 2·(2b) */
-    const cuantas=Math.max(8, Math.round(vuelta/paso));
-    for(let i=0;i<cuantas;i++){
-      const d=i*vuelta/cuantas;
-      if(d < 2*a)            cols.push({x:-a+d,           y:-b});
-      else if(d < 2*a+2*b)   cols.push({x:a,              y:-b+(d-2*a)});
-      else if(d < 4*a+2*b)   cols.push({x:a-(d-2*a-2*b),  y:b});
-      else                   cols.push({x:-a,             y:b-(d-4*a-2*b)});
+    for(let i=0;i<n;i++){
+      const an=Math.random()*Math.PI*2;
+      piezas.push({ c:Math.cos(an), s:Math.sin(an), r:0.7+Math.random()*0.8,
+                    f:Math.random()*RANGO, v:0.8+Math.random()*0.6, azul:i%10===0 });
     }
-    for(const c of cols){
-      const desf=Math.random()*dz;              /* cada columna, su desfase */
-      for(let i=0;i<filas;i++){
-        const claro=Math.random()<0.05;
-        piezas.push({
-          x:c.x+(Math.random()*2-1)*paso*0.16,
-          y:c.y+(Math.random()*2-1)*paso*0.16,
-          s:(i*dz+desf)%RANGO,                  /* la fase */
-          lado:paso*(0.62+Math.random()*0.30),
-          ci: claro ? PAL.length+((Math.random()*CLAROS.length)|0)
-                    : ((Math.random()*PAL.length)|0),
-          /* OPACOS, Y ESTE ERA EL MOTIVO DE QUE SE VIERA «CLARITO».
-             Iban del 80 al 100 %, o sea que cada bloque dejaba pasar hasta un
-             quinto del que tenia detras —y detras hay otro azul—. Con veinte
-             piezas superpuestas en el camino al fondo, todos los azules se
-             promedian entre si y acaban en el mismo azul medio: menos color y
-             ningun canto limpio. Opacos, cada cubo es SU color y su borde es
-             un borde. */
-          a: 1,
-          marca: Math.random()<0.062
-        });
-      }
-    }
-    /* ordenadas por fase, UNA vez en la vida */
-    piezas.sort((m,n)=>n.s-m.s);
-    if(!TABLA)cueceTabla();
   }
 
   function mide(){
@@ -9728,226 +9621,36 @@ const CALM=matchMedia('(prefers-reduced-motion: reduce)').matches;
     return true;
   }
 
-  /* ══ LA TABLA DE COLORES ══════════════════════════════════════════════
-     Aqui estaba el tiron, y no en el numero de cubos.
-
-     Cada pieza armaba su color a mano —«'rgba('+(c[0]*luz*(1-nie)+10*nie|0)+…»—
-     y lo hacia UNA VEZ POR CARA: con las tres caras y quinientas piezas salian
-     mil quinientas cadenas nuevas por cuadro, y el navegador tiene que ANALIZAR
-     cada una para saber de que color le hablas. Medido con la CPU al cuarto:
-     84 ms por cuadro, doce imagenes por segundo.
-
-     La cuenta no cambia, cambia CUANDO se hace. La distancia se reparte en
-     catorce escalones y las cuatro caras se cuecen de antemano para cada tono:
-     veintiuna entradas por catorce escalones por cuatro caras, todas al
-     arrancar. Dentro del bucle ya no se construye ni una cadena: se busca en
-     la tabla y la transparencia va por «globalAlpha», que es un numero y no
-     pasa por el analizador. */
-  const FILO='rgb(215,232,255)';
-  /* p67 · un punto mas de contraste entre caras (antes .50 · .80 · .38) */
-  const ESCALONES=14, CARAS=[1, 0.46, 0.84, 0.34];   /* cara, costado, arriba, abajo */
-  let TABLA=null;
-  function cueceTabla(){
-    const todos=PAL.concat(CLAROS);
-    TABLA=new Array(todos.length);
-    for(let i=0;i<todos.length;i++){
-      const co=todos[i]; TABLA[i]=new Array(ESCALONES);
-      for(let e=0;e<ESCALONES;e++){
-        const hondo=e/(ESCALONES-1), f=1-hondo;
-        const luz=0.70+hondo*0.30, nie=f*f*0.66;
-        const fila=new Array(CARAS.length);
-        for(let k=0;k<CARAS.length;k++){
-          const m=luz*CARAS[k];
-          /* el fondo se va a NEGRO, no a azul: la niebla azul metia aire
-             pero tambien levantaba el suelo y aplanaba el contraste */
-          fila[k]='rgb('+((co[0]*m)*(1-nie)+3*nie|0)+','+
-                         ((co[1]*m)*(1-nie)+7*nie|0)+','+
-                         ((co[2]*m)*(1-nie)+24*nie|0)+')';
-        }
-        TABLA[i][e]=fila;
-      }
-    }
-  }
-
   function pinta(dt){
     ctx.clearRect(0,0,W,H);
-    const cx=W/2, cy=H/2, foco=Math.min(W,H)*0.92;
-    /* SE AHONDA AL BAJAR, Y NO EN LINEA RECTA.
-       Un numero que sube a ritmo constante no se siente como entrar en un
-       sitio: se siente como un control deslizante. La entrada va suavizada
-       —arranca lenta, se abre por el medio y se dispara al final—, que es
-       como acelera una camara de verdad. */
-    const crudo=window.__tunelP||0;
-    const emp=crudo*crudo*(3-2*crudo);
-    /* ══ LA SALIDA ════════════════════════════════════════════════════════
-       Un pasillo infinito es un salvapantallas: se mire cuando se mire, esta
-       igual. Lo que lo convierte en un PLANO es que tenga final.
-       En el ultimo tramo de la bajada el pasillo se ABRE: las paredes se van
-       hacia fuera y pasan de largo. No hay que resembrar nada ni tocar la
-       geometria —se multiplica la distancia de cada pieza al eje, que es lo
-       mismo que separar las paredes—, y como crece muy deprisa al final, lo
-       que se ve es que sales. */
-    /* EMPEZABA EN EL 80 % y dejaba el ultimo quinto de la portada con la
-       escena ya vaciada: una pantalla negra esperando a que terminaras de
-       bajar. El estallido se comprime al ultimo 8 %, asi que el tunel llega
-       lleno hasta el final y se abre justo cuando la prensa ya esta
-       entrando por abajo. */
-    /* SIN APERTURA Y SIN EMBESTIDA. El tunel se abria al final para dejar el
-       centro vacio -el hueco oscuro que se veia justo antes de la prensa- y
-       ademas aceleraba de golpe. Ahora que al acabar el recorrido la pagina
-       salta sola a la seccion siguiente, ninguna de las dos lleva a ningun
-       sitio: el tunel llega lleno y a su paso al salto. */
-    const abre=1;
-    /* MAS LENTO Y SIN EMBESTIDA. Iba de 0,40 en reposo a 3,70 en lo mas
-       hondo, y en el ultimo 8 % la «salida» sumaba otros 5,2: casi el doble
-       de golpe, justo antes del salto. A esa velocidad los cubos de delante
-       -los que estan a 0,42 de la camara- cruzan la pantalla en un par de
-       cuadros y se ven como estelas deformadas: es lo que se veia
-       «distorsionado». Ahora va de 0,20 a 1,70 -la mitad- y la salida ya no
-       acelera nada: el tunel llega al salto a su paso. */
-    const vel=(0.20+emp*1.50)*dt;
-    t=(t+vel)%RANGO;
+    /* se acelera al bajar, suavizado: arranca lento y se abre por el medio */
+    const crudo=window.__tunelP||0, emp=crudo*crudo*(3-2*crudo);
+    t+=(1.1+emp*1.6)*dt;
     vt+=dt;
-    giro+=(0.040+emp*0.075)*dt;
-    /* EL PASILLO GIRA UNA VEZ, NO PIEZA A PIEZA.
-       Girar cada cuadrado por separado son dos «save/restore» y una rotacion
-       por pieza: con quinientas, medio millar de cambios de estado por cuadro.
-       Girar la posicion y girar la pieza el mismo angulo es exactamente lo
-       mismo que girar la escena entera, asi que se gira el lienzo una vez y
-       dentro se pinta todo derecho. Medido: es la diferencia entre ir a
-       tirones y no ir. */
-    /* LA CAMARA RESPIRA, PERO SIN MOVERSE DE SITIO.
-       La respiracion era de un 3 % y el raton de otro 4,5 %: entre las dos
-       llevaban el fondo del pasillo a un lado del texto, que es justo lo que
-       no puede pasar —el final del tunel ES donde esta la palabra—. Se queda
-       un balanceo de menos de un uno por ciento, que se nota como vida y no
-       como descentrado, y el raton a la mitad. El giro sigue entero: rodar no
-       descentra nada. */
+    giro+=(0.02+emp*0.04)*dt;
+    /* el fondo del tunel es donde esta la palabra: la camara respira menos de
+       un uno por ciento y el raton la mueve a medias */
     if(FINO){ mira+=(raton-mira)*Math.min(1,dt*2.0); miraY+=(ratonY-miraY)*Math.min(1,dt*2.0) }
     const vx=anclaX+Math.sin(vt*0.21)*W*0.008+mira*W*0.016;
     const vy=anclaY+Math.cos(vt*0.17)*H*0.007+miraY*H*0.014;
-
+    /* las estelas llenan la forma de la pantalla: media anchura en x, media
+       altura en y */
+    const fx=W*0.5, fy=H*0.5, cola=0.5+emp*0.5, grueso=H/500*1.5;
     ctx.save();
-    ctx.translate(vx,vy); ctx.rotate(giro); ctx.translate(-vx,-vy);
-    /* DE LEJOS A CERCA SIN ORDENAR NADA.
-       Con la z sacada de una fase, la lista ordenada por fase YA esta ordenada
-       por profundidad: basta partirla por donde va el reloj. Las de fase menor
-       que «t» son las de mas atras —han dado la vuelta— y van primero. Una
-       busqueda binaria por cuadro en vez de un «sort» de quinientos. */
-    const n=piezas.length;
-    let lo=0, hi=n;
-    while(lo<hi){ const m=(lo+hi)>>1; if(piezas[m].s>=t) lo=m+1; else hi=m }
-    const corte=lo;
-    const radio=Math.hypot(W,H)*0.5;
-    for(let i=0;i<n;i++){
-      const q=piezas[i<n-corte ? corte+i : i-(n-corte)];
-      let d=q.s-t; if(d<0)d+=RANGO;
+    ctx.translate(vx,vy); ctx.rotate(giro);
+    ctx.lineCap='round';
+    for(const q of piezas){
+      let d=(q.f-t*q.v)%RANGO; if(d<0)d+=RANGO;
       const z=CERCA+d;
-      const k=foco/z;
-      const px=vx+q.x*abre*k, py=vy+q.y*abre*k;
-      const lado=q.lado*k;
-      if(lado<1.1) continue;
-      /* el lienzo va girado, asi que se recorta por distancia al centro y no
-         por los lados: una caja recta aqui dentro se comeria las esquinas */
-      const ex=px-vx, ey=py-vy;
-      if(ex*ex+ey*ey > (radio+lado)*(radio+lado)) continue;
-      const hondo=1-d/RANGO;
-      const sale=Math.min(1,d/0.55);
-      const al=q.a*sale;
-      if(al<0.012) continue;
-      /* el escalon de niebla que le toca, y con el sus cuatro caras */
-      const tono=TABLA[q.ci][(hondo*(ESCALONES-1))|0];
-      ctx.globalAlpha=al;
-      /* LA ESTELA CRECE CON LA VELOCIDAD, y no solo por moverse mas: se
-         mira tres cuadros atras en vez de uno. A paso de entrada apenas se
-         nota; lanzado, las piezas de delante se estiran en rayas de luz, que
-         es lo que hace que una velocidad se VEA. */
-      const kA=foco/(z+vel*(1+emp*2.4)), ax=vx+q.x*abre*kA, ay=vy+q.y*abre*kA;
-      const dx=px-ax, dy=py-ay;
-      if(dx*dx+dy*dy>6){
-        ctx.globalAlpha=al*(0.16+emp*0.30);
-        ctx.strokeStyle=tono[0];
-        ctx.lineWidth=Math.max(1,lado*0.7);
-        ctx.beginPath(); ctx.moveTo(ax,ay); ctx.lineTo(px,py); ctx.stroke();
-        ctx.globalAlpha=al;
-      }
-      /* ══ LA PIEZA, QUE YA NO ES UN CUADRADO ═══════════════════════════
-         Un cuadrado plano nunca sale de la pantalla por mucho que crezca:
-         crece y ya. Lo que hace que una caja se salga es ver sus COSTADOS, y
-         para eso hay que proyectar dos veces —la cara de delante y la de
-         detras— y unirlas.
-
-         Cual costado se ve no se elige a ojo: sale del signo. Una caja a la
-         derecha del punto de fuga enseña su cara IZQUIERDA, porque es la que
-         mira hacia la camara; una que esta por encima enseña la de ABAJO. Y
-         cuanto mas cerca y mas descentrada, mas costado se ve: por eso las
-         de los bordes son las que se te vienen encima.
-
-         Solo se despieza lo que es lo bastante grande en pantalla. Una pieza
-         del fondo de doce pixeles no tiene costados que ensenar y pagarlos
-         costaria tres rellenos en vez de uno, por nada. */
-      const media=lado*0.5;
-      if(lado>24){
-        const prof=q.lado*0.92, zf=z-prof*0.5, zb=z+prof*0.5;
-        if(zf>0.14){
-          const kf=foco/zf, kb=foco/zb, hs=q.lado*0.5;
-          const qx=q.x*abre, qy=q.y*abre;
-          const fx0=vx+(qx-hs)*kf, fx1=vx+(qx+hs)*kf;
-          const fy0=vy+(qy-hs)*kf, fy1=vy+(qy+hs)*kf;
-          const bx0=vx+(qx-hs)*kb, bx1=vx+(qx+hs)*kb;
-          const by0=vy+(qy-hs)*kb, by1=vy+(qy+hs)*kb;
-          /* los costados van ANTES que la cara: estan detras */
-          if(q.x>0.02||q.x<-0.02){
-            ctx.fillStyle=tono[1];
-            ctx.beginPath();
-            if(q.x>0){ ctx.moveTo(fx0,fy0);ctx.lineTo(fx0,fy1);ctx.lineTo(bx0,by1);ctx.lineTo(bx0,by0) }
-            else     { ctx.moveTo(fx1,fy0);ctx.lineTo(fx1,fy1);ctx.lineTo(bx1,by1);ctx.lineTo(bx1,by0) }
-            ctx.closePath(); ctx.fill();
-          }
-          if(q.y>0.02||q.y<-0.02){
-            /* la de abajo mas oscura que la de arriba: la luz viene de arriba,
-               como en toda la casa */
-            ctx.fillStyle=tono[q.y<0?2:3];
-            ctx.beginPath();
-            if(q.y>0){ ctx.moveTo(fx0,fy0);ctx.lineTo(fx1,fy0);ctx.lineTo(bx1,by0);ctx.lineTo(bx0,by0) }
-            else     { ctx.moveTo(fx0,fy1);ctx.lineTo(fx1,fy1);ctx.lineTo(bx1,by1);ctx.lineTo(bx0,by1) }
-            ctx.closePath(); ctx.fill();
-          }
-          ctx.fillStyle=tono[0];
-          ctx.fillRect(fx0,fy0,fx1-fx0,fy1-fy0);
-          ctx.globalAlpha=al*0.16*(0.30+hondo*0.70);
-          ctx.fillStyle=FILO;
-          ctx.fillRect(fx0,fy0,fx1-fx0,Math.max(1,(fy1-fy0)*0.11));
-          /* p67 · el canto de luz: un pixel de pantalla, vivo, en el borde de arriba */
-          ctx.globalAlpha=al*0.62*(0.30+hondo*0.70);
-          ctx.fillRect(fx0,fy0,fx1-fx0,PX1);
-          /* ══ LA MARCA GRABADA ═══════════════════════════════════════════
-             Una de cada dieciseis cajas lleva el rombo de la casa grabado en
-             la cara. No se lee: se RECONOCE, medio segundo, cuando una pasa
-             cerca. Es la diferencia entre un fondo generico y un fondo que es
-             de este sitio y no de otro.
-             Solo en las caras grandes —por debajo de 60 px el rombo es una
-             mancha— y en trazo, no en relleno: un rombo macizo taparia la
-             cara y pareceria una pegatina. */
-          if(q.marca && (fx1-fx0)>60){
-            const w=fx1-fx0, hh=fy1-fy0, r=Math.min(w,hh)*0.21;
-            const mx=fx0+w*0.5, my=fy0+hh*0.5;
-            ctx.globalAlpha=al*0.30;
-            ctx.strokeStyle=FILO; ctx.lineWidth=Math.max(1,r*0.16);
-            ctx.beginPath();
-            ctx.moveTo(mx,my-r); ctx.lineTo(mx+r,my);
-            ctx.lineTo(mx,my+r); ctx.lineTo(mx-r,my);
-            ctx.closePath(); ctx.stroke();
-          }
-          continue;
-        }
-      }
-      ctx.fillStyle=tono[0];
-      ctx.fillRect(px-media,py-media,lado,lado);
-      ctx.globalAlpha=al*0.13*(0.30+hondo*0.70);
-      ctx.fillStyle=FILO;
-      ctx.fillRect(px-media,py-media,lado,Math.max(1,lado*0.12));
-      if(lado>6){ ctx.globalAlpha=al*0.5*(0.30+hondo*0.70); ctx.fillRect(px-media,py-media,lado,PX1) }
+      /* lejos se apaga, y pegada a la pantalla tambien. Asoman ya fuera del
+         rotulo: de mas lejos se amontonaban en un aro alrededor de la palabra */
+      const a=sube(HONDO*0.72,HONDO*0.36,z)*sube(0.33,0.8,z);
+      if(a<0.01) continue;
+      const x=q.c*q.r, y=q.s*q.r, z2=z+cola;
+      ctx.globalAlpha=a*(q.azul?1:0.65);
+      ctx.strokeStyle=q.azul?AZUL:PLATA;
+      ctx.lineWidth=Math.max(PX1,grueso/z);
+      ctx.beginPath(); ctx.moveTo(x*fx/z2,y*fy/z2); ctx.lineTo(x*fx/z,y*fy/z); ctx.stroke();
     }
     ctx.globalAlpha=1;
     ctx.restore();
