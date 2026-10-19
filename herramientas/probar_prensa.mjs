@@ -335,18 +335,22 @@ di((await mo.evaluate(() => document.documentElement.scrollWidth - document.docu
 await ctx2.close();
 
 // ── la misma marca en las tres paginas ──
-// La marca va de canto, en rombo (GIRO -45 en herramientas/logo/logo.py).
-// Esto comprueba las tres paginas a la vez porque el whitepaper y el
-// explorador llevan el logotipo escrito DENTRO, con sus propios ids de
-// degradado: no comparten el <symbol> del index, asi que es justo donde se
-// queda una atras cuando la marca cambia.
-const CUBO = /M136\.00 136\.00 L536\.00 136\.00 L536\.00 536\.00 L136\.00 536\.00 Z/;
-const ROMBO = /M53\.16 336\.00 L336\.00 53\.16/;
+// p99 · la marca es la piramide (herramientas/logo/piramide.py). Esto
+// comprueba las tres paginas a la vez porque el whitepaper y el explorador
+// llevan el logotipo escrito DENTRO, con sus propios ids de degradado: no
+// comparten el <symbol> del index, asi que es justo donde se queda una atras
+// cuando la marca cambia. Se compara el dibujo, quitados los prefijos de ids.
+const VIEJO = /M53\.16 336\.00 L336\.00 53\.16|M136\.00 136\.00 L536\.00 136\.00/;
+const dibujo = s => { const i = s.indexOf('<g data-logo="piramide"'); if (i < 0) return null;
+  return s.slice(i, s.indexOf('</g></g>', i)).replace(/(url\(#|id=")[a-zA-Z]+-/g, '$1') };
+const dibujos = [];
 for (const [f, n] of [['index.html','la portada'], ['whitepaper/index.html','el whitepaper'],
                       ['explorer/index.html','el explorador']]) {
   const s = fs.readFileSync(path.join(RAIZ, f), 'utf8');
-  di(ROMBO.test(s) && !CUBO.test(s), n + ' lleva el rombo, no el cubo de pie');
+  const d = dibujo(s); dibujos.push(d);
+  di(!!d && !VIEJO.test(s), n + ' lleva la piramide, y ni el rombo ni el cubo de antes');
 }
+di(dibujos.every(d => d && d === dibujos[0]), 'y es el mismo dibujo en las tres');
 console.log(mal ? `\n${ok} bien, ${mal} MAL` : `\n${ok}/${ok} correctas`);
 await nav.close(); srv.close();
 process.exit(mal ? 1 : 0);
