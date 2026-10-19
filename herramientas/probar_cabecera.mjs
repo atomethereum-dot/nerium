@@ -157,20 +157,21 @@ const marca = await pg.evaluate(() => {
   const centroPalabra = base - alto / 2;
   const centroDibujo = rs.top + rs.height * (arriba + abajo) / 2;
   const cuerpo = parseFloat(cs.fontSize);
+  const puntaArriba = rs.top + rs.height * arriba, altoDibujo = rs.height * (abajo - arriba);
   return { arriba, abajo, alto, cuerpo,
+           bajoPunta: (base - alto - puntaArriba) / altoDibujo,
            desfase: (centroPalabra - centroDibujo) / cuerpo,
            centroBarra: hd.top + hd.height / 2, centroCubo: rs.top + rs.height / 2 };
 });
 di(marca !== null, 'la palabra de la marca va en su propia caja');
 di(marca && marca.alto > 0, 'y se puede medir su alto de verdad');
-// El cero geometrico no es el sitio: centrar la caja de mayusculas exacta
-// deja la palabra alta, porque «Nereum» es una N y cinco letras bajas y el
-// ojo lee donde esta la tinta, no donde acaba la caja. Baja 0,2534 em, que
-// es lo que se eligio mirando la barra. Se comprueba el valor elegido, no
-// un cero que nunca fue el bueno: si alguien lo mueve sin querer, salta.
-di(marca && Math.abs(marca.desfase - 0.2534) < 0.03,
-   'y baja del medio del rombo lo que tiene que bajar (' +
-   (marca ? marca.desfase.toFixed(4) : '?') + ' em, buscado 0,2534; el dibujo va del ' +
+// p99 · la palabra ya no va centrada en el rombo: arriba, empezando un poco
+// por debajo de la punta de la piramide. Se mide donde arranca la mayuscula
+// respecto al dibujo, en fracciones de su alto: por debajo de la punta, pero
+// en la mitad de arriba. Elegido a ojo sobre la barra: 0,175.
+di(marca && marca.bajoPunta > 0.12 && marca.bajoPunta < 0.30 && marca.desfase < -0.1,
+   'la palabra empieza un poco por debajo de la punta de la piramide, no centrada (' +
+   (marca ? (marca.bajoPunta*100).toFixed(1) : '?') + ' % del dibujo bajo la punta; el dibujo va del ' +
    (marca ? (marca.arriba*100).toFixed(1) : '?') + ' al ' +
    (marca ? (marca.abajo*100).toFixed(1) : '?') + ' % de su recuadro)');
 di(marca && Math.abs(marca.centroBarra - marca.centroCubo) < 0.6,
