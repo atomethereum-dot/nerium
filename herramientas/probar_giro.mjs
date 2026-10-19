@@ -195,6 +195,12 @@ if (!LISAS.length) {
    franja de cada banda a la misma altura y daba 0,004, porque las dos llevan
    la misma luz de escena por arriba y ahi se igualan. Lo que las separa es el
    fondo, y el fondo se pregunta. */
+/* p98 · la compra pinta el tono de la pantalla, que es azul -el de su
+   data-bg- con la ronda a la vista y negro antes de llegar. Se lee con la
+   ronda en pantalla y el fundido ya hecho. */
+await pg.evaluate(() => { const c = document.getElementById('seed-round');
+  scrollTo(0, Math.round(c.getBoundingClientRect().top + scrollY + innerHeight * 0.3)) });
+await pg.waitForTimeout(1600);
 const suelos = await pg.evaluate(() => {
   const lee = id => {
     const s = document.getElementById(id) || document.querySelector('.' + id);
@@ -717,56 +723,15 @@ di(cuadros[1].desv >= 0.010 || cuadros[2].desv >= 0.010,
 }
 
 } else {
-  const tunel = async p => pg.evaluate(async p => {
-    const h = document.getElementById('stack'), r = h.getBoundingClientRect();
-    scrollTo(0, Math.round(r.top + scrollY + p * (h.offsetHeight - innerHeight)));
-    await new Promise(s => setTimeout(s, 900));
-    const cv = document.getElementById('stkCv'), c = document.createElement('canvas');
-    c.width = cv.width >> 2; c.height = cv.height >> 2;
-    const g = c.getContext('2d'); g.drawImage(cv, 0, 0, c.width, c.height);
-    const px = (x, y) => Array.from(g.getImageData(Math.round(x * (c.width - 1)), Math.round(y * (c.height - 1)), 1, 1).data);
-    const bg = getComputedStyle(document.getElementById('seed-round')).backgroundColor.match(/\d+/g).map(Number);
-    return { centro: px(.5, .5), esquinas: [px(.03, .03), px(.97, .03), px(.03, .97), px(.97, .97)], bg };
-  }, p);
-  const luz = c => (0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2]) / 255;
-  const antes = await tunel(0.30), dentro = await tunel(0.66);
-  di(luz(dentro.centro) > luz(antes.centro) + 0.25,
-     'en el tunel se enciende la luz del fondo (' + luz(antes.centro).toFixed(2) + ' → ' + luz(dentro.centro).toFixed(2) + ')');
-  /* LA LLEGADA NO ES UN CORTE. La dapp sube por debajo del escenario y el
-     tunel se disuelve sobre ella siguiendo su borde -la mascara del lienzo
-     va en --b-, con una linea de luz por el borde. Por encima del borde
-     sigue el tunel: nunca queda nada vacio arriba. */
-  const llega = await pg.evaluate(async () => {
-    /* se mide por donde queda el borde de la compra en pantalla -en alturas
-       de pantalla-, no por el avance del tunel: asi no depende del alto de
-       la seccion */
-    const st = document.querySelector('.stk-stage');
-    const pre0 = document.getElementById('seed-round').getBoundingClientRect().top + scrollY;
-    const mira = async bv => { scrollTo(0, Math.round(pre0 - bv * innerHeight)); await new Promise(s => setTimeout(s, 700));
-      const borde = document.getElementById('seed-round').getBoundingClientRect().top;
-      const t = document.querySelector('#seed-round h2') || document.getElementById('seed-round');
-      const cv = document.getElementById('stkCv'), c = document.createElement('canvas');
-      c.width = cv.width >> 3; c.height = cv.height >> 3;
-      const g = c.getContext('2d'); g.drawImage(cv, 0, 0, c.width, c.height);
-      /* lo que pinta el lienzo por encima del borde: si es tunel, varia */
-      const alto = Math.max(1, Math.min(c.height, Math.floor(c.height * borde / innerHeight) - 2));
-      const d = g.getImageData(0, 0, c.width, alto).data; let m = 0, m2 = 0, n = 0;
-      for (let k = 0; k < d.length; k += 4) { const L = d[k] + d[k+1] + d[k+2]; m += L; m2 += L * L; n++ }
-      const desv = Math.sqrt(Math.max(0, m2 / n - (m / n) ** 2));
-      return { borde: Math.round(borde), b: parseFloat(st.style.getPropertyValue('--b')),
-               velo: parseFloat(st.style.getPropertyValue('--velo')) || 0, op: +getComputedStyle(st).opacity,
-               tit: Math.round(t.getBoundingClientRect().top), vh: innerHeight, desv: Math.round(desv) } };
-    return { lejos: await mira(1.7), medio: await mira(0.5), fin: await mira(-0.12) };
-  });
-  di(llega.lejos.b >= llega.lejos.vh,
-     'mientras dura el tunel, tapa entero la dapp que sube por debajo (borde a ' + llega.lejos.b + ' px)');
-  di(Math.abs(llega.medio.b - llega.medio.borde) <= 4 && llega.medio.velo > 0.5 && llega.medio.borde > 0,
-     'a mitad de la llegada el tunel se disuelve siguiendo el borde de la dapp, con la linea de luz encendida (' +
-     llega.medio.b + ' px, luz ' + llega.medio.velo + ')');
-  di(llega.medio.desv > 12,
-     'y por encima del borde sigue el tunel, no un azul vacio (variacion ' + llega.medio.desv + ')');
-  di(llega.fin.b <= 0 && llega.fin.velo < 0.05 && llega.fin.tit > 0 && llega.fin.tit < llega.fin.vh,
-     'y al final se esta en la dapp: el tunel se ha disuelto y el titular de la compra esta en pantalla (' + llega.fin.tit + ' px)');
+  /* p93 · SIN TUNEL. Se pidio quitar el tunel de cubos que llevaba a la compra
+     y dejar solo el paso de negro a azul. Lo que aqui se media del tunel -que
+     se encendiera, que tapara la dapp y se disolviera sobre ella- ya no tiene
+     escena que medir: se comprueba que no queda, y el paso de color lo
+     comprueba «probar_detalle». */
+  const sin = await pg.evaluate(() => { const h = document.getElementById('stack');
+    return { oculto: !h || h.hidden || getComputedStyle(h).display === 'none',
+             alto: h ? Math.round(h.getBoundingClientRect().height) : 0 } });
+  di(sin.oculto && sin.alto === 0, 'el tunel de cubos no esta y no cobra scroll (alto ' + sin.alto + ' px)');
 }
 /* ── 3 · la cifra, la misma en los cuatro sitios ──────────────────────────── */
 const cifras = await pg.evaluate(() => {
@@ -788,7 +753,7 @@ const movida = await pg.evaluate(() => {
 if (movida) di(String(movida.umbral).replace(/\D/g, '') === '41',
                'y la del umbral es la misma cifra viva, no un 85 escrito a mano (__aviso(41) → ' + movida.umbral + ')');
 if (movida) di(String(movida.tunel).replace(/\D/g, '') === '41',
-               'y la del rotulo del tunel tambien (__aviso(41) → ' + movida.tunel + ')');
+               'y la del rotulo de la ronda tambien (__aviso(41) → ' + movida.tunel + ')');
 else console.log('  ··  no hay __aviso() expuesto: la cifra viva no se puede mover desde aqui');
 
 di(errs.length === 0, 'sin errores de pagina' + (errs.length ? ': ' + errs[0] : ''));

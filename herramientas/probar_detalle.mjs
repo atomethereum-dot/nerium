@@ -163,6 +163,52 @@ di(e2.cifra === (await w.evaluate(() => document.getElementById('stkPct').textCo
 di(e2.vivas >= 2, 'y la luz se mueve sola (' + e2.vivas + ' capas vivas)');
 const e3 = await mira('seed-round', 0.4);
 di(e3.azul && e3.pantalla, 'la compra sigue en el mismo azul');
+/* p98 · LA JUNTA. Entre el rotulo y la compra va una cinta con los datos de la
+   ronda que corre sola, montada sobre el borde -mitad en cada lado-, con una
+   luz que se abre a los dos lados. Se mira que este encima del borde, que se
+   mueva sola, y que a los dos lados de la cinta el azul sea el mismo: que no
+   se vea costura. */
+{
+  const bt = await w.evaluate(async () => { const c = document.getElementById('seed-round');
+    scrollTo(0, Math.round(c.getBoundingClientRect().top + scrollY - innerHeight / 2));
+    await new Promise(s => setTimeout(s, 1800));
+    return Math.round(c.getBoundingClientRect().top) });
+  const j = await w.evaluate(async () => {
+    const ci = document.querySelector('#junta .junta-cinta'), pi = document.querySelector('#junta .junta-pista');
+    if (!ci || !pi) return null;
+    const r = ci.getBoundingClientRect(), b = document.getElementById('seed-round').getBoundingClientRect().top;
+    const x0 = new DOMMatrix(getComputedStyle(pi).transform).m41;
+    await new Promise(s => setTimeout(s, 900));
+    const x1 = new DOMMatrix(getComputedStyle(pi).transform).m41;
+    return { encima: r.top < b - 12 && r.bottom > b + 12, ancho: r.width >= innerWidth - 2, corre: x1 < x0 - 4,
+             texto: ci.textContent.replace(/\s+/g, ' ').trim().slice(0, 90) };
+  });
+  di(!!j && j.encima && j.ancho, 'entre el rotulo y la compra, la cinta va montada sobre el borde, de lado a lado');
+  di(!!j && j.corre, 'y corre sola: «' + (j ? j.texto : '') + '…»');
+  /* la costura se mira DEBAJO de la cinta: se esconde un momento y se
+     comparan las filas justo encima y justo debajo del borde. Con las luces
+     del rotulo cortadas en seco el salto era de 1,2 */
+  await w.evaluate(() => { document.getElementById('junta').style.visibility = 'hidden' });
+  await w.waitForTimeout(200);
+  const png = (await w.screenshot({ clip:{ x:0, y:bt - 4, width:1523, height:8 } })).toString('base64');
+  await w.evaluate(() => { document.getElementById('junta').style.visibility = '' });
+  const lados = await w.evaluate(async (b64) => {
+    const im = new Image(); await new Promise(r => { im.onload = r; im.src = 'data:image/png;base64,' + b64 });
+    const c = document.createElement('canvas'); c.width = im.width; c.height = im.height;
+    const g = c.getContext('2d'); g.drawImage(im, 0, 0);
+    /* por tramos de un octavo de ancho: un salto en un lado no se diluye en la media */
+    const tramos = y => { const d = g.getImageData(0, y, c.width, 1).data, t = [];
+      for (let k = 0; k < 8; k++) { let m = 0, n = 0;
+        for (let x = Math.floor(c.width * k / 8); x < Math.floor(c.width * (k + 1) / 8); x++) { const i = x * 4; m += 0.2126*d[i] + 0.7152*d[i+1] + 0.0722*d[i+2]; n++ }
+        t.push(m / n) } return t };
+    const ar = tramos(1), ab = tramos(6);
+    return { peor: Math.max(...ar.map((v, k) => Math.max(v, ab[k]) / Math.min(v, ab[k]))), ar: ar.map(Math.round), ab: ab.map(Math.round) };
+  }, png);
+  const funde = await w.evaluate(() => { const l = document.querySelector('#alba .alba-luz');
+    const m = l ? (getComputedStyle(l).maskImage || getComputedStyle(l).webkitMaskImage || '') : '';
+    return /(transparent|rgba\(0, 0, 0, 0\))\)$/.test(m.trim()) });
+  di(funde && lados.peor < 1.04, 'y debajo de la cinta el rotulo y la compra se juntan sin costura: las luces del rotulo se apagan antes del borde (peor salto ' + lados.peor.toFixed(3) + ')');
+}
 const e4 = await mira('token', 0.4);
 di(!e4.azul && !e4.pantalla, 'y al llegar al token la pantalla vuelve a negro (' + e4.fondos[3] + ')');
 const e5 = await mira('seed-round', 0.4);

@@ -4,6 +4,9 @@
    navegador en vez del suave por JavaScript. En un equipo rapido no entra.
    Y el boton flotante y el acento de la raiz no rehacen el estilo mientras
    se baja. */
+/* p98 · The Stack ya no esta -se quito el tunel de cubos- y el lienzo que se
+   mira es el del globo («Real-world asset chain»), la otra escena a pantalla
+   completa. */
 import { chromium } from 'playwright';
 import http from 'node:http'; import fs from 'node:fs'; import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -23,10 +26,12 @@ const cuenta=()=>new Promise(res=>{const M=['fillRect','fill','drawImage','strok
   document.querySelectorAll('canvas').forEach(c=>{if(c.offsetWidth<300)return;const g=c.getContext('2d');if(!g)return;
     M.forEach(m=>{const o=g[m];if(typeof o!=='function')return;g[m]=function(){let s=por.get(c);if(!s){s=new Set();por.set(c,s)}s.add(cu);return o.apply(g,arguments)};quita.push(()=>{g[m]=o})})});
   (function f(){cu++;scrollBy(0,6);if(cu<60)requestAnimationFrame(f);else{quita.forEach(q=>q());let best=0;por.forEach(s=>{if(s.size>best)best=s.size});res({cu,frac:best/cu})}})()});
+/* lo de fuera -RPC, precios- se contesta vacio; lo de la propia pagina
+   -el mapa del globo- se sirve de verdad, o el globo se queda sin paises */
 async function abre(nucleos){
   const ctx=await nav.newContext({viewport:{width:1440,height:900}});
   await ctx.addInitScript(n=>{Object.defineProperty(navigator,'hardwareConcurrency',{get:()=>n});Object.defineProperty(navigator,'deviceMemory',{get:()=>8});
-    window.fetch=async()=>new Response('{}',{status:200})},nucleos);
+    const of=window.fetch;window.fetch=async(u,o)=>{const q=String(u&&u.url||u);return /^https?:/.test(q)&&!q.startsWith(location.origin)?new Response('{}',{status:200}):of(u,o)}},nucleos);
   const pg=await ctx.newPage();const errs=[];pg.on('pageerror',e=>errs.push(e.message));
   await pg.goto(URL_,{waitUntil:'load'});await pg.waitForTimeout(4600);return {ctx,pg,errs};
 }
@@ -35,10 +40,10 @@ async function abre(nucleos){
   di(r.lig&&r.flag,'cuatro nucleos: entra en modo ligero desde el principio');
   di(!r.sm,'y el escritorio usa el scroll del navegador, no el suave por JavaScript');
   /* un lienzo a la vista pinta uno de cada dos cuadros */
-  await pg.evaluate(()=>scrollTo(0,document.getElementById('stack').getBoundingClientRect().top+scrollY+300));await pg.waitForTimeout(800);
+  await pg.evaluate(()=>scrollTo(0,document.getElementById('xfade').getBoundingClientRect().top+scrollY+300));await pg.waitForTimeout(800);
   const k=await pg.evaluate(cuenta);
   di(k.cu>=60,'los bucles siguen vivos ('+k.cu+' cuadros)');
-  di(k.frac>.3&&k.frac<.7,'el lienzo de «The stack», bajando, pinta uno de cada dos cuadros ('+Math.round(k.frac*100)+' %)');
+  di(k.frac>.3&&k.frac<.7,'el lienzo del globo, bajando, pinta uno de cada dos cuadros ('+Math.round(k.frac*100)+' %)');
   /* la rueda no se intercepta */
   const y0=await pg.evaluate(()=>scrollY);await pg.mouse.move(700,450);await pg.mouse.wheel(0,600);await pg.waitForTimeout(500);
   const y1=await pg.evaluate(()=>scrollY);di(y1-y0>=500,'la rueda baja la pagina con el scroll del navegador ('+Math.round(y1-y0)+' px)');
@@ -48,9 +53,9 @@ async function abre(nucleos){
   const r=await pg.evaluate(()=>({lig:document.documentElement.classList.contains('ligero'),sm:document.body.classList.contains('sm')}));
   di(!r.lig,'dieciseis nucleos: no entra en modo ligero de entrada');
   di(r.sm,'y conserva el scroll suave del escritorio');
-  await pg.evaluate(()=>scrollTo(0,document.getElementById('stack').getBoundingClientRect().top+scrollY+300));await pg.waitForTimeout(800);
+  await pg.evaluate(()=>scrollTo(0,document.getElementById('xfade').getBoundingClientRect().top+scrollY+300));await pg.waitForTimeout(800);
   const k=await pg.evaluate(cuenta);
-  di(k.frac>.85,'y el lienzo de «The stack», bajando, pinta en todos los cuadros ('+Math.round(k.frac*100)+' %)');
+  di(k.frac>.85,'y el lienzo del globo, bajando, pinta en todos los cuadros ('+Math.round(k.frac*100)+' %)');
   /* mientras se baja, nadie escribe el acento en la raiz */
   const n=await pg.evaluate(async()=>{let c=0;const D=document.documentElement.style,o=D.setProperty.bind(D);D.setProperty=function(k,v){if(k==='--blue')c++;return o(k,v)};
     for(let i=0;i<40;i++){window.dispatchEvent(new WheelEvent('wheel',{deltaY:120,cancelable:true}));await new Promise(r=>requestAnimationFrame(r))}
@@ -63,15 +68,15 @@ async function abre(nucleos){
    por segundo. En el telefono -aun con cuatro nucleos- los lienzos pintan en
    todos los cuadros de su reloj, y solo se quitan los desenfoques. */
 { const ctx=await nav.newContext({viewport:{width:390,height:844},deviceScaleFactor:3,isMobile:true,hasTouch:true});
-  await ctx.addInitScript(()=>{Object.defineProperty(navigator,'hardwareConcurrency',{get:()=>4});window.fetch=async()=>new Response('{}',{status:200})});
+  await ctx.addInitScript(()=>{Object.defineProperty(navigator,'hardwareConcurrency',{get:()=>4});const of=window.fetch;window.fetch=async(u,o)=>{const q=String(u&&u.url||u);return /^https?:/.test(q)&&!q.startsWith(location.origin)?new Response('{}',{status:200}):of(u,o)}});
   const pg=await ctx.newPage();const errs=[];pg.on('pageerror',e=>errs.push(e.message));
   await pg.goto(URL_,{waitUntil:'load'});await pg.waitForTimeout(4600);
-  await pg.evaluate(()=>scrollTo(0,document.getElementById('stack').getBoundingClientRect().top+scrollY+300));await pg.waitForTimeout(800);
+  await pg.evaluate(()=>scrollTo(0,document.getElementById('xfade').getBoundingClientRect().top+scrollY+300));await pg.waitForTimeout(800);
   const r=await pg.evaluate(()=>({lento:!!window.__lento,lig:document.documentElement.classList.contains('ligero')}));
   di(!r.lento,'telefono con cuatro nucleos: no parte los cuadros');
   di(r.lig,'y si quita los desenfoques (clase «ligero»)');
   const k=await pg.evaluate(cuenta);
-  di(k.frac>.85,'el lienzo de «The stack», bajando, pinta en cada cuadro de su reloj ('+Math.round(k.frac*100)+' %)');
+  di(k.frac>.85,'el lienzo del globo, bajando, pinta en cada cuadro de su reloj ('+Math.round(k.frac*100)+' %)');
   di(!errs.length,'sin errores de pagina'+(errs.length?': '+errs[0]:''));
   await ctx.close(); }
 console.log(mal?`${ok} bien, ${mal} MAL`:`${ok}/${ok} correctas`);
