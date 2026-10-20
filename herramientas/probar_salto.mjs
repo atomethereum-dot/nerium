@@ -30,10 +30,8 @@ for (const [nombre, opciones] of [['móvil', {...devices['iPhone 13']}],
     return new Response(JSON.stringify({jsonrpc:'2.0',id:j.id,result:res}),{status:200,headers:{'content-type':'application/json'}});};
   },{R});
   /* cuenta lo que pinta el tunel, para saber si sigue encendido */
-  /* p100 · las estelas se trazan, no se rellenan: se cuentan los dos */
-  await ctx.addInitScript(()=>{ window.__tp=0; const P=CanvasRenderingContext2D.prototype;
-    for(const m of ['fillRect','stroke']){ const f=P[m];
-      P[m]=function(){ if(this.canvas&&this.canvas.id==='shTunel') window.__tp++; return f.apply(this,arguments); }; } });
+  await ctx.addInitScript(()=>{ window.__tp=0; const P=CanvasRenderingContext2D.prototype, f=P.fillRect;
+    P.fillRect=function(){ if(this.canvas&&this.canvas.id==='shTunel') window.__tp++; return f.apply(this,arguments); }; });
   const pg=await ctx.newPage();
   await pg.goto('http://127.0.0.1:8949/index.html',{waitUntil:'load'});
   await pg.waitForTimeout(1600);
