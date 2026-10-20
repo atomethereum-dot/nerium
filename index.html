@@ -120,21 +120,24 @@ navegador, se ve igual en claro y en oscuro.
 Van como archivos y no incrustados, porque Safari e iOS ignoran los
 iconos escritos como datos dentro del HTML. El .ico lleva seis tamaños
 dentro (16 a 256) para Windows, marcadores y navegadores antiguos. -->
-<link rel="icon" type="image/svg+xml" href="/favicon.svg">
-<link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48 64x64 128x128 256x256">
-<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
-<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png">
+<!-- p101 · «?v=3»: el navegador guarda el favicon durante semanas aunque el
+     archivo cambie. Con el logo nuevo se le cambia el nombre a la peticion y
+     lo vuelve a pedir. Si el logo cambia otra vez, se sube el numero. -->
+<link rel="icon" type="image/svg+xml" href="/favicon.svg?v=3">
+<link rel="icon" href="/favicon.ico?v=3" sizes="16x16 32x32 48x48 64x64 128x128 256x256">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png?v=3">
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=3">
 <!-- iOS no escoge por densidad, escoge por tamaño declarado: dándole el suyo a
 cada aparato (iPhone 120, iPad 152, iPad Pro 167, y 180 como respaldo moderno)
 no reescala ninguno. Van transparentes, como el resto del juego: iOS los compone
 sobre negro en la pantalla de inicio, y sobre negro el plateado da 9,85:1. -->
-<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-<link rel="apple-touch-icon" sizes="167x167" href="/apple-touch-icon-167.png">
-<link rel="apple-touch-icon" sizes="152x152" href="/apple-touch-icon-152.png">
-<link rel="apple-touch-icon" sizes="120x120" href="/apple-touch-icon-120.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png?v=3">
+<link rel="apple-touch-icon" sizes="167x167" href="/apple-touch-icon-167.png?v=3">
+<link rel="apple-touch-icon" sizes="152x152" href="/apple-touch-icon-152.png?v=3">
+<link rel="apple-touch-icon" sizes="120x120" href="/apple-touch-icon-120.png?v=3">
 <!-- pestaña anclada de Safari en macOS: silueta plana, el color lo pone el usuario -->
-<link rel="mask-icon" href="/mask-icon.svg" color="#1A7AFF">
-<link rel="manifest" href="/site.webmanifest">
+<link rel="mask-icon" href="/mask-icon.svg?v=3" color="#1A7AFF">
+<link rel="manifest" href="/site.webmanifest?v=3">
 <meta name="application-name" content="Nereum">
 <meta name="apple-mobile-web-app-title" content="Nereum">
 <meta name="apple-mobile-web-app-capable" content="yes">
