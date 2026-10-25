@@ -55,6 +55,13 @@ const COLGADAS=()=>{
        el derecho: lo que se persigue es el que YA arranco y no llego */
     const jefe=ws.closest('.sp');
     if(!jefe || !jefe.classList.contains('in')) return;
+    /* y uno que esta SUBIENDO tampoco: el observador puede encenderlo despues
+       de que «QUIETO» haya mirado (la seccion se maqueta al acercarse y el
+       titular cruza la linea un poco mas tarde). Medido con la intro en video,
+       que deja la pagina lista desde el principio para las pruebas: la letra
+       estaba a 117 ms de su entrada, «running», y 1,5 s despues no quedaba
+       ninguna abajo. El abrazo que se busca es una transicion PAUSADA. */
+    if(wi.getAnimations().some(a=>a.playState==='running')) return;
     const b=wi.getBoundingClientRect();
     if(b.height && (b.top-a.top) > a.height*0.35){
       const t=ws.closest('[data-orig]');
