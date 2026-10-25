@@ -2,19 +2,18 @@
 
 `NereumSeedRound_plano.sol` es el mismo contrato de `../src/NereumSeedRound.sol`
 con las dependencias de OpenZeppelin incrustadas, para que Remix no tenga que
-resolver ningún import. **La lógica no cambia ni una línea.**
+resolver ningún import. **La lógica no cambia ni una línea.** Va sin
+comentarios, igual que el contrato: es el código que se publica al verificar.
 
 Comprobado: compila con **0 errores y 0 avisos**, y produce **exactamente el
-mismo bytecode** que el proyecto de Hardhat — 14 901 bytes, idénticos salvo los
-últimos 53, que son la huella de los nombres de archivo y no ejecutan nada.
+mismo bytecode** que el proyecto de Hardhat (14 901 bytes), salvo la huella de
+metadatos del final, que no ejecuta nada.
 
-Si se toca `../src/NereumSeedRound.sol`, hay que regenerarlo:
+Si se toca `../src/NereumSeedRound.sol`, se regenera con:
 
 ```
-npx hardhat flatten src/NereumSeedRound.sol > remix/NereumSeedRound_plano.sol
+npx hardhat run scripts/plano.js
 ```
-
-y volver a dejar una sola línea de licencia y una sola de `pragma`.
 
 ## Al compilar en Remix
 

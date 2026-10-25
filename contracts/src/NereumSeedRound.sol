@@ -8,9 +8,6 @@ import {Ownable2Step, Ownable} from "@openzeppelin/contracts/access/Ownable2Step
 import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import {Pausable} from "@openzeppelin/contracts/utils/Pausable.sol";
 
-/// @notice Lo mínimo de un oráculo de Chainlink. Se declara aquí en vez de traer
-///         el paquete entero: son cuatro líneas y deja el contrato sin más
-///         dependencias que OpenZeppelin, que es una cosa menos que auditar.
 interface AggregatorV3Interface {
     function decimals() external view returns (uint8);
     function latestRoundData() external view returns (
@@ -18,93 +15,30 @@ interface AggregatorV3Interface {
     );
 }
 
-/**
- * @title  Seed Round de Nereum
- * @notice Se paga en la moneda nativa de la cadena (ETH en Ethereum, BNB en BNB
- *         Chain) o en USDT. El mismo código sirve en las dos redes.
- *
- *         EL PRECIO SE FIJA EN DÓLARES, UNO SOLO. El contrato pregunta a
- *         Chainlink cuánto vale ETH o BNB en cada compra, así que 0,10 $ siguen
- *         siendo 0,10 $ aunque la moneda se mueva. Y como el precio vive en
- *         dólares y no en unidades de cada moneda, el mismo número vale para
- *         Ethereum y para BNB Chain: se acabó el riesgo de confundir los 6
- *         decimales de USDT en Ethereum con los 18 de BNB Chain.
- *
- *         LA VENTA NO SE PARA NUNCA, Y SIN QUE NADIE TENGA QUE INTERVENIR. El
- *         precio no depende de un oráculo sino de VARIOS, en orden de
- *         preferencia: se pregunta al primero y, si no responde o responde algo
- *         inservible, se pasa al siguiente. Que caigan todos a la vez es
- *         prácticamente imposible, pero incluso entonces se cobra con el último
- *         precio bueno que el propio contrato guardó, y la venta continúa.
- *
- *         La compra anota lo que corresponde a cada dirección; el reparto se
- *         abre cuando la ronda ha terminado y el token está depositado.
- *
- *         REFERIDOS, PAGADOS EN EL ACTO. Quien compra desde el enlace de otro
- *         paga lo mismo y recibe los mismos tokens; de lo que paga, un 10 %
- *         sale en la MISMA transacción hacia quien lo trajo, en la misma moneda
- *         (ETH, BNB o USDT). Si ese envío no se puede hacer -una cartera que
- *         rechaza ETH, una dirección bloqueada por USDT-, la compra no se cae:
- *         la comisión queda apartada y el referidor la retira con
- *         claimReferral(destino). El dueño nunca puede retirar lo apartado.
- */
 contract NereumSeedRound is Ownable2Step, ReentrancyGuard, Pausable {
     using SafeERC20 for IERC20;
 
-    /// @dev Todos los importes en dólares llevan 8 decimales, que es la escala
-    ///      en la que Chainlink publica ETH/USD y BNB/USD.
     uint256 private constant USD = 1e8;
 
-    // ─────────────────────────── configuración fija ───────────────────────────
-
-    /// @notice USDT de la red. En Ethereum no devuelve bool en transfer, por eso
-    ///         todo el contrato usa SafeERC20.
     IERC20 public immutable usdt;
 
     uint8 public immutable saleTokenDecimals;
 
-    uint256 private immutable _unit;      // 10**decimales del token en venta
-    uint256 private immutable _usdtUnit;  // 10**decimales de USDT
+    uint256 private immutable _unit;
+    uint256 private immutable _usdtUnit;
 
-    // ─────────────────────────────── estado ───────────────────────────────────
-
-    /// @notice Precio de UN token entero en dólares, con 8 decimales.
-    ///         0,10 $ se escribe 10000000.
     uint256 public priceUsd;
 
-    /// @notice Compra mínima en dólares, 8 decimales. 1 $ se escribe 100000000.
     uint256 public minBuyUsd;
 
-    /// @notice Tope POR CARTERA en dólares, 8 decimales. 10.000 $ se escribe
-    ///         1000000000000. Cero significa sin tope.
-    ///
-    ///         CONVIENE SABER QUÉ ES Y QUÉ NO ES: cuenta lo gastado por
-    ///         dirección, sumando pagos en moneda nativa y en USDT. Nadie pasa
-    ///         de aquí con una cartera, pero cualquiera puede abrir otra y
-    ///         volver a empezar. Sirve para que la venta reparta y para
-    ///         sostener lo que anuncia la web; NO es un control de identidad.
-    ///         Si hace falta de verdad limitar por persona, eso se hace con
-    ///         lista blanca, y eso es otra cosa.
     uint256 public maxBuyUsd;
 
-    /// @notice Un oráculo y sus decimales, que se leen una vez y se guardan para
-    ///         no gastar una llamada extra en cada compra.
     struct Feed { AggregatorV3Interface oracle; uint256 unit; }
 
-    /// @notice Los oráculos, EN ORDEN DE PREFERENCIA. Se usa el primero que
-    ///         responda algo válido. Cualquier proveedor que exponga la interfaz
-    ///         de Chainlink sirve: la propia Chainlink, API3, RedStone, Pyth o
-    ///         Band a través de sus adaptadores.
     Feed[] public feeds;
 
-    /// @notice A partir de esta antigüedad la respuesta de un oráculo se descarta
-    ///         y se prueba el siguiente.
     uint256 public maxPriceAge = 24 hours;
 
-    /// @notice El último precio bueno que se leyó, y cuándo. Lo guarda el propio
-    ///         contrato en cada compra: es la red de seguridad para el caso, casi
-    ///         imposible, de que TODOS los oráculos fallen a la vez. Nadie tiene
-    ///         que ponerlo a mano.
     uint256 public lastGoodPrice;
     uint64 public lastGoodAt;
 
@@ -124,37 +58,23 @@ contract NereumSeedRound is Ownable2Step, ReentrancyGuard, Pausable {
     mapping(address => uint256) public allocation;
     mapping(address => uint256) public claimed;
 
-    /// @notice Lo gastado por cada dirección, en dólares con 8 decimales, para
-    ///         poder aplicar el tope por cartera.
     mapping(address => uint256) public spentUsd;
 
-    // ────────────────────────────── referidos ─────────────────────────────────
-
-    /// @notice Comisión del referidor sobre lo pagado, en puntos básicos.
-    ///         1000 = 10 %. Nunca por encima de MAX_REFERRAL_BPS.
     uint256 public referralBps = 1000;
     uint256 public constant MAX_REFERRAL_BPS = 2000;
 
-    /// @notice Lo ganado por cada referidor, en moneda nativa y en USDT, y
-    ///         cuántas compras trajo. Es lo que enseña la web.
     mapping(address => uint256) public referralEarnedNative;
     mapping(address => uint256) public referralEarnedUsdt;
     mapping(address => uint256) public referralCount;
     uint256 public totalReferralNative;
     uint256 public totalReferralUsdt;
 
-    /// @notice Lo que no se pudo entregar en el acto y espera a claimReferral().
     mapping(address => uint256) public referralOwedNative;
     mapping(address => uint256) public referralOwedUsdt;
     uint256 public totalReferralOwedNative;
     uint256 public totalReferralOwedUsdt;
 
-    /// @dev Gas para el envío en el acto. Basta para una cartera normal o un
-    ///      Safe; un receptor que gaste más no puede encarecer ni tumbar la
-    ///      compra: su comisión queda apartada.
     uint256 private constant REFERRAL_GAS = 30_000;
-
-    // ─────────────────────────────── eventos ──────────────────────────────────
 
     event RoundScheduled(uint64 startTime, uint64 endTime);
     event RoundEnded(uint64 endedAt);
@@ -163,10 +83,9 @@ contract NereumSeedRound is Ownable2Step, ReentrancyGuard, Pausable {
     event MaxBuyUsdUpdated(uint256 maxBuyUsd);
     event MaxPriceAgeUpdated(uint256 seconds_);
     event FeedsUpdated(uint256 count);
-    /// @notice El oráculo preferido no respondió y se usó otro de la lista.
+
     event OracleFellBack(uint256 indexed usedIndex, uint256 price);
-    /// @notice Ninguno respondió y se cobró con el último precio guardado. Es el
-    ///         único caso que merece una alerta.
+
     event AllOraclesDown(uint256 cachedPrice, uint64 cachedAt);
     event HardCapUpdated(uint256 hardCapTokens);
     event Purchased(address indexed buyer, bool paidInUsdt, uint256 paid, uint256 usdValue, uint256 tokens);
@@ -177,12 +96,10 @@ contract NereumSeedRound is Ownable2Step, ReentrancyGuard, Pausable {
     event UsdtWithdrawn(address indexed to, uint256 amount);
     event UnsoldTokensWithdrawn(address indexed to, uint256 amount);
     event ForeignTokenRescued(address indexed token, address indexed to, uint256 amount);
-    /// @notice Comisión de un referido. delivered=false: quedó apartada.
+
     event ReferralPaid(address indexed referrer, address indexed buyer, bool inUsdt, uint256 amount, bool delivered);
     event ReferralClaimed(address indexed referrer, uint256 nativeAmount, uint256 usdtAmount);
     event ReferralBpsUpdated(uint256 bps);
-
-    // ─────────────────────────────── errores ──────────────────────────────────
 
     error RoundNotLive();
     error RoundNotOver();
@@ -209,16 +126,6 @@ contract NereumSeedRound is Ownable2Step, ReentrancyGuard, Pausable {
     error ReferralTooHigh(uint256 bps, uint256 maximum);
     error AboveFreeBalance(uint256 requested, uint256 free);
 
-    // ───────────────────────────── constructor ────────────────────────────────
-
-    /**
-     * @param usdt_    USDT de la red.
-     *                 Ethereum:  0xdAC17F958D2ee523a2206206994597C13D831ec7
-     *                 BNB Chain: 0x55d398326f99059fF775485246999027B3197955
-     * @param feeds_   Oráculos ETH/USD o BNB/USD, EN ORDEN DE PREFERENCIA.
-     *                  Pon al menos dos de proveedores distintos.
-     * @param owner_   Quien administra. Usa un multisig.
-     */
     constructor(
         IERC20 usdt_,
         AggregatorV3Interface[] memory feeds_,
@@ -238,9 +145,6 @@ contract NereumSeedRound is Ownable2Step, ReentrancyGuard, Pausable {
         _usdtUnit = 10 ** IERC20Metadata(address(usdt_)).decimals();
         _setFeeds(feeds_);
 
-        /* La economía se fija al desplegar y no en llamadas sueltas despues:
-           asi no existe el momento en que el contrato esta desplegado pero a
-           medio configurar. Los setters siguen ahi para corregir en marcha. */
         priceUsd = priceUsd_;
         minBuyUsd = minBuyUsd_;
         maxBuyUsd = maxBuyUsd_;
@@ -249,41 +153,30 @@ contract NereumSeedRound is Ownable2Step, ReentrancyGuard, Pausable {
         emit MaxBuyUsdUpdated(maxBuyUsd_);
     }
 
-    // ──────────────────────────── administración ──────────────────────────────
-
-    /// @notice Precio de un token en dólares, 8 decimales. 0,10 $ = 10000000.
     function setPriceUsd(uint256 price) external onlyOwner {
         if (price == 0) revert PriceNotSet();
         priceUsd = price;
         emit PriceUsdUpdated(price);
     }
 
-    /// @notice Compra mínima en dólares, 8 decimales. 1 $ = 100000000.
     function setMinBuyUsd(uint256 min) external onlyOwner {
         if (maxBuyUsd != 0 && min > maxBuyUsd) revert BadWindow();
         minBuyUsd = min;
         emit MinBuyUsdUpdated(min);
     }
 
-    /// @notice Tope por cartera en dólares, 8 decimales. 10.000 $ = 1000000000000.
-    ///         Cero quita el tope. Bajarlo no anula lo ya comprado: quien
-    ///         estuviera por encima simplemente no puede comprar más.
     function setMaxBuyUsd(uint256 max) external onlyOwner {
         if (max != 0 && max < minBuyUsd) revert BadWindow();
         maxBuyUsd = max;
         emit MaxBuyUsdUpdated(max);
     }
 
-    /// @notice Antigüedad a partir de la cual se usa el precio de respaldo.
     function setMaxPriceAge(uint256 seconds_) external onlyOwner {
         if (seconds_ == 0) revert PriceNotSet();
         maxPriceAge = seconds_;
         emit MaxPriceAgeUpdated(seconds_);
     }
 
-    /// @notice Reemplaza la lista de oráculos, en orden de preferencia. Exige que
-    ///         al menos uno responda ahora mismo: una lista de oráculos muertos
-    ///         dejaría la venta colgando del precio guardado.
     function setFeeds(AggregatorV3Interface[] calldata list) external onlyOwner {
         _setFeeds(list);
     }
@@ -317,7 +210,6 @@ contract NereumSeedRound is Ownable2Step, ReentrancyGuard, Pausable {
         emit RoundScheduled(s, end);
     }
 
-    /// @notice Cierra la ronda ya. No tiene vuelta atrás.
     function endRound() external onlyOwner {
         if (finalized) revert RoundAlreadyFinalized();
         finalized = true;
@@ -334,21 +226,12 @@ contract NereumSeedRound is Ownable2Step, ReentrancyGuard, Pausable {
     function pause() external onlyOwner { _pause(); }
     function unpause() external onlyOwner { _unpause(); }
 
-    /// @notice Comisión de referidos en puntos básicos. 1000 = 10 %, 0 la apaga.
     function setReferralBps(uint256 bps) external onlyOwner {
         if (bps > MAX_REFERRAL_BPS) revert ReferralTooHigh(bps, MAX_REFERRAL_BPS);
         referralBps = bps;
         emit ReferralBpsUpdated(bps);
     }
 
-    // ─────────────────────────────── oráculo ──────────────────────────────────
-
-    /**
-     * @dev Recorre los oráculos por orden y devuelve el primero que responda algo
-     *      válido. Cada llamada va en try/catch: un oráculo pausado, migrado o
-     *      retirado revierte, y aquí eso solo significa "pasa al siguiente", no
-     *      que se caiga la compra.
-     */
     function _readOracles() private view returns (uint256 price, bool ok, uint256 index) {
         uint256 n = feeds.length;
         for (uint256 i; i < n; ++i) {
@@ -364,12 +247,6 @@ contract NereumSeedRound is Ownable2Step, ReentrancyGuard, Pausable {
         return (0, false, type(uint256).max);
     }
 
-    /**
-     * @notice Cuánto vale una unidad de la moneda nativa en dólares, 8 decimales.
-     * @return price La cotización que se va a usar.
-     * @return live  Si salió de un oráculo vivo. Falso significa que ninguno
-     *               respondió y se está usando el último precio guardado.
-     */
     function nativeUsdPrice() public view returns (uint256 price, bool live) {
         (uint256 p, bool ok, ) = _readOracles();
         if (ok) return (p, true);
@@ -377,10 +254,6 @@ contract NereumSeedRound is Ownable2Step, ReentrancyGuard, Pausable {
         return (lastGoodPrice, false);
     }
 
-    /**
-     * @notice Estado de cada oráculo, para vigilarlos desde fuera sin adivinar.
-     *         Un `false` en `healthy` dice exactamente cuál está fallando.
-     */
     function feedsStatus() external view returns (
         address[] memory oracles, uint256[] memory prices, bool[] memory healthy
     ) {
@@ -402,21 +275,12 @@ contract NereumSeedRound is Ownable2Step, ReentrancyGuard, Pausable {
         }
     }
 
-    // ─────────────────────────────── compra ───────────────────────────────────
-
-    /**
-     * @param minTokensOut Mínimo que el comprador acepta recibir. Es su protección
-     *                     frente a un movimiento del oráculo o un cambio de precio
-     *                     entre que ve la cotización y se mina su transacción.
-     */
     function buyWithNative(uint256 minTokensOut)
         external payable nonReentrant whenNotPaused returns (uint256 tokens)
     {
         return _buyNative(minTokensOut, address(0));
     }
 
-    /// @notice Como buyWithNative, y el 10 % de lo pagado sale en el acto hacia
-    ///         `referrer`. Quien compra recibe exactamente los mismos tokens.
     function buyWithNativeRef(uint256 minTokensOut, address referrer)
         external payable nonReentrant whenNotPaused returns (uint256 tokens)
     {
@@ -426,9 +290,6 @@ contract NereumSeedRound is Ownable2Step, ReentrancyGuard, Pausable {
     function _buyNative(uint256 minTokensOut, address referrer) private returns (uint256 tokens) {
         _requireLive();
 
-        /* Se lee aquí y no en la vista porque esta sí puede escribir: cada compra
-           con un oráculo sano deja guardado su precio, que es lo que sostiene la
-           venta si algún día caen todos. */
         (uint256 nativeUsd, bool ok, uint256 idx) = _readOracles();
         if (ok) {
             lastGoodPrice = nativeUsd;
@@ -454,8 +315,6 @@ contract NereumSeedRound is Ownable2Step, ReentrancyGuard, Pausable {
         return _buyUsdt(amount, minTokensOut, address(0));
     }
 
-    /// @notice Como buyWithUsdt, y el 10 % de lo pagado sale en el acto hacia
-    ///         `referrer`, en USDT.
     function buyWithUsdtRef(uint256 amount, uint256 minTokensOut, address referrer)
         external nonReentrant whenNotPaused returns (uint256 tokens)
     {
@@ -465,14 +324,10 @@ contract NereumSeedRound is Ownable2Step, ReentrancyGuard, Pausable {
     function _buyUsdt(uint256 amount, uint256 minTokensOut, address referrer) private returns (uint256 tokens) {
         _requireLive();
 
-        /* Se mide lo que entra de verdad, por si USDT activase algún día una
-           comisión de transferencia: cobrar por el importe pedido regalaría tokens. */
         uint256 before = usdt.balanceOf(address(this));
         usdt.safeTransferFrom(msg.sender, address(this), amount);
         uint256 received = usdt.balanceOf(address(this)) - before;
 
-        /* USDT se toma como un dólar. Es lo que hace todo el mundo, pero conviene
-           saberlo: si USDT perdiera la paridad, este contrato no se entera. */
         uint256 usdValue = (received * USD) / _usdtUnit;
         tokens = _record(msg.sender, usdValue, minTokensOut);
 
@@ -481,12 +336,6 @@ contract NereumSeedRound is Ownable2Step, ReentrancyGuard, Pausable {
         _payReferral(referrer, true, received);
     }
 
-    /**
-     * @dev La comisión del referido, despues de anotar la compra (el estado ya
-     *      esta escrito y la funcion que llama es nonReentrant). Sin referidor,
-     *      a uno mismo o al propio contrato no hay comision. Si el envio falla,
-     *      la compra sigue y la comision queda apartada para claimReferral().
-     */
     function _payReferral(address referrer, bool inUsdt, uint256 paid) private {
         if (referrer == address(0) || referrer == msg.sender || referrer == address(this)) return;
         uint256 cut = (paid * referralBps) / 10_000;
@@ -496,9 +345,7 @@ contract NereumSeedRound is Ownable2Step, ReentrancyGuard, Pausable {
         if (inUsdt) {
             referralEarnedUsdt[referrer] += cut;
             totalReferralUsdt += cut;
-            /* Llamada a mano en vez de safeTransfer: un fallo aqui no debe
-               revertir la compra. Vale para USDT de Ethereum, que no devuelve
-               nada, y para el de BNB Chain, que devuelve un bool. */
+
             (bool ok, bytes memory ret) = address(usdt).call(abi.encodeCall(IERC20.transfer, (referrer, cut)));
             delivered = ok && (ret.length == 0 || abi.decode(ret, (bool)));
             if (!delivered) { referralOwedUsdt[referrer] += cut; totalReferralOwedUsdt += cut; }
@@ -512,9 +359,6 @@ contract NereumSeedRound is Ownable2Step, ReentrancyGuard, Pausable {
         emit ReferralPaid(referrer, msg.sender, inUsdt, cut, delivered);
     }
 
-    /// @notice Retira las comisiones que no se pudieron entregar en el acto, a la
-    ///         dirección que elija el referidor: si la suya rechazaba ETH, puede
-    ///         cobrar en otra.
     function claimReferral(address payable to) external nonReentrant {
         if (to == address(0)) revert ZeroAddress();
         uint256 n = referralOwedNative[msg.sender];
@@ -537,8 +381,6 @@ contract NereumSeedRound is Ownable2Step, ReentrancyGuard, Pausable {
     {
         if (usdValue < minBuyUsd) revert BelowMinimum(usdValue, minBuyUsd);
 
-        /* El tope cuenta lo gastado por la dirección a lo largo de toda la
-           ronda, sumando moneda nativa y USDT: no es un tope por transacción. */
         uint256 spent = spentUsd[buyer] + usdValue;
         if (maxBuyUsd != 0 && spent > maxBuyUsd) revert AboveMaximum(spent, maxBuyUsd);
 
@@ -561,10 +403,7 @@ contract NereumSeedRound is Ownable2Step, ReentrancyGuard, Pausable {
         }
     }
 
-    /// @notice Un envío directo no lleva protección de precio: se rechaza.
     receive() external payable { revert UseBuyFunction(); }
-
-    // ─────────────────────────────── reparto ──────────────────────────────────
 
     function setSaleToken(IERC20 token) external onlyOwner {
         if (address(saleToken) != address(0)) revert SaleTokenAlreadySet();
@@ -577,12 +416,6 @@ contract NereumSeedRound is Ownable2Step, ReentrancyGuard, Pausable {
         emit SaleTokenSet(address(token));
     }
 
-    /**
-     * @notice Abre el reparto. Exige dos cosas: que la ronda haya TERMINADO
-     *         —por fecha o porque se cerró a mano— y que el contrato ya tenga
-     *         depositado todo lo vendido, para que nadie reclame contra un saldo
-     *         insuficiente y deje sin nada al que llegue último.
-     */
     function openClaims() external onlyOwner {
         if (!isOver()) revert RoundNotOver();
         if (address(saleToken) == address(0)) revert SaleTokenNotSet();
@@ -610,11 +443,9 @@ contract NereumSeedRound is Ownable2Step, ReentrancyGuard, Pausable {
         return allocation[buyer] - claimed[buyer];
     }
 
-    // ────────────────────────────── retiradas ─────────────────────────────────
-
     function withdrawNative(address payable to, uint256 amount) external onlyOwner nonReentrant {
         if (to == address(0)) revert ZeroAddress();
-        /* lo apartado para referidos no es del dueño */
+
         uint256 free = address(this).balance - totalReferralOwedNative;
         uint256 value = amount == 0 ? free : amount;
         if (value > free) revert AboveFreeBalance(value, free);
@@ -632,7 +463,6 @@ contract NereumSeedRound is Ownable2Step, ReentrancyGuard, Pausable {
         emit UsdtWithdrawn(to, value);
     }
 
-    /// @notice Solo el excedente sobre lo que se debe a los compradores.
     function withdrawUnsoldTokens(address to, uint256 amount) external onlyOwner nonReentrant {
         if (to == address(0)) revert ZeroAddress();
         if (address(saleToken) == address(0)) revert SaleTokenNotSet();
@@ -656,20 +486,15 @@ contract NereumSeedRound is Ownable2Step, ReentrancyGuard, Pausable {
         emit ForeignTokenRescued(address(token), to, amount);
     }
 
-    // ──────────────────────────────── vistas ──────────────────────────────────
-
     function isLive() public view returns (bool) {
         return !finalized && !paused() && startTime != 0
             && block.timestamp >= startTime && block.timestamp < endTime;
     }
 
-    /// @notice La ronda ha terminado: se cerró a mano o pasó la fecha.
     function isOver() public view returns (bool) {
         return finalized || (startTime != 0 && block.timestamp >= endTime);
     }
 
-    /// @notice Cuántos tokens saldrían por un pago en moneda nativa. Es lo que
-    ///         debe llamar la web para calcular el mínimo que enviará el comprador.
     function quoteNative(uint256 amount) external view returns (uint256) {
         if (priceUsd == 0) return 0;
         (uint256 nativeUsd, ) = nativeUsdPrice();
@@ -681,15 +506,11 @@ contract NereumSeedRound is Ownable2Step, ReentrancyGuard, Pausable {
         return (((amount * USD) / _usdtUnit) * _unit) / priceUsd;
     }
 
-    /// @notice Cuánta moneda nativa hay que enviar para un importe en dólares.
-    ///         Útil para pintar "0,032 ETH" junto a "100 $" en la web.
     function nativeForUsd(uint256 usdAmount) external view returns (uint256) {
         (uint256 nativeUsd, ) = nativeUsdPrice();
         return (usdAmount * 1e18) / nativeUsd;
     }
 
-    /// @notice Cuánto le queda por gastar a una dirección antes de topar.
-    ///         Sin tope devuelve el máximo, que es como decir "sin límite".
     function remainingAllowanceUsd(address buyer) external view returns (uint256) {
         if (maxBuyUsd == 0) return type(uint256).max;
         uint256 spent = spentUsd[buyer];
