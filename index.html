@@ -1620,24 +1620,17 @@ body.light .subir{background:rgba(255,255,255,.7);border-color:rgba(232,236,244,
 body.cur-on #cur{display:block}
 body.cur-on,body.cur-on *{cursor:none}
 body.cur-on input,body.cur-on textarea{cursor:text}
-/* p102 · LA INTRO, COMO UNA ANIMACION DE MARCA. Se pidio igual que un video
-   de referencia «o mejor»: el logo en 3D, un destello, el logo dibujado en
-   linea y una linea que sale a la derecha trazando las letras, el relleno con
-   un barrido, otro destello y un zoom que abre la pagina. La barra de 0 a 100
-   es esa misma linea: dibuja el nombre mientras cuenta. */
-.pre{position:fixed;inset:0;z-index:200;background:#000;display:grid;place-items:center;overflow:hidden;
+/* p102 · LA INTRO, COMO UN VIDEO DE MARCA. Se pidio igual que un video de
+   referencia «o mejor», y despues: siempre en 3D y con color, sin tirones y
+   mas lenta. Por eso no se dibuja en el navegador: es un video renderizado
+   cuadro a cuadro (una escena 3D a 60 fps, con desenfoque de movimiento),
+   uno horizontal y otro vertical, y el navegador solo lo reproduce. La barra
+   de 0 a 100 va dentro del video. */
+.pre{position:fixed;inset:0;z-index:200;background:#000;overflow:hidden;
   transition:opacity .45s ease,visibility 0s linear .45s}
-/* los destellos son de golpe, como en un corte de montaje: con transicion se
-   veia un gris a medio camino */
-.pre.claro{background:#E9EEF8}
 .pre.gone{opacity:0;visibility:hidden}
-.pre-svg{width:min(76vw,640px);height:auto;overflow:visible;transform-origin:50% 50%;will-change:transform,opacity}
-.pre-svg .pre-c,.pre-svg .pre-m{fill:none;stroke:#D5E2FF;stroke-width:1.6;vector-effect:non-scaling-stroke;
-  stroke-linejoin:round;stroke-linecap:round;stroke-dasharray:1 1;stroke-dashoffset:1}
-.pre-svg #preRelleno{color:#F3F6FB}
-.pre-svg #preLinea{stroke:#2E86FF;stroke-width:1.4;vector-effect:non-scaling-stroke}
-.pre-svg #prePunta{fill:#2E86FF}
-.pre-svg #preN{font-family:var(--m);font-size:150px;fill:#7FB0FF;letter-spacing:.06em}
+.pre-v{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0}
+.pre-v.on{opacity:1}
 @media(prefers-reduced-motion:reduce){.pre{display:none}}
 .hud-count{position:fixed;right:16px;bottom:var(--hud-b);z-index:61;font-family:var(--m);font-size:11px;
   color:rgba(255,255,255,.72);letter-spacing:.1em}
@@ -8327,22 +8320,18 @@ body.lock .flota{opacity:0 !important;pointer-events:none !important}
 
 <nav class="srail" id="srail" aria-label="Sections"></nav>
 <div class="pre" id="pre" aria-hidden="true">
-  <svg class="pre-svg" id="preSvg" viewBox="-60 -60 5560 1720">
-    <defs><filter id="preBarre" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur id="preBarreG" stdDeviation="0 0"/></filter></defs>
-    <g id="preTodo">
-      <g id="preMarca">
-        <use id="preLogo" href="#nlogo" width="1600" height="1600" opacity="0"/>
-        <path class="pre-m" pathLength="1" d="M800 33L1567 800L800 1567L33 800Z"/>
-        <path class="pre-m" pathLength="1" d="M800 33L800 1567"/>
-        <path class="pre-m" pathLength="1" d="M33 800L1567 800"/>
-      </g>
-      <g id="preLetras" transform="translate(2000 960)"><g id="preRelleno" opacity="0"><path fill="currentColor" d="M78 0V-680H174L487 -200L526 -133V-680H618V0H522L210 -477L170 -547V0ZM1185 -173Q1164 -82 1101.5 -35Q1039 12 946 12Q830 12 764.5 -61.5Q699 -135 699 -265Q699 -399 763.5 -471.5Q828 -544 941 -544Q1053 -544 1117 -471.5Q1181 -399 1181 -272V-250H789Q793 -161 833.5 -112.5Q874 -64 946 -64Q1065 -64 1093 -173ZM941 -468Q812 -468 792 -316H1089Q1080 -389 1041.5 -428.5Q1003 -468 941 -468ZM1258 0V-531H1346V-449Q1399 -544 1503 -544Q1537 -544 1553 -531V-452Q1532 -459 1498 -459Q1421 -459 1383.5 -415.5Q1346 -372 1346 -297V0ZM2050 -173Q2029 -82 1966.5 -35Q1904 12 1811 12Q1695 12 1629.5 -61.5Q1564 -135 1564 -265Q1564 -399 1628.5 -471.5Q1693 -544 1806 -544Q1918 -544 1982 -471.5Q2046 -399 2046 -272V-250H1654Q1658 -161 1698.5 -112.5Q1739 -64 1811 -64Q1930 -64 1958 -173ZM1806 -468Q1677 -468 1657 -316H1954Q1945 -389 1906.5 -428.5Q1868 -468 1806 -468ZM2461 -217V-531H2549V0H2461V-72Q2407 12 2300 12Q2216 12 2169.5 -36.5Q2123 -85 2123 -176V-531H2211V-194Q2211 -132 2239 -97.5Q2267 -63 2324 -63Q2385 -63 2423 -109.5Q2461 -156 2461 -217ZM2649 0V-531H2737V-463Q2788 -544 2889 -544Q3002 -544 3040 -450Q3093 -544 3204 -544Q3286 -544 3331.5 -495Q3377 -446 3377 -355V0H3289V-337Q3289 -469 3185 -469Q3128 -469 3092.5 -422Q3057 -375 3057 -314V0H2969V-337Q2969 -469 2865 -469Q2808 -469 2772.5 -422Q2737 -375 2737 -314V0Z"/></g><g id="preTrazo"><path class="pre-c" data-l="0" pathLength="1" d="M78 0V-680H174L487 -200L526 -133V-680H618V0H522L210 -477L170 -547V0Z"/><path class="pre-c" data-l="1" pathLength="1" d="M1185 -173Q1164 -82 1101.5 -35Q1039 12 946 12Q830 12 764.5 -61.5Q699 -135 699 -265Q699 -399 763.5 -471.5Q828 -544 941 -544Q1053 -544 1117 -471.5Q1181 -399 1181 -272V-250H789Q793 -161 833.5 -112.5Q874 -64 946 -64Q1065 -64 1093 -173Z"/><path class="pre-c" data-l="1" pathLength="1" d="M941 -468Q812 -468 792 -316H1089Q1080 -389 1041.5 -428.5Q1003 -468 941 -468Z"/><path class="pre-c" data-l="2" pathLength="1" d="M1258 0V-531H1346V-449Q1399 -544 1503 -544Q1537 -544 1553 -531V-452Q1532 -459 1498 -459Q1421 -459 1383.5 -415.5Q1346 -372 1346 -297V0Z"/><path class="pre-c" data-l="3" pathLength="1" d="M2050 -173Q2029 -82 1966.5 -35Q1904 12 1811 12Q1695 12 1629.5 -61.5Q1564 -135 1564 -265Q1564 -399 1628.5 -471.5Q1693 -544 1806 -544Q1918 -544 1982 -471.5Q2046 -399 2046 -272V-250H1654Q1658 -161 1698.5 -112.5Q1739 -64 1811 -64Q1930 -64 1958 -173Z"/><path class="pre-c" data-l="3" pathLength="1" d="M1806 -468Q1677 -468 1657 -316H1954Q1945 -389 1906.5 -428.5Q1868 -468 1806 -468Z"/><path class="pre-c" data-l="4" pathLength="1" d="M2461 -217V-531H2549V0H2461V-72Q2407 12 2300 12Q2216 12 2169.5 -36.5Q2123 -85 2123 -176V-531H2211V-194Q2211 -132 2239 -97.5Q2267 -63 2324 -63Q2385 -63 2423 -109.5Q2461 -156 2461 -217Z"/><path class="pre-c" data-l="5" pathLength="1" d="M2649 0V-531H2737V-463Q2788 -544 2889 -544Q3002 -544 3040 -450Q3093 -544 3204 -544Q3286 -544 3331.5 -495Q3377 -446 3377 -355V0H3289V-337Q3289 -469 3185 -469Q3128 -469 3092.5 -422Q3057 -375 3057 -314V0H2969V-337Q2969 -469 2865 -469Q2808 -469 2772.5 -422Q2737 -375 2737 -314V0Z"/></g></g>
-      <line id="preLinea" x1="1567" y1="800" x2="1567" y2="800" opacity="0"/>
-      <circle id="prePunta" cx="1567" cy="800" r="20" opacity="0"/>
-      <text id="preN" x="1567" y="690" opacity="0">00</text>
-    </g>
-  </svg>
+  <video class="pre-v" id="preV" muted playsinline preload="auto" disablepictureinpicture></video>
 </div>
+<script>/* la intro empieza a bajar aqui y no al final de la pagina: el video
+   horizontal si la ventana es al menos 16:10; si no, el vertical, que con
+   «cover» se recorta por arriba y por abajo y el logotipo sigue entero */
+(function(){var v=document.getElementById('preV');
+if(matchMedia('(prefers-reduced-motion: reduce)').matches||(navigator.webdriver&&!window.__conIntro))return;
+/* H.264 primero: se decodifica por hardware en todas partes; el WebM queda
+   para los navegadores sin H.264 */
+var m=v.canPlayType('video/mp4; codecs="avc1.640028"');
+v.src='img/intro-'+(innerWidth/innerHeight>=1.6?'esc':'tel')+(m?'.mp4':'.webm');
+v.muted=true;var r=v.play();if(r&&r.catch)r.catch(function(){v.dataset.no='1'});})();</script>
 <div class="hud" aria-hidden="true">
   <i class="tl"></i><i class="tr"></i><i class="br"></i>
   <span class="lang">English &#8250;</span>
@@ -10375,82 +10364,52 @@ const CALM=matchMedia('(prefers-reduced-motion: reduce)').matches;
     ir(); [120,400,900,1600,2400,3400].forEach(ms=>setTimeout(ir,ms));
     addEventListener('load',()=>setTimeout(ir,60),{once:true});
   })();
-  /* p102 · LA INTRO. Un reloj y seis tiempos, en segundos:
-       0,00-0,50  la piramide entra, con un brillo
-       0,50-0,78  destello claro: la piramide, oscura
-       0,78-2,30  la piramide se dibuja en linea y la linea -la barra de 0 a
-                  100- sale a la derecha trazando «Nereum» letra a letra
-       2,30-2,62  relleno con un barrido horizontal
-       2,62-2,86  segundo destello, la marca en oscuro con su sombra en azul
-       2,86-3,40  zoom que abre la pagina
-     Tocar, la rueda o una tecla la llevan al zoom. Con movimiento reducido
-     no hay intro. Tampoco para el navegador automatizado de las pruebas
+  /* p102 · LA INTRO, un video de 7,7 s (ver el CSS). Lo que se ve:
+       0,00-1,15  la piramide en 3D, de plata y azul, girando
+       1,15-2,25  corte a claro: la piramide en azul marino
+       2,25-4,42  el rombo se recorre y sale la barra de 0 a 100, que traza
+                  «Nereum» letra a letra con flechas
+       4,42-4,66  relleno con un barrido de luz: letras en 3D
+       4,66-5,95  el logotipo se aleja y se queda, piramide azul
+       5,95-6,85  corte a claro con aberracion cromatica
+       6,85-7,70  zoom: las letras enormes y la piramide encima
+     La pagina queda lista a 7,2 s, mientras el zoom se funde. Si el video no
+     arranca a tiempo (sin autoplay, ahorro de energia, red lenta) no hay
+     intro, y si se atasca a medias se va: la pagina nunca espera por ella.
+     Tocar, la rueda o una tecla la cierran. Con movimiento reducido no hay
+     intro; tampoco para el navegador automatizado de las pruebas
      (navigator.webdriver), salvo que pida «window.__conIntro»: la intro
      tiene su propia prueba, probar_intro. */
   (function(){
-    const pre=document.getElementById('pre');
+    const pre=document.getElementById('pre'),v=document.getElementById('preV');
     const fuera=()=>{document.body.classList.add('ready');if(pre)pre.remove()};
-    if(!pre||CALM||(navigator.webdriver&&!window.__conIntro)){fuera();return}
-    const $=id=>document.getElementById(id);
-    const svg=$('preSvg'),todo=$('preTodo'),marca=$('preMarca'),logo=$('preLogo'),
-          relleno=$('preRelleno'),trazo=$('preTrazo'),linea=$('preLinea'),punta=$('prePunta'),
-          num=$('preN'),barre=$('preBarreG');
-    const lados=[...marca.querySelectorAll('.pre-m')],letras=[...trazo.querySelectorAll('.pre-c')];
-    const RANGOS=[[2078, 2618], [2699.0, 3185.0], [3258.0, 3553.0], [3564.0, 4050.0], [4123.0, 4549.0], [4649.0, 5377.0]], X0=1567, X1=5447, TX0=1930;
-    const sube=(a,b,t)=>{const q=cl((t-a)/(b-a));return q*q*(3-2*q)};
-    const sale=(a,b,t)=>{const q=cl((t-a)/(b-a));return 1-Math.pow(1-q,3)};
-    let t0=performance.now(),salto=0,claro=false,listo=false,fin=false;
-    const atajo=()=>{const t=(performance.now()-t0)/1000+salto;if(t<2.86)salto+=2.86-t};
-    ['pointerdown','wheel','touchstart','keydown'].forEach(ev=>addEventListener(ev,atajo,{once:true,passive:true}));
-    const destello=v=>{if(v!==claro){claro=v;pre.classList.toggle('claro',v)}};
-    function cuadro(ahora){
-      const t=(ahora-t0)/1000+salto;
-      window.__introT=t;
-      /* A · la piramide entra */
-      const a=sube(0,.42,t);
-      marca.setAttribute('transform','translate(800 800) scale('+(.82+.18*a).toFixed(4)+') translate(-800 -800)');
-      /* B y E · los destellos */
-      destello((t>=.5&&t<.78)||(t>=2.62&&t<2.86));
-      let brillo=1+.6*Math.sin(Math.PI*cl((t-.1)/.4));
-      if(t>=.5&&t<.78) brillo=.17;
-      /* C · en linea: el logo de color se va y vuelve en el relleno */
-      const enColor=t<.78?a:sube(2.3,2.5,t);
-      logo.setAttribute('opacity',enColor.toFixed(3));
-      const oscuro=t>=2.62&&t<2.86;
-      logo.style.filter='brightness('+(oscuro?.17:brillo).toFixed(3)+')';
-      const dib=sale(.78,1.15,t), lineaFuera=1-sube(2.3,2.5,t);
-      lados.forEach(l=>{l.style.strokeDashoffset=(1-dib).toFixed(4);l.style.opacity=(t<.78?0:lineaFuera).toFixed(3)});
-      /* el lockup se recoloca: empieza con la piramide en el centro */
-      todo.setAttribute('transform','translate('+(TX0*(1-sube(1,2.2,t))).toFixed(1)+' 0)');
-      /* la barra: cuenta y dibuja */
-      const p=sube(1,2.25,t), x=X0+p*(X1-X0), vis=(t>=1&&t<2.5)?lineaFuera:0;
-      linea.setAttribute('x2',x.toFixed(1)); linea.setAttribute('opacity',(vis*.9).toFixed(3));
-      punta.setAttribute('cx',x.toFixed(1)); punta.setAttribute('opacity',vis.toFixed(3));
-      num.setAttribute('x',(x+40).toFixed(1)); num.setAttribute('opacity',vis.toFixed(3));
-      num.textContent=String(Math.round(p*100)).padStart(2,'0');
-      for(const c of letras){const r=RANGOS[c.dataset.l],lp=cl((x-r[0])/(r[1]-r[0])*1.25);
-        c.style.strokeDashoffset=(1-lp).toFixed(4); c.style.opacity=lineaFuera.toFixed(3)}
-      /* D · el relleno, con un barrido horizontal que se asienta */
-      const r=sube(2.3,2.56,t);
-      relleno.setAttribute('opacity',r.toFixed(3));
-      const borr=t>=2.3&&t<2.62?(1-r)*70:0;
-      barre.setAttribute('stdDeviation',borr.toFixed(1)+' 0');
-      /* el barrido va como filtro SVG del grupo, que Safari si respeta */
-      if(borr>0) todo.setAttribute('filter','url(#preBarre)'); else todo.removeAttribute('filter');
-      svg.style.filter=oscuro?'drop-shadow(-5px 0 rgba(46,134,255,.85)) drop-shadow(5px 0 rgba(0,190,255,.55))':'';
-      relleno.style.color=oscuro?'#0B1020':'';
-      /* F · el zoom que abre la pagina */
-      const z=t-2.86;
-      if(z>0){
-        const e=z*z*z*1.6;
-        svg.style.transform='scale('+(1+e*9).toFixed(4)+')';
-        svg.style.opacity=(1-sube(.12,.5,z)).toFixed(3);
-        if(!listo&&z>.04){listo=true;document.body.classList.add('ready')}
-        if(!fin&&z>.22){fin=true;pre.classList.add('gone');setTimeout(()=>{pre.remove();measure()},520)}
-      }
-      if(!fin||z<.6) requestAnimationFrame(cuadro);
-    }
-    requestAnimationFrame(cuadro);
+    if(!pre||!v||!v.src||v.dataset.no||v.error||CALM||(navigator.webdriver&&!window.__conIntro)){fuera();return}
+    const LISTO=7.2;
+    let cerrada=false,atasco=0;
+    const cerrar=()=>{
+      if(cerrada)return; cerrada=true; window.__introT=99;
+      document.body.classList.add('ready'); pre.classList.add('gone');
+      setTimeout(()=>{v.pause();v.removeAttribute('src');pre.remove();measure()},520);
+    };
+    const reloj=()=>{
+      if(cerrada)return;
+      window.__introT=v.currentTime;
+      /* si ya avanza, se ve: «playing» pudo dispararse antes de este codigo */
+      if(v.currentTime>0&&!v.paused&&!v.classList.contains('on'))va();
+      if(v.currentTime>=LISTO||v.ended){cerrar();return}
+      requestAnimationFrame(reloj);
+    };
+    function va(){v.classList.add('on');clearTimeout(atasco);atasco=0}
+    v.addEventListener('playing',va);
+    if(!v.paused&&v.readyState>2)va();
+    /* si no arranca en 1,6 s desde que empezo la pagina, fuera */
+    setTimeout(()=>{if(!v.classList.contains('on'))cerrar()},Math.max(0,1600-performance.now()));
+    v.addEventListener('waiting',()=>{if(!v.classList.contains('on'))return;clearTimeout(atasco);atasco=setTimeout(cerrar,900)});
+    v.addEventListener('error',cerrar); v.addEventListener('ended',cerrar);
+    v.addEventListener('pause',()=>{if(!cerrada&&!v.ended)cerrar()});
+    ['pointerdown','wheel','touchstart','keydown'].forEach(ev=>addEventListener(ev,cerrar,{once:true,passive:true}));
+    setTimeout(cerrar,11000);
+    requestAnimationFrame(reloj);
   })();
   (function(){
     const wash=document.getElementById('wash');if(!wash)return;
