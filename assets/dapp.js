@@ -94,8 +94,10 @@
 
   /* Tolerancia de precio entre que el comprador firma y se mina su transacción.
      Va como minTokensOut: si el oráculo se mueve más que esto, la compra
-     revierte en vez de darle menos tokens de los que vio. */
-  var HOLGURA_BPS = 100;            /* 1 % */
+     revierte en vez de darle menos tokens de los que vio. Era el 1 %, y una
+     compra que se cae es un comprador que se va: con el 5 % solo salta en un
+     desplome de ETH o BNB en los segundos que tarda en minarse. */
+  var HOLGURA_BPS = 500;            /* 5 % */
 
   /* Objetivo de recaudación que muestra la barra cuando el contrato no tiene
      hard cap puesto. Es una cifra de la página, no de la cadena. */

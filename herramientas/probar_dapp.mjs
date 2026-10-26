@@ -156,8 +156,8 @@ const tx1 = (await pg.evaluate(() => window.__tx))[0] || {};
 chk('destino de la compra', (tx1.to||'').toLowerCase(), '0xacbf1add75139d0e926d57ec715fdab8bee04a89');
 chk('firma exactamente lo escrito', BigInt(tx1.value||0).toString(), weiEsp.toString());
 chk('selector buyWithNative', (tx1.data||'').slice(0,10), '0x31ad36ab');
-const minEsp = (usdReal * 10n**18n / PRECIO_USD) * 9900n / 10000n;
-chk('minTokensOut (1% holgura)', BigInt('0x'+(tx1.data||'').slice(10)).toString(), minEsp.toString());
+const minEsp = (usdReal * 10n**18n / PRECIO_USD) * 9500n / 10000n;
+chk('minTokensOut (5% holgura)', BigInt('0x'+(tx1.data||'').slice(10)).toString(), minEsp.toString());
 
 // ── 5 · cambio de red al elegir BNB ──────────────────────────────────────────
 await pg.evaluate(()=>{ window.__tx.length=0; });
