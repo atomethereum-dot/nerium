@@ -298,7 +298,7 @@ todo el gas, así que cobran igual (`test/referidos_directo.js`).
 `0xC5e644cD439526F0bbb2c277fc9887ACc4A437F9` (cuenta del dueño, nonce 0 en las
 dos), con `startRound(0, 1918857599)`: abierta hasta el 21-10-2030 23:59:59 UTC.
 `assets/dapp.js` apunta a ella (`VENTA`) con `REF_EN_CONTRATO = true`. El
-contrato anterior, `0xaCbf1Add…04A89`, no tiene referidos: la web ya no compra
-en él, pero sigue leyendo lo que vendió para la barra. Conviene cerrarlo con
-`endRound()` para que nadie compre ahí desde el explorador.
+contrato anterior, `0xaCbf1Add…04A89`, no tiene referidos ni llegó a vender: la
+web ya no lo usa. Conviene cerrarlo con `endRound()` para que nadie compre ahí
+desde el explorador.
 

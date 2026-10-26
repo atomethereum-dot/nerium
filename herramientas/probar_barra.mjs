@@ -31,9 +31,9 @@ const Rs=[]; const chk=(n,a,b)=>Rs.push({n,ok:String(a)===String(b),a,b});
 // DOS veces y la barra salia inflada. No era un fallo de la pagina —en
 // produccion esa cadena no responde y no suma nada— sino del doble que hacia
 // de RPC. Se enruta por url, como las otras dos.
-// El contrato de venta anterior (sin referidos) se sigue leyendo para que la
-// barra no pierda lo que vendio: tiene su propia tabla, y por defecto no ha
-// vendido nada. Se enruta por la direccion a la que va la llamada.
+// El contrato de venta anterior (sin referidos, sin ventas) tiene su propia
+// tabla, vacia: si la pagina volviera a leerlo, no podria colarle las cifras
+// de Ethereum. Se enruta por la direccion a la que va la llamada.
 const ANTERIOR='0xacbf1add75139d0e926d57ec715fdab8bee04a89';
 async function ver(eth,bsc,rh,ant){
  rh = rh || tabla(0n); ant = ant || {};
@@ -71,10 +71,6 @@ async function ver(eth,bsc,rh,ant){
 // con hard cap puesto, el objetivo sale de la cadena
 { const {ctx,pg}=await ver(tabla(1000000n*E18, 11920000n*E18), tabla(0n));
   chk('el objetivo lo marca el hard cap', await pg.locator('#saleRaised + span').textContent(), 'raised of $16,000,000');
-  await ctx.close(); }
-// lo vendido en el contrato anterior suma: 250.000 NRM en el de Ethereum = $50.000
-{ const {ctx,pg}=await ver(tabla(0n),tabla(0n),null,{'0x63b20117':'0x'+w(250000n*E18)});
-  chk('lo vendido en el contrato anterior tambien suma', await pg.locator('#saleRaised').textContent(), '$13,716,000');
   await ctx.close(); }
 // una compra pequena mueve la cifra, aunque poco
 { const {ctx,pg}=await ver(tabla(50000n*E18),tabla(0n));

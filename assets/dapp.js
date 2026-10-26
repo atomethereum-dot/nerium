@@ -24,9 +24,8 @@
      versión con referidos: el 10 % sale hacia el referidor en la misma
      transacción de la compra. Ronda abierta hasta el 21-10-2030 23:59:59 UTC. */
   var VENTA = '0xC5e644cD439526F0bbb2c277fc9887ACc4A437F9';
-  /* La de antes, sin referidos. Ya no vende desde la web; se sigue leyendo lo
-     que vendió para que la barra no pierda esas compras. */
-  var VENTA_ANTERIOR = '0xaCbf1Add75139D0E926d57EC715FDaB8bee04A89';
+  /* La de antes, sin referidos, era 0xaCbf1Add…04A89. No llegó a vender: la web
+     ya no la lee. */
 
   /* Robinhood Chain rompe la coincidencia, y no por cambiar de cartera: es la
      misma, 0xf222259D…B6aa6. Lo que cambió fue el nonce. En Ethereum y BNB
@@ -44,7 +43,7 @@
   var CADENAS = {
     1: {
       id: 1, hex: '0x1', nombre: 'Ethereum', simbolo: 'ETH', moneda: 'Ether',
-      venta: VENTA, anterior: VENTA_ANTERIOR,
+      venta: VENTA,
       usdt: '0xdAC17F958D2ee523a2206206994597C13D831ec7', usdtDec: 6,
       explorador: 'https://etherscan.io',
       rpc: [
@@ -56,7 +55,7 @@
     },
     56: {
       id: 56, hex: '0x38', nombre: 'BNB Chain', simbolo: 'BNB', moneda: 'BNB',
-      venta: VENTA, anterior: VENTA_ANTERIOR,
+      venta: VENTA,
       usdt: '0x55d398326f99059fF775485246999027B3197955', usdtDec: 18,
       explorador: 'https://bscscan.com',
       rpc: [
@@ -372,11 +371,7 @@
         inicio: decU(palabras(r[9])[0]),
         reparto: decB(palabras(r[10])[0])
       };
-      if (!c.anterior) return estado[cid];
-      var e = estado[cid];
-      return llamar(cid, c.anterior, SEL.totalTokensSold).then(function (x) {
-        e.vendidosAntes = decU(palabras(x)[0]); return e;
-      }, function () { return e; });
+      return estado[cid];
     }).catch(function () { estado[cid] = { ok: false }; return estado[cid]; });
   }
 
@@ -1594,7 +1589,7 @@
     REDES.forEach(function (k) {
       var e = estado[k];
       if (e && e.ok && e.precioUsd) {
-        t += Number((e.vendidos + (e.vendidosAntes || 0n)) * e.precioUsd / 1000000000000000000n) / 1e8;
+        t += Number(e.vendidos * e.precioUsd / 1000000000000000000n) / 1e8;
       }
     });
     return t;
