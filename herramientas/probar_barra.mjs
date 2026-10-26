@@ -31,17 +31,22 @@ const Rs=[]; const chk=(n,a,b)=>Rs.push({n,ok:String(a)===String(b),a,b});
 // DOS veces y la barra salia inflada. No era un fallo de la pagina —en
 // produccion esa cadena no responde y no suma nada— sino del doble que hacia
 // de RPC. Se enruta por url, como las otras dos.
-async function ver(eth,bsc,rh){
- rh = rh || tabla(0n);
+// El contrato de venta anterior (sin referidos) se sigue leyendo para que la
+// barra no pierda lo que vendio: tiene su propia tabla, y por defecto no ha
+// vendido nada. Se enruta por la direccion a la que va la llamada.
+const ANTERIOR='0xacbf1add75139d0e926d57ec715fdab8bee04a89';
+async function ver(eth,bsc,rh,ant){
+ rh = rh || tabla(0n); ant = ant || {};
  const ctx=await nav.newContext({viewport:{width:1400,height:1000}});
- await ctx.addInitScript(({eth,bsc,rh})=>{const of=window.fetch;
+ await ctx.addInitScript(({eth,bsc,rh,ant,ANTERIOR})=>{const of=window.fetch;
   window.fetch=async(u,o)=>{const url=String(u);
    if(url.indexOf('explorer-api')>=0)return new Response('{"listings":{}}',{status:200,headers:{'content-type':'application/json'}});
    if(!o||!o.body)return of(u,o); const j=JSON.parse(o.body);
-   const t=/robinhood/.test(url)?rh:(/bsc|binance|defibit/.test(url)?bsc:eth); let res=null;
+   let t=/robinhood/.test(url)?rh:(/bsc|binance|defibit/.test(url)?bsc:eth); let res=null;
+   if(j.method==='eth_call'&&String(j.params[0].to||'').toLowerCase()===ANTERIOR)t=ant;
    if(j.method==='eth_call')res=t[j.params[0].data.slice(0,10)]??'0x'+'0'.repeat(64);
    return new Response(JSON.stringify({jsonrpc:'2.0',id:j.id,result:res}),{status:200,headers:{'content-type':'application/json'}});};
- },{eth,bsc,rh});
+ },{eth,bsc,rh,ant,ANTERIOR});
  const pg=await ctx.newPage();
  await pg.goto('http://127.0.0.1:8938/index.html',{waitUntil:'load'});
  await pg.locator('#seed-round').scrollIntoViewIfNeeded();
@@ -66,6 +71,10 @@ async function ver(eth,bsc,rh){
 // con hard cap puesto, el objetivo sale de la cadena
 { const {ctx,pg}=await ver(tabla(1000000n*E18, 11920000n*E18), tabla(0n));
   chk('el objetivo lo marca el hard cap', await pg.locator('#saleRaised + span').textContent(), 'raised of $16,000,000');
+  await ctx.close(); }
+// lo vendido en el contrato anterior suma: 250.000 NRM en el de Ethereum = $50.000
+{ const {ctx,pg}=await ver(tabla(0n),tabla(0n),null,{'0x63b20117':'0x'+w(250000n*E18)});
+  chk('lo vendido en el contrato anterior tambien suma', await pg.locator('#saleRaised').textContent(), '$13,716,000');
   await ctx.close(); }
 // una compra pequena mueve la cifra, aunque poco
 { const {ctx,pg}=await ver(tabla(50000n*E18),tabla(0n));

@@ -22,7 +22,7 @@ const PRECIO_NATIVO = 250595548942n;   // $2.505,95548942 / ETH
 const PRECIO_USD    = 20000000n;       // $0,20
 const MIN           = 20000000n;       // $0,20
 const MAX           = 1000000000000n;  // $10.000
-const VENTA_ETH     = '0xacbf1add75139d0e926d57ec715fdab8bee04a89';
+const VENTA_ETH     = '0xc5e644cd439526f0bbb2c277fc9887acc4a437f9';
 
 const w = v => BigInt(v).toString(16).padStart(64,'0');
 
@@ -153,7 +153,7 @@ chk('CTA conectado', await pg.locator('#wCta').textContent(), 'Buy 2,506 NRM');
 await pg.locator('#wCta').click();
 await pg.waitForTimeout(1200);
 const tx1 = (await pg.evaluate(() => window.__tx))[0] || {};
-chk('destino de la compra', (tx1.to||'').toLowerCase(), '0xacbf1add75139d0e926d57ec715fdab8bee04a89');
+chk('destino de la compra', (tx1.to||'').toLowerCase(), '0xc5e644cd439526f0bbb2c277fc9887acc4a437f9');
 chk('firma exactamente lo escrito', BigInt(tx1.value||0).toString(), weiEsp.toString());
 chk('selector buyWithNative', (tx1.data||'').slice(0,10), '0x31ad36ab');
 const minEsp = (usdReal * 10n**18n / PRECIO_USD) * 9500n / 10000n;
@@ -188,7 +188,7 @@ if (txs.length === 2) {
       '0xdac17f958d2ee523a2206206994597c13d831ec7');
   chk('selector approve', (txs[0].data||'').slice(0,10), '0x095ea7b3');
   chk('gastador aprobado', '0x'+(txs[0].data||'').slice(34,74),
-      '0xacbf1add75139d0e926d57ec715fdab8bee04a89');
+      '0xc5e644cd439526f0bbb2c277fc9887acc4a437f9');
   chk('aprueba SOLO lo de esta compra, no el tope de la ronda',
       BigInt('0x'+(txs[0].data||'').slice(74,138)).toString(), '500000000');
   chk('selector buyWithUsdt', (txs[1].data||'').slice(0,10), '0x7789e96e');

@@ -22,7 +22,7 @@ const PRECIO_NATIVO = 250595548942n;   // $2.505,95548942 / ETH
 const PRECIO_USD    = 20000000n;       // $0,20
 const MIN           = 20000000n;       // $0,20
 const MAX           = 1000000000000n;  // $10.000
-const VENTA_ETH     = '0xacbf1add75139d0e926d57ec715fdab8bee04a89';
+const VENTA_ETH     = '0xc5e644cd439526f0bbb2c277fc9887acc4a437f9';
 
 const w = v => BigInt(v).toString(16).padStart(64,'0');
 
@@ -63,6 +63,8 @@ const mockCartera = ({RESP}) => {
     if (j.method === 'eth_call') {
       const data = j.params[0].data;
       result = RESP[data.slice(0,10)] ?? '0x'+'0'.repeat(64);
+      if (result === 'REVERT') return new Response(JSON.stringify({jsonrpc:'2.0',id:j.id,error:{code:3,message:'execution reverted'}}),
+        {status:200, headers:{'content-type':'application/json'}});
     } else if (j.method === 'eth_getTransactionReceipt') {
       result = { status:'0x1', transactionHash: j.params[0] };
     }
@@ -95,7 +97,8 @@ const mockCartera = ({RESP}) => {
   });
   window.__prov = prov;
 };
-await ctx.addInitScript(mockCartera, { RESP });
+const GANADO = { '0x75ce6548':'0x'+(10n**17n).toString(16).padStart(64,'0'), '0x27ccc760':'0x'+(10n*10n**6n).toString(16).padStart(64,'0'), '0xdb74559b':'0x'+(2n).toString(16).padStart(64,'0') };
+await ctx.addInitScript(mockCartera, { RESP: { ...RESP, ...GANADO } });
 
 const pg = await ctx.newPage();
 const errores = [];
@@ -108,9 +111,10 @@ const COLA = '4e524d52' + REF.slice(2);
 const R = [];
 const chk = (n, real, esp) => R.push({ n, ok: String(real)===String(esp), real, esp });
 
-/* p78 · REFERIDOS. Se entra por un enlace con ?ref=, la compra lleva al final
-   la marca «NRMR» y la direccion de quien la trajo, y el widget da a cada
-   cartera su propio enlace. El contrato no se toca: la compra es la misma. */
+/* p78 · REFERIDOS. Se entra por un enlace con ?ref=, el widget da a cada
+   cartera su propio enlace, y la compra llama a buyWithNativeRef /
+   buyWithUsdtRef con el referidor como argumento: el contrato le paga el 10 %
+   en la misma transaccion. */
 await pg.goto('http://127.0.0.1:8957/index.html?ref=' + REF, { waitUntil:'load' });
 await pg.waitForTimeout(1200);
 chk('el referido se guarda en el navegador',
@@ -128,15 +132,18 @@ await pg.locator('.w-ref-fila button').click(); await pg.waitForTimeout(200);
 chk('el boton copia', await pg.locator('.w-ref-fila button').textContent(), 'Copied');
 chk('y el enlace queda en el portapapeles', await pg.evaluate(() => navigator.clipboard.readText()), 'https://nereum.xyz/?ref=' + YO + '#seed-round');
 
+chk('el texto dice que se envia al instante', (await pg.locator('.w-ref p').textContent()).includes('instantly'), true);
+chk('lo ganado sale del contrato', (await pg.locator('.w-ref-gan b').textContent()), '0.1 ETH · 10 USDT · 2 purchases');
+
 // compra con ETH
 await pg.evaluate(() => { window.__tx.length = 0 });
 await pg.locator('#wCta').click(); await pg.waitForTimeout(1200);
 let tx = (await pg.evaluate(() => window.__tx))[0] || {};
-chk('ETH: selector buyWithNative', (tx.data||'').slice(0,10), '0x31ad36ab');
-chk('ETH: el referido va al final, detras del argumento', (tx.data||'').slice(74), COLA);
-chk('ETH: y el argumento queda intacto', (tx.data||'').length, 10 + 64 + 48);
+chk('ETH: al contrato nuevo', (tx.to||'').toLowerCase(), VENTA_ETH);
+chk('ETH: llama a buyWithNativeRef', (tx.data||'').slice(0,10), '0xcad6ab48');
+chk('ETH: con el referidor como argumento y nada detras', (tx.data||'').slice(74), REF.slice(2).padStart(64,'0'));
 
-// compra con USDT: la aprobacion va limpia, la compra lleva el referido
+// compra con USDT: la aprobacion va limpia, la compra lleva al referidor
 await pg.locator('#wPay button').nth(2).click(); await pg.waitForTimeout(400);
 await pg.locator('#wUsd').fill('500'); await pg.locator('#wUsd').blur(); await pg.waitForTimeout(300);
 await pg.evaluate(() => { window.__tx.length = 0 });
@@ -145,7 +152,7 @@ let txs = await pg.evaluate(() => window.__tx);
 chk('USDT: aprobacion + compra', txs.length, 2);
 if (txs.length === 2) {
   chk('USDT: la aprobacion no lleva nada detras', (txs[0].data||'').length, 10 + 128);
-  chk('USDT: la compra lleva el referido al final', (txs[1].data||'').slice(138), COLA);
+  chk('USDT: llama a buyWithUsdtRef con el referidor', (txs[1].data||'').slice(0,10) + (txs[1].data||'').slice(138), '0xe7c75ea1' + REF.slice(2).padStart(64,'0'));
 }
 
 // referirse a uno mismo no pega nada
@@ -166,16 +173,47 @@ tx = (await pg.evaluate(() => window.__tx))[0] || {};
 chk('caducado: la compra va sin referido', (tx.data||'').length, 10 + 64);
 
 
-/* ── EN EL ACTO: con REF_EN_CONTRATO (la version del contrato que reparte) la
-   compra llama a buyWithNativeRef / buyWithUsdtRef con el referidor como
-   argumento, sin nada pegado detras, y el widget lee lo ganado ── */
+/* ── SI AL REFERIDOR NO SE LE PUEDE PAGAR, LA VENTA NO SE PIERDE. El contrato
+   revierte la compra entera si el 10 % no llega (no hay comisiones
+   pendientes). La web la simula antes de firmar: si la compra con referido
+   revertiria, firma la de siempre, con la marca del referido detras ── */
 {
-  const fuente = fs.readFileSync(path.join(RAIZ, 'assets/dapp.js'), 'utf8').replace('var REF_EN_CONTRATO = false;', 'var REF_EN_CONTRATO = true;');
+  const ctx3 = await nav.newContext({ viewport:{width:1400,height:1000} });
+  const p3 = await ctx3.newPage();
+  await p3.route('**explorer-api.walletconnect.com/**', r => r.fulfill({ status:200, contentType:'application/json', body:JSON.stringify({listings:{}}) }));
+  await ctx3.addInitScript(mockCartera, { RESP: { ...RESP, '0xcad6ab48':'REVERT', '0xe7c75ea1':'REVERT' } });
+  const err3 = []; p3.on('pageerror', e => err3.push(String(e)));
+  await p3.goto('http://127.0.0.1:8957/index.html?ref=' + REF, { waitUntil:'load' });
+  await p3.waitForTimeout(1200);
+  await p3.locator('#seed-round').scrollIntoViewIfNeeded(); await p3.waitForTimeout(1500);
+  await p3.locator('#wUsd').fill('0.2'); await p3.locator('#wUsd').blur(); await p3.waitForTimeout(300);
+  await p3.locator('#wCta').click(); await p3.waitForTimeout(400);
+  await p3.locator('.nrm-w').first().click(); await p3.waitForTimeout(1500);
+  await p3.evaluate(() => { window.__tx.length = 0 });
+  await p3.locator('#wCta').click(); await p3.waitForTimeout(1500);
+  const t3 = (await p3.evaluate(() => window.__tx))[0] || {};
+  chk('referidor que no puede cobrar: ETH compra igual con buyWithNative', (t3.data||'').slice(0,10), '0x31ad36ab');
+  chk('y lleva la marca del referido detras', (t3.data||'').slice(74), COLA);
+  await p3.locator('#wPay button').nth(2).click(); await p3.waitForTimeout(400);
+  await p3.locator('#wUsd').fill('500'); await p3.locator('#wUsd').blur(); await p3.waitForTimeout(300);
+  await p3.evaluate(() => { window.__tx.length = 0 });
+  await p3.locator('#wCta').click(); await p3.waitForTimeout(2500);
+  const ts3 = await p3.evaluate(() => window.__tx);
+  chk('referidor que no puede cobrar: USDT compra igual con buyWithUsdt', ts3.length === 2 ? (ts3[1].data||'').slice(0,10) : '', '0x7789e96e');
+  chk('sin errores de pagina (simulacion)', err3.join(' | '), '');
+  await ctx3.close();
+}
+
+/* ── LA MARCA DE ANTES. Con REF_EN_CONTRATO = false (el contrato anterior, sin
+   referidos) la compra lleva al final la marca «NRMR» y la direccion de quien
+   la trajo, y el pago se hace con el script al cerrar ── */
+{
+  const fuente = fs.readFileSync(path.join(RAIZ, 'assets/dapp.js'), 'utf8').replace('var REF_EN_CONTRATO = true;', 'var REF_EN_CONTRATO = false;');
   const ctx2 = await nav.newContext({ viewport:{width:1400,height:1000} });
   const p2 = await ctx2.newPage();
   await p2.route('**/assets/dapp.js', r => r.fulfill({ status:200, contentType:'text/javascript', body: fuente }));
   await p2.route('**explorer-api.walletconnect.com/**', r => r.fulfill({ status:200, contentType:'application/json', body:JSON.stringify({listings:{}}) }));
-  await ctx2.addInitScript(mockCartera, { RESP: { ...RESP, '0x75ce6548':'0x'+(10n**17n).toString(16).padStart(64,'0'), '0x27ccc760':'0x'+(10n*10n**6n).toString(16).padStart(64,'0'), '0xdb74559b':'0x'+(2n).toString(16).padStart(64,'0') } });
+  await ctx2.addInitScript(mockCartera, { RESP });
   const err2 = []; p2.on('pageerror', e => err2.push(String(e)));
   await p2.goto('http://127.0.0.1:8957/index.html?ref=' + REF, { waitUntil:'load' });
   await p2.waitForTimeout(1200);
@@ -183,20 +221,14 @@ chk('caducado: la compra va sin referido', (tx.data||'').length, 10 + 64);
   await p2.locator('#wUsd').fill('0.2'); await p2.locator('#wUsd').blur(); await p2.waitForTimeout(300);
   await p2.locator('#wCta').click(); await p2.waitForTimeout(400);
   await p2.locator('.nrm-w').first().click(); await p2.waitForTimeout(1500);
-  chk('en el acto: el texto dice que se envia al instante', (await p2.locator('.w-ref p').textContent()).includes('instantly'), true);
-  chk('en el acto: lo ganado sale del contrato', (await p2.locator('.w-ref-gan b').textContent()), '0.1 ETH · 10 USDT · 2 purchases');
+  chk('marca: el texto dice que se paga al cerrar', (await p2.locator('.w-ref p').textContent()).includes('after the Seed Round closes'), true);
   await p2.evaluate(() => { window.__tx.length = 0 });
   await p2.locator('#wCta').click(); await p2.waitForTimeout(1200);
-  let t2 = (await p2.evaluate(() => window.__tx))[0] || {};
-  chk('en el acto: ETH llama a buyWithNativeRef', (t2.data||'').slice(0,10), '0xcad6ab48');
-  chk('en el acto: con el referidor como argumento', (t2.data||'').slice(74), REF.slice(2).padStart(64,'0'));
-  await p2.locator('#wPay button').nth(2).click(); await p2.waitForTimeout(400);
-  await p2.locator('#wUsd').fill('500'); await p2.locator('#wUsd').blur(); await p2.waitForTimeout(300);
-  await p2.evaluate(() => { window.__tx.length = 0 });
-  await p2.locator('#wCta').click(); await p2.waitForTimeout(2500);
-  const ts2 = await p2.evaluate(() => window.__tx);
-  chk('en el acto: USDT llama a buyWithUsdtRef con el referidor', ts2.length === 2 ? (ts2[1].data||'').slice(0,10) + (ts2[1].data||'').slice(138) : '', '0xe7c75ea1' + REF.slice(2).padStart(64,'0'));
-  chk('en el acto: sin errores de pagina', err2.join(' | '), '');
+  const t2 = (await p2.evaluate(() => window.__tx))[0] || {};
+  chk('marca: ETH llama a buyWithNative', (t2.data||'').slice(0,10), '0x31ad36ab');
+  chk('marca: el referido va al final, detras del argumento', (t2.data||'').slice(74), COLA);
+  chk('marca: y el argumento queda intacto', (t2.data||'').length, 10 + 64 + 48);
+  chk('marca: sin errores de pagina', err2.join(' | '), '');
   await ctx2.close();
 }
 

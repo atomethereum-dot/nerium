@@ -20,8 +20,13 @@
   var PROYECTO_WC = '87eced186475c03170cf7792da6a9ecd';
 
   /* La misma dirección en Ethereum y BNB. No es casualidad: se desplegó desde la
-     misma cuenta con el nonce 0 en ambas. */
-  var VENTA = '0xaCbf1Add75139D0E926d57EC715FDaB8bee04A89';
+     misma cuenta (la del dueño, 0xE15f…80ee3) con el nonce 0 en ambas. Es la
+     versión con referidos: el 10 % sale hacia el referidor en la misma
+     transacción de la compra. Ronda abierta hasta el 21-10-2030 23:59:59 UTC. */
+  var VENTA = '0xC5e644cD439526F0bbb2c277fc9887ACc4A437F9';
+  /* La de antes, sin referidos. Ya no vende desde la web; se sigue leyendo lo
+     que vendió para que la barra no pierda esas compras. */
+  var VENTA_ANTERIOR = '0xaCbf1Add75139D0E926d57EC715FDaB8bee04A89';
 
   /* Robinhood Chain rompe la coincidencia, y no por cambiar de cartera: es la
      misma, 0xf222259D…B6aa6. Lo que cambió fue el nonce. En Ethereum y BNB
@@ -39,7 +44,7 @@
   var CADENAS = {
     1: {
       id: 1, hex: '0x1', nombre: 'Ethereum', simbolo: 'ETH', moneda: 'Ether',
-      venta: VENTA,
+      venta: VENTA, anterior: VENTA_ANTERIOR,
       usdt: '0xdAC17F958D2ee523a2206206994597C13D831ec7', usdtDec: 6,
       explorador: 'https://etherscan.io',
       rpc: [
@@ -51,7 +56,7 @@
     },
     56: {
       id: 56, hex: '0x38', nombre: 'BNB Chain', simbolo: 'BNB', moneda: 'BNB',
-      venta: VENTA,
+      venta: VENTA, anterior: VENTA_ANTERIOR,
       usdt: '0x55d398326f99059fF775485246999027B3197955', usdtDec: 18,
       explorador: 'https://bscscan.com',
       rpc: [
@@ -142,10 +147,10 @@
 
   /* EN EL ACTO. Con la version del contrato que reparte -contracts/src,
      funciones buyWithNativeRef y buyWithUsdtRef-, el 10 % sale hacia el
-     referidor en la MISMA transaccion de la compra. Se pone a true el dia que
-     esa version este desplegada y VENTA apunte a ella; mientras tanto la web
-     usa la marca al final de la compra y el pago se hace con el script. */
-  var REF_EN_CONTRATO = false;
+     referidor en la MISMA transaccion de la compra. Esa version es la de VENTA
+     desde el 26-10-2026. (Con false la web vuelve a la marca al final de la
+     compra y al pago con el script, que es lo que servia al contrato anterior.) */
+  var REF_EN_CONTRATO = true;
 
   /* ─────────────────────────── selectores (keccak) ────────────────────────── */
 
@@ -367,7 +372,11 @@
         inicio: decU(palabras(r[9])[0]),
         reparto: decB(palabras(r[10])[0])
       };
-      return estado[cid];
+      if (!c.anterior) return estado[cid];
+      var e = estado[cid];
+      return llamar(cid, c.anterior, SEL.totalTokensSold).then(function (x) {
+        e.vendidosAntes = decU(palabras(x)[0]); return e;
+      }, function () { return e; });
     }).catch(function () { estado[cid] = { ok: false }; return estado[cid]; });
   }
 
@@ -1585,7 +1594,7 @@
     REDES.forEach(function (k) {
       var e = estado[k];
       if (e && e.ok && e.precioUsd) {
-        t += Number(e.vendidos * e.precioUsd / 1000000000000000000n) / 1e8;
+        t += Number((e.vendidos + (e.vendidosAntes || 0n)) * e.precioUsd / 1000000000000000000n) / 1e8;
       }
     });
     return t;
@@ -2113,9 +2122,10 @@
      firma la compra de siempre, sin referido, y el comprador compra igual. */
   function simular(c, tx) {
     var params = [{ from: sesion.cuenta, to: tx.to, data: tx.data, value: tx.value || '0x0' }, 'latest'];
+    var porRpc = function () { return rpc(c.id, 'eth_call', params); };
     var p = (sesion.prov && sesion.cid === c.id)
-      ? sesion.prov.request({ method: 'eth_call', params: params })
-      : rpc(c.id, 'eth_call', params);
+      ? sesion.prov.request({ method: 'eth_call', params: params }).catch(porRpc)
+      : porRpc();
     return p.then(function () { return true; }, function () { return false; });
   }
   function conRefOSin(c, conRef, sinRef, value) {

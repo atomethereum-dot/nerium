@@ -294,7 +294,11 @@ la compra con referido y, si fallaría, firma la compra de siempre sin referido:
 la venta no se pierde. A las carteras que son contratos (multisig) se les pasa
 todo el gas, así que cobran igual (`test/referidos_directo.js`).
 
-Esta versión hay que **desplegarla** (Ethereum y BNB Chain) para que funcione:
-el contrato que hay hoy en `0xaCbf1Add…04A89` no la tiene. Después, en
-`assets/dapp.js`, se pone su dirección en `VENTA` y `REF_EN_CONTRATO = true`.
-Hasta entonces la web usa la marca al final de la compra y el script de arriba.
+**Desplegada el 26-10-2026** en Ethereum y en BNB Chain con la misma dirección,
+`0xC5e644cD439526F0bbb2c277fc9887ACc4A437F9` (cuenta del dueño, nonce 0 en las
+dos), con `startRound(0, 1918857599)`: abierta hasta el 21-10-2030 23:59:59 UTC.
+`assets/dapp.js` apunta a ella (`VENTA`) con `REF_EN_CONTRATO = true`. El
+contrato anterior, `0xaCbf1Add…04A89`, no tiene referidos: la web ya no compra
+en él, pero sigue leyendo lo que vendió para la barra. Conviene cerrarlo con
+`endRound()` para que nadie compre ahí desde el explorador.
+

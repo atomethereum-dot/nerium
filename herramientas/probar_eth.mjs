@@ -141,7 +141,7 @@ chk('   y lleva el boton de abrir MetaMask',
 const tx = await pg.evaluate(()=>window.__tx);
 chk('se firma una transaccion', !!tx, true);
 chk('   al contrato de venta', (tx&&tx.to||'').toLowerCase(),
-    '0xacbf1add75139d0e926d57ec715fdab8bee04a89');
+    '0xc5e644cd439526f0bbb2c277fc9887acc4a437f9');
 chk('   con buyWithNative', (tx&&tx.data||'').slice(0,10), '0x31ad36ab');
 chk('   y el valor que se escribio', BigInt(tx&&tx.value||'0x0').toString(), (5n*10n**16n).toString());
 chk('sale la hoja para firmar en MetaMask',
@@ -210,7 +210,7 @@ chk('  2) ... por encima de la compra',
     BigInt('0x'+((txs[1]||{}).arg||'0')) >= 1000000n, true);
 chk('  3) y la compra con buyWithUsdt', (txs[2]||{}).sel, '0x7789e96e');
 chk('  3) ... al contrato de venta', (txs[2]||{}).to,
-    '0xacbf1add75139d0e926d57ec715fdab8bee04a89');
+    '0xc5e644cd439526f0bbb2c277fc9887acc4a437f9');
 
 console.log('');
 Rs.forEach(r=>console.log((r.ok?'  ok  ':'  MAL ')+r.n+(r.ok?'':`   (era ${r.a}, se esperaba ${r.b})`)));
