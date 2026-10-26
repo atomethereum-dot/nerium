@@ -12,7 +12,10 @@ const srv = http.createServer((req,res)=>{
   let f = decodeURIComponent(req.url.split('?')[0]);
   if (f.endsWith('/')) f += 'index.html';
   const p = path.join(RAIZ, f);
-  if (!p.startsWith(RAIZ) || !fs.existsSync(p) || fs.statSync(p).isDirectory()) { res.writeHead(404); return res.end(); }
+  if (!p.startsWith(RAIZ) || !fs.existsSync(p) || fs.statSync(p).isDirectory()) {
+    /* como GitHub Pages: lo que no existe recibe /404.html, con estado 404 */
+    res.writeHead(404, {'content-type':'text/html'}); return res.end(fs.readFileSync(path.join(RAIZ, '404.html')));
+  }
   res.writeHead(200, {'content-type': TIPOS[path.extname(p)] || 'application/octet-stream'});
   res.end(fs.readFileSync(p));
 });
@@ -127,10 +130,10 @@ chk('y aun no hay enlace propio', await pg.locator('.w-ref-mio').isHidden(), tru
 await pg.locator('#wUsd').fill('0.2'); await pg.locator('#wUsd').blur(); await pg.waitForTimeout(300);
 await pg.locator('#wCta').click(); await pg.waitForTimeout(400);
 await pg.locator('.nrm-w').first().click(); await pg.waitForTimeout(900);
-chk('conectado: su enlace propio', await pg.locator('.w-ref-mio code').textContent(), 'https://nereum.xyz/?ref=' + YO + '#seed-round');
+chk('conectado: su enlace propio, el corto', await pg.locator('.w-ref-mio code').textContent(), 'https://nereum.xyz/' + YO);
 await pg.locator('.w-ref-fila button').click(); await pg.waitForTimeout(200);
 chk('el boton copia', await pg.locator('.w-ref-fila button').textContent(), 'Copied');
-chk('y el enlace queda en el portapapeles', await pg.evaluate(() => navigator.clipboard.readText()), 'https://nereum.xyz/?ref=' + YO + '#seed-round');
+chk('y el enlace queda en el portapapeles', await pg.evaluate(() => navigator.clipboard.readText()), 'https://nereum.xyz/' + YO);
 
 chk('el texto dice que se envia al instante', (await pg.locator('.w-ref p').textContent()).includes('instantly'), true);
 chk('lo ganado sale del contrato', (await pg.locator('.w-ref-gan b').textContent()), '0.1 ETH · 10 USDT · 2 purchases');
@@ -231,6 +234,22 @@ chk('caducado: la compra va sin referido', (tx.data||'').length, 10 + 64);
   chk('marca: sin errores de pagina', err2.join(' | '), '');
   await ctx2.close();
 }
+
+/* ── TODAS LAS ENTRADAS GUARDAN EL REFERIDO. El enlace corto (nereum.xyz/0x…,
+   que recoge 404.html), el largo y el de la Seed Round. El largo con
+   #seed-round lo perdia: la pagina dejaba «/seed-round» en la barra antes de
+   que dapp.js leyera el ?ref ── */
+for (const ruta of ['/' + REF, '/' + REF + '/', '/?ref=' + REF + '#seed-round', '/seed-round/?ref=' + REF, '/?ref=' + REF]) {
+  const c4 = await nav.newContext(); const p4 = await c4.newPage();
+  await p4.goto('http://127.0.0.1:8957' + ruta, { waitUntil:'load' }); await p4.waitForTimeout(1200);
+  const g = await p4.evaluate(() => { try { return JSON.parse(localStorage.getItem('nrm-ref') || '{}').a } catch (e) { return null } });
+  chk('entrada ' + ruta.replace(REF, '0x2222…') + ' guarda el referido', g, REF);
+  await c4.close();
+}
+{ const c5 = await nav.newContext(); const p5 = await c5.newPage();
+  await p5.goto('http://127.0.0.1:8957/no-existe', { waitUntil:'load' }); await p5.waitForTimeout(800);
+  chk('una ruta que no existe lleva a la portada, sin referido', await p5.evaluate(() => location.pathname + '|' + localStorage.getItem('nrm-ref')), '/|null');
+  await c5.close(); }
 
 chk('sin errores de pagina', errores.join(' | '), '');
 

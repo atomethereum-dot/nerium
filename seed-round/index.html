@@ -20,7 +20,9 @@
 <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=3">
 <meta name="theme-color" content="#030409">
 <!-- nereum.xyz/seed-round: lleva a la web principal y la web baja sola a la Seed Round
-     (index.html lee «?ir=seed-round» y deja en la barra «nereum.xyz/seed-round») -->
-<script>location.replace('/?ir=seed-round');</script>
+     (index.html lee «?ir=seed-round» y deja en la barra «nereum.xyz/seed-round»).
+     Si viene con ?ref=0x…, el referido viaja con ella. -->
+<script>(function(){var r=/[?&]ref=(0x[0-9a-fA-F]{40})(?![0-9a-fA-F])/.exec(location.search);
+location.replace('/?ir=seed-round'+(r?'&ref='+r[1]:''));})();</script>
 <style>html,body{margin:0;height:100%;background:#030409}</style>
 </head><body></body></html>

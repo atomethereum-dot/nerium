@@ -120,8 +120,8 @@
      contracts/scripts/referidos.js lee esas compras al cerrar la ronda y saca
      lo que se debe a cada uno: el 10 % de lo pagado, en la misma moneda
      (ETH, BNB o USDT). Referirse a uno mismo no cuenta.
-     El enlace es nereum.xyz/?ref=0x…: se guarda 60 dias en este navegador y
-     manda el ultimo que se haya abierto. */
+     El enlace es nereum.xyz/0x… (o nereum.xyz/?ref=0x…): se guarda 60 dias en
+     este navegador y manda el ultimo que se haya abierto. */
   var REF_MARCA = '4e524d52';        /* «NRMR» */
   var REF_CLAVE = 'nrm-ref', REF_DIAS = 60;
   var REF_WEB = 'https://nereum.xyz/';
@@ -1412,7 +1412,9 @@
     ].join('');
     document.head.appendChild(e);
   }
-  function enlaceRef() { return REF_WEB + '?ref=' + sesion.cuenta + '#seed-round'; }
+  /* El enlace corto: nereum.xyz/0x… lo recoge 404.html y lo lleva a la Seed
+     Round con el referido. */
+  function enlaceRef() { return REF_WEB + sesion.cuenta; }
   function pintarReferidos(cerrada) {
     if (!nota || !nota.parentNode) return;
     if (!refCaja) {
