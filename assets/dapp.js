@@ -175,9 +175,6 @@
     referralEarnedNative: '0x75ce6548',
     referralEarnedUsdt:   '0x27ccc760',
     referralCount:        '0xdb74559b',
-    referralOwedNative:   '0xd16d3f70',
-    referralOwedUsdt:     '0x2fc84246',
-    claimReferral:        '0xe61aee51',   /* claimReferral(address) */
     allowance:       '0xdd62ed3e',
     approve:         '0x095ea7b3',
     balanceOf:       '0x70a08231'
@@ -2108,16 +2105,33 @@
     }).catch(function (err) { libre(); aviso(motivo(err), true); });
   }
 
+  /* EL REFERIDOR COBRA EN LA MISMA TRANSACCION O NO HAY REFERIDO. El contrato
+     no deja comisiones pendientes: si el 10 % no se le puede entregar (una
+     cartera-contrato que rechaza ETH, una direccion bloqueada por Tether), la
+     compra entera revierte. Para que eso nunca le cueste la venta a nadie, la
+     compra con referido se simula antes de firmar; si la simulacion falla, se
+     firma la compra de siempre, sin referido, y el comprador compra igual. */
+  function simular(c, tx) {
+    var params = [{ from: sesion.cuenta, to: tx.to, data: tx.data, value: tx.value || '0x0' }, 'latest'];
+    var p = (sesion.prov && sesion.cid === c.id)
+      ? sesion.prov.request({ method: 'eth_call', params: params })
+      : rpc(c.id, 'eth_call', params);
+    return p.then(function () { return true; }, function () { return false; });
+  }
+  function conRefOSin(c, conRef, sinRef, value) {
+    if (!REF_EN_CONTRATO || !referidor()) return Promise.resolve(sinRef);
+    return simular(c, { to: c.venta, data: conRef, value: value })
+      .then(function (ok) { return ok ? conRef : sinRef; });
+  }
+
   function comprarNativo(wei, minimo) {
-    var c = red();
+    var c = red(), value = '0x' + wei.toString(16);
     trabajando('Confirm in your wallet…');
-    return enviar({
-      to: c.venta,
-      value: '0x' + wei.toString(16),
-      data: REF_EN_CONTRATO
-        ? SEL.buyWithNativeRef + encU(minimo) + encA(referidor() || '0x' + '0'.repeat(40))
-        : SEL.buyWithNative + encU(minimo) + colaRef()
-    }).then(function (h) { return confirmar(h); });
+    return conRefOSin(c,
+      SEL.buyWithNativeRef + encU(minimo) + encA(referidor() || '0x' + '0'.repeat(40)),
+      SEL.buyWithNative + encU(minimo) + colaRef(), value)
+      .then(function (data) { return enviar({ to: c.venta, value: value, data: data }); })
+      .then(function (h) { return confirmar(h); });
   }
 
   function comprarUsdt(cantidad, usd8, minimo) {
@@ -2153,13 +2167,11 @@
       })
       .then(function () {
         trabajando('Confirm the purchase…');
-        return enviar({
-          to: c.venta,
-          data: REF_EN_CONTRATO
-            ? SEL.buyWithUsdtRef + encU(cantidad) + encU(minimo) + encA(referidor() || '0x' + '0'.repeat(40))
-            : SEL.buyWithUsdt + encU(cantidad) + encU(minimo) + colaRef()
-        });
+        return conRefOSin(c,
+          SEL.buyWithUsdtRef + encU(cantidad) + encU(minimo) + encA(referidor() || '0x' + '0'.repeat(40)),
+          SEL.buyWithUsdt + encU(cantidad) + encU(minimo) + colaRef());
       })
+      .then(function (data) { return enviar({ to: c.venta, data: data }); })
       .then(function (h) { return confirmar(h); });
   }
 

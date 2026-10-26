@@ -6,8 +6,9 @@ const E = ethers.parseEther, U6 = n => ethers.parseUnits(String(n), 6), USD = n 
 
 /* El referidor cobra EN EL ACTO: el 10 % de lo pagado sale en la misma
    transaccion de la compra, en la misma moneda. El comprador recibe los
-   mismos tokens que sin referido. Si el envio no se puede hacer, la compra
-   sigue y la comision queda apartada para claimReferral(destino). */
+   mismos tokens que sin referido. No hay comisiones pendientes: si el envio
+   no se puede hacer, la compra entera revierte (y la dapp, que la simula
+   antes, compra entonces sin referido para no perder la venta). */
 describe("referidos pagados en el acto", function () {
   let owner, ana, luis, ref, otro, usdt, p;
   beforeEach(async () => {
@@ -24,7 +25,7 @@ describe("referidos pagados en el acto", function () {
   it("ETH: el referidor cobra el 10 % en la misma transaccion y el comprador recibe lo mismo", async () => {
     const antes = await ethers.provider.getBalance(ref.address);
     await expect(p.connect(ana).buyWithNativeRef(0, ref.address, { value: E("1") }))
-      .to.emit(p, "ReferralPaid").withArgs(ref.address, ana.address, false, E("0.1"), true);
+      .to.emit(p, "ReferralPaid").withArgs(ref.address, ana.address, false, E("0.1"));
     expect(await ethers.provider.getBalance(ref.address) - antes).to.equal(E("0.1"));
     expect(await p.allocation(ana.address)).to.equal(E("30000"));          // igual que sin referido
     expect(await ethers.provider.getBalance(p.target)).to.equal(E("0.9"));
@@ -49,24 +50,35 @@ describe("referidos pagados en el acto", function () {
     expect(await p.totalReferralNative()).to.equal(0n);
   });
 
-  it("si el referidor rechaza ETH, la compra sigue y la comision queda apartada; la cobra en otra direccion", async () => {
+  it("si el referidor rechaza ETH, la compra entera revierte: nadie cobra y el comprador conserva su dinero", async () => {
     const r = await (await ethers.getContractFactory("RechazaEth")).deploy();
+    const antes = await ethers.provider.getBalance(ana.address);
     await expect(p.connect(ana).buyWithNativeRef(0, r.target, { value: E("1") }))
-      .to.emit(p, "ReferralPaid").withArgs(r.target, ana.address, false, E("0.1"), false);
-    expect(await p.allocation(ana.address)).to.equal(E("30000"));
-    expect(await p.referralOwedNative(r.target)).to.equal(E("0.1"));
-    // el dueño no puede llevarse lo apartado
-    await expect(p.withdrawNative(owner.address, E("1"))).to.be.revertedWithCustomError(p, "AboveFreeBalance");
-    const antes = await ethers.provider.getBalance(owner.address);
-    const tx = await p.withdrawNative(owner.address, 0);                       // todo lo libre
-    const rc = await tx.wait();
-    expect(await ethers.provider.getBalance(owner.address) - antes + rc.gasUsed * rc.gasPrice).to.equal(E("0.9"));
-    // el referidor cobra en otra direccion
-    const a0 = await ethers.provider.getBalance(otro.address);
-    await r.reclamar(p.target, otro.address);
-    expect(await ethers.provider.getBalance(otro.address) - a0).to.equal(E("0.1"));
-    expect(await p.referralOwedNative(r.target)).to.equal(0n);
+      .to.be.revertedWithCustomError(p, "ReferralPaymentFailed").withArgs(r.target);
+    expect(await p.allocation(ana.address)).to.equal(0n);
     expect(await ethers.provider.getBalance(p.target)).to.equal(0n);
+    expect(await p.totalReferralNative()).to.equal(0n);
+    expect(antes - await ethers.provider.getBalance(ana.address)).to.be.lessThan(E("0.01")); // solo el gas
+    // y la misma compra sin referido entra
+    await p.connect(ana).buyWithNative(0, { value: E("1") });
+    expect(await p.allocation(ana.address)).to.equal(E("30000"));
+  });
+
+  it("una cartera que es un contrato (multisig) cobra aunque gaste gas al recibir", async () => {
+    const w = await (await ethers.getContractFactory("CarteraContrato")).deploy();
+    await p.connect(ana).buyWithNativeRef(0, w.target, { value: E("1") });
+    expect(await w.recibido()).to.equal(E("0.1"));
+    expect(await w.veces()).to.equal(1n);
+    expect(await p.referralEarnedNative(w.target)).to.equal(E("0.1"));
+  });
+
+  it("el dueño retira todo lo recaudado: no queda nada apartado", async () => {
+    await p.connect(ana).buyWithNativeRef(0, ref.address, { value: E("1") });
+    await p.connect(luis).buyWithUsdtRef(U6("100"), 0, ref.address);
+    await p.withdrawNative(owner.address, 0);
+    await p.withdrawUsdt(owner.address, 0);
+    expect(await ethers.provider.getBalance(p.target)).to.equal(0n);
+    expect(await usdt.balanceOf(p.target)).to.equal(0n);
   });
 
   it("la comision se ajusta y tiene techo del 20 %", async () => {
@@ -75,9 +87,5 @@ describe("referidos pagados en el acto", function () {
     await p.setReferralBps(0);
     await p.connect(ana).buyWithNativeRef(0, ref.address, { value: E("1") });
     expect(await p.totalReferralNative()).to.equal(0n);
-  });
-
-  it("claimReferral sin nada pendiente revierte", async () => {
-    await expect(p.connect(ref).claimReferral(ref.address)).to.be.revertedWithCustomError(p, "NothingToClaim");
   });
 });

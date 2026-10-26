@@ -6,7 +6,7 @@ resolver ningún import. **La lógica no cambia ni una línea.** Va sin
 comentarios, igual que el contrato: es el código que se publica al verificar.
 
 Comprobado: compila con **0 errores y 0 avisos**, y produce **exactamente el
-mismo bytecode** que el proyecto de Hardhat (14 901 bytes), salvo la huella de
+mismo bytecode** que el proyecto de Hardhat (13 784 bytes), salvo la huella de
 metadatos del final, que no ejecuta nada.
 
 Si se toca `../src/NereumSeedRound.sol`, se regenera con:

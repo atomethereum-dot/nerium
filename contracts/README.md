@@ -41,7 +41,6 @@ Ethereum y 18 en BNB Chain.
 | `claim()` | Retira sus tokens cuando el reparto está abierto |
 | `buyWithNativeRef(minTokens, referidor)` | Compra con ETH/BNB; el 10 % sale **en el acto** hacia el referidor |
 | `buyWithUsdtRef(importe, minTokens, referidor)` | Compra con USDT; el 10 % sale en el acto, en USDT |
-| `claimReferral(destino)` | El referidor cobra lo que no se pudo entregar en el acto |
 | `referralEarnedNative/Usdt(dir)`, `referralCount(dir)` | Lo ganado por un referidor y cuántas compras trajo |
 | `quoteNative(wei)` / `quoteUsdt(importe)` | Cuántos tokens saldrían |
 | `nativeForUsd(usd)` | Cuánto ETH son X dólares. Para pintar la web |
@@ -286,11 +285,14 @@ Lo ya pagado se apunta en `referidos/pagados.json` y se descuenta la vez siguien
 `buyWithNativeRef` y `buyWithUsdtRef` reparten en la misma transacción de la
 compra: el comprador recibe exactamente los mismos tokens, el 10 % de lo pagado
 va al referidor en la misma moneda y el 90 % queda en el contrato. Sin
-referidor, a uno mismo o al propio contrato no hay comisión. Si el envío no se
-puede hacer (una cartera que rechaza ETH, una dirección bloqueada por USDT), la
-compra no se cae: la comisión queda apartada, el referidor la cobra con
-`claimReferral(destino)` y `withdrawNative` / `withdrawUsdt` nunca la tocan
-(`test/referidos_directo.js`).
+referidor, a uno mismo o al propio contrato no hay comisión. **No hay comisiones
+pendientes**: el 10 % llega a la cartera del referidor en esa misma transacción
+o la compra no se hace. Si el envío no se puede hacer (una cartera que rechaza
+ETH, una dirección bloqueada por Tether), la compra entera revierte con
+`ReferralPaymentFailed` y el comprador conserva su dinero. La dapp simula antes
+la compra con referido y, si fallaría, firma la compra de siempre sin referido:
+la venta no se pierde. A las carteras que son contratos (multisig) se les pasa
+todo el gas, así que cobran igual (`test/referidos_directo.js`).
 
 Esta versión hay que **desplegarla** (Ethereum y BNB Chain) para que funcione:
 el contrato que hay hoy en `0xaCbf1Add…04A89` no la tiene. Después, en

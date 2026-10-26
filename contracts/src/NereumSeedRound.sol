@@ -69,13 +69,6 @@ contract NereumSeedRound is Ownable2Step, ReentrancyGuard, Pausable {
     uint256 public totalReferralNative;
     uint256 public totalReferralUsdt;
 
-    mapping(address => uint256) public referralOwedNative;
-    mapping(address => uint256) public referralOwedUsdt;
-    uint256 public totalReferralOwedNative;
-    uint256 public totalReferralOwedUsdt;
-
-    uint256 private constant REFERRAL_GAS = 30_000;
-
     event RoundScheduled(uint64 startTime, uint64 endTime);
     event RoundEnded(uint64 endedAt);
     event PriceUsdUpdated(uint256 priceUsd);
@@ -97,8 +90,7 @@ contract NereumSeedRound is Ownable2Step, ReentrancyGuard, Pausable {
     event UnsoldTokensWithdrawn(address indexed to, uint256 amount);
     event ForeignTokenRescued(address indexed token, address indexed to, uint256 amount);
 
-    event ReferralPaid(address indexed referrer, address indexed buyer, bool inUsdt, uint256 amount, bool delivered);
-    event ReferralClaimed(address indexed referrer, uint256 nativeAmount, uint256 usdtAmount);
+    event ReferralPaid(address indexed referrer, address indexed buyer, bool inUsdt, uint256 amount);
     event ReferralBpsUpdated(uint256 bps);
 
     error RoundNotLive();
@@ -124,7 +116,7 @@ contract NereumSeedRound is Ownable2Step, ReentrancyGuard, Pausable {
     error NativeTransferFailed();
     error UseBuyFunction();
     error ReferralTooHigh(uint256 bps, uint256 maximum);
-    error AboveFreeBalance(uint256 requested, uint256 free);
+    error ReferralPaymentFailed(address referrer);
 
     constructor(
         IERC20 usdt_,
@@ -341,39 +333,19 @@ contract NereumSeedRound is Ownable2Step, ReentrancyGuard, Pausable {
         uint256 cut = (paid * referralBps) / 10_000;
         if (cut == 0) return;
 
-        bool delivered;
+        referralCount[referrer] += 1;
         if (inUsdt) {
             referralEarnedUsdt[referrer] += cut;
             totalReferralUsdt += cut;
-
-            (bool ok, bytes memory ret) = address(usdt).call(abi.encodeCall(IERC20.transfer, (referrer, cut)));
-            delivered = ok && (ret.length == 0 || abi.decode(ret, (bool)));
-            if (!delivered) { referralOwedUsdt[referrer] += cut; totalReferralOwedUsdt += cut; }
+            emit ReferralPaid(referrer, msg.sender, true, cut);
+            usdt.safeTransfer(referrer, cut);
         } else {
             referralEarnedNative[referrer] += cut;
             totalReferralNative += cut;
-            (delivered, ) = referrer.call{value: cut, gas: REFERRAL_GAS}("");
-            if (!delivered) { referralOwedNative[referrer] += cut; totalReferralOwedNative += cut; }
+            emit ReferralPaid(referrer, msg.sender, false, cut);
+            (bool ok, ) = referrer.call{value: cut}("");
+            if (!ok) revert ReferralPaymentFailed(referrer);
         }
-        referralCount[referrer] += 1;
-        emit ReferralPaid(referrer, msg.sender, inUsdt, cut, delivered);
-    }
-
-    function claimReferral(address payable to) external nonReentrant {
-        if (to == address(0)) revert ZeroAddress();
-        uint256 n = referralOwedNative[msg.sender];
-        uint256 u = referralOwedUsdt[msg.sender];
-        if (n == 0 && u == 0) revert NothingToClaim();
-        referralOwedNative[msg.sender] = 0;
-        referralOwedUsdt[msg.sender] = 0;
-        totalReferralOwedNative -= n;
-        totalReferralOwedUsdt -= u;
-        if (u != 0) usdt.safeTransfer(to, u);
-        if (n != 0) {
-            (bool ok, ) = to.call{value: n}("");
-            if (!ok) revert NativeTransferFailed();
-        }
-        emit ReferralClaimed(msg.sender, n, u);
     }
 
     function _record(address buyer, uint256 usdValue, uint256 minTokensOut)
@@ -445,10 +417,7 @@ contract NereumSeedRound is Ownable2Step, ReentrancyGuard, Pausable {
 
     function withdrawNative(address payable to, uint256 amount) external onlyOwner nonReentrant {
         if (to == address(0)) revert ZeroAddress();
-
-        uint256 free = address(this).balance - totalReferralOwedNative;
-        uint256 value = amount == 0 ? free : amount;
-        if (value > free) revert AboveFreeBalance(value, free);
+        uint256 value = amount == 0 ? address(this).balance : amount;
         (bool ok, ) = to.call{value: value}("");
         if (!ok) revert NativeTransferFailed();
         emit NativeWithdrawn(to, value);
@@ -456,9 +425,7 @@ contract NereumSeedRound is Ownable2Step, ReentrancyGuard, Pausable {
 
     function withdrawUsdt(address to, uint256 amount) external onlyOwner nonReentrant {
         if (to == address(0)) revert ZeroAddress();
-        uint256 free = usdt.balanceOf(address(this)) - totalReferralOwedUsdt;
-        uint256 value = amount == 0 ? free : amount;
-        if (value > free) revert AboveFreeBalance(value, free);
+        uint256 value = amount == 0 ? usdt.balanceOf(address(this)) : amount;
         usdt.safeTransfer(to, value);
         emit UsdtWithdrawn(to, value);
     }
