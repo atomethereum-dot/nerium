@@ -317,16 +317,17 @@ td b{color:var(--ink)}
 @media(prefers-color-scheme:dark){ .eq img{filter:grayscale(1) contrast(1.04) brightness(.92)} }
 
 /* el certificado de KYC tal como lo publica CyberScope: la imagen entera, sin
-   tocar, enlazada al original de su repositorio */
+   tocar, enlazada al original de su repositorio. Trae sus propias esquinas
+   redondeadas y transparentes, asi que va sin marco ni fondo: la sombra sigue
+   la silueta de la imagen */
 .cert{margin:24px 0 26px;max-width:74ch}
-.cert .cert-img{display:block;border:1px solid var(--linea);border-radius:12px;
-  overflow:hidden;background:#000;line-height:0;
-  box-shadow:0 18px 50px -24px rgba(10,12,16,.35)}
-.cert img{display:block;width:100%;height:auto;aspect-ratio:1920/1357}
+.cert .cert-img{display:block;line-height:0;
+  filter:drop-shadow(0 16px 26px rgba(10,12,16,.22))}
+.cert img{display:block;width:100%;height:auto;aspect-ratio:1920/1320}
 .cert figcaption{margin-top:10px;font-family:var(--m);font-size:10.5px;
   letter-spacing:.04em;line-height:1.6;color:var(--ink-3)}
 .cert figcaption a.enl{font-family:var(--f);font-size:12.5px;letter-spacing:0}
-@media print{ #impreso .cert{break-inside:avoid;box-shadow:none} }
+@media print{ #impreso .cert{break-inside:avoid} #impreso .cert .cert-img{filter:none} }
 
 .caja{width:min(560px,100%);background:var(--paper);border:1px solid var(--linea);
   border-radius:10px;overflow:hidden;box-shadow:0 24px 70px -20px rgba(10,12,16,.28)}
@@ -1756,7 +1757,7 @@ proyecto y la conserva en su archivo.</p>
 
 <figure class="cert">
   <a class="cert-img" href="https://github.com/cyberscope-io/kyc/blob/main/nrm/kyc.png" target="_blank" rel="noopener">
-    <img src="../img/certificados/kyc-cyberscope.webp" width="1920" height="1357" decoding="async"
+    <img src="../img/certificados/kyc-cyberscope-nrm.webp" width="1920" height="1320" decoding="async"
          alt="Certificado de KYC de CyberScope para Nereum ($NRM), emitido el 14 de octubre de 2026">
   </a>
   <figcaption>Certificado de KYC emitido por CyberScope para Nereum ($NRM) · 14 de octubre de 2026 ·
@@ -3492,7 +3493,7 @@ file.</p>
 
 <figure class="cert">
   <a class="cert-img" href="https://github.com/cyberscope-io/kyc/blob/main/nrm/kyc.png" target="_blank" rel="noopener">
-    <img src="../img/certificados/kyc-cyberscope.webp" width="1920" height="1357" decoding="async"
+    <img src="../img/certificados/kyc-cyberscope-nrm.webp" width="1920" height="1320" decoding="async"
          alt="CyberScope KYC certificate for Nereum ($NRM), issued on 14 October 2026">
   </a>
   <figcaption>KYC certificate issued by CyberScope for Nereum ($NRM) · 14 October 2026 ·
