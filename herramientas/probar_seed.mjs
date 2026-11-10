@@ -41,7 +41,7 @@ const txt = await pg.locator('body').evaluate(el => el.textContent);
 chk('la portada no dice whitelist', /whitelist/i.test(txt), false);
 chk('y sí dice Seed Round', txt.includes('Seed Round open'), true);
 chk('el precio se llama así', txt.includes('Seed Round price'), true);
-chk('el multiplicador también', txt.includes('from Seed Round to listing'), true);
+chk('sin precio de listado ni multiplicador', /from Seed Round to listing|Listing price/.test(txt), false);
 chk('y el botón', txt.includes('Join the Seed Round'), true);
 chk('la descripción social', await pg.locator('meta[property="og:description"]').getAttribute('content'),
     'Issue, move and settle real-world assets on a chain built for them. Seed Round open.');

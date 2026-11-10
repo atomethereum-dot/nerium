@@ -107,7 +107,6 @@
      hard cap puesto. Es una cifra de la página, no de la cadena. */
   var OBJETIVO_USD = 16000000;
 
-  var LISTADO = 1.00;               /* precio de listado, solo informativo */
 
   /* ───────────────────────────── referidos ────────────────────────────────
      p78 · EL 10 % POR TRAER COMPRADORES, SIN TOCAR EL CONTRATO.
@@ -1087,8 +1086,6 @@
       nrmOut = document.getElementById('wNrm'),
       eq     = document.getElementById('wEq'),
       tasa   = document.getElementById('wRate'),
-      val    = document.getElementById('wVal'),
-      gain   = document.getElementById('wGain'),
       range  = document.getElementById('wRange'),
       chips  = document.getElementById('wChips'),
       nota   = document.getElementById('wNote'),
@@ -1493,8 +1490,6 @@
       if (!desdeInput) usdIn.value = '';
       usdIn.placeholder = '0.00';
       nrmOut.value = '';
-      val.textContent = dinero(0);
-      gain.textContent = '+' + dinero(0);
       range.value = String(Math.log10(mn0));
       campo.classList.remove('bad');
       nota.classList.remove('bad');
@@ -1546,8 +1541,6 @@
     var tk = tokensPor(usd);
     nrmOut.value = nrm(tk);
     tasa.textContent = '1 NRM = ' + dinero(pr, 2);
-    val.textContent  = dinero(d / pr * LISTADO);
-    gain.textContent = '+' + dinero(d / pr * LISTADO - d);
     range.value = aBarra(Math.min(mx, Math.max(mn, d))).toFixed(3);
 
     pintarCta();
