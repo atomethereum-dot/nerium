@@ -133,7 +133,7 @@ for (let y = 0; y < alto; y += 450) { await pg.evaluate(v => scrollTo(0, v), y);
   // senalando un fallo donde no lo habia. Se comprueba lo que importa.
   di(!r.enMenu, 'no entra en el menu (que tiene ' + r.menu + ' entradas)');
   /* p93 · sin el tunel de cubos de antes de la compra, una seccion menos */
-  di(r.num === '06' && /^06\s*Roadmap$/.test(r.rotulo.trim()), 'se numera «06 Roadmap», detras de proyectos (05) (' + r.rotulo.trim() + ')');
+  di(r.num === '05' && /^05\s*Roadmap$/.test(r.rotulo.trim()), 'se numera «05 Roadmap», detras de proyectos (04) (' + r.rotulo.trim() + ')');
 }
 
 /* Lo que se hace DENTRO de la pagina: leer los lienzos.
@@ -666,7 +666,7 @@ await indice(pg, 1440, 900);
   await p6.waitForTimeout(1800);
   const encendidos = await mide();
   const hud = await p6.evaluate(() => document.querySelector('.hud-count').textContent.replace(/\s+/g, ' ').trim());
-  di(hud === '06 / 07', 'dentro de la ruta el contador de abajo dice «' + hud + '»');
+  di(hud === '05 / 06', 'dentro de la ruta el contador de abajo dice «' + hud + '»');
   for (const [q, lista] of [['apagado', apagados], ['encendido', encendidos]]) {
     di(lista.length === 2 && lista.every(x => x.txt === 'In progress'), q + ' · las dos fases en marcha dicen «In progress» (' + lista.length + ')');
     di(lista.every(x => x.tono >= 200 && x.tono <= 230 && !x.ambar),

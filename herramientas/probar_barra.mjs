@@ -53,20 +53,20 @@ async function ver(eth,bsc,rh,ant){
  await pg.waitForTimeout(3200);
  return {ctx,pg};
 }
-// sin ventas en cadena: solo la privada
+// sin ventas en cadena: la barra arranca de $0 (la privada ya no se suma)
 { const {ctx,pg}=await ver(tabla(0n),tabla(0n));
-  chk('sin ventas, solo la privada', await pg.locator('#saleRaised').textContent(), '$13,616,000');
+  chk('sin ventas, la barra en $0', await pg.locator('#saleRaised').textContent(), '$0');
   chk('objetivo de la pagina', await pg.locator('#saleRaised + span').textContent(), 'raised of $16,000,000');
   await ctx.close(); }
 // 1.000.000 NRM en Ethereum + 500.000 en BSC = $300.000
 { const {ctx,pg}=await ver(tabla(1000000n*E18),tabla(500000n*E18));
-  chk('suma lo vendido en las dos redes', await pg.locator('#saleRaised').textContent(), '$13,916,000');
-  chk('y el porcentaje sube', await pg.locator('#saleTip em').textContent(), '87.0%');
+  chk('suma lo vendido en las dos redes', await pg.locator('#saleRaised').textContent(), '$300,000');
+  chk('y el porcentaje sube', await pg.locator('#saleTip em').textContent(), '1.9%');
   await ctx.close(); }
 // y la tercera cuenta igual que las otras dos: 1.000.000 NRM = $200.000
 { const {ctx,pg}=await ver(tabla(0n),tabla(0n),tabla(1000000n*E18));
   chk('lo vendido en Robinhood Chain tambien suma',
-      await pg.locator('#saleRaised').textContent(), '$13,816,000');
+      await pg.locator('#saleRaised').textContent(), '$200,000');
   await ctx.close(); }
 // con hard cap puesto, el objetivo sale de la cadena
 { const {ctx,pg}=await ver(tabla(1000000n*E18, 11920000n*E18), tabla(0n));
@@ -74,7 +74,7 @@ async function ver(eth,bsc,rh,ant){
   await ctx.close(); }
 // una compra pequena mueve la cifra, aunque poco
 { const {ctx,pg}=await ver(tabla(50000n*E18),tabla(0n));
-  chk('$10.000 de ventas se ven', await pg.locator('#saleRaised').textContent(), '$13,626,000');
+  chk('$10.000 de ventas se ven', await pg.locator('#saleRaised').textContent(), '$10,000');
   await ctx.close(); }
 await nav.close(); srv.close();
 let mal=0; for(const r of Rs){ if(!r.ok)mal++;

@@ -218,7 +218,7 @@ const suelos = await pg.evaluate(() => {
   const pinta = e => { const c = getComputedStyle(e);
     if (!/rgba\(0, 0, 0, 0\)|transparent/.test(c.backgroundColor)) return c.backgroundColor;
     const m = c.backgroundImage.match(/rgba?\([^)]*\)/); return m ? m[0] : c.backgroundColor };
-  return { network: lee('network'), press: lee('press'),
+  return { network: lee('network'),
            security: lee('security'), tras: { css: pinta(v), dice: v.getAttribute('data-bg'), id: v.id },
            team: lee('team'), join: lee('join') };
 });
@@ -233,7 +233,8 @@ const rgb01 = t => {
 };
 const claro01 = t => { const m = rgb01(t);
                        return (0.2126*m[0] + 0.7152*m[1] + 0.0722*m[2]) / 255 };
-const PEGADAS = [['network','press'], ['security','tras'], ['team','join']];
+/* la prensa ya no esta: la pareja «network → press» se fue con ella */
+const PEGADAS = [['security','tras'], ['team','join']];
 for (const [a, b] of PEGADAS) {
   /* Se compara por RAZON y no por diferencia. Con los suelos claros de antes
      -#E4EAF4 contra #D6DEEE- el salto absoluto de luminancia era 0,03 y se

@@ -1568,8 +1568,9 @@
   /* ──────────────────────── barra de recaudación ─────────────────────────── */
 
   /* Lo levantado antes de que existiera el contrato. No vive en ninguna cadena
-     —es la ronda privada, cerrada fuera de aquí— así que va escrito, y encima
-     se suma lo que entra por Ethereum y BNB Chain. */
+     —es la ronda privada, cerrada fuera de aquí— así que va escrito. Solo
+     cuenta para el objetivo: lo recaudado que se ve en la barra arranca de
+     $0 y sube únicamente con lo que entra por Ethereum y BNB Chain. */
   var PRIVADA_BASE = 13616000;
   /* Con la ronda en espera (NRM_PRONTO, en index.html) no se suma la privada:
      la barra enseña solo lo que entra por la cadena. El objetivo sigue
@@ -1578,7 +1579,8 @@
      $0 y la meta a $500,000. Al terminar las pruebas se quita esto y la
      dapp vuelve a la privada de siempre y a su meta. */
   var PRONTO_META = 500000;
-  var PRIVADA_USD = window.NRM_PRONTO ? 0 : PRIVADA_BASE;
+  /* La barra cuenta desde $0: la privada ya no se suma a lo recaudado. */
+  var PRIVADA_USD = 0;
 
   var barra = document.getElementById('saleFill'),
       globo = document.getElementById('saleTip'),

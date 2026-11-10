@@ -697,7 +697,6 @@ td b{color:var(--ink)}
     <div class="gr">
       <h5>Company</h5>
       <a href="#/team">Team</a>
-      <a href="#/press">News and mentions</a>
       <a href="#/links">Official links</a>
       <a href="#/faq">Questions</a>
     </div>
@@ -1077,9 +1076,6 @@ const DIAG={
   team:         figuraCard('q','torre',      'Team',
                   'Who is building it, and what can be verified', 'COMPANY',
                   {escala:280, cx:840, cy:60, ax:-0.36, ay:0.64}),
-  press:        figuraCard('r','partido',    'News and mentions',
-                  'Independent coverage, and what counts as coverage', 'COMPANY',
-                  {escala:290, cx:850, cy:80, ax:-0.28, ay:0.72}),
   links:        figuraCard('s','anillo',     'Official links',
                   'The only addresses that belong to Nereum', 'COMPANY',
                   {escala:330, cx:850, cy:90, ax:-0.46, ay:0.40}),
@@ -1358,9 +1354,6 @@ wallet:{tipo:'marcos',
 team:{tipo:'sello',
   en:'Identity verified by an independent party and kept on file',
   es:'Identidad verificada por un tercero independiente y conservada en archivo'},
-press:{tipo:'radios', arg:4,
-  en:'Independent coverage, separated from what the project chose to say',
-  es:'Cobertura independiente, separada de lo que el proyecto eligió decir'},
 links:{tipo:'radios', arg:5,
   en:'One authorised centre; everything outside it is impersonation',
   es:'Un único centro autorizado; todo lo de fuera es suplantación'},
@@ -2412,28 +2405,6 @@ explicar qué ocupa su lugar: contratos bloqueados, fondos en depósito, un KYC
 custodiado por un tercero que pueda identificar al fundador ante un
 regulador, o un esquema de firma múltiple con partes externas nombradas.</p>
 
-`},
-
-press:{grupo:'La empresa', titulo:'Noticias y menciones', html:`
-<p>Cobertura independiente de Nereum: artículos, entrevistas y menciones
-publicadas por alguien que no somos nosotros.</p>
-
-<h2 id="cuenta">Qué cuenta como cobertura</h2>
-<p>La distinción importa, porque los lectores la hacen aunque la página no la
-haga:</p>
-<ul>
-  <li><strong>Cobertura editorial.</strong> Un periodista decidió escribir sobre
-      el proyecto. Es la única que tiene peso independiente.</li>
-  <li><strong>Nota de prensa pagada.</strong> Distribuida a redes de sindicación.
-      Es legítima, es común, y conviene etiquetarla como tal: muchos medios las
-      republican automáticamente y son fáciles de reconocer.</li>
-  <li><strong>Entrevistas y pódcast.</strong> Útiles, pero el proyecto eligió qué
-      decir. Conviene listarlas aparte de lo editorial.</li>
-  <li><strong>Agregadores y listados.</strong> Una ficha en una base de datos no
-      es cobertura.</li>
-</ul>
-<p>Etiquetar cada entrada con honestidad no cuesta nada y gana credibilidad justo
-con los lectores que si no lo comprobarían y se enterarían.</p>
 `},
 
 links:{grupo:'La empresa', titulo:'Enlaces oficiales', html:`
@@ -3747,33 +3718,6 @@ with named external parties.</p>
 
 `},
 
-  press:{
-    grupo:'Company', titulo:'News and mentions',
-    html:`
-<p>Independent coverage of Nereum: articles, interviews and mentions published by
-someone other than us.</p>
-
-<h2 id="cuenta">What counts as coverage</h2>
-<p>The distinction matters, because readers make it whether or not the page does:</p>
-<ul>
-  <li><strong>Editorial coverage.</strong> A journalist chose to write about the
-      project. This is the only kind that carries independent weight.</li>
-  <li><strong>Paid placement.</strong> A press release distributed to syndication
-      networks. Legitimate, common, and worth labelling as such — many outlets
-      republish these automatically and they are easy to recognise.</li>
-  <li><strong>Interviews and podcasts.</strong> Useful, but the project chose what
-      to say. Worth listing separately from editorial.</li>
-  <li><strong>Aggregators and listings.</strong> A database entry is not coverage.</li>
-</ul>
-<p>Labelling each entry honestly costs nothing and buys credibility from exactly
-the readers who would otherwise check and find out.</p>
-
-<h2 id="prensa">Press kit</h2>
-<p>Making it easy for a journalist to write about you correctly is the cheapest
-communications work there is.</p>
-
-`},
-
   links:{
     grupo:'Company', titulo:'Official links',
     html:`
@@ -3863,7 +3807,7 @@ const ORDEN=['introduction','vision',
   'seedround','dexscreener',
   'network','scan','tokenization',
   'dex','nusd','forge','vaults','feed','link','wallet',
-  'team','press','links','faq'];
+  'team','links','faq'];
 
 const doc=document.getElementById('doc'), rail=document.getElementById('rail');
 const lat=document.getElementById('lat');
@@ -3935,7 +3879,7 @@ function pinta(id){
 /* La sección se llamaba `whitelist` y ahora es `seedround`. Los enlaces con el
    nombre viejo ya están repartidos por ahí fuera, así que se traducen en vez de
    caer en la introducción como si no existieran. */
-const VIEJAS={whitelist:'seedround'};
+const VIEJAS={whitelist:'seedround', press:'team'};
 
 function ruta(){
   let h=location.hash.replace('#/','').split('#')[0];

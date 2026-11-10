@@ -41,8 +41,8 @@ const r = await pg.evaluate(() => {
 di(r.flag === false, 'la ronda esta en vivo en la pagina publicada (sin espera)');
 di([r.ann, r.hero, r.stk].every(x => /^\d+(\.\d)?%$/.test(x)), 'aviso, portada y tunel dan la cifra (' + [r.ann, r.hero, r.stk].join(' / ') + ')');
 di(r.pcVisibles >= 3, 'y asoman «complete», «Seed Round open» y «Launching soon» (' + r.pcVisibles + ')');
-di(parseFloat(r.annW) > 80 && parseFloat(r.stkP) > 80, 'las barras van llenas hasta la cifra (' + r.annW + ', ' + r.stkP + ')');
-di(/^\$[\d,]+$/.test(r.raised) && r.raised !== '$0' && /\$16,000,000/.test(r.meta), 'la dapp suma la privada sobre la meta de siempre (' + r.raised + ' ' + r.meta + ')');
+di(Math.round(parseFloat(r.annW)) === parseInt(r.ann) && Math.round(parseFloat(r.stkP)) === parseInt(r.stk), 'las barras van llenas hasta la cifra (' + r.annW + ', ' + r.stkP + ')');
+di(/^\$[\d,]+$/.test(r.raised) && /\$16,000,000/.test(r.meta), 'lo recaudado arranca de $0 y sube con la cadena, sobre la meta de siempre (' + r.raised + ' ' + r.meta + ')');
 di(r.listado, 'la compra enseña el precio de listado ($1.00), la flecha y el 5x');
 di(r.auditada, 'Seguridad: contrato del token auditado por CyberScope, 6 de 6, con el enlace al informe');
 di(r.enProceso === 0 && r.cyber && r.kyc, 'Seguridad: KYC verificado por CyberScope, 3 / 3, con el certificado y la ficha enlazados (' + r.enProceso + ' en proceso)');

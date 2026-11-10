@@ -45,7 +45,8 @@ const av = await pg.evaluate(() => {
 });
 di(!!av, 'la franja sigue en el marcado, montada o no');
 di(av && /Seed Round/.test(av.txt), 'dice de que ronda habla');
-di(av && /8[0-9]%|9[0-9]%|100%/.test(av.pct), 'lleva el porcentaje: ' + (av && av.pct));
+/* la barra arranca de $0: el porcentaje sale de la cadena, desde 0% */
+di(av && /^\d{1,3}%$/.test(av.pct), 'lleva el porcentaje: ' + (av && av.pct));
 di(av && av.destino === '#seed-round', 'y lleva a la ronda al pulsarlo');
 
 // El aviso y la barra de recaudacion tienen que decir lo mismo.
@@ -238,7 +239,7 @@ const vivos = await pg.evaluate(ids => ids.filter(i => {
   const e = document.getElementById(i);
   return e && getComputedStyle(e).display !== 'none';
 }), delMenu);
-di(delMenu.length >= 5, 'el menu tiene sus entradas (' + delMenu.length + ')');
+di(delMenu.length >= 4, 'el menu tiene sus entradas (' + delMenu.length + ')');
 di(vivos.length === delMenu.length,
    'y ninguna lleva a una seccion oculta o que no existe' +
    (vivos.length === delMenu.length ? '' :
@@ -266,8 +267,8 @@ const es = await (async () => {
     nav: [...document.querySelectorAll('.nav>a')].map(a=>a.textContent.trim().replace(/^(.+?)\1$/,'$1')),
     ann: document.querySelector('.ann-in').innerText.replace(/\s+/g,' ') }));
 })();
-/* sin The Stack, «Pila» ya no esta en el menu: se mira «Prensa» */
-di(es.nav.includes('Seguridad') && es.nav.includes('Prensa'), 'el menu se traduce: ' + es.nav.join(' '));
+/* sin The Stack ni la prensa en el menu: se mira «Seguridad» y «En abierto» */
+di(es.nav.includes('Seguridad') && es.nav.includes('En abierto'), 'el menu se traduce: ' + es.nav.join(' '));
 di(/completado/.test(es.ann), 'y el aviso tambien: ' + es.ann.trim());
 await ctx.close();
 
@@ -338,7 +339,7 @@ await ctx2.close();
       return { x: Math.round(r.left) + 4, y: Math.round(r.top) + 4,
                width: Math.round(r.width) - 8, height: Math.round(r.height) - 8 }; })
     .filter(c => c.width > 4 && c.height > 4));
-  di(cajas.length >= 5, 'las fichas del menu estan a la vista para medirlas (' + cajas.length + ')');
+  di(cajas.length >= 4, 'las fichas del menu estan a la vista para medirlas (' + cajas.length + ')');
   let macizo = 0, niebla = 0, azul = 0, tot = 0;
   for (const q of cajas) {
     const b64 = (await ch.screenshot({ clip:q })).toString('base64');
