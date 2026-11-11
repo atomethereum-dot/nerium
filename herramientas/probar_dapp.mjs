@@ -133,10 +133,10 @@ chk('NRM por ese importe', await pg.locator('#wNrm').inputValue(), '2,506');
 chk('pie de la barra',    (await pg.locator('#seed-round .raise-foot').textContent()).trim(),
     'Minimum $0.20Maximum $10,000 per wallet');
 
-// ── 2 · la barra arranca de $0: la privada no se suma a lo recaudado ─────────
+// ── 2 · la barra de la ronda privada NO se toca ──────────────────────────────
 await pg.waitForTimeout(2200);
-chk('lo recaudado arranca de $0', await pg.locator('#saleRaised').textContent(), '$0');
-chk('y el porcentaje en 0', await pg.locator('#saleTip em').textContent(), '0.0%');
+chk('la privada sigue siendo la base', await pg.locator('#saleRaised').textContent(), '$13,616,000');
+chk('porcentaje intacto', await pg.locator('#saleTip em').textContent(), '85.1%');
 
 // ── 3 · conectar cartera ─────────────────────────────────────────────────────
 chk('CTA sin conectar', await pg.locator('#wCta').textContent(), 'Connect wallet');

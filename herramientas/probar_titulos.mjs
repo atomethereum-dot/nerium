@@ -36,7 +36,7 @@ const di = (b, t) => { if (b) { ok++; console.log('  ok  ' + t) } else { mal++; 
 // que quedaba centrada de las once y se paso al margen, asi que ahora se le
 // pide lo mismo que a las demas. «#xfade» sigue fuera: eso no es la cabecera
 // de una seccion, es una palabra a pantalla completa entre dos escenas.
-const SECCIONES = ['network','thesis','solutions','security','stack','seed-round','token','builds','join'];
+const SECCIONES = ['network','press','thesis','solutions','security','stack','seed-round','token','builds','join'];
 
 // Un recorrido entero para que salte todo lo que aparece al entrar en cuadro;
 // medir antes da cajas de ancho cero y una bateria que aprueba sin mirar.
@@ -164,7 +164,7 @@ for (const [W, H] of [[1440,900],[1280,900],[768,1024],[390,844]]) {
   await pg.evaluate(() => { document.body.classList.add('rtl'); document.documentElement.dir = 'rtl'; });
   await pg.waitForTimeout(400);
   await recorrer(pg);
-  for (const s of ['security','token','builds','join']) {
+  for (const s of ['press','security','token','builds','join']) {
     await pg.evaluate(i => { const e = document.getElementById(i); if (e) e.scrollIntoView({ block:'center' }); }, s);
     await pg.waitForTimeout(420);
     const d = await pg.evaluate(i => {

@@ -1,7 +1,7 @@
 // probar_pronto: la espera (NRM_PRONTO) esta apagada: la ronda va en vivo
-// («Seed Round open» y el porcentaje que diga la cadena, desde 0 %), lo
-// recaudado arranca de $0 sobre la meta de $16,000,000, la compra enseña SOLO
-// el precio de la Seed Round -ni precio de listado, ni 5x, ni valor al listar-; y
+// («Seed Round open», 85 % complete en el aviso, la portada y el tunel, barras
+// al 85 %), la dapp suma la privada sobre la meta de $16,000,000 y la compra
+// enseña el precio de listado ($1.00) y el 5x; y
 // Seguridad y el Roadmap dicen que la empresa esta registrada, que CyberScope
 // ya audito el contrato del token -con su informe enlazado- y que verifico el
 // KYC -con su certificado y su ficha enlazados-.
@@ -33,7 +33,7 @@ const r = await pg.evaluate(() => {
     registrada: /Registered/.test(sec) && /6697114960CU/.test(sec) && !!document.querySelector('#security a.sx-go[href*="sunbiz.org"]'),
     viejo: /Halborn|Assure DeFi|KYC passed|Audit in progress|Sale, vesting, treasury|L26000341887/.test(document.getElementById('security').innerHTML + document.getElementById('top').innerHTML),
     hb: document.querySelector('.hb.white').textContent.trim(),
-    sinListado: !document.querySelector('.pr.up, .pr-mult, .pr-arrow, #wVal, #wGain') && !/Listing price|at listing|\$1\.00|5\u00d7/i.test(document.getElementById('seed-round').textContent + document.getElementById('junta').textContent) && /\$0\.20/.test(document.querySelector('.pr').textContent),
+    listado: vis(document.querySelector('.pr.up')) && /\$1\.00/.test(document.querySelector('.pr.up').textContent) && vis(document.querySelector('.pr-mult')) && vis(document.querySelector('.pr-arrow')),
     ruta: [...document.querySelectorAll('#ruta .ruta-est')].map(e => e.textContent.trim()),
     rutaPasado: /Audit passed|KYC passed/.test(document.getElementById('ruta').textContent),
     rutaProc: document.querySelectorAll('#ruta .ruta-proc:not([hidden])').length };
@@ -41,9 +41,9 @@ const r = await pg.evaluate(() => {
 di(r.flag === false, 'la ronda esta en vivo en la pagina publicada (sin espera)');
 di([r.ann, r.hero, r.stk].every(x => /^\d+(\.\d)?%$/.test(x)), 'aviso, portada y tunel dan la cifra (' + [r.ann, r.hero, r.stk].join(' / ') + ')');
 di(r.pcVisibles >= 3, 'y asoman «complete», «Seed Round open» y «Launching soon» (' + r.pcVisibles + ')');
-di(Math.round(parseFloat(r.annW)) === parseInt(r.ann) && Math.round(parseFloat(r.stkP)) === parseInt(r.stk), 'las barras van llenas hasta la cifra (' + r.annW + ', ' + r.stkP + ')');
-di(/^\$[\d,]+$/.test(r.raised) && /\$16,000,000/.test(r.meta), 'lo recaudado arranca de $0 y sube con la cadena, sobre la meta de siempre (' + r.raised + ' ' + r.meta + ')');
-di(r.sinListado, 'la compra enseña solo el precio de la Seed Round ($0.20): sin precio de listado, sin 5x y sin valor al listar');
+di(parseFloat(r.annW) > 80 && parseFloat(r.stkP) > 80, 'las barras van llenas hasta la cifra (' + r.annW + ', ' + r.stkP + ')');
+di(/^\$[\d,]+$/.test(r.raised) && r.raised !== '$0' && /\$16,000,000/.test(r.meta), 'la dapp suma la privada sobre la meta de siempre (' + r.raised + ' ' + r.meta + ')');
+di(r.listado, 'la compra enseña el precio de listado ($1.00), la flecha y el 5x');
 di(r.auditada, 'Seguridad: contrato del token auditado por CyberScope, 6 de 6, con el enlace al informe');
 di(r.enProceso === 0 && r.cyber && r.kyc, 'Seguridad: KYC verificado por CyberScope, 3 / 3, con el certificado y la ficha enlazados (' + r.enProceso + ' en proceso)');
 di(r.registrada, 'Seguridad: Nereum Finance LLC registrada, con su numero de seguimiento y el enlace a Sunbiz');
