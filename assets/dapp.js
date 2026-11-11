@@ -107,7 +107,7 @@
      hard cap puesto. Es una cifra de la página, no de la cadena. */
   var OBJETIVO_USD = 16000000;
 
-  var LISTADO = 1.00;               /* precio de listado, solo informativo */
+  var LISTADO = 0.50;               /* precio de listado, solo informativo */
 
   /* ───────────────────────────── referidos ────────────────────────────────
      p78 · EL 10 % POR TRAER COMPRADORES, SIN TOCAR EL CONTRATO.
