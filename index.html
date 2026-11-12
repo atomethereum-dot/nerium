@@ -4045,61 +4045,60 @@ footer .fgrid h3,footer .tec-real{color:#9EA2AB}
 .ruta-marca-g{animation:marcaGira 26s linear infinite;
   transform:translateZ(-260px)}
 
-/* ── la pieza ──
-   «--lado» es el tamaño del logo y «--gr» el grosor del canto: un 4,5% del
-   lado, que es la proporcion de una pieza solida y no la de una chapa. */
-/* Mas grande y MUCHO mas gruesa: el grosor pasa del 5,5% al 22% del lado. A
-   0,22 de opacidad un canto fino se funde con la cara y la pieza se lee
-   plana; lo que hace el 3D no es que gire, es que se vea el lateral. */
-.ruta-marca{--lado:min(90vw,1020px);--gr:calc(var(--lado) * .22)}
+/* ── la pieza: la piramide del logo, en solido ──
+   El logo es una piramide vista desde arriba: cuatro caras que se juntan en
+   el vertice. Aqui es un solido de verdad —cuatro caras y su base—: de frente
+   se ve el logo tal cual y al girar enseña el volumen.
+   «--lado» es la base. Cada piramide tiene de alto el 36 % del lado, asi que
+   la cara mide 0,6161 lados de alto (raiz de 0,36² + 0,5²) y se inclina
+   35,75° sobre la base (atan 0,72). Los colores son los del logo con el velo
+   horneado, como los tenia la pieza anterior: el 32 % de cada cara. */
+.ruta-marca{--lado:min(90vw,1020px);--sl:calc(var(--lado) * .6161)}
 .ruta-marca-x{position:absolute;inset:0;display:block;
   transform-style:preserve-3d;animation:marcaCabecea 29s ease-in-out infinite}
-.ruta-marca-f,.ruta-marca-b{position:absolute;left:50%;top:50%;
-  width:var(--lado);height:var(--lado);
-  margin:calc(var(--lado) / -2) 0 0 calc(var(--lado) / -2);
-  transform-style:preserve-3d;
-  /* Cada cara se deja de pintar cuando da la espalda. En un solido la de
-     atras la tapa la de delante de todas formas, asi que pintarlas las dos
-     siempre es trabajo tirado: son 1.120 px de lado y cada superficie grande
-     costaba unos trece milisegundos por cuadro. Con esto solo se pinta la que
-     de verdad se ve. */
+.ruta-marca-p{position:absolute;inset:0;display:block;
+  transform-style:preserve-3d}
+/* De frente la base queda en rombo, como el logo: el giro ya la ladea 38° y
+   esto le pone los 7 que faltan hasta 45. */
+.ruta-marca-p{transform:rotateZ(7deg)}
+/* LA BASE. La otra mitad ya no es una segunda piramide -eran cuatro capas
+   grandes mas y el telefono no daba abasto-: es la base de esta, mirando hacia
+   atras, con el logo dibujado plano, como la trasera de la pieza anterior.
+   Pasada la media vuelta lo que mira a camara sigue siendo el logo, y en la
+   misma posicion: la base va girada 180° y la pieza tambien, se anulan. */
+.ruta-marca-base{position:absolute;left:50%;top:50%;display:block;
+  width:var(--lado);height:var(--lado);margin:calc(var(--lado) / -2) 0 0 calc(var(--lado) / -2);
+  transform:rotateY(180deg);
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1000 1000'%3E%3Cdefs%3E%3ClinearGradient id='t' x1='0' y1='0' x2='0' y2='.5'%3E%3Cstop offset='0' stop-color='%2323252C'/%3E%3Cstop offset='1' stop-color='%233C3E47'/%3E%3C/linearGradient%3E%3ClinearGradient id='r' x1='1' y1='0' x2='.5' y2='0'%3E%3Cstop offset='0' stop-color='%230B0D12'/%3E%3Cstop offset='1' stop-color='%2315171C'/%3E%3C/linearGradient%3E%3ClinearGradient id='b' x1='0' y1='1' x2='0' y2='.5'%3E%3Cstop offset='0' stop-color='%231A1B1F'/%3E%3Cstop offset='1' stop-color='%23303137'/%3E%3C/linearGradient%3E%3ClinearGradient id='l' x1='0' y1='0' x2='.5' y2='0'%3E%3Cstop offset='0' stop-color='%23434449'/%3E%3Cstop offset='1' stop-color='%234F5052'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M0 0H1000L500 500Z' fill='url(%23t)'/%3E%3Cpath d='M1000 0V1000L500 500Z' fill='url(%23r)'/%3E%3Cpath d='M0 1000H1000L500 500Z' fill='url(%23b)'/%3E%3Cpath d='M0 0V1000L500 500Z' fill='url(%23l)'/%3E%3Cpath d='M0 0 1000 1000M1000 0 0 1000' stroke='%234C4E54' stroke-opacity='.8' stroke-width='3' fill='none'/%3E%3Crect x='3' y='3' width='994' height='994' stroke='%233E4045' stroke-width='6' fill='none'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
   backface-visibility:hidden;-webkit-backface-visibility:hidden}
-/* EL CANTO. Dieciocho laminas hacia atras en Z, cada una mas oscura. Vistas
-   de frente no se ven —quedan justo detras de la cara—, pero en cuanto la
-   pieza cabecea aparecen de lado y forman un lateral macizo con su sombreado.
-   Es lo que separa una pieza de un papel: un papel girado sigue sin tener
-   canto, y por mucho que se mueva se lee plano. */
-/* El canto ya no es una pila de capas: son cuatro trapecios dentro del propio
-   SVG. Aqui solo queda separar las dos caras en Z, que es lo que le da cuerpo
-   al girar. */
-/* La caja, centrada: la cara de delante media pieza hacia fuera y la de atras
-   media hacia dentro. Asi los cuatro lados caen donde tienen que caer. */
-.ruta-marca-f{transform:translateZ(calc(var(--gr) / 2))}
+/* UNA CARA. Un triangulo con la base en el borde de arriba y el vertice abajo;
+   gira sobre ese borde hasta inclinarse 35,75°, sube media base y se reparte
+   con «--k» a cada lado del cuadrado. Cada cara deja de pintarse cuando da la
+   espalda.
 
-/* LOS CUATRO LADOS. Lo que rellena el volumen. Cada uno es una tira de
-   «--gr» de fondo girada a su sitio; juntos cierran la pieza y se acaba el
-   hueco que se veia por los cantos.
-
-   Tambien llevan «backface-visibility»: de los cuatro, a cualquier angulo solo
-   hay dos mirando a camara, asi que pintar los otros dos es trabajo tirado. */
-.ruta-marca-l{position:absolute;left:50%;top:50%;display:block;
+   EL TRIANGULO ES UN SVG DE FONDO, NO UN RECORTE. Con «clip-path» cada cara
+   era una capa con mascara y en el telefono la seccion bajaba de 16 a 6
+   cuadros por segundo; dibujado, fuera del triangulo el fondo es transparente
+   y la cara se compone como cualquier otra capa. En el mismo dibujo van las
+   aristas -el borde de la base y la de la izquierda hasta el vertice; la de
+   la derecha la pone la cara vecina-, como las diagonales y el marco de la
+   pieza anterior: sin ellas, a este brillo, no se leia la piramide. Los
+   colores son los del logo con el velo horneado, como en la pieza anterior:
+   el 32 % de cada cara, de fuera hacia el vertice, que es lo claro. */
+.ruta-marca-c{position:absolute;left:50%;top:50%;display:block;
+  width:var(--lado);height:var(--sl);margin-left:calc(var(--lado) / -2);
+  transform-origin:50% 0;
+  transform:rotateZ(calc(var(--k) * 90deg)) translateY(calc(var(--lado) / -2)) rotateX(35.75deg);
+  background:var(--cara) center / 100% 100% no-repeat;
   backface-visibility:hidden;-webkit-backface-visibility:hidden}
-.l-ar,.l-ab{width:var(--lado);height:var(--gr);
-  margin:calc(var(--gr) / -2) 0 0 calc(var(--lado) / -2)}
-.l-iz,.l-de{width:var(--gr);height:var(--lado);
-  margin:calc(var(--lado) / -2) 0 0 calc(var(--gr) / -2)}
-.l-ar{transform:rotateX(90deg) translateZ(calc(var(--lado) / 2));
-  background:linear-gradient(to bottom,#404149,#222329 62%,#121316)}
-.l-ab{transform:rotateX(-90deg) translateZ(calc(var(--lado) / 2));
-  background:linear-gradient(to top,#0D0E10,#171820 58%,#0B0C0D)}
-.l-iz{transform:rotateY(-90deg) translateZ(calc(var(--lado) / 2));
-  background:linear-gradient(to right,#3A3B3F,#1F2023 66%,#101114)}
-.l-de{transform:rotateY(90deg) translateZ(calc(var(--lado) / 2));
-  background:linear-gradient(to left,#101114,#191A1C 54%,#0B0C0E)}
-/* La trasera, al fondo del canto y espejada. Sin ella, pasada la media vuelta
-   lo que miraba a camara era la ultima lamina: un rectangulo gris sin forma. */
-.ruta-marca-b{transform:translateZ(calc(var(--gr) / -2)) rotateY(180deg)}
-.ruta-marca svg{position:absolute;inset:0;width:100%;height:100%;display:block}
+.rmc0{--cara:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1000 616.1' preserveAspectRatio='none'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%2323252C'/%3E%3Cstop offset='1' stop-color='%233C3E47'/%3E%3C/linearGradient%3E%3ClinearGradient id='a' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%234C4E54' stop-opacity='.95'/%3E%3Cstop offset='1' stop-color='%234C4E54' stop-opacity='.55'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpolygon points='0,0 1000,0 500,616.1' fill='url(%23g)'/%3E%3Cpath d='M0,0 1000,0' stroke='%233E4045' stroke-width='6' fill='none'/%3E%3Cpath d='M1.5,1.8 500,616.1' stroke='url(%23a)' stroke-width='3' fill='none'/%3E%3C/svg%3E")}
+.rmc1{--cara:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1000 616.1' preserveAspectRatio='none'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%230B0D12'/%3E%3Cstop offset='1' stop-color='%2315171C'/%3E%3C/linearGradient%3E%3ClinearGradient id='a' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%234C4E54' stop-opacity='.95'/%3E%3Cstop offset='1' stop-color='%234C4E54' stop-opacity='.55'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpolygon points='0,0 1000,0 500,616.1' fill='url(%23g)'/%3E%3Cpath d='M0,0 1000,0' stroke='%233E4045' stroke-width='6' fill='none'/%3E%3Cpath d='M1.5,1.8 500,616.1' stroke='url(%23a)' stroke-width='3' fill='none'/%3E%3C/svg%3E")}
+.rmc2{--cara:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1000 616.1' preserveAspectRatio='none'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%231A1B1F'/%3E%3Cstop offset='1' stop-color='%23303137'/%3E%3C/linearGradient%3E%3ClinearGradient id='a' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%234C4E54' stop-opacity='.95'/%3E%3Cstop offset='1' stop-color='%234C4E54' stop-opacity='.55'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpolygon points='0,0 1000,0 500,616.1' fill='url(%23g)'/%3E%3Cpath d='M0,0 1000,0' stroke='%233E4045' stroke-width='6' fill='none'/%3E%3Cpath d='M1.5,1.8 500,616.1' stroke='url(%23a)' stroke-width='3' fill='none'/%3E%3C/svg%3E")}
+.rmc3{--cara:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1000 616.1' preserveAspectRatio='none'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%23434449'/%3E%3Cstop offset='1' stop-color='%234F5052'/%3E%3C/linearGradient%3E%3ClinearGradient id='a' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%234C4E54' stop-opacity='.95'/%3E%3Cstop offset='1' stop-color='%234C4E54' stop-opacity='.55'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpolygon points='0,0 1000,0 500,616.1' fill='url(%23g)'/%3E%3Cpath d='M0,0 1000,0' stroke='%233E4045' stroke-width='6' fill='none'/%3E%3Cpath d='M1.5,1.8 500,616.1' stroke='url(%23a)' stroke-width='3' fill='none'/%3E%3C/svg%3E")}
+/* La luz que recorre las caras de delante: esta si va recortada al
+   triangulo, pero es una sola banda por cara y solo en las cuatro de delante. */
+.ruta-marca-k{position:absolute;inset:0;display:block;overflow:hidden;
+  clip-path:polygon(0 0,100% 0,50% 100%)}
 /* El reflejo que recorre la cara. Va aparte del SVG y con su propio tiempo:
    pegado al dibujo giraria con el y un reflejo que gira con la pieza no es un
    reflejo, es una mancha pintada encima. */
@@ -9063,7 +9062,7 @@ body.lock .flota{opacity:0 !important;pointer-events:none !important}
 
 
 <section class="ruta" id="ruta" data-bg="#030409" data-acc="#63A9FF">
-  <i class="ruta-marca" aria-hidden="true"><i class="ruta-marca-v"><i class="ruta-marca-x"><i class="ruta-marca-g"><i class="ruta-marca-l l-ar"></i><i class="ruta-marca-l l-ab"></i><i class="ruta-marca-l l-iz"></i><i class="ruta-marca-l l-de"></i><i class="ruta-marca-b"><svg viewBox="0 0 512 512"><path fill="#2D2F33" d="M6.0 6.0 506.0 6.0 472.0 40.0 40.0 40.0 Z"/><path fill="#0E0F10" d="M506.0 6.0 506.0 506.0 472.0 472.0 472.0 40.0 Z"/><path fill="#08090A" d="M506.0 506.0 6.0 506.0 40.0 472.0 472.0 472.0 Z"/><path fill="#222327" d="M6.0 506.0 6.0 6.0 40.0 40.0 40.0 472.0 Z"/><defs><linearGradient id="nr-i-b" gradientUnits="userSpaceOnUse" x1="40" y1="256" x2="256" y2="256"><stop offset="0" stop-color="#2A2B2D"/><stop offset="1" stop-color="#313233"/></linearGradient><linearGradient id="nr-a-b" gradientUnits="userSpaceOnUse" x1="256" y1="256" x2="472" y2="40"><stop offset="0" stop-color="#25272C"/><stop offset="1" stop-color="#16171C"/></linearGradient><linearGradient id="nr-d-b" gradientUnits="userSpaceOnUse" x1="256" y1="256" x2="472" y2="256"><stop offset="0" stop-color="#0D0F12"/><stop offset="1" stop-color="#07080B"/></linearGradient><linearGradient id="nr-b-b" gradientUnits="userSpaceOnUse" x1="256" y1="256" x2="472" y2="472"><stop offset="0" stop-color="#1E1F22"/><stop offset="1" stop-color="#101114"/></linearGradient><linearGradient id="nr-brillo-b" gradientUnits="userSpaceOnUse" x1="40.0" y1="40.0" x2="472.0" y2="472.0"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".42" stop-color="#fff" stop-opacity="0.07"/><stop offset=".55" stop-color="#fff" stop-opacity="0.02"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient></defs><path fill="url(#nr-i-b)" d="M40 40 40 472 256 256Z"/><path fill="url(#nr-a-b)" d="M40 40 472 40 256 256Z"/><path fill="url(#nr-d-b)" d="M472 40 472 472 256 256Z"/><path fill="url(#nr-b-b)" d="M40 472 472 472 256 256Z"/><path d="M40 40 472 472M472 40 40 472" stroke="#2B2C30" stroke-width="3" fill="none"/><rect x="40.0" y="40.0" width="432.0" height="432.0" fill="url(#nr-brillo-b)"/></svg></i><i class="ruta-marca-f"><svg viewBox="0 0 512 512"><path fill="#484A4D" d="M6.0 6.0 506.0 6.0 472.0 40.0 40.0 40.0 Z"/><path fill="#1D1F22" d="M506.0 6.0 506.0 506.0 472.0 472.0 472.0 40.0 Z"/><path fill="#101113" d="M506.0 506.0 6.0 506.0 40.0 472.0 472.0 472.0 Z"/><path fill="#3E3F43" d="M6.0 506.0 6.0 6.0 40.0 40.0 40.0 472.0 Z"/><defs><linearGradient id="nr-i" gradientUnits="userSpaceOnUse" x1="40" y1="256" x2="256" y2="256"><stop offset="0" stop-color="#434449"/><stop offset="1" stop-color="#4F5052"/></linearGradient><linearGradient id="nr-a" gradientUnits="userSpaceOnUse" x1="256" y1="256" x2="472" y2="40"><stop offset="0" stop-color="#3C3E47"/><stop offset="1" stop-color="#23252C"/></linearGradient><linearGradient id="nr-d" gradientUnits="userSpaceOnUse" x1="256" y1="256" x2="472" y2="256"><stop offset="0" stop-color="#15171C"/><stop offset="1" stop-color="#0B0D12"/></linearGradient><linearGradient id="nr-b" gradientUnits="userSpaceOnUse" x1="256" y1="256" x2="472" y2="472"><stop offset="0" stop-color="#303137"/><stop offset="1" stop-color="#1A1C1F"/></linearGradient><linearGradient id="nr-brillo" gradientUnits="userSpaceOnUse" x1="40.0" y1="40.0" x2="472.0" y2="472.0"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".42" stop-color="#fff" stop-opacity="0.16"/><stop offset=".55" stop-color="#fff" stop-opacity="0.045"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient></defs><path fill="url(#nr-i)" d="M40 40 40 472 256 256Z"/><path fill="url(#nr-a)" d="M40 40 472 40 256 256Z"/><path fill="url(#nr-d)" d="M472 40 472 472 256 256Z"/><path fill="url(#nr-b)" d="M40 472 472 472 256 256Z"/><path d="M40 40 472 472M472 40 40 472" stroke="#44474D" stroke-width="3" fill="none"/><rect x="40.0" y="40.0" width="432.0" height="432.0" fill="url(#nr-brillo)"/></svg><i class="ruta-marca-luz"></i></i></i></i></i></i>
+  <i class="ruta-marca" aria-hidden="true"><i class="ruta-marca-v"><i class="ruta-marca-x"><i class="ruta-marca-g"><i class="ruta-marca-p"><i class="ruta-marca-c rmc0" style="--k:0"><i class="ruta-marca-k"><i class="ruta-marca-luz"></i></i></i><i class="ruta-marca-c rmc1" style="--k:1"><i class="ruta-marca-k"><i class="ruta-marca-luz"></i></i></i><i class="ruta-marca-c rmc2" style="--k:2"><i class="ruta-marca-k"><i class="ruta-marca-luz"></i></i></i><i class="ruta-marca-c rmc3" style="--k:3"><i class="ruta-marca-k"><i class="ruta-marca-luz"></i></i></i><i class="ruta-marca-base"></i></i></i></i></i></i></i>
   <!-- r04: la hebra la pinta el lienzo .hb-lz -->
   <div class="wrap ruta-wrap">
     <canvas class="hb-lz" aria-hidden="true"></canvas>
